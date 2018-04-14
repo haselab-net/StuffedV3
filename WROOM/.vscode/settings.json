@@ -1,0 +1,9 @@
+{
+    "C_Cpp.intelliSenseEngineFallback": "Enabled",
+    "files.associations": {
+        "stdio.h": "c",
+        "freertos.h": "c",
+        "gpio.h": "c",
+        "sdkconfig.h": "c"
+    }
+}

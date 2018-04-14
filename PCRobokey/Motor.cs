@@ -1,0 +1,253 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Windows.Forms;
+
+namespace Robokey
+{
+    public class SDEC
+    {
+        public static double toDouble(int s)
+        {
+            const int SDEC_BITS = 10;
+            double d = s;
+            d /= (1 << SDEC_BITS);
+            return d;
+        }
+    }
+    public class MotorLimit
+    {
+        public NumericUpDown udCalib, udMin, udMax;
+        public Panel panel;
+        public int Minimum
+        {
+            set { udCalib.Minimum = udMin.Value = value; }
+            get { return (int)udMin.Value; }
+        }
+        public int Maximum
+        {
+            set { udCalib.Maximum = udMax.Value = value; }
+            get { return (int)udMax.Value; }
+        }
+        public MotorLimit()
+        {
+            int width = 100;
+            udMin = new NumericUpDown();
+            udMax = new NumericUpDown();
+            udCalib = new NumericUpDown();
+            udMin.Width = width;
+            udMax.Width = width;
+            udCalib.Width = width;
+            panel = new Panel();
+            udMax.Minimum = udMin.Minimum = -300000;
+            udMax.Maximum = udMin.Maximum = 300000;
+
+            udCalib.Top = 0;
+            udMax.Top = udCalib.Top + udCalib.Height;
+            udMin.Top = udMax.Top + udMax.Height;
+            udMax.TabStop = false;
+            udMin.TabStop = false;
+
+            Label la = new Label();
+            la.Width = 30;
+            la.Text = "Min:";
+            la.Top = udMin.Top;
+            panel.Controls.Add(la);
+            udMin.Left = la.Width;
+            panel.Controls.Add(udMin);
+
+            la = new Label();
+            la.Width = 30;
+            la.Text = "Max:";
+            la.Top = udMax.Top;
+            panel.Controls.Add(la);
+            udMax.Left = la.Width;
+            panel.Controls.Add(udMax);
+
+            la = new Label();
+            la.Text = "Off:";
+            la.Width = 30;
+            la.Top = udCalib.Top;
+            panel.Controls.Add(la);
+
+            udCalib.Left = la.Width;
+            panel.Controls.Add(udCalib);
+            panel.Height = udMin.Height + udMax.Height + udCalib.Height;
+            panel.Width = udMin.Width + la.Width;
+        }
+    }
+
+    public class MotorPosition
+    {
+        public Panel panel;
+        public NumericUpDown upDown;
+        public TrackBar bar;
+        public event EventHandler ValueChanged;
+        public int encoder;
+        public int ad;
+        public int duty;
+        public int TargetLength;    //ロボットのステータス
+        public int targetLength_local;
+        public int Newton128;
+        public int Newton128_Length;
+        public UInt32 Impulse;      //力積（SH側で計算する）
+        public IMP_STATE impedanceCoeFlag;    //インピーダンス制御で使用している係数
+        public enum IMP_STATE
+        {
+            STATIC = 0,
+            MOBAVLE = 1,
+        };
+        public MotorPosition()
+        {
+            upDown = new NumericUpDown();
+            bar = new TrackBar();
+            bar.Top = upDown.Height;
+            bar.Width = upDown.Width;
+            panel = new Panel();
+            panel.Width = upDown.Width;
+            panel.Height = upDown.Height + bar.Height - 10;
+            panel.Controls.Add(upDown);
+            panel.Controls.Add(bar);
+            upDown.ValueChanged += UpdateBar;
+            bar.ValueChanged += UpdateUpDown;
+            bar.Minimum = (int)upDown.Minimum;
+            bar.Maximum = (int)upDown.Maximum;
+            bar.TabStop = false;
+            bar.LargeChange = 1000;
+            upDown.Increment = 1000;
+            ad = 0;
+            encoder = 0;
+            TargetLength = 0;
+            targetLength_local = 0;
+            impedanceCoeFlag = IMP_STATE.STATIC;
+            Impulse = 0;
+        }
+        private void UpdateBar(object sender, EventArgs e)
+        {
+            bar.Value = (int)((NumericUpDown)sender).Value;
+//            ValueChanged(sender, e);
+        }
+        private void UpdateUpDown(object sender, EventArgs e)
+        {
+            upDown.Value = ((TrackBar)sender).Value;
+            ValueChanged(sender, e);
+        }
+        public int Maximum
+        {
+            set { upDown.Maximum = bar.Maximum = value; }
+            get { return (int)upDown.Maximum; }
+        }
+        public int Minimum
+        {
+            set { upDown.Minimum = bar.Minimum = value; }
+            get { return (int)upDown.Minimum; }
+        }
+        public int Value
+        {
+            set { upDown.Value = value; }
+            get { return (int)upDown.Value; }
+        }
+    }
+    public class MotorTorque {
+        public Panel panel;
+        public NumericUpDown udMin;
+        public NumericUpDown udMax;
+        public int Maximum
+        {
+            set { udMax.Value = value; }
+            get { return (int)udMax.Value; }
+        }
+        public int Minimum
+        {
+            set { udMin.Value = value; }
+            get { return (int)udMin.Value; }
+        }
+        public MotorTorque() {
+            int width = 100;
+            udMin = new NumericUpDown();
+            udMax = new NumericUpDown();
+            udMin.Width = width;
+            udMax.Width = width;
+            panel = new Panel();
+            udMax.Minimum = udMin.Minimum = -30000;
+            udMax.Maximum = udMin.Maximum = 30000;
+            Minimum = -1000;
+            Maximum = 1000;
+
+            udMin.Top = 0;
+            Label la = new Label();
+            la.Width = 30;
+            la.Text = "Min:";
+            la.Top = udMin.Top;
+            udMin.Left = la.Width;
+            panel.Controls.Add(udMin);
+            panel.Controls.Add(la);
+
+            udMax.Top = udMin.Top + udMin.Height;
+            la = new Label();
+            la.Width = 30;
+            la.Text = "Max:";
+            la.Top = udMax.Top;
+            udMax.Left = la.Width;
+            panel.Controls.Add(udMax);
+            panel.Controls.Add(la);
+            panel.Height = udMin.Height + udMax.Height;
+            panel.Width = udMin.Width + la.Width;
+        }
+    }
+    public class Motor {
+        public MotorPosition position;
+        public MotorLimit limit;
+        public MotorTorque torque;
+        public Motor()
+        {
+            position = new MotorPosition();
+            limit = new MotorLimit();
+            torque = new MotorTorque();
+            Minimum = -10000;
+            Maximum = 30000;
+            limit.udMax.ValueChanged += MaximumChanged;
+            limit.udMin.ValueChanged += MinimumChanged;
+        }
+        void MaximumChanged(Object sender, EventArgs e)
+        {
+            Maximum = (int)((NumericUpDown)sender).Value;
+        }
+        void MinimumChanged(Object sender, EventArgs e)
+        {
+            Minimum = (int)((NumericUpDown)sender).Value;
+        }
+
+        public int Maximum
+        {
+            set { limit.Maximum = position.Maximum = value; }
+            get { return limit.Maximum; }
+        }
+        public int Minimum
+        {
+            set { limit.Minimum = position.Minimum = value; }
+            get { return limit.Minimum; }
+        }
+        public int Value
+        {
+            set { position.Value = value; }
+            get { return position.Value; }
+        }
+    }
+    public class Touch
+    {
+        public Int32 Value;
+
+        public Int16 Threshold;
+
+        public bool Flag;
+
+        public Touch()
+        {
+            Value = 0;
+            Threshold = 0;
+            Flag = false;
+        }
+    }
+}
