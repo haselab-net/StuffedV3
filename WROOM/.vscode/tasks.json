@@ -48,7 +48,8 @@
             ],
             "presentation": {
                 "reveal": "always"
-            }
+            },
+            "problemMatcher": []
         },
         {
             "label": "monitor",
@@ -73,6 +74,38 @@
                 "args": [
                     "make",
                     "menuconfig"
+                ]
+            },
+            "presentation": {
+                "reveal": "always"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "command line",
+            "type": "process",
+            "windows": {
+                "command": "C:/msys32/mingw32.exe",
+                "args": []
+            },
+            "presentation": {
+                "reveal": "always"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "jtag OpenOCD",
+            "type": "process",
+            "windows": {
+                "command": "C:/msys32/mingw32.exe",
+                "args": [
+                    "openocd.exe",
+                    "-s" ,
+                    "/mingw32/share/openocd/scripts",
+                    "-f",
+                    "/mingw32/share/openocd/scripts/interface/ftdi/um232h.cfg",
+                    "-f",
+                    "/mingw32/share/openocd/scripts/board/esp-wroom-32.cfg",                        
                 ]
             },
             "presentation": {

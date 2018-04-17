@@ -4,6 +4,9 @@
         "stdio.h": "c",
         "freertos.h": "c",
         "gpio.h": "c",
-        "sdkconfig.h": "c"
+        "sdkconfig.h": "c",
+        "algorithm": "cpp",
+        "stuffedrobot.h": "c",
+        "task.h": "c"
     }
 }

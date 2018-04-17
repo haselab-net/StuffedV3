@@ -5,11 +5,11 @@
 
 #ifdef __cplusplus
 #define BOARDINFOFUNCS(BOARD)	\
-	static const char* GetBoardName(){ return #BOARD;}					\
-	static const int GetModelNumber(){ return BOARD##_MODEL_NUMBER;}	\
-	static const int GetNTarget(){ return BOARD##_NTARGET;}				\
-	static const int GetNMotor(){ return BOARD##_NMOTOR;}				\
-	static const int GetNForce(){ return BOARD##_NFORCE;}				\
+	static const char* GetBoardName(){ return #BOARD;}				\
+	static int GetModelNumber(){ return BOARD##_MODEL_NUMBER;}		\
+	static int GetNTarget(){ return BOARD##_NTARGET;}				\
+	static int GetNMotor(){ return BOARD##_NMOTOR;}					\
+	static int GetNForce(){ return BOARD##_NFORCE;}					\
 
 #else
 #define BOARDINFOFUNCS(BOARD)

@@ -8,7 +8,7 @@
             "name": "OpenOCD Debug",
             "type": "gdb",
             "request": "attach",
-            "executable": "./build/hello-world.elf",
+            "executable": "./build/stuffedRobot.elf",
             "target": ":3333",
             "remote": true,
             "cwd": "${workspaceRoot}",
