@@ -113,7 +113,7 @@ public:
 
 	void ConnectWifi();
 	void Init();
-	void OnReceive(struct udp_pcb * upcb, struct pbuf * p, ip_addr_t* addr, u16_t port);
+	void OnReceive(struct udp_pcb * upcb, struct pbuf * p, const ip_addr_t* addr, u16_t port);
 	void ExecCommand();
 	void PrepareRetPacket(int cmd);
 	void SendRetPacket(ip_addr_t& returnIp);

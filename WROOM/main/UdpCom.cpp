@@ -15,6 +15,7 @@
 #include "lwip/udp.h"
 #include "esp_system.h"
 #include "esp_wifi.h"
+#include "nvs_flash.h"
 
 #include <algorithm>
 #include <string.h>
@@ -59,14 +60,19 @@ void UdpRetPacket::ClearData() {
 	memset(data, 0, length);
 }
 
+static void onReceive(void *arg, struct udp_pcb *pcb, struct pbuf *p, const ip_addr_t *addr, u16_t port)
+{
+	((UdpCom*)arg)->OnReceive(pcb, p, addr, port);
+}
 void UdpCom::Init() {
 	recvRest = 0;
 	commandCount = 0;
 	ConnectWifi();
+	udp = udp_new();
+	udp_recv(udp, onReceive, this);
 }
 
-void UdpCom::OnReceive(struct udp_pcb * upcb, struct pbuf * top,
-	ip_addr_t* addr, u16_t port) {
+void UdpCom::OnReceive(struct udp_pcb * upcb, struct pbuf * top, const ip_addr_t* addr, u16_t port) {
 	if (!recvs.WriteAvail()){
 		printf("Udp recv buffer full.\n");
 		pbuf_free(top);
@@ -277,8 +283,9 @@ static esp_err_t onWifiEvent(void *ctx, system_event_t *event){
 }
 
 void UdpCom::ConnectWifi() {
-    wifi_event_group = xEventGroupCreate();
+	nvs_flash_init();
     tcpip_adapter_init();
+	    wifi_event_group = xEventGroupCreate();
     ESP_ERROR_CHECK(esp_event_loop_init(onWifiEvent, NULL) );
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));

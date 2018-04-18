@@ -94,7 +94,7 @@
             "problemMatcher": []
         },
         {
-            "label": "jtag OpenOCD",
+            "label": "Start OpenOCD",
             "type": "process",
             "windows": {
                 "command": "C:/msys32/mingw32.exe",
@@ -112,6 +112,24 @@
                 "reveal": "always"
             },
             "problemMatcher": []
+            //  openocd.exe -s /mingw32/share/openocd/scripts -f /mingw32/share/openocd/scripts/interface/ftdi/um232h.cfg -f /mingw32/share/openocd/scripts/board/esp-wroom-32.cfg
+        },
+        {
+            "label": "Kill OpenOCD",
+            "type": "process",
+            "windows": {
+                "command": "taskkill",
+                "args": [
+                    "/f",
+                    "-im" ,
+                    "openocd.exe",
+                ]
+            },
+            "presentation": {
+                "reveal": "always"
+            },
+            "problemMatcher": []
+            //  openocd.exe -s /mingw32/share/openocd/scripts -f /mingw32/share/openocd/scripts/interface/ftdi/um232h.cfg -f /mingw32/share/openocd/scripts/board/esp-wroom-32.cfg
         }
     ]
 }
