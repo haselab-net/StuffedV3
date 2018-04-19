@@ -3,6 +3,7 @@
 #include "VCEdit.h"
 #include "ArrayRing.h"
 #include "UartCom.h"
+#include "esp_event_loop.h"
 
 /**	Udp packet from PC
 	Each command has sequential counter to detect packet drop.
@@ -112,6 +113,7 @@ public:
 	UdpRetPacket send;
 
 	void ConnectWifi();
+	void OnWifi(system_event_t* event);
 	void Init();
 	void OnReceive(struct udp_pcb * upcb, struct pbuf * p, const ip_addr_t* addr, u16_t port);
 	void ExecCommand();

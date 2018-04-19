@@ -4,7 +4,7 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "build app",
+            "label": "Build app (alt+ctrl+b)",
             "group": "build",
             "command": "make",
             "type": "shell",
@@ -28,9 +28,10 @@
             }
         },
         {
-            "label": "clean app",
+            "label": "Clean app",
             "command": "make",
             "type": "shell",
+            "group": "build",
             "args": [
                 "app-clean"
             ],
@@ -40,24 +41,25 @@
             "problemMatcher": []
         },
         {
-            "label": "flash app",
-            "command": "make",
-            "type": "shell",
-            "args": [
-                "app-flash"
-            ],
+            "label": "Flash app (alt+ctrl+f)",
+            "type": "process",
+            "windows": {
+                "command": "task.cmd",
+                "args": [
+                    "app-flash"
+                ]
+            },
             "presentation": {
                 "reveal": "always"
             },
             "problemMatcher": []
         },
         {
-            "label": "monitor",
+            "label": "Monitor (alt+ctrl+m)",
             "type": "process",
             "windows": {
-                "command": "c:/msys32/mingw32.exe",
+                "command": "task.cmd",
                 "args": [
-                    "make",
                     "monitor"
                 ]
             },
