@@ -28,7 +28,9 @@
                 "C:/msys32/home/espressif/esp/esp-idf/components/driver/include/driver",
                 "C:/msys32/home/espressif/esp/esp-idf/components/spi_flash/include",
                 "C:/msys32/home/espressif/esp/esp-idf/components/tcpip_adapter/include",
-                "C:/msys32/home/espressif/esp/esp-idf/components/log/include"
+                "C:/msys32/home/espressif/esp/esp-idf/components/log/include",
+                "C:/msys32/home/espressif/esp/esp-idf/components/nvs_flash/include",
+                "C:/msys32/home/espressif/esp/esp-idf/components/newlib/platform_include"
             ],
             "intelliSenseMode": "clang-x64",
             "browse": {

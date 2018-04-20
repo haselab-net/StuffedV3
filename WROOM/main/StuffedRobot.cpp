@@ -18,4 +18,5 @@ extern "C" void setup() {
 extern "C" void loop() {
 	udpCom.ExecCommand();
 	uarts.Loop();
+	ets_delay_us(1000*20);
 }
