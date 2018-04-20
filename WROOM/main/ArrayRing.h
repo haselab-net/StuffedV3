@@ -5,7 +5,7 @@
 template <class T, int N>
 class ArrayRing {
 	T buf[N];
-	int read, write;
+	volatile int read, write;
 public:
 	const int bufLen = N;
 	T& operator [] (size_t index) { return buf[index]; }
@@ -15,18 +15,14 @@ public:
 	T& Peek() {
 		return buf[read];
 	}
-	T& Read(){
-		T& rv = buf[read];
+	void Read(){
 		read = (read+1) % N;
-		return rv;
 	}
 	T& Poke() {
 		return buf[write];
 	}
-	T& Write() {
-		T& rv = buf[write];
+	void Write() {
 		write = (write+1) % N;
-		return rv;
 	}
 	int WriteAvail() {
 		int rv = read - write;

@@ -11,6 +11,7 @@
 #include "freertos/task.h"
 #include "esp_system.h"
 #include "esp_spi_flash.h"
+#include "esp_task_wdt.h"
 void setup();
 void loop();
 
@@ -32,5 +33,6 @@ void app_main()
     setup();
     while(1){
         loop();
-    }
+        esp_task_wdt_reset();
+     }
 }

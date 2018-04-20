@@ -7,6 +7,7 @@
         "sdkconfig.h": "c",
         "algorithm": "cpp",
         "stuffedrobot.h": "c",
-        "task.h": "c"
+        "task.h": "c",
+        "esp_int_wdt.h": "c"
     }
 }

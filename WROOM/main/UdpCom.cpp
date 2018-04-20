@@ -15,6 +15,7 @@
 #include "lwip/udp.h"
 #include "esp_system.h"
 #include "esp_wifi.h"
+#include "esp_log.h"
 #include "nvs_flash.h"
 
 #include <algorithm>
@@ -22,7 +23,7 @@
 
 
 UdpCom udpCom;
-
+const char* Tag = "UdpCom";
 
 int UdpCmdPacket::CommandLen() {
 	switch (command)
@@ -80,43 +81,42 @@ void UdpCom::OnReceive(struct udp_pcb * upcb, struct pbuf * top, const ip_addr_t
 	int readLen = 0; 
 	int cur = 0;
 	int cmdLen = UdpPacket::HEADERLEN;
-	UdpCmdPacket& recv = recvs.Poke();
+	UdpCmdPacket* recv = &recvs.Poke();
 	while(1){
 		int l = p->len - cur;
 		if (l > cmdLen-readLen) l = cmdLen-readLen;
-		memcpy(recv.bytes + readLen, ((char*)p->payload)+cur, l);
+		memcpy(recv->bytes + readLen, ((char*)p->payload)+cur, l);
 		readLen += l;
 		cur += l;
 		if (readLen == cmdLen){
 			if (cmdLen == UdpPacket::HEADERLEN){
-				cmdLen = recv.CommandLen();
+				cmdLen = recv->CommandLen();
 #if 1
-				printf("L=%d Cm=%d Ct=%d received from %s.\n", recv.length, recv.command, recv.count, ipaddr_ntoa(addr));
+				printf("L=%d Cm=%d Ct=%d received from %s.\n", recv->length, recv->command, recv->count, ipaddr_ntoa(addr));
 #endif
 			}
 			if (readLen == cmdLen){
-				recv.returnIp = *addr;
-				if (recv.length != cmdLen) {
-					printf("cmdLen %d != recvLen %d\n", cmdLen, recv.length);
+				recv->returnIp = *addr;
+				if (recv->length != cmdLen) {
+					ESP_LOGE(Tag, "cmdLen %d != recvLen %d\n", cmdLen, recv->length);
 				}
-				if (recv.command == CIU_GET_IPADDRESS) {
+				if (recv->command == CIU_GET_IPADDRESS) {
 					recvs.Write();
-					printf("L=%d Cm=%d Ct=%d written.\n", recv.length, recv.command, recv.count);
 				}
-				else if (recv.count == commandCount + 1) {		// check and update counter
+				else if (recv->count == commandCount + 1) {		// check and update counter
 					recvs.Write();
-					printf("L=%d Cm=%d Ct=%d written.\n", recv.length, recv.command, recv.count);
 					commandCount++;
 				}
 				else {
-					printf(" ignore %d", recv.count);
+					ESP_LOGI(Tag, "ignore %d\n", recv->count);
 				}
 				if (!recvs.WriteAvail()){
-					printf("Udp recv buffer full.\n");
+					ESP_LOGE(Tag, "Udp recv buffer full.\n");
 					pbuf_free(top);
 					return;
 				}
-				recv = recvs.Poke();
+				recv = &recvs.Poke();
+				cmdLen = UdpPacket::HEADERLEN;
 				readLen = 0;
 			}
 		}
@@ -134,19 +134,19 @@ void UdpCom::OnReceive(struct udp_pcb * upcb, struct pbuf * top, const ip_addr_t
 
 void UdpCom::ExecCommand(){
 	if (recvs.ReadAvail()) {
-		UdpCmdPacket& recv = recvs.Peek();
-		if (CI_BOARD_INFO < recv.command && recv.command < CI_NCOMMAND) {
+		UdpCmdPacket* recv = &recvs.Peek();
+		if (CI_BOARD_INFO < recv->command && recv->command < CI_NCOMMAND) {
 			if (uarts.IsIdle()) {
-				uarts.WriteCmd(recv);
+				uarts.WriteCmd(*recv);
 				if (!uarts.StartCmd()) {
-					PrepareRetPacket(recv.command);
-					SendRetPacket(recv.returnIp);
+					PrepareRetPacket(recv->command);
+					SendRetPacket(recv->returnIp);
 				}
 				recvs.Read();
 			}
 		}
 		else {
-			ExecUdpCommand(recvs.Peek());
+			ExecUdpCommand(*recv);
 			recvs.Read();
 		}
 	}
@@ -173,7 +173,7 @@ void UdpCom::SendText(char* text, short errorlevel) {
     memcpy (pb->payload, send.bytes, send.length);
 	udp_sendto(udp, pb, &ownerIp, port);
     pbuf_free(pb); //De-allocate packet buffer
-	printf("Ret%d C%d L%d to %s\n", send.command, send.count, send.length, ipaddr_ntoa(&ownerIp));
+	ESP_LOGI(Tag, "Ret%d C%d L%d to %s\n", send.command, send.count, send.length, ipaddr_ntoa(&ownerIp));
 }
 void UdpCom::PrepareRetPacket(int cmd) {
 	send.command = cmd;
@@ -190,7 +190,7 @@ void UdpCom::SendRetPacket(ip_addr_t& returnIp) {
     memcpy (pb->payload, send.bytes, send.length);
 	udp_sendto(udp, pb, &returnIp, port);
     pbuf_free(pb); //De-allocate packet buffer
-	printf("Ret%d C%d L%d to %s\n", send.command, send.count, send.length, ipaddr_ntoa(&ownerIp));
+	ESP_LOGI(Tag, "Ret%d C%d L%d to %s\n", send.command, send.count, send.length, ipaddr_ntoa(&returnIp));
 }
 void UdpCom::ExecUdpCommand(UdpCmdPacket& recv) {
 	switch (recv.command)
@@ -234,7 +234,8 @@ void UdpCom::ExecUdpCommand(UdpCmdPacket& recv) {
 		SendRetPacket(recv.returnIp);
 		break;
 	default:
-		printf("Invalid command %d count %d received.\n", (int)send.command, (int)send.count);
+		ESP_LOGI(Tag, "Invalid command %d count %d received from %s at %x.\n", 
+			(int)recv.command, (int)recv.count, ipaddr_ntoa(&recv.returnIp), (unsigned)&recv);
 		break;
 	}
 }
