@@ -4,11 +4,64 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+        { 
+            "name": "(c/c++)OpenOCD Debug",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "build/${env:PROJECT_NAME}.elf",
+            "cwd": "${workspaceFolder}",
+            "stopAtEntry": false,
+            "MIMode": "gdb",
+            "miDebuggerPath": "C:/msys32/opt/xtensa-esp32-elf/bin/xtensa-esp32-elf-gdb.exe",
+            "miDebuggerServerAddress": "localhost:3333",
+            "launchCompleteCommand": "exec-continue",
+            "customLaunchSetupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Set current working directory",
+                    "text": "-environment-cd ${workspaceFolder}"
+                },
+                {
+                    "description": "Loading symbol table",
+                    "text": "-file-exec-and-symbols build/stuffedRobot.elf",
+                    "ignoreFailures": false
+                },
+                {
+                    "text": "-target-select remote localhost:3333"
+                },
+                {
+                    "text": "-interpreter-exec console \"monitor reset halt\""
+                },
+                {
+                    "text": "-interpreter-exec console \"x $a1=0\""
+                },
+                // {
+                //     "description": "",
+                //     "text": "-break-insert -h -f app_main",
+                //     "ignoreFailures": false
+                // },
+                // {
+                //     "text": "-exec-continue"
+                // },
+            ],
+            "logging": {
+                "trace": false,
+                "traceResponse": false,
+                "engineLogging": false
+            },
+            "targetArchitecture": "x64",
+            "internalConsoleOptions": "openOnSessionStart",
+            "externalConsole": true
+        },
         {
-            "name": "OpenOCD Debug",
+            "name": "(Native)OpenOCD Debug",
             "type": "gdb",
             "request": "attach",
-            "executable": "./build/stuffedRobot.elf",
+            "executable": "./build/${env:PROJECT_NAME}.elf",
             "target": ":3333",
             "remote": true,
             "cwd": "${workspaceRoot}",
@@ -19,7 +72,6 @@
                 "thb app_main"
             ],
             "printCalls": true,
-            //"preLaunchTask": "openOCD"
         }
     ]
 }
