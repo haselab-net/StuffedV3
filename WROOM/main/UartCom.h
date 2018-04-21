@@ -16,19 +16,21 @@ class Uarts;
 class Uart :public UTRefCount {
 	int id;
 	uart_port_t port;
-	QueueHandle_t eventQueue;
+//	friend void uartEvent(void* a);
 public:
 	struct Cur {
 		volatile int board;	//	boards[board]
+#if 0
 		int cur;	//	cursor in board packet
+#endif
 	};
 	Cur cmdCur;
 	Cur retCur;
 	Boards boards;
-	void EnumerateBoard(Uarts* s);
-	Uart(uart_port_t ch) : port(ch) {
-	}
+	Uart(uart_port_t ch) : port(ch) {}
 	void Init(uart_config_t conf, int rxPin, int txPin);
+	void EnumerateBoard(Uarts* s);
+#if 0
 	void Loop();
 	bool IsIdle() { return cmdCur.board == boards.size(); }
 	void StartCmd() {
@@ -40,6 +42,7 @@ public:
 		retCur.cur = 0;
 		retCur.board = 0;
 	}
+#endif
 };
 
 class DeviceMap {
@@ -124,6 +127,7 @@ public:
 		for (int i = 0; i < NUART; ++i) {
 			uart[i]->StartCmd();
 		}
+		Loop();
 		return rv;
 	}
 	///	loop for uart

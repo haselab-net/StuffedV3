@@ -111,6 +111,7 @@ public:
 	unsigned short commandCount;
 	int recvRest;
 	UdpRetPacket send;
+	TaskHandle_t taskExeCmd; 
 
 	void ConnectWifi();
 	void OnWifi(system_event_t* event);

@@ -23,7 +23,7 @@
 
 
 UdpCom udpCom;
-const char* Tag = "UdpCom";
+static const char* Tag = "UdpCom";
 
 int UdpCmdPacket::CommandLen() {
 	switch (command)
@@ -65,10 +65,18 @@ static void onReceive(void *arg, struct udp_pcb *pcb, struct pbuf *p, const ip_a
 {
 	((UdpCom*)arg)->OnReceive(pcb, p, addr, port);
 }
+static void execCommandLoop(void* udpCom){
+    for( ;; )
+    {
+        ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+		((UdpCom*) udpCom)->ExecCommand();
+    }
+}
 void UdpCom::Init() {
 	recvRest = 0;
 	commandCount = 0;
 	ConnectWifi();
+    xTaskCreate(execCommandLoop, "ExeCmd", 8*1024, &udpCom, tskIDLE_PRIORITY, &taskExeCmd);
 }
 
 void UdpCom::OnReceive(struct udp_pcb * upcb, struct pbuf * top, const ip_addr_t* addr, u16_t port) {
@@ -102,9 +110,11 @@ void UdpCom::OnReceive(struct udp_pcb * upcb, struct pbuf * top, const ip_addr_t
 				}
 				if (recv->command == CIU_GET_IPADDRESS) {
 					recvs.Write();
+					xTaskNotifyGive(taskExeCmd);
 				}
 				else if (recv->count == commandCount + 1) {		// check and update counter
 					recvs.Write();
+					xTaskNotifyGive(taskExeCmd);
 					commandCount++;
 				}
 				else {
@@ -149,6 +159,8 @@ void UdpCom::ExecCommand(){
 			ExecUdpCommand(*recv);
 			recvs.Read();
 		}
+	}else{
+		ESP_LOGE(Tag, "Failed to read from recived commands (recvs).\n");
 	}
 	if (uarts.RetReady()) {	//	Send udp packet when uarts ready
 		printf("URet");
@@ -300,8 +312,11 @@ void UdpCom::ConnectWifi() {
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
     wifi_config_t wifi_config;
     ESP_ERROR_CHECK( esp_wifi_set_storage(WIFI_STORAGE_RAM) );
+/*
 	strcpy((char*)wifi_config.sta.ssid, "hasefone");
 	strcpy((char*)wifi_config.sta.password, "hasevr@gmail.com");
+*/	strcpy((char*)wifi_config.sta.ssid, "HOME");
+	strcpy((char*)wifi_config.sta.password, "2human2human2");
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA) );
     ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config) );
     ESP_ERROR_CHECK(esp_wifi_start() );

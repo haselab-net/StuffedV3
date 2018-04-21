@@ -121,7 +121,7 @@
             "problemMatcher": []
         },
         {
-            "label": "Start OpenOCD",
+            "label": "JTAG (OpenOCD) start (alt+ctrl+j)",
             "type": "shell",
             "windows": {
                 "command": "./task.sh",

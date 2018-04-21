@@ -11,6 +11,7 @@
             "program": "build/${env:PROJECT_NAME}.elf",
             "cwd": "${workspaceFolder}",
             "stopAtEntry": false,
+            //"preLaunchTask": "JTAG (OpenOCD) start (alt+ctrl+j)",
             "MIMode": "gdb",
             "miDebuggerPath": "C:/msys32/opt/xtensa-esp32-elf/bin/xtensa-esp32-elf-gdb.exe",
             "miDebuggerServerAddress": "localhost:3333",
