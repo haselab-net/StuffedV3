@@ -8,119 +8,51 @@
 
 static const char* Tag = "Uart";
 
-void uartEvent(void* a){
-    uart_event_t event;
-	Uart* u = (Uart*)a;
-    for(;;) {
-        //Waiting for UART event.
-        if(xQueueReceive(u->eventQueue, (void *)&event, (portTickType)portMAX_DELAY)) {
-			ESP_LOGI(Tag, "Event %x, Size %d", event.type, event.size);
-			u->Event(event);
-		}
-	}
-} 
 void Uart::Init(uart_config_t conf, int rxPin, int txPin){
 	uart_param_config(port, &conf);
 	uart_set_pin(port, txPin, rxPin, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
-	uart_driver_install(port, 256, 256, 20, &eventQueue, 0);
+	uart_driver_install(port, 256, 256, 20, NULL, 0);
 }
-void Uart::EventStart(){
-#if 0
-	/*
-	UART_TX_DONE_INT: Triggered when the transmitter has sent out all FIFO data.
-	UART_TXFIFO_EMPTY_INT: Triggered when the amount of data in the transmit-FIFO is less
-	 than what tx_mem_cnttxfifo_cnt specifies.
-	UART_RXFIFO_FULL_INT: Triggered when the receiver gets more data than 
-	 what (rx_flow_thrhd_h3, rx_flow_thrhd) specifies.	*/
-	uart_intr_config_t cfg={
-	/*!< UART interrupt enable mask, choose from UART_XXXX_INT_ENA_M under UART_INT_ENA_REG(i), connect with bit-or operator*/
-    	.intr_enable_mask = UART_TX_DONE_INT_ENA_M | UART_TXFIFO_EMPTY_INT_ENA_M | UART_RXFIFO_FULL_INT_CLR_M,
-		.rx_timeout_thresh = 10,
-    	.txfifo_empty_intr_thresh = 20,	//	200kHz/20 = 10kHz, UART_FIFO_LEN=128
-    	.rxfifo_full_thresh = 1,
-	};
-	uart_intr_config(port, &cfg);
-#endif
-	uart_enable_rx_intr(port);
-	uart_enable_tx_intr(port, 1, 20);
-	xTaskCreate(uartEvent, "UartEvent", 8*1024, this, 12, NULL);
+static void recvTask(void* a){
+	((Uart*)a)->RecvTask();
 }
-
-void Uart::Event(uart_event_t& ev){
-	switch(ev.type){
-		case UART_DATA:              /*!< UART data event*/
-			Loop();
-		break;
-		default:
-		ESP_LOGE(Tag, "Unexpected event type %x occured.", ev.type);
-		break;
+static void sendTask(void* a){
+	((Uart*)a)->SendTask();
+}
+void Uart::CreateTask(){
+	xTaskCreate(recvTask, "RecvTask", 4*1024, this, 12, &taskRecv);
+	xTaskCreate(sendTask, "SendTask", 4*1024, this, 10, &taskSend);
+}
+void Uart::SendTask(){
+	while(1){
+		ulTaskNotifyTake(pdFALSE, portMAX_DELAY);	//	given by WriteCmd
+		for(cmdCur.board=0; cmdCur.board<boards.size(); cmdCur.board++){
+			int retLen = boards[cmdCur.board]->RetLenForCommand();
+			uart_write_bytes(port, (char*)boards[cmdCur.board]->CmdStart(),
+				(size_t)boards[cmdCur.board]->CmdLen());
+			if (retLen){
+				//	given by RecvTask(). if command has return packet, wait return before sending command for the next board.
+				ulTaskNotifyTake(pdFALSE, portMAX_DELAY);
+			}
+		}
+		xSemaphoreGive(uarts->seUartFinished);
 	}
 }
 void Uart::RecvTask(){
 	while(1){
-		ulTaskNotifyTake(, portMAX_DELAY);	//	given when udp sent.
 		for (retCur.board=0; retCur.board < boards.size(); retCur.board++) {
 			//	read 1 byte tentatively. this blocks the thread.
-			uart_read_bytes(port, boards[0]->RetStart()+retCur.cur, 1, portMAX_DELAY);
+			uart_read_bytes(port, boards[0]->RetStart(), 1, portMAX_DELAY);
 			//	receive rest.
-			uart_read_bytes(port, boards[retCur.board]->RetStart()+retCur.cur,
+			uart_read_bytes(port, boards[retCur.board]->RetStart()+1,
 				boards[retCur.board]->RetLen()-1, portMAX_DELAY);
-			//	read 1 byte from the next board
-			uart_read_bytes(port, boards[retCur.board+1]->RetStart()+retCur.cur, 1, portMAX_DELAY);
-			xTaskNotifyGive(taskSend);		//	notify to send to next borad.
+			xTaskNotifyGive(taskSend);	//	notify to send to next borad.
 		}
-	}
-}
-void Uart::SendTask(){
-	while(1){
-		ulTaskNotifyTake(pdFALSE, portMAX_DELAY);	//	given by ExecCmd
-		for(cmdCur.board=0; cmdCur.board<boards.size(); cmdCur.board++){
-			int retLen = boards[cmdCur.board]->RetLenForCommand();
-			if (retLen != 0){
-				//	if command has return packet, wait return before sending command for the next board.
-				ulTaskNotifyTake(, portMAX_DELAY);
-			}
-			uart_write_bytes(port, (char*)boards[cmdCur.board]->CmdStart(),
-				(size_t)boards[cmdCur.board]->CmdLen());
-		}
-	}
-}
-void Uart::Loop() {
-	//	receive first
-	size_t rxLen;
-	uart_get_buffered_data_len(port, &rxLen);
-	while (rxLen && retCur.board < boards.size()) {
-#if 1
-		ESP_LOGI(Tag, "rx%d B%dR%d %d \n", rxLen, retCur.board, retCur.cur, boards[retCur.board]->RetStart()[retCur.cur]);
-#endif
-		rxLen -= uart_read_bytes(port, boards[retCur.board]->RetStart()+retCur.cur, 1, 0);
-		retCur.cur++;
-		if (retCur.cur == boards[retCur.board]->RetLen()) {
-			retCur.cur = 0;
-			retCur.board++;
-		}
-	}
-	//	then send
-	if (cmdCur.board < boards.size()) {
-		int retLen = boards[cmdCur.board]->RetLenForCommand();
-		if (retLen == 0 || cmdCur.board <= retCur.board) {
-			//	if command has return packet, wait return before sending command for the next board.
-			//	otherwise
-			cmdCur.cur += uart_write_bytes(port, (char*)boards[cmdCur.board]->CmdStart()+cmdCur.cur,
-			 	(size_t)boards[cmdCur.board]->CmdLen() - cmdCur.cur);
-			if (cmdCur.cur == boards[cmdCur.board]->CmdLen()) {
-				cmdCur.cur = 0;
-				cmdCur.board++;
-			}
-		}
-		else {
-			printf("Wait c: %d-%d r:%d-%d rl%d\r\n",cmdCur.board, cmdCur.cur, 
-				retCur.board, retCur.cur, boards[retCur.board]->RetLenForCommand());
-		}
+		ulTaskNotifyTake(pdFALSE, portMAX_DELAY);	//	given when udp sent.
 	}
 }
 
-void Uart::EnumerateBoard(Uarts* uarts) {
+void Uart::EnumerateBoard() {
 	boards.clear();
 	CommandPacketBD0 cmd;
 	ReturnPacketBD0 ret;
@@ -160,9 +92,7 @@ void Uart::EnumerateBoard(Uarts* uarts) {
 		printf("\n");
 	}
 	cmdCur.board = boards.size();
-	cmdCur.cur = 0;
 	retCur.board = 0;
-	retCur.cur = 0;
 	//	set command length for all boards
 	for (int i = 0; i < boards.size(); ++i) {
 		printf("Board %d CLEN:", boards[i]->GetBoardId());
@@ -181,32 +111,8 @@ void Uarts::EnumerateBoard() {
 	motorMap.clear();
 	forceMap.clear();
 	for (int i = 0; i < NUART; ++i) {
-		uart[i]->EnumerateBoard(this);
+		uart[i]->EnumerateBoard();
 	}
-#ifdef DEBUG
-	Serial.print("Motors:");
-	for (int i = 0; i<motorMap.size(); ++i){
-		Serial.print(" ");
-		Serial.print(motorMap[i].board);
-		Serial.print("-");
-		Serial.print(motorMap[i].id);
-	}
-	Serial.println();
-	for (int i = 0; i < NUART; ++i) {
-		for (int j = 0; j < uart[i]->boards.size(); ++j) {
-			Serial.print("U");
-			Serial.print(i);
-			Serial.print("B");
-			Serial.print(j);
-			Serial.print(" =");
-			for(int k=0; k< uart[i]->boards[j]->motorMap.size(); ++k){
-				Serial.print(" ");
-				Serial.print(uart[i]->boards[j]->motorMap[k]);
-			}
-			Serial.println();
-		}
-	}
-#endif
 	nTargetMin = 0xFFFF;
 	nBoard = 0;
 	for (int i = 0; i < NUART; ++i) {
@@ -233,18 +139,22 @@ void Uarts::Init() {
 	uart[1]->Init(uconf, 16, 17);
 	printf(". done.\n");
 	EnumerateBoard();
-	uart[0]->EventStart();
-	uart[1]->EventStart();
+	uart[0]->CreateTask();
+	uart[1]->CreateTask();
 }
 
 Uarts uarts;
-Uart uart1(UART_NUM_1);
-Uart uart2(UART_NUM_2);
+Uart uart1(UART_NUM_1, &uarts);
+Uart uart2(UART_NUM_2, &uarts);
 Uarts::Uarts(){
 	uart[0] = &uart1;
 	uart[1] = &uart2;
 	nBoard = 0;
 	nTargetMin = 0;
+	seUartFinished = xSemaphoreCreateCounting(0xFFFF, 0);
+}
+Uarts::~Uarts(){
+	vSemaphoreDelete(seUartFinished);
 }
 void Uarts::WriteCmd(UdpCmdPacket& packet) {
 	for (int i = 0; i < NUART; ++i) {
@@ -253,12 +163,21 @@ void Uarts::WriteCmd(UdpCmdPacket& packet) {
 		}
 	}
 	returnIp = packet.returnIp;
+	//	Start uart communications 
+	for (int i = 0; i < NUART; ++i) {
+		xTaskNotifyGive(uart[i]->taskSend);
+	}
+	//	Wait for ending of uart communications
+	for (int i = 0; i < NUART; ++i) {
+		xSemaphoreTake(seUartFinished, portMAX_DELAY);
+	}
 }
 void Uarts::ReadRet(UdpRetPacket& packet){
 	for (int i = 0; i < NUART; ++i) {
 		for (int j = 0; j < uart[i]->boards.size(); ++j) {
 			uart[i]->boards[j]->ReadRet(packet);
 		}
+		xTaskNotifyGive(uart[i]->taskRecv);	//	recv next
 	}
 	if (packet.command == CI_INTERPOLATE || packet.command == CI_FORCE_CONTROL) {
 		nTargetVacancy = packet.GetVacancy();

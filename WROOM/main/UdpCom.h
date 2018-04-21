@@ -117,7 +117,7 @@ public:
 	void OnWifi(system_event_t* event);
 	void Init();
 	void OnReceive(struct udp_pcb * upcb, struct pbuf * p, const ip_addr_t* addr, u16_t port);
-	void ExecCommand();
+	void ExecCommandLoop();
 	void PrepareRetPacket(int cmd);
 	void SendRetPacket(ip_addr_t& returnIp);
 	void ExecUdpCommand(UdpCmdPacket& recv);

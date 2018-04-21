@@ -16,33 +16,21 @@ class Uarts;
 class Uart :public UTRefCount {
 	int id;
 	uart_port_t port;
-//	friend void uartEvent(void* a);
+	Uarts* uarts;
 public:
+	TaskHandle_t taskRecv, taskSend;
 	struct Cur {
 		volatile int board;	//	boards[board]
-#if 0
-		int cur;	//	cursor in board packet
-#endif
 	};
 	Cur cmdCur;
 	Cur retCur;
 	Boards boards;
-	Uart(uart_port_t ch) : port(ch) {}
+	Uart(uart_port_t ch, Uarts* u) : port(ch), uarts(u) {}
 	void Init(uart_config_t conf, int rxPin, int txPin);
-	void EnumerateBoard(Uarts* s);
-#if 0
-	void Loop();
-	bool IsIdle() { return cmdCur.board == boards.size(); }
-	void StartCmd() {
-		//	start to write command
-		cmdCur.cur = 0;
-		cmdCur.board = 0;
-	}
-	void RetBegin() {
-		retCur.cur = 0;
-		retCur.board = 0;
-	}
-#endif
+	void EnumerateBoard();
+	void CreateTask();
+	void RecvTask();
+	void SendTask();
 };
 
 class DeviceMap {
@@ -55,7 +43,13 @@ public:
 
 class Uarts{
 public:
-	bool bRetFinished = true;
+/*	bool bRetFinished = true;
+	enum UartState{
+		US_IDLE,
+		US_SENDING,
+		US_RECEIVING,
+	} uartState;
+*/
 	int nTargetMin;			//	nTaret for all board
 	int nTargetVacancy;		//	nTargetVecancy for all board
 	int nBoard;
@@ -63,37 +57,25 @@ public:
 	static const int NUART = 2;
 	tiny::vector<DeviceMap> motorMap;
 	tiny::vector<DeviceMap> forceMap;
+	Uart* uart[NUART];
+	SemaphoreHandle_t seUartFinished;
 	int GetNTotalMotor() { return motorMap.size(); }
 	int GetNTotalForce() { return forceMap.size(); }
 	int GetNTarget() { return nTargetMin; }
 	int GetSystemId() { return 0; }
-	Uart* uart[NUART];
 	Uarts();
+	~Uarts();
 	void EnumerateBoard();	
 	void Init();
-	void WriteCmd(UdpCmdPacket& packet);
-	void ReadRet(UdpRetPacket& packet);
-	///	If all return packet from boards are arrived or not. Works between RetBegin and RetEnd.
-	bool RetReady(){
-		if (nBoard == 0) return false;
-		if (bRetFinished)  return false;
+	bool HasRet(unsigned short id){
 		for (int i = 0; i < NUART; ++i) {
-			if (uart[i]->retCur.board < uart[i]->boards.size()) {
-				printf(".");
-				return false;
+			for (int j = 0; j < uart[i]->boards.size(); ++j) {
+				if (uart[i]->boards[j]->retPacketLen[id]) return true;
 			}
 		}
-		return true;
+		return false;
 	}
-	///	Prepare for receiving return packet from boards
-	void RetBegin() {
-		for (int i = 0; i < NUART; ++i) uart[i]->RetBegin();	//	 set retCur = 0
-		bRetFinished = false;
-	}
-	///	Release ret packet buffers. Must call after RetReady()==true and finished to read buffer.
-	void RetEnd() {
-		bRetFinished = true;
-	}
+#if 0
 	///	Get the command id of the ret packet from one of the boards.
 	int RetCommand() {
 		for (int i = 0; i < NUART; ++i) {
@@ -101,41 +83,10 @@ public:
 		}
 		return -1;
 	}
-	///	Is uarts are idle (finished to both sending and receiveing)
-	bool IsIdle() {
-		if (!bRetFinished) return false;
-		bool rv = true;
-		for (int i = 0; i < NUART; ++i) {
-			if (!uart[i]->IsIdle()) rv = false;
-		}
-		return rv;
-	}
-	///	Start to send commmand. Prepare for receive packet from board if needed.
-	bool StartCmd() {
-		bool rv = false;
-		//	prepare to receive return
-		for(int i=0; i<NUART; ++i){
-			for (int j = 0; j < uart[i]->boards.size(); ++j) {
-				if (uart[i]->boards[j]->RetLenForCommand()) {
-					RetBegin();	//	if receive packet from any boards
-					rv = true;
-					goto next;
-				}
-			}
-		}
-		next:;
-		for (int i = 0; i < NUART; ++i) {
-			uart[i]->StartCmd();
-		}
-		Loop();
-		return rv;
-	}
-	///	loop for uart
-	void Loop() {
-		for (int i = 0; i < NUART; ++i) {
-			uart[i]->Loop();
-		}
-	}
+#endif
+	///	Write contents of the UdpCmdPacket to all boards. 
+	void WriteCmd(UdpCmdPacket& packet);	
+	///	Read returns of all boards to  UdpRetPacket. 
+	void ReadRet(UdpRetPacket& packet);
 };
-
 extern Uarts uarts;

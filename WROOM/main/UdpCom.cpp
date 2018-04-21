@@ -65,18 +65,14 @@ static void onReceive(void *arg, struct udp_pcb *pcb, struct pbuf *p, const ip_a
 {
 	((UdpCom*)arg)->OnReceive(pcb, p, addr, port);
 }
-static void execCommandLoop(void* udpCom){
-    for( ;; )
-    {
-        ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
-		((UdpCom*) udpCom)->ExecCommand();
-    }
+static void execCommand(void* udpCom){
+	((UdpCom*) udpCom)->ExecCommandLoop();
 }
 void UdpCom::Init() {
 	recvRest = 0;
 	commandCount = 0;
 	ConnectWifi();
-    xTaskCreate(execCommandLoop, "ExeCmd", 8*1024, &udpCom, tskIDLE_PRIORITY, &taskExeCmd);
+    xTaskCreate(execCommand, "ExeCmd", 8*1024, &udpCom, tskIDLE_PRIORITY, &taskExeCmd);
 }
 
 void UdpCom::OnReceive(struct udp_pcb * upcb, struct pbuf * top, const ip_addr_t* addr, u16_t port) {
@@ -99,7 +95,7 @@ void UdpCom::OnReceive(struct udp_pcb * upcb, struct pbuf * top, const ip_addr_t
 		if (readLen == cmdLen){
 			if (cmdLen == UdpPacket::HEADERLEN){
 				cmdLen = recv->CommandLen();
-#if 1
+#if 0
 				printf("L=%d Cm=%d Ct=%d received from %s.\n", recv->length, recv->command, recv->count, ipaddr_ntoa(addr));
 #endif
 			}
@@ -142,32 +138,24 @@ void UdpCom::OnReceive(struct udp_pcb * upcb, struct pbuf * top, const ip_addr_t
 	pbuf_free(top);
 }
 
-void UdpCom::ExecCommand(){
-	if (recvs.ReadAvail()) {
-		UdpCmdPacket* recv = &recvs.Peek();
-		if (CI_BOARD_INFO < recv->command && recv->command < CI_NCOMMAND) {
-			if (uarts.IsIdle()) {
+void UdpCom::ExecCommandLoop(){
+    while(1){
+		ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+		while (recvs.ReadAvail()) {
+			UdpCmdPacket* recv = &recvs.Peek();
+			if (CI_BOARD_INFO < recv->command && recv->command < CI_NCOMMAND) {
 				uarts.WriteCmd(*recv);
-				if (!uarts.StartCmd()) {
-					PrepareRetPacket(recv->command);
-					SendRetPacket(recv->returnIp);
+				PrepareRetPacket(recv->command);
+				if (uarts.HasRet(recv->command)){
+					uarts.ReadRet(send);
 				}
-				recvs.Read();
+				SendRetPacket(recv->returnIp);
 			}
-		}
-		else {
-			ExecUdpCommand(*recv);
+			else {
+				ExecUdpCommand(*recv);
+			}
 			recvs.Read();
 		}
-	}else{
-		ESP_LOGE(Tag, "Failed to read from recived commands (recvs).\n");
-	}
-	if (uarts.RetReady()) {	//	Send udp packet when uarts ready
-		printf("URet");
-		PrepareRetPacket(uarts.RetCommand());
-		uarts.ReadRet(send);
-		uarts.RetEnd();		//	release uarts
-		SendRetPacket(uarts.returnIp);
 	}
 }
 
@@ -185,7 +173,7 @@ void UdpCom::SendText(char* text, short errorlevel) {
     memcpy (pb->payload, send.bytes, send.length);
 	udp_sendto(udp, pb, &ownerIp, port);
     pbuf_free(pb); //De-allocate packet buffer
-	ESP_LOGI(Tag, "Ret%d C%d L%d to %s\n", send.command, send.count, send.length, ipaddr_ntoa(&ownerIp));
+//	ESP_LOGI(Tag, "Ret%d C%d L%d to %s\n", send.command, send.count, send.length, ipaddr_ntoa(&ownerIp));
 }
 void UdpCom::PrepareRetPacket(int cmd) {
 	send.command = cmd;
@@ -202,7 +190,7 @@ void UdpCom::SendRetPacket(ip_addr_t& returnIp) {
     memcpy (pb->payload, send.bytes, send.length);
 	udp_sendto(udp, pb, &returnIp, port);
     pbuf_free(pb); //De-allocate packet buffer
-	ESP_LOGI(Tag, "Ret%d C%d L%d to %s\n", send.command, send.count, send.length, ipaddr_ntoa(&returnIp));
+//	ESP_LOGI(Tag, "Ret%d C%d L%d to %s\n", send.command, send.count, send.length, ipaddr_ntoa(&returnIp));
 }
 void UdpCom::ExecUdpCommand(UdpCmdPacket& recv) {
 	switch (recv.command)
@@ -312,11 +300,13 @@ void UdpCom::ConnectWifi() {
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
     wifi_config_t wifi_config;
     ESP_ERROR_CHECK( esp_wifi_set_storage(WIFI_STORAGE_RAM) );
-/*
+#if 1
 	strcpy((char*)wifi_config.sta.ssid, "hasefone");
 	strcpy((char*)wifi_config.sta.password, "hasevr@gmail.com");
-*/	strcpy((char*)wifi_config.sta.ssid, "HOME");
+#else
+	strcpy((char*)wifi_config.sta.ssid, "HOME");
 	strcpy((char*)wifi_config.sta.password, "2human2human2");
+#endif
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA) );
     ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config) );
     ESP_ERROR_CHECK(esp_wifi_start() );
