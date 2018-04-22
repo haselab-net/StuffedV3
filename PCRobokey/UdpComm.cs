@@ -350,7 +350,7 @@ namespace Robokey
             if (udp == null || sendPoint == null) return;
             int p = 0;
             WriteShort(len, ref p, cmd);
-            while (!sendQueue.Write(cmd)) {
+            for (int i=0; i<100 && !sendQueue.Write(cmd); ++i) {
                 int cur = 2;
                 ushort ct = (ushort)ReadShort(ref cur, sendQueue.Peek());
                 sendQueue.FreeTo(ct);

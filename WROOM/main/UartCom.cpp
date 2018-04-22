@@ -11,7 +11,8 @@ static const char* Tag = "Uart";
 void Uart::Init(uart_config_t conf, int rxPin, int txPin){
 	uart_param_config(port, &conf);
 	uart_set_pin(port, txPin, rxPin, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
-	uart_driver_install(port, 256, 256, 20, NULL, 0);
+	uart_driver_install(port, 256, 256, 10, NULL, 0);
+	uart_enable_tx_intr(port, 1, 40);
 }
 static void recvTask(void* a){
 	((Uart*)a)->RecvTask();
