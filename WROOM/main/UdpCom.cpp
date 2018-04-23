@@ -124,7 +124,7 @@ void UdpCom::OnReceive(struct udp_pcb * upcb, struct pbuf * top, const ip_addr_t
 					xTaskNotifyGive(taskExeCmd);
 				}
 				else {
-					ESP_LOGI(Tag, "ignore %d\n", recv->count);
+					ESP_LOGI(Tag, "ignore Ct:%d|%d Cm:%d\n", recv->count, commandCount, recv->command);
 				}
 				if (!recvs.WriteAvail()){
 					ESP_LOGE(Tag, "Udp recv buffer full.\n");
@@ -313,8 +313,11 @@ void UdpCom::ConnectWifi() {
 #if 1
 	strcpy((char*)wifi_config.sta.ssid, "hasefone");
 	strcpy((char*)wifi_config.sta.password, "hasevr@gmail.com");
-#else
+#elif 0
 	strcpy((char*)wifi_config.sta.ssid, "HOME");
+	strcpy((char*)wifi_config.sta.password, "2human2human2");
+#else
+	strcpy((char*)wifi_config.sta.ssid, "haselab_pi_G");
 	strcpy((char*)wifi_config.sta.password, "2human2human2");
 #endif
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA) );

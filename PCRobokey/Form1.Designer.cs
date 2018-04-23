@@ -42,6 +42,8 @@
             this.btResetMotors = new System.Windows.Forms.Button();
             this.runTimer = new System.Windows.Forms.Timer(this.components);
             this.panelTop = new System.Windows.Forms.Panel();
+            this.label3 = new System.Windows.Forms.Label();
+            this.udTick = new System.Windows.Forms.NumericUpDown();
             this.laPort = new System.Windows.Forms.Label();
             this.udTime = new System.Windows.Forms.NumericUpDown();
             this.udLoopTime = new System.Windows.Forms.NumericUpDown();
@@ -76,6 +78,7 @@
             this.panelCom.SuspendLayout();
             this.panel2.SuspendLayout();
             this.panelTop.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.udTick)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.udTime)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.udLoopTime)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.udStep)).BeginInit();
@@ -215,6 +218,8 @@
             // 
             // panelTop
             // 
+            this.panelTop.Controls.Add(this.label3);
+            this.panelTop.Controls.Add(this.udTick);
             this.panelTop.Controls.Add(this.laPort);
             this.panelTop.Controls.Add(this.udTime);
             this.panelTop.Controls.Add(this.udLoopTime);
@@ -231,6 +236,33 @@
             this.panelTop.Name = "panelTop";
             this.panelTop.Size = new System.Drawing.Size(1169, 45);
             this.panelTop.TabIndex = 69;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(899, 15);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(29, 18);
+            this.label3.TabIndex = 78;
+            this.label3.Text = "ms";
+            // 
+            // udTick
+            // 
+            this.udTick.Location = new System.Drawing.Point(832, 9);
+            this.udTick.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.udTick.Name = "udTick";
+            this.udTick.Size = new System.Drawing.Size(61, 25);
+            this.udTick.TabIndex = 77;
+            this.udTick.Value = new decimal(new int[] {
+            50,
+            0,
+            0,
+            0});
+            this.udTick.ValueChanged += new System.EventHandler(this.udTick_ValueChanged);
             // 
             // laPort
             // 
@@ -613,6 +645,7 @@
             this.panel2.PerformLayout();
             this.panelTop.ResumeLayout(false);
             this.panelTop.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.udTick)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.udTime)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.udLoopTime)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.udStep)).EndInit();
@@ -681,6 +714,8 @@
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.FlowLayoutPanel fpFoundRobot;
         private System.Windows.Forms.Label laPort;
+        private System.Windows.Forms.NumericUpDown udTick;
+        private System.Windows.Forms.Label label3;
     }
 }
 

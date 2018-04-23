@@ -4,6 +4,6 @@
 
 void commandInit();
 
-CHOOSE_BoardInfo(B1F);
+CHOOSE_BoardInfo(B1M);
 
 #endif

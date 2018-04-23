@@ -25,8 +25,10 @@ void Uart::CreateTask(){
 	xTaskCreate(sendTask, "SendTask", 4*1024, this, 10, &taskSend);
 }
 void Uart::SendTask(){
+//	const char* Tag = "UartSend";
 	while(1){
 		ulTaskNotifyTake(pdFALSE, portMAX_DELAY);	//	given by WriteCmd
+//		ESP_LOGI(Tag, "#%d start\n", port);
 		for(cmdCur.board=0; cmdCur.board<boards.size(); cmdCur.board++){
 			int retLen = boards[cmdCur.board]->RetLenForCommand();
 			uart_write_bytes(port, (char*)boards[cmdCur.board]->CmdStart(),
@@ -37,13 +39,16 @@ void Uart::SendTask(){
 			}
 		}
 		xSemaphoreGive(uarts->seUartFinished);
+//		ESP_LOGI(Tag, "#%d  end\n", port);
 	}
 }
 void Uart::RecvTask(){
+//	const char* Tag = "UartRecv";
 	while(1){
 		for (retCur.board=0; retCur.board < boards.size(); retCur.board++) {
 			//	read 1 byte tentatively. this blocks the thread.
-			uart_read_bytes(port, boards[0]->RetStart(), 1, portMAX_DELAY);
+			uart_read_bytes(port, boards[retCur.board]->RetStart(), 1, portMAX_DELAY);
+//			ESP_LOGI(Tag, "#%d H:%x L:%d", port, (int)boards[retCur.board]->RetStart()[0], boards[retCur.board]->RetLen());
 			//	receive rest.
 			uart_read_bytes(port, boards[retCur.board]->RetStart()+1,
 				boards[retCur.board]->RetLen()-1, portMAX_DELAY);

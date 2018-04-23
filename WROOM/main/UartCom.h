@@ -14,7 +14,6 @@
 
 class Uarts;
 class Uart :public UTRefCount {
-	int id;
 	uart_port_t port;
 	Uarts* uarts;
 public:

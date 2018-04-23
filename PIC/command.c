@@ -3,7 +3,7 @@
 #include "control.h"
 #include "mcc_generated_files/uart1.h"
 
-unsigned char boardId = 0;
+unsigned char boardId = 1;
 CommandPacket command;
 int cmdCur;
 int cmdLen;

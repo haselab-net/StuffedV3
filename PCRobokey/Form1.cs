@@ -549,6 +549,11 @@ namespace Robokey
             }
         }
 
+        private void udTick_ValueChanged(object sender, EventArgs e)
+        {
+            runTimer.Interval = (int)udTick.Value;
+        }
+
         void OnUpdateRobotState() {
             tbState.Text = "Motor:";
             for (int i = 0; i < udpComm.pose.nMotor; ++i) {

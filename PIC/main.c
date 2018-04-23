@@ -56,6 +56,8 @@ int main(void)
     UART2_Write('.');
     UART2_Write('\r');
     UART2_Write('\n');
+	extern unsigned char boardId;
+    printf("Borad ID:%d Model:%d nTargets:%d nMotor:%d nForce:%d\r\n", (int)boardId, MODEL_NUMBER, NTARGET, NMOTOR, NFORCE);
 
 #if 0	//	uart test
 	U1STAbits.UTXEN = 1;
