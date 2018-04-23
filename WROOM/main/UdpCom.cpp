@@ -108,10 +108,20 @@ void UdpCom::OnReceive(struct udp_pcb * upcb, struct pbuf * top, const ip_addr_t
 					recvs.Write();
 					xTaskNotifyGive(taskExeCmd);
 				}
+				else if (recv->command == CI_INTERPOLATE || recv->command == CI_FORCE_CONTROL) {
+					if (recv->count == commandCount + 1){
+						commandCount++;
+						recvs.Write();
+						xTaskNotifyGive(taskExeCmd);
+					}else if (commandCount - recv->count <= uarts.nTargetRemain -1){
+						recvs.Write();
+						xTaskNotifyGive(taskExeCmd);						
+					}
+				}
 				else if (recv->count == commandCount + 1) {		// check and update counter
+					commandCount++;
 					recvs.Write();
 					xTaskNotifyGive(taskExeCmd);
-					commandCount++;
 				}
 				else {
 					ESP_LOGI(Tag, "ignore %d\n", recv->count);

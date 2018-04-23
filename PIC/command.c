@@ -95,7 +95,7 @@ void rcInterpolate(){
         retPacket.interpolate.pos[i] = L2SDEC(motorState.pos[i]);
     }
     retPacket.interpolate.vacancy = targetsWriteAvail();
-    retPacket.interpolate.rest = targetsReadAvail();
+    retPacket.interpolate.remain = targetsReadAvail();
     retPacket.interpolate.tick = targets.tick;
 }
 void rcForceControl(){

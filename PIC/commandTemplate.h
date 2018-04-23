@@ -118,7 +118,7 @@ union ReturnPacket##BOARD {										\
 			struct {		 /*	 CI_INTERPOLATE */				\
 				SDEC pos[BOARD##_NMOTOR];						\
 				unsigned char vacancy;							\
-				unsigned char rest;								\
+				unsigned char remain;							\
 				unsigned short tick;							\
 			}__attribute__((__packed__)) interpolate;			\
 		};														\

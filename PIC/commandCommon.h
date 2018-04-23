@@ -7,7 +7,7 @@
 #endif
 #ifndef _COMMANDID_CS
 #define _COMMANDID_CS
-#include "../Robokey/commandId.cs"
+#include "../PCRobokey/commandId.cs"
 #endif
 
 //extern unsigned char boardId;

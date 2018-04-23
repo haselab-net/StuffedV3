@@ -75,7 +75,10 @@ public:
 		short &pv = data[uarts.GetNTotalMotor()];
 		pv = pv < v ? pv : v;
 	}
-	void SetRest(short r) {
+	short GetRemain() {
+		return data[uarts.GetNTotalMotor() + 1];
+	}
+	void SetRemain(short r) {
 		short &pr = data[uarts.GetNTotalMotor() + 1];
 		pr = pr < r ? pr : r;
 	}

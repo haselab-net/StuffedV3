@@ -182,5 +182,6 @@ void Uarts::ReadRet(UdpRetPacket& packet){
 	}
 	if (packet.command == CI_INTERPOLATE || packet.command == CI_FORCE_CONTROL) {
 		nTargetVacancy = packet.GetVacancy();
+		nTargetRemain = packet.GetRemain();
 	}
 }

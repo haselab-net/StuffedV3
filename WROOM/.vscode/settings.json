@@ -9,6 +9,8 @@
         "stuffedrobot.h": "c",
         "task.h": "c",
         "esp_int_wdt.h": "c",
-        "uart.h": "c"
+        "uart.h": "c",
+        "initializer_list": "cpp",
+        "utility": "cpp"
     }
 }

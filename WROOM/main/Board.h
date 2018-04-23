@@ -85,7 +85,7 @@ public:
 				packet.MotorPos(motorMap[i]) = ret.interpolate.pos[i];
 			}
 			packet.SetVacancy(ret.interpolate.vacancy);
-			packet.SetRest(ret.interpolate.rest);
+			packet.SetRemain(ret.interpolate.remain);
 			packet.SetTick(ret.interpolate.tick);
 			break;
 		case CI_SENSOR:

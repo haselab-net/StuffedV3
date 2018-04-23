@@ -52,6 +52,7 @@ public:
 */
 	int nTargetMin;			//	nTaret for all board
 	int nTargetVacancy;		//	nTargetVecancy for all board
+	int nTargetRemain;		//	minimum remaining targets in the board
 	int nBoard;
 	ip_addr_t returnIp;
 	static const int NUART = 2;

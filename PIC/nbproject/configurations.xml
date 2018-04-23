@@ -25,9 +25,9 @@
       <itemPath>decimal.h</itemPath>
       <itemPath>control.h</itemPath>
       <itemPath>commandTemplate.h</itemPath>
-      <itemPath>../Robokey/CommandId.cs</itemPath>
       <itemPath>command.h</itemPath>
       <itemPath>commandCommon.h</itemPath>
+      <itemPath>../PCRobokey/CommandId.cs</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -69,6 +69,7 @@
   <sourceRootList>
     <Elem>.</Elem>
     <Elem>../Robokey</Elem>
+    <Elem>../PCRobokey</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
