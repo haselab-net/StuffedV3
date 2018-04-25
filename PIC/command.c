@@ -4,24 +4,16 @@
 #include "mcc_generated_files/uart1.h"
 
 unsigned char boardId = 1;
+
 CommandPacket command;
 int cmdCur;
 int cmdLen;
+int retLen;
+static volatile bool bRunExecCommand=false;
 
 //	command packet length for all boards
 unsigned char cmdPacketLens[MAXBOARDID+1][CI_NCOMMAND];
-void commandInit(){
-	int i, c;
-	for(i=0; i<MAXBOARDID+1; ++i){
-		for(c=0; c<CI_NCOMMAND; ++c){
-			cmdPacketLens[i][c] = cmdPacketLen[c];
-		}
-	}
-#ifdef PICUARTINT
-	U1STAbits.URXISEL = 0;	// 00 = Interrupt flag bit is asserted while receive buffer is not empty (i.e., has at least 1 data character)	
-	IEC0bits.U1RXIE = 1;	// Enable uart1 receive interrupt.
-#endif
-}
+
 
 void ecNop(){
 }
@@ -128,28 +120,34 @@ ExecCommand* returnCommand[CI_NCOMMAND] = {
     rcNop,	//	torqueLimit
 };
 
-void uartSendRet(){
-	while (retCur < retLen && !U1STAbits.UTXBF){
-		U1TXREG = retPacket.bytes[retCur];
-		retCur ++;
-	}
-	if (retCur == retLen && U1STAbits.TRMT){	//	TX completed and disable
-		U1STAbits.UTXEN = 0;
-	}
-}
 
-#ifdef PICUARTINT
+void commandInit(){
+	int i, c;
+	for(i=0; i<MAXBOARDID+1; ++i){
+		for(c=0; c<CI_NCOMMAND; ++c){
+			cmdPacketLens[i][c] = cmdPacketLen[c];
+		}
+	}
+	/*	10 = Interrupt flag bit is asserted while receive buffer is 3/4 or more full (i.e., has 6 or more data characters)
+		01 = Interrupt flag bit is asserted while receive buffer is 1/2 or more full (i.e., has 4 or more data characters)
+		00 = Interrupt flag bit is asserted while receive buffer is not empty (i.e., has at least 1 data character)	*/
+	U1STAbits.URXISEL = 2;
+	IEC0bits.U1RXIE = 1;	// Enable uart1 receive interrupt.
+}
 
 //  handler for tx interrupt
 //	Note: "IPL3" below must fit to "IPC5bits.U1TXIP = 3" in interrupt_manager.c;
 void __attribute__ ((vector(_UART1_TX_VECTOR), interrupt(IPL3SOFT))) _UART1_TX_HANDLER(void){	
+    if (retCur == 0){
+		returnCommand[retPacket.commandId]();
+	}
 	while (retCur < retLen && !U1STAbits.UTXBF){
 		U1TXREG = retPacket.bytes[retCur];
 		retCur ++;
 	}
 	if (retCur == retLen){
-		U1STAbits.UTXISEL = 1;	//	01 = Interrupt is generated and asserted when all characters have been transmitted
-		if (U1STAbits.TRMT){	//	TX completed and disable
+		U1STAbits.UTXISEL = 1;		//	01 = Interrupt is generated and asserted when all characters have been transmitted
+		if (U1STAbits.TRMT){		//	TX completed and disable
 			IEC0bits.U1TXIE = 0;	//	disable interrupt
 			U1STAbits.UTXEN = 0;	//	disbble U1X
 		}
@@ -158,101 +156,71 @@ void __attribute__ ((vector(_UART1_TX_VECTOR), interrupt(IPL3SOFT))) _UART1_TX_H
 }
 
 //	handler for rx interrupt
-void onReceive();
 //	Note: "IPL4" below must fit to "IPC5bits.U1RXIP = 4" in interrupt_manager.c;
 void __attribute__ ((vector(_UART1_RX_VECTOR), interrupt(IPL4SOFT))) _UART1_RX_HANDLER(void){
-	onReceive();
-	IFS0CLR = 1 << _IFS0_U1RXIF_POSITION;	//	clear interrupt flag
-}
-void onReceive(){
-    while (U1STAbits.URXDA == 1){
-        command.bytes[cmdCur] = U1RXREG;
+	int i;
+	union CommandHeader head;
+	static bool bRead;
+	for(i=0; i<6; ++i){
         if (cmdCur == 0){
-			//	skip invalid value. They can arrive after reest.
-            if (command.bytes[0] == 0 || command.bytes[0] == 0xFF) continue;
-			//	skip invalid command 
-			if (command.commandId >= CI_NCOMMAND) continue;
+	        head.header = U1RXREG;
+			//	Skip spacing (make time for return packet), invalid value (They may come after reset.) and invalid command
+            if (head.header == 0 || head.header >= (CI_NCOMMAND<<BORADIDBITS)) continue;
+			//printf("H%x C%d\r\n", (int)head.header, (int)head.commandId);
 			//	In case of valid command ID, get packet length
-            cmdLen = cmdPacketLens[command.boardId][command.commandId];
-#ifdef DEBUG
-			printf("%02xL%d", command.header, cmdLen);
-#endif
-			//	start to send return packet.
-            if (command.boardId == boardId){
-				retPacket.header = command.header;
-                returnCommand[retPacket.commandId]();
-				retCur = 0;
-				retLen = retPacketLen[retPacket.commandId];
+            cmdLen = cmdPacketLens[head.boardId][head.commandId];
+            bRead = false;
+			if (head.boardId == boardId){
+				//	start to send return packet.
+				retLen = retPacketLen[head.commandId];
+				//printf("retLen%d\r\n", retLen);
 				if (retLen) {	//	Enable and start TX
+					retPacket.header = head.header;
+					retCur = 0;
 					U1STAbits.UTXISEL = 2;	//	10 = Interrupt is generated and asserted while the transmit buffer is empty
 					U1STAbits.UTXEN = 1;	//	enable TX
 					IEC0bits.U1TXIE = 1;	//	enable interrupt
 				}
+				bRead = true;
+				command.bytes[0] = head.header;
             }
-        }
-#ifdef DEBUG
-		//	Too heavy for 2M baud UART
-		//		printf(" %02x", (unsigned int)command.bytes[cmdCur]);
-#endif
-		if (cmdCur == cmdLen-1){
-            if (command.boardId == boardId || command.commandId == CI_SET_CMDLEN){
-				printf("Ex%d\r\n", command.commandId);
-                execCommand[command.commandId]();
-            }
-#ifdef DEBUG
-			else{
-				printf("\r\n");
+			if (head.commandId == CI_SET_CMDLEN){
+				bRead = true;
+				command.bytes[0] = head.header;
 			}
-#endif
+        }else if (bRead){
+			command.bytes[cmdCur] = U1RXREG;
+		}else{
+			head.header = U1RXREG;
+		}
+		if (cmdCur == cmdLen-1){
+            if (bRead){
+				bRunExecCommand = true;
+            }
             cmdCur = 0;
         } else {
 			cmdCur ++;
 		}
     }
+	IFS0CLR = 1 << _IFS0_U1RXIF_POSITION;	//	clear interrupt flag
 }
-#else
-void uartLoop(){
-    while (U1STAbits.URXDA == 1){
-        command.bytes[cmdCur] = U1RXREG;
-        if (cmdCur == 0){
-            if (command.bytes[0] == 0) break;		//	After reset
-            if (command.bytes[0] == 0xFF) break;	//	After reset
-			if (command.commandId >= CI_NCOMMAND) break; // invalid command
-            cmdLen = cmdPacketLens[command.boardId][command.commandId];
-#ifdef DEBUG
-			printf("%02xL%d", command.header, cmdLen);
-#endif
-			//	start to send return packet.
-            if (command.boardId == boardId){
-				retPacket.header = command.header;
-                returnCommand[retPacket.commandId]();
-				retCur = 0;
-				retLen = retPacketLen[retPacket.commandId];
-				if (retLen) {	//	Enable and start TX
-					U1STAbits.UTXEN = 1;
-					uartSendRet();
-				}
-            }
-        }
-#ifdef DEBUG
-		//	Too heavy for 2M baud UART
-		//		printf(" %02x", (unsigned int)command.bytes[cmdCur]);
-#endif
-		if (cmdCur == cmdLen-1){
-            if (command.boardId == boardId || command.commandId == CI_SET_CMDLEN){
-				printf("Ex%d\r\n", command.commandId);
-                execCommand[command.commandId]();
-            }
-#ifdef DEBUG
-			else{
-				printf("\r\n");
-			}
-#endif
-            cmdCur = 0;
-        } else {
-			cmdCur ++;
+
+void uartExecCommand(){
+	if (bRunExecCommand){
+		bRunExecCommand = false;
+        execCommand[command.commandId]();
+		printf("H%x Ex%d\r\n", (int)command.header, (int)command.commandId);
+	}else{
+#if 0
+		static int i;
+		i++;
+		if (i>30000){
+			printf("U1STA %8x\r\n", U1STA);
+			i = 0;
 		}
-    }
-	uartSendRet();
-}
 #endif
+	}
+}
+
+
+

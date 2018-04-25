@@ -7,12 +7,12 @@
 #include "esp_log.h"
 
 static const char* Tag = "Uart";
+static char zero[80];
 
 void Uart::Init(uart_config_t conf, int rxPin, int txPin){
 	uart_param_config(port, &conf);
 	uart_set_pin(port, txPin, rxPin, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
-	uart_driver_install(port, 256, 256, 10, NULL, 0);
-	uart_enable_tx_intr(port, 1, 40);
+	uart_driver_install(port, 512, 512, 10, NULL, 0);
 }
 static void recvTask(void* a){
 	((Uart*)a)->RecvTask();
@@ -24,35 +24,50 @@ void Uart::CreateTask(){
 	xTaskCreate(recvTask, "RecvTask", 4*1024, this, 12, &taskRecv);
 	xTaskCreate(sendTask, "SendTask", 4*1024, this, 10, &taskSend);
 }
+#define UART_USE_NOTIFY	0
 void Uart::SendTask(){
-//	const char* Tag = "UartSend";
+	const char* Tag = "UartSend";
 	while(1){
 		ulTaskNotifyTake(pdFALSE, portMAX_DELAY);	//	given by WriteCmd
 //		ESP_LOGI(Tag, "#%d start\n", port);
+		int wait = 0;
 		for(cmdCur.board=0; cmdCur.board<boards.size(); cmdCur.board++){
 			int retLen = boards[cmdCur.board]->RetLenForCommand();
+#if UART_USE_NOTIFY	//	use notify
 			uart_write_bytes(port, (char*)boards[cmdCur.board]->CmdStart(),
 				(size_t)boards[cmdCur.board]->CmdLen());
 			if (retLen){
 				//	given by RecvTask(). if command has return packet, wait return before sending command for the next board.
 				ulTaskNotifyTake(pdFALSE, portMAX_DELAY);
 			}
+#else	//	send null to make time for return
+			uart_write_bytes(port, (char*)boards[cmdCur.board]->CmdStart(),
+				(size_t)boards[cmdCur.board]->CmdLen());
+			wait = retLen - boards[cmdCur.board]->CmdLen() + 10;
+			assert(wait < sizeof(zero));
+			uart_write_bytes(port, zero, wait);
+#endif
+		}
+		if (wait < 5){
+			uart_write_bytes(port, zero, 5-wait);
 		}
 		xSemaphoreGive(uarts->seUartFinished);
 //		ESP_LOGI(Tag, "#%d  end\n", port);
 	}
 }
 void Uart::RecvTask(){
-//	const char* Tag = "UartRecv";
+	const char* Tag = "UartRecv";
 	while(1){
 		for (retCur.board=0; retCur.board < boards.size(); retCur.board++) {
-			//	read 1 byte tentatively. this blocks the thread.
+			//	receive the header byte
 			uart_read_bytes(port, boards[retCur.board]->RetStart(), 1, portMAX_DELAY);
+#if UART_USE_NOTIFY	//	uset notify
+			xTaskNotifyGive(taskSend);	//	notify to send to next borad.
+#endif
 //			ESP_LOGI(Tag, "#%d H:%x L:%d", port, (int)boards[retCur.board]->RetStart()[0], boards[retCur.board]->RetLen());
 			//	receive rest.
 			uart_read_bytes(port, boards[retCur.board]->RetStart()+1,
 				boards[retCur.board]->RetLen()-1, portMAX_DELAY);
-			xTaskNotifyGive(taskSend);	//	notify to send to next borad.
 		}
 		ulTaskNotifyTake(pdFALSE, portMAX_DELAY);	//	given when udp sent.
 	}
@@ -68,6 +83,7 @@ void Uart::EnumerateBoard() {
 		cmd.boardId = i;
 		uart_flush_input(port);	//	clear input buffer
 		uart_write_bytes(port, (char*)cmd.bytes, BD0_CLEN_BOARD_INFO);	//	send board info command
+		uart_write_bytes(port, zero, 5);
 		for (int w = 0; w < 20; ++w) {
 			printf(".");
 			ets_delay_us(1000);
@@ -112,6 +128,7 @@ void Uart::EnumerateBoard() {
 		uart_flush_input(port);												//	clear input buffer
 		uart_write_bytes(port, (char*)cmd.bytes, BD0_CLEN_SET_CMDLEN);		//	send board info command
 	}
+	uart_write_bytes(port, zero, 5);
 }
 void Uarts::EnumerateBoard() {
 	motorMap.clear();

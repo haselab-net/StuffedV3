@@ -129,11 +129,7 @@ void monitor(){
 			ch = 0;
 			break;
 		case 'u':
-			U1STAbits.UTXEN = 0;
-			ch = 0;
-			break;
-		case 'U':
-			U1STAbits.UTXEN = 1;
+			printf("U1STA %8x\r\n", U1STA);
 			ch = 0;
 			break;
 		case 'r':

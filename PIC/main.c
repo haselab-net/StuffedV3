@@ -41,6 +41,7 @@ void puts1(const char* s){
 }
 void monitor();
 void parseUart();
+void uartExecComman();
 /*
                          Main application
  */
@@ -73,6 +74,8 @@ int main(void)
 		monitor();
 #ifndef PICUARTINT
 		uartLoop();
+#else
+		uartExecCommand();
 #endif
 		monOut();
 #if 0

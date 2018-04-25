@@ -395,6 +395,7 @@ namespace Robokey
         }
         public void SendPoseDirect(PoseData pose)
         {
+            if (pose == null) return;
             byte[] packet = new byte[1000];
             int p = 0;
             WriteHeader((int)CommandId.CI_DIRECT, ref p, packet);

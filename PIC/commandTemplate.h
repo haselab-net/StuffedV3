@@ -16,6 +16,15 @@
 #endif
 
 #define MAXBOARDID	7
+#define BORADIDBITS 3
+
+union CommandHeader{
+	unsigned char header;
+	struct {
+		unsigned boardId : 3;
+		unsigned commandId : 5;
+	} __attribute__((__packed__));
+} __attribute__((__packed__));
 
 #define DEFINE_CommandPacket(BOARD)									\
 union CommandPacket##BOARD {										\

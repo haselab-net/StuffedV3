@@ -61,7 +61,7 @@ void INTERRUPT_Initialize (void)
     //	UART1
 	IPC5bits.U1RXIP = 4;	//	receive first
 	IPC5bits.U1RXIS = 0; 
-	IPC6bits.U1TXIP = 3;	//	then send
+	IPC6bits.U1TXIP = 3;	//	the send
 	IPC6bits.U1TXIS = 0;
 		
 	//    CTI: Core Timer
