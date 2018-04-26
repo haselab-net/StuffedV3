@@ -3,7 +3,7 @@
 #include "control.h"
 #include "mcc_generated_files/uart1.h"
 
-unsigned char boardId = 1;
+unsigned char boardId = 2;
 
 CommandPacket command;
 int cmdCur;
@@ -135,15 +135,31 @@ void commandInit(){
 	IEC0bits.U1RXIE = 1;	// Enable uart1 receive interrupt.
 }
 
+
+uint32_t timeRecv;
+uint32_t timeSend;
+
+//	handler for TMR2 timer for TX
+void __attribute__ ((vector(_TIMER_1_VECTOR), interrupt(IPL5SOFT))) TMR1_ISR()
+{
+	IEC0bits.T1IE = false;
+	IFS0CLR= 1 << _IFS0_T1IF_POSITION;
+	U1STAbits.UTXEN = 1;	//	enable TX
+	U1STAbits.UTXISEL = 2;	//	10 = Interrupt is generated and asserted while the transmit buffer is empty
+	IEC0bits.U1TXIE = 1;	//	enable interrupt
+}
+
 //  handler for tx interrupt
 //	Note: "IPL3" below must fit to "IPC5bits.U1TXIP = 3" in interrupt_manager.c;
 void __attribute__ ((vector(_UART1_TX_VECTOR), interrupt(IPL3SOFT))) _UART1_TX_HANDLER(void){	
     if (retCur == 0){
 		returnCommand[retPacket.commandId]();
 	}
-	while (retCur < retLen && !U1STAbits.UTXBF){
-		U1TXREG = retPacket.bytes[retCur];
-		retCur ++;
+	if (retCur < retLen){
+		while (retCur < retLen && !U1STAbits.UTXBF){
+			U1TXREG = retPacket.bytes[retCur];
+			retCur ++;
+		}
 	}
 	if (retCur == retLen){
 		U1STAbits.UTXISEL = 1;		//	01 = Interrupt is generated and asserted when all characters have been transmitted
@@ -166,21 +182,12 @@ void __attribute__ ((vector(_UART1_RX_VECTOR), interrupt(IPL4SOFT))) _UART1_RX_H
 	        head.header = U1RXREG;
 			//	Skip spacing (make time for return packet), invalid value (They may come after reset.) and invalid command
             if (head.header == 0 || head.header >= (CI_NCOMMAND<<BORADIDBITS)) continue;
-			//printf("H%x C%d\r\n", (int)head.header, (int)head.commandId);
 			//	In case of valid command ID, get packet length
             cmdLen = cmdPacketLens[head.boardId][head.commandId];
             bRead = false;
 			if (head.boardId == boardId){
 				//	start to send return packet.
-				retLen = retPacketLen[head.commandId];
-				//printf("retLen%d\r\n", retLen);
-				if (retLen) {	//	Enable and start TX
-					retPacket.header = head.header;
-					retCur = 0;
-					U1STAbits.UTXISEL = 2;	//	10 = Interrupt is generated and asserted while the transmit buffer is empty
-					U1STAbits.UTXEN = 1;	//	enable TX
-					IEC0bits.U1TXIE = 1;	//	enable interrupt
-				}
+				timeRecv = TMR1;			//	save time
 				bRead = true;
 				command.bytes[0] = head.header;
             }
@@ -195,6 +202,20 @@ void __attribute__ ((vector(_UART1_RX_VECTOR), interrupt(IPL4SOFT))) _UART1_RX_H
 		}
 		if (cmdCur == cmdLen-1){
             if (bRead){
+				//	start to return
+				retLen = retPacketLen[command.commandId];
+				//printf("retLen%d\r\n", retLen);
+				if (retLen) {	//	Enable and start TX
+					retPacket.header = command.header;
+					retCur = 0;
+					//	Set and enable TMR1 interrupt
+					timeRecv = TMR1;
+					PR1 = timeRecv + 200;
+					IFS0CLR= 1 << _IFS0_T1IF_POSITION;
+				    IFS0bits.T1IF = false;
+					IEC0bits.T1IE = true;
+				}
+				//	exec command
 				bRunExecCommand = true;
             }
             cmdCur = 0;
@@ -209,7 +230,7 @@ void uartExecCommand(){
 	if (bRunExecCommand){
 		bRunExecCommand = false;
         execCommand[command.commandId]();
-		printf("H%x Ex%d\r\n", (int)command.header, (int)command.commandId);
+		printf("H%x Ex%d  Send%d-Recv%d=%d\r\n", (int)command.header, (int)command.commandId, timeRecv, timeSend, timeSend-timeRecv);
 	}else{
 #if 0
 		static int i;

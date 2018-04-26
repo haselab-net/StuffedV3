@@ -2,8 +2,9 @@
 
 #include "BoardBase.h"
 #include "UdpCom.h"
+#include "esp_log.h"
 
-
+#define CMDWAITMAXLEN	80
 template <class CMD, class RET>
 class Board: public BoardBase{
 public:
@@ -14,6 +15,7 @@ public:
 	ReturnPacketB1M ret;
 #else
 	CmdPacket cmd;
+	uint8_t zero[CMDWAITMAXLEN];
 	RetPacket ret;
 #endif
 	Board(int bid, const unsigned char * c, const unsigned char * r) {
@@ -78,6 +80,7 @@ public:
 				packet.MotorPos(motorMap[i]) = ret.direct.pos[i];
 				packet.MotorVel(motorMap[i]) = ret.direct.vel[i];
 			}
+			//ESP_LOGI("Board", "Direct Motor Pos: %d %d %d %d\n", packet.MotorPos(0),  packet.MotorPos(1), packet.MotorPos(2),  packet.MotorPos(3));
 			break;
 		case CI_INTERPOLATE:
 		case CI_FORCE_CONTROL:
@@ -87,6 +90,7 @@ public:
 			packet.SetVacancy(ret.interpolate.vacancy);
 			packet.SetRemain(ret.interpolate.remain);
 			packet.SetTick(ret.interpolate.tick);
+			//ESP_LOGI("Board", "Motor Pos: %d %d %d %d\n", packet.MotorPos(0),  packet.MotorPos(1), packet.MotorPos(2),  packet.MotorPos(3));
 			break;
 		case CI_SENSOR:
 			for (int i = 0; i < GetNMotor(); ++i) {

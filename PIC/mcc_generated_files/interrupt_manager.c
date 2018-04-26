@@ -56,8 +56,9 @@ void INTERRUPT_Initialize (void)
     INTCONbits.MVEC = 1;
     
     //    SPITXI: SPI 2 Transmission
-    IPC9bits.SPI2TXIP = 5;    //    Priority: 5
+    IPC9bits.SPI2TXIP = 6;    //    Priority: 5
     IPC9bits.SPI2TXIS = 0;    //    Sub Priority: 0
+
     //	UART1
 	IPC5bits.U1RXIP = 4;	//	receive first
 	IPC5bits.U1RXIS = 0; 
@@ -65,8 +66,10 @@ void INTERRUPT_Initialize (void)
 	IPC6bits.U1TXIS = 0;
 		
 	//    CTI: Core Timer
-    //    Priority: 1
     IPC0bits.CTIP = 1;
-    //    Sub Priority: 0
     IPC0bits.CTIS = 0;
+
+    //    TI: Timer 1
+    IPC2bits.T1IP = 5;
+    IPC2bits.T1IS = 0;
 }

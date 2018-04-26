@@ -52,6 +52,7 @@ namespace Robokey
                 robotInfo = info;
                 pose = new Pose(robotInfo.nMotor);
                 velocity = new Pose(robotInfo.nMotor);
+                force = new short[robotInfo.nForce];
                 nInterpolateTotal = robotInfo.nTarget;
                 nInterpolateVacancy = nInterpolateTotal;
                 if (OnUpdateRobotInfo != null)
@@ -73,6 +74,7 @@ namespace Robokey
         //  robot state
         public PoseData pose = null;                        //  current angles of motors; ReadPose
         public PoseData velocity = null;                    //  current velocities of motors; ReadVelocity
+        public short [] force = null;                       //  force sensor's values
         public int interpolatePeriod =0;                    //  period for interpolation; send to robot.
         public int interpolateTick =0;                      //  tick for interpolation; ReadVacancy
         public int nInterpolateVacancy =0;                  //  target buffer vacancy
@@ -221,6 +223,13 @@ namespace Robokey
                 ReadShortExt(ref pose.values[i], ref cur, buf);
             }
         }
+        void ReadForce(ref int cur, byte[] buf)
+        {
+            for (int i = 0; i < force.Length; ++i)
+            {
+                force[i] = ReadShort(ref cur, buf);
+            }
+        }
         void ReadVelocity(ref int cur, byte[] buf)
         {
             for (int i = 0; i < velocity.values.Length; ++i)
@@ -300,6 +309,10 @@ namespace Robokey
                         ReadPose(ref cur, receiveBytes);
                         ReadTick(ref cur, receiveBytes);
                         CallUpdateRobotState();
+                        break;
+                    case CommandId.CI_SENSOR:
+                        ReadPose(ref cur, receiveBytes);
+                        ReadForce(ref cur, receiveBytes);
                         break;
                     case CommandId.CIU_GET_IPADDRESS:
                         ReadPeerIPAddress(ref cur, receiveBytes);
@@ -471,6 +484,12 @@ namespace Robokey
             byte[] packet = new byte[10];
             int p = 0;
             WriteHeader((int)CommandId.CI_BOARD_INFO, ref p, packet);
+            PutCommand(packet, p);
+        }
+        public void SendSensor() {
+            byte[] packet = new byte[10];
+            int p = 0;
+            WriteHeader((int)CommandId.CI_SENSOR, ref p, packet);
             PutCommand(packet, p);
         }
         public void FindRobot()

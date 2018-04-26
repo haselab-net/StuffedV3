@@ -49,16 +49,17 @@
 #include "pin_manager.h"
 #include <stdint.h>
 #include <stdbool.h>
-#include "uart1.h"
+#include "tmr1.h"
+#include "adc1.h"
+#include "mccp1_compare.h"
 #include "uart2.h"
-#include "sccp2_compare.h"
+#include "uart1.h"
+#include "spi2_driver.h"
 #include "interrupt_manager.h"
 #include "exceptions.h"
+#include "sccp2_compare.h"
 #include "sccp3_compare.h"
-#include "spi2_driver.h"
-#include "adc1.h"
 #include "coretimer.h"
-#include "mccp1_compare.h"
 
 #define _XTAL_FREQ  24000000UL
 

@@ -97,6 +97,7 @@ void SYSTEM_Initialize(void)
     ADC1_Initialize();
 #endif
     SCCP2_COMPARE_Initialize();
+    TMR1_Initialize();
     MCCP1_COMPARE_Initialize();
     INTERRUPT_GlobalEnable();
 }

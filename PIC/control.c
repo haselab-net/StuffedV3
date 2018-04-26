@@ -133,7 +133,7 @@ void setPwm(int ch, SDEC ratio){
 		CCP1RB = (unsigned)CCP1PR * ratio >> SDEC_BITS;
     }
 }
-void __attribute__ ((vector(_SPI2_TX_VECTOR), interrupt(IPL5SOFT))) spiEmpty(void)
+void __attribute__ ((vector(_SPI2_TX_VECTOR), interrupt(IPL6SOFT))) spiEmpty(void)
 {
 	SPI2BUF = spiPwm[0];
 	SPI2BUF = spiPwm[1];

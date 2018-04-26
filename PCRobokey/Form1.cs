@@ -18,7 +18,7 @@ namespace Robokey
         // Singleton Instance
         public static Form1 instance;
 
-        
+
         public List<Pose> poses = new List<Pose>();
         public List<Motor> motors = new List<Motor>();
         int curTime;
@@ -31,14 +31,14 @@ namespace Robokey
             InitializeComponent();
             udpComm = new UdpComm(this, runTimer.Interval);
             udpComm.OnRobotFound += OnRobotFound;
-            udpComm.OnUpdateRobotInfo+= OnUpdateRobotInfo;
+            udpComm.OnUpdateRobotInfo += OnUpdateRobotInfo;
             udpComm.OnUpdateRobotState += OnUpdateRobotState;
             udpComm.OnMessageReceive += SetMessage;
             UpdateMotorPanel();
             udLoopTime_ValueChanged(udLoopTime, null);
             openPose.InitialDirectory = System.IO.Directory.GetCurrentDirectory();
             savePose.InitialDirectory = System.IO.Directory.GetCurrentDirectory();
-            }
+        }
 
         ~Form1()
         {
@@ -46,9 +46,10 @@ namespace Robokey
         }
         public void SetErrorMessage(string s)
         {
-            txErrorMsg.Text= s;
+            txErrorMsg.Text = s;
         }
-        public void SetMessage(int type, string s) {
+        public void SetMessage(int type, string s)
+        {
             if (type == -1)
             {
                 SetErrorMessage(s);
@@ -85,7 +86,8 @@ namespace Robokey
         {
             if (poses.Count < 2) return null;
             int i;
-            for (i = 0; i < poses.Count; ++i) {
+            for (i = 0; i < poses.Count; ++i)
+            {
                 Pose pose = (Pose)poses[i];
                 if (pose.Time > time) break;
             }
@@ -100,9 +102,10 @@ namespace Robokey
             }
             double rate = (time - pose0.Time) / dt;
             PoseData rv = new PoseData(udpComm.RobotInfo.nMotor);
-            for(int j=0; j< udpComm.RobotInfo.nMotor; ++j){
+            for (int j = 0; j < udpComm.RobotInfo.nMotor; ++j)
+            {
                 double val = (1 - rate) * (int)pose0.values[j] + rate * (int)pose1.values[j];
-                rv.values[j]= (int)val;
+                rv.values[j] = (int)val;
             }
             rv.Time = (int)time % track.Maximum;
             return rv;
@@ -110,10 +113,12 @@ namespace Robokey
 
         //  motorsにposeの値をロード
         bool SaveFromEditorGuard;
-        void LoadToEditor(PoseData pose) {
+        void LoadToEditor(PoseData pose)
+        {
             SaveFromEditorGuard = true;
             udkeyTime.Value = pose.Time;
-            for (int i = 0; i < udpComm.RobotInfo.nMotor; ++i) {
+            for (int i = 0; i < udpComm.RobotInfo.nMotor; ++i)
+            {
                 Motor m = (Motor)motors[i];
                 int val = (int)pose.values[i];
                 if (m.Maximum < val) val = m.Maximum;
@@ -133,7 +138,8 @@ namespace Robokey
             }
             if (changeTime) track.Value = pose.Time;
         }
-        private void GetEditedValue(object sender, EventArgs e) {
+        private void GetEditedValue(object sender, EventArgs e)
+        {
             Pose pose = null;
             foreach (Pose p in poses)
             {
@@ -159,9 +165,10 @@ namespace Robokey
                 udpComm.SendPoseDirect(pose);
             }
         }
-        
+
         //  新しいPoseを作る。青いインジケータ(ボタン)も作る
-        Pose NewPose() {
+        Pose NewPose()
+        {
             Pose pose = new Pose(udpComm.RobotInfo.nMotor);
             Controls.Add(pose.button);
             pose.Time = track.Value;
@@ -208,24 +215,27 @@ namespace Robokey
         private void del_Click(object sender, EventArgs e)
         {
             Pose find = null;
-            foreach (Pose pose in poses) {
+            foreach (Pose pose in poses)
+            {
                 if (pose.Time == track.Value) find = pose;
             }
-            if (find != null) {
+            if (find != null)
+            {
                 Controls.Remove(find.button);
                 poses.Remove(find);
                 PoseData p = Interpolate(track.Value);
-                if (p!=null) LoadToEditor(p);
+                if (p != null) LoadToEditor(p);
             }
         }
 
         private void pose_Click(object sender, EventArgs e)
         {
-            Pose find=null;
-            foreach(Pose pose in poses){
+            Pose find = null;
+            foreach (Pose pose in poses)
+            {
                 if (pose.button == sender) find = pose;
             }
-            if (find!=null) track.Value = find.Time;
+            if (find != null) track.Value = find.Time;
         }
 
         int dragX, dragTime;
@@ -267,8 +277,10 @@ namespace Robokey
         private void track_ValueChanged(object sender, EventArgs e)
         {
             Pose pose = null;
-            foreach (Pose p in poses) {
-                if (p.Time == track.Value) {
+            foreach (Pose p in poses)
+            {
+                if (p.Time == track.Value)
+                {
                     pose = p;
                 }
             }
@@ -277,7 +289,8 @@ namespace Robokey
                 LoadToEditor(pose);
                 udpComm.SendPoseDirect(pose);
             }
-            else {
+            else
+            {
                 PoseData p = Interpolate(track.Value);
                 if (p != null)
                 {
@@ -321,23 +334,25 @@ namespace Robokey
             }
             file.Close();
         }
- 
+
         private void udLoopTime_ValueChanged(object sender, EventArgs e)
         {
             track.Maximum = (int)udLoopTime.Value;
             udTime.Maximum = udLoopTime.Value;
             udkeyTime.Maximum = udLoopTime.Value;
-            foreach (Pose pose in poses) {
-                pose.Time = pose.Time < track.Maximum ? pose.Time : track.Maximum ;
+            foreach (Pose pose in poses)
+            {
+                pose.Time = pose.Time < track.Maximum ? pose.Time : track.Maximum;
             }
         }
 
-        private void UpdateCurTime(int time, bool bNoSend=false){
+        private void UpdateCurTime(int time, bool bNoSend = false)
+        {
             curTime = time;
             if (curTime > udLoopTime.Value)
             {
                 curTime = 0;
-                if (ckRunOnce.Checked == true ) //モーションを一度だけ実行する場合
+                if (ckRunOnce.Checked == true) //モーションを一度だけ実行する場合
                 {
                     ckRun.Checked = false;
                     runTimer.Enabled = false;
@@ -350,18 +365,22 @@ namespace Robokey
 
         private void ckRun_CheckedChanged(object sender, EventArgs e)
         {
-            runTimer.Enabled = ckRun.Checked;
+            UpdateRunTimer();
+        }
+        void UpdateRunTimer()
+        {
+            runTimer.Enabled = ckRun.Checked || ckSense.Checked;
             sentTime = curTime;
-            if (!runTimer.Enabled){
+            if (!ckRun.Checked)
+            {
                 udpComm.SendPoseDirect(Interpolate(curTime));
             }
         }
-
         private void udTime_KeyPress(object sender, KeyPressEventArgs e)
         {
             if (e.KeyChar == '\r')
                 UpdateCurTime((int)udTime.Value);
-                udpComm.SendPoseDirect(Interpolate(curTime));
+            udpComm.SendPoseDirect(Interpolate(curTime));
         }
 
         private void btCopy_Click(object sender, EventArgs e)
@@ -379,14 +398,14 @@ namespace Robokey
         {
         }
 
-        public bool LoadMotion(String Filename )
-        {  
+        public bool LoadMotion(String Filename)
+        {
             System.IO.StreamReader file = new System.IO.StreamReader(Filename);
             String[] cells;
             do
             {
                 cells = file.ReadLine().Split('\t');
-            } while (cells[0].IndexOf('#') != -1) ;
+            } while (cells[0].IndexOf('#') != -1);
 
             int nPose = int.Parse(cells[0]);
             if (udpComm.IsConnected && udpComm.RobotInfo.nMotor != int.Parse(cells[1]))
@@ -394,18 +413,21 @@ namespace Robokey
                 SetErrorMessage("Dofs of file data and connected system do not match.");
                 return false;
             }
-            else {
+            else
+            {
                 RobotInfo info = udpComm.RobotInfo;
                 info.nMotor = int.Parse(cells[1]);
                 udpComm.SetRobotInfo(info);
             }
             udLoopTime.Value = int.Parse(cells[2]);
-            foreach(Pose pose in poses){
+            foreach (Pose pose in poses)
+            {
                 Controls.Remove(pose.button);
             }
             poses.Clear();
             int lastTime = 0;
-            while(true){
+            while (true)
+            {
                 String line = file.ReadLine();
                 if (line == null) break;
                 if (line.IndexOf('#') != -1) continue;
@@ -413,21 +435,23 @@ namespace Robokey
                 if (cells2.Count() < udpComm.RobotInfo.nMotor + 1) break;
                 Pose pose = NewPose();
                 lastTime += int.Parse(cells2[0]);
-                pose.Time = lastTime; 
-                for(int i=0; i< udpComm.RobotInfo.nMotor; ++i){
-                    pose.values[i] = int.Parse(cells2[i+1]);
+                pose.Time = lastTime;
+                for (int i = 0; i < udpComm.RobotInfo.nMotor; ++i)
+                {
+                    pose.values[i] = int.Parse(cells2[i + 1]);
                 }
                 poses.Add(pose);
             }
             file.Close();
             //udLoopTime.Value = lastTime;
             PoseData p = Interpolate(track.Value);
-            if(p!=null) LoadToEditor(p);
+            if (p != null) LoadToEditor(p);
 
             return (true);
         }
 
-        private void AppIdle(object sender, System.EventArgs e) {
+        private void AppIdle(object sender, System.EventArgs e)
+        {
             updateSensorText(sender, e);
         }
 
@@ -442,23 +466,32 @@ namespace Robokey
         private void runTimer_Tick(object sender, EventArgs e)
         {
             Timer tmRun = (Timer)sender;
-            int diff = NINTERPOLATEFILL - udpComm.nInterpolateRest;
-            System.Diagnostics.Debug.Write("RunTimer: rest = ");
-            System.Diagnostics.Debug.Write(udpComm.nInterpolateRest);
-            System.Diagnostics.Debug.WriteLine(".");
-            if (diff < 1)
+            if (ckRun.Checked)
             {
-                zeroDiffCount++;
-                if (zeroDiffCount > 10) {
-                    diff = 1;
+                int diff = NINTERPOLATEFILL - udpComm.nInterpolateRest;
+                System.Diagnostics.Debug.Write("RunTimer: rest = ");
+                System.Diagnostics.Debug.Write(udpComm.nInterpolateRest);
+                System.Diagnostics.Debug.WriteLine(".");
+                if (diff < 1)
+                {
+                    zeroDiffCount++;
+                    if (zeroDiffCount > 10)
+                    {
+                        diff = 1;
+                    }
+                }
+                for (int i = 0; i < diff; ++i)
+                {
+                    UpdateCurTime(curTime += tmRun.Interval * (int)udStep.Value, true);
+                    if (runTimer.Enabled)
+                    {
+                        udpComm.SendPoseInterpolate(Interpolate(curTime));
+                    }
                 }
             }
-            for(int i=0; i < diff; ++i) {
-                UpdateCurTime(curTime += tmRun.Interval * (int)udStep.Value, true);
-                if (runTimer.Enabled)
-                {
-                    udpComm.SendPoseInterpolate(Interpolate(curTime));
-                }
+            if (ckSense.Checked)
+            {
+                udpComm.SendSensor();
             }
         }
 
@@ -466,17 +499,22 @@ namespace Robokey
         private void ckMotor_CheckedChanged(object sender, EventArgs e)
         {
             CheckBox cb = (CheckBox)sender;
-            if (cb.Checked) {
+            if (cb.Checked)
+            {
                 int[] minT = new int[motors.Count];
                 int[] maxT = new int[motors.Count];
-                for (int i = 0; i < motors.Count; ++i) {
+                for (int i = 0; i < motors.Count; ++i)
+                {
                     minT[i] = motors[i].torque.Minimum;
                     maxT[i] = motors[i].torque.Maximum;
                 }
                 udpComm.SendTorqueLimit(motors.Count, minT, maxT);
-            } else {
+            }
+            else
+            {
                 int[] zeros = new int[motors.Count];
-                for (int i = 0; i < motors.Count; ++i) {
+                for (int i = 0; i < motors.Count; ++i)
+                {
                 }
                 udpComm.SendTorqueLimit(motors.Count, zeros, zeros);
             }
@@ -501,7 +539,8 @@ namespace Robokey
                 udpComm.FindRobot();
             }
         }
-        private void OnBtRobotClick(object sender, EventArgs e) {
+        private void OnBtRobotClick(object sender, EventArgs e)
+        {
             Button bt = (Button)sender;
             udpComm.StopFindRobot();
             udpComm.SetAddress(bt.Text);
@@ -515,10 +554,11 @@ namespace Robokey
             udpComm.SendGetBoardInfo();
         }
 
-        internal void OnRobotFound(System.Net.IPAddress adr) {
+        internal void OnRobotFound(System.Net.IPAddress adr)
+        {
             string astr = adr.ToString();
             bool bFound = false;
-            foreach(Control c in fpFoundRobot.Controls)
+            foreach (Control c in fpFoundRobot.Controls)
             {
                 Button b = (Button)c;
                 if (b.Text.CompareTo(astr) == 0)
@@ -554,11 +594,23 @@ namespace Robokey
             runTimer.Interval = (int)udTick.Value;
         }
 
-        void OnUpdateRobotState() {
+        private void ckSense_CheckedChanged(object sender, EventArgs e)
+        {
+            UpdateRunTimer();
+        }
+
+        void OnUpdateRobotState()
+        {
             tbState.Text = "Motor:";
-            for (int i = 0; i < udpComm.pose.nMotor; ++i) {
+            for (int i = 0; i < udpComm.pose.nMotor; ++i)
+            {
                 double v = SDEC.toDouble(udpComm.pose.values[i]);
                 tbState.Text += string.Format("{0,9}", v.ToString("F3"));
+            }
+            tbState.Text += "\r\nForce:";
+            for (int i = 0; i < udpComm.force.Length; ++i)
+            {
+                tbState.Text += string.Format("{0,9}", udpComm.force[i].ToString());
             }
         }
     }

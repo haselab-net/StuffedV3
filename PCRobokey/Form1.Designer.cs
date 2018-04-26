@@ -74,6 +74,7 @@
             this.tbState = new System.Windows.Forms.TextBox();
             this.tpMessage = new System.Windows.Forms.TabPage();
             this.tbMessage = new System.Windows.Forms.TextBox();
+            this.ckSense = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.track)).BeginInit();
             this.panelCom.SuspendLayout();
             this.panel2.SuspendLayout();
@@ -218,6 +219,7 @@
             // 
             // panelTop
             // 
+            this.panelTop.Controls.Add(this.ckSense);
             this.panelTop.Controls.Add(this.label3);
             this.panelTop.Controls.Add(this.udTick);
             this.panelTop.Controls.Add(this.laPort);
@@ -240,7 +242,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(899, 15);
+            this.label3.Location = new System.Drawing.Point(317, 14);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(29, 18);
             this.label3.TabIndex = 78;
@@ -248,14 +250,14 @@
             // 
             // udTick
             // 
-            this.udTick.Location = new System.Drawing.Point(832, 9);
+            this.udTick.Location = new System.Drawing.Point(241, 9);
             this.udTick.Minimum = new decimal(new int[] {
             1,
             0,
             0,
             0});
             this.udTick.Name = "udTick";
-            this.udTick.Size = new System.Drawing.Size(61, 25);
+            this.udTick.Size = new System.Drawing.Size(73, 25);
             this.udTick.TabIndex = 77;
             this.udTick.Value = new decimal(new int[] {
             50,
@@ -278,7 +280,7 @@
             // 
             this.udTime.Font = new System.Drawing.Font("MS UI Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.udTime.ForeColor = System.Drawing.SystemColors.MenuText;
-            this.udTime.Location = new System.Drawing.Point(375, 8);
+            this.udTime.Location = new System.Drawing.Point(482, 8);
             this.udTime.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
             this.udTime.Maximum = new decimal(new int[] {
             500,
@@ -292,7 +294,7 @@
             // 
             // udLoopTime
             // 
-            this.udLoopTime.Location = new System.Drawing.Point(492, 8);
+            this.udLoopTime.Location = new System.Drawing.Point(599, 8);
             this.udLoopTime.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
             this.udLoopTime.Maximum = new decimal(new int[] {
             1000000,
@@ -317,7 +319,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(476, 11);
+            this.label1.Location = new System.Drawing.Point(583, 11);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(17, 18);
             this.label1.TabIndex = 75;
@@ -336,7 +338,7 @@
             // 
             // udStep
             // 
-            this.udStep.Location = new System.Drawing.Point(301, 8);
+            this.udStep.Location = new System.Drawing.Point(408, 8);
             this.udStep.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
             this.udStep.Name = "udStep";
             this.udStep.Size = new System.Drawing.Size(50, 25);
@@ -350,7 +352,7 @@
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(243, 12);
+            this.label10.Location = new System.Drawing.Point(350, 12);
             this.label10.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(55, 18);
@@ -370,7 +372,7 @@
             // ckRun
             // 
             this.ckRun.AutoSize = true;
-            this.ckRun.Location = new System.Drawing.Point(102, 11);
+            this.ckRun.Location = new System.Drawing.Point(99, 11);
             this.ckRun.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
             this.ckRun.Name = "ckRun";
             this.ckRun.Size = new System.Drawing.Size(158, 22);
@@ -381,7 +383,7 @@
             // 
             // del
             // 
-            this.del.Location = new System.Drawing.Point(690, 5);
+            this.del.Location = new System.Drawing.Point(797, 5);
             this.del.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
             this.del.Name = "del";
             this.del.Size = new System.Drawing.Size(83, 33);
@@ -392,7 +394,7 @@
             // 
             // add
             // 
-            this.add.Location = new System.Drawing.Point(606, 5);
+            this.add.Location = new System.Drawing.Point(713, 5);
             this.add.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
             this.add.Name = "add";
             this.add.Size = new System.Drawing.Size(83, 33);
@@ -619,6 +621,18 @@
             this.tbMessage.TabIndex = 0;
             this.tbMessage.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.tbMessage_KeyPress);
             // 
+            // ckSense
+            // 
+            this.ckSense.AutoSize = true;
+            this.ckSense.Location = new System.Drawing.Point(890, 10);
+            this.ckSense.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
+            this.ckSense.Name = "ckSense";
+            this.ckSense.Size = new System.Drawing.Size(80, 22);
+            this.ckSense.TabIndex = 79;
+            this.ckSense.Text = "&Sense";
+            this.ckSense.UseVisualStyleBackColor = true;
+            this.ckSense.CheckedChanged += new System.EventHandler(this.ckSense_CheckedChanged);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 18F);
@@ -716,6 +730,7 @@
         private System.Windows.Forms.Label laPort;
         private System.Windows.Forms.NumericUpDown udTick;
         private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.CheckBox ckSense;
     }
 }
 
