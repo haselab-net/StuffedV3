@@ -115,6 +115,9 @@ void monitor(){
 			}
 			ch = 0;
 			break;
+		case 'm':
+			printf("CoreTimer cur:%d cmp:%d,  rest:%d, timeOut %d.\r\n", CORETIMER_CountGet(), coretimerCompare, timerRestTime, timeOutCount);
+			break;
 		case 'w':
 			pwmTest2();
 			printf(" pwm test 2.\r\n");

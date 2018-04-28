@@ -21,7 +21,7 @@ const SDEC msinOffset[NAXIS] ={
 
 inline short FilterForADC(short prev, short cur){
     const short IIR = 1;
-    return prev*(IIR-1)/IIR + cur;
+    return (prev*(IIR-1) + cur) / IIR;
 }
 #ifdef MODULETEST
 #include "math.h"
@@ -133,7 +133,7 @@ void setPwm(int ch, SDEC ratio){
 		CCP1RB = (unsigned)CCP1PR * ratio >> SDEC_BITS;
     }
 }
-void __attribute__ ((vector(_SPI2_TX_VECTOR), interrupt(IPL6SOFT))) spiEmpty(void)
+void __attribute__ ((vector(_SPI2_TX_VECTOR), interrupt(IPL6AUTO))) spiEmpty(void)
 {
 	SPI2BUF = spiPwm[0];
 	SPI2BUF = spiPwm[1];
@@ -149,17 +149,19 @@ void updateMotorState(){
 	readADC();
     for(i=0; i<NMOTOR; ++i){
         LDEC sense, prev, cur, diff;
-		sense = S2LDEC(atan2SDEC(msin[i], mcos[i]));
-		cur = prev = motorState.pos[i];
-        diff = sense - GetDecimalL(prev);
-        cur += diff;
-		if (diff < -LDEC_ONE/2){
-            cur += LDEC_ONE;
-        }else if (diff > LDEC_ONE/2){
-            cur -= LDEC_ONE;
-        }
-        motorState.pos[i] = cur;
-        motorState.vel[i] = motorState.pos[i] - prev;
+		if (mcos[i] || msin[i]){
+			sense = S2LDEC(atan2SDEC(msin[i], mcos[i]));
+			cur = prev = motorState.pos[i];
+			diff = sense - GetDecimalL(prev);
+			cur += diff;
+			if (diff < -LDEC_ONE/2){
+				cur += LDEC_ONE;
+			}else if (diff > LDEC_ONE/2){
+				cur -= LDEC_ONE;
+			}
+			motorState.pos[i] = cur;
+			motorState.vel[i] = motorState.pos[i] - prev;
+		}
 #if 0
 		if (i==0){
 			printf("p %f,  s %f, (%d,%d) %d\r\n", LDEC2DBL(motorState.pos[i]), LDEC2DBL(sense), msin[i], mcos[i], diff);

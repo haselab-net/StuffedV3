@@ -55,14 +55,14 @@
   Section: Core Timer Module APIs
 */
 
-uint32_t static compare = 0x2EE0;
+uint32_t coretimerCompare = 0x2EE0;
 void CORETIMER_Initialize()
 {
    // Set the count value
    _CP0_SET_COUNT(0x0); 
-   // Set the compare value
-	compare = 0x2EE0;
-	_CP0_SET_COMPARE(compare); 
+   // Set the coretimerCompare value
+	coretimerCompare = 0x2EE0;
+	_CP0_SET_COMPARE(coretimerCompare); 
     // Enable the interrupt
    IEC0bits.CTIE = 1;
 
@@ -83,19 +83,24 @@ uint32_t CORETIMER_CountGet()
    return _CP0_GET_COUNT();
 }
 
+int timeOutCount;
 int timerRestTime;
 void __attribute__ ((vector(_CORE_TIMER_VECTOR), interrupt(IPL1SOFT))) _CORE_TIMER_ISR(void)
 {
-	// Update the compare value
-	compare = compare + 0x2EE0;
-
-	_CP0_SET_COMPARE(compare);
-
-	IFS0CLR= 1 << _IFS0_CTIF_POSITION;
-	// Add your custom code here
+	// Update the coretimerCompare value
+	coretimerCompare = coretimerCompare + 0x2EE0;
+	//	Control task
 	onControlTimer();
+	asm volatile("di");// Disable all interrupts 
 	uint32_t now = _CP0_GET_COUNT();
-	timerRestTime = compare - now; 
+	timerRestTime = coretimerCompare - now;
+	if (timerRestTime < 0){
+		coretimerCompare = now + 1000;
+		timeOutCount++;
+	}
+	_CP0_SET_COMPARE(coretimerCompare);
+	IFS0CLR= 1 << _IFS0_CTIF_POSITION;
+	asm volatile("ehb");// Disable all interrupts
 }
 
 /**

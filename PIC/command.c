@@ -3,7 +3,7 @@
 #include "control.h"
 #include "mcc_generated_files/uart1.h"
 
-unsigned char boardId = 2;
+unsigned char boardId = 1;
 
 CommandPacket command;
 int cmdCur;
@@ -145,7 +145,7 @@ uint32_t timeRetCmd, timeTx;
 
 //	handler for TMR1 timer for TX
 volatile bool bRunReturnCommand = false;
-void __attribute__ ((vector(_TIMER_1_VECTOR), interrupt(IPL3SOFT))) TMR1_ISR()
+void __attribute__ ((vector(_TIMER_1_VECTOR), interrupt(IPL3AUTO))) TMR1_ISR()
 {
 	if (bRunReturnCommand){	//	call from recv
 		bRunReturnCommand = false;
@@ -166,7 +166,7 @@ void __attribute__ ((vector(_TIMER_1_VECTOR), interrupt(IPL3SOFT))) TMR1_ISR()
 
 //  Handler for TX interrupt
 //	Note: "IPL2" below must fit to "IPC5bits.U1TXIP = 2" in interrupt_manager.c;
-void __attribute__ ((vector(_UART1_TX_VECTOR), interrupt(IPL2SOFT))) _UART1_TX_HANDLER(void){	
+void __attribute__ ((vector(_UART1_TX_VECTOR), interrupt(IPL2AUTO))) _UART1_TX_HANDLER(void){	
 	//	Send
 	while (retCur < retLen && !U1STAbits.UTXBF){
 		U1TXREG = retPacket.bytes[retCur];
@@ -185,7 +185,7 @@ void __attribute__ ((vector(_UART1_TX_VECTOR), interrupt(IPL2SOFT))) _UART1_TX_H
 
 //	handler for rx interrupt
 //	Note: "IPL4" below must fit to "IPC5bits.U1RXIP = 4" in interrupt_manager.c;
-void __attribute__ ((vector(_UART1_RX_VECTOR), interrupt(IPL4SOFT))) _UART1_RX_HANDLER(void){
+void __attribute__ ((vector(_UART1_RX_VECTOR), interrupt(IPL4AUTO))) _UART1_RX_HANDLER(void){
 	int i;
 	union CommandHeader head;
 	static bool bRead;

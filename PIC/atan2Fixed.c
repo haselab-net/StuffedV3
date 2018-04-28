@@ -33,6 +33,12 @@ int atan45(int s, int c){
     assert(c >= 0);
     assert(c >= s);
 #endif
+	if (c==0){
+		#ifdef __DEBUG
+		  __builtin_software_breakpoint();
+		  /* If we are in debug mode, cause a software breakpoint in the debugger */
+		#endif
+	}
     int tan = (s << SDEC_BITS) / c;
     int index = tan >> (SDEC_BITS - 4);   //  tan = 0..1 -> index = 0..15
     if (index > 15) index = 15;

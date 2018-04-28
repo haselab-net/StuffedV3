@@ -272,7 +272,7 @@
             this.udTick.Size = new System.Drawing.Size(73, 25);
             this.udTick.TabIndex = 77;
             this.udTick.Value = new decimal(new int[] {
-            50,
+            5,
             0,
             0,
             0});
