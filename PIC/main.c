@@ -71,22 +71,21 @@ int main(void)
     controlInit();
 	commandInit();
 	while(1){
-		monitor();
-#ifndef PICUARTINT
-		uartLoop();
-#else
-		uartExecCommand();
-#endif
-		monOut();
-#if 0
-		i++;
-		if (i>10000){
-			i = 0;
-			printf("T:%d\r\n", timerRestTime);
+		if (!uartExecCommand()){
+			uint32_t now = _CP0_GET_COUNT();
+			uint32_t cmp = _CP0_GET_COMPARE();
+			int diff = cmp - now;
+			if (diff < -12000){	//	delay 1ms 
+				_CP0_SET_COMPARE(now + 6000);
+				printf("RO\r\n");
+			}
+			if (U2STAbits.TRMT){
+				monitor();
+			}else{
+				monOut();
+			}
 		}
-#endif
 	}
-
 #else
     puts1("Start.\n");
 #if 1   //  test for interpolation

@@ -3,6 +3,8 @@
 #include "commandCommon.h"
 
 void commandInit();
+bool uartExecCommand();
+
 
 CHOOSE_BoardInfo(B1M);
 

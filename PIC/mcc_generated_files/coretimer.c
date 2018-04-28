@@ -88,9 +88,10 @@ int timerRestTime;
 void __attribute__ ((vector(_CORE_TIMER_VECTOR), interrupt(IPL1SOFT))) _CORE_TIMER_ISR(void)
 {
 	// Update the coretimerCompare value
-	coretimerCompare = coretimerCompare + 0x2EE0;
+	coretimerCompare = coretimerCompare + 12000;	//	12MHz/12k = 1kHz
 	//	Control task
 	onControlTimer();
+	IFS0CLR= 1 << _IFS0_CTIF_POSITION;
 	asm volatile("di");// Disable all interrupts 
 	uint32_t now = _CP0_GET_COUNT();
 	timerRestTime = coretimerCompare - now;
@@ -99,7 +100,6 @@ void __attribute__ ((vector(_CORE_TIMER_VECTOR), interrupt(IPL1SOFT))) _CORE_TIM
 		timeOutCount++;
 	}
 	_CP0_SET_COMPARE(coretimerCompare);
-	IFS0CLR= 1 << _IFS0_CTIF_POSITION;
 	asm volatile("ehb");// Disable all interrupts
 }
 

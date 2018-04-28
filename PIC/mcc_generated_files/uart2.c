@@ -125,7 +125,7 @@ static char mon_buffer[512];
 static int wp=0;
 static int rp=0;
 void monOut(){
-    while(rp != wp && !U2STAbits.UTXBF){
+    if (rp != wp && !U2STAbits.UTXBF){
 		U2TXREG = mon_buffer[rp];
 		if (rp < sizeof(mon_buffer)) rp++;
 		else rp = 0;

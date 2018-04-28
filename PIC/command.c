@@ -234,26 +234,14 @@ void __attribute__ ((vector(_UART1_RX_VECTOR), interrupt(IPL4AUTO))) _UART1_RX_H
 	IFS0CLR = 1 << _IFS0_U1RXIF_POSITION;	//	clear interrupt flag
 }
 
-void uartExecCommand(){
+bool uartExecCommand(){
 	if (bRunExecCommand){
 		bRunExecCommand = false;
         execCommand[command.commandId]();
 		//printf("H%x Ex%d ", (int)command.header, (int)command.commandId);
+		return true;
 	}else{
-#if 0
-		if (timeTx - timeRetCmd < 5000){
-			printf("RC%d W%d\r\n", timeRetCmd, timeTx-timeRetCmd);
-			timeTx = timeRetCmd + 10000;
-		}
-#endif
-#if 0
-		static int i;
-		i++;
-		if (i>30000){
-			printf("U1STA %8x\r\n", U1STA);
-			i = 0;
-		}
-#endif
+		return false;
 	}
 }
 
