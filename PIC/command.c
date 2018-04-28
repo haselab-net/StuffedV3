@@ -133,39 +133,51 @@ void commandInit(){
 		00 = Interrupt flag bit is asserted while receive buffer is not empty (i.e., has at least 1 data character)	*/
 	U1STAbits.URXISEL = 2;
 	IEC0bits.U1RXIE = 1;	// Enable uart1 receive interrupt.
-}
+
+	//	timer to start TX1 after receive command header
+		//	2M baud/10bit = 200kBps= 5us/byte. 3600/24M=150us
+		//PR1 = 3600;		//	150us
+		PR1 = 600;			//	25us
+	}
 
 
-uint32_t timeRecv;
-uint32_t timeSend;
+uint32_t timeRetCmd, timeTx;
 
-//	handler for TMR2 timer for TX
-void __attribute__ ((vector(_TIMER_1_VECTOR), interrupt(IPL5SOFT))) TMR1_ISR()
+//	handler for TMR1 timer for TX
+volatile bool bRunReturnCommand = false;
+void __attribute__ ((vector(_TIMER_1_VECTOR), interrupt(IPL3SOFT))) TMR1_ISR()
 {
-	IEC0bits.T1IE = false;
+	if (bRunReturnCommand){	//	call from recv
+		bRunReturnCommand = false;
+		returnCommand[retPacket.commandId]();
+		timeRetCmd = TMR1;
+		IFS0bits.T1IF = false;
+	}else{
+		//	stop timer interrupt
+		IEC0bits.T1IE = 0;
+		//	start TX
+		U1STAbits.UTXEN = 1;	//	enable TX
+		U1STAbits.UTXISEL = 2;	//	10 = Interrupt is generated and asserted while the transmit buffer is empty
+		IEC0bits.U1TXIE = 1;	//	enable interrupt
+		timeTx = TMR1 + PR1;
+	}
 	IFS0CLR= 1 << _IFS0_T1IF_POSITION;
-	U1STAbits.UTXEN = 1;	//	enable TX
-	U1STAbits.UTXISEL = 2;	//	10 = Interrupt is generated and asserted while the transmit buffer is empty
-	IEC0bits.U1TXIE = 1;	//	enable interrupt
 }
 
-//  handler for tx interrupt
-//	Note: "IPL3" below must fit to "IPC5bits.U1TXIP = 3" in interrupt_manager.c;
-void __attribute__ ((vector(_UART1_TX_VECTOR), interrupt(IPL3SOFT))) _UART1_TX_HANDLER(void){	
-    if (retCur == 0){
-		returnCommand[retPacket.commandId]();
+//  Handler for TX interrupt
+//	Note: "IPL2" below must fit to "IPC5bits.U1TXIP = 2" in interrupt_manager.c;
+void __attribute__ ((vector(_UART1_TX_VECTOR), interrupt(IPL2SOFT))) _UART1_TX_HANDLER(void){	
+	//	Send
+	while (retCur < retLen && !U1STAbits.UTXBF){
+		U1TXREG = retPacket.bytes[retCur];
+		retCur ++;
 	}
-	if (retCur < retLen){
-		while (retCur < retLen && !U1STAbits.UTXBF){
-			U1TXREG = retPacket.bytes[retCur];
-			retCur ++;
-		}
-	}
+	//	StopTX
 	if (retCur == retLen){
 		U1STAbits.UTXISEL = 1;		//	01 = Interrupt is generated and asserted when all characters have been transmitted
-		if (U1STAbits.TRMT){		//	TX completed and disable
+		if (U1STAbits.TRMT){		//	TX completed
 			IEC0bits.U1TXIE = 0;	//	disable interrupt
-			U1STAbits.UTXEN = 0;	//	disbble U1X
+			U1STAbits.UTXEN = 0;	//	disable U1TX
 		}
 	}
 	IFS0CLR= 1 << _IFS0_U1TXIF_POSITION;	//	clear interrupt flag
@@ -186,14 +198,24 @@ void __attribute__ ((vector(_UART1_RX_VECTOR), interrupt(IPL4SOFT))) _UART1_RX_H
             cmdLen = cmdPacketLens[head.boardId][head.commandId];
             bRead = false;
 			if (head.boardId == boardId){
-				//	start to send return packet.
-				timeRecv = TMR1;			//	save time
 				bRead = true;
-				command.bytes[0] = head.header;
+				command.header = head.header;
+				retLen = retPacketLen[command.commandId];
+				//printf("retLen%d\r\n", retLen);
+				if (retLen) {	//	start to return.
+					//	Prepare to return
+					retPacket.header = command.header;
+					retCur = 0;
+					//	Start TMR1 to enable TX after some delay.
+					bRunReturnCommand = true;
+					IEC0bits.T1IE = true;
+					IFS0bits.T1IF = false;
+					TMR1 = PR1-1;	//	call timer as soon as this task is ended.
+				}
             }
 			if (head.commandId == CI_SET_CMDLEN){
 				bRead = true;
-				command.bytes[0] = head.header;
+				command.header = head.header;
 			}
         }else if (bRead){
 			command.bytes[cmdCur] = U1RXREG;
@@ -202,21 +224,7 @@ void __attribute__ ((vector(_UART1_RX_VECTOR), interrupt(IPL4SOFT))) _UART1_RX_H
 		}
 		if (cmdCur == cmdLen-1){
             if (bRead){
-				//	start to return
-				retLen = retPacketLen[command.commandId];
-				//printf("retLen%d\r\n", retLen);
-				if (retLen) {	//	Enable and start TX
-					retPacket.header = command.header;
-					retCur = 0;
-					//	Set and enable TMR1 interrupt
-					timeRecv = TMR1;
-					PR1 = timeRecv + 200;
-					IFS0CLR= 1 << _IFS0_T1IF_POSITION;
-				    IFS0bits.T1IF = false;
-					IEC0bits.T1IE = true;
-				}
-				//	exec command
-				bRunExecCommand = true;
+				bRunExecCommand = true;	//	exec command in main thread.
             }
             cmdCur = 0;
         } else {
@@ -230,8 +238,14 @@ void uartExecCommand(){
 	if (bRunExecCommand){
 		bRunExecCommand = false;
         execCommand[command.commandId]();
-		printf("H%x Ex%d  Send%d-Recv%d=%d\r\n", (int)command.header, (int)command.commandId, timeRecv, timeSend, timeSend-timeRecv);
+		//printf("H%x Ex%d ", (int)command.header, (int)command.commandId);
 	}else{
+#if 0
+		if (timeTx - timeRetCmd < 5000){
+			printf("RC%d W%d\r\n", timeRetCmd, timeTx-timeRetCmd);
+			timeTx = timeRetCmd + 10000;
+		}
+#endif
 #if 0
 		static int i;
 		i++;

@@ -7,7 +7,6 @@
 #include "esp_log.h"
 #include "board.h"
 
-static const char* Tag = "Uart";
 static char zero[80];
 
 void Uart::Init(uart_config_t conf, int rxPin, int txPin){
@@ -22,21 +21,20 @@ static void sendTask(void* a){
 	((Uart*)a)->SendTask();
 }
 void Uart::CreateTask(){
-	xTaskCreate(recvTask, "RecvTask", 4*1024, this, 12, &taskRecv);
-	xTaskCreate(sendTask, "SendTask", 4*1024, this, 10, &taskSend);
+	xTaskCreate(recvTask, "RecvTask", 4*1024, this, 10, &taskRecv);
+	xTaskCreate(sendTask, "SendTask", 4*1024, this, 12, &taskSend);
 }
-#define UART_USE_NOTIFY	0
 void Uart::SendTask(){
-	const char* Tag = "UartSend";
 	while(1){
-		ulTaskNotifyTake(pdFALSE, portMAX_DELAY);	//	given by WriteCmd
-//		ESP_LOGI(Tag, "#%d start\n", port);
+		ulTaskNotifyTake(pdFALSE, portMAX_DELAY);	//	given by WriteCmd()
+//		ESP_LOGI("SendTask", "#%d start\n", port);
 		int wait = 0;
 		bool bRet = false;
 		for(cmdCur.board=0; cmdCur.board<boards.size(); cmdCur.board++){
 			int retLen = boards[cmdCur.board]->RetLenForCommand();
 			if (retLen) bRet = true;
-			wait = retLen - boards[cmdCur.board]->CmdLen() + 10;
+//			wait = retLen - boards[cmdCur.board]->CmdLen() + 10;
+			wait = retLen - boards[cmdCur.board]->CmdLen() + 20;
 			if (wait < 5) wait = 5;
 			assert(wait < CMDWAITMAXLEN);
 			memset(boards[cmdCur.board]->CmdStart() + boards[cmdCur.board]->CmdLen(), 0, wait);
@@ -46,22 +44,37 @@ void Uart::SendTask(){
 		if (!bRet){
 			xSemaphoreGive(uarts->seUartFinished);
 		}
-//		ESP_LOGI(Tag, "#%d  end\n", port);
+		xTaskNotifyGive(taskRecv);					//	start to receive.
+//		ESP_LOGI(SendTask, "#%d  end\n", port);
 	}
 }
 void Uart::RecvTask(){
-	const char* Tag = "UartRecv";
+	const ulong READWAIT = 200;	//[ticks(=ms)]
 	while(1){
+		ulTaskNotifyTake(pdFALSE, portMAX_DELAY);	//	Start to receive
 		for (retCur.board=0; retCur.board < boards.size(); retCur.board++) {
 			int retLen = boards[retCur.board]->RetLenForCommand();
 			if (retLen){
 				//	receive the header byte
-				uart_read_bytes(port, boards[retCur.board]->RetStart(), retLen, portMAX_DELAY);
-				//	ESP_LOGI(Tag, "#%d H:%x L:%d", port, (int)boards[retCur.board]->RetStart()[0], boards[retCur.board]->RetLen());
+				int readLen = uart_read_bytes(port, boards[retCur.board]->RetStart(), retLen, READWAIT);
+				if (readLen != retLen){
+					//	timeout
+					int i;
+					for(i=0; i<readLen; ++i){
+						if (boards[retCur.board]->RetStart()[i] == boards[retCur.board]->CmdStart()[0]){
+							break;
+						}
+					}
+					ESP_LOGE("Uart::RecvTask", "Read %d != ret %d, H%2x C%2x pos%d", readLen, retLen,
+						 (int)boards[retCur.board]->RetStart()[0], (int)boards[retCur.board]->CmdStart()[0], i);
+					ets_delay_us(2000);
+					uart_flush_input(port);
+				}
+				//	ESP_LOGI("RecvTask", "#%d H:%x L:%d", port, (int)boards[retCur.board]->RetStart()[0], boards[retCur.board]->RetLen());
 			}
 		}
-		xSemaphoreGive(uarts->seUartFinished);
-		ulTaskNotifyTake(pdFALSE, portMAX_DELAY);	//	given when udp sent.
+		xSemaphoreGive(uarts->seUartFinished);		//	To finish WriteCmd()
+		ulTaskNotifyTake(pdFALSE, portMAX_DELAY);	//	Given by ReadRet().
 	}
 }
 

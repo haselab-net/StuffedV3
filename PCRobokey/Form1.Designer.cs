@@ -42,6 +42,7 @@
             this.btResetMotors = new System.Windows.Forms.Button();
             this.runTimer = new System.Windows.Forms.Timer(this.components);
             this.panelTop = new System.Windows.Forms.Panel();
+            this.ckSense = new System.Windows.Forms.CheckBox();
             this.label3 = new System.Windows.Forms.Label();
             this.udTick = new System.Windows.Forms.NumericUpDown();
             this.laPort = new System.Windows.Forms.Label();
@@ -74,7 +75,6 @@
             this.tbState = new System.Windows.Forms.TextBox();
             this.tpMessage = new System.Windows.Forms.TabPage();
             this.tbMessage = new System.Windows.Forms.TextBox();
-            this.ckSense = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.track)).BeginInit();
             this.panelCom.SuspendLayout();
             this.panel2.SuspendLayout();
@@ -214,7 +214,7 @@
             // 
             // runTimer
             // 
-            this.runTimer.Interval = 50;
+            this.runTimer.Interval = 5;
             this.runTimer.Tick += new System.EventHandler(this.runTimer_Tick);
             // 
             // panelTop
@@ -238,6 +238,18 @@
             this.panelTop.Name = "panelTop";
             this.panelTop.Size = new System.Drawing.Size(1169, 45);
             this.panelTop.TabIndex = 69;
+            // 
+            // ckSense
+            // 
+            this.ckSense.AutoSize = true;
+            this.ckSense.Location = new System.Drawing.Point(890, 10);
+            this.ckSense.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
+            this.ckSense.Name = "ckSense";
+            this.ckSense.Size = new System.Drawing.Size(80, 22);
+            this.ckSense.TabIndex = 79;
+            this.ckSense.Text = "&Sense";
+            this.ckSense.UseVisualStyleBackColor = true;
+            this.ckSense.CheckedChanged += new System.EventHandler(this.ckSense_CheckedChanged);
             // 
             // label3
             // 
@@ -620,18 +632,6 @@
             this.tbMessage.Size = new System.Drawing.Size(317, 542);
             this.tbMessage.TabIndex = 0;
             this.tbMessage.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.tbMessage_KeyPress);
-            // 
-            // ckSense
-            // 
-            this.ckSense.AutoSize = true;
-            this.ckSense.Location = new System.Drawing.Point(890, 10);
-            this.ckSense.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
-            this.ckSense.Name = "ckSense";
-            this.ckSense.Size = new System.Drawing.Size(80, 22);
-            this.ckSense.TabIndex = 79;
-            this.ckSense.Text = "&Sense";
-            this.ckSense.UseVisualStyleBackColor = true;
-            this.ckSense.CheckedChanged += new System.EventHandler(this.ckSense_CheckedChanged);
             // 
             // Form1
             // 

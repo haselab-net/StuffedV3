@@ -468,6 +468,7 @@ namespace Robokey
             Timer tmRun = (Timer)sender;
             if (ckRun.Checked)
             {
+#if false
                 int diff = NINTERPOLATEFILL - udpComm.nInterpolateRest;
                 System.Diagnostics.Debug.Write("RunTimer: rest = ");
                 System.Diagnostics.Debug.Write(udpComm.nInterpolateRest);
@@ -488,6 +489,10 @@ namespace Robokey
                         udpComm.SendPoseInterpolate(Interpolate(curTime));
                     }
                 }
+#else
+                UpdateCurTime(curTime += tmRun.Interval * (int)udStep.Value);
+                udpComm.SendPoseDirect(Interpolate(curTime));
+#endif
             }
             if (ckSense.Checked)
             {

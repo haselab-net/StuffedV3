@@ -310,10 +310,10 @@ void UdpCom::ConnectWifi() {
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
     wifi_config_t wifi_config;
     ESP_ERROR_CHECK( esp_wifi_set_storage(WIFI_STORAGE_RAM) );
-#if 1
+#if 0
 	strcpy((char*)wifi_config.sta.ssid, "hasefone");
 	strcpy((char*)wifi_config.sta.password, "hasevr@gmail.com");
-#elif 0
+#elif 1
 	strcpy((char*)wifi_config.sta.ssid, "HOME");
 	strcpy((char*)wifi_config.sta.password, "2human2human2");
 #else
