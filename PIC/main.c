@@ -75,8 +75,9 @@ int main(void)
 			uint32_t now = _CP0_GET_COUNT();
 			uint32_t cmp = _CP0_GET_COMPARE();
 			int diff = cmp - now;
-			if (diff < -12000){	//	delay 1ms 
-				_CP0_SET_COMPARE(now + 6000);
+			if (diff < -3000){	//	delay 1ms 
+				coretimerCompare = now + 3000;
+				_CP0_SET_COMPARE(coretimerCompare);
 				printf("RO\r\n");
 			}
 			if (U2STAbits.TRMT){

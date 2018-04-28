@@ -78,6 +78,7 @@ void monitor(){
         printf("%c", ch);
     }
 	switch(ch){
+#if 0	//	Dangerous for full circuit.
 		case 'S':
 			SPI2BUF = 0xFF00FF00;
 			break;
@@ -89,21 +90,16 @@ void monitor(){
 			outTest(0);
 			ch = 0;
 			break;
+#endif
 		case 'a':	//	ad converter
 			for(i=0; i<16; ++i) printf(" %x", *(&ADC1BUF0 + 4*i));
 			printf("\r\n");
 			break;
-		case 'A':	//	ad converter in motor roder
+		case 'A':	//	ad converter in motor order
 			printf(" %d %d ", ADC1BUF5, ADC1BUF2);
 			printf(" %d %d ", ADC1BUF7, ADC1BUF6);
 			printf(" %d %d ", ADC1BUF1, ADC1BUF0);
 			printf(" %d %d\r\n", ADC1BUF4, ADC1BUF3);
-			break;
-		case 't':
-			for(i=0; i<4; ++i){
-				printf(" %1.3f", LDEC2DBL(motorState.pos[i]));
-			}
-			printf("\r\n");
 			break;
 		case 's':
 			if (IEC0bits.CTIE){
@@ -115,8 +111,9 @@ void monitor(){
 			}
 			ch = 0;
 			break;
-		case 'm':
-			printf("CoreTimer cur:%d cmp:%d,  rest:%d, timeOut %d.\r\n", CORETIMER_CountGet(), coretimerCompare, timerRestTime, timeOutCount);
+		case 't':
+			printf(" core timer cur:%8x cmp:%8x remain:%5d\r\n", 
+					_CP0_GET_COUNT(), _CP0_GET_COMPARE(), coretimerRemainTime);
 			break;
 		case 'w':
 			pwmTest2();

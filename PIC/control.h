@@ -67,8 +67,7 @@ inline SDEC getForce(int ch){
 	if (ch == 1) return msin[3];
 }
 
-extern int timeOutCount;
-extern int timerRestTime;
+extern int coretimerRemainTime;
 extern uint32_t coretimerCompare;
 
 #endif

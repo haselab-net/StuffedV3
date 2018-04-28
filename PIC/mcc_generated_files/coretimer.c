@@ -65,7 +65,6 @@ void CORETIMER_Initialize()
 	_CP0_SET_COMPARE(coretimerCompare); 
     // Enable the interrupt
    IEC0bits.CTIE = 1;
-
 }
 
 void CORETIMER_EnableInterrupt()
@@ -83,24 +82,17 @@ uint32_t CORETIMER_CountGet()
    return _CP0_GET_COUNT();
 }
 
-int timeOutCount;
-int timerRestTime;
+int coretimerRemainTime;
 void __attribute__ ((vector(_CORE_TIMER_VECTOR), interrupt(IPL1SOFT))) _CORE_TIMER_ISR(void)
 {
 	// Update the coretimerCompare value
-	coretimerCompare = coretimerCompare + 12000;	//	12MHz/12k = 1kHz
+	coretimerCompare = coretimerCompare + 4000;	//	12MHz/12k = 1kHz
+	_CP0_SET_COMPARE(coretimerCompare);
+	IFS0CLR= 1 << _IFS0_CTIF_POSITION;
 	//	Control task
 	onControlTimer();
-	IFS0CLR= 1 << _IFS0_CTIF_POSITION;
-	asm volatile("di");// Disable all interrupts 
 	uint32_t now = _CP0_GET_COUNT();
-	timerRestTime = coretimerCompare - now;
-	if (timerRestTime < 0){
-		coretimerCompare = now + 1000;
-		timeOutCount++;
-	}
-	_CP0_SET_COMPARE(coretimerCompare);
-	asm volatile("ehb");// Disable all interrupts
+	coretimerRemainTime = coretimerCompare - now;
 }
 
 /**

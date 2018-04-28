@@ -468,7 +468,7 @@ namespace Robokey
             Timer tmRun = (Timer)sender;
             if (ckRun.Checked)
             {
-#if false
+#if false    //  user interpolate or not
                 int diff = NINTERPOLATEFILL - udpComm.nInterpolateRest;
                 System.Diagnostics.Debug.Write("RunTimer: rest = ");
                 System.Diagnostics.Debug.Write(udpComm.nInterpolateRest);
