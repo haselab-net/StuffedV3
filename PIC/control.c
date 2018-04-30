@@ -8,7 +8,6 @@ struct PdParam pdParam;
 struct TorqueLimit torqueLimit;
 struct Targets targets;
 enum ControlMode controlMode;
-
 //	 angle
 SDEC mcos[NAXIS], msin[NAXIS];
 const SDEC mcosOffset[NAXIS] ={
@@ -17,6 +16,7 @@ const SDEC mcosOffset[NAXIS] ={
 const SDEC msinOffset[NAXIS] ={
     2048, 2048, 2048, 2048
 };
+uint32_t controlCount;
 
 
 inline short FilterForADC(short prev, short cur){
@@ -308,6 +308,7 @@ void targetsForceControlProceed(){
 	}
 }
 void controlLoop(){
+	controlCount ++;
     if (controlMode == CM_INTERPOLATE){
         targetsProceed();
     }else if (controlMode == CM_FORCE_CONTROL){
@@ -366,11 +367,9 @@ void controlSetMode(enum ControlMode m){
 }
 
 void onControlTimer(){
-#if 1
 	LATCbits.LATC2 = 1;
 	controlLoop();
 	LATCbits.LATC2 = 0;
-#endif
 }
 
 #ifdef MODULETEST
@@ -408,3 +407,4 @@ void printMotorControl(){
     printf("\n");
 }
 #endif
+

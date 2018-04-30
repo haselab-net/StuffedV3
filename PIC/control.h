@@ -69,5 +69,6 @@ inline SDEC getForce(int ch){
 
 extern int coretimerRemainTime;
 extern uint32_t coretimerCompare;
+extern uint32_t controlCount;
 
 #endif

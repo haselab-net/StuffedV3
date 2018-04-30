@@ -90,6 +90,19 @@ void monitor(){
 			outTest(0);
 			ch = 0;
 			break;
+		case 'w':
+			pwmTest2();
+			printf(" pwm test 2.\r\n");
+			ch = 0;
+			break;				
+		case 'p':
+			pwmTest(0);
+			ch = 0;
+			break;
+		case 'P':
+			pwmTest(1);
+			ch = 0;
+			break;
 #endif
 		case 'a':	//	ad converter
 			for(i=0; i<16; ++i) printf(" %x", *(&ADC1BUF0 + 4*i));
@@ -101,6 +114,13 @@ void monitor(){
 			printf(" %d %d ", ADC1BUF1, ADC1BUF0);
 			printf(" %d %d\r\n", ADC1BUF4, ADC1BUF3);
 			break;
+		case 'c':{	//	control status
+			static uint32_t ct;
+			if (ct != controlCount){
+				ct = controlCount;
+				printf("ctrl\t%d\t%d\t%d\t%d\t%d\r\n", ct, motorState.pos[0], motorTarget.pos[0], motorState.vel[0], motorTarget.vel[0]);
+			}
+		}break;
 		case 's':
 			if (IEC0bits.CTIE){
 				CORETIMER_DisableInterrupt();
@@ -114,19 +134,6 @@ void monitor(){
 		case 't':
 			printf(" core timer cur:%8x cmp:%8x remain:%5d\r\n", 
 					_CP0_GET_COUNT(), _CP0_GET_COMPARE(), coretimerRemainTime);
-			break;
-		case 'w':
-			pwmTest2();
-			printf(" pwm test 2.\r\n");
-			ch = 0;
-			break;				
-		case 'p':
-			pwmTest(0);
-			ch = 0;
-			break;
-		case 'P':
-			pwmTest(1);
-			ch = 0;
 			break;
 		case 'u':
 			printf("U1STA %8x\r\n", U1STA);
