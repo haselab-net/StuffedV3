@@ -35,40 +35,48 @@ public:
 	unsigned char* RetStart() { return ret.bytes; }
 	int RetLen() { return retPacketLen[ret.commandId]; }
 	int RetLenForCommand() { return retPacketLen[cmd.commandId]; }
+	unsigned char GetTargetCountOfRead(){
+		return ret.interpolate.countOfRead;
+	}
+	unsigned short GetTick(){
+		return ret.interpolate.tick;
+	}
 	void WriteCmd(UdpCmdPacket& packet) {
 		cmd.commandId = packet.command;
 		switch (packet.command){
 		case CI_DIRECT:
 			for (int i = 0; i < GetNMotor(); ++i) {
-				cmd.direct.pos[i] = packet.MotorPos(motorMap[i]);
-				cmd.direct.vel[i] = packet.MotorVel(motorMap[i]);
+				cmd.direct.pos[i] = packet.GetMotorPos(motorMap[i]);
+				cmd.direct.vel[i] = packet.GetMotorVel(motorMap[i]);
 			}
 			break;
 		case CI_INTERPOLATE:
 			for (int i = 0; i < GetNMotor(); ++i) {
-				cmd.interpolate.pos[i] = packet.MotorPos(motorMap[i]);
-				cmd.interpolate.period = packet.Period();
+				cmd.interpolate.pos[i] = packet.GetMotorPos(motorMap[i]);
 			}
+			cmd.interpolate.period = packet.GetPeriod();
+			cmd.interpolate.count = packet.GetTargetCount();
 			break;
 		case CI_FORCE_CONTROL:
 			for (int i = 0; i < GetNMotor(); ++i) {
-				cmd.forceControl.pos[i] = packet.MotorPos(motorMap[i]);
+				cmd.forceControl.pos[i] = packet.GetMotorPos(motorMap[i]);
+				cmd.interpolate.period = packet.GetPeriod();
+				cmd.interpolate.count = packet.GetTargetCount();
 				for (int j = 0; j < GetNForce(); ++j) {
-					cmd.forceControl.JK[j][i] = packet.ForceControlJK(forceMap[j], i);
+					cmd.forceControl.JK[j][i] = packet.GetForceControlJK(forceMap[j], i);
 				}
-				cmd.interpolate.period = packet.Period();
 			}
 			break;
 		case CI_PDPARAM:
 			for (int i = 0; i < GetNMotor(); ++i) {
-				cmd.pdParam.k[i] = packet.K(motorMap[i]);
-				cmd.pdParam.b[i] = packet.B(motorMap[i]);
+				cmd.pdParam.k[i] = packet.GetControlK(motorMap[i]);
+				cmd.pdParam.b[i] = packet.GetControlB(motorMap[i]);
 			}
 			break;
 		case CI_TORQUE_LIMIT:
 			for (int i = 0; i < GetNMotor(); ++i) {
-				cmd.torqueLimit.min[i] = packet.TorqueMin(motorMap[i]);
-				cmd.torqueLimit.max[i] = packet.TorqueMax(motorMap[i]);
+				cmd.torqueLimit.min[i] = packet.GetTorqueMin(motorMap[i]);
+				cmd.torqueLimit.max[i] = packet.GetTorqueMax(motorMap[i]);
 			}
 			break;
 		}
@@ -77,27 +85,24 @@ public:
 		switch (packet.command) {
 		case CI_DIRECT:
 			for (int i = 0; i < GetNMotor(); ++i) {
-				packet.MotorPos(motorMap[i]) = ret.direct.pos[i];
-				packet.MotorVel(motorMap[i]) = ret.direct.vel[i];
+				packet.SetMotorPos(ret.direct.pos[i], motorMap[i]);
+				packet.SetMotorVel(ret.direct.vel[i], motorMap[i]);
 			}
 			//ESP_LOGI("Board", "Direct Motor Pos: %d %d %d %d\n", packet.MotorPos(0),  packet.MotorPos(1), packet.MotorPos(2),  packet.MotorPos(3));
 			break;
 		case CI_INTERPOLATE:
 		case CI_FORCE_CONTROL:
 			for (int i = 0; i < GetNMotor(); ++i) {
-				packet.MotorPos(motorMap[i]) = ret.interpolate.pos[i];
+				packet.SetMotorPos(ret.interpolate.pos[i], motorMap[i]);
 			}
-			packet.SetVacancy(ret.interpolate.vacancy);
-			packet.SetRemain(ret.interpolate.remain);
-			packet.SetTick(ret.interpolate.tick);
 			//ESP_LOGI("Board", "Motor Pos: %d %d %d %d\n", packet.MotorPos(0),  packet.MotorPos(1), packet.MotorPos(2),  packet.MotorPos(3));
 			break;
 		case CI_SENSOR:
 			for (int i = 0; i < GetNMotor(); ++i) {
-				packet.MotorPos(motorMap[i]) = ret.sensor.pos[i];
+				packet.SetMotorPos(ret.sensor.pos[i], motorMap[i]);
 			}
 			for (int i = 0; i < GetNForce(); ++i) {
-				packet.Force(forceMap[i]) = ret.sensor.force[i];
+				packet.SetForce(ret.sensor.force[i], forceMap[i]);
 			}
 			break;
 		}

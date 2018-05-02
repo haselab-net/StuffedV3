@@ -78,7 +78,7 @@ int main(void)
 			if (diff < -3000){	//	delay 1ms 
 				coretimerCompare = now + 3000;
 				_CP0_SET_COMPARE(coretimerCompare);
-				printf("RO\r\n");
+				//printf("RO\r\n");
 			}
 			if (U2STAbits.TRMT){
 				monitor();

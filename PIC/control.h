@@ -32,12 +32,13 @@ struct TorqueLimit{
 extern struct TorqueLimit torqueLimit;
 
 struct Target{
-	short period;	//	update period for interpolation
+	short period;	//	period to reach this target.
 	SDEC pos[NMOTOR];
 	SDEC JK[NFORCE][NMOTOR];
 };
 struct Targets{
-	short tick;		//	current tick count
+	unsigned short tick;		//	current tick count
+	unsigned char countOfRead;	//	couner value of buf[read]
 	volatile char read;         //	interpolation works between "pos[read]" and "pos[read+1]".
 	volatile char write;		//	cursor to add new data. pos[write] = newdata.
 	struct Target buf[NTARGET];
@@ -52,11 +53,21 @@ enum ControlMode{
 extern enum ControlMode controlMode;
 
 void targetsInit();
-void targetsAdd(short* pos, short period);
-void targetsForceControlAdd(SDEC* pos, SDEC JK[NFORCE][NMOTOR] ,short period);
+void targetsAddOrUpdate(short* pos, short period, unsigned char count);
+void targetsForceControlAddOrUpdate(SDEC* pos, SDEC JK[NFORCE][NMOTOR] ,short period, unsigned char count);
 void targetsWrite();
-int targetsWriteAvail();
-int targetsReadAvail();
+inline unsigned char targetsWriteAvail(){
+	char len = targets.read - targets.write;
+	if (len < 0) len += NTARGET;
+	return len;
+}
+inline unsigned char targetsReadAvail(){
+	char len = targets.write - targets.read;
+	if (len <= 0) len += NTARGET;
+	return len;
+}
+int targetsCountMin();
+int targetsCountMax();
 
 void controlInit();
 void controlSetMode(enum ControlMode m);

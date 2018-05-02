@@ -75,11 +75,14 @@ namespace Robokey
         public PoseData pose = null;                        //  current angles of motors; ReadPose
         public PoseData velocity = null;                    //  current velocities of motors; ReadVelocity
         public short [] force = null;                       //  force sensor's values
+        public int nInterpolateTotal=0;                     //  capacity of interpolation targets.
         public int interpolatePeriod =0;                    //  period for interpolation; send to robot.
-        public int interpolateTick =0;                      //  tick for interpolation; ReadVacancy
+        public byte interpolateTargetCountOfWrite = 0;       //  count of interpolation at write cursor
+        public byte interpolateTargetCountOfRead = 0;        //  count of interpolation at read cursor
+        public int interpolateTickMin = 0;                  //  tick of interpolation
+        public int interpolateTickMax = 0;                  //  tick of interpolation
+        public int nInterpolateRemain = 0;                  //  number of data in target buffer 
         public int nInterpolateVacancy =0;                  //  target buffer vacancy
-        public int nInterpolateRest = 0;                    //  number of data in target buffer 
-        public int nInterpolateTotal = 0;                   //  number of total target buffer 
         public struct Packet {
             byte[] data;
             int length;
@@ -239,9 +242,11 @@ namespace Robokey
         }
         void ReadTick(ref int cur, byte[] buf)
         {
+            interpolateTargetCountOfRead = (byte)ReadShort(ref cur, buf);
+            interpolateTickMin = ReadShort(ref cur, buf);
+            interpolateTickMax = ReadShort(ref cur, buf);
+            nInterpolateRemain = ReadShort(ref cur, buf);
             nInterpolateVacancy = ReadShort(ref cur, buf);
-            nInterpolateRest = ReadShort(ref cur, buf);
-            interpolateTick = ReadShort(ref cur, buf);
         }
         void CallUpdateRobotState() {
             if (OnUpdateRobotState != null)
@@ -313,6 +318,7 @@ namespace Robokey
                     case CommandId.CI_SENSOR:
                         ReadPose(ref cur, receiveBytes);
                         ReadForce(ref cur, receiveBytes);
+                        CallUpdateRobotState();
                         break;
                     case CommandId.CIU_GET_IPADDRESS:
                         ReadPeerIPAddress(ref cur, receiveBytes);
@@ -422,6 +428,7 @@ namespace Robokey
                 WriteShort(0, ref p, packet);   //  Tentative: set velocity to 0 
             }
             PutCommand(packet, p);
+            interpolateTargetCountOfWrite = 0;
         }
         public void SendPoseInterpolate(PoseData pose)
         {
@@ -435,7 +442,9 @@ namespace Robokey
                 WriteShort(v, ref p, packet);
             }
             WriteShort(interpolatePeriod, ref p, packet);
+            WriteShort(interpolateTargetCountOfWrite, ref p, packet);
             PutCommand(packet, p);
+            interpolateTargetCountOfWrite++;
         }
         public void SendPdParam(int nMotor, int[] k, int[] b)
         {

@@ -42,16 +42,15 @@ public:
 
 class Uarts{
 public:
-/*	bool bRetFinished = true;
-	enum UartState{
-		US_IDLE,
-		US_SENDING,
-		US_RECEIVING,
-	} uartState;
-*/
-	int nTargetMin;			//	nTaret for all board
-	int nTargetVacancy;		//	nTargetVecancy for all board
-	int nTargetRemain;		//	minimum remaining targets in the board
+	enum ControlMode{
+		CM_DIRECT,
+		CM_INTERPOLATE
+	} mode;
+	unsigned char nTargetMin;			//	nTaret for all board
+	unsigned char nTargetVacancy;		//	nTargetVecancy for all board
+	unsigned char nTargetRemain;		//	minimum remaining targets in the board. Must be >= 3.
+	unsigned char targetCountWrite;		//	targetCount for next writing. 
+	unsigned char targetCountReadMax;	//	targetCount for read of one of the board.
 	int nBoard;
 	ip_addr_t returnIp;
 	static const int NUART = 2;
@@ -75,15 +74,6 @@ public:
 		}
 		return false;
 	}
-#if 0
-	///	Get the command id of the ret packet from one of the boards.
-	int RetCommand() {
-		for (int i = 0; i < NUART; ++i) {
-			if (uart[i]->boards.size() > 0) return uart[i]->boards[0]->GetRetCommand();
-		}
-		return -1;
-	}
-#endif
 	///	Write contents of the UdpCmdPacket to all boards. 
 	void WriteCmd(UdpCmdPacket& packet);	
 	///	Read returns of all boards to  UdpRetPacket. 

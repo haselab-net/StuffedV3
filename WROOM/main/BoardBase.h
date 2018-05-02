@@ -19,6 +19,8 @@ public:
 	virtual int GetNMotor() = 0;
 	virtual int GetNForce() = 0;
 	virtual int GetBoardId() = 0;
+	virtual unsigned char GetTargetCountOfRead() = 0;
+	virtual unsigned short GetTick() = 0;
 	virtual void WriteCmd(UdpCmdPacket& packet) = 0;
 	virtual void ReadRet(UdpRetPacket& packet) = 0;
 	virtual int GetRetCommand() = 0;

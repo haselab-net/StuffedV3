@@ -5,6 +5,8 @@
 #include "command.h"
 #include <stdio.h>
 
+int traceLevel = 1;
+
 void outTest(int dir){
     static int pos;
 	TRISAbits.TRISA0 = 0;
@@ -75,7 +77,7 @@ void monitor(){
 	}
 	if (ch != ' ' && ch != 0){
         while(monWaiting()) monOut()    ;
-        printf("%c", ch);
+        //printf("%c", ch);
     }
 	switch(ch){
 #if 0	//	Dangerous for full circuit.
@@ -105,10 +107,12 @@ void monitor(){
 			break;
 #endif
 		case 'a':	//	ad converter
+			printf("ad");
 			for(i=0; i<16; ++i) printf(" %x", *(&ADC1BUF0 + 4*i));
 			printf("\r\n");
 			break;
 		case 'A':	//	ad converter in motor order
+			printf("Ad");
 			printf(" %d %d ", ADC1BUF5, ADC1BUF2);
 			printf(" %d %d ", ADC1BUF7, ADC1BUF6);
 			printf(" %d %d ", ADC1BUF1, ADC1BUF0);
@@ -118,29 +122,42 @@ void monitor(){
 			static uint32_t ct;
 			if (ct != controlCount){
 				ct = controlCount;
-				printf("ctrl\t%d\t%d\t%d\t%d\t%d\r\n", ct, motorState.pos[0], motorTarget.pos[0], motorState.vel[0], motorTarget.vel[0]);
+				printf("ctrl\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\r\n", 
+						motorState.pos[0], motorTarget.pos[0], motorState.vel[0], motorTarget.vel[0], 
+						targets.write, targets.read, targets.tick, targets.buf[(targets.read+1)%NTARGET].period, ct);
 			}
 		}break;
+		case 'C':
+			printf("Core timer cur:%8x cmp:%8x remain:%5d\r\n", 
+					_CP0_GET_COUNT(), _CP0_GET_COMPARE(), coretimerRemainTime);
+			break;
+		case 't':
+			traceLevel ++;
+			printf("trace level = %d", traceLevel);
+			ch = 0;
+			break;
+		case 'T':
+			traceLevel --;
+			printf("Trace level = %d", traceLevel);
+			ch = 0;
+			break;
 		case 's':
 			if (IEC0bits.CTIE){
 				CORETIMER_DisableInterrupt();
-				printf(" Stop timer interrupt.\r\n");
+				printf("stop timer interrupt.\r\n");
 			}else{
 				CORETIMER_Initialize();
-				printf(" Start timer interrupt.\r\n");
+				printf("Start timer interrupt.\r\n");
 			}
 			ch = 0;
 			break;
-		case 't':
-			printf(" core timer cur:%8x cmp:%8x remain:%5d\r\n", 
-					_CP0_GET_COUNT(), _CP0_GET_COMPARE(), coretimerRemainTime);
-			break;
 		case 'u':
-			printf("U1STA %8x\r\n", U1STA);
+			printf("u1STA %8x\r\n", U1STA);
 			ch = 0;
 			break;
 		case 'r':
 			{
+			printf("r");
 			int i;
 			for(i=0; i<NMOTOR; ++i){
 				printf(" %i=%2.3f (%d,%d)", i, LDEC2DBL(motorState.pos[i]), 

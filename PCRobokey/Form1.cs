@@ -460,7 +460,7 @@ namespace Robokey
             Application.Idle += new EventHandler(AppIdle);
         }
 
-        const int NINTERPOLATEFILL = 6; //  At least two must in buffer for interpolation.
+        const int NINTERPOLATEFILL = 4; //  At least two must in buffer for interpolation.
 
         int zeroDiffCount = 0;
         private void runTimer_Tick(object sender, EventArgs e)
@@ -468,11 +468,21 @@ namespace Robokey
             Timer tmRun = (Timer)sender;
             if (ckRun.Checked)
             {
-#if false    //  user interpolate or not
-                int diff = NINTERPOLATEFILL - udpComm.nInterpolateRest;
-                System.Diagnostics.Debug.Write("RunTimer: rest = ");
-                System.Diagnostics.Debug.Write(udpComm.nInterpolateRest);
+#if true    //  user interpolate or not
+                System.Diagnostics.Debug.Write("RunTimer: Remain=");
+                System.Diagnostics.Debug.Write(udpComm.nInterpolateRemain);
+                System.Diagnostics.Debug.Write(" Cw=");
+                System.Diagnostics.Debug.Write(udpComm.interpolateTargetCountOfWrite);
+                System.Diagnostics.Debug.Write(" Cr=");
+                System.Diagnostics.Debug.Write(udpComm.interpolateTargetCountOfRead);
+                System.Diagnostics.Debug.Write(" tMin=");
+                System.Diagnostics.Debug.Write(udpComm.interpolateTickMin);
+                System.Diagnostics.Debug.Write(" tMax=");
+                System.Diagnostics.Debug.Write(udpComm.interpolateTickMax);
+                System.Diagnostics.Debug.Write(" vac=");
+                System.Diagnostics.Debug.Write(udpComm.nInterpolateVacancy);
                 System.Diagnostics.Debug.WriteLine(".");
+                int diff = NINTERPOLATEFILL - udpComm.nInterpolateRemain;
                 if (diff < 1)
                 {
                     zeroDiffCount++;
@@ -481,9 +491,25 @@ namespace Robokey
                         diff = 1;
                     }
                 }
+                if (udpComm.nInterpolateVacancy < 2)
+                {
+                    diff = 0;
+                }
                 for (int i = 0; i < diff; ++i)
                 {
-                    UpdateCurTime(curTime += tmRun.Interval * (int)udStep.Value, true);
+#if false           //  test for update
+                    if (runTimer.Enabled)
+                    {
+                        int len = (int)udpComm.interpolateTargetCountOfWrite - (int)udpComm.interpolateTargetCountOfRead;
+                        if (len > 3)
+                        {
+                            udpComm.interpolateTargetCountOfWrite--;
+                            udpComm.SendPoseInterpolate(Interpolate(curTime));
+                        }
+                    }
+#endif
+                    curTime += tmRun.Interval * (int)udStep.Value;
+                    UpdateCurTime(curTime, true);
                     if (runTimer.Enabled)
                     {
                         udpComm.SendPoseInterpolate(Interpolate(curTime));

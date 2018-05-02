@@ -5,6 +5,8 @@
 #include "UartCom.h"
 #include "esp_event_loop.h"
 
+
+
 /**	Udp packet from PC
 	Each command has sequential counter to detect packet drop.
 	Counters in return packets indicate that of lastly received command packet.
@@ -24,74 +26,74 @@ public:
 			short data[(MAXLEN-2*3)/2];
 		}__attribute__((__packed__));
 	};
-	short& MotorPos(int i) {
-		return data[i];
-	}
-	short& MotorVel(int i) {
-		return data[uarts.GetNTotalMotor() + i];
-	}
-	short ForceControlJK(int j, int i) {	//	2 forces x 3 motors,
-		int b = j / 2;
-		int r = j % 2;
-		return data[uarts.GetNTotalMotor() + b*6 + r*3 + i];
-	}
 };
 class UdpCmdPacket: public UdpPacket{
 public:
 	ip_addr_t returnIp;
 	int CommandLen();	///<	length of packet in bytes
-	short& Period() {
-		return data[uarts.GetNTotalMotor()];
-	}
-	short& K(int i) {
+	short GetMotorPos(int i) {
 		return data[i];
 	}
-	short& B(int i) {
+	short GetMotorVel(int i) {
 		return data[uarts.GetNTotalMotor() + i];
 	}
-	short& TorqueMin(int i) {
+	short GetPeriod() const {
+		return data[uarts.GetNTotalMotor()];
+	}
+	short GetTargetCount() const {
+		return data[uarts.GetNTotalMotor()+1];
+	}
+	short GetForceControlJK(int j, int i) const {	//	j: row, i: col,
+		//	The matrix is 2 row x  3 col or 2*nBoard row x 3 col.
+	//	int b = j / 2;
+	//	int r = j % 2;
+	//	return data[uarts.GetNTotalMotor() + 2 + b*6 + r*3 + i];
+		return data[uarts.GetNTotalMotor() + 2 + j*3 + i];
+	}
+	short GetControlK(int i) const {
 		return data[i];
 	}
-	short& TorqueMax(int i) {
+	short GetControlB(int i) const {
+		return data[uarts.GetNTotalMotor() + i];
+	}
+	short GetTorqueMin(int i) const {
+		return data[i];
+	}
+	short GetTorqueMax(int i) const {
 		return data[uarts.GetNTotalMotor() + i];
 	}
 };
 class UdpRetPacket:public UdpPacket{
 public:
+	//	Set length of the packet based on command.
 	void SetLength();
 	void ClearData();
-	void SetCommand(short cmd) {
-		command = cmd;
-		if (cmd == CI_INTERPOLATE) {
-			short &pv = data[uarts.GetNTotalMotor()];
-			short &pr = data[uarts.GetNTotalMotor() + 1];
-			pv = pr = 0x7FFF;
-		}
+	void SetCommand(short cmd) { command = cmd; }
+	void SetMotorPos(short p, int i) {
+		data[i] = p;
 	}
-	short GetVacancy() {
-		return data[uarts.GetNTotalMotor()];
+	void SetMotorVel(short v, int i) {
+		data[uarts.GetNTotalMotor() + i] = v;
 	}
-	void SetVacancy(short v) {
-		short &pv = data[uarts.GetNTotalMotor()];
-		pv = pv < v ? pv : v;
+	//	for interpolate and force control
+	void SetTargetCountRead(short c) {
+		data[uarts.GetNTotalMotor()] = c;
 	}
-	short GetRemain() {
-		return data[uarts.GetNTotalMotor() + 1];
+	void SetTickMin(short t) {
+		data[uarts.GetNTotalMotor()+1] = t;
 	}
-	void SetRemain(short r) {
-		short &pr = data[uarts.GetNTotalMotor() + 1];
-		pr = pr < r ? pr : r;
+	void SetTickMax(short t) {
+		data[uarts.GetNTotalMotor()+2] = t;
 	}
-	void SetTick(short t) {
-		data[uarts.GetNTotalMotor() + 2] = t;
+	void SetNTargetRemain(short t){
+		data[uarts.GetNTotalMotor()+3] = t;		
 	}
-	void InitInterpolate() {
-		short &pv = data[uarts.GetNTotalMotor()];
-		short &pr = data[uarts.GetNTotalMotor() + 1];
-		pv = pr = 1000;
+	void SetNTargetVacancy(short t){
+		data[uarts.GetNTotalMotor()+4] = t;		
 	}
-	short& Force(int i) {
-		return data[uarts.GetNTotalMotor() + i];
+	//	sense
+	void SetForce(short f, int i) {
+		data[uarts.GetNTotalMotor() + i] = f;
 	}
 	void SetBoardInfo(int systemId, int nTarget, int nMotor, int nForce) {
 		data[0] = systemId;

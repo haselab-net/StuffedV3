@@ -1,6 +1,7 @@
 #include "decimal.h"
 #include "control.h"
 #include "mcc_generated_files/mcc.h"
+#include <assert.h>
 
 struct MotorState motorTarget, motorState;
 SDEC forceControlJK[NFORCE][NMOTOR];
@@ -209,45 +210,67 @@ void targetsWrite(){
 	}else{
 		targets.write = 0;
 	}
-	//printf("W%d t%d  ", targets.write, targets.tick);
 }
-void targetsAdd(SDEC* pos, short period){
-	int i;
-	targets.buf[targets.write].period = period;
-	for(i=0; i<NMOTOR; ++i){
-		targets.buf[targets.write].pos[i] = pos[i];
-	}
-	targetsWrite();
-}
-void targetsForceControlAdd(SDEC* pos, SDEC JK[NFORCE][NMOTOR] ,short period){
-	int i, j;
-	targets.buf[targets.write].period = period;
-	for(i=0; i<NMOTOR; ++i){
-		targets.buf[targets.write].pos[i] = pos[i];
-		for(j=0; j<NFORCE; ++j){
-			targets.buf[targets.write].JK[j][i] = JK[j][i];
+void targetsAddOrUpdate(SDEC* pos, short period, unsigned char count){
+	char diff;
+	unsigned char avail, cor;
+	if(traceLevel) printf("targetsAdd p:%d c:%d\r\n", period, (int)count);
+	asm volatile("di"); // Disable all interrupts 
+	avail = targetsReadAvail();
+	cor = targets.countOfRead;
+	asm volatile("ei"); // Enable all interrupt	
+	diff = count - cor;
+	/*	buf[0],[1] is currently used for interpolation. buf[2] will can be used in the next step.
+		So, we can update from buf[3] to buf[read + avail-1]. and add to buf[read + avail]	*/
+	if (diff == avail || (3 <= diff && diff < avail)){
+		int i;
+		int w = (targets.read + diff) % NTARGET;
+		targets.buf[w].period = period;
+		for(i=0; i<NMOTOR; ++i){
+			targets.buf[w].pos[i] = pos[i];
+		}
+		if(traceLevel) printf("Write@%d a:%d p:%d c:%d\r\n", w, targetsReadAvail(), period, (int)count);
+		if (w == targets.write){
+			assert(diff == avail);
+			targetsWrite();
 		}
 	}
-	targetsWrite();
 }
-int targetsWriteAvail(){
-	int len = targets.read - targets.write;
-	if (len < 0) len += NTARGET;
-	return len;
-}
-int targetsReadAvail(){
-	int len = targets.write - targets.read;
-	if (len <= 0) len += NTARGET;
-	return len;
+void targetsForceControlAddOrUpdate(SDEC* pos, SDEC JK[NFORCE][NMOTOR] ,short period, unsigned char count){
+	char diff;
+	unsigned char avail, cor;
+	asm volatile("di"); // Disable all interrupts 
+	avail = targetsReadAvail();
+	cor = targets.countOfRead;
+	asm volatile("ei"); // Enable all interrupt	
+	diff = count - cor;
+	/*	buf[0],[1] is currently used for interpolation. buf[2] will can be used in the next step.
+		So, we can update from buf[3] to buf[read + avail-1]. and add to buf[read + avail]	*/
+	if (3 <= diff && diff <= avail){
+		int i, j;
+		int w = (targets.read + diff) % NTARGET;
+		targets.buf[w].period = period;
+		for(i=0; i<NMOTOR; ++i){
+			targets.buf[w].pos[i] = pos[i];
+			for(j=0; j<NFORCE; ++j){
+				targets.buf[w].JK[j][i] = JK[j][i];
+			}
+		}
+		if (w == targets.write){
+			assert(diff == avail);
+			targetsWrite();
+		}
+	}
 }
 void targetsInit(){
 	int i, j;
-	targets.tick = 100;
+	targets.tick = 1;
 	targets.read = 0;
 	targets.write = 2;
+	targets.countOfRead = 0x100 - 2;
 	updateMotorState();
-	targets.buf[0].period = 100;
-	targets.buf[1].period = 100;
+	targets.buf[0].period = 1;
+	targets.buf[1].period = 1;
 	for(i=0; i<NMOTOR; ++i){
 		targets.buf[0].pos[i] = L2SDEC(motorState.pos[i]);
 		targets.buf[1].pos[i] = L2SDEC(motorState.pos[i]);
@@ -263,12 +286,13 @@ void targetsTickProceed(){
 	if (targets.tick >= targets.buf[(targets.read+1)%NTARGET].period){
 		if (targetsReadAvail() > 2){
 			targets.tick = 0;
+			targets.countOfRead ++;
 			if (targets.read < NTARGET-1){
 				targets.read ++;
 			}else{
 				targets.read = 0;
 			}
-			//printf("R%d t%d  ", targets.read, targets.tick);
+			if (traceLevel) printf("Read=%d", targets.read);
 		}else{
 			targets.tick = targets.buf[(targets.read+1)%NTARGET].period;
 		}

@@ -11,4 +11,6 @@
 #define DEBUG
 #endif
 
+extern int traceLevel;
+
 #endif

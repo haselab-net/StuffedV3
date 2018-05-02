@@ -25,34 +25,51 @@
 UdpCom udpCom;
 static const char* Tag = "UdpCom";
 
+static const int NHEADER = UdpPacket::HEADERLEN/2;
 int UdpCmdPacket::CommandLen() {
 	switch (command)
 	{
-	case CI_BOARD_INFO: return 3 * 2;								//	model nTarget nMotor nForce
-	case CI_DIRECT: return (3 + uarts.GetNTotalMotor() * 2) * 2;	//	vel pos
-	case CI_INTERPOLATE: return (3 + uarts.GetNTotalMotor() + 1) * 2;	//	pos period
-	case CI_FORCE_CONTROL: return (3 + uarts.GetNTotalMotor() + uarts.GetNTotalForce()*3 + 1) * 2;	//	pos period
-	case CI_PDPARAM: return (3 + uarts.GetNTotalMotor() * 2) * 2;	//  K B.
-	case CI_TORQUE_LIMIT: return (3 + uarts.GetNTotalMotor() * 2) * 2;		//  min max.
-	case CI_SENSOR: return (1 + uarts.GetNTotalMotor() + uarts.GetNTotalForce()) * 2;
-	case CIU_TEXT:	return (3 + 1 + 1) * 2 + data[1];		//	return text message: cmd, type, len, bytes
-	case CIU_SET_IPADDRESS:	return 3 * 2;					//  Set ip address to return the packet
-	case CIU_GET_IPADDRESS: return 3 * 2;					//  Get ip address to return the packet
+	case CI_BOARD_INFO:		//	command only
+		return NHEADER * 2;
+	case CI_DIRECT:			//	vel pos
+		return (NHEADER + uarts.GetNTotalMotor() * 2) * 2;
+	case CI_INTERPOLATE: 	//	pos period targetCount
+		return (NHEADER + uarts.GetNTotalMotor() + 2) * 2;
+	case CI_FORCE_CONTROL: 	//	pos JK period targetCount
+		return (NHEADER + uarts.GetNTotalMotor() + uarts.GetNTotalForce()*3 + 2) * 2;	
+	case CI_PDPARAM: 		//	K B
+		return (NHEADER + uarts.GetNTotalMotor() * 2) * 2;
+	case CI_TORQUE_LIMIT:	//  min max.
+		return (NHEADER + uarts.GetNTotalMotor() * 2) * 2;
+	case CI_SENSOR:			//	command only
+		 return NHEADER * 2;
+	case CIU_SET_IPADDRESS:	//  Set ip address to return the packet: command only
+		return NHEADER * 2;
+	case CIU_GET_IPADDRESS:	//  Get ip address to return the packet: command only
+		return NHEADER * 2;
 	}
 	return 0;
 }
-void UdpRetPacket::SetLength() {	//	length in short (per 2bytes)
-	switch (command)
-	{
-	case CI_BOARD_INFO: length = (3 + 4) * 2; break;							//	model nTarget nMotor nForce
-	case CI_DIRECT: length = (3 + uarts.GetNTotalMotor() * 2) * 2; break;		//	vel pos
-	case CI_INTERPOLATE: length = (3 + uarts.GetNTotalMotor() + 3) * 2; break;	//	pos vacancy avail tick
-	case CI_FORCE_CONTROL: length = (3 + uarts.GetNTotalMotor() + 3) * 2; break;	//	pos vacancy avail tick
-	case CI_SENSOR: length = (1 + uarts.GetNTotalMotor() + uarts.GetNTotalForce()) * 2; break;
-	case CIU_TEXT:	length = (3 + 1 + 1) * 2 + data[1]; break;	//	return text message: cmd, type, length, bytes
-	case CIU_GET_IPADDRESS: length = (3 + 16) * 2; break;		//  Get ip address to return the packet
-	default:
-		length = 3 * 2;											//	Ack
+void UdpRetPacket::SetLength() {
+	switch (command){
+	case CI_BOARD_INFO:		//	model nTarget nMotor nForce
+		length = (NHEADER + 4) * 2; break;
+	case CI_DIRECT:			//	vel pos
+		length = (NHEADER + uarts.GetNTotalMotor() * 2) * 2; break;
+	case CI_INTERPOLATE:	//	pos targetCountRead tickMin tickMax remain vacancy
+	case CI_FORCE_CONTROL: 
+		length = (NHEADER + uarts.GetNTotalMotor() + 5) * 2; break;
+	case CI_SENSOR: 		//	pos force
+		length = (NHEADER + uarts.GetNTotalMotor() + uarts.GetNTotalForce()) * 2; break;
+	case CIU_TEXT:			//	return text message: cmd, type, length, bytes
+		length = (NHEADER + 1 + 1) * 2 + data[1]; break;
+	case CIU_SET_IPADDRESS:	//  Set ip address to return the packet
+		length = NHEADER * 2; break;
+	case CIU_GET_IPADDRESS:	//  Get ip address to return the packet
+		length = (NHEADER + 16) * 2; break;
+	default:				//	error
+		ESP_LOGE("UdpRetPacket", "Undefined command %d set lentgh to 0", command);
+		length = 0;
 		break;
 	}
 }
@@ -108,16 +125,6 @@ void UdpCom::OnReceive(struct udp_pcb * upcb, struct pbuf * top, const ip_addr_t
 					recvs.Write();
 					xTaskNotifyGive(taskExeCmd);
 				}
-				else if (recv->command == CI_INTERPOLATE || recv->command == CI_FORCE_CONTROL) {
-					if (recv->count == commandCount + 1){
-						commandCount++;
-						recvs.Write();
-						xTaskNotifyGive(taskExeCmd);
-					}else if (commandCount - recv->count <= uarts.nTargetRemain -1){
-						recvs.Write();
-						xTaskNotifyGive(taskExeCmd);						
-					}
-				}
 				else if (recv->count == commandCount + 1) {		// check and update counter
 					commandCount++;
 					recvs.Write();
@@ -154,6 +161,7 @@ void UdpCom::ExecCommandLoop(){
 		while (recvs.ReadAvail()) {
 			UdpCmdPacket* recv = &recvs.Peek();
 			if (CI_BOARD_INFO < recv->command && recv->command < CI_NCOMMAND) {
+				//	send packet to uarts
 				uarts.WriteCmd(*recv);
 				PrepareRetPacket(recv->command);
 				if (uarts.HasRet(recv->command)){
@@ -188,12 +196,7 @@ void UdpCom::SendText(char* text, short errorlevel) {
 void UdpCom::PrepareRetPacket(int cmd) {
 	send.command = cmd;
 	send.count = commandCount;
-	send.SetLength();
 	send.ClearData();
-	if (cmd == CI_INTERPOLATE || cmd == CI_FORCE_CONTROL) {
-		send.InitInterpolate();
-	}
-
 }
 void UdpCom::SendRetPacket(ip_addr_t& returnIp) {
 	struct pbuf* pb = pbuf_alloc(PBUF_TRANSPORT, send.length, PBUF_RAM);
@@ -313,7 +316,7 @@ void UdpCom::ConnectWifi() {
 #if 0
 	strcpy((char*)wifi_config.sta.ssid, "hasefone");
 	strcpy((char*)wifi_config.sta.password, "hasevr@gmail.com");
-#elif 1
+#elif 0
 	strcpy((char*)wifi_config.sta.ssid, "HOME");
 	strcpy((char*)wifi_config.sta.password, "2human2human2");
 #else

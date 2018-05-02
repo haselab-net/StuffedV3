@@ -142,7 +142,7 @@ void Uarts::EnumerateBoard() {
 	for (int i = 0; i < NUART; ++i) {
 		uart[i]->EnumerateBoard();
 	}
-	nTargetMin = 0xFFFF;
+	nTargetMin = 0xFF;
 	nBoard = 0;
 	for (int i = 0; i < NUART; ++i) {
 		nBoard += uart[i]->boards.size();
@@ -181,11 +181,23 @@ Uarts::Uarts(){
 	nBoard = 0;
 	nTargetMin = 0;
 	seUartFinished = xSemaphoreCreateCounting(0xFFFF, 0);
+	mode = CM_DIRECT;
 }
 Uarts::~Uarts(){
 	vSemaphoreDelete(seUartFinished);
 }
 void Uarts::WriteCmd(UdpCmdPacket& packet) {
+	//	Update state based on packet
+	if (packet.command == CI_INTERPOLATE || packet.command == CI_FORCE_CONTROL){
+		targetCountWrite = (unsigned char)packet.GetTargetCount();
+		if (mode == CM_DIRECT){
+			mode = CM_INTERPOLATE;
+			assert(packet.GetTargetCount() == 0);
+		} 
+	}else if(packet.command == CI_DIRECT){
+		mode = CM_DIRECT;
+	}
+	//	Write command to borads via uart;
 	for (int i = 0; i < NUART; ++i) {
 		for (int j = 0; j < uart[i]->boards.size(); ++j) {
 			uart[i]->boards[j]->WriteCmd(packet);
@@ -202,14 +214,46 @@ void Uarts::WriteCmd(UdpCmdPacket& packet) {
 	}
 }
 void Uarts::ReadRet(UdpRetPacket& packet){
-	for (int i = 0; i < NUART; ++i) {
-		for (int j = 0; j < uart[i]->boards.size(); ++j) {
-			uart[i]->boards[j]->ReadRet(packet);
-		}
-		xTaskNotifyGive(uart[i]->taskRecv);	//	recv next
-	}
 	if (packet.command == CI_INTERPOLATE || packet.command == CI_FORCE_CONTROL) {
-		nTargetVacancy = packet.GetVacancy();
-		nTargetRemain = packet.GetRemain();
+		int diffMin = 0x100;
+		int diffMax = -0x100;
+		unsigned short tickMin = 0;
+		unsigned short tickMax = 0xFFFF;
+		int countOfRead;
+		for (int i = 0; i < NUART; ++i) {
+			for (int j = 0; j < uart[i]->boards.size(); ++j) {
+				uart[i]->boards[j]->ReadRet(packet);
+				countOfRead = (int)uart[i]->boards[j]->GetTargetCountOfRead();
+				int diff = ((int)targetCountWrite - (int)uart[i]->boards[j]->GetTargetCountOfRead() + 0x100) & 0xFF;
+				if (diff < diffMin) diffMin = diff;
+				if (diff > diffMax) diffMax = diff;
+				unsigned short tick = uart[i]->boards[j]->GetTick();
+				if (tick < tickMin) tickMin = tick;
+				if (tick > tickMax) tickMax = tick;
+			}
+			xTaskNotifyGive(uart[i]->taskRecv);	//	recv next
+		}		
+		targetCountReadMax = targetCountWrite - diffMin;
+		nTargetVacancy = nTargetMin - diffMax;
+		nTargetRemain = diffMin;
+		if (tickMax - tickMin > 0x7FFF){
+			unsigned short temp = tickMin;
+			tickMin = tickMax;
+			tickMax = temp;
+		}
+		ESP_LOGI("TGT", "remain:%d vac:%d cor%d cow%d",
+			 (int)nTargetRemain, (int)nTargetVacancy, countOfRead, targetCountWrite);
+		packet.SetTargetCountRead(targetCountReadMax);
+		packet.SetTickMin(tickMin);
+		packet.SetTickMax(tickMax);
+		packet.SetNTargetRemain(nTargetRemain);
+		packet.SetNTargetVacancy(nTargetVacancy);
+	}else{
+		for (int i = 0; i < NUART; ++i) {
+			for (int j = 0; j < uart[i]->boards.size(); ++j) {
+				uart[i]->boards[j]->ReadRet(packet);
+			}
+			xTaskNotifyGive(uart[i]->taskRecv);	//	recv next
+		}		
 	}
 }

@@ -53,11 +53,13 @@ union CommandPacket##BOARD {										\
 			struct { /*	 CI_INTERPOLATE */							\
 				SDEC pos[BOARD##_NMOTOR];							\
 				short period;		/*	period to interpolate */	\
+				unsigned char count;								\
 			} __attribute__((__packed__)) interpolate;				\
 			struct { /*	 CI_FORCE_CONTROL */						\
 				SDEC pos[BOARD##_NMOTOR];							\
 				SDEC JK[BOARD##_NFORCE][BOARD##_NMOTOR];			\
 				short period;		/*	period to interpolate */	\
+				unsigned char count;								\
 			} __attribute__((__packed__)) forceControl;				\
 			struct {				 /*	 CI_PDPARAM */				\
 				SDEC k[BOARD##_NMOTOR];								\
@@ -126,9 +128,8 @@ union ReturnPacket##BOARD {										\
 			}__attribute__((__packed__)) direct;				\
 			struct {		 /*	 CI_INTERPOLATE */				\
 				SDEC pos[BOARD##_NMOTOR];						\
-				unsigned char vacancy;							\
-				unsigned char remain;							\
 				unsigned short tick;							\
+				unsigned char countOfRead;						\
 			}__attribute__((__packed__)) interpolate;			\
 		};														\
 	};															\

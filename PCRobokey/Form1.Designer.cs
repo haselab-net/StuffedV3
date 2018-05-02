@@ -214,7 +214,7 @@
             // 
             // runTimer
             // 
-            this.runTimer.Interval = 5;
+            this.runTimer.Interval = 500;
             this.runTimer.Tick += new System.EventHandler(this.runTimer_Tick);
             // 
             // panelTop
@@ -263,6 +263,11 @@
             // udTick
             // 
             this.udTick.Location = new System.Drawing.Point(241, 9);
+            this.udTick.Maximum = new decimal(new int[] {
+            1000,
+            0,
+            0,
+            0});
             this.udTick.Minimum = new decimal(new int[] {
             1,
             0,
@@ -272,7 +277,7 @@
             this.udTick.Size = new System.Drawing.Size(73, 25);
             this.udTick.TabIndex = 77;
             this.udTick.Value = new decimal(new int[] {
-            5,
+            500,
             0,
             0,
             0});
