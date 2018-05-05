@@ -217,9 +217,9 @@ void Uarts::ReadRet(UdpRetPacket& packet){
 	if (packet.command == CI_INTERPOLATE || packet.command == CI_FORCE_CONTROL) {
 		int diffMin = 0x100;
 		int diffMax = -0x100;
-		unsigned short tickMin = 0;
-		unsigned short tickMax = 0xFFFF;
-		int countOfRead;
+		unsigned short tickMin = 0xFFFF;
+		unsigned short tickMax = 0;
+		int countOfRead = 0;
 		for (int i = 0; i < NUART; ++i) {
 			for (int j = 0; j < uart[i]->boards.size(); ++j) {
 				uart[i]->boards[j]->ReadRet(packet);

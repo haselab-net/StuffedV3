@@ -212,53 +212,51 @@ void targetsWrite(){
 	}
 }
 void targetsAddOrUpdate(SDEC* pos, short period, unsigned char count){
-	char diff;
-	unsigned char avail, cor;
-	if(traceLevel) printf("targetsAdd p:%d c:%d\r\n", period, (int)count);
-	asm volatile("di"); // Disable all interrupts 
-	avail = targetsReadAvail();
-	cor = targets.countOfRead;
-	asm volatile("ei"); // Enable all interrupt	
-	diff = count - cor;
-	/*	buf[0],[1] is currently used for interpolation. buf[2] will can be used in the next step.
-		So, we can update from buf[3] to buf[read + avail-1]. and add to buf[read + avail]	*/
-	if (diff == avail || (3 <= diff && diff < avail)){
-		int i;
-		int w = (targets.read + diff) % NTARGET;
-		targets.buf[w].period = period;
-		for(i=0; i<NMOTOR; ++i){
-			targets.buf[w].pos[i] = pos[i];
-		}
-		if(traceLevel) printf("Write@%d a:%d p:%d c:%d\r\n", w, targetsReadAvail(), period, (int)count);
-		if (w == targets.write){
-			assert(diff == avail);
-			targetsWrite();
-		}
-	}
+	targetsForceControlAddOrUpdate(pos, NULL, period, count);
 }
 void targetsForceControlAddOrUpdate(SDEC* pos, SDEC JK[NFORCE][NMOTOR] ,short period, unsigned char count){
-	char diff;
+	char delta;
 	unsigned char avail, cor;
+	LOGI("targetsAdd p:%d c:%d\r\n", period, (int)count);
+	if (period == 0) return;	//	for vacancy check
+	
+	//	check targets delta
 	asm volatile("di"); // Disable all interrupts 
 	avail = targetsReadAvail();
 	cor = targets.countOfRead;
 	asm volatile("ei"); // Enable all interrupt	
-	diff = count - cor;
+	delta = count - cor;
+	if (delta > avail){
+		//	target count jumped. may be communication error.
+		printf("CJ");
+		targets.countOfRead = count - avail;
+	}
+	
 	/*	buf[0],[1] is currently used for interpolation. buf[2] will can be used in the next step.
 		So, we can update from buf[3] to buf[read + avail-1]. and add to buf[read + avail]	*/
-	if (3 <= diff && diff <= avail){
+	if (delta == avail || (3 <= delta && delta < avail)){
 		int i, j;
-		int w = (targets.read + diff) % NTARGET;
+		int w = (targets.read + delta) % NTARGET;
 		targets.buf[w].period = period;
 		for(i=0; i<NMOTOR; ++i){
 			targets.buf[w].pos[i] = pos[i];
-			for(j=0; j<NFORCE; ++j){
-				targets.buf[w].JK[j][i] = JK[j][i];
+		}
+		if (JK){
+			for(i=0; i<NMOTOR; ++i){
+				for(j=0; j<NFORCE; ++j){
+					targets.buf[w].JK[j][i] = JK[j][i];
+				}
 			}
 		}
+		LOGI("Write@%d a:%d p:%d c:%d\r\n", w, targetsReadAvail(), period, (int)count);
 		if (w == targets.write){
-			assert(diff == avail);
-			targetsWrite();
+			assert(delta == avail);
+			if (targetsWriteAvail()){
+				targetsWrite();
+			}else{
+				LOGI("Error: overflow of targets readCount shifted\r\n");
+				targets.countOfRead ++;		//
+			}
 		}
 	}
 }
@@ -292,7 +290,7 @@ void targetsTickProceed(){
 			}else{
 				targets.read = 0;
 			}
-			if (traceLevel) printf("Read=%d", targets.read);
+			LOGI("Read=%d", targets.read);
 		}else{
 			targets.tick = targets.buf[(targets.read+1)%NTARGET].period;
 		}

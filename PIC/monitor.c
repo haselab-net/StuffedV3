@@ -5,8 +5,6 @@
 #include "command.h"
 #include <stdio.h>
 
-int traceLevel = 1;
-
 void outTest(int dir){
     static int pos;
 	TRISAbits.TRISA0 = 0;
@@ -131,14 +129,14 @@ void monitor(){
 			printf("Core timer cur:%8x cmp:%8x remain:%5d\r\n", 
 					_CP0_GET_COUNT(), _CP0_GET_COMPARE(), coretimerRemainTime);
 			break;
-		case 't':
-			traceLevel ++;
-			printf("trace level = %d", traceLevel);
+		case 'l':
+			logLevel ++;
+			printf("log level = %d", logLevel);
 			ch = 0;
 			break;
-		case 'T':
-			traceLevel --;
-			printf("Trace level = %d", traceLevel);
+		case 'L':
+			logLevel --;
+			printf("Log level = %d", logLevel);
 			ch = 0;
 			break;
 		case 's':

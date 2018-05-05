@@ -29,7 +29,7 @@ namespace Robokey
         {
             instance = this;
             InitializeComponent();
-            udpComm = new UdpComm(this, runTimer.Interval);
+            udpComm = new UdpComm(this);
             udpComm.OnRobotFound += OnRobotFound;
             udpComm.OnUpdateRobotInfo += OnUpdateRobotInfo;
             udpComm.OnUpdateRobotState += OnUpdateRobotState;
@@ -494,6 +494,7 @@ namespace Robokey
                 if (udpComm.nInterpolateVacancy < 2)
                 {
                     diff = 0;
+                    udpComm.SendPoseInterpolate(Interpolate(curTime), 0);
                 }
                 for (int i = 0; i < diff; ++i)
                 {
@@ -504,7 +505,7 @@ namespace Robokey
                         if (len > 3)
                         {
                             udpComm.interpolateTargetCountOfWrite--;
-                            udpComm.SendPoseInterpolate(Interpolate(curTime));
+                            udpComm.SendPoseInterpolate(Interpolate(curTime), (ushort)runTimer.Interval);
                         }
                     }
 #endif
@@ -512,7 +513,7 @@ namespace Robokey
                     UpdateCurTime(curTime, true);
                     if (runTimer.Enabled)
                     {
-                        udpComm.SendPoseInterpolate(Interpolate(curTime));
+                        udpComm.SendPoseInterpolate(Interpolate(curTime), (ushort)runTimer.Interval);
                     }
                 }
 #else

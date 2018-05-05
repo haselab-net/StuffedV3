@@ -14,10 +14,7 @@ static volatile bool bRunExecCommand=false;
 //	command packet length for all boards
 unsigned char cmdPacketLens[MAXBOARDID+1][CI_NCOMMAND];
 
-
 void ecNop(){
-}
-void ecBoardInfo(){
 }
 void ecSetCmdLen(){
 	int c;
@@ -32,10 +29,6 @@ void ecDirect(){
         motorTarget.pos[i] = S2LDEC(command.direct.pos[i]);
         motorTarget.vel[i] = S2LDEC(command.direct.vel[i]);
     }
-}
-void ecInterpolate(){
-}
-void ecForceControl(){
 }
 void ecPdParam(){
     int i;
@@ -55,6 +48,8 @@ void ecTorqueLimit(){
 ReturnPacket retPacket;
 int retCur;
 int retLen;
+void rcNop(){
+}
 void rcBoardInfo(){
 	retPacket.boardInfo.modelNumber = MODEL_NUMBER;
 	retPacket.boardInfo.nTarget = NTARGET;
@@ -77,41 +72,35 @@ void rcDirect(){
         retPacket.direct.vel[i] = L2SDEC(motorState.vel[i]);
     }
 }
-void rcInterpolate(){
-    int i;
-	
-    controlSetMode(CM_INTERPOLATE);
-	targetsAddOrUpdate(command.interpolate.pos, command.interpolate.period, command.interpolate.count);
-
+inline void returnInterpolateParam(){
+    int i;	
     for(i=0; i<NMOTOR; ++i){
         retPacket.interpolate.pos[i] = L2SDEC(motorState.pos[i]);
     }
     retPacket.interpolate.countOfRead = targets.countOfRead;
 	retPacket.interpolate.tick = targets.tick;
+}
+void rcInterpolate(){
+    controlSetMode(CM_INTERPOLATE);
+	targetsAddOrUpdate(command.interpolate.pos, command.interpolate.period, command.interpolate.count);
+	returnInterpolateParam();
 }
 void rcForceControl(){
     int i;
     controlSetMode(CM_FORCE_CONTROL);
 	targetsForceControlAddOrUpdate(command.forceControl.pos , command.forceControl.JK, command.forceControl.period, command.forceControl.count);
-
-    for(i=0; i<NMOTOR; ++i){
-        retPacket.interpolate.pos[i] = L2SDEC(motorState.pos[i]);
-    }
-    retPacket.interpolate.countOfRead = targets.countOfRead;
-	retPacket.interpolate.tick = targets.tick;
-}
-void rcNop(){
+	returnInterpolateParam();
 }
 
 typedef void ExecCommand();
 ExecCommand* execCommand[CI_NCOMMAND] = {
-    ecNop,
-	ecBoardInfo,
+	ecNop,
+	ecNop,		//	board info
 	ecSetCmdLen,
 	ecNop,
 	ecDirect,
-    ecInterpolate,
-	ecForceControl,
+    ecNop,		//	interpolate
+	ecNop,		//	force control
     ecPdParam,
     ecTorqueLimit
 };
@@ -156,7 +145,7 @@ void __attribute__ ((vector(_TIMER_1_VECTOR), interrupt(IPL3AUTO))) TMR1_ISR()
 {
 	if (bRunReturnCommand){	//	call from recv
 		bRunReturnCommand = false;
-		if(traceLevel) printf("RC%d len%d ", retPacket.commandId, retLen);
+		LOGI("RC%d len%d ", retPacket.commandId, retLen);
 		returnCommand[retPacket.commandId]();
 		timeRetCmd = TMR1;
 		IFS0bits.T1IF = false;
@@ -209,7 +198,6 @@ void __attribute__ ((vector(_UART1_RX_VECTOR), interrupt(IPL4AUTO))) _UART1_RX_H
 				bRead = true;
 				command.header = head.header;
 				retLen = retPacketLen[command.commandId];
-				//if (traceLevel) printf("R%d len%d\r\n", command.commandId, retLen);
 				if (retLen) {	//	start to return.
 					//	Prepare to return
 					retPacket.header = command.header;
@@ -246,7 +234,7 @@ bool uartExecCommand(){
 	if (bRunExecCommand){
 		bRunExecCommand = false;
         execCommand[command.commandId]();
-		if (traceLevel) printf("H%x Ex%d\r\n", (int)command.header, (int)command.commandId);
+		LOGI("H%x Ex%d\r\n", (int)command.header, (int)command.commandId);
 		return true;
 	}else{
 		return false;

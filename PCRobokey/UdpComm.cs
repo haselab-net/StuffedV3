@@ -76,9 +76,8 @@ namespace Robokey
         public PoseData velocity = null;                    //  current velocities of motors; ReadVelocity
         public short [] force = null;                       //  force sensor's values
         public int nInterpolateTotal=0;                     //  capacity of interpolation targets.
-        public int interpolatePeriod =0;                    //  period for interpolation; send to robot.
-        public byte interpolateTargetCountOfWrite = 0;       //  count of interpolation at write cursor
-        public byte interpolateTargetCountOfRead = 0;        //  count of interpolation at read cursor
+        public byte interpolateTargetCountOfWrite = 0;      //  count of interpolation at write cursor
+        public byte interpolateTargetCountOfRead = 0;       //  count of interpolation at read cursor
         public int interpolateTickMin = 0;                  //  tick of interpolation
         public int interpolateTickMax = 0;                  //  tick of interpolation
         public int nInterpolateRemain = 0;                  //  number of data in target buffer 
@@ -142,10 +141,9 @@ namespace Robokey
             }
         } 
         CommandQueue sendQueue = new CommandQueue();
-        public UdpComm(Control o, int ip)
+        public UdpComm(Control o)
         {
             owner = o;
-            interpolatePeriod = ip;
         }
         public void SetAddress(String adr)
         {
@@ -430,7 +428,7 @@ namespace Robokey
             PutCommand(packet, p);
             interpolateTargetCountOfWrite = 0;
         }
-        public void SendPoseInterpolate(PoseData pose)
+        public void SendPoseInterpolate(PoseData pose, ushort period)
         {
             if (pose == null) return;
             byte[] packet = new byte[1000];
@@ -441,10 +439,10 @@ namespace Robokey
                 int v = pose == null ? 0 : pose.values[i];
                 WriteShort(v, ref p, packet);
             }
-            WriteShort(interpolatePeriod, ref p, packet);
+            WriteShort(period, ref p, packet);
             WriteShort(interpolateTargetCountOfWrite, ref p, packet);
             PutCommand(packet, p);
-            interpolateTargetCountOfWrite++;
+            if (period != 0) interpolateTargetCountOfWrite++;
         }
         public void SendPdParam(int nMotor, int[] k, int[] b)
         {
