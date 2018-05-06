@@ -482,41 +482,54 @@ namespace Robokey
                 System.Diagnostics.Debug.Write(" vac=");
                 System.Diagnostics.Debug.Write(udpComm.nInterpolateVacancy);
                 System.Diagnostics.Debug.WriteLine(".");
-                int diff = NINTERPOLATEFILL - udpComm.nInterpolateRemain;
+                int remain = (int)(byte)((int)udpComm.interpolateTargetCountOfWrite - (int)udpComm.interpolateTargetCountOfRead);
+                int vacancy = udpComm.nInterpolateTotal - remain;
+                int diff = NINTERPOLATEFILL - remain;
                 if (diff < 1)
                 {
+                    if (diff != 0) {
+                        System.Diagnostics.Debug.WriteLine("Interpolation targets error diff = " + diff);
+                    }
+                    diff = 0;
                     zeroDiffCount++;
                     if (zeroDiffCount > 10)
                     {
                         diff = 1;
+                        zeroDiffCount = 0;
                     }
                 }
-                if (udpComm.nInterpolateVacancy < 2)
+                if (vacancy < 2)
                 {
                     diff = 0;
+                }
+                if (diff == 0)
+                {
                     udpComm.SendPoseInterpolate(Interpolate(curTime), 0);
                 }
-                for (int i = 0; i < diff; ++i)
+                else
                 {
-#if false           //  test for update
-                    if (runTimer.Enabled)
+                    for (int i = 0; i < diff; ++i)
                     {
-                        int len = (int)udpComm.interpolateTargetCountOfWrite - (int)udpComm.interpolateTargetCountOfRead;
-                        if (len > 3)
+#if false           //  test for update
+                        if (runTimer.Enabled)
                         {
-                            udpComm.interpolateTargetCountOfWrite--;
+                            int len = (int)udpComm.interpolateTargetCountOfWrite - (int)udpComm.interpolateTargetCountOfRead;
+                            if (len > 3)
+                            {
+                                udpComm.interpolateTargetCountOfWrite--;
+                                udpComm.SendPoseInterpolate(Interpolate(curTime), (ushort)runTimer.Interval);
+                            }
+                        }
+#endif
+                        curTime += tmRun.Interval * (int)udStep.Value;
+                        UpdateCurTime(curTime, true);
+                        if (runTimer.Enabled)
+                        {
                             udpComm.SendPoseInterpolate(Interpolate(curTime), (ushort)runTimer.Interval);
                         }
                     }
-#endif
-                    curTime += tmRun.Interval * (int)udStep.Value;
-                    UpdateCurTime(curTime, true);
-                    if (runTimer.Enabled)
-                    {
-                        udpComm.SendPoseInterpolate(Interpolate(curTime), (ushort)runTimer.Interval);
-                    }
                 }
-#else
+#else   //  use direct
                 UpdateCurTime(curTime += tmRun.Interval * (int)udStep.Value);
                 udpComm.SendPoseDirect(Interpolate(curTime));
 #endif
