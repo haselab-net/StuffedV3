@@ -16,7 +16,7 @@ extern enum CommandId commandId;
 
 enum B1M_PARAM{
 	B1M_MODEL_NUMBER = 1,
-	B1M_NTARGET = 8,
+	B1M_NTARGET = 12,
     B1M_NMOTOR = 4,
     B1M_NFORCE = 0,
 };

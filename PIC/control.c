@@ -211,13 +211,15 @@ void targetsWrite(){
 		targets.write = 0;
 	}
 }
+//	Update or add interpolate target
 void targetsAddOrUpdate(SDEC* pos, short period, unsigned char count){
 	targetsForceControlAddOrUpdate(pos, NULL, period, count);
 }
+//	Update or add interpolate target with force control
 void targetsForceControlAddOrUpdate(SDEC* pos, SDEC JK[NFORCE][NMOTOR] ,short period, unsigned char count){
 	char delta;
 	unsigned char avail, cor;
-	LOGI("targetsAdd p:%d c:%d\r\n", period, (int)count);
+	LOGI("targetsAdd m0:%d pr:%d c:%d\r\n", (int)pos[0], (int)period, (int)count);
 	if (period == 0) return;	//	for vacancy check
 	
 	//	check targets delta
@@ -228,12 +230,12 @@ void targetsForceControlAddOrUpdate(SDEC* pos, SDEC JK[NFORCE][NMOTOR] ,short pe
 	delta = count - cor;
 	if (delta > avail){
 		//	target count jumped. may be communication error.
-		printf("CJ");
-		targets.countOfRead = count - avail;
+		LOGE("CJ\r\n");
+		targets.countOfRead = count - (avail-1);
 	}
 	
-	/*	buf[0],[1] is currently used for interpolation. buf[2] will can be used in the next step.
-		So, we can update from buf[3] to buf[read + avail-1]. and add to buf[read + avail]	*/
+	/*	buf[0],[1] is currently used for interpolation. buf[2] will be used in the next step.
+		So, we can update from buf[3] to buf[read + avail-1]. Also we can add to buf[read + avail]	*/
 	if (delta == avail || (3 <= delta && delta < avail)){
 		int i, j;
 		int w = (targets.read + delta) % NTARGET;
@@ -248,15 +250,18 @@ void targetsForceControlAddOrUpdate(SDEC* pos, SDEC JK[NFORCE][NMOTOR] ,short pe
 				}
 			}
 		}
-		LOGI("Write@%d a:%d p:%d c:%d\r\n", w, targetsReadAvail(), period, (int)count);
+		LOGI("Write@%d a:%d p:%d c:%d", w, targetsReadAvail(), period, (int)count);
 		if (w == targets.write){
+			LOGI(" Add.\r\n");
 			assert(delta == avail);
 			if (targetsWriteAvail()){
 				targetsWrite();
 			}else{
-				LOGI("Error: overflow of targets readCount shifted\r\n");
+				LOGE("Error: overflow of targets readCount shifted\r\n");
 				targets.countOfRead ++;		//
 			}
+		}else{
+			LOGI(" Update.\r\n");		
 		}
 	}
 }
@@ -380,11 +385,16 @@ void controlInit(){
 #endif
 }
 void controlSetMode(enum ControlMode m){
+	
+	asm volatile("di"); // Disable all interrupts 
 	if (controlMode != m){
 		controlMode = m;
+		asm volatile("ei"); // Enable all interrupts 
 		if (controlMode == CM_INTERPOLATE || controlMode == CM_FORCE_CONTROL){
 			targetsInit();
 		}
+	}else{
+		asm volatile("ei"); // Enable all interrupts 
 	}
 }
 

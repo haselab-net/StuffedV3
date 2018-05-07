@@ -460,7 +460,7 @@ namespace Robokey
             Application.Idle += new EventHandler(AppIdle);
         }
 
-        const int NINTERPOLATEFILL = 4; //  At least two must in buffer for interpolation.
+        const int NINTERPOLATEFILL = 6; //  At least two must in buffer for interpolation.
 
         int zeroDiffCount = 0;
         private void runTimer_Tick(object sender, EventArgs e)
@@ -469,9 +469,14 @@ namespace Robokey
             if (ckRun.Checked)
             {
 #if true    //  user interpolate or not
+                int remain = (int)(byte)((int)udpComm.interpolateTargetCountOfWrite - (int)udpComm.interpolateTargetCountOfRead);
+                int vacancy = udpComm.nInterpolateTotal - remain;
+                int diff = NINTERPOLATEFILL - remain;
                 System.Diagnostics.Debug.Write("RunTimer: Remain=");
+                System.Diagnostics.Debug.Write(remain);
+                System.Diagnostics.Debug.Write("(");
                 System.Diagnostics.Debug.Write(udpComm.nInterpolateRemain);
-                System.Diagnostics.Debug.Write(" Cw=");
+                System.Diagnostics.Debug.Write(") Cw=");
                 System.Diagnostics.Debug.Write(udpComm.interpolateTargetCountOfWrite);
                 System.Diagnostics.Debug.Write(" Cr=");
                 System.Diagnostics.Debug.Write(udpComm.interpolateTargetCountOfRead);
@@ -480,22 +485,17 @@ namespace Robokey
                 System.Diagnostics.Debug.Write(" tMax=");
                 System.Diagnostics.Debug.Write(udpComm.interpolateTickMax);
                 System.Diagnostics.Debug.Write(" vac=");
+                System.Diagnostics.Debug.Write(vacancy);
+                System.Diagnostics.Debug.Write("(");
                 System.Diagnostics.Debug.Write(udpComm.nInterpolateVacancy);
-                System.Diagnostics.Debug.WriteLine(".");
-                int remain = (int)(byte)((int)udpComm.interpolateTargetCountOfWrite - (int)udpComm.interpolateTargetCountOfRead);
-                int vacancy = udpComm.nInterpolateTotal - remain;
-                int diff = NINTERPOLATEFILL - remain;
+                System.Diagnostics.Debug.Write(") diff=");
+                System.Diagnostics.Debug.Write(diff);
+
                 if (diff < 1)
                 {
                     if (diff != 0) {
                         System.Diagnostics.Debug.WriteLine("Interpolation targets error diff = " + diff);
-                    }
-                    diff = 0;
-                    zeroDiffCount++;
-                    if (zeroDiffCount > 10)
-                    {
-                        diff = 1;
-                        zeroDiffCount = 0;
+                        diff = 0;
                     }
                 }
                 if (vacancy < 2)
@@ -526,6 +526,10 @@ namespace Robokey
                         if (runTimer.Enabled)
                         {
                             udpComm.SendPoseInterpolate(Interpolate(curTime), (ushort)runTimer.Interval);
+                            System.Diagnostics.Debug.Write(" pr:");
+                            System.Diagnostics.Debug.Write((ushort)runTimer.Interval);
+                            System.Diagnostics.Debug.Write(" tg:");
+                            System.Diagnostics.Debug.Write(Interpolate(curTime).values[0]);
                         }
                     }
                 }
@@ -534,6 +538,7 @@ namespace Robokey
                 udpComm.SendPoseDirect(Interpolate(curTime));
 #endif
             }
+            System.Diagnostics.Debug.WriteLine(".");
             if (ckSense.Checked)
             {
                 udpComm.SendSensor();

@@ -30,6 +30,14 @@ void ecDirect(){
         motorTarget.vel[i] = S2LDEC(command.direct.vel[i]);
     }
 }
+void ecInterpolate(){
+    controlSetMode(CM_INTERPOLATE);
+	targetsAddOrUpdate(command.interpolate.pos, command.interpolate.period, command.interpolate.count);
+}
+void ecForceControl(){
+    controlSetMode(CM_FORCE_CONTROL);
+	targetsForceControlAddOrUpdate(command.forceControl.pos , command.forceControl.JK, command.forceControl.period, command.forceControl.count);
+}
 void ecPdParam(){
     int i;
     for(i=0; i<NMOTOR; ++i){
@@ -82,13 +90,11 @@ inline void returnInterpolateParam(){
 }
 void rcInterpolate(){
     controlSetMode(CM_INTERPOLATE);
-	targetsAddOrUpdate(command.interpolate.pos, command.interpolate.period, command.interpolate.count);
 	returnInterpolateParam();
 }
 void rcForceControl(){
     int i;
     controlSetMode(CM_FORCE_CONTROL);
-	targetsForceControlAddOrUpdate(command.forceControl.pos , command.forceControl.JK, command.forceControl.period, command.forceControl.count);
 	returnInterpolateParam();
 }
 
@@ -99,8 +105,8 @@ ExecCommand* execCommand[CI_NCOMMAND] = {
 	ecSetCmdLen,
 	ecNop,
 	ecDirect,
-    ecNop,		//	interpolate
-	ecNop,		//	force control
+    ecInterpolate,	//	interpolate
+	ecForceControl,	//	force control
     ecPdParam,
     ecTorqueLimit
 };
@@ -111,7 +117,7 @@ ExecCommand* returnCommand[CI_NCOMMAND] = {
 	rcSensor,
     rcDirect,
     rcInterpolate,
-    rcForceControl,
+    rcInterpolate,
 	rcNop,	//	pdParam
     rcNop,	//	torqueLimit
 };

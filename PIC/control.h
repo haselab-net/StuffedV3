@@ -38,10 +38,10 @@ struct Target{
 };
 struct Targets{
 	unsigned short tick;		//	current tick count
-	unsigned char countOfRead;	//	couner value of buf[read]
+	volatile unsigned char countOfRead;	//	couner value of buf[read]
 	volatile char read;         //	interpolation works between "pos[read]" and "pos[read+1]".
 	volatile char write;		//	cursor to add new data. pos[write] = newdata.
-	struct Target buf[NTARGET];
+	volatile struct Target buf[NTARGET];
 };
 extern struct Targets targets;
 
