@@ -118,9 +118,12 @@ public:
 	UdpRetPacket send;
 	TaskHandle_t taskExeCmd; 
 
+#if 0 
 	void ConnectWifi();
 	void OnWifi(system_event_t* event);
+#endif
 	void Init();
+	void Start();
 	void OnReceive(struct udp_pcb * upcb, struct pbuf * p, const ip_addr_t* addr, u16_t port);
 	void ExecCommandLoop();
 	void PrepareRetPacket(int cmd);

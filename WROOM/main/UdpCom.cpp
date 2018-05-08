@@ -15,7 +15,6 @@
 #include "lwip/udp.h"
 #include "esp_system.h"
 #include "esp_wifi.h"
-#include "esp_log.h"
 #include "nvs_flash.h"
 
 #include <algorithm>
@@ -29,8 +28,11 @@ static const int NHEADER = UdpPacket::HEADERLEN/2;
 int UdpCmdPacket::CommandLen() {
 	switch (command)
 	{
-	case CI_BOARD_INFO:		//	command only
+	case CI_BOARD_INFO:		//	
 		return NHEADER * 2;
+	//	case CI_SET_CMDLEN is only for uart
+	case CI_SENSOR:			//	
+		 return NHEADER * 2;
 	case CI_DIRECT:			//	vel pos
 		return (NHEADER + uarts.GetNTotalMotor() * 2) * 2;
 	case CI_INTERPOLATE: 	//	pos period targetCount
@@ -41,8 +43,6 @@ int UdpCmdPacket::CommandLen() {
 		return (NHEADER + uarts.GetNTotalMotor() * 2) * 2;
 	case CI_TORQUE_LIMIT:	//  min max.
 		return (NHEADER + uarts.GetNTotalMotor() * 2) * 2;
-	case CI_SENSOR:			//	command only
-		 return NHEADER * 2;
 	case CIU_SET_IPADDRESS:	//  Set ip address to return the packet: command only
 		return NHEADER * 2;
 	case CIU_GET_IPADDRESS:	//  Get ip address to return the packet: command only
@@ -54,13 +54,17 @@ void UdpRetPacket::SetLength() {
 	switch (command){
 	case CI_BOARD_INFO:		//	model nTarget nMotor nForce
 		length = (NHEADER + 4) * 2; break;
+	//	case CI_SET_CMDLEN is only for uart
+	case CI_SENSOR:
+		length = (NHEADER + uarts.GetNTotalMotor() + uarts.GetNTotalForce()) * 2; break;
 	case CI_DIRECT:			//	vel pos
 		length = (NHEADER + uarts.GetNTotalMotor() * 2) * 2; break;
 	case CI_INTERPOLATE:	//	pos targetCountRead tickMin tickMax remain vacancy
 	case CI_FORCE_CONTROL: 
 		length = (NHEADER + uarts.GetNTotalMotor() + 5) * 2; break;
-	case CI_SENSOR: 		//	pos force
-		length = (NHEADER + uarts.GetNTotalMotor() + uarts.GetNTotalForce()) * 2; break;
+	case CI_PDPARAM:
+	case CI_TORQUE_LIMIT:
+		length = NHEADER*2; break;
 	case CIU_TEXT:			//	return text message: cmd, type, length, bytes
 		length = (NHEADER + 1 + 1) * 2 + data[1]; break;
 	case CIU_SET_IPADDRESS:	//  Set ip address to return the packet
@@ -88,10 +92,16 @@ static void execCommand(void* udpCom){
 void UdpCom::Init() {
 	recvRest = 0;
 	commandCount = 0;
-	ConnectWifi();
+	//ConnectWifi();
     xTaskCreate(execCommand, "ExeCmd", 8*1024, &udpCom, tskIDLE_PRIORITY, &taskExeCmd);
 }
-
+void UdpCom::Start(){
+	udp_init();
+	if (udp) udp_remove(udp);
+	udp = udp_new();
+	udp_bind(udp, (ip_addr_t*)IP4_ADDR_ANY, port);
+	udp_recv(udp, onReceive, this);
+}
 void UdpCom::OnReceive(struct udp_pcb * upcb, struct pbuf * top, const ip_addr_t* addr, u16_t port) {
 	if (!recvs.WriteAvail()){
 		printf("Udp recv buffer full.\n");
@@ -253,6 +263,8 @@ void UdpCom::ExecUdpCommand(UdpCmdPacket& recv) {
 	}
 }
 
+
+#if 0
 static char* mac2Str(uint8_t* m){
 	static char buf[256];
 	sprintf(buf, "%02x%02x %02x%02x %02x%02x", MAC2STR(m));
@@ -331,3 +343,4 @@ void UdpCom::ConnectWifi() {
     ESP_LOGI(TAG, "connect to ap SSID:%s password:%s",
              wifi_config.sta.ssid, wifi_config.sta.password);
 }
+#endif

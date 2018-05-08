@@ -11,6 +11,8 @@
         "esp_int_wdt.h": "c",
         "uart.h": "c",
         "initializer_list": "cpp",
-        "utility": "cpp"
+        "utility": "cpp",
+        "event_groups.h": "c",
+        "esp_event_loop.h": "c"
     }
 }

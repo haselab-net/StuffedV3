@@ -4,6 +4,8 @@
             "name": "ESP32-Win",
             "includePath": [
                 "${workspaceRoot}",
+                "${workspaceRoot}/main",
+                "${workspaceRoot}/main/wifiMan",
                 "${workspaceRoot}/build/include",
                 "${workspaceRoot}/../PIC",
                 "${workspaceRoot}/../PCRobokey",
@@ -30,7 +32,8 @@
                 "C:/msys32/home/espressif/esp/esp-idf/components/tcpip_adapter/include",
                 "C:/msys32/home/espressif/esp/esp-idf/components/log/include",
                 "C:/msys32/home/espressif/esp/esp-idf/components/nvs_flash/include",
-                "C:/msys32/home/espressif/esp/esp-idf/components/newlib/platform_include"
+                "C:/msys32/home/espressif/esp/esp-idf/components/newlib/platform_include",
+                "C:/msys32/home/espressif/esp/esp-idf/components/mdns/include"
             ],
             "intelliSenseMode": "clang-x64",
             "browse": {
@@ -49,5 +52,5 @@
             "cppStandard": "c++17"
         }
     ],
-    "version": 3
+    "version": 4
 }
