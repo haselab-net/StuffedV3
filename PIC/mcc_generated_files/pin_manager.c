@@ -61,14 +61,23 @@ void PIN_MANAGER_Initialize(void)
      * Setting the Output Latch SFR(s)
      ***************************************************************************/
     LATA = 0x0000;
+#if defined BOARD1_MOTORDRIVER
     LATB = 0x4010;
     LATC = 0x0004;
-
+#elif defined BOARD2_COMBINATION
+    LATB = 0x4400;
+    LATC = 0x0000;
+#endif
     /****************************************************************************
      * Setting the GPIO Direction SFR(s)
      ***************************************************************************/
+#if defined BOARD1_MOTORDRIVER
     TRISA = 0x000B;
     TRISB = 0xF00F;
+#elif defined BOARD2_COMBINATION
+    TRISA = 0x000F;
+    TRISB = 0xB86F;
+#endif
     TRISC = 0x0003;
 
     /****************************************************************************
@@ -78,7 +87,7 @@ void PIN_MANAGER_Initialize(void)
     CNPDB = 0x0000;
     CNPDC = 0x0000;
     CNPUA = 0x0000;
-    CNPUB = 0x4000;
+    CNPUB = 0x0000;
     CNPUC = 0x0000;
 
     /****************************************************************************
@@ -91,8 +100,13 @@ void PIN_MANAGER_Initialize(void)
     /****************************************************************************
      * Setting the Analog/Digital Configuration SFR(s)
      ***************************************************************************/
+#if defined BOARD1_MOTORDRIVER
     ANSELA = 0x0007;
     ANSELB = 0x300C;
+#elif defined BOARD2_COMBINATION
+    ANSELA = 0x000F;
+    ANSELB = 0x300F;	//0xB00F for AD
+#endif
     ANSELC = 0x0003;
 
     /****************************************************************************
@@ -101,16 +115,28 @@ void PIN_MANAGER_Initialize(void)
     SYSTEM_RegUnlock(); // unlock PPS
     RPCONbits.IOLOCK = 0;
 
+#if defined BOARD1_MOTORDRIVER
     RPOR1bits.RP5R = 0x0001;   //RB4->UART2:U2TX;
     RPINR9bits.U2RXR = 0x0004;   //RA3->UART2:U2RX;
     RPOR1bits.RP6R = 0x0006;   //RA4->SCCP2:OCM2;
     RPOR1bits.RP8R = 0x0003;   //RB9->SPI2:SDO2;
     RPOR4bits.RP20R = 0x0007;   //RA9->SCCP3:OCM3;
+#elif defined BOARD2_COMBINATION
+    RPINR9bits.U2RXR = 0x0012;   //RB11->UART2:U2RX;
+    RPOR4bits.RP17R = 0x0001;   //RB10->UART2:U2TX;
+    RPOR1bits.RP5R = 0x0007;   //RB4->SCCP3:OCM3;
+    RPOR1bits.RP6R = 0x0007;   //RA4->SCCP3:OCM3;
+    RPOR4bits.RP19R = 0x0003;   //RC9->SPI2:SDO2;
+    RPOR4bits.RP20R = 0x0006;   //RA9->SCCP2:OCM2;
+    RPOR2bits.RP11R = 0x0007;   //RB7->SCCP3:OCM3;
+#endif
 
+#if defined BOARD1_MOTORDRIVER
     RPCONbits.IOLOCK = 1; // lock   PPS
-	
+#elif defined BOARD2_COMBINATION
+	//	BOARD2 need to change PPS to change PWM out pin.
+#else
+#error
+#endif	
     SYSTEM_RegLock(); 
-    
-
 }
-

@@ -2,8 +2,10 @@
 #include "command.h"
 #include "control.h"
 #include "mcc_generated_files/uart1.h"
+#include "uart.h"
+#include "boardType.h"
 
-unsigned char boardId = 2;
+unsigned char boardId = BOARD_ID;
 
 CommandPacket command;
 int cmdCur;
@@ -133,8 +135,8 @@ void commandInit(){
 	/*	10 = Interrupt flag bit is asserted while receive buffer is 3/4 or more full (i.e., has 6 or more data characters)
 		01 = Interrupt flag bit is asserted while receive buffer is 1/2 or more full (i.e., has 4 or more data characters)
 		00 = Interrupt flag bit is asserted while receive buffer is not empty (i.e., has at least 1 data character)	*/
-	U1STAbits.URXISEL = 2;
-	IEC0bits.U1RXIE = 1;	// Enable uart1 receive interrupt.
+	UCSTAbits.URXISEL = 2;
+	IEC_UCRXIE = 1;	// Enable uart1 receive interrupt.
 
 	//	timer to start TX1 after receive command header
 		//	2M baud/10bit = 200kBps= 5us/byte. 3600/24M=150us
@@ -159,42 +161,41 @@ void __attribute__ ((vector(_TIMER_1_VECTOR), interrupt(IPL3AUTO))) TMR1_ISR()
 		//	stop timer interrupt
 		IEC0bits.T1IE = 0;
 		//	start TX
-		U1STAbits.UTXEN = 1;	//	enable TX
-		U1STAbits.UTXISEL = 2;	//	10 = Interrupt is generated and asserted while the transmit buffer is empty
-		IEC0bits.U1TXIE = 1;	//	enable interrupt
+		UCSTAbits.UTXEN = 1;	//	enable TX
+		UCSTAbits.UTXISEL = 2;	//	10 = Interrupt is generated and asserted while the transmit buffer is empty
+		IEC_UCTXIE = 1;	//	enable interrupt
 		timeTx = TMR1 + PR1;
 	}
 	IFS0CLR= 1 << _IFS0_T1IF_POSITION;
 }
 
 //  Handler for TX interrupt
-//	Note: "IPL2" below must fit to "IPC5bits.U1TXIP = 2" in interrupt_manager.c;
-void __attribute__ ((vector(_UART1_TX_VECTOR), interrupt(IPL2AUTO))) _UART1_TX_HANDLER(void){	
+//	Note: "IPL2" below must fit to "IPC_UCTXIP = 2" in interrupt_manager.c;
+void __attribute__ ((vector(_UARTC_TX_VECTOR), interrupt(IPL2AUTO))) _UARTC_TX_HANDLER(void){	
 	//	Send
-	while (retCur < retLen && !U1STAbits.UTXBF){
-		U1TXREG = retPacket.bytes[retCur];
+	while (retCur < retLen && !UCSTAbits.UTXBF){
+		UCTXREG = retPacket.bytes[retCur];
 		retCur ++;
 	}
 	//	StopTX
 	if (retCur == retLen){
-		U1STAbits.UTXISEL = 1;		//	01 = Interrupt is generated and asserted when all characters have been transmitted
-		if (U1STAbits.TRMT){		//	TX completed
-			IEC0bits.U1TXIE = 0;	//	disable interrupt
-			U1STAbits.UTXEN = 0;	//	disable U1TX
+		UCSTAbits.UTXISEL = 1;		//	01 = Interrupt is generated and asserted when all characters have been transmitted
+		if (UCSTAbits.TRMT){		//	TX completed
+			IEC_UCTXIE = 0;	//	disable interrupt
+			UCSTAbits.UTXEN = 0;	//	disable UCTX
 		}
 	}
-	IFS0CLR= 1 << _IFS0_U1TXIF_POSITION;	//	clear interrupt flag
+	CLEAR_IFS_UCTXIF;
 }
-
 //	handler for rx interrupt
-//	Note: "IPL4" below must fit to "IPC5bits.U1RXIP = 4" in interrupt_manager.c;
+//	Note: "IPL4" below must fit to "IPC5bits.UCRXIP = 4" in interrupt_manager.c;
 void __attribute__ ((vector(_UART1_RX_VECTOR), interrupt(IPL4AUTO))) _UART1_RX_HANDLER(void){
 	int i;
 	union CommandHeader head;
 	static bool bRead;
 	for(i=0; i<6; ++i){
         if (cmdCur == 0){
-	        head.header = U1RXREG;
+	        head.header = UCRXREG;
 			//	Skip spacing (make time for return packet), invalid value (They may come after reset.) and invalid command
             if (head.header == 0 || head.header >= (CI_NCOMMAND<<BORADIDBITS)) continue;
 			//	In case of valid command ID, get packet length
@@ -220,9 +221,9 @@ void __attribute__ ((vector(_UART1_RX_VECTOR), interrupt(IPL4AUTO))) _UART1_RX_H
 				command.header = head.header;
 			}
         }else if (bRead){
-			command.bytes[cmdCur] = U1RXREG;
+			command.bytes[cmdCur] = UCRXREG;
 		}else{
-			head.header = U1RXREG;
+			head.header = UCRXREG;
 		}
 		if (cmdCur == cmdLen-1){
             if (bRead){
@@ -233,7 +234,7 @@ void __attribute__ ((vector(_UART1_RX_VECTOR), interrupt(IPL4AUTO))) _UART1_RX_H
 			cmdCur ++;
 		}
     }
-	IFS0CLR = 1 << _IFS0_U1RXIF_POSITION;	//	clear interrupt flag
+	CLEAR_IFS_UCRXIF;
 }
 
 bool uartExecCommand(){

@@ -41,7 +41,7 @@
     MICROCHIP PROVIDES THIS SOFTWARE CONDITIONALLY UPON YOUR ACCEPTANCE OF THESE
     TERMS.
 */
-
+#include "../boardType.h"
 
 // Configuration bits: selected in the GUI
 
@@ -50,7 +50,14 @@
 
 // FICD
 #pragma config JTAGEN = OFF    // JTAG Enable bit->JTAG is disabled
+#if defined BOARD1_MOTORDRIVER
 #pragma config ICS = PGx1    // ICE/ICD Communication Channel Selection bits->Communicate on PGEC1/PGED1
+#elif defined BOARD2_COMBINATION
+#pragma config ICS = PGx3    // ICE/ICD Communication Channel Selection bits->Communicate on PGEC3/PGED3
+#else
+#error
+#endif
+
 
 // FPOR
 #pragma config BOREN = BOR3    // Brown-out Reset Enable bits->Brown-out Reset enabled in hardware; SBOREN bit disabled

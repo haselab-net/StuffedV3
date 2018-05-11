@@ -3,6 +3,7 @@
 #include "mcc_generated_files/mcc.h"
 #include "control.h"
 #include "command.h"
+#include "uart.h"
 #include <stdio.h>
 
 void outTest(int dir){
@@ -56,22 +57,10 @@ void pwmTest2(){
 	LATBbits.LATB11 = 1; // BIN2R
 }
 void monitor(){
-#if 0
-	LATCbits.LATC2 = 0;
-	while(1){
-		if (U2STAbits.URXDA){
-			LATCbits.LATC2 = 1;
-			ch = UART2_Read();
-			UART2_Write(ch);
-			LATCbits.LATC2 = 0;
-			if (ch == '\r') break;
-		}
-	}
-#endif
 	static int ch = 0;
 	int i;
-	if (U2STAbits.URXDA){
-		ch = UART2_Read();
+	if (UMSTAbits.URXDA){
+		ch = UMRXREG;
 	}
 	if (ch != ' ' && ch != 0){
         while(monWaiting()) monOut()    ;
@@ -111,10 +100,20 @@ void monitor(){
 			break;
 		case 'A':	//	ad converter in motor order
 			printf("Ad");
+#if defined BOARD1_MOTORDRIVER
 			printf(" %d %d ", ADC1BUF5, ADC1BUF2);
 			printf(" %d %d ", ADC1BUF7, ADC1BUF6);
 			printf(" %d %d ", ADC1BUF1, ADC1BUF0);
 			printf(" %d %d\r\n", ADC1BUF4, ADC1BUF3);
+#elif defined BOARD2_COMBINATION			
+			printf(" %d %d ", ADC1BUF0, ADC1BUF1);
+			printf(" %d %d ", ADC1BUF6, ADC1BUF7);
+			printf(" %d %d ", ADC1BUF3, ADC1BUF9);
+			printf(" %d %d\r\n", ADC1BUF10, ADC1BUF11);
+#else
+#error
+#endif
+
 			break;
 		case 'c':{	//	control status
 			static uint32_t ct;

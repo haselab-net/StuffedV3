@@ -46,6 +46,7 @@
   Section: Included Files
 */
 #include "uart1.h"
+#include "../uart.h"
 
 /**
   Section: UART1 APIs
@@ -59,11 +60,22 @@ void UART1_Initialize(void)
     U1MODE = (0x8008 & ~(1<<15)); // disabling UART ON bit  
     // UTXISEL TX_ONE_CHAR; UTXINV disabled; ADDR 0; MASK 0; URXEN disabled; OERR disabled; URXISEL RX_ONE_CHAR; UTXBRK disabled; UTXEN disabled; ADDEN disabled; 
     U1STA = 0x0;
+#if defined BOARD1_MOTORDRIVER
     // BaudRate = 2000000; Frequency = 24000000 Hz; BRG 2; 
     U1BRG = 0x2;
-     
+#elif defined BOARD2_COMBINATION
+    // BaudRate = 3000000; Frequency = 24000000 Hz; BRG 1; 
+    U1BRG = 0x1;
+#else
+#error
+#endif
+	
     //Make sure to set LAT bit corresponding to TxPin as high before UART initialization
-    //U1STASET = _U1STA_UTXEN_MASK;	//	Do not on TX until called by master.
+#if defined BOARD1_MOTORDRIVER
+	//U1STASET = _U1STA_UTXEN_MASK;	//	Do not on TX until called by master.
+#else    
+	U1STASET = _U1STA_UTXEN_MASK;	//	Do not on TX until called by master.
+#endif
     U1MODESET = _U1MODE_ON_MASK;	// enabling UART ON bit
     U1STASET = _U1STA_URXEN_MASK; 
 

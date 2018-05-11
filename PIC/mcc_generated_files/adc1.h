@@ -52,6 +52,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include "../boardType.h"
 
 #ifdef __cplusplus  // Provide C++ Compatibility
 
@@ -78,16 +79,32 @@ typedef enum
 {
     channel_AN0 =  0x0,
     channel_AN1 =  0x1,
+#ifdef BOARD2_COMBINATION
+    channel_AN2 =  0x2,
+    channel_AN3 =  0x3,
+#endif
     channel_AN4 =  0x4,
+#ifdef BOARD2_COMBINATION
+    channel_AN5 =  0x5,
+#endif
     channel_AN7 =  0x7,
     channel_AN8 =  0x8,
+#ifdef BOARD2_COMBINATION
+    channel_AN10 =  0xA,
+#endif
     channel_AN11 =  0xB,
     channel_AN12 =  0xC,
     channel_AN13 =  0xD,
     ADC1_CHANNEL_VBG =  0x1C,
     ADC1_CHANNEL_AVSS =  0x1D,
     ADC1_CHANNEL_AVDD =  0x1E,
+#if defined BOARD1_MOTORDRIVER
     ADC1_MAX_CHANNEL_COUNT = 11
+#elif defined BOARD2_COMBINATION
+    ADC1_MAX_CHANNEL_COUNT = 15
+#else
+#error
+#endif
 } ADC1_CHANNEL;
 
 /**

@@ -31,17 +31,10 @@
 #include "mcc_generated_files/mcc.h"
 #include "control.h"
 #include "command.h"
+#include "uart.h"
 #include <stdio.h>
 
-void puts1(const char* s){
-    while(*s){
-        UART1_Write(*s);
-        s++;
-    }
-}
 void monitor();
-void parseUart();
-void uartExecComman();
 /*
                          Main application
  */
@@ -50,24 +43,11 @@ int main(void)
 {
     int i = 0;
     SYSTEM_Initialize();
-#ifndef MODULETEST
-    U2TXREG = 'S';
-	UART2_Write('t');
-    printf("art");
-    UART2_Write('.');
-    UART2_Write('\r');
-    UART2_Write('\n');
+    UMTXREG = 'S';
+    printf("tart.\r\n");
 	extern unsigned char boardId;
     printf("Borad ID:%d Model:%d nTargets:%d nMotor:%d nForce:%d\r\n", (int)boardId, MODEL_NUMBER, NTARGET, NMOTOR, NFORCE);
 
-#if 0	//	uart test
-	U1STAbits.UTXEN = 1;
-	while(1){
-		while(!U1STAbits.UTXBF){
-			U1TXREG = 'A';
-		}
-	}
-#endif
     controlInit();
 	commandInit();
 	while(1){
@@ -80,66 +60,13 @@ int main(void)
 				_CP0_SET_COMPARE(coretimerCompare);
 				//printf("RO\r\n");
 			}
-			if (U2STAbits.TRMT){
+			if (UMSTAbits.TRMT){
 				monitor();
 			}else{
 				monOut();
 			}
 		}
 	}
-#else
-    puts1("Start.\n");
-#if 1   //  test for interpolation
-    controlInit();
-    controlSetMode(CM_INTERPOLATE);
-    {
-        int ip = 0;
-        for(i=0; i<60; ++i){
-            int j;
-#if 1
-            while(targetsWriteAvail() > 0){
-                short tgs[NMOTOR];
-				for(j=0; j<NMOTOR; ++j) tgs[j] = (ip+1) * SDEC_ONE / (3+j);
-                targetsAdd(tgs, 10);
-                if (ip < 1) ip++;
-            }
-#endif
-            for(j=0; j<3000; ++j);
-			printMotorControl();
-        }
-    }
-#endif
-
-#if 0   //  test for motor velocity
-    for(i=0; i<200; ++i){
-        controlLoop();
-        printMotorState();
-    }
-#endif
-#if 0   //  test for motor angle read
-    for(i=0; i<200; ++i){
-        updateMotorState();
-        printMotorState();
-    }
-#endif
-#if 0   //  test for atan2S
-    atan2FixedTest();
-#endif
-
-#endif
-    // When using interrupts, you need to set the Global Interrupt Enable bits
-    // Use the following macros to:
-
-    // Enable the Global Interrupts
-    //INTERRUPT_GlobalEnable();
-
-    // Disable the Global Interrupts
-    //INTERRUPT_GlobalDisable();
-
-    while (1)
-    {
-        // Add your application code
-    }
 }
 /**
  End of File

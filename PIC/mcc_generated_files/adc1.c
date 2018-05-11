@@ -84,21 +84,29 @@ void ADC1_Initialize (void)
 
    AD1CON1 = 0x807C;
 
-    // CSCNA enabled; BUFM disabled; SMPI Generates interrupt after completion of every sample/conversion operation; OFFCAL disabled; VCFG AVDD/AVSS; BUFREGEN disabled; 
-
+    // CSCNA enabled; BUFM disabled; SMPI 12; OFFCAL disabled; VCFG AVDD/AVSS; BUFREGEN disabled; 
+#if defined BOARD1_MOTORDRIVER
    AD1CON2 = 0x420;
-
+#elif defined BOARD2_COMBINATION
+   AD1CON2 = 0x430;
+#else
+#error
+#endif
     // SAMC 31; EXTSAM disabled; ADRC PBCLK; ADCS 3; 
-
    AD1CON3 = 0x1F03;
 
-    // CH0SA AN0; CH0NA AVSS; 
-
+   // CH0SA AN0; CH0NA AVSS; 
    AD1CHS = 0x0;
 
+#if defined BOARD1_MOTORDRIVER
     // CSS9 disabled; CSS8 enabled; CSS7 enabled; CSS6 disabled; CSS5 disabled; CSS4 enabled; CSS3 disabled; CSS2 disabled; CSS1 enabled; CSS0 enabled; CSS13 enabled; CSS12 enabled; CSS11 enabled; CSS10 disabled; CSS30 disabled; CSS29 disabled; CSS28 disabled; 
-
    AD1CSS = 0x3993;
+#elif defined BOARD2_COMBINATION
+    // CSS9 disabled; CSS8 enabled; CSS7 enabled; CSS6 disabled; CSS5 enabled; CSS4 enabled; CSS3 enabled; CSS2 enabled; CSS1 enabled; CSS0 enabled; CSS13 enabled; CSS12 enabled; CSS11 enabled; CSS10 enabled; CSS30 disabled; CSS29 disabled; CSS28 disabled;
+    AD1CSS = 0x3DBF;
+#else
+#error
+#endif
 
     // CHH9 disabled; CHH8 disabled; CHH7 disabled; CHH6 disabled; CHH5 disabled; CHH4 disabled; CHH3 disabled; CHH2 disabled; CHH1 disabled; CHH0 disabled; CHH11 disabled; CHH10 disabled; CHH13 disabled; CHH12 disabled; 
 

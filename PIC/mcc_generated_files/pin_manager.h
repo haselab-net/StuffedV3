@@ -46,6 +46,7 @@
 
 #ifndef _PIN_MANAGER_H
 #define _PIN_MANAGER_H
+#if 0
 /**
     Section: Includes
 */
@@ -437,11 +438,11 @@ inline static void channel_AN1_SetValue(bool value)
   @Example
     <code>
     // Set RA2 high (1)
-    IO_RA2_SetHigh();
+    channel_AN5_SetHigh();
     </code>
 
 */
-#define IO_RA2_SetHigh()          ( LATASET = (1 << 2) )
+#define channel_AN5_SetHigh()          ( LATASET = (1 << 2) )
 /**
   @Summary
     Sets the GPIO pin, RA2, low using LATAbits.LATA2.
@@ -461,11 +462,11 @@ inline static void channel_AN1_SetValue(bool value)
   @Example
     <code>
     // Set RA2 low (0)
-    IO_RA2_SetLow();
+    channel_AN5_SetLow();
     </code>
 
 */
-#define IO_RA2_SetLow()           ( LATACLR = (1 << 2) )
+#define channel_AN5_SetLow()           ( LATACLR = (1 << 2) )
 
 /**
   @Summary
@@ -486,19 +487,19 @@ inline static void channel_AN1_SetValue(bool value)
   @Example
     <code>
     // Set RA2 to low.
-    IO_RA2_SetValue(false);
+    channel_AN5_SetValue(false);
     </code>
 
 */
-inline static void IO_RA2_SetValue(bool value)
+inline static void channel_AN5_SetValue(bool value)
 {
   if(value)
   {
-    IO_RA2_SetHigh();
+    channel_AN5_SetHigh();
   }
   else
   {
-    IO_RA2_SetLow();
+    channel_AN5_SetLow();
   }
 }
 
@@ -521,11 +522,11 @@ inline static void IO_RA2_SetValue(bool value)
   @Example
     <code>
     // Toggle RA2
-    IO_RA2_Toggle();
+    channel_AN5_Toggle();
     </code>
 
 */
-#define IO_RA2_Toggle()           ( LATAINV = (1 << 2) )
+#define channel_AN5_Toggle()           ( LATAINV = (1 << 2) )
 /**
   @Summary
     Reads the value of the GPIO pin, RA2.
@@ -547,11 +548,11 @@ inline static void IO_RA2_SetValue(bool value)
     uint16_t portValue;
 
     // Read RA2
-    postValue = IO_RA2_GetValue();
+    postValue = channel_AN5_GetValue();
     </code>
 
 */
-#define IO_RA2_GetValue()         PORTAbits.RA2
+#define channel_AN5_GetValue()         PORTAbits.RA2
 /**
   @Summary
     Configures the GPIO pin, RA2, as an input.
@@ -571,11 +572,11 @@ inline static void IO_RA2_SetValue(bool value)
   @Example
     <code>
     // Sets the RA2 as an input
-    IO_RA2_SetDigitalInput();
+    channel_AN5_SetDigitalInput();
     </code>
 
 */
-#define IO_RA2_SetDigitalInput()   ( TRISASET = (1 << 2) )
+#define channel_AN5_SetDigitalInput()   ( TRISASET = (1 << 2) )
 /**
   @Summary
     Configures the GPIO pin, RA2, as an output.
@@ -595,20 +596,20 @@ inline static void IO_RA2_SetValue(bool value)
   @Example
     <code>
     // Sets the RA2 as an output
-    IO_RA2_SetDigitalOutput();
+    channel_AN5_SetDigitalOutput();
     </code>
 
 */
-#define IO_RA2_SetDigitalOutput()   ( TRISACLR = (1 << 2) )
+#define channel_AN5_SetDigitalOutput()   ( TRISACLR = (1 << 2) )
 /**
   @Summary
-    Sets the GPIO pin, RB10, high using LATBbits.LATB10.
+    Sets the GPIO pin, RB0, high using LATBbits.LATB0.
 
   @Description
-    Sets the GPIO pin, RB10, high using LATBbits.LATB10.
+    Sets the GPIO pin, RB0, high using LATBbits.LATB0.
 
   @Preconditions
-    The RB10 must be set to an output.
+    The RB0 must be set to an output.
 
   @Returns
     None.
@@ -618,21 +619,21 @@ inline static void IO_RA2_SetValue(bool value)
 
   @Example
     <code>
-    // Set RB10 high (1)
-    IO_RB10_SetHigh();
+    // Set RB0 high (1)
+    channel_AN2_SetHigh();
     </code>
 
 */
-#define IO_RB10_SetHigh()          ( LATBSET = (1 << 10) )
+#define channel_AN2_SetHigh()          ( LATBSET = (1 << 0) )
 /**
   @Summary
-    Sets the GPIO pin, RB10, low using LATBbits.LATB10.
+    Sets the GPIO pin, RB0, low using LATBbits.LATB0.
 
   @Description
-    Sets the GPIO pin, RB10, low using LATBbits.LATB10.
+    Sets the GPIO pin, RB0, low using LATBbits.LATB0.
 
   @Preconditions
-    The RB10 must be set to an output.
+    The RB0 must be set to an output.
 
   @Returns
     None.
@@ -642,22 +643,22 @@ inline static void IO_RA2_SetValue(bool value)
 
   @Example
     <code>
-    // Set RB10 low (0)
-    IO_RB10_SetLow();
+    // Set RB0 low (0)
+    channel_AN2_SetLow();
     </code>
 
 */
-#define IO_RB10_SetLow()           ( LATBCLR = (1 << 10) )
+#define channel_AN2_SetLow()           ( LATBCLR = (1 << 0) )
 
 /**
   @Summary
     Sets a value to the GPIO pin.
 
   @Description
-    Sets or Resets the GPIO pin, RB10, low or high using LATBbits.LATB10.
+    Sets or Resets the GPIO pin, RB0, low or high using LATBbits.LATB0.
 
   @Preconditions
-    The RB10 must be set to an output.
+    The RB0 must be set to an output.
 
   @Returns
     None.
@@ -667,32 +668,32 @@ inline static void IO_RA2_SetValue(bool value)
 
   @Example
     <code>
-    // Set RB10 to low.
-    IO_RB10_SetValue(false);
+    // Set RB0 to low.
+    channel_AN2_SetValue(false);
     </code>
 
 */
-inline static void IO_RB10_SetValue(bool value)
+inline static void channel_AN2_SetValue(bool value)
 {
   if(value)
   {
-    IO_RB10_SetHigh();
+    channel_AN2_SetHigh();
   }
   else
   {
-    IO_RB10_SetLow();
+    channel_AN2_SetLow();
   }
 }
 
 /**
   @Summary
-    Toggles the GPIO pin, RB10, using LATBbits.LATB10.
+    Toggles the GPIO pin, RB0, using LATBbits.LATB0.
 
   @Description
-    Toggles the GPIO pin, RB10, using LATBbits.LATB10.
+    Toggles the GPIO pin, RB0, using LATBbits.LATB0.
 
   @Preconditions
-    The RB10 must be set to an output.
+    The RB0 must be set to an output.
 
   @Returns
     None.
@@ -702,18 +703,18 @@ inline static void IO_RB10_SetValue(bool value)
 
   @Example
     <code>
-    // Toggle RB10
-    IO_RB10_Toggle();
+    // Toggle RB0
+    channel_AN2_Toggle();
     </code>
 
 */
-#define IO_RB10_Toggle()           ( LATBINV = (1 << 10) )
+#define channel_AN2_Toggle()           ( LATBINV = (1 << 0) )
 /**
   @Summary
-    Reads the value of the GPIO pin, RB10.
+    Reads the value of the GPIO pin, RB0.
 
   @Description
-    Reads the value of the GPIO pin, RB10.
+    Reads the value of the GPIO pin, RB0.
 
   @Preconditions
     None.
@@ -728,18 +729,18 @@ inline static void IO_RB10_SetValue(bool value)
     <code>
     uint16_t portValue;
 
-    // Read RB10
-    postValue = IO_RB10_GetValue();
+    // Read RB0
+    postValue = channel_AN2_GetValue();
     </code>
 
 */
-#define IO_RB10_GetValue()         PORTBbits.RB10
+#define channel_AN2_GetValue()         PORTBbits.RB0
 /**
   @Summary
-    Configures the GPIO pin, RB10, as an input.
+    Configures the GPIO pin, RB0, as an input.
 
   @Description
-    Configures the GPIO pin, RB10, as an input.
+    Configures the GPIO pin, RB0, as an input.
 
   @Preconditions
     None.
@@ -752,18 +753,18 @@ inline static void IO_RB10_SetValue(bool value)
 
   @Example
     <code>
-    // Sets the RB10 as an input
-    IO_RB10_SetDigitalInput();
+    // Sets the RB0 as an input
+    channel_AN2_SetDigitalInput();
     </code>
 
 */
-#define IO_RB10_SetDigitalInput()   ( TRISBSET = (1 << 10) )
+#define channel_AN2_SetDigitalInput()   ( TRISBSET = (1 << 0) )
 /**
   @Summary
-    Configures the GPIO pin, RB10, as an output.
+    Configures the GPIO pin, RB0, as an output.
 
   @Description
-    Configures the GPIO pin, RB10, as an output.
+    Configures the GPIO pin, RB0, as an output.
 
   @Preconditions
     None.
@@ -776,21 +777,21 @@ inline static void IO_RB10_SetValue(bool value)
 
   @Example
     <code>
-    // Sets the RB10 as an output
-    IO_RB10_SetDigitalOutput();
+    // Sets the RB0 as an output
+    channel_AN2_SetDigitalOutput();
     </code>
 
 */
-#define IO_RB10_SetDigitalOutput()   ( TRISBCLR = (1 << 10) )
+#define channel_AN2_SetDigitalOutput()   ( TRISBCLR = (1 << 0) )
 /**
   @Summary
-    Sets the GPIO pin, RB11, high using LATBbits.LATB11.
+    Sets the GPIO pin, RB1, high using LATBbits.LATB1.
 
   @Description
-    Sets the GPIO pin, RB11, high using LATBbits.LATB11.
+    Sets the GPIO pin, RB1, high using LATBbits.LATB1.
 
   @Preconditions
-    The RB11 must be set to an output.
+    The RB1 must be set to an output.
 
   @Returns
     None.
@@ -800,21 +801,21 @@ inline static void IO_RB10_SetValue(bool value)
 
   @Example
     <code>
-    // Set RB11 high (1)
-    IO_RB11_SetHigh();
+    // Set RB1 high (1)
+    channel_AN3_SetHigh();
     </code>
 
 */
-#define IO_RB11_SetHigh()          ( LATBSET = (1 << 11) )
+#define channel_AN3_SetHigh()          ( LATBSET = (1 << 1) )
 /**
   @Summary
-    Sets the GPIO pin, RB11, low using LATBbits.LATB11.
+    Sets the GPIO pin, RB1, low using LATBbits.LATB1.
 
   @Description
-    Sets the GPIO pin, RB11, low using LATBbits.LATB11.
+    Sets the GPIO pin, RB1, low using LATBbits.LATB1.
 
   @Preconditions
-    The RB11 must be set to an output.
+    The RB1 must be set to an output.
 
   @Returns
     None.
@@ -824,22 +825,22 @@ inline static void IO_RB10_SetValue(bool value)
 
   @Example
     <code>
-    // Set RB11 low (0)
-    IO_RB11_SetLow();
+    // Set RB1 low (0)
+    channel_AN3_SetLow();
     </code>
 
 */
-#define IO_RB11_SetLow()           ( LATBCLR = (1 << 11) )
+#define channel_AN3_SetLow()           ( LATBCLR = (1 << 1) )
 
 /**
   @Summary
     Sets a value to the GPIO pin.
 
   @Description
-    Sets or Resets the GPIO pin, RB11, low or high using LATBbits.LATB11.
+    Sets or Resets the GPIO pin, RB1, low or high using LATBbits.LATB1.
 
   @Preconditions
-    The RB11 must be set to an output.
+    The RB1 must be set to an output.
 
   @Returns
     None.
@@ -849,32 +850,32 @@ inline static void IO_RB10_SetValue(bool value)
 
   @Example
     <code>
-    // Set RB11 to low.
-    IO_RB11_SetValue(false);
+    // Set RB1 to low.
+    channel_AN3_SetValue(false);
     </code>
 
 */
-inline static void IO_RB11_SetValue(bool value)
+inline static void channel_AN3_SetValue(bool value)
 {
   if(value)
   {
-    IO_RB11_SetHigh();
+    channel_AN3_SetHigh();
   }
   else
   {
-    IO_RB11_SetLow();
+    channel_AN3_SetLow();
   }
 }
 
 /**
   @Summary
-    Toggles the GPIO pin, RB11, using LATBbits.LATB11.
+    Toggles the GPIO pin, RB1, using LATBbits.LATB1.
 
   @Description
-    Toggles the GPIO pin, RB11, using LATBbits.LATB11.
+    Toggles the GPIO pin, RB1, using LATBbits.LATB1.
 
   @Preconditions
-    The RB11 must be set to an output.
+    The RB1 must be set to an output.
 
   @Returns
     None.
@@ -884,18 +885,18 @@ inline static void IO_RB11_SetValue(bool value)
 
   @Example
     <code>
-    // Toggle RB11
-    IO_RB11_Toggle();
+    // Toggle RB1
+    channel_AN3_Toggle();
     </code>
 
 */
-#define IO_RB11_Toggle()           ( LATBINV = (1 << 11) )
+#define channel_AN3_Toggle()           ( LATBINV = (1 << 1) )
 /**
   @Summary
-    Reads the value of the GPIO pin, RB11.
+    Reads the value of the GPIO pin, RB1.
 
   @Description
-    Reads the value of the GPIO pin, RB11.
+    Reads the value of the GPIO pin, RB1.
 
   @Preconditions
     None.
@@ -910,18 +911,18 @@ inline static void IO_RB11_SetValue(bool value)
     <code>
     uint16_t portValue;
 
-    // Read RB11
-    postValue = IO_RB11_GetValue();
+    // Read RB1
+    postValue = channel_AN3_GetValue();
     </code>
 
 */
-#define IO_RB11_GetValue()         PORTBbits.RB11
+#define channel_AN3_GetValue()         PORTBbits.RB1
 /**
   @Summary
-    Configures the GPIO pin, RB11, as an input.
+    Configures the GPIO pin, RB1, as an input.
 
   @Description
-    Configures the GPIO pin, RB11, as an input.
+    Configures the GPIO pin, RB1, as an input.
 
   @Preconditions
     None.
@@ -934,18 +935,18 @@ inline static void IO_RB11_SetValue(bool value)
 
   @Example
     <code>
-    // Sets the RB11 as an input
-    IO_RB11_SetDigitalInput();
+    // Sets the RB1 as an input
+    channel_AN3_SetDigitalInput();
     </code>
 
 */
-#define IO_RB11_SetDigitalInput()   ( TRISBSET = (1 << 11) )
+#define channel_AN3_SetDigitalInput()   ( TRISBSET = (1 << 1) )
 /**
   @Summary
-    Configures the GPIO pin, RB11, as an output.
+    Configures the GPIO pin, RB1, as an output.
 
   @Description
-    Configures the GPIO pin, RB11, as an output.
+    Configures the GPIO pin, RB1, as an output.
 
   @Preconditions
     None.
@@ -958,12 +959,12 @@ inline static void IO_RB11_SetValue(bool value)
 
   @Example
     <code>
-    // Sets the RB11 as an output
-    IO_RB11_SetDigitalOutput();
+    // Sets the RB1 as an output
+    channel_AN3_SetDigitalOutput();
     </code>
 
 */
-#define IO_RB11_SetDigitalOutput()   ( TRISBCLR = (1 << 11) )
+#define channel_AN3_SetDigitalOutput()   ( TRISBCLR = (1 << 1) )
 /**
   @Summary
     Sets the GPIO pin, RB12, high using LATBbits.LATB12.
@@ -1330,13 +1331,13 @@ inline static void channel_AN8_SetValue(bool value)
 #define channel_AN8_SetDigitalOutput()   ( TRISBCLR = (1 << 13) )
 /**
   @Summary
-    Sets the GPIO pin, RB14, high using LATBbits.LATB14.
+    Sets the GPIO pin, RB15, high using LATBbits.LATB15.
 
   @Description
-    Sets the GPIO pin, RB14, high using LATBbits.LATB14.
+    Sets the GPIO pin, RB15, high using LATBbits.LATB15.
 
   @Preconditions
-    The RB14 must be set to an output.
+    The RB15 must be set to an output.
 
   @Returns
     None.
@@ -1346,21 +1347,21 @@ inline static void channel_AN8_SetValue(bool value)
 
   @Example
     <code>
-    // Set RB14 high (1)
-    IO_RB14_SetHigh();
+    // Set RB15 high (1)
+    channel_AN10_SetHigh();
     </code>
 
 */
-#define IO_RB14_SetHigh()          ( LATBSET = (1 << 14) )
+#define channel_AN10_SetHigh()          ( LATBSET = (1 << 15) )
 /**
   @Summary
-    Sets the GPIO pin, RB14, low using LATBbits.LATB14.
+    Sets the GPIO pin, RB15, low using LATBbits.LATB15.
 
   @Description
-    Sets the GPIO pin, RB14, low using LATBbits.LATB14.
+    Sets the GPIO pin, RB15, low using LATBbits.LATB15.
 
   @Preconditions
-    The RB14 must be set to an output.
+    The RB15 must be set to an output.
 
   @Returns
     None.
@@ -1370,22 +1371,22 @@ inline static void channel_AN8_SetValue(bool value)
 
   @Example
     <code>
-    // Set RB14 low (0)
-    IO_RB14_SetLow();
+    // Set RB15 low (0)
+    channel_AN10_SetLow();
     </code>
 
 */
-#define IO_RB14_SetLow()           ( LATBCLR = (1 << 14) )
+#define channel_AN10_SetLow()           ( LATBCLR = (1 << 15) )
 
 /**
   @Summary
     Sets a value to the GPIO pin.
 
   @Description
-    Sets or Resets the GPIO pin, RB14, low or high using LATBbits.LATB14.
+    Sets or Resets the GPIO pin, RB15, low or high using LATBbits.LATB15.
 
   @Preconditions
-    The RB14 must be set to an output.
+    The RB15 must be set to an output.
 
   @Returns
     None.
@@ -1395,32 +1396,32 @@ inline static void channel_AN8_SetValue(bool value)
 
   @Example
     <code>
-    // Set RB14 to low.
-    IO_RB14_SetValue(false);
+    // Set RB15 to low.
+    channel_AN10_SetValue(false);
     </code>
 
 */
-inline static void IO_RB14_SetValue(bool value)
+inline static void channel_AN10_SetValue(bool value)
 {
   if(value)
   {
-    IO_RB14_SetHigh();
+    channel_AN10_SetHigh();
   }
   else
   {
-    IO_RB14_SetLow();
+    channel_AN10_SetLow();
   }
 }
 
 /**
   @Summary
-    Toggles the GPIO pin, RB14, using LATBbits.LATB14.
+    Toggles the GPIO pin, RB15, using LATBbits.LATB15.
 
   @Description
-    Toggles the GPIO pin, RB14, using LATBbits.LATB14.
+    Toggles the GPIO pin, RB15, using LATBbits.LATB15.
 
   @Preconditions
-    The RB14 must be set to an output.
+    The RB15 must be set to an output.
 
   @Returns
     None.
@@ -1430,18 +1431,18 @@ inline static void IO_RB14_SetValue(bool value)
 
   @Example
     <code>
-    // Toggle RB14
-    IO_RB14_Toggle();
+    // Toggle RB15
+    channel_AN10_Toggle();
     </code>
 
 */
-#define IO_RB14_Toggle()           ( LATBINV = (1 << 14) )
+#define channel_AN10_Toggle()           ( LATBINV = (1 << 15) )
 /**
   @Summary
-    Reads the value of the GPIO pin, RB14.
+    Reads the value of the GPIO pin, RB15.
 
   @Description
-    Reads the value of the GPIO pin, RB14.
+    Reads the value of the GPIO pin, RB15.
 
   @Preconditions
     None.
@@ -1456,18 +1457,18 @@ inline static void IO_RB14_SetValue(bool value)
     <code>
     uint16_t portValue;
 
-    // Read RB14
-    postValue = IO_RB14_GetValue();
+    // Read RB15
+    postValue = channel_AN10_GetValue();
     </code>
 
 */
-#define IO_RB14_GetValue()         PORTBbits.RB14
+#define channel_AN10_GetValue()         PORTBbits.RB15
 /**
   @Summary
-    Configures the GPIO pin, RB14, as an input.
+    Configures the GPIO pin, RB15, as an input.
 
   @Description
-    Configures the GPIO pin, RB14, as an input.
+    Configures the GPIO pin, RB15, as an input.
 
   @Preconditions
     None.
@@ -1480,18 +1481,18 @@ inline static void IO_RB14_SetValue(bool value)
 
   @Example
     <code>
-    // Sets the RB14 as an input
-    IO_RB14_SetDigitalInput();
+    // Sets the RB15 as an input
+    channel_AN10_SetDigitalInput();
     </code>
 
 */
-#define IO_RB14_SetDigitalInput()   ( TRISBSET = (1 << 14) )
+#define channel_AN10_SetDigitalInput()   ( TRISBSET = (1 << 15) )
 /**
   @Summary
-    Configures the GPIO pin, RB14, as an output.
+    Configures the GPIO pin, RB15, as an output.
 
   @Description
-    Configures the GPIO pin, RB14, as an output.
+    Configures the GPIO pin, RB15, as an output.
 
   @Preconditions
     None.
@@ -1504,12 +1505,12 @@ inline static void IO_RB14_SetValue(bool value)
 
   @Example
     <code>
-    // Sets the RB14 as an output
-    IO_RB14_SetDigitalOutput();
+    // Sets the RB15 as an output
+    channel_AN10_SetDigitalOutput();
     </code>
 
 */
-#define IO_RB14_SetDigitalOutput()   ( TRISBCLR = (1 << 14) )
+#define channel_AN10_SetDigitalOutput()   ( TRISBCLR = (1 << 15) )
 /**
   @Summary
     Sets the GPIO pin, RB2, high using LATBbits.LATB2.
@@ -1874,734 +1875,6 @@ inline static void channel_AN11_SetValue(bool value)
 
 */
 #define channel_AN11_SetDigitalOutput()   ( TRISBCLR = (1 << 3) )
-/**
-  @Summary
-    Sets the GPIO pin, RB5, high using LATBbits.LATB5.
-
-  @Description
-    Sets the GPIO pin, RB5, high using LATBbits.LATB5.
-
-  @Preconditions
-    The RB5 must be set to an output.
-
-  @Returns
-    None.
-
-  @Param
-    None.
-
-  @Example
-    <code>
-    // Set RB5 high (1)
-    IO_RB5_SetHigh();
-    </code>
-
-*/
-#define IO_RB5_SetHigh()          ( LATBSET = (1 << 5) )
-/**
-  @Summary
-    Sets the GPIO pin, RB5, low using LATBbits.LATB5.
-
-  @Description
-    Sets the GPIO pin, RB5, low using LATBbits.LATB5.
-
-  @Preconditions
-    The RB5 must be set to an output.
-
-  @Returns
-    None.
-
-  @Param
-    None.
-
-  @Example
-    <code>
-    // Set RB5 low (0)
-    IO_RB5_SetLow();
-    </code>
-
-*/
-#define IO_RB5_SetLow()           ( LATBCLR = (1 << 5) )
-
-/**
-  @Summary
-    Sets a value to the GPIO pin.
-
-  @Description
-    Sets or Resets the GPIO pin, RB5, low or high using LATBbits.LATB5.
-
-  @Preconditions
-    The RB5 must be set to an output.
-
-  @Returns
-    None.
-
-  @Param
-    bool value; : value to be set to the GPIO pin.
-
-  @Example
-    <code>
-    // Set RB5 to low.
-    IO_RB5_SetValue(false);
-    </code>
-
-*/
-inline static void IO_RB5_SetValue(bool value)
-{
-  if(value)
-  {
-    IO_RB5_SetHigh();
-  }
-  else
-  {
-    IO_RB5_SetLow();
-  }
-}
-
-/**
-  @Summary
-    Toggles the GPIO pin, RB5, using LATBbits.LATB5.
-
-  @Description
-    Toggles the GPIO pin, RB5, using LATBbits.LATB5.
-
-  @Preconditions
-    The RB5 must be set to an output.
-
-  @Returns
-    None.
-
-  @Param
-    None.
-
-  @Example
-    <code>
-    // Toggle RB5
-    IO_RB5_Toggle();
-    </code>
-
-*/
-#define IO_RB5_Toggle()           ( LATBINV = (1 << 5) )
-/**
-  @Summary
-    Reads the value of the GPIO pin, RB5.
-
-  @Description
-    Reads the value of the GPIO pin, RB5.
-
-  @Preconditions
-    None.
-
-  @Returns
-    None.
-
-  @Param
-    None.
-
-  @Example
-    <code>
-    uint16_t portValue;
-
-    // Read RB5
-    postValue = IO_RB5_GetValue();
-    </code>
-
-*/
-#define IO_RB5_GetValue()         PORTBbits.RB5
-/**
-  @Summary
-    Configures the GPIO pin, RB5, as an input.
-
-  @Description
-    Configures the GPIO pin, RB5, as an input.
-
-  @Preconditions
-    None.
-
-  @Returns
-    None.
-
-  @Param
-    None.
-
-  @Example
-    <code>
-    // Sets the RB5 as an input
-    IO_RB5_SetDigitalInput();
-    </code>
-
-*/
-#define IO_RB5_SetDigitalInput()   ( TRISBSET = (1 << 5) )
-/**
-  @Summary
-    Configures the GPIO pin, RB5, as an output.
-
-  @Description
-    Configures the GPIO pin, RB5, as an output.
-
-  @Preconditions
-    None.
-
-  @Returns
-    None.
-
-  @Param
-    None.
-
-  @Example
-    <code>
-    // Sets the RB5 as an output
-    IO_RB5_SetDigitalOutput();
-    </code>
-
-*/
-#define IO_RB5_SetDigitalOutput()   ( TRISBCLR = (1 << 5) )
-/**
-  @Summary
-    Sets the GPIO pin, RB6, high using LATBbits.LATB6.
-
-  @Description
-    Sets the GPIO pin, RB6, high using LATBbits.LATB6.
-
-  @Preconditions
-    The RB6 must be set to an output.
-
-  @Returns
-    None.
-
-  @Param
-    None.
-
-  @Example
-    <code>
-    // Set RB6 high (1)
-    IO_RB6_SetHigh();
-    </code>
-
-*/
-#define IO_RB6_SetHigh()          ( LATBSET = (1 << 6) )
-/**
-  @Summary
-    Sets the GPIO pin, RB6, low using LATBbits.LATB6.
-
-  @Description
-    Sets the GPIO pin, RB6, low using LATBbits.LATB6.
-
-  @Preconditions
-    The RB6 must be set to an output.
-
-  @Returns
-    None.
-
-  @Param
-    None.
-
-  @Example
-    <code>
-    // Set RB6 low (0)
-    IO_RB6_SetLow();
-    </code>
-
-*/
-#define IO_RB6_SetLow()           ( LATBCLR = (1 << 6) )
-
-/**
-  @Summary
-    Sets a value to the GPIO pin.
-
-  @Description
-    Sets or Resets the GPIO pin, RB6, low or high using LATBbits.LATB6.
-
-  @Preconditions
-    The RB6 must be set to an output.
-
-  @Returns
-    None.
-
-  @Param
-    bool value; : value to be set to the GPIO pin.
-
-  @Example
-    <code>
-    // Set RB6 to low.
-    IO_RB6_SetValue(false);
-    </code>
-
-*/
-inline static void IO_RB6_SetValue(bool value)
-{
-  if(value)
-  {
-    IO_RB6_SetHigh();
-  }
-  else
-  {
-    IO_RB6_SetLow();
-  }
-}
-
-/**
-  @Summary
-    Toggles the GPIO pin, RB6, using LATBbits.LATB6.
-
-  @Description
-    Toggles the GPIO pin, RB6, using LATBbits.LATB6.
-
-  @Preconditions
-    The RB6 must be set to an output.
-
-  @Returns
-    None.
-
-  @Param
-    None.
-
-  @Example
-    <code>
-    // Toggle RB6
-    IO_RB6_Toggle();
-    </code>
-
-*/
-#define IO_RB6_Toggle()           ( LATBINV = (1 << 6) )
-/**
-  @Summary
-    Reads the value of the GPIO pin, RB6.
-
-  @Description
-    Reads the value of the GPIO pin, RB6.
-
-  @Preconditions
-    None.
-
-  @Returns
-    None.
-
-  @Param
-    None.
-
-  @Example
-    <code>
-    uint16_t portValue;
-
-    // Read RB6
-    postValue = IO_RB6_GetValue();
-    </code>
-
-*/
-#define IO_RB6_GetValue()         PORTBbits.RB6
-/**
-  @Summary
-    Configures the GPIO pin, RB6, as an input.
-
-  @Description
-    Configures the GPIO pin, RB6, as an input.
-
-  @Preconditions
-    None.
-
-  @Returns
-    None.
-
-  @Param
-    None.
-
-  @Example
-    <code>
-    // Sets the RB6 as an input
-    IO_RB6_SetDigitalInput();
-    </code>
-
-*/
-#define IO_RB6_SetDigitalInput()   ( TRISBSET = (1 << 6) )
-/**
-  @Summary
-    Configures the GPIO pin, RB6, as an output.
-
-  @Description
-    Configures the GPIO pin, RB6, as an output.
-
-  @Preconditions
-    None.
-
-  @Returns
-    None.
-
-  @Param
-    None.
-
-  @Example
-    <code>
-    // Sets the RB6 as an output
-    IO_RB6_SetDigitalOutput();
-    </code>
-
-*/
-#define IO_RB6_SetDigitalOutput()   ( TRISBCLR = (1 << 6) )
-/**
-  @Summary
-    Sets the GPIO pin, RB7, high using LATBbits.LATB7.
-
-  @Description
-    Sets the GPIO pin, RB7, high using LATBbits.LATB7.
-
-  @Preconditions
-    The RB7 must be set to an output.
-
-  @Returns
-    None.
-
-  @Param
-    None.
-
-  @Example
-    <code>
-    // Set RB7 high (1)
-    IO_RB7_SetHigh();
-    </code>
-
-*/
-#define IO_RB7_SetHigh()          ( LATBSET = (1 << 7) )
-/**
-  @Summary
-    Sets the GPIO pin, RB7, low using LATBbits.LATB7.
-
-  @Description
-    Sets the GPIO pin, RB7, low using LATBbits.LATB7.
-
-  @Preconditions
-    The RB7 must be set to an output.
-
-  @Returns
-    None.
-
-  @Param
-    None.
-
-  @Example
-    <code>
-    // Set RB7 low (0)
-    IO_RB7_SetLow();
-    </code>
-
-*/
-#define IO_RB7_SetLow()           ( LATBCLR = (1 << 7) )
-
-/**
-  @Summary
-    Sets a value to the GPIO pin.
-
-  @Description
-    Sets or Resets the GPIO pin, RB7, low or high using LATBbits.LATB7.
-
-  @Preconditions
-    The RB7 must be set to an output.
-
-  @Returns
-    None.
-
-  @Param
-    bool value; : value to be set to the GPIO pin.
-
-  @Example
-    <code>
-    // Set RB7 to low.
-    IO_RB7_SetValue(false);
-    </code>
-
-*/
-inline static void IO_RB7_SetValue(bool value)
-{
-  if(value)
-  {
-    IO_RB7_SetHigh();
-  }
-  else
-  {
-    IO_RB7_SetLow();
-  }
-}
-
-/**
-  @Summary
-    Toggles the GPIO pin, RB7, using LATBbits.LATB7.
-
-  @Description
-    Toggles the GPIO pin, RB7, using LATBbits.LATB7.
-
-  @Preconditions
-    The RB7 must be set to an output.
-
-  @Returns
-    None.
-
-  @Param
-    None.
-
-  @Example
-    <code>
-    // Toggle RB7
-    IO_RB7_Toggle();
-    </code>
-
-*/
-#define IO_RB7_Toggle()           ( LATBINV = (1 << 7) )
-/**
-  @Summary
-    Reads the value of the GPIO pin, RB7.
-
-  @Description
-    Reads the value of the GPIO pin, RB7.
-
-  @Preconditions
-    None.
-
-  @Returns
-    None.
-
-  @Param
-    None.
-
-  @Example
-    <code>
-    uint16_t portValue;
-
-    // Read RB7
-    postValue = IO_RB7_GetValue();
-    </code>
-
-*/
-#define IO_RB7_GetValue()         PORTBbits.RB7
-/**
-  @Summary
-    Configures the GPIO pin, RB7, as an input.
-
-  @Description
-    Configures the GPIO pin, RB7, as an input.
-
-  @Preconditions
-    None.
-
-  @Returns
-    None.
-
-  @Param
-    None.
-
-  @Example
-    <code>
-    // Sets the RB7 as an input
-    IO_RB7_SetDigitalInput();
-    </code>
-
-*/
-#define IO_RB7_SetDigitalInput()   ( TRISBSET = (1 << 7) )
-/**
-  @Summary
-    Configures the GPIO pin, RB7, as an output.
-
-  @Description
-    Configures the GPIO pin, RB7, as an output.
-
-  @Preconditions
-    None.
-
-  @Returns
-    None.
-
-  @Param
-    None.
-
-  @Example
-    <code>
-    // Sets the RB7 as an output
-    IO_RB7_SetDigitalOutput();
-    </code>
-
-*/
-#define IO_RB7_SetDigitalOutput()   ( TRISBCLR = (1 << 7) )
-/**
-  @Summary
-    Sets the GPIO pin, RB9, high using LATBbits.LATB9.
-
-  @Description
-    Sets the GPIO pin, RB9, high using LATBbits.LATB9.
-
-  @Preconditions
-    The RB9 must be set to an output.
-
-  @Returns
-    None.
-
-  @Param
-    None.
-
-  @Example
-    <code>
-    // Set RB9 high (1)
-    SDO2_SetHigh();
-    </code>
-
-*/
-#define SDO2_SetHigh()          ( LATBSET = (1 << 9) )
-/**
-  @Summary
-    Sets the GPIO pin, RB9, low using LATBbits.LATB9.
-
-  @Description
-    Sets the GPIO pin, RB9, low using LATBbits.LATB9.
-
-  @Preconditions
-    The RB9 must be set to an output.
-
-  @Returns
-    None.
-
-  @Param
-    None.
-
-  @Example
-    <code>
-    // Set RB9 low (0)
-    SDO2_SetLow();
-    </code>
-
-*/
-#define SDO2_SetLow()           ( LATBCLR = (1 << 9) )
-
-/**
-  @Summary
-    Sets a value to the GPIO pin.
-
-  @Description
-    Sets or Resets the GPIO pin, RB9, low or high using LATBbits.LATB9.
-
-  @Preconditions
-    The RB9 must be set to an output.
-
-  @Returns
-    None.
-
-  @Param
-    bool value; : value to be set to the GPIO pin.
-
-  @Example
-    <code>
-    // Set RB9 to low.
-    SDO2_SetValue(false);
-    </code>
-
-*/
-inline static void SDO2_SetValue(bool value)
-{
-  if(value)
-  {
-    SDO2_SetHigh();
-  }
-  else
-  {
-    SDO2_SetLow();
-  }
-}
-
-/**
-  @Summary
-    Toggles the GPIO pin, RB9, using LATBbits.LATB9.
-
-  @Description
-    Toggles the GPIO pin, RB9, using LATBbits.LATB9.
-
-  @Preconditions
-    The RB9 must be set to an output.
-
-  @Returns
-    None.
-
-  @Param
-    None.
-
-  @Example
-    <code>
-    // Toggle RB9
-    SDO2_Toggle();
-    </code>
-
-*/
-#define SDO2_Toggle()           ( LATBINV = (1 << 9) )
-/**
-  @Summary
-    Reads the value of the GPIO pin, RB9.
-
-  @Description
-    Reads the value of the GPIO pin, RB9.
-
-  @Preconditions
-    None.
-
-  @Returns
-    None.
-
-  @Param
-    None.
-
-  @Example
-    <code>
-    uint16_t portValue;
-
-    // Read RB9
-    postValue = SDO2_GetValue();
-    </code>
-
-*/
-#define SDO2_GetValue()         PORTBbits.RB9
-/**
-  @Summary
-    Configures the GPIO pin, RB9, as an input.
-
-  @Description
-    Configures the GPIO pin, RB9, as an input.
-
-  @Preconditions
-    None.
-
-  @Returns
-    None.
-
-  @Param
-    None.
-
-  @Example
-    <code>
-    // Sets the RB9 as an input
-    SDO2_SetDigitalInput();
-    </code>
-
-*/
-#define SDO2_SetDigitalInput()   ( TRISBSET = (1 << 9) )
-/**
-  @Summary
-    Configures the GPIO pin, RB9, as an output.
-
-  @Description
-    Configures the GPIO pin, RB9, as an output.
-
-  @Preconditions
-    None.
-
-  @Returns
-    None.
-
-  @Param
-    None.
-
-  @Example
-    <code>
-    // Sets the RB9 as an output
-    SDO2_SetDigitalOutput();
-    </code>
-
-*/
-#define SDO2_SetDigitalOutput()   ( TRISBCLR = (1 << 9) )
 /**
   @Summary
     Sets the GPIO pin, RC0, high using LATCbits.LATC0.
@@ -3531,11 +2804,11 @@ inline static void IO_RC8_SetValue(bool value)
   @Example
     <code>
     // Set RC9 high (1)
-    IO_RC9_SetHigh();
+    SDO2_SetHigh();
     </code>
 
 */
-#define IO_RC9_SetHigh()          ( LATCSET = (1 << 9) )
+#define SDO2_SetHigh()          ( LATCSET = (1 << 9) )
 /**
   @Summary
     Sets the GPIO pin, RC9, low using LATCbits.LATC9.
@@ -3555,11 +2828,11 @@ inline static void IO_RC8_SetValue(bool value)
   @Example
     <code>
     // Set RC9 low (0)
-    IO_RC9_SetLow();
+    SDO2_SetLow();
     </code>
 
 */
-#define IO_RC9_SetLow()           ( LATCCLR = (1 << 9) )
+#define SDO2_SetLow()           ( LATCCLR = (1 << 9) )
 
 /**
   @Summary
@@ -3580,19 +2853,19 @@ inline static void IO_RC8_SetValue(bool value)
   @Example
     <code>
     // Set RC9 to low.
-    IO_RC9_SetValue(false);
+    SDO2_SetValue(false);
     </code>
 
 */
-inline static void IO_RC9_SetValue(bool value)
+inline static void SDO2_SetValue(bool value)
 {
   if(value)
   {
-    IO_RC9_SetHigh();
+    SDO2_SetHigh();
   }
   else
   {
-    IO_RC9_SetLow();
+    SDO2_SetLow();
   }
 }
 
@@ -3615,11 +2888,11 @@ inline static void IO_RC9_SetValue(bool value)
   @Example
     <code>
     // Toggle RC9
-    IO_RC9_Toggle();
+    SDO2_Toggle();
     </code>
 
 */
-#define IO_RC9_Toggle()           ( LATCINV = (1 << 9) )
+#define SDO2_Toggle()           ( LATCINV = (1 << 9) )
 /**
   @Summary
     Reads the value of the GPIO pin, RC9.
@@ -3641,11 +2914,11 @@ inline static void IO_RC9_SetValue(bool value)
     uint16_t portValue;
 
     // Read RC9
-    postValue = IO_RC9_GetValue();
+    postValue = SDO2_GetValue();
     </code>
 
 */
-#define IO_RC9_GetValue()         PORTCbits.RC9
+#define SDO2_GetValue()         PORTCbits.RC9
 /**
   @Summary
     Configures the GPIO pin, RC9, as an input.
@@ -3665,11 +2938,11 @@ inline static void IO_RC9_SetValue(bool value)
   @Example
     <code>
     // Sets the RC9 as an input
-    IO_RC9_SetDigitalInput();
+    SDO2_SetDigitalInput();
     </code>
 
 */
-#define IO_RC9_SetDigitalInput()   ( TRISCSET = (1 << 9) )
+#define SDO2_SetDigitalInput()   ( TRISCSET = (1 << 9) )
 /**
   @Summary
     Configures the GPIO pin, RC9, as an output.
@@ -3689,11 +2962,14 @@ inline static void IO_RC9_SetValue(bool value)
   @Example
     <code>
     // Sets the RC9 as an output
-    IO_RC9_SetDigitalOutput();
+    SDO2_SetDigitalOutput();
     </code>
 
 */
-#define IO_RC9_SetDigitalOutput()   ( TRISCCLR = (1 << 9) )
+#define SDO2_SetDigitalOutput()   ( TRISCCLR = (1 << 9) )
+
+#endif	//	if 0
+
 
 /**
     Section: Function Prototypes
@@ -3727,6 +3003,7 @@ inline static void IO_RC9_SetValue(bool value)
     </code>
 
 */
+
 void PIN_MANAGER_Initialize(void);
 
 #endif

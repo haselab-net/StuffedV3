@@ -1,5 +1,7 @@
 #ifndef COMMAND_TEMPLATE_H
 #define COMMAND_TEMPLATE_H
+#include "env.h"
+#include "decimal.h"
 
 #define sizeof_field(s,m) (sizeof((((s*)0)->m)))
 

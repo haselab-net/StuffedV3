@@ -45,6 +45,7 @@
 #ifndef MCC_H
 #define	MCC_H
 #define WDT_CLR_KEY 0x5743
+#include "../boardType.h"
 #include <xc.h>
 #include "pin_manager.h"
 #include <stdint.h>

@@ -46,6 +46,7 @@
     Section: Includes
 */
 #include <xc.h>
+#include "../uart.h"
 
 /**
     void INTERRUPT_Initialize (void)
@@ -59,11 +60,11 @@ void INTERRUPT_Initialize (void)
     IPC9bits.SPI2TXIP = 6;    //    Priority: 6
     IPC9bits.SPI2TXIS = 0;    //    Sub Priority: 0
 
-    //	UART1
-	IPC5bits.U1RXIP = 4;	//	receive first
-	IPC5bits.U1RXIS = 0; 
-	IPC6bits.U1TXIP = 2;	//	the send
-	IPC6bits.U1TXIS = 0;
+    //	UART to commucate with the main board
+	IPC_UCRXIP = 4;	//	receive first
+	IPC_UCRXIS = 0; 
+	IPC_UCTXIP = 2;	//	the send
+	IPC_UCTXIS = 0;
 		
 	//    CTI: Core Timer
     IPC0bits.CTIP = 1;

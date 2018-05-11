@@ -46,7 +46,7 @@
   Section: Included Files
 */
 #include "uart2.h"
-#include "../env.h"
+#include "../uart.h"
 
 /**
   Section: UART2 APIs
@@ -60,16 +60,24 @@ void UART2_Initialize(void)
     U2MODE = (0x8008 & ~(1<<15)); // disabling UART ON bit  
     // UTXISEL TX_ONE_CHAR; UTXINV disabled; ADDR 0; MASK 0; URXEN disabled; OERR disabled; URXISEL RX_ONE_CHAR; UTXBRK disabled; UTXEN disabled; ADDEN disabled; 
     U2STA = 0x0;
+#if defined BOARD1_MOTORDRIVER
     // BaudRate = 3000000; Frequency = 24000000 Hz; BRG 1; 
     U2BRG = 0x1;
+#elif defined BOARD2_COMBINATION
+    // BaudRate = 2000000; Frequency = 24000000 Hz; BRG 2; 
+    U2BRG = 0x2;
+#else
+#error
+#endif
      
     //Make sure to set LAT bit corresponding to TxPin as high before UART initialization
+#if defined BOARD1_MOTORDRIVER
     U2STASET = _U2STA_UTXEN_MASK;
+#else    
+	//U2STASET = _U2STA_UTXEN_MASK;	//	Do not on TX until called by master.
+#endif
     U2MODESET = _U2MODE_ON_MASK;  // enabling UART ON bit
-    U2STASET = _U2STA_URXEN_MASK; 
-
-    
-    
+    U2STASET = _U2STA_URXEN_MASK;  
 }
 
 
@@ -125,8 +133,8 @@ static char mon_buffer[512];
 static int wp=0;
 static int rp=0;
 void monOut(){
-    if (rp != wp && !U2STAbits.UTXBF){
-		U2TXREG = mon_buffer[rp];
+    if (rp != wp && !UMSTAbits.UTXBF){
+		UMTXREG = mon_buffer[rp];
 		if (rp < sizeof(mon_buffer)) rp++;
 		else rp = 0;
 	}
@@ -145,8 +153,8 @@ void _mon_putc(char c) {
 }
 #else
 void _mon_putc(char c) {
-    while(U2STAbits.TRMT == 0);  
-    U2TXREG = c;        
+    while(UMSTAbits.TRMT == 0);  
+    UMTXREG = c;        
 }
 #endif
 

@@ -29,6 +29,8 @@
       <itemPath>command.h</itemPath>
       <itemPath>commandCommon.h</itemPath>
       <itemPath>../PCRobokey/CommandId.cs</itemPath>
+      <itemPath>uart.h</itemPath>
+      <itemPath>boardType.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -67,6 +69,7 @@
       <itemPath>Makefile</itemPath>
       <itemPath>MyConfig.mc3</itemPath>
       <itemPath>MyConfigDIP.mc3</itemPath>
+      <itemPath>B1Config.mc3</itemPath>
     </logicalFolder>
   </logicalFolder>
   <sourceRootList>
