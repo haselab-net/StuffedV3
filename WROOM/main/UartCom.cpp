@@ -6,6 +6,7 @@
 #include "driver/uart.h"
 #include "esp_log.h"
 #include "board.h"
+#include "../../PIC/BoardType.h"
 
 static char zero[80];
 
@@ -83,7 +84,7 @@ void Uart::EnumerateBoard() {
 	CommandPacketBD0 cmd;
 	ReturnPacketBD0 ret;
 	for (int i = 0; i <= MAXBOARDID; ++i) {
-		printf("Enumerate borad on uart #%d.", i);
+		printf("Enumerate borad on uart #%d-%d.", port, i);
 		cmd.commandId = CI_BOARD_INFO;
 		cmd.boardId = i;
 		uart_write_bytes(port, zero, 40);	//	clear pending command
@@ -152,6 +153,20 @@ void Uarts::EnumerateBoard() {
 		}
 	}
 }
+#if defined BOARD1_MOTORDRIVER
+#define U1RXPIN	32
+#define U1TXPIN	33	
+#define U2RXPIN	16
+#define U2TXPIN	17
+#elif defined BOARD2_COMBINATION
+#define U1TXPIN	16
+#define U1RXPIN	17	
+#define U2TXPIN	5
+#define U2RXPIN	18
+#else
+#error
+#endif
+
 void Uarts::Init() {
 	assert(NUART == 2);	//NUART must be much to followings.
 	printf("Start uarts");
@@ -163,9 +178,9 @@ void Uarts::Init() {
     uconf.flow_ctrl = UART_HW_FLOWCTRL_DISABLE;
     uconf.rx_flow_ctrl_thresh = 0;
     uconf.use_ref_tick = false;
-	uart[0]->Init(uconf, 32, 33); // pin must be changed. IO6-11 are reserved. (RX=32 Yellow, TX=33 Green)
+	uart[0]->Init(uconf, U1RXPIN, U1TXPIN); // pin must be changed. IO6-11 are reserved. (RX=32 Yellow, TX=33 Green)
 	printf(".");
-	uart[1]->Init(uconf, 16, 17);
+	uart[1]->Init(uconf, U2RXPIN, U2TXPIN);
 	printf(". done.\n");
 	EnumerateBoard();
 	uart[0]->CreateTask();

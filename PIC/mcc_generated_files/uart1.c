@@ -74,13 +74,10 @@ void UART1_Initialize(void)
 #if defined BOARD1_MOTORDRIVER
 	//U1STASET = _U1STA_UTXEN_MASK;	//	Do not on TX until called by master.
 #else    
-	U1STASET = _U1STA_UTXEN_MASK;	//	Do not on TX until called by master.
+	U1STASET = _U1STA_UTXEN_MASK;	//	Enable TX.
 #endif
     U1MODESET = _U1MODE_ON_MASK;	// enabling UART ON bit
-    U1STASET = _U1STA_URXEN_MASK; 
-
-    
-    
+    U1STASET = _U1STA_URXEN_MASK;
 }
 
 

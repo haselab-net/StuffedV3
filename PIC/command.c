@@ -1,7 +1,6 @@
 #include "decimal.h"
 #include "command.h"
 #include "control.h"
-#include "mcc_generated_files/uart1.h"
 #include "uart.h"
 #include "boardType.h"
 
@@ -132,17 +131,19 @@ void commandInit(){
 			cmdPacketLens[i][c] = cmdPacketLen[c];
 		}
 	}
+	UARTC_Initialize();
 	/*	10 = Interrupt flag bit is asserted while receive buffer is 3/4 or more full (i.e., has 6 or more data characters)
 		01 = Interrupt flag bit is asserted while receive buffer is 1/2 or more full (i.e., has 4 or more data characters)
 		00 = Interrupt flag bit is asserted while receive buffer is not empty (i.e., has at least 1 data character)	*/
 	UCSTAbits.URXISEL = 2;
-	IEC_UCRXIE = 1;	// Enable uart1 receive interrupt.
+	IEC_UCRXIE = 1;	// Enable UARTC receive interrupt.
+	CLEAR_IFS_UCRXIF;
 
-	//	timer to start TX1 after receive command header
-		//	2M baud/10bit = 200kBps= 5us/byte. 3600/24M=150us
-		//PR1 = 3600;		//	150us
-		PR1 = 600;			//	25us
-	}
+	//	timer to start TXC after receive command header
+	//	2M baud/10bit = 200kBps= 5us/byte. 3600/24M=150us
+	//PR1 = 3600;		//	150us
+	PR1 = 600;			//	25us
+}
 
 
 uint32_t timeRetCmd, timeTx;
@@ -189,7 +190,7 @@ void __attribute__ ((vector(_UARTC_TX_VECTOR), interrupt(IPL2AUTO))) _UARTC_TX_H
 }
 //	handler for rx interrupt
 //	Note: "IPL4" below must fit to "IPC5bits.UCRXIP = 4" in interrupt_manager.c;
-void __attribute__ ((vector(_UART1_RX_VECTOR), interrupt(IPL4AUTO))) _UART1_RX_HANDLER(void){
+void __attribute__ ((vector(_UARTC_RX_VECTOR), interrupt(IPL4AUTO))) _UARTC_RX_HANDLER(void){
 	int i;
 	union CommandHeader head;
 	static bool bRead;

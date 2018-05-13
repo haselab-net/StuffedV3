@@ -149,7 +149,12 @@ void monitor(){
 			ch = 0;
 			break;
 		case 'u':
-			printf("u1STA %8x\r\n", U1STA);
+			printf("uCSTA %8x", UCSTA);
+			while(UCSTAbits.URXDA){
+				printf(" %x", (int)UCRXREG);
+			}
+			printf("\r\n");
+			printf("uMSTA %8x\r\n", UMSTA);
 			ch = 0;
 			break;
 		case 'r':

@@ -73,8 +73,10 @@ void UART2_Initialize(void)
     //Make sure to set LAT bit corresponding to TxPin as high before UART initialization
 #if defined BOARD1_MOTORDRIVER
     U2STASET = _U2STA_UTXEN_MASK;
-#else    
+#elif defined BOARD2_COMBINATION
 	//U2STASET = _U2STA_UTXEN_MASK;	//	Do not on TX until called by master.
+#else
+#error
 #endif
     U2MODESET = _U2MODE_ON_MASK;  // enabling UART ON bit
     U2STASET = _U2STA_URXEN_MASK;  
