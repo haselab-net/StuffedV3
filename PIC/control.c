@@ -67,7 +67,17 @@ void readADC(){
 #elif defined BOARD2_COMBINATION
     /*  ADC connection
      M1:  AN11, AN4 (cos, sin)
-     M2:  AN13, AN12,    M3:  AN8, AN7,    M4:  AN1, AN0    */
+     M2:  AN13, AN12,    M3:  AN8, AN7,    M4:  AN1, AN0    
+	 
+AN7 AN8		6 7 
+AN0 AN1		0 1
+AN4 AN11	4 9
+AN12 AN13	10 11
+
+BUF 0 1 2 3  4 5 6 7  8   9 10 11
+AN  0 1 2 3  4 5 7 8 10  11 12 13 
+AN      2 3    5     10         
+*/
     mcos[0] = FilterForADC(mcos[0], ADC1BUF6 - mcosOffset[0]);
     msin[0] = FilterForADC(msin[0], ADC1BUF7 - msinOffset[0]);
     mcos[1] = FilterForADC(mcos[1], ADC1BUF0 - mcosOffset[1]);

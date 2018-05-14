@@ -88,7 +88,7 @@ void ADC1_Initialize (void)
 #if defined BOARD1_MOTORDRIVER
    AD1CON2 = 0x420;
 #elif defined BOARD2_COMBINATION
-   AD1CON2 = 0x42C;
+   AD1CON2 = 0x430;
 #else
 #error
 #endif
@@ -103,7 +103,7 @@ void ADC1_Initialize (void)
    AD1CSS = 0x3993;
 #elif defined BOARD2_COMBINATION
     // CSS9 disabled; CSS8 enabled; CSS7 enabled; CSS6 disabled; CSS5 enabled; CSS4 enabled; CSS3 enabled; CSS2 enabled; CSS1 enabled; CSS0 enabled; CSS13 enabled; CSS12 enabled; CSS11 enabled; CSS10 enabled; CSS30 disabled; CSS29 disabled; CSS28 disabled;
-    AD1CSS = 0x3D9F;
+    AD1CSS = 0x3DBF;
 #else
 #error
 #endif
