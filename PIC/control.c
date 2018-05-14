@@ -68,11 +68,11 @@ void readADC(){
     /*  ADC connection
      M1:  AN11, AN4 (cos, sin)
      M2:  AN13, AN12,    M3:  AN8, AN7,    M4:  AN1, AN0    */
-    mcos[0] = FilterForADC(mcos[0], ADC1BUF0 - mcosOffset[0]);
-    msin[0] = FilterForADC(msin[0], ADC1BUF1 - msinOffset[0]);
-    mcos[1] = FilterForADC(mcos[1], ADC1BUF6 - mcosOffset[1]);
-    msin[1] = FilterForADC(msin[1], ADC1BUF7 - msinOffset[1]);
-	mcos[2] = FilterForADC(mcos[2], ADC1BUF3 - mcosOffset[2]);
+    mcos[0] = FilterForADC(mcos[0], ADC1BUF6 - mcosOffset[0]);
+    msin[0] = FilterForADC(msin[0], ADC1BUF7 - msinOffset[0]);
+    mcos[1] = FilterForADC(mcos[1], ADC1BUF0 - mcosOffset[1]);
+    msin[1] = FilterForADC(msin[1], ADC1BUF1 - msinOffset[1]);
+	mcos[2] = FilterForADC(mcos[2], ADC1BUF4 - mcosOffset[2]);
 	msin[2] = FilterForADC(msin[2], ADC1BUF9 - msinOffset[2]);
 	mcos[3] = FilterForADC(mcos[3], ADC1BUF10 - mcosOffset[3]);
 	msin[3] = FilterForADC(msin[3], ADC1BUF11 - msinOffset[3]);
@@ -104,9 +104,6 @@ inline void setSpiPwm(SDEC ratio){
 }
 
 void setPwm(int ch, SDEC ratio){
-#ifdef MODULETEST
-	motorTorques[ch] = S2LDEC(ratio);
-#endif
     if (ratio > torqueLimit.max[ch]) ratio = torqueLimit.max[ch];
     if (ratio < torqueLimit.min[ch]) ratio = torqueLimit.min[ch];
 	//	Connector at the left most.
@@ -125,17 +122,16 @@ void setPwm(int ch, SDEC ratio){
 #elif defined BOARD2_COMBINATION
 		if (ratio < 0){
 			ratio = -ratio;
-			CCP1CON2bits.OCAEN = 1;
-			CCP1CON2bits.OCBEN = 0;	//	this size is 0 = low
+			RPOR1bits.RP6R = 6;		//	OCM2
+			RPOR4bits.RP20R = 0;	//	NC(PIO))
 		}else{
-			CCP1CON2bits.OCAEN = 0;
-			CCP1CON2bits.OCBEN = 1;
+			RPOR1bits.RP6R = 0;		//	NC(PIO))
+			RPOR4bits.RP20R = 6;	//	OCM2
 		}
-		CCP1RA = 0;
-		CCP1RB = (unsigned)CCP1PR * ratio >> SDEC_BITS;
+		CCP2RA = 0;
+		CCP2RB = (unsigned)CCP2PR * ratio >> SDEC_BITS;
 #endif
-	//	Connector at second position from left
-	}else if (ch == 1){
+	}else if (ch == 1){	//	Connector at second position from left
 #if defined BOARD1_MOTORDRIVER
 		if (ratio < 0){
 			ratio = -ratio;
@@ -145,18 +141,20 @@ void setPwm(int ch, SDEC ratio){
 			LATBbits.LATB6 = 0;	//	AIN1
 			LATBbits.LATB7 = 1;	//	AIN2
 		}
+		CCP2RA = 0;
+		CCP2RB = (unsigned)CCP2PR * ratio >> SDEC_BITS;
 #elif defined BOARD2_COMBINATION
 		if (ratio < 0){
 			ratio = -ratio;
-			RPOR1bits.RP6R = 6;		//	OCM2
-			RPOR4bits.RP20R = 0;	//	NC(PIO))
+			CCP1CON2bits.OCAEN = 1;
+			CCP1CON2bits.OCBEN = 0;
 		}else{
-			RPOR1bits.RP6R = 0;		//	NC(PIO))
-			RPOR4bits.RP20R = 6;	//	OCM2
+			CCP1CON2bits.OCAEN = 0;
+			CCP1CON2bits.OCBEN = 1;
 		}
+		CCP1RA = 0;
+		CCP1RB = (unsigned)CCP1PR * ratio >> SDEC_BITS;
 #endif
-		CCP2RA = 0;
-		CCP2RB = (unsigned)CCP2PR * ratio >> SDEC_BITS;
 	//	Connector at third position from left
 	}else if (ch == 2){
 #if defined BOARD1_MOTORDRIVER
@@ -172,11 +170,11 @@ void setPwm(int ch, SDEC ratio){
 #elif defined BOARD2_COMBINATION
 		if (ratio < 0){
 			ratio = -ratio;
-			RPOR1bits.RP6R = 7;		//	OCM3
-			RPOR4bits.RP20R = 0;	//	NC(PIO))
+			RPOR1bits.RP5R = 7;		//	OCM3
+			RPOR2bits.RP11R = 0;	//	NC(PIO))
 		}else{
-			RPOR1bits.RP6R = 0;		//	NC(PIO))
-			RPOR4bits.RP20R = 7;	//	OCM3
+			RPOR1bits.RP5R = 0;		//	NC(PIO))
+			RPOR2bits.RP11R = 7;	//	OCM3
 		}
 		CCP3RA = 0;
 		CCP3RB = (unsigned)CCP3PR * ratio >> SDEC_BITS;
@@ -198,10 +196,10 @@ void setPwm(int ch, SDEC ratio){
 		if (ratio < 0){
 			ratio = -ratio;
 			RPOR4bits.RP19R = 3;		//	SDO2
-			RPOR0bits.RP3R = 0;			//	NC(PIO))
+			RPOR0bits.RP4R = 0;			//	NC(PIO))
 		}else{
 			RPOR4bits.RP19R = 0;		//	NC(PIO))
-			RPOR0bits.RP3R = 3;			//	SDO2
+			RPOR0bits.RP4R = 3;			//	SDO2
 		}		
 		setSpiPwm(ratio);
 #endif

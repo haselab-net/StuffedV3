@@ -50,6 +50,7 @@ int main(void)
 
     controlInit();
 	commandInit();
+	setPwm(0, SDEC_ONE*0.1);
 	while(1){
 		if (!uartExecCommand()){
 			uint32_t now = _CP0_GET_COUNT();

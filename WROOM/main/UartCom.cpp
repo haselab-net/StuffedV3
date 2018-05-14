@@ -10,7 +10,7 @@
 
 static char zero[80];
 
-void Uart::Init(uart_config_t conf, int rxPin, int txPin){
+void Uart::Init(uart_config_t conf, int txPin, int rxPin){
 	uart_param_config(port, &conf);
 	uart_set_pin(port, txPin, rxPin, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
 	uart_driver_install(port, 512, 512, 10, NULL, 0);
@@ -154,10 +154,10 @@ void Uarts::EnumerateBoard() {
 	}
 }
 #if defined BOARD1_MOTORDRIVER
-#define U1RXPIN	32
 #define U1TXPIN	33	
-#define U2RXPIN	16
+#define U1RXPIN	32
 #define U2TXPIN	17
+#define U2RXPIN	16
 #elif defined BOARD2_COMBINATION
 #define U1TXPIN	16
 #define U1RXPIN	17	
@@ -178,9 +178,9 @@ void Uarts::Init() {
     uconf.flow_ctrl = UART_HW_FLOWCTRL_DISABLE;
     uconf.rx_flow_ctrl_thresh = 0;
     uconf.use_ref_tick = false;
-	uart[0]->Init(uconf, U1RXPIN, U1TXPIN); // pin must be changed. IO6-11 are reserved. (RX=32 Yellow, TX=33 Green)
+	uart[0]->Init(uconf, U1TXPIN, U1RXPIN); // pin must be changed. IO6-11 are reserved. (RX=32 Yellow, TX=33 Green)
 	printf(".");
-	uart[1]->Init(uconf, U2RXPIN, U2TXPIN);
+	uart[1]->Init(uconf, U2TXPIN, U2RXPIN);
 	printf(". done.\n");
 	EnumerateBoard();
 	uart[0]->CreateTask();

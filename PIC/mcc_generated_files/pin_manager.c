@@ -65,7 +65,7 @@ void PIN_MANAGER_Initialize(void)
     LATB = 0x4010;
     LATC = 0x0004;
 #elif defined BOARD2_COMBINATION
-    LATB = 0x4400;
+    LATB = 0x4800;
     LATC = 0x0000;
 #endif
     /****************************************************************************
@@ -74,13 +74,14 @@ void PIN_MANAGER_Initialize(void)
 #if defined BOARD1_MOTORDRIVER
     TRISA = 0x000B;
     TRISB = 0xF00F;
+    TRISC = 0x0003;		//	
 #elif defined BOARD2_COMBINATION
-    TRISA = 0x000F;
-    TRISB = 0xBD6F;		//	U2TX set to input	11i 10i 9o 8i
+    TRISA = 0x0003;		//					            9o 4o  3210i
+    TRISB = 0xBC6F;		//	U2TX set to input	11i 10i 9o 8o  7o6i5i4o 3210i 
+    TRISC = 0x010B;		//							     9o8i           3i2o10i
 #else
 #error
 #endif
-    TRISC = 0x0003;
 
     /****************************************************************************
      * Setting the Weak Pull Up and Weak Pull Down SFR(s)
@@ -111,7 +112,7 @@ void PIN_MANAGER_Initialize(void)
     ANSELA = 0x0007;
     ANSELB = 0x300C;
 #elif defined BOARD2_COMBINATION
-    ANSELA = 0x000F;
+    ANSELA = 0x000B;
     ANSELB = 0x300F;	//0xB00F for AD
 #endif
     ANSELC = 0x0003;
@@ -131,13 +132,13 @@ void PIN_MANAGER_Initialize(void)
 #elif defined BOARD2_COMBINATION
 //    RPINR9bits.U2RXR = 18;     //RP18=RB11->UART2:U2RX;
 //    RPOR4bits.RP17R = 0x0001;  //RP17=RB10->UART2:U2TX;
-    RPINR9bits.U2RXR = 17;     //RP17=RB10->UART2:U2RX;
-    RPOR4bits.RP18R = 0x0001;  //RP18=RB11->UART2:U2TX;
+    RPINR9bits.U2RXR = 0x0011;   //RB10->UART2:U2RX;
+    RPOR4bits.RP18R = 0x0001;   //RB11->UART2:U2TX;
     RPOR1bits.RP5R = 0x0007;   //RB4->SCCP3:OCM3;
-    RPOR1bits.RP6R = 0x0007;   //RA4->SCCP3:OCM3;
-    RPOR4bits.RP19R = 0x0003;  //RC9->SPI2:SDO2;
-    RPOR4bits.RP20R = 0x0006;  //RA9->SCCP2:OCM2;
-    RPOR2bits.RP11R = 0x0007;  //RB7->SCCP3:OCM3;
+    RPOR1bits.RP6R = 0x0006;   //RA4->SCCP2:OCM2;
+    RPOR4bits.RP19R = 0x0003;   //RC9->SPI2:SDO2;
+    RPOR4bits.RP20R = 0x0006;   //RA9->SCCP2:OCM2;
+    RPOR2bits.RP11R = 0x0007;   //RB7->SCCP3:OCM3;
 #else
 #error
 #endif

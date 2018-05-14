@@ -56,124 +56,140 @@ void pwmTest2(){
 	LATBbits.LATB10 = 1; // BIN1R
 	LATBbits.LATB11 = 1; // BIN2R
 }
+struct MonitorFunc{
+	char ch;
+	char* desc;
+	void (*func) ();
+	bool callAgain;
+};
+void showAD(){
+	int i;
+	printf("ad");
+	for(i=0; i<16; ++i) printf(" %x", *(&ADC1BUF0 + 4*i));
+	printf("\r\n");
+}
+void showADInMotorOrder(){
+	printf("Ad");
+#if defined BOARD1_MOTORDRIVER
+	printf(" %d %d ", ADC1BUF5, ADC1BUF2);
+	printf(" %d %d ", ADC1BUF7, ADC1BUF6);
+	printf(" %d %d ", ADC1BUF1, ADC1BUF0);
+	printf(" %d %d\r\n", ADC1BUF4, ADC1BUF3);
+#elif defined BOARD2_COMBINATION			
+	printf(" %d %d ", ADC1BUF6, ADC1BUF7);
+	printf(" %d %d ", ADC1BUF0, ADC1BUF1);
+	printf(" %d %d ", ADC1BUF4, ADC1BUF9);
+	printf(" %d %d\r\n", ADC1BUF10, ADC1BUF11);
+#else
+#error
+#endif
+}
+
+void showControlStatus(){
+	static uint32_t ct;
+	if (ct != controlCount){
+		ct = controlCount;
+		printf("ctrl\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\r\n", 
+				motorState.pos[0], motorTarget.pos[0], motorState.vel[0], motorTarget.vel[0], 
+				targets.write, targets.read, targets.tick, targets.buf[(targets.read+1)%NTARGET].period, ct);
+	}
+}
+void showCoreTimer(){
+	printf("Core timer cur:%8x cmp:%8x remain:%5d\r\n", 
+			_CP0_GET_COUNT(), _CP0_GET_COMPARE(), coretimerRemainTime);
+}
+void logLevelUp(){
+	logLevel ++;
+	printf("log level = %d", logLevel);
+}
+void logLevelDown(){
+	logLevel --;
+	printf("Log level = %d", logLevel);
+}
+void toggleControlTimer(){
+	if (IEC0bits.CTIE){
+		CORETIMER_DisableInterrupt();
+		printf("stop timer interrupt.\r\n");
+	}else{
+		CORETIMER_Initialize();
+		printf("Start timer interrupt.\r\n");
+	}
+}
+void showUartState(){
+	printf("uCSTA %8x", UCSTA);
+	while(UCSTAbits.URXDA){
+		printf(" %x", (int)UCRXREG);
+	}
+	printf("\r\n");
+	printf("uMSTA %8x\r\n", UMSTA);
+}
+void showMotorRotation(){
+	int i;
+	printf("r");
+	for(i=0; i<NMOTOR; ++i){
+		printf(" %i=%2.3f (%d,%d)", i, LDEC2DBL(motorState.pos[i]), 
+				mcos[i], msin[i]);
+	}
+	printf("\r\n");
+}
+
+static int motorCh;
+static int pwm[NMOTOR];
+void selectMotor(){
+	motorCh++;
+	if (motorCh >= NMOTOR) motorCh = 0;
+	printf("Select motor %d. pww is %d\r\n", motorCh, pwm[motorCh]);
+}
+void pwmUp(){
+	if (pwm[motorCh] < 10) pwm[motorCh] ++;
+	printf("Set pwm %d to motor %d \r\n", pwm[motorCh], motorCh);
+	setPwm(motorCh, pwm[motorCh] * (SDEC_ONE/10));
+}
+void pwmDown(){
+	if (pwm[motorCh] > -10) pwm[motorCh] --;
+	printf("Set pwm %d to motor %d \r\n", pwm[motorCh], motorCh);
+	setPwm(motorCh, pwm[motorCh] * (SDEC_ONE/10));
+}
+struct MonitorFunc monitors[] = {
+	{'a', "Show all A/D value", showAD, true},
+	{'A', "Show A/D value in motor order", showADInMotorOrder, true},
+	{'r', "Show motor rotation", showMotorRotation, true},
+	{'c', "Show control status", showControlStatus, true},
+	{'C', "Show core timer", showCoreTimer, true},
+	{'u', "show uart status", showUartState, true},
+	{'L', "Log level up", logLevelUp, false},
+	{'l', "Log level down", logLevelDown, false},
+	{'s', "toggle control timer", toggleControlTimer, false},
+	{'m', "Select motor", selectMotor, false},
+	{'P', "Pwm up", pwmUp, false},
+	{'p', "Pwm down", pwmDown, false},
+};
+void showHelp(){
+	int i;
+	for(i=0; i<sizeof(monitors)/sizeof(monitors[0]); ++i){
+		printf("%c: %s %c\r\n", monitors[i].ch, monitors[i].desc, monitors[i].callAgain ? 'R':' ');
+	}
+}
+
 void monitor(){
 	static int ch = 0;
+	bool bHit = false;
 	int i;
 	if (UMSTAbits.URXDA){
 		ch = UMRXREG;
 	}
-	if (ch != ' ' && ch != 0){
-        while(monWaiting()) monOut()    ;
-        //printf("%c", ch);
-    }
-	switch(ch){
-#if 0	//	Dangerous for full circuit.
-		case 'S':
-			SPI2BUF = 0xFF00FF00;
-			break;
-		case 'O':
-			outTest(1);
-			ch = 0;
-			break;
-		case 'o':
-			outTest(0);
-			ch = 0;
-			break;
-		case 'w':
-			pwmTest2();
-			printf(" pwm test 2.\r\n");
-			ch = 0;
-			break;				
-		case 'p':
-			pwmTest(0);
-			ch = 0;
-			break;
-		case 'P':
-			pwmTest(1);
-			ch = 0;
-			break;
-#endif
-		case 'a':	//	ad converter
-			printf("ad");
-			for(i=0; i<16; ++i) printf(" %x", *(&ADC1BUF0 + 4*i));
-			printf("\r\n");
-			break;
-		case 'A':	//	ad converter in motor order
-			printf("Ad");
-#if defined BOARD1_MOTORDRIVER
-			printf(" %d %d ", ADC1BUF5, ADC1BUF2);
-			printf(" %d %d ", ADC1BUF7, ADC1BUF6);
-			printf(" %d %d ", ADC1BUF1, ADC1BUF0);
-			printf(" %d %d\r\n", ADC1BUF4, ADC1BUF3);
-#elif defined BOARD2_COMBINATION			
-			printf(" %d %d ", ADC1BUF0, ADC1BUF1);
-			printf(" %d %d ", ADC1BUF6, ADC1BUF7);
-			printf(" %d %d ", ADC1BUF3, ADC1BUF9);
-			printf(" %d %d\r\n", ADC1BUF10, ADC1BUF11);
-#else
-#error
-#endif
-
-			break;
-		case 'c':{	//	control status
-			static uint32_t ct;
-			if (ct != controlCount){
-				ct = controlCount;
-				printf("ctrl\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\r\n", 
-						motorState.pos[0], motorTarget.pos[0], motorState.vel[0], motorTarget.vel[0], 
-						targets.write, targets.read, targets.tick, targets.buf[(targets.read+1)%NTARGET].period, ct);
+	for(i=0; i<sizeof(monitors)/sizeof(monitors[0]); ++i){
+		if (ch == monitors[i].ch){
+			monitors[i].func();
+			bHit = true;
+			if (monitors[i].callAgain == false){
+				ch = 0;
 			}
-		}break;
-		case 'C':
-			printf("Core timer cur:%8x cmp:%8x remain:%5d\r\n", 
-					_CP0_GET_COUNT(), _CP0_GET_COMPARE(), coretimerRemainTime);
-			break;
-		case 'l':
-			logLevel ++;
-			printf("log level = %d", logLevel);
-			ch = 0;
-			break;
-		case 'L':
-			logLevel --;
-			printf("Log level = %d", logLevel);
-			ch = 0;
-			break;
-		case 's':
-			if (IEC0bits.CTIE){
-				CORETIMER_DisableInterrupt();
-				printf("stop timer interrupt.\r\n");
-			}else{
-				CORETIMER_Initialize();
-				printf("Start timer interrupt.\r\n");
-			}
-			ch = 0;
-			break;
-		case 'u':
-			printf("uCSTA %8x", UCSTA);
-			while(UCSTAbits.URXDA){
-				printf(" %x", (int)UCRXREG);
-			}
-			printf("\r\n");
-			printf("uMSTA %8x\r\n", UMSTA);
-			ch = 0;
-			break;
-		case 'r':
-			{
-			printf("r");
-			int i;
-			for(i=0; i<NMOTOR; ++i){
-				printf(" %i=%2.3f (%d,%d)", i, LDEC2DBL(motorState.pos[i]), 
-						mcos[i], msin[i]);
-			}
-			printf("\r\n");
-			}
-			break;
-			
-		case ' ':
-		case 0:	//	operation completed.
-			break;
-		default:
-			printf(" not used\r\n");
-			break;
+		}
+	}
+	if (!bHit && ch!=' ' && ch != 0){
+		printf("'%c' is not used.\r\n", ch);
+		showHelp();
+		ch = 0;
 	}
 }
