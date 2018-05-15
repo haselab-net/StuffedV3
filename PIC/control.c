@@ -132,11 +132,11 @@ void setPwm(int ch, SDEC ratio){
 #elif defined BOARD2_COMBINATION
 		if (ratio < 0){
 			ratio = -ratio;
-			RPOR1bits.RP6R = 6;		//	OCM2
-			RPOR4bits.RP20R = 0;	//	NC(PIO))
-		}else{
 			RPOR1bits.RP6R = 0;		//	NC(PIO))
 			RPOR4bits.RP20R = 6;	//	OCM2
+		}else{
+			RPOR1bits.RP6R = 6;		//	OCM2
+			RPOR4bits.RP20R = 0;	//	NC(PIO))
 		}
 		CCP2RA = 0;
 		CCP2RB = (unsigned)CCP2PR * ratio >> SDEC_BITS;
@@ -156,11 +156,11 @@ void setPwm(int ch, SDEC ratio){
 #elif defined BOARD2_COMBINATION
 		if (ratio < 0){
 			ratio = -ratio;
-			CCP1CON2bits.OCAEN = 1;
-			CCP1CON2bits.OCBEN = 0;
-		}else{
 			CCP1CON2bits.OCAEN = 0;
 			CCP1CON2bits.OCBEN = 1;
+		}else{
+			CCP1CON2bits.OCAEN = 1;
+			CCP1CON2bits.OCBEN = 0;
 		}
 		CCP1RA = 0;
 		CCP1RB = (unsigned)CCP1PR * ratio >> SDEC_BITS;
@@ -205,11 +205,11 @@ void setPwm(int ch, SDEC ratio){
 #elif defined BOARD2_COMBINATION
 		if (ratio < 0){
 			ratio = -ratio;
-			RPOR4bits.RP19R = 3;		//	SDO2
-			RPOR0bits.RP4R = 0;			//	NC(PIO))
-		}else{
 			RPOR4bits.RP19R = 0;		//	NC(PIO))
 			RPOR0bits.RP4R = 3;			//	SDO2
+		}else{
+			RPOR4bits.RP19R = 3;		//	SDO2
+			RPOR0bits.RP4R = 0;			//	NC(PIO))
 		}		
 		setSpiPwm(ratio);
 #endif
