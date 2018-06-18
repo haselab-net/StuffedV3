@@ -196,15 +196,65 @@ namespace Robokey
             panel.Width = udMin.Width + la.Width;
         }
     }
+    public class MotorPd
+    {
+        public Panel panel;
+        public NumericUpDown udK;
+        public NumericUpDown udB;
+        public int K
+        {
+            set { udK.Value = value; }
+            get { return (int)udK.Value; }
+        }
+        public int B
+        {
+            set { udB.Value = value; }
+            get { return (int)udB.Value; }
+        }
+        public MotorPd()
+        {
+            int width = 100;
+            udK = new NumericUpDown();
+            udB = new NumericUpDown();
+            udK.Width = width;
+            udB.Width = width;
+            panel = new Panel();
+            udK.Minimum = udB.Minimum = -32000;
+            udK.Maximum = udB.Maximum = 32000;
+            K = 1024*10;
+            B = 1024*5;
+            udK.Top = 0;
+            Label la = new Label();
+            la.Width = 20;
+            la.Text = "K:";
+            la.Top = udK.Top;
+            udK.Left = la.Width;
+            panel.Controls.Add(udK);
+            panel.Controls.Add(la);
+            udB.Top = udK.Top + udK.Height;
+            la = new Label();
+            la.Width = 20;
+            la.Text = "B:";
+            la.Top = udB.Top;
+            udB.Left = la.Width;
+            panel.Controls.Add(udB);
+            panel.Controls.Add(la);
+            panel.Height = udK.Height + udB.Height;
+            panel.Width = udK.Width + la.Width;
+        }
+    }
+
     public class Motor {
         public MotorPosition position;
         public MotorLimit limit;
         public MotorTorque torque;
+        public MotorPd pd;
         public Motor()
         {
             position = new MotorPosition();
             limit = new MotorLimit();
             torque = new MotorTorque();
+            pd = new MotorPd();
             Minimum = -10000;
             Maximum = 30000;
             limit.udMax.ValueChanged += MaximumChanged;

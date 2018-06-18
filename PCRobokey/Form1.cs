@@ -70,6 +70,7 @@ namespace Robokey
             flPose.Controls.Clear();
             flLength.Controls.Clear();
             flTorque.Controls.Clear();
+            flPd.Controls.Clear();
             for (int i = 0; i < udpComm.RobotInfo.nMotor; ++i)
             {
                 motor = new Motor();
@@ -78,6 +79,7 @@ namespace Robokey
                 flPose.Controls.Add(motor.position.panel);
                 flLength.Controls.Add(motor.limit.panel);
                 flTorque.Controls.Add(motor.torque.panel);
+                flPd.Controls.Add(motor.pd.panel);
             }
             if (motor != null) flLength.Width = motor.limit.panel.Width * 3 + 20;
         }
@@ -647,6 +649,18 @@ namespace Robokey
         private void ckSense_CheckedChanged(object sender, EventArgs e)
         {
             UpdateRunTimer();
+        }
+
+        private void btSendPD_Click(object sender, EventArgs e)
+        {
+            int n = udpComm.RobotInfo.nMotor;
+            int[] k = new int[n];
+            int[] b = new int[n];
+            for (int i = 0; i < n; ++i) {
+                k[i] = motors[i].pd.K;
+                b[i] = motors[i].pd.B;
+            }
+            udpComm.SendPdParam(n, k, b);
         }
 
         void OnUpdateRobotState()

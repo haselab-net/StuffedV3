@@ -75,6 +75,10 @@
             this.tbState = new System.Windows.Forms.TextBox();
             this.tpMessage = new System.Windows.Forms.TabPage();
             this.tbMessage = new System.Windows.Forms.TextBox();
+            this.tabPdParam = new System.Windows.Forms.TabPage();
+            this.panel3 = new System.Windows.Forms.Panel();
+            this.btSendPD = new System.Windows.Forms.Button();
+            this.flPd = new System.Windows.Forms.FlowLayoutPanel();
             ((System.ComponentModel.ISupportInitialize)(this.track)).BeginInit();
             this.panelCom.SuspendLayout();
             this.panel2.SuspendLayout();
@@ -95,6 +99,8 @@
             this.tabInfo.SuspendLayout();
             this.tpState.SuspendLayout();
             this.tpMessage.SuspendLayout();
+            this.tabPdParam.SuspendLayout();
+            this.panel3.SuspendLayout();
             this.SuspendLayout();
             // 
             // track
@@ -442,6 +448,7 @@
             this.tabControl.Controls.Add(this.tabPoseEditor);
             this.tabControl.Controls.Add(this.tabMotors);
             this.tabControl.Controls.Add(this.tabTorque);
+            this.tabControl.Controls.Add(this.tabPdParam);
             this.tabControl.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl.Location = new System.Drawing.Point(0, 0);
             this.tabControl.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
@@ -638,6 +645,46 @@
             this.tbMessage.TabIndex = 0;
             this.tbMessage.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.tbMessage_KeyPress);
             // 
+            // tabPdParam
+            // 
+            this.tabPdParam.Controls.Add(this.flPd);
+            this.tabPdParam.Controls.Add(this.panel3);
+            this.tabPdParam.Location = new System.Drawing.Point(4, 28);
+            this.tabPdParam.Name = "tabPdParam";
+            this.tabPdParam.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPdParam.Size = new System.Drawing.Size(654, 548);
+            this.tabPdParam.TabIndex = 3;
+            this.tabPdParam.Text = "PD";
+            this.tabPdParam.UseVisualStyleBackColor = true;
+            // 
+            // panel3
+            // 
+            this.panel3.Controls.Add(this.btSendPD);
+            this.panel3.Dock = System.Windows.Forms.DockStyle.Top;
+            this.panel3.Location = new System.Drawing.Point(3, 3);
+            this.panel3.Name = "panel3";
+            this.panel3.Size = new System.Drawing.Size(648, 34);
+            this.panel3.TabIndex = 0;
+            // 
+            // btSendPD
+            // 
+            this.btSendPD.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btSendPD.Location = new System.Drawing.Point(3, 3);
+            this.btSendPD.Name = "btSendPD";
+            this.btSendPD.Size = new System.Drawing.Size(155, 31);
+            this.btSendPD.TabIndex = 0;
+            this.btSendPD.Text = "Set Param";
+            this.btSendPD.UseVisualStyleBackColor = true;
+            this.btSendPD.Click += new System.EventHandler(this.btSendPD_Click);
+            // 
+            // flPd
+            // 
+            this.flPd.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.flPd.Location = new System.Drawing.Point(3, 37);
+            this.flPd.Name = "flPd";
+            this.flPd.Size = new System.Drawing.Size(648, 508);
+            this.flPd.TabIndex = 1;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 18F);
@@ -684,6 +731,8 @@
             this.tpState.PerformLayout();
             this.tpMessage.ResumeLayout(false);
             this.tpMessage.PerformLayout();
+            this.tabPdParam.ResumeLayout(false);
+            this.panel3.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -736,6 +785,10 @@
         private System.Windows.Forms.NumericUpDown udTick;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.CheckBox ckSense;
+        private System.Windows.Forms.TabPage tabPdParam;
+        private System.Windows.Forms.FlowLayoutPanel flPd;
+        private System.Windows.Forms.Panel panel3;
+        private System.Windows.Forms.Button btSendPD;
     }
 }
 
