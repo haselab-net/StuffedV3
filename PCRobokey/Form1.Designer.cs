@@ -70,15 +70,17 @@
             this.flLength = new System.Windows.Forms.FlowLayoutPanel();
             this.tabTorque = new System.Windows.Forms.TabPage();
             this.flTorque = new System.Windows.Forms.FlowLayoutPanel();
+            this.tabPdParam = new System.Windows.Forms.TabPage();
+            this.flPd = new System.Windows.Forms.FlowLayoutPanel();
+            this.panel3 = new System.Windows.Forms.Panel();
+            this.btSendPD = new System.Windows.Forms.Button();
             this.tabInfo = new System.Windows.Forms.TabControl();
             this.tpState = new System.Windows.Forms.TabPage();
             this.tbState = new System.Windows.Forms.TextBox();
             this.tpMessage = new System.Windows.Forms.TabPage();
             this.tbMessage = new System.Windows.Forms.TextBox();
-            this.tabPdParam = new System.Windows.Forms.TabPage();
-            this.panel3 = new System.Windows.Forms.Panel();
-            this.btSendPD = new System.Windows.Forms.Button();
-            this.flPd = new System.Windows.Forms.FlowLayoutPanel();
+            this.panel4 = new System.Windows.Forms.Panel();
+            this.btSendTorque = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.track)).BeginInit();
             this.panelCom.SuspendLayout();
             this.panel2.SuspendLayout();
@@ -96,11 +98,12 @@
             ((System.ComponentModel.ISupportInitialize)(this.udkeyTime)).BeginInit();
             this.tabMotors.SuspendLayout();
             this.tabTorque.SuspendLayout();
+            this.tabPdParam.SuspendLayout();
+            this.panel3.SuspendLayout();
             this.tabInfo.SuspendLayout();
             this.tpState.SuspendLayout();
             this.tpMessage.SuspendLayout();
-            this.tabPdParam.SuspendLayout();
-            this.panel3.SuspendLayout();
+            this.panel4.SuspendLayout();
             this.SuspendLayout();
             // 
             // track
@@ -475,10 +478,10 @@
             // 
             this.flPose.AutoSize = true;
             this.flPose.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.flPose.Location = new System.Drawing.Point(5, 42);
+            this.flPose.Location = new System.Drawing.Point(5, 41);
             this.flPose.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
             this.flPose.Name = "flPose";
-            this.flPose.Size = new System.Drawing.Size(644, 502);
+            this.flPose.Size = new System.Drawing.Size(644, 503);
             this.flPose.TabIndex = 0;
             // 
             // panel1
@@ -492,16 +495,16 @@
             this.panel1.Location = new System.Drawing.Point(5, 4);
             this.panel1.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(644, 38);
+            this.panel1.Size = new System.Drawing.Size(644, 37);
             this.panel1.TabIndex = 9;
             // 
             // btCopy
             // 
             this.btCopy.AutoSize = true;
-            this.btCopy.Location = new System.Drawing.Point(398, 3);
+            this.btCopy.Location = new System.Drawing.Point(398, 2);
             this.btCopy.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
             this.btCopy.Name = "btCopy";
-            this.btCopy.Size = new System.Drawing.Size(89, 33);
+            this.btCopy.Size = new System.Drawing.Size(89, 31);
             this.btCopy.TabIndex = 10;
             this.btCopy.Text = "&Copy";
             this.btCopy.UseVisualStyleBackColor = true;
@@ -519,10 +522,10 @@
             // 
             // btSave
             // 
-            this.btSave.Location = new System.Drawing.Point(314, 3);
+            this.btSave.Location = new System.Drawing.Point(314, 2);
             this.btSave.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
             this.btSave.Name = "btSave";
-            this.btSave.Size = new System.Drawing.Size(83, 33);
+            this.btSave.Size = new System.Drawing.Size(83, 31);
             this.btSave.TabIndex = 7;
             this.btSave.Text = "&Save";
             this.btSave.UseVisualStyleBackColor = true;
@@ -530,10 +533,10 @@
             // 
             // btLoad
             // 
-            this.btLoad.Location = new System.Drawing.Point(228, 3);
+            this.btLoad.Location = new System.Drawing.Point(228, 2);
             this.btLoad.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
             this.btLoad.Name = "btLoad";
-            this.btLoad.Size = new System.Drawing.Size(83, 33);
+            this.btLoad.Size = new System.Drawing.Size(83, 31);
             this.btLoad.TabIndex = 6;
             this.btLoad.Text = "&Load";
             this.btLoad.UseVisualStyleBackColor = true;
@@ -564,11 +567,12 @@
             this.flLength.Location = new System.Drawing.Point(0, 0);
             this.flLength.Name = "flLength";
             this.flLength.Size = new System.Drawing.Size(654, 548);
-            this.flLength.TabIndex = 0;
+            this.flLength.TabIndex = 2;
             // 
             // tabTorque
             // 
             this.tabTorque.Controls.Add(this.flTorque);
+            this.tabTorque.Controls.Add(this.panel4);
             this.tabTorque.Location = new System.Drawing.Point(4, 28);
             this.tabTorque.Name = "tabTorque";
             this.tabTorque.Size = new System.Drawing.Size(654, 548);
@@ -580,10 +584,50 @@
             // 
             this.flTorque.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.flTorque.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.flTorque.Location = new System.Drawing.Point(0, 0);
+            this.flTorque.Location = new System.Drawing.Point(0, 36);
             this.flTorque.Name = "flTorque";
-            this.flTorque.Size = new System.Drawing.Size(654, 548);
+            this.flTorque.Size = new System.Drawing.Size(654, 512);
             this.flTorque.TabIndex = 1;
+            // 
+            // tabPdParam
+            // 
+            this.tabPdParam.Controls.Add(this.flPd);
+            this.tabPdParam.Controls.Add(this.panel3);
+            this.tabPdParam.Location = new System.Drawing.Point(4, 28);
+            this.tabPdParam.Name = "tabPdParam";
+            this.tabPdParam.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPdParam.Size = new System.Drawing.Size(654, 548);
+            this.tabPdParam.TabIndex = 3;
+            this.tabPdParam.Text = "PD";
+            this.tabPdParam.UseVisualStyleBackColor = true;
+            // 
+            // flPd
+            // 
+            this.flPd.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.flPd.Location = new System.Drawing.Point(3, 37);
+            this.flPd.Name = "flPd";
+            this.flPd.Size = new System.Drawing.Size(648, 508);
+            this.flPd.TabIndex = 1;
+            // 
+            // panel3
+            // 
+            this.panel3.Controls.Add(this.btSendPD);
+            this.panel3.Dock = System.Windows.Forms.DockStyle.Top;
+            this.panel3.Location = new System.Drawing.Point(3, 3);
+            this.panel3.Name = "panel3";
+            this.panel3.Size = new System.Drawing.Size(648, 34);
+            this.panel3.TabIndex = 0;
+            // 
+            // btSendPD
+            // 
+            this.btSendPD.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.btSendPD.Location = new System.Drawing.Point(490, 3);
+            this.btSendPD.Name = "btSendPD";
+            this.btSendPD.Size = new System.Drawing.Size(155, 28);
+            this.btSendPD.TabIndex = 0;
+            this.btSendPD.Text = "Send Param";
+            this.btSendPD.UseVisualStyleBackColor = true;
+            this.btSendPD.Click += new System.EventHandler(this.btSendPD_Click);
             // 
             // tabInfo
             // 
@@ -645,45 +689,24 @@
             this.tbMessage.TabIndex = 0;
             this.tbMessage.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.tbMessage_KeyPress);
             // 
-            // tabPdParam
+            // panel4
             // 
-            this.tabPdParam.Controls.Add(this.flPd);
-            this.tabPdParam.Controls.Add(this.panel3);
-            this.tabPdParam.Location = new System.Drawing.Point(4, 28);
-            this.tabPdParam.Name = "tabPdParam";
-            this.tabPdParam.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPdParam.Size = new System.Drawing.Size(654, 548);
-            this.tabPdParam.TabIndex = 3;
-            this.tabPdParam.Text = "PD";
-            this.tabPdParam.UseVisualStyleBackColor = true;
+            this.panel4.Controls.Add(this.btSendTorque);
+            this.panel4.Dock = System.Windows.Forms.DockStyle.Top;
+            this.panel4.Location = new System.Drawing.Point(0, 0);
+            this.panel4.Name = "panel4";
+            this.panel4.Size = new System.Drawing.Size(654, 36);
+            this.panel4.TabIndex = 2;
             // 
-            // panel3
+            // btSendTorque
             // 
-            this.panel3.Controls.Add(this.btSendPD);
-            this.panel3.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panel3.Location = new System.Drawing.Point(3, 3);
-            this.panel3.Name = "panel3";
-            this.panel3.Size = new System.Drawing.Size(648, 34);
-            this.panel3.TabIndex = 0;
-            // 
-            // btSendPD
-            // 
-            this.btSendPD.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.btSendPD.Location = new System.Drawing.Point(3, 3);
-            this.btSendPD.Name = "btSendPD";
-            this.btSendPD.Size = new System.Drawing.Size(155, 31);
-            this.btSendPD.TabIndex = 0;
-            this.btSendPD.Text = "Set Param";
-            this.btSendPD.UseVisualStyleBackColor = true;
-            this.btSendPD.Click += new System.EventHandler(this.btSendPD_Click);
-            // 
-            // flPd
-            // 
-            this.flPd.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.flPd.Location = new System.Drawing.Point(3, 37);
-            this.flPd.Name = "flPd";
-            this.flPd.Size = new System.Drawing.Size(648, 508);
-            this.flPd.TabIndex = 1;
+            this.btSendTorque.Location = new System.Drawing.Point(457, 3);
+            this.btSendTorque.Name = "btSendTorque";
+            this.btSendTorque.Size = new System.Drawing.Size(194, 30);
+            this.btSendTorque.TabIndex = 0;
+            this.btSendTorque.Text = "Send Torque Limit";
+            this.btSendTorque.UseVisualStyleBackColor = true;
+            this.btSendTorque.Click += new System.EventHandler(this.btSendTorque_Click);
             // 
             // Form1
             // 
@@ -726,13 +749,14 @@
             ((System.ComponentModel.ISupportInitialize)(this.udkeyTime)).EndInit();
             this.tabMotors.ResumeLayout(false);
             this.tabTorque.ResumeLayout(false);
+            this.tabPdParam.ResumeLayout(false);
+            this.panel3.ResumeLayout(false);
             this.tabInfo.ResumeLayout(false);
             this.tpState.ResumeLayout(false);
             this.tpState.PerformLayout();
             this.tpMessage.ResumeLayout(false);
             this.tpMessage.PerformLayout();
-            this.tabPdParam.ResumeLayout(false);
-            this.panel3.ResumeLayout(false);
+            this.panel4.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -770,7 +794,6 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.NumericUpDown udkeyTime;
         private System.Windows.Forms.TabPage tabMotors;
-        private System.Windows.Forms.FlowLayoutPanel flLength;
         private System.Windows.Forms.TabPage tabTorque;
         private System.Windows.Forms.FlowLayoutPanel flTorque;
         private System.Windows.Forms.TabControl tabInfo;
@@ -789,6 +812,9 @@
         private System.Windows.Forms.FlowLayoutPanel flPd;
         private System.Windows.Forms.Panel panel3;
         private System.Windows.Forms.Button btSendPD;
+        private System.Windows.Forms.FlowLayoutPanel flLength;
+        private System.Windows.Forms.Panel panel4;
+        private System.Windows.Forms.Button btSendTorque;
     }
 }
 

@@ -9,7 +9,8 @@ using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-
+using System.Runtime.Serialization;
+using System.Xml;
 
 namespace Robokey
 {
@@ -65,17 +66,23 @@ namespace Robokey
         }
         void UpdateMotorPanel()
         {
-            motors.Clear();
             Motor motor = null;
             flPose.Controls.Clear();
             flLength.Controls.Clear();
             flTorque.Controls.Clear();
             flPd.Controls.Clear();
-            for (int i = 0; i < udpComm.RobotInfo.nMotor; ++i)
+            for (int i=0; i < udpComm.RobotInfo.nMotor; ++i)
             {
-                motor = new Motor();
+                if (i < motors.Count)
+                {
+                    motor = motors[i];
+                }
+                else
+                {
+                    motor = new Motor();
+                    motors.Add(motor);
+                }
                 motor.position.ValueChanged += GetEditedValue;
-                motors.Add(motor);
                 flPose.Controls.Add(motor.position.panel);
                 flLength.Controls.Add(motor.limit.panel);
                 flTorque.Controls.Add(motor.torque.panel);
@@ -575,7 +582,8 @@ namespace Robokey
 
         private void btResetMotors_Click(object sender, EventArgs e)
         {
-
+            udpComm.SendResetSensor();
+            
         }
 
         private void btFindRobot_Click(object sender, EventArgs e)
@@ -628,8 +636,15 @@ namespace Robokey
                 fpFoundRobot.Controls.Add(bt);
             }
         }
-        void OnUpdateRobotInfo()
+        void OnUpdateRobotInfo(byte[] prevMacAddress)
         {
+            //            byte [] zeroMacAddress = new byte[6]{0,0,0,0,0,0};
+            //            if (!prevMacAddress.SequenceEqual(zeroMacAddress))
+            if (motors.Count > 0)
+            {
+                SaveSetting(prevMacAddress);
+            }
+            LoadSetting(udpComm.RobotInfo.macAddress);
             UpdateMotorPanel();
         }
 
@@ -663,6 +678,12 @@ namespace Robokey
             udpComm.SendPdParam(n, k, b);
         }
 
+        private void btResetSensor_Click(object sender, EventArgs e)
+        {
+            udpComm.SendResetSensor();
+
+        }
+
         void OnUpdateRobotState()
         {
             tbState.Text = "Motor:";
@@ -676,6 +697,58 @@ namespace Robokey
             {
                 tbState.Text += string.Format("{0,9}", udpComm.force[i].ToString());
             }
+        }
+
+        void SaveSetting(byte[] adr)
+        {
+            var serializer = new DataContractSerializer(motors.GetType());
+            XmlWriterSettings settings = new XmlWriterSettings();
+            settings.Encoding = new System.Text.UTF8Encoding(false);
+            string str = System.AppDomain.CurrentDomain.BaseDirectory;
+            str += "SR";
+            foreach (int a in adr)
+            {
+                str += a.ToString("X2");
+            }
+            str += ".xml";
+            XmlWriter xw = XmlWriter.Create(str, settings);
+            //シリアル化し、XMLファイルに保存する
+            serializer.WriteObject(xw, motors);
+            //ファイルを閉じる
+            xw.Close();
+        }
+
+        private void btSendTorque_Click(object sender, EventArgs e)
+        {
+            ckMotor.Checked = false;
+            ckMotor.Checked = true;
+        }
+
+        void LoadSetting(byte[] adr)
+        {
+            string str = System.AppDomain.CurrentDomain.BaseDirectory;
+            str += "SR";
+            foreach (int a in adr)
+            {
+                str += a.ToString("X2");
+            }
+            str += ".xml";
+            //DataContractSerializerオブジェクトを作成
+            DataContractSerializer serializer =
+                new DataContractSerializer(motors.GetType());
+            //読み込むファイルを開く
+            XmlReader xr = null;
+            try
+            {
+                xr = XmlReader.Create(str);
+                //XMLファイルから読み込み、逆シリアル化する
+                motors = (List<Motor>)serializer.ReadObject(xr);
+                //ファイルを閉じる
+            }
+            catch (Exception)
+            {
+            }
+            if (xr != null) xr.Close();
         }
     }
 }

@@ -53,6 +53,13 @@ void ecTorqueLimit(){
         torqueLimit.max[i] = command.torqueLimit.max[i];
     }
 }
+void ecResetSensor(){
+    int i;
+    for(i=0; i<NMOTOR; ++i){
+        motorState.pos[i] = motorState.pos[i] % LDEC_ONE;
+		motorState.vel[i] = 0;
+    }
+}
 
 ReturnPacket retPacket;
 int retCur;
@@ -109,7 +116,8 @@ ExecCommand* execCommand[CI_NCOMMAND] = {
     ecInterpolate,	//	interpolate
 	ecForceControl,	//	force control
     ecPdParam,
-    ecTorqueLimit
+    ecTorqueLimit,
+    ecResetSensor,
 };
 ExecCommand* returnCommand[CI_NCOMMAND] = {
     rcNop,

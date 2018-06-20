@@ -3,16 +3,31 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.Runtime.Serialization;
 
 namespace Robokey
 {
     public class SDEC
     {
+        public const int NBITS = 10;
+        public const int ONE = 1 << NBITS;
+        public const int MASK = ONE-1;
         public static double toDouble(int s)
         {
-            const int SDEC_BITS = 10;
             double d = s;
-            d /= (1 << SDEC_BITS);
+            d /= (1 << NBITS);
+            return d;
+        }
+    }
+    public class LDEC
+    {
+        public const int NBITS = 16;
+        public const int ONE = 1 << NBITS;
+        public const int MASK = ONE - 1;
+        public static double toDouble(int s)
+        {
+            double d = s;
+            d /= (1 << NBITS);
             return d;
         }
     }
@@ -30,7 +45,17 @@ namespace Robokey
             set { udCalib.Maximum = udMax.Value = value; }
             get { return (int)udMax.Value; }
         }
-        public MotorLimit()
+        public int Offset
+        {
+            set { udCalib.Value = value; }
+            get { return (int)udCalib.Value; }
+        }
+        public MotorLimit() {
+            Init();
+        }
+        [OnDeserializing]
+        private void OnDeserializing(StreamingContext context) { Init(); }
+        private void Init()
         {
             int width = 100;
             udMin = new NumericUpDown();
@@ -84,21 +109,10 @@ namespace Robokey
         public NumericUpDown upDown;
         public TrackBar bar;
         public event EventHandler ValueChanged;
-        public int encoder;
-        public int ad;
-        public int duty;
-        public int TargetLength;    //ロボットのステータス
-        public int targetLength_local;
-        public int Newton128;
-        public int Newton128_Length;
-        public UInt32 Impulse;      //力積（SH側で計算する）
-        public IMP_STATE impedanceCoeFlag;    //インピーダンス制御で使用している係数
-        public enum IMP_STATE
-        {
-            STATIC = 0,
-            MOBAVLE = 1,
-        };
-        public MotorPosition()
+        [OnDeserializing]
+        private void OnDeserializing(StreamingContext context) { Init(); }
+        public MotorPosition() { Init();  }
+        private void Init()
         {
             upDown = new NumericUpDown();
             bar = new TrackBar();
@@ -116,17 +130,10 @@ namespace Robokey
             bar.TabStop = false;
             bar.LargeChange = 1000;
             upDown.Increment = 1000;
-            ad = 0;
-            encoder = 0;
-            TargetLength = 0;
-            targetLength_local = 0;
-            impedanceCoeFlag = IMP_STATE.STATIC;
-            Impulse = 0;
         }
         private void UpdateBar(object sender, EventArgs e)
         {
             bar.Value = (int)((NumericUpDown)sender).Value;
-//            ValueChanged(sender, e);
         }
         private void UpdateUpDown(object sender, EventArgs e)
         {
@@ -149,31 +156,37 @@ namespace Robokey
             get { return (int)upDown.Value; }
         }
     }
+    [DataContract]
     public class MotorTorque {
         public Panel panel;
         public NumericUpDown udMin;
         public NumericUpDown udMax;
+        [DataMember]
         public int Maximum
         {
             set { udMax.Value = value; }
             get { return (int)udMax.Value; }
         }
+        [DataMember]
         public int Minimum
         {
             set { udMin.Value = value; }
             get { return (int)udMin.Value; }
         }
-        public MotorTorque() {
+        [OnDeserializing]
+        private void OnDeserializing(StreamingContext context) { Init(); }
+        public MotorTorque() { Init(); }
+        private void Init(){
             int width = 100;
             udMin = new NumericUpDown();
             udMax = new NumericUpDown();
             udMin.Width = width;
             udMax.Width = width;
             panel = new Panel();
-            udMax.Minimum = udMin.Minimum = -30000;
-            udMax.Maximum = udMin.Maximum = 30000;
-            Minimum = -1000;
-            Maximum = 1000;
+            udMax.Minimum = udMin.Minimum = -SDEC.ONE;
+            udMax.Maximum = udMin.Maximum = SDEC.ONE;
+            Minimum = -SDEC.ONE;
+            Maximum = SDEC.ONE;
 
             udMin.Top = 0;
             Label la = new Label();
@@ -196,23 +209,28 @@ namespace Robokey
             panel.Width = udMin.Width + la.Width;
         }
     }
+    [DataContract]
     public class MotorPd
     {
         public Panel panel;
         public NumericUpDown udK;
         public NumericUpDown udB;
+        [DataMember]
         public int K
         {
             set { udK.Value = value; }
             get { return (int)udK.Value; }
         }
+        [DataMember]
         public int B
         {
             set { udB.Value = value; }
             get { return (int)udB.Value; }
         }
-        public MotorPd()
-        {
+        [OnDeserializing]
+        private void OnDeserializing(StreamingContext context) { Init(); }
+        public MotorPd() { Init();  }
+        private void Init(){
             int width = 100;
             udK = new NumericUpDown();
             udB = new NumericUpDown();
@@ -243,14 +261,21 @@ namespace Robokey
             panel.Width = udK.Width + la.Width;
         }
     }
-
+    [DataContract]
     public class Motor {
         public MotorPosition position;
         public MotorLimit limit;
+        [DataMember]
         public MotorTorque torque;
+        [DataMember]
         public MotorPd pd;
         public Motor()
         {
+            Init();
+        }
+        [OnDeserializing]
+        private void OnDeserializing(StreamingContext context) { Init();  }
+        private void Init() {
             position = new MotorPosition();
             limit = new MotorLimit();
             torque = new MotorTorque();
@@ -269,15 +294,23 @@ namespace Robokey
             Minimum = (int)((NumericUpDown)sender).Value;
         }
 
-        public int Maximum
+        [DataMember]
+        public int Offset
         {
-            set { limit.Maximum = position.Maximum = value; }
-            get { return limit.Maximum; }
+            set { limit.Offset = value; }
+            get { return limit.Offset; }
         }
+        [DataMember]
         public int Minimum
         {
             set { limit.Minimum = position.Minimum = value; }
             get { return limit.Minimum; }
+        }
+        [DataMember]
+        public int Maximum
+        {
+            set { limit.Maximum = position.Maximum = value; }
+            get { return limit.Maximum; }
         }
         public int Value
         {

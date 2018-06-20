@@ -13,6 +13,7 @@ namespace Robokey
         public int nTarget;
         public int nMotor;
         public int nForce;
+        public byte[] macAddress = new byte[6];
         public Object Clone()
         {
             RobotInfo rv = new RobotInfo();
@@ -20,6 +21,7 @@ namespace Robokey
             rv.nTarget = nTarget;
             rv.nMotor = nMotor;
             rv.nForce = nForce;
+            macAddress.CopyTo(rv.macAddress, 0);
             return rv;
         }
         public int CompareTo(object o) {
@@ -49,6 +51,8 @@ namespace Robokey
         {
             if (info.CompareTo(robotInfo) != 0)
             {
+                byte[] prevMacAddress = new byte[6];
+                robotInfo.macAddress.CopyTo(prevMacAddress, 0);
                 robotInfo = info;
                 pose = new Pose(robotInfo.nMotor);
                 velocity = new Pose(robotInfo.nMotor);
@@ -57,7 +61,7 @@ namespace Robokey
                 nInterpolateVacancy = nInterpolateTotal;
                 if (OnUpdateRobotInfo != null)
                 {
-                    owner.Invoke(new UpdateRobotInfoHandlerType(OnUpdateRobotInfo));
+                    owner.Invoke(new UpdateRobotInfoHandlerType(OnUpdateRobotInfo), prevMacAddress);
                 }
             }
         }
@@ -171,10 +175,11 @@ namespace Robokey
             buf[cur+1] = (byte)(s >> 8);
             cur += 2;
         }
-        void ReadByte(ref int s, ref int cur, byte[] buf)
+        static byte ReadByte(ref int cur, byte[] buf)
         {
-            s = buf[cur];
+            byte s = buf[cur];
             cur ++;
+            return s;
         }
         static short ReadShort(ref int cur, byte[] buf)
         {
@@ -215,6 +220,10 @@ namespace Robokey
             info.nTarget = ReadShort(ref cur, buf);
             info.nMotor = ReadShort(ref cur, buf);
             info.nForce = ReadShort(ref cur, buf);
+            for (int i = 0; i < 6; ++i)
+            {
+                info.macAddress[i] = ReadByte(ref cur, buf);
+            }
             SetRobotInfo(info);
             bConnected = true;
         }
@@ -474,7 +483,17 @@ namespace Robokey
             }
             PutCommand(packet, p);
         }
+        public void SendResetSensor() {
+            byte[] packet = new byte[1000];
+            int p = 0;
+            WriteHeader((int)CommandId.CI_RESET_SENSOR, ref p, packet);
+            PutCommand(packet, p);
+            for (int i = 0; i < pose.values.Count(); i++) {
+                pose.values[i] = pose.values[i] % SDEC.ONE;
+            }
+        }
         public void SendSetIp()
+
         {
             byte[] packet = new byte[1000];
             int p = 0;
@@ -525,7 +544,7 @@ namespace Robokey
         public Control owner;
         public delegate void RobotFindHandlerType(System.Net.IPAddress adr);
         public event RobotFindHandlerType OnRobotFound = null;
-        public delegate void UpdateRobotInfoHandlerType();
+        public delegate void UpdateRobotInfoHandlerType(byte[] prevMacAddress);
         public event UpdateRobotInfoHandlerType OnUpdateRobotInfo = null;
         public delegate void MessageRecieveHandlerType(int type, string msg);
         public event MessageRecieveHandlerType OnMessageReceive = null;

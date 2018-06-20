@@ -52,8 +52,8 @@ int UdpCmdPacket::CommandLen() {
 }
 void UdpRetPacket::SetLength() {
 	switch (command){
-	case CI_BOARD_INFO:		//	model nTarget nMotor nForce
-		length = (NHEADER + 4) * 2; break;
+	case CI_BOARD_INFO:		//	model nTarget nMotor nForce macAddress
+		length = (NHEADER + 4) * 2 + 6; break;
 	//	case CI_SET_CMDLEN is only for uart
 	case CI_SENSOR:
 		length = (NHEADER + uarts.GetNTotalMotor() + uarts.GetNTotalForce()) * 2; break;

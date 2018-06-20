@@ -100,6 +100,7 @@ public:
 		data[1] = nTarget;
 		data[2] = nMotor;
 		data[3] = nForce;
+		esp_read_mac((uint8_t*)(data+4), ESP_MAC_WIFI_STA);	// 6 bytes
 	}
 };
 
