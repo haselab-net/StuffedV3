@@ -90,7 +90,8 @@ namespace Robokey
             }
             if (motor != null) flLength.Width = motor.limit.panel.Width * 3 + 20;
         }
-
+        
+        //  Return interpolated pose of poses in the timeline + Offset.
         PoseData Interpolate(double time)
         {
             if (poses.Count < 2) return null;
@@ -114,7 +115,7 @@ namespace Robokey
             for (int j = 0; j < udpComm.RobotInfo.nMotor; ++j)
             {
                 double val = (1 - rate) * (int)pose0.values[j] + rate * (int)pose1.values[j];
-                rv.values[j] = (int)val;
+                rv.values[j] = (int)val + motors[j].Offset;
             }
             rv.Time = (int)time % track.Maximum;
             return rv;
@@ -471,13 +472,12 @@ namespace Robokey
 
         const int NINTERPOLATEFILL = 6; //  At least two must in buffer for interpolation.
 
-        int zeroDiffCount = 0;
         private void runTimer_Tick(object sender, EventArgs e)
         {
             Timer tmRun = (Timer)sender;
             if (ckRun.Checked)
             {
-#if true    //  user interpolate or not
+#if true    //  interpolate on motor drivers
                 int remain = (int)(byte)((int)udpComm.interpolateTargetCountOfWrite - (int)udpComm.interpolateTargetCountOfRead);
                 int vacancy = udpComm.nInterpolateTotal - remain;
                 int diff = NINTERPOLATEFILL - remain;
@@ -538,7 +538,10 @@ namespace Robokey
                             System.Diagnostics.Debug.Write(" pr:");
                             System.Diagnostics.Debug.Write((ushort)runTimer.Interval);
                             System.Diagnostics.Debug.Write(" tg:");
-                            System.Diagnostics.Debug.Write(Interpolate(curTime).values[0]);
+                            if (Interpolate(curTime) != null)
+                            {
+                                System.Diagnostics.Debug.Write(Interpolate(curTime).values[0]);
+                            }
                         }
                     }
                 }
@@ -554,20 +557,22 @@ namespace Robokey
             }
         }
 
-
+        void SendTorqueLimit() {
+            int[] minT = new int[motors.Count];
+            int[] maxT = new int[motors.Count];
+            for (int i = 0; i < motors.Count; ++i)
+            {
+                minT[i] = motors[i].torque.Minimum;
+                maxT[i] = motors[i].torque.Maximum;
+            }
+            udpComm.SendTorqueLimit(motors.Count, minT, maxT);
+        }
         private void ckMotor_CheckedChanged(object sender, EventArgs e)
         {
             CheckBox cb = (CheckBox)sender;
             if (cb.Checked)
             {
-                int[] minT = new int[motors.Count];
-                int[] maxT = new int[motors.Count];
-                for (int i = 0; i < motors.Count; ++i)
-                {
-                    minT[i] = motors[i].torque.Minimum;
-                    maxT[i] = motors[i].torque.Maximum;
-                }
-                udpComm.SendTorqueLimit(motors.Count, minT, maxT);
+                SendTorqueLimit();
             }
             else
             {
@@ -583,13 +588,16 @@ namespace Robokey
         private void btResetMotors_Click(object sender, EventArgs e)
         {
             udpComm.SendResetSensor();
-            
+            for (int i=0; i< motors.Count; ++i) {
+                motors[i].Offset = udpComm.pose.values[i];
+            }
         }
 
         private void btFindRobot_Click(object sender, EventArgs e)
         {
             if (btFindRobot.Text.CompareTo("Close") == 0)
             {
+                SaveSetting(udpComm.RobotInfo.macAddress);
                 udpComm.Close();
                 btFindRobot.Text = "Find Robot";
                 laPort.Text = "Closed";
@@ -646,6 +654,8 @@ namespace Robokey
             }
             LoadSetting(udpComm.RobotInfo.macAddress);
             UpdateMotorPanel();
+            SendPd();
+            SendTorqueLimit();
         }
 
         private void tbMessage_KeyPress(object sender, KeyPressEventArgs e)
@@ -668,20 +678,18 @@ namespace Robokey
 
         private void btSendPD_Click(object sender, EventArgs e)
         {
+            SendPd();
+        }
+        void SendPd() {
             int n = udpComm.RobotInfo.nMotor;
             int[] k = new int[n];
             int[] b = new int[n];
-            for (int i = 0; i < n; ++i) {
+            for (int i = 0; i < n; ++i)
+            {
                 k[i] = motors[i].pd.K;
                 b[i] = motors[i].pd.B;
             }
             udpComm.SendPdParam(n, k, b);
-        }
-
-        private void btResetSensor_Click(object sender, EventArgs e)
-        {
-            udpComm.SendResetSensor();
-
         }
 
         void OnUpdateRobotState()
@@ -689,13 +697,13 @@ namespace Robokey
             tbState.Text = "Motor:";
             for (int i = 0; i < udpComm.pose.nMotor; ++i)
             {
-                double v = SDEC.toDouble(udpComm.pose.values[i]);
-                tbState.Text += string.Format("{0,9}", v.ToString("F3"));
+                int v = udpComm.pose.values[i] - motors[i].Offset;
+                tbState.Text += string.Format("{0,9}", v.ToString("D"));
             }
             tbState.Text += "\r\nForce:";
             for (int i = 0; i < udpComm.force.Length; ++i)
             {
-                tbState.Text += string.Format("{0,9}", udpComm.force[i].ToString());
+                tbState.Text += string.Format("{0,9}", udpComm.force[i].ToString("D"));
             }
         }
 
@@ -720,8 +728,13 @@ namespace Robokey
 
         private void btSendTorque_Click(object sender, EventArgs e)
         {
-            ckMotor.Checked = false;
-            ckMotor.Checked = true;
+            SendTorqueLimit();
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            SaveSetting(udpComm.RobotInfo.macAddress);
+            udpComm.Close();
         }
 
         void LoadSetting(byte[] adr)

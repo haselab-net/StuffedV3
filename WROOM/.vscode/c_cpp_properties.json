@@ -5,6 +5,7 @@
             "includePath": [
                 "${workspaceRoot}",
                 "${workspaceRoot}/main",
+                "${workspaceRoot}/main/",
                 "${workspaceRoot}/main/wifiMan",
                 "${workspaceRoot}/build/include",
                 "${workspaceRoot}/../PIC",

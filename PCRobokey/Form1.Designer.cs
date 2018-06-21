@@ -70,6 +70,8 @@
             this.flLength = new System.Windows.Forms.FlowLayoutPanel();
             this.tabTorque = new System.Windows.Forms.TabPage();
             this.flTorque = new System.Windows.Forms.FlowLayoutPanel();
+            this.panel4 = new System.Windows.Forms.Panel();
+            this.btSendTorque = new System.Windows.Forms.Button();
             this.tabPdParam = new System.Windows.Forms.TabPage();
             this.flPd = new System.Windows.Forms.FlowLayoutPanel();
             this.panel3 = new System.Windows.Forms.Panel();
@@ -79,8 +81,6 @@
             this.tbState = new System.Windows.Forms.TextBox();
             this.tpMessage = new System.Windows.Forms.TabPage();
             this.tbMessage = new System.Windows.Forms.TextBox();
-            this.panel4 = new System.Windows.Forms.Panel();
-            this.btSendTorque = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.track)).BeginInit();
             this.panelCom.SuspendLayout();
             this.panel2.SuspendLayout();
@@ -98,12 +98,12 @@
             ((System.ComponentModel.ISupportInitialize)(this.udkeyTime)).BeginInit();
             this.tabMotors.SuspendLayout();
             this.tabTorque.SuspendLayout();
+            this.panel4.SuspendLayout();
             this.tabPdParam.SuspendLayout();
             this.panel3.SuspendLayout();
             this.tabInfo.SuspendLayout();
             this.tpState.SuspendLayout();
             this.tpMessage.SuspendLayout();
-            this.panel4.SuspendLayout();
             this.SuspendLayout();
             // 
             // track
@@ -589,6 +589,25 @@
             this.flTorque.Size = new System.Drawing.Size(654, 512);
             this.flTorque.TabIndex = 1;
             // 
+            // panel4
+            // 
+            this.panel4.Controls.Add(this.btSendTorque);
+            this.panel4.Dock = System.Windows.Forms.DockStyle.Top;
+            this.panel4.Location = new System.Drawing.Point(0, 0);
+            this.panel4.Name = "panel4";
+            this.panel4.Size = new System.Drawing.Size(654, 36);
+            this.panel4.TabIndex = 2;
+            // 
+            // btSendTorque
+            // 
+            this.btSendTorque.Location = new System.Drawing.Point(457, 3);
+            this.btSendTorque.Name = "btSendTorque";
+            this.btSendTorque.Size = new System.Drawing.Size(194, 30);
+            this.btSendTorque.TabIndex = 0;
+            this.btSendTorque.Text = "Send Torque Limit";
+            this.btSendTorque.UseVisualStyleBackColor = true;
+            this.btSendTorque.Click += new System.EventHandler(this.btSendTorque_Click);
+            // 
             // tabPdParam
             // 
             this.tabPdParam.Controls.Add(this.flPd);
@@ -689,25 +708,6 @@
             this.tbMessage.TabIndex = 0;
             this.tbMessage.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.tbMessage_KeyPress);
             // 
-            // panel4
-            // 
-            this.panel4.Controls.Add(this.btSendTorque);
-            this.panel4.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panel4.Location = new System.Drawing.Point(0, 0);
-            this.panel4.Name = "panel4";
-            this.panel4.Size = new System.Drawing.Size(654, 36);
-            this.panel4.TabIndex = 2;
-            // 
-            // btSendTorque
-            // 
-            this.btSendTorque.Location = new System.Drawing.Point(457, 3);
-            this.btSendTorque.Name = "btSendTorque";
-            this.btSendTorque.Size = new System.Drawing.Size(194, 30);
-            this.btSendTorque.TabIndex = 0;
-            this.btSendTorque.Text = "Send Torque Limit";
-            this.btSendTorque.UseVisualStyleBackColor = true;
-            this.btSendTorque.Click += new System.EventHandler(this.btSendTorque_Click);
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 18F);
@@ -726,6 +726,7 @@
             this.Name = "Form1";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Show;
             this.Text = "Robokey";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.track)).EndInit();
             this.panelCom.ResumeLayout(false);
@@ -749,6 +750,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.udkeyTime)).EndInit();
             this.tabMotors.ResumeLayout(false);
             this.tabTorque.ResumeLayout(false);
+            this.panel4.ResumeLayout(false);
             this.tabPdParam.ResumeLayout(false);
             this.panel3.ResumeLayout(false);
             this.tabInfo.ResumeLayout(false);
@@ -756,7 +758,6 @@
             this.tpState.PerformLayout();
             this.tpMessage.ResumeLayout(false);
             this.tpMessage.PerformLayout();
-            this.panel4.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }

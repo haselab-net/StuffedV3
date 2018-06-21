@@ -43,6 +43,8 @@ int UdpCmdPacket::CommandLen() {
 		return (NHEADER + uarts.GetNTotalMotor() * 2) * 2;
 	case CI_TORQUE_LIMIT:	//  min max.
 		return (NHEADER + uarts.GetNTotalMotor() * 2) * 2;
+	case CI_RESET_SENSOR:
+		return NHEADER * 2;
 	case CIU_SET_IPADDRESS:	//  Set ip address to return the packet: command only
 		return NHEADER * 2;
 	case CIU_GET_IPADDRESS:	//  Get ip address to return the packet: command only
@@ -64,6 +66,7 @@ void UdpRetPacket::SetLength() {
 		length = (NHEADER + uarts.GetNTotalMotor() + 5) * 2; break;
 	case CI_PDPARAM:
 	case CI_TORQUE_LIMIT:
+	case CI_RESET_SENSOR:
 		length = NHEADER*2; break;
 	case CIU_TEXT:			//	return text message: cmd, type, length, bytes
 		length = (NHEADER + 1 + 1) * 2 + data[1]; break;

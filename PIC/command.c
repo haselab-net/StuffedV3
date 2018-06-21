@@ -129,8 +129,8 @@ ExecCommand* returnCommand[CI_NCOMMAND] = {
     rcInterpolate,
 	rcNop,	//	pdParam
     rcNop,	//	torqueLimit
+    rcNop,	//	resetSensor
 };
-
 
 void commandInit(){
 	int i, c;

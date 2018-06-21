@@ -14,6 +14,12 @@ namespace Robokey
         public int nMotor;
         public int nForce;
         public byte[] macAddress = new byte[6];
+        public void Clear()
+        {
+            for (int i = 0; i < macAddress.Count(); ++i) {
+                macAddress[i] = 0;
+            }
+        }
         public Object Clone()
         {
             RobotInfo rv = new RobotInfo();
@@ -361,6 +367,7 @@ namespace Robokey
         public void Close()
         {
             bConnected = false;
+            robotInfo.Clear();
             if (udp != null) udp.Close();
             udp = null;
         }
@@ -383,7 +390,6 @@ namespace Robokey
             }
             SendPackets();
         }
-        int lastSendCount = 0;
         public void SendPackets()
         {
             if (udp == null || sendPoint == null) return;

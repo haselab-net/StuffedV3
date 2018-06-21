@@ -6,4 +6,6 @@
         "args": "Flash app (alt+ctrl+f)"},
     { "key": "alt+ctrl+m",         "command": "workbench.action.tasks.runTask",
         "args": "Monitor (alt+ctrl+m)"},
+    { "key": "alt+ctrl+r",         "command": "workbench.action.tasks.runTask",
+        "args": "Run app (alt+ctrl+r)"},
 ]

@@ -9,12 +9,12 @@ enum CommandId {
 	CI_FORCE_CONTROL,		//6	Position and force control with interpolation.
 	CI_PDPARAM,             //7 Set control parameter.
 	CI_TORQUE_LIMIT,        //8 Set min and max torques.
-    CI_RESET_SENSOR,        //9 Reset sensor
+    CI_RESET_SENSOR,        //9 Reset sensor.
     CI_NCOMMAND,
-    CIU_TEXT = CI_NCOMMAND,	//9	return text message: cmd, type, length, bytes
-	CIU_SET_IPADDRESS,		//10 Set ip address to return the packet
-    CIU_GET_IPADDRESS,      //11 Get ip address to return the packet
+    CIU_TEXT = CI_NCOMMAND,	//10 return text message: cmd, type, length, bytes
+	CIU_SET_IPADDRESS,		//11 Set ip address to return the packet
+    CIU_GET_IPADDRESS,      //12 Get ip address to return the packet
 
-	CIU_NCOMMAND,           //12 number of commands
+	CIU_NCOMMAND,           //13 number of commands
 	CIU_NONE = -1           //  no command is in receiving state.
 };

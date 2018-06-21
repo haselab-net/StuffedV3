@@ -77,13 +77,14 @@ union CommandPacket##BOARD {										\
 enum BOARD##CommandLenEnum{																	\
 	BOARD##_CLEN_NONE = 1,																	\
 	BOARD##_CLEN_BOARD_INFO = 1,															\
-	BOARD##_CLEN_SET_CMDLEN = 1+sizeof_field(union CommandPacket##BOARD, cmdLen),				\
+	BOARD##_CLEN_SET_CMDLEN = 1+sizeof_field(union CommandPacket##BOARD, cmdLen),			\
     BOARD##_CLEN_SENSOR = 1,																\
 	BOARD##_CLEN_DIRECT = 1+sizeof_field(union CommandPacket##BOARD, direct),				\
     BOARD##_CLEN_INTERPOLATE = 1+sizeof_field(union CommandPacket##BOARD, interpolate),		\
     BOARD##_CLEN_FORCE_CONTROL = 1+sizeof_field(union CommandPacket##BOARD, forceControl),	\
     BOARD##_CLEN_PD_PARAM = 1+sizeof_field(union CommandPacket##BOARD, pdParam),			\
     BOARD##_CLEN_TORQUE_LIMIT = 1+sizeof_field(union CommandPacket##BOARD, torqueLimit),	\
+	BOARD##_CLEN_RESET_SENSOR = 1,															\
 };																	\
 const unsigned char cmdPacketLen##BOARD[CI_NCOMMAND] = {			\
     BOARD##_CLEN_NONE,												\
@@ -95,6 +96,7 @@ const unsigned char cmdPacketLen##BOARD[CI_NCOMMAND] = {			\
     BOARD##_CLEN_FORCE_CONTROL,										\
     BOARD##_CLEN_PD_PARAM,											\
     BOARD##_CLEN_TORQUE_LIMIT,										\
+	BOARD##_CLEN_RESET_SENSOR,  									\
 };																	\
 
 #define DEFINE_ReturnPacket(BOARD) \
@@ -153,6 +155,7 @@ const unsigned char retPacketLen##BOARD[CI_NCOMMAND]={									\
     BOARD##_RLEN_DIRECT,																\
     BOARD##_RLEN_INTERPOLATE,															\
     BOARD##_RLEN_FORCE_CONTROL,															\
+    BOARD##_RLEN_NORETURN,																\
     BOARD##_RLEN_NORETURN,																\
     BOARD##_RLEN_NORETURN,																\
 };

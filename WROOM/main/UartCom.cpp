@@ -6,7 +6,7 @@
 #include "driver/uart.h"
 #include "esp_log.h"
 #include "board.h"
-#include "../../PIC/BoardType.h"
+#include "../../PIC/boardType.h"
 
 static char zero[80];
 
