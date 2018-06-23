@@ -17,7 +17,6 @@
 #include "UartCom.h"
 #include "esp_log.h"
 #include "nvs_flash.h"
-//void wifiSmartConfig();
 #include "wifiMan.h"
 #include "wifiMan/http_server.h"
 #include "wifiMan/wifi_manager.h"
@@ -49,8 +48,9 @@ extern "C" void app_main()
     printf("%d motors, %d force sensors found.\n", uarts.GetNTotalMotor(), uarts.GetNTotalForce());
     udpCom.Init();
 	printf("Init udp finished.\n");
-    touch_sensing.init();
-    printf("Init Touch Sensing finished.\n");
+//  On old board, this prevents UARTs.
+//    touch_sensing.init();
+//    printf("Init Touch Sensing finished.\n");
     
     while(1){
         xEventGroupWaitBits(wifi_manager_event_group, WIFI_MANAGER_WIFI_CONNECTED_BIT, pdFALSE, pdFALSE, portMAX_DELAY);
