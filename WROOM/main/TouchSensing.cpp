@@ -1,4 +1,4 @@
-#include "TouchPad.h"
+#include "TouchSensing.h"
 #include "esp_log.h"
 
 
@@ -77,7 +77,7 @@ void TouchSensing::create_task() {
         "Touch Sensing Task",
         10 * 1024,
         this,
-        8,
+        6,
         &handle_read_task);
 };
 
