@@ -389,8 +389,13 @@ void targetsProceed(){
 	readPlus = (targets.read+1)%NTARGET;
 	period = targets.buf[readPlus].period;
 	for(i=0; i<NMOTOR; ++i){
+#if 0
 		motorTarget.pos[i] = ((period - targets.tick)* S2LDEC(targets.buf[targets.read].pos[i])
 			+ targets.tick*S2LDEC(targets.buf[readPlus].pos[i])) / period;
+#else
+        SDEC diff = targets.buf[readPlus].pos[i] - targets.buf[targets.read].pos[i];
+        motorTarget.pos[i] = S2LDEC(targets.buf[targets.read].pos[i]) + S2LDEC((int)diff * (int)targets.tick / period); 
+#endif
 		motorTarget.vel[i] = S2LDEC(targets.buf[readPlus].pos[i] - targets.buf[targets.read].pos[i]) / period;
 	}
 }

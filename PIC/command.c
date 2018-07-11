@@ -24,10 +24,17 @@ void ecSetCmdLen(){
 	}
 }
 void ecDirect(){
-    controlSetMode(CM_DIRECT);
     int i;
+    static SDEC newPos, diff;
+    controlSetMode(CM_DIRECT);
     for(i=0; i<NMOTOR; ++i){
+#if 1
+        newPos = command.direct.pos[i];
+        diff = newPos - L2SDEC(motorTarget.pos[i]);
+        motorTarget.pos[i] += S2LDEC(diff);
+#else
         motorTarget.pos[i] = S2LDEC(command.direct.pos[i]);
+#endif
         motorTarget.vel[i] = S2LDEC(command.direct.vel[i]);
     }
 }

@@ -433,7 +433,7 @@ namespace Robokey
             WriteHeader((int)CommandId.CI_DIRECT, ref p, packet);
             for (int i = 0; i < pose.values.Count(); ++i)
             {
-                int v = pose == null ? 0 : (int)pose.values[i];
+                int v = pose == null ? 0 : pose.values[i];
                 WriteShort(v, ref p, packet);
             }
             for (int i = 0; i < pose.values.Count(); ++i)

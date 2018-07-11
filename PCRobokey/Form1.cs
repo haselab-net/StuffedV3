@@ -737,6 +737,11 @@ namespace Robokey
             udpComm.Close();
         }
 
+        private void ckForce_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
         void LoadSetting(byte[] adr)
         {
             string str = System.AppDomain.CurrentDomain.BaseDirectory;

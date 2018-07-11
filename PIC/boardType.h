@@ -1,7 +1,7 @@
 #pragma once
 #include "commandCommon.h"
 
-#if 1
+#if 0
 #define BOARD1_MOTORDRIVER		//	first board without WROOM
 #else
 #define BOARD2_COMBINATION		//	second board with WROOM
