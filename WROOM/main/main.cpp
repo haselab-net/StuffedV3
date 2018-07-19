@@ -21,6 +21,7 @@
 #include "wifiMan/http_server.h"
 #include "wifiMan/wifi_manager.h"
 #include "TouchSensing.h"
+#include "../../PIC/boardType.h"
 
 
 
@@ -40,18 +41,27 @@ extern "C" void app_main()
 
     //----------------------------------
     printf("!!! Stuffed Robot Start !!!\n");
-    //  start wifi config tasks
-    wifiMan();
-	//wifiSmartConfig();
+
+    //  Enable next line to clear all nvs enable. Use only when nvs makes trouble. 
+    //  nvs_flash_erase();
+
+
     uarts.Init();
     printf("Init uarts finished. ");
     printf("%d motors, %d force sensors found.\n", uarts.GetNTotalMotor(), uarts.GetNTotalForce());
+    //  start wifi manager
+    wifiMan();
+	//wifiSmartConfig();
+    //  init udp but not start
     udpCom.Init();
 	printf("Init udp finished.\n");
-//  On old board, this prevents UARTs.
-//    touch_sensing.init();
-//    printf("Init Touch Sensing finished.\n");
-    
+    //  On old board, this prevents UARTs.
+ 
+#if 0    //defined BOARD2_COMBINATION
+    touch_sensing.init();
+    printf("Init Touch Sensing finished.\n");
+#endif
+    vTaskDelay(1000);
     while(1){
         xEventGroupWaitBits(wifi_manager_event_group, WIFI_MANAGER_WIFI_CONNECTED_BIT, pdFALSE, pdFALSE, portMAX_DELAY);
         udpCom.Start();
