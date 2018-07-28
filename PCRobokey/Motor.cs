@@ -185,8 +185,8 @@ namespace Robokey
             panel = new Panel();
             udMax.Minimum = udMin.Minimum = -SDEC.ONE;
             udMax.Maximum = udMin.Maximum = SDEC.ONE;
-            Minimum = -SDEC.ONE;
-            Maximum = SDEC.ONE;
+            Minimum = -SDEC.ONE / 3;
+            Maximum = SDEC.ONE / 3;
 
             udMin.Top = 0;
             Label la = new Label();

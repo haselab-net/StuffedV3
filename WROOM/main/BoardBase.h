@@ -26,7 +26,7 @@ public:
 	virtual int GetRetCommand() = 0;
 	virtual unsigned char* CmdStart() = 0;
 	virtual int CmdLen() = 0;
-	virtual unsigned char* RetStart() = 0;
+	virtual volatile unsigned char* RetStart() = 0;
 	virtual int RetLen() = 0;
 	virtual int RetLenForCommand() = 0;
 };

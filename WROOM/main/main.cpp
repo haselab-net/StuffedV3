@@ -42,21 +42,21 @@ extern "C" void app_main()
     //----------------------------------
     printf("!!! Stuffed Robot Start !!!\n");
 
-    //  Enable next line to clear all nvs enable. Use only when nvs makes trouble. 
-    //  nvs_flash_erase();
+    // Enable next line to clear all nvs enable. Use only when nvs makes trouble. 
+    // nvs_flash_erase();
 
 
     uarts.Init();
     printf("Init uarts finished. ");
     printf("%d motors, %d force sensors found.\n", uarts.GetNTotalMotor(), uarts.GetNTotalForce());
-    //  start wifi manager
-    wifiMan();
 	//wifiSmartConfig();
     //  init udp but not start
     udpCom.Init();
 	printf("Init udp finished.\n");
-    //  On old board, this prevents UARTs.
- 
+    //  start wifi manager
+    wifiMan();
+
+    //  On old board, this prevents UARTs. 
 #if 0    //defined BOARD2_COMBINATION
     touch_sensing.init();
     printf("Init Touch Sensing finished.\n");

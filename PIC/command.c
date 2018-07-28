@@ -65,6 +65,7 @@ void ecResetSensor(){
     for(i=0; i<NMOTOR; ++i){
         motorState.pos[i] = motorState.pos[i] % LDEC_ONE;
 		motorState.vel[i] = 0;
+        motorTarget.pos[i] = motorTarget.pos[i] % LDEC_ONE;
     }
 }
 

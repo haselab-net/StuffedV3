@@ -57,7 +57,7 @@ void Uart::RecvTask(){
 			int retLen = boards[retCur.board]->RetLenForCommand();
 			if (retLen){
 				//	receive the header byte
-				int readLen = uart_read_bytes(port, boards[retCur.board]->RetStart(), retLen, READWAIT);
+				int readLen = uart_read_bytes(port, (uint8_t*)(boards[retCur.board]->RetStart()), retLen, READWAIT);
 				if (readLen != retLen){
 					//	timeout
 					int i;
@@ -128,6 +128,10 @@ void Uart::EnumerateBoard() {
 		for (int c = 0; c < CI_NCOMMAND; ++c) {
 			cmd.cmdLen.len[c] = boards[i]->cmdPacketLen[c];
 			printf(" %d", (int) boards[i]->cmdPacketLen[c]);
+		}
+		printf(" RLEN:");
+		for (int c = 0; c < CI_NCOMMAND; ++c) {
+			printf(" %d", (int) boards[i]->retPacketLen[c]);
 		}
 		printf("\n");
 		cmd.commandId = CI_SET_CMDLEN;

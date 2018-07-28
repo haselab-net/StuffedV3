@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 using System.Windows.Forms;
+using System.IO;
 
 namespace Robokey
 {
@@ -45,6 +46,7 @@ namespace Robokey
         const int remotePort = 9090;
         const int localPort = 9090;
         bool bFindRobot = false;
+        public StreamWriter log;
 
         //  board info
         RobotInfo robotInfo = new RobotInfo();
@@ -195,17 +197,9 @@ namespace Robokey
         }
         void ReadShortExt(ref int s, ref int cur, byte[] buf)
         {
-            int t = (short)(buf[cur] | (buf[cur + 1] << 8));
-            int diff = t - (short)s;
+            int t = buf[cur] | (buf[cur + 1] << 8);
+            short diff = (short)(t - (s & 0xFFFF));
             s += diff;
-            if (diff < -0x8000)
-            {
-                s += 0x10000;
-            }
-            if (diff > 0x8000)
-            {
-                s -= 0x10000;
-            }
             cur += 2;
         }
         void WriteHeader(int cmd, ref int cur, byte[] buf)
@@ -307,56 +301,76 @@ namespace Robokey
             if (uc.udp == null) return;
             byte[] receiveBytes = uc.udp.EndReceive(ar, ref uc.recvPoint);
             if (uc.recvPoint.Port != localBcPort)   //  In broad cast case, sent packet can be received. Must skip.
-            {   
+            {
                 int cur = 0;
                 ushort length = 0;
                 ushort count = 0;
                 ushort commandId = 0;
-                ReadHeader(ref length, ref count, ref commandId, ref cur, receiveBytes);
-                sendQueue.FreeTo(count);
-                switch ((CommandId)commandId)
+                while (cur < receiveBytes.Length)
                 {
-                    case CommandId.CI_BOARD_INFO:
-                        ReadBoard(ref cur, receiveBytes);
-                        break;
-                    case CommandId.CI_DIRECT:
-                        ReadPose(ref cur, receiveBytes);
-                        CallUpdateRobotState();
-                        break;
-                    case CommandId.CI_INTERPOLATE:
-                        ReadPose(ref cur, receiveBytes);
-                        ReadTick(ref cur, receiveBytes);
-                        CallUpdateRobotState();
-                        break;
-                    case CommandId.CI_SENSOR:
-                        ReadPose(ref cur, receiveBytes);
-                        ReadForce(ref cur, receiveBytes);
-                        CallUpdateRobotState();
-                        break;
-                    case CommandId.CIU_GET_IPADDRESS:
-                        ReadPeerIPAddress(ref cur, receiveBytes);
-                        if (bFindRobot)
+                    int start = cur;
+                    ReadHeader(ref length, ref count, ref commandId, ref cur, receiveBytes);
+                    if (log != null)
+                    {
+                        log.Write("L" + length + " C" + commandId);
+                        for (int i = cur; i < receiveBytes.Length; i += 2)
                         {
-                            lock (sendQueue)
-                            {
-                                sendQueue.Clear();
-                                sendQueue.commandCount = count;
-                            }
-                            if (OnRobotFound != null)
-                            {
-                                owner.Invoke(new RobotFindHandlerType(OnRobotFound), recvPoint.Address);
-                            }
+                            short s = (short)(receiveBytes[i] | (receiveBytes[i + 1] << 8));
+                            log.Write(" " + string.Format("{0,0:X4}", s));
                         }
-                        break;
-                    case CommandId.CIU_TEXT:
-                        ReadText(ref cur, receiveBytes);
-                        break;
-                    default:
-                        if (commandId >= (int)CommandId.CIU_NCOMMAND) {
-                            string msg = "Invalid command " + commandId + " received";
-                            SetMessage(-1, msg);
-                        }
-                        break;
+                        log.Write("\r\n");
+                    }
+                    sendQueue.FreeTo(count);
+                    switch ((CommandId)commandId)
+                    {
+                        case CommandId.CI_BOARD_INFO:
+                            ReadBoard(ref cur, receiveBytes);
+                            break;
+                        case CommandId.CI_DIRECT:
+                            ReadPose(ref cur, receiveBytes);
+                            cur += pose.values.Length * 2;
+                            CallUpdateRobotState();
+                            break;
+                        case CommandId.CI_INTERPOLATE:
+                            ReadPose(ref cur, receiveBytes);
+                            ReadTick(ref cur, receiveBytes);
+                            CallUpdateRobotState();
+                            break;
+                        case CommandId.CI_SENSOR:
+                            ReadPose(ref cur, receiveBytes);
+                            ReadForce(ref cur, receiveBytes);
+                            CallUpdateRobotState();
+                            break;
+                        case CommandId.CIU_GET_IPADDRESS:
+                            ReadPeerIPAddress(ref cur, receiveBytes);
+                            if (bFindRobot)
+                            {
+                                lock (sendQueue)
+                                {
+                                    sendQueue.Clear();
+                                    sendQueue.commandCount = count;
+                                }
+                                if (OnRobotFound != null)
+                                {
+                                    owner.Invoke(new RobotFindHandlerType(OnRobotFound), recvPoint.Address);
+                                }
+                            }
+                            break;
+                        case CommandId.CIU_TEXT:
+                            ReadText(ref cur, receiveBytes);
+                            break;
+                        default:
+                            if (commandId >= (int)CommandId.CIU_NCOMMAND)
+                            {
+                                string msg = "Invalid command " + commandId + " received";
+                                SetMessage(-1, msg);
+                            }
+                            break;
+                    }
+                    if (cur != start + length) {
+                        System.Diagnostics.Debug.WriteLine("Recv lengths not match !");
+                    }
+                    cur = start + length;
                 }
             }
             if (uc.udp != null)

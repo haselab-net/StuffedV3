@@ -175,22 +175,7 @@ enum BoardInfo{                     							\
 };																\
 typedef union CommandPacket##BOARD CommandPacket;				\
 typedef union ReturnPacket##BOARD ReturnPacket;					\
-enum CommandLenEnum{											\
-    CLEN_BOARD_INFO =  BOARD##_CLEN_BOARD_INFO,					\
-	CLEN_DIRECT = BOARD##_CLEN_DIRECT,							\
-    CLEN_INTERPOLATE = BOARD##_CLEN_INTERPOLATE,				\
-    CLEN_FORCE_CONTROL = BOARD##_CLEN_FORCE_CONTROL,			\
-    CLEN_PD_PARAM = BOARD##_CLEN_PD_PARAM,						\
-    CLEN_TORQUE_LIMIT = BOARD##_CLEN_TORQUE_LIMIT,				\
-	CLEN_RESET_SENSOR = BOARD##_CLEN_RESET_SENSOR,  			\
-};																\
-enum ReturnLenEnum{												\
-    RLEN_BOARD_INFO =  BOARD##_RLEN_BOARD_INFO,					\
-    RLEN_DIRECT = BOARD##_RLEN_DIRECT,							\
-   	RLEN_INTERPOLATE = BOARD##_RLEN_INTERPOLATE, 				\
-    RLEN_NORETURN = BOARD##_RLEN_NORETURN,						\
-};																\
-const unsigned char* const cmdPacketLen = cmdPacketLen##BOARD;			\
-const unsigned char* const retPacketLen = retPacketLen##BOARD;			\
+const unsigned char* const cmdPacketLen = cmdPacketLen##BOARD;	\
+const unsigned char* const retPacketLen = retPacketLen##BOARD;	\
 
 #endif

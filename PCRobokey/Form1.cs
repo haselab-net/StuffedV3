@@ -741,6 +741,22 @@ namespace Robokey
         {
 
         }
+        public StreamWriter logFile;
+        private void ckLog_CheckedChanged(object sender, EventArgs e)
+        {
+            CheckBox c = (CheckBox)sender;
+            if (c.Checked)
+            {
+                string name = "Log_" + DateTime.Now.ToString("yyyy.MM.dd_HH.mm.ss") + ".txt";
+                logFile = new StreamWriter(name);
+                udpComm.log = logFile;
+            }
+            else {
+                logFile.Close();
+                logFile = null;
+                udpComm.log = logFile;
+            }
+        }
 
         void LoadSetting(byte[] adr)
         {

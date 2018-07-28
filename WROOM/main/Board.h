@@ -16,7 +16,7 @@ public:
 #else
 	CmdPacket cmd;
 	uint8_t zero[CMDWAITMAXLEN];
-	RetPacket ret;
+	volatile RetPacket ret;
 #endif
 	Board(int bid, const unsigned char * c, const unsigned char * r) {
 		cmd.boardId = bid;
@@ -32,7 +32,7 @@ public:
 	int GetRetCommand() { return ret.commandId; }
 	unsigned char* CmdStart() { return cmd.bytes;  }
 	int CmdLen() { return cmdPacketLen[cmd.commandId]; }
-	unsigned char* RetStart() { return ret.bytes; }
+	volatile unsigned char* RetStart() { return ret.bytes; }
 	int RetLen() { return retPacketLen[ret.commandId]; }
 	int RetLenForCommand() { return retPacketLen[cmd.commandId]; }
 	unsigned char GetTargetCountOfRead(){
@@ -98,6 +98,7 @@ public:
 			//ESP_LOGI("Board", "Motor Pos: %d %d %d %d\n", packet.MotorPos(0),  packet.MotorPos(1), packet.MotorPos(2),  packet.MotorPos(3));
 			break;
 		case CI_SENSOR:
+			//ESP_LOGI("UART", "M0:%x", (int)ret.sensor.pos[0]);
 			for (int i = 0; i < GetNMotor(); ++i) {
 				packet.SetMotorPos(ret.sensor.pos[i], motorMap[i]);
 			}
