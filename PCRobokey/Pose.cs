@@ -36,7 +36,7 @@ namespace Robokey
                 time_ = value;
                 if (button.Parent != null)
                 {
-                    Form1 f = (Form1)button.Parent;
+                    MainForm f = (MainForm)button.Parent;
                     TrackBar track = (TrackBar)f.Controls.Find("track", true)[0];
                     button.Left = (int)(Time * Scale + Offset);
                     button.Top = track.Top + track.Height / 2 - 5;
@@ -52,7 +52,7 @@ namespace Robokey
             get
             {
                 if (button.Parent == null) return 1;
-                Form1 f = (Form1)button.Parent;
+                MainForm f = (MainForm)button.Parent;
                 return f.TrackScale();
             }
         }
@@ -61,7 +61,7 @@ namespace Robokey
             get
             {
                 if (button.Parent == null) return 0;
-                Form1 f = (Form1)button.Parent;
+                MainForm f = (MainForm)button.Parent;
                 return f.TrackOffset() - button.Size.Width / 2.0;
             }
         }

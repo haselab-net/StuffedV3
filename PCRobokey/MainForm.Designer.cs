@@ -1,6 +1,6 @@
 ﻿namespace Robokey
 {
-    partial class Form1
+    partial class MainForm
     {
         /// <summary>
         /// 必要なデザイナ変数です。

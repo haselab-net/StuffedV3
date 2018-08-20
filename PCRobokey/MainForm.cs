@@ -14,10 +14,10 @@ using System.Xml;
 
 namespace Robokey
 {
-    public partial class Form1 : Form
+    public partial class MainForm : Form
     {
         // Singleton Instance
-        public static Form1 instance;
+        public static MainForm instance;
 
 
         public List<Pose> poses = new List<Pose>();
@@ -26,7 +26,7 @@ namespace Robokey
         int sentTime;
         UdpComm udpComm;
 
-        public Form1()
+        public MainForm()
         {
             instance = this;
             InitializeComponent();
@@ -41,7 +41,7 @@ namespace Robokey
             savePose.InitialDirectory = System.IO.Directory.GetCurrentDirectory();
         }
 
-        ~Form1()
+        ~MainForm()
         {
             udpComm.Close();
         }
