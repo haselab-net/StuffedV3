@@ -109,12 +109,14 @@ namespace Robokey
         public NumericUpDown upDown;
         public TrackBar bar;
         public event EventHandler ValueChanged;
+        const int WIDTH = 120;
         [OnDeserializing]
-        private void OnDeserializing(StreamingContext context) { Init(); }
-        public MotorPosition() { Init();  }
-        private void Init()
+        private void OnDeserializing(StreamingContext context) { Init(WIDTH); }
+        public MotorPosition(int w = WIDTH) { Init(w);  }
+        private void Init(int w)
         {
             upDown = new NumericUpDown();
+            upDown.Width = w;
             bar = new TrackBar();
             bar.Top = upDown.Height;
             bar.Width = upDown.Width;
@@ -138,7 +140,7 @@ namespace Robokey
         private void UpdateUpDown(object sender, EventArgs e)
         {
             upDown.Value = ((TrackBar)sender).Value;
-            ValueChanged(sender, e);
+            if (ValueChanged != null) ValueChanged(sender, e);
         }
         public int Maximum
         {
@@ -154,6 +156,11 @@ namespace Robokey
         {
             set { upDown.Value = value; }
             get { return (int)upDown.Value; }
+        }
+        public int Width
+        {
+            set { upDown.Width = bar.Width = panel.Width = value;  }
+            get { return panel.Width; }
         }
     }
     [DataContract]

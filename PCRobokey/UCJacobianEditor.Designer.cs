@@ -28,195 +28,280 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.picLeft = new System.Windows.Forms.PictureBox();
-            this.pnForce = new System.Windows.Forms.Panel();
-            this.numericUpDown4 = new System.Windows.Forms.NumericUpDown();
-            this.numericUpDown5 = new System.Windows.Forms.NumericUpDown();
-            this.numericUpDown6 = new System.Windows.Forms.NumericUpDown();
-            this.numericUpDown3 = new System.Windows.Forms.NumericUpDown();
-            this.numericUpDown2 = new System.Windows.Forms.NumericUpDown();
-            this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
+            this.picForce = new System.Windows.Forms.PictureBox();
+            this.udMotorZ = new System.Windows.Forms.NumericUpDown();
+            this.udMotorY = new System.Windows.Forms.NumericUpDown();
+            this.udMotorX = new System.Windows.Forms.NumericUpDown();
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
-            this.lbWire = new System.Windows.Forms.Label();
-            this.picRight = new System.Windows.Forms.PictureBox();
-            ((System.ComponentModel.ISupportInitialize)(this.picLeft)).BeginInit();
-            this.pnForce.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown4)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown5)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown6)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown3)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.picRight)).BeginInit();
+            this.flMotor = new System.Windows.Forms.FlowLayoutPanel();
+            this.label5 = new System.Windows.Forms.Label();
+            this.picPos = new System.Windows.Forms.PictureBox();
+            this.pnLeft = new System.Windows.Forms.Panel();
+            this.pnCtrls = new System.Windows.Forms.Panel();
+            this.udScale = new System.Windows.Forms.NumericUpDown();
+            this.btLoad = new System.Windows.Forms.Button();
+            this.btSave = new System.Windows.Forms.Button();
+            this.label4 = new System.Windows.Forms.Label();
+            this.saveDlg = new System.Windows.Forms.SaveFileDialog();
+            this.loadDlg = new System.Windows.Forms.OpenFileDialog();
+            ((System.ComponentModel.ISupportInitialize)(this.picForce)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.udMotorZ)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.udMotorY)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.udMotorX)).BeginInit();
+            this.flMotor.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.picPos)).BeginInit();
+            this.pnLeft.SuspendLayout();
+            this.pnCtrls.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.udScale)).BeginInit();
             this.SuspendLayout();
             // 
-            // picLeft
+            // picForce
             // 
-            this.picLeft.Dock = System.Windows.Forms.DockStyle.Left;
-            this.picLeft.Location = new System.Drawing.Point(0, 117);
-            this.picLeft.Name = "picLeft";
-            this.picLeft.Size = new System.Drawing.Size(215, 319);
-            this.picLeft.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
-            this.picLeft.TabIndex = 0;
-            this.picLeft.TabStop = false;
-            this.picLeft.Paint += new System.Windows.Forms.PaintEventHandler(this.pic_Paint);
+            this.picForce.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.picForce.Location = new System.Drawing.Point(0, 57);
+            this.picForce.Margin = new System.Windows.Forms.Padding(2);
+            this.picForce.Name = "picForce";
+            this.picForce.Size = new System.Drawing.Size(254, 286);
+            this.picForce.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
+            this.picForce.TabIndex = 0;
+            this.picForce.TabStop = false;
+            this.picForce.Paint += new System.Windows.Forms.PaintEventHandler(this.picForce_Paint);
+            this.picForce.MouseDown += new System.Windows.Forms.MouseEventHandler(this.picForce_MouseDown);
+            this.picForce.MouseMove += new System.Windows.Forms.MouseEventHandler(this.picForce_MouseMove);
             // 
-            // pnForce
+            // udMotorZ
             // 
-            this.pnForce.Controls.Add(this.numericUpDown4);
-            this.pnForce.Controls.Add(this.numericUpDown5);
-            this.pnForce.Controls.Add(this.numericUpDown6);
-            this.pnForce.Controls.Add(this.numericUpDown3);
-            this.pnForce.Controls.Add(this.numericUpDown2);
-            this.pnForce.Controls.Add(this.numericUpDown1);
-            this.pnForce.Controls.Add(this.label3);
-            this.pnForce.Controls.Add(this.label2);
-            this.pnForce.Controls.Add(this.label1);
-            this.pnForce.Controls.Add(this.lbWire);
-            this.pnForce.Dock = System.Windows.Forms.DockStyle.Top;
-            this.pnForce.Location = new System.Drawing.Point(0, 0);
-            this.pnForce.Name = "pnForce";
-            this.pnForce.Size = new System.Drawing.Size(465, 117);
-            this.pnForce.TabIndex = 1;
-            this.pnForce.Paint += new System.Windows.Forms.PaintEventHandler(this.pnForce_Paint);
+            this.udMotorZ.Location = new System.Drawing.Point(212, 4);
+            this.udMotorZ.Margin = new System.Windows.Forms.Padding(2);
+            this.udMotorZ.Name = "udMotorZ";
+            this.udMotorZ.Size = new System.Drawing.Size(42, 22);
+            this.udMotorZ.TabIndex = 9;
             // 
-            // numericUpDown4
+            // udMotorY
             // 
-            this.numericUpDown4.Location = new System.Drawing.Point(118, 87);
-            this.numericUpDown4.Name = "numericUpDown4";
-            this.numericUpDown4.Size = new System.Drawing.Size(78, 25);
-            this.numericUpDown4.TabIndex = 9;
+            this.udMotorY.Location = new System.Drawing.Point(149, 4);
+            this.udMotorY.Margin = new System.Windows.Forms.Padding(2);
+            this.udMotorY.Name = "udMotorY";
+            this.udMotorY.Size = new System.Drawing.Size(42, 22);
+            this.udMotorY.TabIndex = 8;
             // 
-            // numericUpDown5
+            // udMotorX
             // 
-            this.numericUpDown5.Location = new System.Drawing.Point(118, 56);
-            this.numericUpDown5.Name = "numericUpDown5";
-            this.numericUpDown5.Size = new System.Drawing.Size(78, 25);
-            this.numericUpDown5.TabIndex = 8;
-            // 
-            // numericUpDown6
-            // 
-            this.numericUpDown6.Location = new System.Drawing.Point(118, 25);
-            this.numericUpDown6.Name = "numericUpDown6";
-            this.numericUpDown6.Size = new System.Drawing.Size(78, 25);
-            this.numericUpDown6.TabIndex = 7;
-            // 
-            // numericUpDown3
-            // 
-            this.numericUpDown3.Location = new System.Drawing.Point(34, 88);
-            this.numericUpDown3.Name = "numericUpDown3";
-            this.numericUpDown3.Size = new System.Drawing.Size(78, 25);
-            this.numericUpDown3.TabIndex = 6;
-            // 
-            // numericUpDown2
-            // 
-            this.numericUpDown2.Location = new System.Drawing.Point(34, 57);
-            this.numericUpDown2.Name = "numericUpDown2";
-            this.numericUpDown2.Size = new System.Drawing.Size(78, 25);
-            this.numericUpDown2.TabIndex = 5;
-            // 
-            // numericUpDown1
-            // 
-            this.numericUpDown1.Location = new System.Drawing.Point(34, 26);
-            this.numericUpDown1.Name = "numericUpDown1";
-            this.numericUpDown1.Size = new System.Drawing.Size(78, 25);
-            this.numericUpDown1.TabIndex = 4;
+            this.udMotorX.Location = new System.Drawing.Point(82, 4);
+            this.udMotorX.Margin = new System.Windows.Forms.Padding(2);
+            this.udMotorX.Name = "udMotorX";
+            this.udMotorX.Size = new System.Drawing.Size(42, 22);
+            this.udMotorX.TabIndex = 7;
             // 
             // label3
             // 
             this.label3.AutoSize = true;
             this.label3.ForeColor = System.Drawing.Color.Blue;
-            this.label3.Location = new System.Drawing.Point(7, 90);
+            this.label3.Location = new System.Drawing.Point(193, 7);
+            this.label3.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(21, 18);
+            this.label3.Size = new System.Drawing.Size(18, 15);
             this.label3.TabIndex = 3;
             this.label3.Text = "3:";
-            this.label3.Click += new System.EventHandler(this.label3_Click);
             // 
             // label2
             // 
             this.label2.AutoSize = true;
             this.label2.ForeColor = System.Drawing.Color.Green;
-            this.label2.Location = new System.Drawing.Point(7, 59);
+            this.label2.Location = new System.Drawing.Point(129, 7);
+            this.label2.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(21, 18);
+            this.label2.Size = new System.Drawing.Size(18, 15);
             this.label2.TabIndex = 2;
             this.label2.Text = "2:";
-            this.label2.Click += new System.EventHandler(this.label2_Click);
             // 
             // label1
             // 
             this.label1.AutoSize = true;
             this.label1.ForeColor = System.Drawing.Color.Red;
-            this.label1.Location = new System.Drawing.Point(7, 28);
+            this.label1.Location = new System.Drawing.Point(62, 7);
+            this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(21, 18);
+            this.label1.Size = new System.Drawing.Size(18, 15);
             this.label1.TabIndex = 1;
             this.label1.Text = "1:";
-            this.label1.Click += new System.EventHandler(this.label1_Click);
             // 
-            // lbWire
+            // flMotor
             // 
-            this.lbWire.AutoSize = true;
-            this.lbWire.Location = new System.Drawing.Point(4, 4);
-            this.lbWire.Name = "lbWire";
-            this.lbWire.Size = new System.Drawing.Size(180, 18);
-            this.lbWire.TabIndex = 0;
-            this.lbWire.Text = "Wire Angle      Motor ID";
-            this.lbWire.Click += new System.EventHandler(this.lbWire_Click);
+            this.flMotor.AutoSize = true;
+            this.flMotor.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.flMotor.Controls.Add(this.label5);
+            this.flMotor.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.flMotor.Location = new System.Drawing.Point(0, 343);
+            this.flMotor.MinimumSize = new System.Drawing.Size(0, 20);
+            this.flMotor.Name = "flMotor";
+            this.flMotor.Size = new System.Drawing.Size(254, 20);
+            this.flMotor.TabIndex = 2;
             // 
-            // picRight
+            // label5
             // 
-            this.picRight.Dock = System.Windows.Forms.DockStyle.Right;
-            this.picRight.Location = new System.Drawing.Point(250, 117);
-            this.picRight.Name = "picRight";
-            this.picRight.Size = new System.Drawing.Size(215, 319);
-            this.picRight.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
-            this.picRight.TabIndex = 2;
-            this.picRight.TabStop = false;
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(3, 0);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(31, 15);
+            this.label5.TabIndex = 0;
+            this.label5.Text = "Pos";
+            // 
+            // picPos
+            // 
+            this.picPos.Dock = System.Windows.Forms.DockStyle.Right;
+            this.picPos.Location = new System.Drawing.Point(254, 0);
+            this.picPos.Name = "picPos";
+            this.picPos.Size = new System.Drawing.Size(118, 363);
+            this.picPos.TabIndex = 3;
+            this.picPos.TabStop = false;
+            this.picPos.Click += new System.EventHandler(this.picPos_Click);
+            this.picPos.Paint += new System.Windows.Forms.PaintEventHandler(this.picPos_Paint);
+            this.picPos.MouseDown += new System.Windows.Forms.MouseEventHandler(this.picPos_MouseDown);
+            this.picPos.MouseMove += new System.Windows.Forms.MouseEventHandler(this.picPos_MouseMove);
+            // 
+            // pnLeft
+            // 
+            this.pnLeft.Controls.Add(this.picForce);
+            this.pnLeft.Controls.Add(this.pnCtrls);
+            this.pnLeft.Controls.Add(this.flMotor);
+            this.pnLeft.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pnLeft.Location = new System.Drawing.Point(0, 0);
+            this.pnLeft.Name = "pnLeft";
+            this.pnLeft.Size = new System.Drawing.Size(254, 363);
+            this.pnLeft.TabIndex = 4;
+            // 
+            // pnCtrls
+            // 
+            this.pnCtrls.AutoSize = true;
+            this.pnCtrls.Controls.Add(this.udScale);
+            this.pnCtrls.Controls.Add(this.btLoad);
+            this.pnCtrls.Controls.Add(this.btSave);
+            this.pnCtrls.Controls.Add(this.label4);
+            this.pnCtrls.Controls.Add(this.udMotorZ);
+            this.pnCtrls.Controls.Add(this.udMotorY);
+            this.pnCtrls.Controls.Add(this.label1);
+            this.pnCtrls.Controls.Add(this.udMotorX);
+            this.pnCtrls.Controls.Add(this.label2);
+            this.pnCtrls.Controls.Add(this.label3);
+            this.pnCtrls.Dock = System.Windows.Forms.DockStyle.Top;
+            this.pnCtrls.Location = new System.Drawing.Point(0, 0);
+            this.pnCtrls.Name = "pnCtrls";
+            this.pnCtrls.Size = new System.Drawing.Size(254, 57);
+            this.pnCtrls.TabIndex = 3;
+            // 
+            // udScale
+            // 
+            this.udScale.Increment = new decimal(new int[] {
+            1000,
+            0,
+            0,
+            0});
+            this.udScale.Location = new System.Drawing.Point(6, 31);
+            this.udScale.Margin = new System.Windows.Forms.Padding(2);
+            this.udScale.Maximum = new decimal(new int[] {
+            100000,
+            0,
+            0,
+            0});
+            this.udScale.Name = "udScale";
+            this.udScale.Size = new System.Drawing.Size(74, 22);
+            this.udScale.TabIndex = 13;
+            this.udScale.Value = new decimal(new int[] {
+            10000,
+            0,
+            0,
+            0});
+            // 
+            // btLoad
+            // 
+            this.btLoad.Location = new System.Drawing.Point(89, 31);
+            this.btLoad.Name = "btLoad";
+            this.btLoad.Size = new System.Drawing.Size(52, 23);
+            this.btLoad.TabIndex = 12;
+            this.btLoad.Text = "&Load";
+            this.btLoad.UseVisualStyleBackColor = true;
+            this.btLoad.Click += new System.EventHandler(this.btLoad_Click);
+            // 
+            // btSave
+            // 
+            this.btSave.Location = new System.Drawing.Point(147, 31);
+            this.btSave.Name = "btSave";
+            this.btSave.Size = new System.Drawing.Size(52, 23);
+            this.btSave.TabIndex = 11;
+            this.btSave.Text = "&Save";
+            this.btSave.UseVisualStyleBackColor = true;
+            this.btSave.Click += new System.EventHandler(this.btSave_Click);
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(0, 7);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(52, 15);
+            this.label4.TabIndex = 10;
+            this.label4.Text = "Motor#";
+            // 
+            // saveDlg
+            // 
+            this.saveDlg.DefaultExt = "txt";
+            this.saveDlg.FileName = "forces.txt";
+            this.saveDlg.FileOk += new System.ComponentModel.CancelEventHandler(this.saveDlg_FileOk);
+            // 
+            // loadDlg
+            // 
+            this.loadDlg.DefaultExt = "txt";
+            this.loadDlg.FileName = "forces.txt";
+            this.loadDlg.FileOk += new System.ComponentModel.CancelEventHandler(this.loadDlg_FileOk);
             // 
             // UCJacobianEditor
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 18F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.picRight);
-            this.Controls.Add(this.picLeft);
-            this.Controls.Add(this.pnForce);
+            this.Controls.Add(this.pnLeft);
+            this.Controls.Add(this.picPos);
+            this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "UCJacobianEditor";
-            this.Size = new System.Drawing.Size(465, 436);
+            this.Size = new System.Drawing.Size(372, 363);
             this.Load += new System.EventHandler(this.UCJacobianEditor_Load);
             this.Resize += new System.EventHandler(this.UCJacobianEditor_Resize);
-            ((System.ComponentModel.ISupportInitialize)(this.picLeft)).EndInit();
-            this.pnForce.ResumeLayout(false);
-            this.pnForce.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown4)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown5)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown6)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown3)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.picRight)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picForce)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.udMotorZ)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.udMotorY)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.udMotorX)).EndInit();
+            this.flMotor.ResumeLayout(false);
+            this.flMotor.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.picPos)).EndInit();
+            this.pnLeft.ResumeLayout(false);
+            this.pnLeft.PerformLayout();
+            this.pnCtrls.ResumeLayout(false);
+            this.pnCtrls.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.udScale)).EndInit();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
         #endregion
 
-        private System.Windows.Forms.PictureBox picLeft;
-        private System.Windows.Forms.Panel pnForce;
-        private System.Windows.Forms.Label lbWire;
+        private System.Windows.Forms.PictureBox picForce;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.NumericUpDown numericUpDown3;
-        private System.Windows.Forms.NumericUpDown numericUpDown2;
-        private System.Windows.Forms.NumericUpDown numericUpDown1;
-        private System.Windows.Forms.NumericUpDown numericUpDown4;
-        private System.Windows.Forms.NumericUpDown numericUpDown5;
-        private System.Windows.Forms.NumericUpDown numericUpDown6;
-        private System.Windows.Forms.PictureBox picRight;
+        private System.Windows.Forms.NumericUpDown udMotorZ;
+        private System.Windows.Forms.NumericUpDown udMotorY;
+        private System.Windows.Forms.NumericUpDown udMotorX;
+        private System.Windows.Forms.FlowLayoutPanel flMotor;
+        private System.Windows.Forms.Panel pnLeft;
+        private System.Windows.Forms.Panel pnCtrls;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Label label5;
+        public System.Windows.Forms.PictureBox picPos;
+        private System.Windows.Forms.Button btLoad;
+        private System.Windows.Forms.Button btSave;
+        private System.Windows.Forms.SaveFileDialog saveDlg;
+        private System.Windows.Forms.OpenFileDialog loadDlg;
+        private System.Windows.Forms.NumericUpDown udScale;
     }
 }

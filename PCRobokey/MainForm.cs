@@ -35,6 +35,7 @@ namespace Robokey
             udpComm.OnUpdateRobotInfo += OnUpdateRobotInfo;
             udpComm.OnUpdateRobotState += OnUpdateRobotState;
             udpComm.OnMessageReceive += SetMessage;
+            ucJacobianEditor1.ValueChanged += ReadJacobianEditor;
             UpdateMotorPanel();
             udLoopTime_ValueChanged(udLoopTime, null);
             openPose.InitialDirectory = System.IO.Directory.GetCurrentDirectory();
@@ -756,6 +757,18 @@ namespace Robokey
                 logFile = null;
                 udpComm.log = logFile;
             }
+        }
+
+        private void tabControl_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (tabControl.SelectedTab == tabForce)
+            {
+                ucJacobianEditor1.ReadFromMotors(motors);
+            }
+        }
+        private void ReadJacobianEditor(Object sender, EventArgs e) {
+            UCJacobianEditor je = (UCJacobianEditor)sender;
+            je.WriteToMotors(motors);
         }
 
         void LoadSetting(byte[] adr)

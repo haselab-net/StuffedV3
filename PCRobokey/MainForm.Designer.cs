@@ -36,6 +36,7 @@
             this.panelCom = new System.Windows.Forms.Panel();
             this.txErrorMsg = new System.Windows.Forms.TextBox();
             this.panel2 = new System.Windows.Forms.Panel();
+            this.ckLog = new System.Windows.Forms.CheckBox();
             this.ckSense = new System.Windows.Forms.CheckBox();
             this.fpFoundRobot = new System.Windows.Forms.FlowLayoutPanel();
             this.btFindRobot = new System.Windows.Forms.Button();
@@ -78,13 +79,12 @@
             this.panel3 = new System.Windows.Forms.Panel();
             this.btSendPD = new System.Windows.Forms.Button();
             this.tabForce = new System.Windows.Forms.TabPage();
+            this.ucJacobianEditor1 = new Robokey.UCJacobianEditor();
             this.tabInfo = new System.Windows.Forms.TabControl();
             this.tpState = new System.Windows.Forms.TabPage();
             this.tbState = new System.Windows.Forms.TextBox();
             this.tpMessage = new System.Windows.Forms.TabPage();
             this.tbMessage = new System.Windows.Forms.TextBox();
-            this.ucJacobianEditor1 = new Robokey.UCJacobianEditor();
-            this.ckLog = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.track)).BeginInit();
             this.panelCom.SuspendLayout();
             this.panel2.SuspendLayout();
@@ -156,7 +156,7 @@
             this.panelCom.Controls.Add(this.panel2);
             this.panelCom.Dock = System.Windows.Forms.DockStyle.Right;
             this.panelCom.Location = new System.Drawing.Point(797, 87);
-            this.panelCom.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.panelCom.Margin = new System.Windows.Forms.Padding(2);
             this.panelCom.Name = "panelCom";
             this.panelCom.Size = new System.Drawing.Size(138, 484);
             this.panelCom.TabIndex = 66;
@@ -165,7 +165,7 @@
             // 
             this.txErrorMsg.Dock = System.Windows.Forms.DockStyle.Fill;
             this.txErrorMsg.Location = new System.Drawing.Point(0, 280);
-            this.txErrorMsg.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.txErrorMsg.Margin = new System.Windows.Forms.Padding(2);
             this.txErrorMsg.Multiline = true;
             this.txErrorMsg.Name = "txErrorMsg";
             this.txErrorMsg.ReadOnly = true;
@@ -182,10 +182,22 @@
             this.panel2.Controls.Add(this.btResetMotors);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel2.Location = new System.Drawing.Point(0, 0);
-            this.panel2.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.panel2.Margin = new System.Windows.Forms.Padding(2);
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(138, 280);
             this.panel2.TabIndex = 69;
+            // 
+            // ckLog
+            // 
+            this.ckLog.AutoSize = true;
+            this.ckLog.Location = new System.Drawing.Point(84, 197);
+            this.ckLog.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.ckLog.Name = "ckLog";
+            this.ckLog.Size = new System.Drawing.Size(52, 19);
+            this.ckLog.TabIndex = 80;
+            this.ckLog.Text = "Log";
+            this.ckLog.UseVisualStyleBackColor = true;
+            this.ckLog.CheckedChanged += new System.EventHandler(this.ckLog_CheckedChanged);
             // 
             // ckSense
             // 
@@ -203,7 +215,7 @@
             // 
             this.fpFoundRobot.AutoScroll = true;
             this.fpFoundRobot.Location = new System.Drawing.Point(0, 32);
-            this.fpFoundRobot.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.fpFoundRobot.Margin = new System.Windows.Forms.Padding(2);
             this.fpFoundRobot.Name = "fpFoundRobot";
             this.fpFoundRobot.Size = new System.Drawing.Size(138, 158);
             this.fpFoundRobot.TabIndex = 45;
@@ -267,7 +279,7 @@
             this.panelTop.Controls.Add(this.ckRunOnce);
             this.panelTop.Dock = System.Windows.Forms.DockStyle.Top;
             this.panelTop.Location = new System.Drawing.Point(0, 50);
-            this.panelTop.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.panelTop.Margin = new System.Windows.Forms.Padding(2);
             this.panelTop.Name = "panelTop";
             this.panelTop.Size = new System.Drawing.Size(935, 37);
             this.panelTop.TabIndex = 69;
@@ -298,7 +310,7 @@
             // 
             this.ckForce.AutoSize = true;
             this.ckForce.Location = new System.Drawing.Point(539, 8);
-            this.ckForce.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.ckForce.Margin = new System.Windows.Forms.Padding(2);
             this.ckForce.Name = "ckForce";
             this.ckForce.Size = new System.Drawing.Size(94, 19);
             this.ckForce.TabIndex = 79;
@@ -319,7 +331,7 @@
             // udTick
             // 
             this.udTick.Location = new System.Drawing.Point(178, 7);
-            this.udTick.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.udTick.Margin = new System.Windows.Forms.Padding(2);
             this.udTick.Maximum = new decimal(new int[] {
             1000,
             0,
@@ -461,7 +473,7 @@
             // 
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer1.Location = new System.Drawing.Point(0, 87);
-            this.splitContainer1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.splitContainer1.Margin = new System.Windows.Forms.Padding(2);
             this.splitContainer1.Name = "splitContainer1";
             // 
             // splitContainer1.Panel1
@@ -490,6 +502,7 @@
             this.tabControl.SelectedIndex = 0;
             this.tabControl.Size = new System.Drawing.Size(529, 484);
             this.tabControl.TabIndex = 6;
+            this.tabControl.SelectedIndexChanged += new System.EventHandler(this.tabControl_SelectedIndexChanged);
             // 
             // tabPoseEditor
             // 
@@ -585,7 +598,7 @@
             // 
             this.tabMotors.Controls.Add(this.flLength);
             this.tabMotors.Location = new System.Drawing.Point(4, 25);
-            this.tabMotors.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabMotors.Margin = new System.Windows.Forms.Padding(2);
             this.tabMotors.Name = "tabMotors";
             this.tabMotors.Size = new System.Drawing.Size(521, 455);
             this.tabMotors.TabIndex = 1;
@@ -597,7 +610,7 @@
             this.flLength.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.flLength.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flLength.Location = new System.Drawing.Point(0, 0);
-            this.flLength.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.flLength.Margin = new System.Windows.Forms.Padding(2);
             this.flLength.Name = "flLength";
             this.flLength.Size = new System.Drawing.Size(521, 455);
             this.flLength.TabIndex = 2;
@@ -607,7 +620,7 @@
             this.tabTorque.Controls.Add(this.flTorque);
             this.tabTorque.Controls.Add(this.panel4);
             this.tabTorque.Location = new System.Drawing.Point(4, 25);
-            this.tabTorque.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabTorque.Margin = new System.Windows.Forms.Padding(2);
             this.tabTorque.Name = "tabTorque";
             this.tabTorque.Size = new System.Drawing.Size(521, 455);
             this.tabTorque.TabIndex = 2;
@@ -619,7 +632,7 @@
             this.flTorque.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.flTorque.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flTorque.Location = new System.Drawing.Point(0, 30);
-            this.flTorque.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.flTorque.Margin = new System.Windows.Forms.Padding(2);
             this.flTorque.Name = "flTorque";
             this.flTorque.Size = new System.Drawing.Size(521, 425);
             this.flTorque.TabIndex = 1;
@@ -629,7 +642,7 @@
             this.panel4.Controls.Add(this.btSendTorque);
             this.panel4.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel4.Location = new System.Drawing.Point(0, 0);
-            this.panel4.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.panel4.Margin = new System.Windows.Forms.Padding(2);
             this.panel4.Name = "panel4";
             this.panel4.Size = new System.Drawing.Size(521, 30);
             this.panel4.TabIndex = 2;
@@ -637,7 +650,7 @@
             // btSendTorque
             // 
             this.btSendTorque.Location = new System.Drawing.Point(366, 2);
-            this.btSendTorque.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.btSendTorque.Margin = new System.Windows.Forms.Padding(2);
             this.btSendTorque.Name = "btSendTorque";
             this.btSendTorque.Size = new System.Drawing.Size(155, 25);
             this.btSendTorque.TabIndex = 0;
@@ -650,9 +663,9 @@
             this.tabPdParam.Controls.Add(this.flPd);
             this.tabPdParam.Controls.Add(this.panel3);
             this.tabPdParam.Location = new System.Drawing.Point(4, 25);
-            this.tabPdParam.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabPdParam.Margin = new System.Windows.Forms.Padding(2);
             this.tabPdParam.Name = "tabPdParam";
-            this.tabPdParam.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabPdParam.Padding = new System.Windows.Forms.Padding(2);
             this.tabPdParam.Size = new System.Drawing.Size(521, 455);
             this.tabPdParam.TabIndex = 3;
             this.tabPdParam.Text = "PD";
@@ -662,7 +675,7 @@
             // 
             this.flPd.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flPd.Location = new System.Drawing.Point(2, 30);
-            this.flPd.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.flPd.Margin = new System.Windows.Forms.Padding(2);
             this.flPd.Name = "flPd";
             this.flPd.Size = new System.Drawing.Size(517, 423);
             this.flPd.TabIndex = 1;
@@ -672,7 +685,7 @@
             this.panel3.Controls.Add(this.btSendPD);
             this.panel3.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel3.Location = new System.Drawing.Point(2, 2);
-            this.panel3.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.panel3.Margin = new System.Windows.Forms.Padding(2);
             this.panel3.Name = "panel3";
             this.panel3.Size = new System.Drawing.Size(517, 28);
             this.panel3.TabIndex = 0;
@@ -681,7 +694,7 @@
             // 
             this.btSendPD.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.btSendPD.Location = new System.Drawing.Point(392, 2);
-            this.btSendPD.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.btSendPD.Margin = new System.Windows.Forms.Padding(2);
             this.btSendPD.Name = "btSendPD";
             this.btSendPD.Size = new System.Drawing.Size(124, 23);
             this.btSendPD.TabIndex = 0;
@@ -693,12 +706,21 @@
             // 
             this.tabForce.Controls.Add(this.ucJacobianEditor1);
             this.tabForce.Location = new System.Drawing.Point(4, 25);
-            this.tabForce.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabForce.Margin = new System.Windows.Forms.Padding(2);
             this.tabForce.Name = "tabForce";
             this.tabForce.Size = new System.Drawing.Size(521, 455);
             this.tabForce.TabIndex = 4;
             this.tabForce.Text = "Force Ctrl";
             this.tabForce.UseVisualStyleBackColor = true;
+            // 
+            // ucJacobianEditor1
+            // 
+            this.ucJacobianEditor1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.ucJacobianEditor1.Location = new System.Drawing.Point(0, 0);
+            this.ucJacobianEditor1.Margin = new System.Windows.Forms.Padding(2);
+            this.ucJacobianEditor1.Name = "ucJacobianEditor1";
+            this.ucJacobianEditor1.Size = new System.Drawing.Size(521, 455);
+            this.ucJacobianEditor1.TabIndex = 0;
             // 
             // tabInfo
             // 
@@ -706,7 +728,7 @@
             this.tabInfo.Controls.Add(this.tpMessage);
             this.tabInfo.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabInfo.Location = new System.Drawing.Point(0, 0);
-            this.tabInfo.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabInfo.Margin = new System.Windows.Forms.Padding(2);
             this.tabInfo.Name = "tabInfo";
             this.tabInfo.SelectedIndex = 0;
             this.tabInfo.Size = new System.Drawing.Size(265, 484);
@@ -716,9 +738,9 @@
             // 
             this.tpState.Controls.Add(this.tbState);
             this.tpState.Location = new System.Drawing.Point(4, 25);
-            this.tpState.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tpState.Margin = new System.Windows.Forms.Padding(2);
             this.tpState.Name = "tpState";
-            this.tpState.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tpState.Padding = new System.Windows.Forms.Padding(2);
             this.tpState.Size = new System.Drawing.Size(257, 455);
             this.tpState.TabIndex = 0;
             this.tpState.Text = "State";
@@ -742,9 +764,9 @@
             // 
             this.tpMessage.Controls.Add(this.tbMessage);
             this.tpMessage.Location = new System.Drawing.Point(4, 25);
-            this.tpMessage.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tpMessage.Margin = new System.Windows.Forms.Padding(2);
             this.tpMessage.Name = "tpMessage";
-            this.tpMessage.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tpMessage.Padding = new System.Windows.Forms.Padding(2);
             this.tpMessage.Size = new System.Drawing.Size(257, 455);
             this.tpMessage.TabIndex = 1;
             this.tpMessage.Text = "Message";
@@ -755,7 +777,7 @@
             this.tbMessage.BackColor = System.Drawing.SystemColors.Window;
             this.tbMessage.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tbMessage.Location = new System.Drawing.Point(2, 2);
-            this.tbMessage.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tbMessage.Margin = new System.Windows.Forms.Padding(2);
             this.tbMessage.Multiline = true;
             this.tbMessage.Name = "tbMessage";
             this.tbMessage.ReadOnly = true;
@@ -764,28 +786,7 @@
             this.tbMessage.TabIndex = 0;
             this.tbMessage.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.tbMessage_KeyPress);
             // 
-            // ucJacobianEditor1
-            // 
-            this.ucJacobianEditor1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.ucJacobianEditor1.Location = new System.Drawing.Point(0, 0);
-            this.ucJacobianEditor1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
-            this.ucJacobianEditor1.Name = "ucJacobianEditor1";
-            this.ucJacobianEditor1.Size = new System.Drawing.Size(521, 455);
-            this.ucJacobianEditor1.TabIndex = 0;
-            // 
-            // ckLog
-            // 
-            this.ckLog.AutoSize = true;
-            this.ckLog.Location = new System.Drawing.Point(84, 197);
-            this.ckLog.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.ckLog.Name = "ckLog";
-            this.ckLog.Size = new System.Drawing.Size(52, 19);
-            this.ckLog.TabIndex = 80;
-            this.ckLog.Text = "Log";
-            this.ckLog.UseVisualStyleBackColor = true;
-            this.ckLog.CheckedChanged += new System.EventHandler(this.ckLog_CheckedChanged);
-            // 
-            // Form1
+            // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -798,9 +799,8 @@
             this.Controls.Add(this.track);
             this.KeyPreview = true;
             this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.MaximumSize = new System.Drawing.Size(1284, 808);
             this.MinimumSize = new System.Drawing.Size(484, 341);
-            this.Name = "Form1";
+            this.Name = "MainForm";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Show;
             this.Text = "Robokey";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
