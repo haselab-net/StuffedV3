@@ -76,8 +76,8 @@ namespace Robokey
 
 
         //  network
-        System.Net.Sockets.UdpClient udp = null;
-        System.Net.Sockets.UdpClient udpBc = null;
+        volatile System.Net.Sockets.UdpClient udp = null;
+        volatile System.Net.Sockets.UdpClient udpBc = null;
         public System.Net.IPEndPoint sendPoint = null;
         public System.Net.IPEndPoint recvPoint = null;
         bool bConnected = false;
@@ -299,83 +299,91 @@ namespace Robokey
             {
             UdpComm uc = (UdpComm)(ar.AsyncState);
             if (uc.udp == null) return;
-            byte[] receiveBytes = uc.udp.EndReceive(ar, ref uc.recvPoint);
-            if (uc.recvPoint.Port != localBcPort)   //  In broad cast case, sent packet can be received. Must skip.
+            byte[] receiveBytes;
+            try
             {
-                int cur = 0;
-                ushort length = 0;
-                ushort count = 0;
-                ushort commandId = 0;
-                while (cur < receiveBytes.Length)
+                 receiveBytes = uc.udp.EndReceive(ar, ref uc.recvPoint);
+                if (uc.recvPoint.Port != localBcPort)   //  In broad cast case, sent packet can be received. Must skip.
                 {
-                    int start = cur;
-                    ReadHeader(ref length, ref count, ref commandId, ref cur, receiveBytes);
-                    if (log != null)
+                    int cur = 0;
+                    ushort length = 0;
+                    ushort count = 0;
+                    ushort commandId = 0;
+                    while (cur < receiveBytes.Length)
                     {
-                        log.Write("L" + length + " C" + commandId);
-                        for (int i = cur; i < receiveBytes.Length; i += 2)
+                        int start = cur;
+                        ReadHeader(ref length, ref count, ref commandId, ref cur, receiveBytes);
+                        if (log != null)
                         {
-                            short s = (short)(receiveBytes[i] | (receiveBytes[i + 1] << 8));
-                            log.Write(" " + string.Format("{0,0:X4}", s));
+                            log.Write("L" + length + " C" + commandId);
+                            for (int i = cur; i < receiveBytes.Length; i += 2)
+                            {
+                                short s = (short)(receiveBytes[i] | (receiveBytes[i + 1] << 8));
+                                log.Write(" " + string.Format("{0,0:X4}", s));
+                            }
+                            log.Write("\r\n");
                         }
-                        log.Write("\r\n");
-                    }
-                    sendQueue.FreeTo(count);
-                    switch ((CommandId)commandId)
-                    {
-                        case CommandId.CI_BOARD_INFO:
-                            ReadBoard(ref cur, receiveBytes);
-                            break;
-                        case CommandId.CI_DIRECT:
-                            ReadPose(ref cur, receiveBytes);
-                            cur += pose.values.Length * 2;
-                            CallUpdateRobotState();
-                            break;
-                        case CommandId.CI_INTERPOLATE:
-                            ReadPose(ref cur, receiveBytes);
-                            ReadTick(ref cur, receiveBytes);
-                            CallUpdateRobotState();
-                            break;
-                        case CommandId.CI_SENSOR:
-                            ReadPose(ref cur, receiveBytes);
-                            ReadForce(ref cur, receiveBytes);
-                            CallUpdateRobotState();
-                            break;
-                        case CommandId.CIU_GET_IPADDRESS:
-                            ReadPeerIPAddress(ref cur, receiveBytes);
-                            if (bFindRobot)
-                            {
-                                lock (sendQueue)
+                        sendQueue.FreeTo(count);
+                        switch ((CommandId)commandId)
+                        {
+                            case CommandId.CI_BOARD_INFO:
+                                ReadBoard(ref cur, receiveBytes);
+                                break;
+                            case CommandId.CI_DIRECT:
+                                ReadPose(ref cur, receiveBytes);
+                                cur += pose.values.Length * 2;
+                                CallUpdateRobotState();
+                                break;
+                            case CommandId.CI_INTERPOLATE:
+                                ReadPose(ref cur, receiveBytes);
+                                ReadTick(ref cur, receiveBytes);
+                                CallUpdateRobotState();
+                                break;
+                            case CommandId.CI_SENSOR:
+                                ReadPose(ref cur, receiveBytes);
+                                ReadForce(ref cur, receiveBytes);
+                                CallUpdateRobotState();
+                                break;
+                            case CommandId.CIU_GET_IPADDRESS:
+                                ReadPeerIPAddress(ref cur, receiveBytes);
+                                if (bFindRobot)
                                 {
-                                    sendQueue.Clear();
-                                    sendQueue.commandCount = count;
+                                    lock (sendQueue)
+                                    {
+                                        sendQueue.Clear();
+                                        sendQueue.commandCount = count;
+                                    }
+                                    if (OnRobotFound != null)
+                                    {
+                                        owner.Invoke(new RobotFindHandlerType(OnRobotFound), recvPoint.Address);
+                                    }
                                 }
-                                if (OnRobotFound != null)
+                                break;
+                            case CommandId.CIU_TEXT:
+                                ReadText(ref cur, receiveBytes);
+                                break;
+                            default:
+                                if (commandId >= (int)CommandId.CIU_NCOMMAND)
                                 {
-                                    owner.Invoke(new RobotFindHandlerType(OnRobotFound), recvPoint.Address);
+                                    string msg = "Invalid command " + commandId + " received";
+                                    SetMessage(-1, msg);
                                 }
-                            }
-                            break;
-                        case CommandId.CIU_TEXT:
-                            ReadText(ref cur, receiveBytes);
-                            break;
-                        default:
-                            if (commandId >= (int)CommandId.CIU_NCOMMAND)
-                            {
-                                string msg = "Invalid command " + commandId + " received";
-                                SetMessage(-1, msg);
-                            }
-                            break;
+                                break;
+                        }
+                        if (cur != start + length) {
+                            System.Diagnostics.Debug.WriteLine("Recv lengths not match !");
+                        }
+                        cur = start + length;
                     }
-                    if (cur != start + length) {
-                        System.Diagnostics.Debug.WriteLine("Recv lengths not match !");
-                    }
-                    cur = start + length;
+                }
+                if (uc.udp != null)
+                {
+                    uc.udp.BeginReceive(OnReceive, ar.AsyncState);
                 }
             }
-            if (uc.udp != null)
+            catch (Exception)
             {
-                uc.udp.BeginReceive(OnReceive, ar.AsyncState);
+                return;
             }
         }
         public void Close()
