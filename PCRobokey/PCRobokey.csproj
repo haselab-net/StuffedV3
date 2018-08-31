@@ -75,6 +75,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Utility.cs" />
     <Compile Include="commandId.cs" />
     <Compile Include="Motor.cs" />
     <Compile Include="UdpComm.cs" />

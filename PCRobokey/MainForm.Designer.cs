@@ -78,13 +78,16 @@
             this.flPd = new System.Windows.Forms.FlowLayoutPanel();
             this.panel3 = new System.Windows.Forms.Panel();
             this.btSendPD = new System.Windows.Forms.Button();
-            this.tabForce = new System.Windows.Forms.TabPage();
-            this.ucJacobianEditor1 = new Robokey.UCJacobianEditor();
+            this.tabLForce = new System.Windows.Forms.TabPage();
+            this.tabRForce = new System.Windows.Forms.TabPage();
             this.tabInfo = new System.Windows.Forms.TabControl();
             this.tpState = new System.Windows.Forms.TabPage();
             this.tbState = new System.Windows.Forms.TextBox();
             this.tpMessage = new System.Windows.Forms.TabPage();
             this.tbMessage = new System.Windows.Forms.TextBox();
+            this.ucJacobianEditor1 = new Robokey.UCJacobianEditor();
+            this.jeRight = new Robokey.UCJacobianEditor();
+            this.jeLeft = new Robokey.UCJacobianEditor();
             ((System.ComponentModel.ISupportInitialize)(this.track)).BeginInit();
             this.panelCom.SuspendLayout();
             this.panel2.SuspendLayout();
@@ -105,7 +108,8 @@
             this.panel4.SuspendLayout();
             this.tabPdParam.SuspendLayout();
             this.panel3.SuspendLayout();
-            this.tabForce.SuspendLayout();
+            this.tabLForce.SuspendLayout();
+            this.tabRForce.SuspendLayout();
             this.tabInfo.SuspendLayout();
             this.tpState.SuspendLayout();
             this.tpMessage.SuspendLayout();
@@ -494,7 +498,8 @@
             this.tabControl.Controls.Add(this.tabMotors);
             this.tabControl.Controls.Add(this.tabTorque);
             this.tabControl.Controls.Add(this.tabPdParam);
-            this.tabControl.Controls.Add(this.tabForce);
+            this.tabControl.Controls.Add(this.tabLForce);
+            this.tabControl.Controls.Add(this.tabRForce);
             this.tabControl.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl.Location = new System.Drawing.Point(0, 0);
             this.tabControl.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
@@ -702,25 +707,26 @@
             this.btSendPD.UseVisualStyleBackColor = true;
             this.btSendPD.Click += new System.EventHandler(this.btSendPD_Click);
             // 
-            // tabForce
+            // tabLForce
             // 
-            this.tabForce.Controls.Add(this.ucJacobianEditor1);
-            this.tabForce.Location = new System.Drawing.Point(4, 25);
-            this.tabForce.Margin = new System.Windows.Forms.Padding(2);
-            this.tabForce.Name = "tabForce";
-            this.tabForce.Size = new System.Drawing.Size(521, 455);
-            this.tabForce.TabIndex = 4;
-            this.tabForce.Text = "Force Ctrl";
-            this.tabForce.UseVisualStyleBackColor = true;
+            this.tabLForce.Controls.Add(this.jeLeft);
+            this.tabLForce.Location = new System.Drawing.Point(4, 25);
+            this.tabLForce.Margin = new System.Windows.Forms.Padding(2);
+            this.tabLForce.Name = "tabLForce";
+            this.tabLForce.Size = new System.Drawing.Size(521, 455);
+            this.tabLForce.TabIndex = 4;
+            this.tabLForce.Text = "L Force";
+            this.tabLForce.UseVisualStyleBackColor = true;
             // 
-            // ucJacobianEditor1
+            // tabRForce
             // 
-            this.ucJacobianEditor1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.ucJacobianEditor1.Location = new System.Drawing.Point(0, 0);
-            this.ucJacobianEditor1.Margin = new System.Windows.Forms.Padding(2);
-            this.ucJacobianEditor1.Name = "ucJacobianEditor1";
-            this.ucJacobianEditor1.Size = new System.Drawing.Size(521, 455);
-            this.ucJacobianEditor1.TabIndex = 0;
+            this.tabRForce.Controls.Add(this.jeRight);
+            this.tabRForce.Location = new System.Drawing.Point(4, 25);
+            this.tabRForce.Name = "tabRForce";
+            this.tabRForce.Size = new System.Drawing.Size(521, 455);
+            this.tabRForce.TabIndex = 5;
+            this.tabRForce.Text = "R Force";
+            this.tabRForce.UseVisualStyleBackColor = true;
             // 
             // tabInfo
             // 
@@ -786,6 +792,26 @@
             this.tbMessage.TabIndex = 0;
             this.tbMessage.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.tbMessage_KeyPress);
             // 
+            // jeRight
+            // 
+            this.jeRight.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.jeRight.FileName = "forcesR.txt";
+            this.jeRight.Location = new System.Drawing.Point(0, 0);
+            this.jeRight.Margin = new System.Windows.Forms.Padding(2);
+            this.jeRight.Name = "jeRight";
+            this.jeRight.Size = new System.Drawing.Size(521, 455);
+            this.jeRight.TabIndex = 0;
+            // 
+            // jeLeft
+            // 
+            this.jeLeft.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.jeLeft.FileName = "forcesL.txt";
+            this.jeLeft.Location = new System.Drawing.Point(0, 0);
+            this.jeLeft.Margin = new System.Windows.Forms.Padding(2);
+            this.jeLeft.Name = "jeLeft";
+            this.jeLeft.Size = new System.Drawing.Size(521, 455);
+            this.jeLeft.TabIndex = 0;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
@@ -830,7 +856,8 @@
             this.panel4.ResumeLayout(false);
             this.tabPdParam.ResumeLayout(false);
             this.panel3.ResumeLayout(false);
-            this.tabForce.ResumeLayout(false);
+            this.tabLForce.ResumeLayout(false);
+            this.tabRForce.ResumeLayout(false);
             this.tabInfo.ResumeLayout(false);
             this.tpState.ResumeLayout(false);
             this.tpState.PerformLayout();
@@ -895,9 +922,12 @@
         private System.Windows.Forms.Panel panel4;
         private System.Windows.Forms.Button btSendTorque;
         private System.Windows.Forms.CheckBox ckForce;
-        private System.Windows.Forms.TabPage tabForce;
+        private System.Windows.Forms.TabPage tabLForce;
         private UCJacobianEditor ucJacobianEditor1;
         private System.Windows.Forms.CheckBox ckLog;
+        private System.Windows.Forms.TabPage tabRForce;
+        private UCJacobianEditor jeLeft;
+        private UCJacobianEditor jeRight;
     }
 }
 

@@ -761,7 +761,7 @@ namespace Robokey
 
         private void tabControl_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (tabControl.SelectedTab == tabForce)
+            if (tabControl.SelectedTab == tabLForce)
             {
                 ucJacobianEditor1.ReadFromMotors(motors);
             }
