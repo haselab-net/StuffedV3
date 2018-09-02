@@ -1,4 +1,6 @@
-﻿using System;
+﻿//#define RUNTICK_DEBUG
+
+using System;
 using System.IO;
 using System.Collections;
 using System.Collections.Generic;
@@ -405,10 +407,6 @@ namespace Robokey
             Clipboard.SetDataObject(str);
         }
 
-        private void updateSensorText(object sender, EventArgs e)
-        {
-        }
-
         public bool LoadMotion(String Filename)
         {
             System.IO.StreamReader file = new System.IO.StreamReader(Filename);
@@ -463,7 +461,6 @@ namespace Robokey
 
         private void AppIdle(object sender, System.EventArgs e)
         {
-            updateSensorText(sender, e);
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -473,7 +470,6 @@ namespace Robokey
 
         const int NINTERPOLATEFILL = 6; //  At least two must in buffer for interpolation.
 
-        static bool bRunTickDebug = true;
         private void runTimer_Tick(object sender, EventArgs e)
         {
             Timer tmRun = (Timer)sender;
@@ -483,7 +479,7 @@ namespace Robokey
                 int remain = (int)(byte)((int)udpComm.interpolateTargetCountOfWrite - (int)udpComm.interpolateTargetCountOfRead);
                 int vacancy = udpComm.nInterpolateTotal - remain;
                 int diff = NINTERPOLATEFILL - remain;
-#if bRunTickDebug
+#if RUNTICK_DEBUG
                 System.Diagnostics.Debug.Write("RunTimer: Remain=");
                 System.Diagnostics.Debug.Write(remain);
                 System.Diagnostics.Debug.Write("(");
@@ -539,14 +535,14 @@ namespace Robokey
                         {
                             if (ckForce.Checked)
                             {
-                                ushort[][] jacob = GetForceControlJacob();
+                                short[][] jacob = GetForceControlJacob();
                                 udpComm.SendPoseForceControl(Interpolate(curTime), (ushort)runTimer.Interval, jacob);
                             }
                             else
                             {
                                 udpComm.SendPoseInterpolate(Interpolate(curTime), (ushort)runTimer.Interval);
                             }
-#if bRunTickDebug
+#if RUNTICK_DEBUG
                             System.Diagnostics.Debug.Write(" pr:");
                             System.Diagnostics.Debug.Write((ushort)runTimer.Interval);
                             System.Diagnostics.Debug.Write(" tg:");
@@ -563,7 +559,7 @@ namespace Robokey
                 udpComm.SendPoseDirect(Interpolate(curTime));
 #endif
             }
-#if bRunTickDebug
+#if RUNTICK_DEBUG
             System.Diagnostics.Debug.WriteLine(".");
 #endif
             if (ckSense.Checked)
@@ -571,9 +567,25 @@ namespace Robokey
                 udpComm.SendSensor();
             }
         }
-        ushort[][] GetForceControlJacob() {
-            ushort[][] jacob = { new ushort[3], new ushort[3] };
-//            jeLeft.Interpolate();
+        short[][] GetForceControlJacob() {
+            double[] mpos = new double[udpComm.pose.values.Count()];
+            for (int i = 0; i < motors.Count; ++i)
+            {
+                mpos[i] = udpComm.pose.values[i] - motors[i].Offset;
+            }
+            short[][] jacob = new short[udpComm.RobotInfo.nForce][];
+            for (int i=0; i< jacob.Count(); ++i)
+            {
+                jacob[i] = new short[3];
+            }
+            if (udpComm.RobotInfo.nForce >= 2)
+            {
+                jeLeft.Jacobian(jacob, 0, mpos);
+            }
+            if (udpComm.RobotInfo.nForce >= 4)
+            {
+                jeRight.Jacobian(jacob, 2, mpos);
+            }
             return jacob;
         }
         void SendTorqueLimit() {
@@ -723,6 +735,14 @@ namespace Robokey
             for (int i = 0; i < udpComm.force.Length; ++i)
             {
                 tbState.Text += string.Format("{0,9}", udpComm.force[i].ToString("D"));
+            }
+            if (udpComm.force.Length >= 2)
+            {
+                jeLeft.SetCurForce(udpComm.force[0], udpComm.force[1]);
+            }
+            if (udpComm.force.Length >= 4)
+            {
+                jeRight.SetCurForce(udpComm.force[0], udpComm.force[1]);
             }
         }
 

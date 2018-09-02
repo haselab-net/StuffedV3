@@ -2,15 +2,31 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Drawing;
 
 namespace Robokey {
     public class Vec2d {
         public double x;
         public double y;
 
+        public Vec2d(Vec2d s)
+        {
+            x = s.x;
+            y = s.y;
+        }
         public Vec2d() {
             this.x = 0.0f;
             this.y = 0.0f;
+        }
+        public Vec2d(PointF p)
+        {
+            this.x = p.X;
+            this.y = p.Y;
+        }
+        public Vec2d(Point p)
+        {
+            this.x = p.X;
+            this.y = p.Y;
         }
 
         public Vec2d(double x, double y) {
@@ -84,6 +100,44 @@ namespace Robokey {
 
         public new string ToString() {
             return getString();
+        }
+    }
+
+    public class Matrix2d {
+        public Vec2d[] cols = new Vec2d[2];
+        public Matrix2d()
+        {
+            cols[0] = new Robokey.Vec2d();
+            cols[1] = new Robokey.Vec2d();
+        }
+        public Matrix2d(Matrix2d s)
+        {
+            cols[0] = new Robokey.Vec2d(s.cols[0]);
+            cols[1] = new Robokey.Vec2d(s.cols[1]);
+        }
+        public Matrix2d(Vec2d c0, Vec2d c1)
+        {
+            cols[0] = c0;
+            cols[1] = c1;
+        }
+        public double Det() {
+            return cols[0].x * cols[1].y - cols[1].x * cols[0].y;
+        }
+        public Matrix2d Inv()
+        {
+            Matrix2d rv = new Matrix2d();
+            rv.cols[0].x = cols[1].y;
+            rv.cols[1].y = cols[0].x;
+            rv.cols[0].y = -cols[0].y;
+            rv.cols[1].x = -cols[1].x;
+            rv *= 1/Det();
+            return rv;
+        }
+        public static Matrix2d operator * (Matrix2d m, double d){
+            Matrix2d rv = new Matrix2d(m);
+            rv.cols[0] *= d;
+            rv.cols[1] *= d;
+            return rv;
         }
     }
 }

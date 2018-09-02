@@ -481,7 +481,7 @@ namespace Robokey
             PutCommand(packet, p);
             if (period != 0) interpolateTargetCountOfWrite++;
         }
-        public void SendPoseForceControl(PoseData pose, ushort period, ushort [][] jacob)
+        public void SendPoseForceControl(PoseData pose, ushort period, short [][] jacob)
         {
             if (pose == null) return;
             byte[] packet = new byte[1000];

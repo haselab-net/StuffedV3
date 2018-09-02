@@ -18,6 +18,7 @@ namespace Robokey
         PosForces[] forces = { new PosForces(), new PosForces(), new PosForces() };
         int selectedPlane = 0;
         int selectedId = -1;
+        PointF curForce = new PointF();
 
         //  propeties
         public string FileName
@@ -31,10 +32,45 @@ namespace Robokey
             get { return  loadDlg.FileName;  }
         }
         //  public methods
-        public PosForce Interpolate(int plane, PointF pos)
+        public void Jacobian(short[][] jacob, int off, double[] mPosAll)
         {
-            return Interpolate(forces[plane], pos);
+            NumericUpDown[] mis = { udMotorX, udMotorY, udMotorZ };
+            for (int i = 0; i < 3; ++i) {
+                mis[i].Minimum = 0;
+                mis[i].Maximum = mPosAll.Count() - 1;
+            }
+            double[] mPos = { mPosAll[(int)mis[0].Value], mPosAll[(int)mis[1].Value], mPosAll[(int)mis[2].Value] };
+            for (int i = 0; i < 3; ++i) {
+                mPos[i] /= (double)udMScale.Value;
+            }
+            double mPosMin = double.MaxValue;
+            int minId = -1;
+            for (int i = 0; i < 3; ++i)
+            {
+                if (mPosMin < mPos[i])
+                {
+                    mPosMin = mPos[i];
+                    minId = i;
+                }
+            }
+            int plane = (minId + 1) % 3;
+            PointF pos = new PointF((float)mPos[plane], (float)mPos[(plane + 1) % 3]);
+            PosForce fInt = Interpolate(forces[plane], pos);
+            Matrix2d matForce = new Matrix2d(new Vec2d(fInt.force[0]), new Vec2d(fInt.force[1]));
+            Matrix2d matForceInv = matForce.Inv();
+            for (int f = 0; f < 2; ++f) {
+                for (int i = 0; i < 2; ++i) {
+                    jacob[f + off][(plane + i) % 3] = (short) (matForceInv.cols[f][i] * (float)udFScale.Value);
+                }
+                jacob[f + off][(plane + 2) % 3] = 0;
+            }
         }
+        public void SetCurForce(float fx, float fy) {
+            curForce.X = fx;
+            curForce.Y = fy;
+            picForce.Invalidate();
+        }
+
         PosForce Interpolate(PosForces fs, PointF pos)
         {
             Utility.TurnOnFpuException();
@@ -224,7 +260,7 @@ namespace Robokey
                 NumericUpDown[] ud = motorPos;
                 for (int i = 0; i < 3; ++i)
                 {
-                    pos[i] *= (float)udScale.Value;
+                    pos[i] *= (float)udMScale.Value;
                     if ((float)ud[i].Maximum < pos[i]) ud[i].Maximum = (Decimal)pos[i];
                     if ((float)ud[i].Minimum > pos[i]) ud[i].Minimum = (Decimal)pos[i];
                     ud[i].Value = (Decimal)pos[i];
@@ -366,6 +402,7 @@ namespace Robokey
             e.Graphics.DrawLine(Pens.Gray, Graph(-1, 0), Graph(1, 0));
             e.Graphics.DrawLine(Pens.Gray, Graph(0, -1), Graph(0, 1));
 
+            //  Force data of the selected point
             if (selectedId >= 0)
             {
                 PosForce pf = forces[selectedPlane][selectedId];
@@ -384,12 +421,16 @@ namespace Robokey
                 e.Graphics.FillPie(brs2[selectedPlane], Center(s[1]), a0 + ad * r1, ad * (r2 - r1));
                 e.Graphics.FillPie(brs[(selectedPlane + 1) % 3], Center(s[2]), a0 + ad * r2, ad * (1 - r2));
             }
-            //if (selectedPlane == mousePlane)
+            //  Interpolated force
             {
                 PosForce ipf = Interpolate(forces[mousePlane], gMousePos);
                 Pen[] ps = { Pens.DarkRed, Pens.DarkGreen, Pens.DarkBlue, Pens.DarkRed };
                 e.Graphics.DrawLine(ps[mousePlane], Graph(0, 0), Graph(ipf.force[0]));
                 e.Graphics.DrawLine(ps[mousePlane + 1], Graph(0, 0), Graph(ipf.force[1]));
+            }
+            //  Current force
+            {
+                e.Graphics.DrawLine(Pens.Black, Graph(0, 0), Graph(curForce));
             }
         }
 
@@ -598,7 +639,7 @@ namespace Robokey
             file.Write(udMotorY.Value); file.Write("\t");
             file.Write(udMotorZ.Value); file.WriteLine();
             file.Write("scale\t");
-            file.Write(udScale.Value); file.WriteLine();
+            file.Write(udMScale.Value); file.WriteLine();
             int id = 0;
             foreach (PosForces fs in forces)
             {
@@ -647,7 +688,7 @@ namespace Robokey
                 }
                 else if (cells[0] == "scale")
                 {
-                    udScale.Value = decimal.Parse(cells[1]);
+                    udMScale.Value = decimal.Parse(cells[1]);
                 }
                 else if (cells[0] == "plane")
                 {
