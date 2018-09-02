@@ -8,9 +8,12 @@
 #endif
 
 #if defined BOARD1_MOTORDRIVER
+
 CHOOSE_BoardInfo(B1F);	//	B1M or B1F
+#define BOARD_ID	3
+
 #elif defined BOARD2_COMBINATION
 CHOOSE_BoardInfo(B2M);	//	B2M or B2F
+#define BOARD_ID	0
 #endif
 
-#define BOARD_ID	0
