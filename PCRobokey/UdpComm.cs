@@ -481,6 +481,30 @@ namespace Robokey
             PutCommand(packet, p);
             if (period != 0) interpolateTargetCountOfWrite++;
         }
+        public void SendPoseForceControl(PoseData pose, ushort period, ushort [][] jacob)
+        {
+            if (pose == null) return;
+            byte[] packet = new byte[1000];
+            int p = 0;
+            WriteHeader((int)CommandId.CI_FORCE_CONTROL, ref p, packet);
+            for (int i = 0; i < pose.nMotor; ++i)
+            {
+                int v = pose == null ? 0 : pose.values[i];
+                WriteShort(v, ref p, packet);
+            }
+            WriteShort(period, ref p, packet);
+            WriteShort(interpolateTargetCountOfWrite, ref p, packet);
+            //  same as interpolate until here. Add jacobian
+            for(int f=0; f<robotInfo.nForce; ++f)
+            {
+                for (int m = 0; m < 3; ++m)
+                {
+                    WriteShort(jacob[f][m], ref p, packet);
+                }
+            }
+            PutCommand(packet, p);
+            if (period != 0) interpolateTargetCountOfWrite++;
+        }
         public void SendPdParam(int nMotor, int[] k, int[] b)
         {
             byte[] packet = new byte[1000];

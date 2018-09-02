@@ -132,7 +132,7 @@ void UdpCom::OnReceive(struct udp_pcb * upcb, struct pbuf * top, const ip_addr_t
 			if (readLen == cmdLen){
 				recv->returnIp = *addr;
 				if (recv->length != cmdLen) {
-					ESP_LOGE(Tag, "cmdLen %d != recvLen %d\n", cmdLen, recv->length);
+					ESP_LOGE(Tag, "cmdLen %d != recvLen %d in cmd:%d \n", cmdLen, recv->length, recv->command);
 				}
 				if (recv->command == CIU_GET_IPADDRESS) {
 					recvs.Write();

@@ -35,7 +35,6 @@ namespace Robokey
             udpComm.OnUpdateRobotInfo += OnUpdateRobotInfo;
             udpComm.OnUpdateRobotState += OnUpdateRobotState;
             udpComm.OnMessageReceive += SetMessage;
-            ucJacobianEditor1.ValueChanged += ReadJacobianEditor;
             UpdateMotorPanel();
             udLoopTime_ValueChanged(udLoopTime, null);
             openPose.InitialDirectory = System.IO.Directory.GetCurrentDirectory();
@@ -72,17 +71,18 @@ namespace Robokey
             flLength.Controls.Clear();
             flTorque.Controls.Clear();
             flPd.Controls.Clear();
+            while (motors.Count > udpComm.RobotInfo.nMotor)
+            {
+                motors.RemoveAt(motors.Count - 1);
+            }
+            while (motors.Count < udpComm.RobotInfo.nMotor)
+            {
+                motor = new Motor();
+                motors.Add(motor);
+            }
             for (int i=0; i < udpComm.RobotInfo.nMotor; ++i)
             {
-                if (i < motors.Count)
-                {
-                    motor = motors[i];
-                }
-                else
-                {
-                    motor = new Motor();
-                    motors.Add(motor);
-                }
+                motor = motors[i];
                 motor.position.ValueChanged += GetEditedValue;
                 flPose.Controls.Add(motor.position.panel);
                 flLength.Controls.Add(motor.limit.panel);
@@ -473,15 +473,17 @@ namespace Robokey
 
         const int NINTERPOLATEFILL = 6; //  At least two must in buffer for interpolation.
 
+        static bool bRunTickDebug = true;
         private void runTimer_Tick(object sender, EventArgs e)
         {
             Timer tmRun = (Timer)sender;
             if (ckRun.Checked)
             {
-#if true    //  interpolate on motor drivers
+#if true   //  interpolate on motor drivers
                 int remain = (int)(byte)((int)udpComm.interpolateTargetCountOfWrite - (int)udpComm.interpolateTargetCountOfRead);
                 int vacancy = udpComm.nInterpolateTotal - remain;
                 int diff = NINTERPOLATEFILL - remain;
+#if bRunTickDebug
                 System.Diagnostics.Debug.Write("RunTimer: Remain=");
                 System.Diagnostics.Debug.Write(remain);
                 System.Diagnostics.Debug.Write("(");
@@ -500,7 +502,7 @@ namespace Robokey
                 System.Diagnostics.Debug.Write(udpComm.nInterpolateVacancy);
                 System.Diagnostics.Debug.Write(") diff=");
                 System.Diagnostics.Debug.Write(diff);
-
+#endif
                 if (diff < 1)
                 {
                     if (diff != 0) {
@@ -535,7 +537,16 @@ namespace Robokey
                         UpdateCurTime(curTime, true);
                         if (runTimer.Enabled)
                         {
-                            udpComm.SendPoseInterpolate(Interpolate(curTime), (ushort)runTimer.Interval);
+                            if (ckForce.Checked)
+                            {
+                                ushort[][] jacob = GetForceControlJacob();
+                                udpComm.SendPoseForceControl(Interpolate(curTime), (ushort)runTimer.Interval, jacob);
+                            }
+                            else
+                            {
+                                udpComm.SendPoseInterpolate(Interpolate(curTime), (ushort)runTimer.Interval);
+                            }
+#if bRunTickDebug
                             System.Diagnostics.Debug.Write(" pr:");
                             System.Diagnostics.Debug.Write((ushort)runTimer.Interval);
                             System.Diagnostics.Debug.Write(" tg:");
@@ -543,6 +554,7 @@ namespace Robokey
                             {
                                 System.Diagnostics.Debug.Write(Interpolate(curTime).values[0]);
                             }
+#endif
                         }
                     }
                 }
@@ -551,13 +563,19 @@ namespace Robokey
                 udpComm.SendPoseDirect(Interpolate(curTime));
 #endif
             }
+#if bRunTickDebug
             System.Diagnostics.Debug.WriteLine(".");
+#endif
             if (ckSense.Checked)
             {
                 udpComm.SendSensor();
             }
         }
-
+        ushort[][] GetForceControlJacob() {
+            ushort[][] jacob = { new ushort[3], new ushort[3] };
+//            jeLeft.Interpolate();
+            return jacob;
+        }
         void SendTorqueLimit() {
             int[] minT = new int[motors.Count];
             int[] maxT = new int[motors.Count];
@@ -759,13 +777,6 @@ namespace Robokey
             }
         }
 
-        private void tabControl_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (tabControl.SelectedTab == tabLForce)
-            {
-                ucJacobianEditor1.ReadFromMotors(motors);
-            }
-        }
         private void ReadJacobianEditor(Object sender, EventArgs e) {
             UCJacobianEditor je = (UCJacobianEditor)sender;
             je.WriteToMotors(motors);

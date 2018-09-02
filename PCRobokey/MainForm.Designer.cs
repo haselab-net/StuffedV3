@@ -85,7 +85,6 @@
             this.tbState = new System.Windows.Forms.TextBox();
             this.tpMessage = new System.Windows.Forms.TabPage();
             this.tbMessage = new System.Windows.Forms.TextBox();
-            this.ucJacobianEditor1 = new Robokey.UCJacobianEditor();
             this.jeRight = new Robokey.UCJacobianEditor();
             this.jeLeft = new Robokey.UCJacobianEditor();
             ((System.ComponentModel.ISupportInitialize)(this.track)).BeginInit();
@@ -507,7 +506,6 @@
             this.tabControl.SelectedIndex = 0;
             this.tabControl.Size = new System.Drawing.Size(529, 484);
             this.tabControl.TabIndex = 6;
-            this.tabControl.SelectedIndexChanged += new System.EventHandler(this.tabControl_SelectedIndexChanged);
             // 
             // tabPoseEditor
             // 
@@ -923,7 +921,6 @@
         private System.Windows.Forms.Button btSendTorque;
         private System.Windows.Forms.CheckBox ckForce;
         private System.Windows.Forms.TabPage tabLForce;
-        private UCJacobianEditor ucJacobianEditor1;
         private System.Windows.Forms.CheckBox ckLog;
         private System.Windows.Forms.TabPage tabRForce;
         private UCJacobianEditor jeLeft;

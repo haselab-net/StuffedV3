@@ -43,8 +43,9 @@ extern "C" void app_main()
     printf("!!! Stuffed Robot Start !!!\n");
 
     // Enable next line to clear all nvs enable. Use only when nvs makes trouble. 
-    // nvs_flash_erase();
-
+#if 1
+    nvs_flash_erase();
+#endif
 
     uarts.Init();
     printf("Init uarts finished. ");
