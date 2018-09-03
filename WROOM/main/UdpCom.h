@@ -62,6 +62,9 @@ public:
 	short GetTorqueMax(int i) const {
 		return data[uarts.GetNTotalMotor() + i];
 	}
+	short GetResetSensorFlags() const {
+		return data[0];
+	}
 };
 class UdpRetPacket:public UdpPacket{
 public:

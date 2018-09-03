@@ -18,3 +18,7 @@ enum CommandId {
 	CIU_NCOMMAND,           //13 number of commands
 	CIU_NONE = -1           //  no command is in receiving state.
 };
+enum ResetSensorFlag {
+    RSF_MOTOR = 1,
+    RSF_FORCE = 2
+};

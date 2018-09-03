@@ -79,6 +79,9 @@ public:
 				cmd.torqueLimit.max[i] = packet.GetTorqueMax(motorMap[i]);
 			}
 			break;
+		case CI_RESET_SENSOR:
+			cmd.resetSensor.flags = packet.GetResetSensorFlags();
+			break;
 		}
 	}
 	void ReadRet(UdpRetPacket& packet) {

@@ -368,7 +368,6 @@ namespace Robokey
                 if (ckRunOnce.Checked == true) //モーションを一度だけ実行する場合
                 {
                     ckRun.Checked = false;
-                    runTimer.Enabled = false;
                     udpComm.SendPoseDirect(Interpolate(curTime));
                 }
             }
@@ -376,13 +375,21 @@ namespace Robokey
             lbCurTime.Text = curTime.ToString();
         }
 
+        private void ckSense_CheckedChanged(object sender, EventArgs e)
+        {
+            UpdateRunTimer();
+        }
+        private void ckForce_CheckedChanged(object sender, EventArgs e)
+        {
+            UpdateRunTimer();
+        }
         private void ckRun_CheckedChanged(object sender, EventArgs e)
         {
             UpdateRunTimer();
         }
         void UpdateRunTimer()
         {
-            runTimer.Enabled = ckRun.Checked || ckSense.Checked;
+            runTimer.Enabled = ckRun.Checked || ckSense.Checked || ckForce.Checked;
             sentTime = curTime;
             if (!ckRun.Checked)
             {
@@ -559,6 +566,11 @@ namespace Robokey
                 udpComm.SendPoseDirect(Interpolate(curTime));
 #endif
             }
+            else if (ckForce.Checked) // !ckRun.Checked && ckForce.Checked
+            {
+                short[][] jacob = GetForceControlJacob();
+                udpComm.SendPoseForceControl(Interpolate(curTime), (ushort)runTimer.Interval, jacob);
+            }
 #if RUNTICK_DEBUG
             System.Diagnostics.Debug.WriteLine(".");
 #endif
@@ -568,7 +580,7 @@ namespace Robokey
             }
         }
         short[][] GetForceControlJacob() {
-            double[] mpos = new double[udpComm.pose.values.Count()];
+            double[] mpos = new double[motors.Count];
             for (int i = 0; i < motors.Count; ++i)
             {
                 mpos[i] = udpComm.pose.values[i] - motors[i].Offset;
@@ -618,7 +630,7 @@ namespace Robokey
 
         private void btResetMotors_Click(object sender, EventArgs e)
         {
-            udpComm.SendResetSensor();
+            udpComm.SendResetSensor(ResetSensorFlag.RSF_MOTOR);
             for (int i=0; i< motors.Count; ++i) {
                 motors[i].Offset = udpComm.pose.values[i];
             }
@@ -702,11 +714,6 @@ namespace Robokey
             runTimer.Interval = (int)udTick.Value;
         }
 
-        private void ckSense_CheckedChanged(object sender, EventArgs e)
-        {
-            UpdateRunTimer();
-        }
-
         private void btSendPD_Click(object sender, EventArgs e)
         {
             SendPd();
@@ -776,10 +783,6 @@ namespace Robokey
             udpComm.Close();
         }
 
-        private void ckForce_CheckedChanged(object sender, EventArgs e)
-        {
-
-        }
         public StreamWriter logFile;
         private void ckLog_CheckedChanged(object sender, EventArgs e)
         {
@@ -800,6 +803,11 @@ namespace Robokey
         private void ReadJacobianEditor(Object sender, EventArgs e) {
             UCJacobianEditor je = (UCJacobianEditor)sender;
             je.WriteToMotors(motors);
+        }
+
+        private void btCalibForce_Click(object sender, EventArgs e)
+        {
+            udpComm.SendResetSensor(ResetSensorFlag.RSF_FORCE);
         }
 
         void LoadSetting(byte[] adr)

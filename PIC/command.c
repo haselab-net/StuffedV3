@@ -62,10 +62,17 @@ void ecTorqueLimit(){
 }
 void ecResetSensor(){
     int i;
-    for(i=0; i<NMOTOR; ++i){
-        motorState.pos[i] = motorState.pos[i] % LDEC_ONE;
-		motorState.vel[i] = 0;
-        motorTarget.pos[i] = motorTarget.pos[i] % LDEC_ONE;
+    if (command.resetSensor.flags & RSF_MOTOR){
+        for(i=0; i<NMOTOR; ++i){
+            motorState.pos[i] = motorState.pos[i] % LDEC_ONE;
+            motorState.vel[i] = 0;
+            motorTarget.pos[i] = motorTarget.pos[i] % LDEC_ONE;
+        }
+    }
+    if (command.resetSensor.flags & RSF_FORCE){
+        for(i=0; i<NFORCE; ++i){
+            forceOffset[i] = getForceRaw(i);
+        }
     }
 }
 

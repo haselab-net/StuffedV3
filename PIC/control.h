@@ -73,9 +73,15 @@ void controlInit();
 void controlSetMode(enum ControlMode m);
 void controlLoop();
 
-inline SDEC getForce(int ch){
+extern SDEC forceOffset[NFORCE];
+
+inline SDEC getForceRaw(int ch){
 	if (ch == 0) return mcos[3];
 	if (ch == 1) return msin[3];
+}
+inline SDEC getForce(int ch){
+	if (ch == 0) return mcos[3] - forceOffset[ch];
+	if (ch == 1) return msin[3] - forceOffset[ch];
 }
 
 extern int coretimerRemainTime;

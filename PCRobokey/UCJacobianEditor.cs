@@ -424,7 +424,7 @@ namespace Robokey
             //  Interpolated force
             {
                 PosForce ipf = Interpolate(forces[mousePlane], gMousePos);
-                Pen[] ps = { Pens.DarkRed, Pens.DarkGreen, Pens.DarkBlue, Pens.DarkRed };
+                Pen[] ps = { Pens.Red, Pens.Green, Pens.Blue, Pens.Red };
                 e.Graphics.DrawLine(ps[mousePlane], Graph(0, 0), Graph(ipf.force[0]));
                 e.Graphics.DrawLine(ps[mousePlane + 1], Graph(0, 0), Graph(ipf.force[1]));
             }

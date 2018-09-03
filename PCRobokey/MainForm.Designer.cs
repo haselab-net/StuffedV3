@@ -79,14 +79,15 @@
             this.panel3 = new System.Windows.Forms.Panel();
             this.btSendPD = new System.Windows.Forms.Button();
             this.tabLForce = new System.Windows.Forms.TabPage();
+            this.jeLeft = new Robokey.UCJacobianEditor();
             this.tabRForce = new System.Windows.Forms.TabPage();
+            this.jeRight = new Robokey.UCJacobianEditor();
             this.tabInfo = new System.Windows.Forms.TabControl();
             this.tpState = new System.Windows.Forms.TabPage();
             this.tbState = new System.Windows.Forms.TextBox();
             this.tpMessage = new System.Windows.Forms.TabPage();
             this.tbMessage = new System.Windows.Forms.TextBox();
-            this.jeRight = new Robokey.UCJacobianEditor();
-            this.jeLeft = new Robokey.UCJacobianEditor();
+            this.btCalibForce = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.track)).BeginInit();
             this.panelCom.SuspendLayout();
             this.panel2.SuspendLayout();
@@ -167,16 +168,17 @@
             // txErrorMsg
             // 
             this.txErrorMsg.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.txErrorMsg.Location = new System.Drawing.Point(0, 280);
+            this.txErrorMsg.Location = new System.Drawing.Point(0, 312);
             this.txErrorMsg.Margin = new System.Windows.Forms.Padding(2);
             this.txErrorMsg.Multiline = true;
             this.txErrorMsg.Name = "txErrorMsg";
             this.txErrorMsg.ReadOnly = true;
-            this.txErrorMsg.Size = new System.Drawing.Size(138, 204);
+            this.txErrorMsg.Size = new System.Drawing.Size(138, 172);
             this.txErrorMsg.TabIndex = 68;
             // 
             // panel2
             // 
+            this.panel2.Controls.Add(this.btCalibForce);
             this.panel2.Controls.Add(this.ckLog);
             this.panel2.Controls.Add(this.ckSense);
             this.panel2.Controls.Add(this.fpFoundRobot);
@@ -187,7 +189,7 @@
             this.panel2.Location = new System.Drawing.Point(0, 0);
             this.panel2.Margin = new System.Windows.Forms.Padding(2);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(138, 280);
+            this.panel2.Size = new System.Drawing.Size(138, 312);
             this.panel2.TabIndex = 69;
             // 
             // ckLog
@@ -253,7 +255,7 @@
             this.btResetMotors.Location = new System.Drawing.Point(6, 246);
             this.btResetMotors.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.btResetMotors.Name = "btResetMotors";
-            this.btResetMotors.Size = new System.Drawing.Size(118, 28);
+            this.btResetMotors.Size = new System.Drawing.Size(104, 28);
             this.btResetMotors.TabIndex = 43;
             this.btResetMotors.Text = "&Reset motors";
             this.btResetMotors.UseVisualStyleBackColor = true;
@@ -716,6 +718,16 @@
             this.tabLForce.Text = "L Force";
             this.tabLForce.UseVisualStyleBackColor = true;
             // 
+            // jeLeft
+            // 
+            this.jeLeft.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.jeLeft.FileName = "forcesL.txt";
+            this.jeLeft.Location = new System.Drawing.Point(0, 0);
+            this.jeLeft.Margin = new System.Windows.Forms.Padding(2);
+            this.jeLeft.Name = "jeLeft";
+            this.jeLeft.Size = new System.Drawing.Size(521, 455);
+            this.jeLeft.TabIndex = 0;
+            // 
             // tabRForce
             // 
             this.tabRForce.Controls.Add(this.jeRight);
@@ -725,6 +737,16 @@
             this.tabRForce.TabIndex = 5;
             this.tabRForce.Text = "R Force";
             this.tabRForce.UseVisualStyleBackColor = true;
+            // 
+            // jeRight
+            // 
+            this.jeRight.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.jeRight.FileName = "forcesR.txt";
+            this.jeRight.Location = new System.Drawing.Point(0, 0);
+            this.jeRight.Margin = new System.Windows.Forms.Padding(2);
+            this.jeRight.Name = "jeRight";
+            this.jeRight.Size = new System.Drawing.Size(521, 455);
+            this.jeRight.TabIndex = 0;
             // 
             // tabInfo
             // 
@@ -790,25 +812,16 @@
             this.tbMessage.TabIndex = 0;
             this.tbMessage.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.tbMessage_KeyPress);
             // 
-            // jeRight
+            // btCalibForce
             // 
-            this.jeRight.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.jeRight.FileName = "forcesR.txt";
-            this.jeRight.Location = new System.Drawing.Point(0, 0);
-            this.jeRight.Margin = new System.Windows.Forms.Padding(2);
-            this.jeRight.Name = "jeRight";
-            this.jeRight.Size = new System.Drawing.Size(521, 455);
-            this.jeRight.TabIndex = 0;
-            // 
-            // jeLeft
-            // 
-            this.jeLeft.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.jeLeft.FileName = "forcesL.txt";
-            this.jeLeft.Location = new System.Drawing.Point(0, 0);
-            this.jeLeft.Margin = new System.Windows.Forms.Padding(2);
-            this.jeLeft.Name = "jeLeft";
-            this.jeLeft.Size = new System.Drawing.Size(521, 455);
-            this.jeLeft.TabIndex = 0;
+            this.btCalibForce.Location = new System.Drawing.Point(6, 278);
+            this.btCalibForce.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.btCalibForce.Name = "btCalibForce";
+            this.btCalibForce.Size = new System.Drawing.Size(104, 28);
+            this.btCalibForce.TabIndex = 81;
+            this.btCalibForce.Text = "&Calib force";
+            this.btCalibForce.UseVisualStyleBackColor = true;
+            this.btCalibForce.Click += new System.EventHandler(this.btCalibForce_Click);
             // 
             // MainForm
             // 
@@ -925,6 +938,7 @@
         private System.Windows.Forms.TabPage tabRForce;
         private UCJacobianEditor jeLeft;
         private UCJacobianEditor jeRight;
+        private System.Windows.Forms.Button btCalibForce;
     }
 }
 

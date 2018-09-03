@@ -535,13 +535,18 @@ namespace Robokey
             }
             PutCommand(packet, p);
         }
-        public void SendResetSensor() {
+        public void SendResetSensor(ResetSensorFlag f) {
             byte[] packet = new byte[1000];
             int p = 0;
             WriteHeader((int)CommandId.CI_RESET_SENSOR, ref p, packet);
+            WriteShort((short)f, ref p, packet);
             PutCommand(packet, p);
-            for (int i = 0; i < pose.values.Count(); i++) {
-                pose.values[i] = pose.values[i] % SDEC.ONE;
+            if ((f & ResetSensorFlag.RSF_MOTOR) != 0 && pose != null)
+            {
+                for (int i = 0; i < pose.values.Count(); i++)
+                {
+                    pose.values[i] = pose.values[i] % SDEC.ONE;
+                }
             }
         }
         public void SendSetIp()

@@ -44,7 +44,7 @@ int UdpCmdPacket::CommandLen() {
 	case CI_TORQUE_LIMIT:	//  min max.
 		return (NHEADER + uarts.GetNTotalMotor() * 2) * 2;
 	case CI_RESET_SENSOR:
-		return NHEADER * 2;
+		return (NHEADER + 1) * 2;	//	flags
 	case CIU_SET_IPADDRESS:	//  Set ip address to return the packet: command only
 		return NHEADER * 2;
 	case CIU_GET_IPADDRESS:	//  Get ip address to return the packet: command only

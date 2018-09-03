@@ -71,6 +71,9 @@ union CommandPacket##BOARD {										\
 				SDEC min[BOARD##_NMOTOR];							\
 				SDEC max[BOARD##_NMOTOR];							\
 			} __attribute__((__packed__)) torqueLimit;				\
+			struct {				 /*	 CI_RESET_SENSOR	 */		\
+                short flags;                                        \
+			} __attribute__((__packed__)) resetSensor;				\
 		};															\
 	};																\
 };																	\
@@ -84,7 +87,7 @@ enum BOARD##CommandLenEnum{																	\
     BOARD##_CLEN_FORCE_CONTROL = 1+sizeof_field(union CommandPacket##BOARD, forceControl),	\
     BOARD##_CLEN_PD_PARAM = 1+sizeof_field(union CommandPacket##BOARD, pdParam),			\
     BOARD##_CLEN_TORQUE_LIMIT = 1+sizeof_field(union CommandPacket##BOARD, torqueLimit),	\
-	BOARD##_CLEN_RESET_SENSOR = 1,															\
+	BOARD##_CLEN_RESET_SENSOR = 1+sizeof_field(union CommandPacket##BOARD, resetSensor),	\
 };																	\
 const unsigned char cmdPacketLen##BOARD[CI_NCOMMAND] = {			\
     BOARD##_CLEN_NONE,												\

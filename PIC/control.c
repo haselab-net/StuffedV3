@@ -17,6 +17,8 @@ const SDEC mcosOffset[NAXIS] ={
 const SDEC msinOffset[NAXIS] ={
     2048, 2048, 2048, 2048
 };
+SDEC forceOffset[NFORCE] = {0,0};
+
 uint32_t controlCount;
 
 
@@ -399,24 +401,25 @@ void targetsProceed(){
 		motorTarget.vel[i] = S2LDEC(targets.buf[readPlus].pos[i] - targets.buf[targets.read].pos[i]) / period;
 	}
 }
+
+LDEC deltaPosForceControl[NMOTOR];
 void targetsForceControlProceed(){
 	int i, j, readPlus;
 	short period;
-	LDEC dPos[NMOTOR];
 	targetsTickProceed();
 	readPlus = (targets.read+1)%NTARGET;
 	period = targets.buf[readPlus].period;
 	for(i=0; i<NMOTOR; ++i){
-		dPos[i] = 0;
+        deltaPosForceControl[i] = (deltaPosForceControl[i] * ( 0x1000 - 1 )) >> 12; //  multiply (4096-1)/4096 
 		for(j=0; j<NFORCE; ++j){
 			forceControlJK[j][i] = ((period - targets.tick)* S2LDEC(targets.buf[targets.read].JK[j][i])
 			+ targets.tick*S2LDEC(targets.buf[readPlus].JK[j][i])) / period;
-			dPos[i] += forceControlJK[j][i] * getForce(j);
+			deltaPosForceControl[i] += forceControlJK[j][i] * getForce(j);
 		}
 	}
 	for(i=0; i<NMOTOR; ++i){
-		motorTarget.pos[i] = ((period - targets.tick)* S2LDEC(targets.buf[targets.read].pos[i])
-			+ targets.tick*S2LDEC(targets.buf[readPlus].pos[i])) / period + dPos[i];
+        SDEC diff = targets.buf[readPlus].pos[i] - targets.buf[targets.read].pos[i];
+        motorTarget.pos[i] = S2LDEC(targets.buf[targets.read].pos[i]) + S2LDEC((int)diff * (int)targets.tick / period) + deltaPosForceControl[i];
 		motorTarget.vel[i] = S2LDEC(targets.buf[readPlus].pos[i] - targets.buf[targets.read].pos[i]) / period;
 	}
 }
