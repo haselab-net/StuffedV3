@@ -298,11 +298,11 @@ namespace Robokey
         private void OnReceive(IAsyncResult ar)
             {
             UdpComm uc = (UdpComm)(ar.AsyncState);
-            if (uc.udp == null) return;
             byte[] receiveBytes;
             try
             {
-                 receiveBytes = uc.udp.EndReceive(ar, ref uc.recvPoint);
+                if (uc.udp == null) return;
+                receiveBytes = uc.udp.EndReceive(ar, ref uc.recvPoint);
                 if (uc.recvPoint.Port != localBcPort)   //  In broad cast case, sent packet can be received. Must skip.
                 {
                     int cur = 0;
@@ -550,7 +550,6 @@ namespace Robokey
             }
         }
         public void SendSetIp()
-
         {
             byte[] packet = new byte[1000];
             int p = 0;

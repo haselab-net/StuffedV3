@@ -329,7 +329,7 @@ void targetsForceControlAddOrUpdate(SDEC* pos, SDEC JK[NFORCE][NMOTOR] ,short pe
 		if (JK){
 			for(i=0; i<NMOTOR; ++i){
 				for(j=0; j<NFORCE; ++j){
-					targets.buf[w].JK[j][i] = JK[j][i];
+					targets.buf[w].Jacob[j][i] = JK[j][i];
 				}
 			}
 		}
@@ -361,8 +361,8 @@ void targetsInit(){
 		targets.buf[0].pos[i] = L2SDEC(motorState.pos[i]);
 		targets.buf[1].pos[i] = L2SDEC(motorState.pos[i]);
 		for(j=0; j<NFORCE; ++j){
-			targets.buf[0].JK[j][i] = 0;
-			targets.buf[1].JK[j][i] = 0;
+			targets.buf[0].Jacob[j][i] = 0;
+			targets.buf[1].Jacob[j][i] = 0;
 			forceControlJK[j][i] = 0;
 		}
 	}
@@ -412,8 +412,8 @@ void targetsForceControlProceed(){
 	for(i=0; i<NMOTOR; ++i){
         deltaPosForceControl[i] = (deltaPosForceControl[i] * ( 0x1000 - 1 )) >> 12; //  multiply (4096-1)/4096 
 		for(j=0; j<NFORCE; ++j){
-			forceControlJK[j][i] = ((period - targets.tick)* S2LDEC(targets.buf[targets.read].JK[j][i])
-			+ targets.tick*S2LDEC(targets.buf[readPlus].JK[j][i])) / period;
+			forceControlJK[j][i] = ((period - targets.tick)* S2LDEC(targets.buf[targets.read].Jacob[j][i])
+			+ targets.tick*S2LDEC(targets.buf[readPlus].Jacob[j][i])) / period;
 			deltaPosForceControl[i] += forceControlJK[j][i] * getForce(j);
 		}
 	}

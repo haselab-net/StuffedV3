@@ -34,7 +34,7 @@ extern struct TorqueLimit torqueLimit;
 struct Target{
 	short period;	//	period to reach this target.
 	SDEC pos[NMOTOR];
-	SDEC JK[NFORCE][NMOTOR];
+	SDEC Jacob[NFORCE][NMOTOR];
 };
 struct Targets{
 	unsigned short tick;		//	current tick count

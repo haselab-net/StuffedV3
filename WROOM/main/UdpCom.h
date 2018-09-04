@@ -43,7 +43,7 @@ public:
 	short GetTargetCount() const {
 		return data[uarts.GetNTotalMotor()+1];
 	}
-	short GetForceControlJK(int j, int i) const {	//	j: row, i: col,
+	short GetForceControlJacob(int j, int i) const {	//	j: row, i: col,
 		//	The matrix is 2 row x  3 col or 2*nBoard row x 3 col.
 	//	int b = j / 2;
 	//	int r = j % 2;

@@ -19,7 +19,7 @@ enum B1M_PARAM{
 };
 enum B1F_PARAM{
 	B1F_MODEL_NUMBER = 2,
-    B1F_NTARGET = 8,
+    B1F_NTARGET = 12,
     B1F_NMOTOR = 3,
     B1F_NFORCE = 2,
 };

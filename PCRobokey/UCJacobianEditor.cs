@@ -65,9 +65,9 @@ namespace Robokey
                 jacob[f + off][(plane + 2) % 3] = 0;
             }
         }
-        public void SetCurForce(float fx, float fy) {
-            curForce.X = fx;
-            curForce.Y = fy;
+        public void SetCurForce(short fx, short fy) {
+            curForce.X = fx / (float)udFScale.Value;
+            curForce.Y = fy / (float)udFScale.Value;
             picForce.Invalidate();
         }
 

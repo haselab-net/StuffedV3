@@ -44,7 +44,7 @@ void ecInterpolate(){
 }
 void ecForceControl(){
     controlSetMode(CM_FORCE_CONTROL);
-	targetsForceControlAddOrUpdate(command.forceControl.pos , command.forceControl.JK, command.forceControl.period, command.forceControl.count);
+	targetsForceControlAddOrUpdate(command.forceControl.pos , command.forceControl.Jacob, command.forceControl.period, command.forceControl.count);
 }
 void ecPdParam(){
     int i;

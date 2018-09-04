@@ -36,6 +36,7 @@
             this.panelCom = new System.Windows.Forms.Panel();
             this.txErrorMsg = new System.Windows.Forms.TextBox();
             this.panel2 = new System.Windows.Forms.Panel();
+            this.btCalibForce = new System.Windows.Forms.Button();
             this.ckLog = new System.Windows.Forms.CheckBox();
             this.ckSense = new System.Windows.Forms.CheckBox();
             this.fpFoundRobot = new System.Windows.Forms.FlowLayoutPanel();
@@ -87,7 +88,6 @@
             this.tbState = new System.Windows.Forms.TextBox();
             this.tpMessage = new System.Windows.Forms.TabPage();
             this.tbMessage = new System.Windows.Forms.TextBox();
-            this.btCalibForce = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.track)).BeginInit();
             this.panelCom.SuspendLayout();
             this.panel2.SuspendLayout();
@@ -192,6 +192,17 @@
             this.panel2.Size = new System.Drawing.Size(138, 312);
             this.panel2.TabIndex = 69;
             // 
+            // btCalibForce
+            // 
+            this.btCalibForce.Location = new System.Drawing.Point(6, 278);
+            this.btCalibForce.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.btCalibForce.Name = "btCalibForce";
+            this.btCalibForce.Size = new System.Drawing.Size(119, 28);
+            this.btCalibForce.TabIndex = 81;
+            this.btCalibForce.Text = "&Calib force";
+            this.btCalibForce.UseVisualStyleBackColor = true;
+            this.btCalibForce.Click += new System.EventHandler(this.btCalibForce_Click);
+            // 
             // ckLog
             // 
             this.ckLog.AutoSize = true;
@@ -255,7 +266,7 @@
             this.btResetMotors.Location = new System.Drawing.Point(6, 246);
             this.btResetMotors.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.btResetMotors.Name = "btResetMotors";
-            this.btResetMotors.Size = new System.Drawing.Size(104, 28);
+            this.btResetMotors.Size = new System.Drawing.Size(119, 28);
             this.btResetMotors.TabIndex = 43;
             this.btResetMotors.Text = "&Reset motors";
             this.btResetMotors.UseVisualStyleBackColor = true;
@@ -811,17 +822,6 @@
             this.tbMessage.Size = new System.Drawing.Size(253, 451);
             this.tbMessage.TabIndex = 0;
             this.tbMessage.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.tbMessage_KeyPress);
-            // 
-            // btCalibForce
-            // 
-            this.btCalibForce.Location = new System.Drawing.Point(6, 278);
-            this.btCalibForce.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.btCalibForce.Name = "btCalibForce";
-            this.btCalibForce.Size = new System.Drawing.Size(104, 28);
-            this.btCalibForce.TabIndex = 81;
-            this.btCalibForce.Text = "&Calib force";
-            this.btCalibForce.UseVisualStyleBackColor = true;
-            this.btCalibForce.Click += new System.EventHandler(this.btCalibForce_Click);
             // 
             // MainForm
             // 

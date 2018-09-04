@@ -43,7 +43,7 @@ extern "C" void app_main()
     printf("!!! Stuffed Robot Start !!!\n");
 
     // Enable next line to clear all nvs enable. Use only when nvs makes trouble. 
-#if 1
+#if 0
     nvs_flash_erase();
 #endif
 

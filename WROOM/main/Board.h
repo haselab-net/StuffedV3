@@ -63,7 +63,7 @@ public:
 				cmd.interpolate.period = packet.GetPeriod();
 				cmd.interpolate.count = packet.GetTargetCount();
 				for (int j = 0; j < GetNForce(); ++j) {
-					cmd.forceControl.JK[j][i] = packet.GetForceControlJK(forceMap[j], i);
+					cmd.forceControl.Jacob[j][i] = packet.GetForceControlJacob(forceMap[j], i);
 				}
 			}
 			break;
