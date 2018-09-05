@@ -149,7 +149,15 @@ namespace Robokey
         }
         public int Minimum
         {
-            set { upDown.Minimum = bar.Minimum = value; }
+            set { upDown.Minimum = bar.Minimum = value;
+                if (Maximum - Minimum > 100000)
+                {
+                    upDown.Increment = 1000;
+                }
+                else {
+                    upDown.Increment = 100;
+                }
+            }
             get { return (int)upDown.Minimum; }
         }
         public int Value
@@ -338,6 +346,17 @@ namespace Robokey
             Value = 0;
             Threshold = 0;
             Flag = false;
+        }
+    }
+    public class Motors: List<Motor>
+    {
+        public PoseData Offset()
+        {
+            PoseData rv = new PoseData(Count);
+            for (int i = 0; i < rv.nMotor; ++i) {
+                rv.values[i] = this.ElementAt(i).Offset;
+            }
+            return rv;
         }
     }
 }

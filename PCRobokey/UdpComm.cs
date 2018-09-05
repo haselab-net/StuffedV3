@@ -479,6 +479,7 @@ namespace Robokey
             WriteShort(period, ref p, packet);
             WriteShort(interpolateTargetCountOfWrite, ref p, packet);
             PutCommand(packet, p);
+//            System.Diagnostics.Debug.Write("IntCoW=" + interpolateTargetCountOfWrite);
             if (period != 0) interpolateTargetCountOfWrite++;
         }
         public void SendPoseForceControl(PoseData pose, ushort period, short [][] jacob)

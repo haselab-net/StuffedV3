@@ -4,7 +4,7 @@
 #include "UdpCom.h"
 #include "esp_log.h"
 
-#define CMDWAITMAXLEN	80
+#define CMDWAITMAXLEN	120
 template <class CMD, class RET>
 class Board: public BoardBase{
 public:
@@ -15,7 +15,7 @@ public:
 	ReturnPacketB1M ret;
 #else
 	CmdPacket cmd;
-	uint8_t zero[CMDWAITMAXLEN];
+	uint8_t zero[CMDWAITMAXLEN];	//	zero for UART wait
 	volatile RetPacket ret;
 #endif
 	Board(int bid, const unsigned char * c, const unsigned char * r) {

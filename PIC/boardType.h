@@ -14,6 +14,6 @@ CHOOSE_BoardInfo(B1F);	//	B1M or B1F
 
 #elif defined BOARD2_COMBINATION
 CHOOSE_BoardInfo(B2M);	//	B2M or B2F
-#define BOARD_ID	0
+#define BOARD_ID	7
 #endif
 

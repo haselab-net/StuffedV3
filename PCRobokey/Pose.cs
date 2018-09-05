@@ -26,6 +26,26 @@ namespace Robokey
         {
             return time_ - ((PoseData)o).time_;
         }
+        public static PoseData operator +(PoseData a, PoseData b)
+        {
+            PoseData rv = new PoseData(a.nMotor);
+            for (int i = 0; i < rv.nMotor; i++)
+            {
+                rv.values[i] = a.values[i] + b.values[i];
+                rv.time_ = a.time_;
+            }
+            return rv;
+        }
+        public static PoseData operator +(PoseData a, int [] b)
+        {
+            PoseData rv = new PoseData(a.nMotor);
+            for (int i = 0; i < rv.nMotor; i++)
+            {
+                rv.values[i] = a.values[i] + b[i];
+                rv.time_ = a.time_;
+            }
+            return rv;
+        }
     }
     public class Pose : PoseData
     {

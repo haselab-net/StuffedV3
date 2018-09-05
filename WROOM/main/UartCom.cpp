@@ -34,8 +34,8 @@ void Uart::SendTask(){
 		for(cmdCur.board=0; cmdCur.board<boards.size(); cmdCur.board++){
 			int retLen = boards[cmdCur.board]->RetLenForCommand();
 			if (retLen) bRet = true;
-//			wait = retLen - boards[cmdCur.board]->CmdLen() + 10;
-			wait = retLen - boards[cmdCur.board]->CmdLen() + 20;
+//			wait = retLen - boards[cmdCur.board]->CmdLen() + 20;
+			wait = retLen - boards[cmdCur.board]->CmdLen() + 80;
 			if (wait < 5) wait = 5;
 			assert(wait < CMDWAITMAXLEN);
 			memset(boards[cmdCur.board]->CmdStart() + boards[cmdCur.board]->CmdLen(), 0, wait);
@@ -238,11 +238,13 @@ void Uarts::ReadRet(UdpRetPacket& packet){
 		int diffMax = -0x100;
 		unsigned short tickMin = 0xFFFF;
 		unsigned short tickMax = 0;
-		int countOfRead = 0;
+		int countOfRead[20];
+		int nCoR = 0;
+		memset(countOfRead, 0, sizeof(countOfRead));
 		for (int i = 0; i < NUART; ++i) {
 			for (int j = 0; j < uart[i]->boards.size(); ++j) {
 				uart[i]->boards[j]->ReadRet(packet);
-				countOfRead = (int)uart[i]->boards[j]->GetTargetCountOfRead();
+				countOfRead[nCoR++] = (int)uart[i]->boards[j]->GetTargetCountOfRead();
 				int diff = ((int)targetCountWrite - (int)uart[i]->boards[j]->GetTargetCountOfRead() + 0x100) & 0xFF;
 				if (diff < diffMin) diffMin = diff;
 				if (diff > diffMax) diffMax = diff;
@@ -260,8 +262,8 @@ void Uarts::ReadRet(UdpRetPacket& packet){
 			tickMin = tickMax;
 			tickMax = temp;
 		}
-		ESP_LOGI("TGT", "remain:%d vac:%d cor%d cow%d",
-			 (int)nTargetRemain, (int)nTargetVacancy, countOfRead, targetCountWrite);
+		ESP_LOGI("TGT", "remain:%d vac:%d cor%d %d %d  cow%d",
+			 (int)nTargetRemain, (int)nTargetVacancy, countOfRead[0], countOfRead[1], countOfRead[2], targetCountWrite);
 		packet.SetTargetCountRead(targetCountReadMax);
 		packet.SetTickMin(tickMin);
 		packet.SetTickMax(tickMax);

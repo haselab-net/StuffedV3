@@ -23,7 +23,7 @@ namespace Robokey
 
 
         public List<Pose> poses = new List<Pose>();
-        public List<Motor> motors = new List<Motor>();
+        public Motors motors = new Motors();
         int curTime;
         int sentTime;
         UdpComm udpComm;
@@ -175,7 +175,7 @@ namespace Robokey
             poses.Sort();
             if (!ckRun.Checked)
             {
-                udpComm.SendPoseDirect(pose);
+                udpComm.SendPoseDirect(pose + motors.Offset());
             }
         }
 
@@ -300,7 +300,7 @@ namespace Robokey
             if (pose != null)
             {
                 LoadToEditor(pose);
-                udpComm.SendPoseDirect(pose);
+                udpComm.SendPoseDirect(pose + motors.Offset());
             }
             else
             {
@@ -308,7 +308,7 @@ namespace Robokey
                 if (p != null)
                 {
                     LoadToEditor(p);
-                    udpComm.SendPoseDirect(p);
+                    udpComm.SendPoseDirect(p + motors.Offset());
                 }
             }
         }
@@ -519,7 +519,15 @@ namespace Robokey
                 }
                 if (diff == 0)
                 {
-                    udpComm.SendPoseInterpolate(Interpolate(curTime), 0);
+                    if (ckForce.Checked)
+                    {
+                        short[][] jacob = GetForceControlJacob();
+                        udpComm.SendPoseForceControl(Interpolate(curTime), 1, jacob);
+                    }
+                    else
+                    {
+                        udpComm.SendPoseInterpolate(Interpolate(curTime), 1);
+                    }
                 }
                 else
                 {
@@ -631,8 +639,13 @@ namespace Robokey
         private void btResetMotors_Click(object sender, EventArgs e)
         {
             udpComm.SendResetSensor(ResetSensorFlag.RSF_MOTOR);
-            for (int i=0; i< motors.Count; ++i) {
+            for (int i = 0; i < motors.Count; ++i)
+            {
                 motors[i].Offset = udpComm.pose.values[i];
+            }
+            for (int i = 0; i < motors.Count; ++i)
+            {
+                motors[i].Value = 0;
             }
         }
 
@@ -699,6 +712,7 @@ namespace Robokey
             UpdateMotorPanel();
             SendPd();
             SendTorqueLimit();
+            SendPd();
         }
 
         private void tbMessage_KeyPress(object sender, KeyPressEventArgs e)
@@ -810,6 +824,15 @@ namespace Robokey
             udpComm.SendResetSensor(ResetSensorFlag.RSF_FORCE);
         }
 
+        private void btSetLimitMax_Click(object sender, EventArgs e)
+        {
+            for (int i = 0; i < motors.Count; ++i)
+            {
+                motors[i].torque.udMax.Value = motors[i].torque.udMax.Maximum;
+                motors[i].torque.udMin.Value = motors[i].torque.udMin.Minimum;
+            }
+        }
+
         void LoadSetting(byte[] adr)
         {
             string str = System.AppDomain.CurrentDomain.BaseDirectory;
@@ -828,7 +851,7 @@ namespace Robokey
             {
                 xr = XmlReader.Create(str);
                 //XMLファイルから読み込み、逆シリアル化する
-                motors = (List<Motor>)serializer.ReadObject(xr);
+                motors = (Motors)serializer.ReadObject(xr);
                 //ファイルを閉じる
             }
             catch (Exception)
