@@ -28,6 +28,7 @@ namespace Robokey
         }
         public static PoseData operator +(PoseData a, PoseData b)
         {
+            if (a == null || b == null) return null;
             PoseData rv = new PoseData(a.nMotor);
             for (int i = 0; i < rv.nMotor; i++)
             {

@@ -335,6 +335,7 @@ namespace Robokey
                                 CallUpdateRobotState();
                                 break;
                             case CommandId.CI_INTERPOLATE:
+                            case CommandId.CI_FORCE_CONTROL:
                                 ReadPose(ref cur, receiveBytes);
                                 ReadTick(ref cur, receiveBytes);
                                 CallUpdateRobotState();

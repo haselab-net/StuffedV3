@@ -118,7 +118,7 @@ namespace Robokey
             for (int j = 0; j < udpComm.RobotInfo.nMotor; ++j)
             {
                 double val = (1 - rate) * (int)pose0.values[j] + rate * (int)pose1.values[j];
-                rv.values[j] = (int)val + motors[j].Offset;
+                rv.values[j] = (int)val;// + motors[j].Offset;
             }
             rv.Time = (int)time % track.Maximum;
             return rv;
@@ -368,7 +368,7 @@ namespace Robokey
                 if (ckRunOnce.Checked == true) //モーションを一度だけ実行する場合
                 {
                     ckRun.Checked = false;
-                    udpComm.SendPoseDirect(Interpolate(curTime));
+                    udpComm.SendPoseDirect(Interpolate(curTime) + motors.Offset());
                 }
             }
             laCurTime.Left = (int)(curTime * TrackScale() + TrackOffset() + laCurTime.Width / 2);
@@ -393,14 +393,14 @@ namespace Robokey
             sentTime = curTime;
             if (!ckRun.Checked)
             {
-                udpComm.SendPoseDirect(Interpolate(curTime));
+                udpComm.SendPoseDirect(Interpolate(curTime) + motors.Offset());
             }
         }
         private void udTime_KeyPress(object sender, KeyPressEventArgs e)
         {
             if (e.KeyChar == '\r')
                 UpdateCurTime((int)udTime.Value);
-            udpComm.SendPoseDirect(Interpolate(curTime));
+            udpComm.SendPoseDirect(Interpolate(curTime) + motors.Offset());
         }
 
         private void btCopy_Click(object sender, EventArgs e)
@@ -460,7 +460,7 @@ namespace Robokey
             }
             file.Close();
             //udLoopTime.Value = lastTime;
-            PoseData p = Interpolate(track.Value);
+            PoseData p = Interpolate(track.Value) + motors.Offset();
             if (p != null) LoadToEditor(p);
 
             return (true);
@@ -482,7 +482,7 @@ namespace Robokey
             Timer tmRun = (Timer)sender;
             if (ckRun.Checked)
             {
-#if true   //  interpolate on motor drivers
+#if false   //  interpolate on motor drivers
                 int remain = (int)(byte)((int)udpComm.interpolateTargetCountOfWrite - (int)udpComm.interpolateTargetCountOfRead);
                 int vacancy = udpComm.nInterpolateTotal - remain;
                 int diff = NINTERPOLATEFILL - remain;
@@ -522,11 +522,11 @@ namespace Robokey
                     if (ckForce.Checked)
                     {
                         short[][] jacob = GetForceControlJacob();
-                        udpComm.SendPoseForceControl(Interpolate(curTime), 1, jacob);
+                        udpComm.SendPoseForceControl(Interpolate(curTime) + motors.Offset(), 1, jacob);
                     }
                     else
                     {
-                        udpComm.SendPoseInterpolate(Interpolate(curTime), 1);
+                        udpComm.SendPoseInterpolate(Interpolate(curTime) + motors.Offset(), 1);
                     }
                 }
                 else
@@ -551,11 +551,11 @@ namespace Robokey
                             if (ckForce.Checked)
                             {
                                 short[][] jacob = GetForceControlJacob();
-                                udpComm.SendPoseForceControl(Interpolate(curTime), (ushort)runTimer.Interval, jacob);
+                                udpComm.SendPoseForceControl(Interpolate(curTime) + motors.Offset(), (ushort)runTimer.Interval, jacob);
                             }
                             else
                             {
-                                udpComm.SendPoseInterpolate(Interpolate(curTime), (ushort)runTimer.Interval);
+                                udpComm.SendPoseInterpolate(Interpolate(curTime) + motors.Offset(), (ushort)runTimer.Interval);
                             }
 #if RUNTICK_DEBUG
                             System.Diagnostics.Debug.Write(" pr:");
@@ -571,13 +571,13 @@ namespace Robokey
                 }
 #else   //  use direct
                 UpdateCurTime(curTime += tmRun.Interval * (int)udStep.Value);
-                udpComm.SendPoseDirect(Interpolate(curTime));
+                udpComm.SendPoseDirect(Interpolate(curTime) + motors.Offset());
 #endif
             }
             else if (ckForce.Checked) // !ckRun.Checked && ckForce.Checked
             {
                 short[][] jacob = GetForceControlJacob();
-                udpComm.SendPoseForceControl(Interpolate(curTime), (ushort)runTimer.Interval, jacob);
+                udpComm.SendPoseForceControl(Interpolate(curTime) + motors.Offset(), (ushort)runTimer.Interval, jacob);
             }
 #if RUNTICK_DEBUG
             System.Diagnostics.Debug.WriteLine(".");
@@ -605,6 +605,12 @@ namespace Robokey
             if (udpComm.RobotInfo.nForce >= 4)
             {
                 jeRight.Jacobian(jacob, 2, mpos);
+                for (int i = 2; i <4; ++i)
+                {
+                    jacob[i][0] = 0;
+                    jacob[i][1] = 0;
+                    jacob[i][2] = 0;
+                }
             }
             return jacob;
         }

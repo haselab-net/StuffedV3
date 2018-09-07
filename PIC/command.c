@@ -141,7 +141,7 @@ ExecCommand* returnCommand[CI_NCOMMAND] = {
 	rcSensor,
     rcDirect,
     rcInterpolate,
-    rcInterpolate,
+    rcForceControl,
 	rcNop,	//	pdParam
     rcNop,	//	torqueLimit
     rcNop,	//	resetSensor

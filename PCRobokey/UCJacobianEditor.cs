@@ -60,14 +60,14 @@ namespace Robokey
             Matrix2d matForceInv = matForce.Inv();
             for (int f = 0; f < 2; ++f) {
                 for (int i = 0; i < 2; ++i) {
-                    jacob[f + off][(plane + i) % 3] = (short) (matForceInv.cols[f][i] * (float)udFScale.Value);
+                    jacob[f + off][(plane + i) % 3] = (short) (- matForceInv.cols[f][i] * (float)(f == 0 ? udFXScale.Value: udFYScale.Value));
                 }
                 jacob[f + off][(plane + 2) % 3] = 0;
             }
         }
         public void SetCurForce(short fx, short fy) {
-            curForce.X = fx / (float)udFScale.Value;
-            curForce.Y = fy / (float)udFScale.Value;
+            curForce.X = fx / (float)udFXScale.Value;
+            curForce.Y = fy / (float)udFYScale.Value;
             picForce.Invalidate();
         }
 
@@ -639,7 +639,9 @@ namespace Robokey
             file.Write(udMotorY.Value); file.Write("\t");
             file.Write(udMotorZ.Value); file.WriteLine();
             file.Write("scale\t");
-            file.Write(udMScale.Value); file.WriteLine();
+            file.Write(udMScale.Value); file.Write("\t");
+            file.Write(udFXScale.Value); file.Write("\t");
+            file.Write(udFYScale.Value); file.WriteLine();
             int id = 0;
             foreach (PosForces fs in forces)
             {
@@ -688,7 +690,12 @@ namespace Robokey
                 }
                 else if (cells[0] == "scale")
                 {
-                    udMScale.Value = decimal.Parse(cells[1]);
+                    if (cells.Length >= 4)
+                    {
+                        udMScale.Value = decimal.Parse(cells[1]);
+                        udFXScale.Value = decimal.Parse(cells[2]);
+                        udFYScale.Value = decimal.Parse(cells[3]);
+                    }
                 }
                 else if (cells[0] == "plane")
                 {

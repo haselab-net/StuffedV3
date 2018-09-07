@@ -60,11 +60,14 @@ public:
 		case CI_FORCE_CONTROL:
 			for (int i = 0; i < GetNMotor(); ++i) {
 				cmd.forceControl.pos[i] = packet.GetMotorPos(motorMap[i]);
-				cmd.interpolate.period = packet.GetPeriod();
-				cmd.interpolate.count = packet.GetTargetCount();
 				for (int j = 0; j < GetNForce(); ++j) {
+					assert(GetNMotor() == 3);
+					assert(GetNForce() == 2);
+					assert(forceMap[j] < 4);
 					cmd.forceControl.Jacob[j][i] = packet.GetForceControlJacob(forceMap[j], i);
 				}
+				cmd.forceControl.period = packet.GetPeriod();
+				cmd.forceControl.count = packet.GetTargetCount();
 			}
 			break;
 		case CI_PDPARAM:

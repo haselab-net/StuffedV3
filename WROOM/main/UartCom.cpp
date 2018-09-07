@@ -34,8 +34,8 @@ void Uart::SendTask(){
 		for(cmdCur.board=0; cmdCur.board<boards.size(); cmdCur.board++){
 			int retLen = boards[cmdCur.board]->RetLenForCommand();
 			if (retLen) bRet = true;
-//			wait = retLen - boards[cmdCur.board]->CmdLen() + 20;
-			wait = retLen - boards[cmdCur.board]->CmdLen() + 80;
+			wait = retLen - boards[cmdCur.board]->CmdLen() + 20;
+//			wait = retLen - boards[cmdCur.board]->CmdLen() + 80;
 			if (wait < 5) wait = 5;
 			assert(wait < CMDWAITMAXLEN);
 			memset(boards[cmdCur.board]->CmdStart() + boards[cmdCur.board]->CmdLen(), 0, wait);

@@ -39,16 +39,17 @@
             this.label5 = new System.Windows.Forms.Label();
             this.picPos = new System.Windows.Forms.PictureBox();
             this.pnLeft = new System.Windows.Forms.Panel();
-            this.udFScale = new System.Windows.Forms.NumericUpDown();
+            this.label7 = new System.Windows.Forms.Label();
+            this.udFXScale = new System.Windows.Forms.NumericUpDown();
             this.pnCtrls = new System.Windows.Forms.Panel();
+            this.label6 = new System.Windows.Forms.Label();
             this.udMScale = new System.Windows.Forms.NumericUpDown();
             this.btLoad = new System.Windows.Forms.Button();
             this.btSave = new System.Windows.Forms.Button();
             this.label4 = new System.Windows.Forms.Label();
             this.saveDlg = new System.Windows.Forms.SaveFileDialog();
             this.loadDlg = new System.Windows.Forms.OpenFileDialog();
-            this.label6 = new System.Windows.Forms.Label();
-            this.label7 = new System.Windows.Forms.Label();
+            this.udFYScale = new System.Windows.Forms.NumericUpDown();
             ((System.ComponentModel.ISupportInitialize)(this.picForce)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.udMotorZ)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.udMotorY)).BeginInit();
@@ -56,9 +57,10 @@
             this.flMotor.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picPos)).BeginInit();
             this.pnLeft.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.udFScale)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.udFXScale)).BeginInit();
             this.pnCtrls.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.udMScale)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.udFYScale)).BeginInit();
             this.SuspendLayout();
             // 
             // picForce
@@ -168,8 +170,9 @@
             // 
             // pnLeft
             // 
+            this.pnLeft.Controls.Add(this.udFYScale);
             this.pnLeft.Controls.Add(this.label7);
-            this.pnLeft.Controls.Add(this.udFScale);
+            this.pnLeft.Controls.Add(this.udFXScale);
             this.pnLeft.Controls.Add(this.picForce);
             this.pnLeft.Controls.Add(this.pnCtrls);
             this.pnLeft.Controls.Add(this.flMotor);
@@ -179,30 +182,40 @@
             this.pnLeft.Size = new System.Drawing.Size(254, 363);
             this.pnLeft.TabIndex = 4;
             // 
-            // udFScale
+            // label7
             // 
-            this.udFScale.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.udFScale.Increment = new decimal(new int[] {
+            this.label7.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(137, 66);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(42, 15);
+            this.label7.TabIndex = 15;
+            this.label7.Text = "Scale";
+            // 
+            // udFXScale
+            // 
+            this.udFXScale.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.udFXScale.Increment = new decimal(new int[] {
             10,
             0,
             0,
             0});
-            this.udFScale.Location = new System.Drawing.Point(178, 64);
-            this.udFScale.Margin = new System.Windows.Forms.Padding(2);
-            this.udFScale.Maximum = new decimal(new int[] {
-            10000,
+            this.udFXScale.Location = new System.Drawing.Point(178, 64);
+            this.udFXScale.Margin = new System.Windows.Forms.Padding(2);
+            this.udFXScale.Maximum = new decimal(new int[] {
+            1000000,
             0,
             0,
             0});
-            this.udFScale.Minimum = new decimal(new int[] {
+            this.udFXScale.Minimum = new decimal(new int[] {
             1,
             0,
             0,
             0});
-            this.udFScale.Name = "udFScale";
-            this.udFScale.Size = new System.Drawing.Size(74, 22);
-            this.udFScale.TabIndex = 14;
-            this.udFScale.Value = new decimal(new int[] {
+            this.udFXScale.Name = "udFXScale";
+            this.udFXScale.Size = new System.Drawing.Size(74, 22);
+            this.udFXScale.TabIndex = 14;
+            this.udFXScale.Value = new decimal(new int[] {
             1000,
             0,
             0,
@@ -227,6 +240,15 @@
             this.pnCtrls.Name = "pnCtrls";
             this.pnCtrls.Size = new System.Drawing.Size(254, 58);
             this.pnCtrls.TabIndex = 3;
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(3, 36);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(42, 15);
+            this.label6.TabIndex = 14;
+            this.label6.Text = "Scale";
             // 
             // udMScale
             // 
@@ -297,24 +319,34 @@
             this.loadDlg.FileName = "forces.txt";
             this.loadDlg.FileOk += new System.ComponentModel.CancelEventHandler(this.loadDlg_FileOk);
             // 
-            // label6
+            // udFYScale
             // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(3, 36);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(42, 15);
-            this.label6.TabIndex = 14;
-            this.label6.Text = "Scale";
-            // 
-            // label7
-            // 
-            this.label7.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(133, 66);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(42, 15);
-            this.label7.TabIndex = 15;
-            this.label7.Text = "Scale";
+            this.udFYScale.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.udFYScale.Increment = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+            this.udFYScale.Location = new System.Drawing.Point(178, 90);
+            this.udFYScale.Margin = new System.Windows.Forms.Padding(2);
+            this.udFYScale.Maximum = new decimal(new int[] {
+            1000000,
+            0,
+            0,
+            0});
+            this.udFYScale.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.udFYScale.Name = "udFYScale";
+            this.udFYScale.Size = new System.Drawing.Size(74, 22);
+            this.udFYScale.TabIndex = 16;
+            this.udFYScale.Value = new decimal(new int[] {
+            1000,
+            0,
+            0,
+            0});
             // 
             // UCJacobianEditor
             // 
@@ -336,10 +368,11 @@
             ((System.ComponentModel.ISupportInitialize)(this.picPos)).EndInit();
             this.pnLeft.ResumeLayout(false);
             this.pnLeft.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.udFScale)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.udFXScale)).EndInit();
             this.pnCtrls.ResumeLayout(false);
             this.pnCtrls.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.udMScale)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.udFYScale)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -364,8 +397,9 @@
         private System.Windows.Forms.SaveFileDialog saveDlg;
         private System.Windows.Forms.OpenFileDialog loadDlg;
         private System.Windows.Forms.NumericUpDown udMScale;
-        private System.Windows.Forms.NumericUpDown udFScale;
+        private System.Windows.Forms.NumericUpDown udFXScale;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.NumericUpDown udFYScale;
     }
 }

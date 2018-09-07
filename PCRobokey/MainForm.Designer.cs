@@ -74,6 +74,7 @@
             this.tabTorque = new System.Windows.Forms.TabPage();
             this.flTorque = new System.Windows.Forms.FlowLayoutPanel();
             this.panel4 = new System.Windows.Forms.Panel();
+            this.btSetLimitMax = new System.Windows.Forms.Button();
             this.btSendTorque = new System.Windows.Forms.Button();
             this.tabPdParam = new System.Windows.Forms.TabPage();
             this.flPd = new System.Windows.Forms.FlowLayoutPanel();
@@ -88,7 +89,6 @@
             this.tbState = new System.Windows.Forms.TextBox();
             this.tpMessage = new System.Windows.Forms.TabPage();
             this.tbMessage = new System.Windows.Forms.TextBox();
-            this.btSetLimitMax = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.track)).BeginInit();
             this.panelCom.SuspendLayout();
             this.panel2.SuspendLayout();
@@ -363,7 +363,7 @@
             this.udTick.Size = new System.Drawing.Size(58, 22);
             this.udTick.TabIndex = 77;
             this.udTick.Value = new decimal(new int[] {
-            50,
+            10,
             0,
             0,
             0});
@@ -665,6 +665,17 @@
             this.panel4.Size = new System.Drawing.Size(521, 30);
             this.panel4.TabIndex = 2;
             // 
+            // btSetLimitMax
+            // 
+            this.btSetLimitMax.Location = new System.Drawing.Point(278, 3);
+            this.btSetLimitMax.Margin = new System.Windows.Forms.Padding(2);
+            this.btSetLimitMax.Name = "btSetLimitMax";
+            this.btSetLimitMax.Size = new System.Drawing.Size(84, 25);
+            this.btSetLimitMax.TabIndex = 1;
+            this.btSetLimitMax.Text = "Set Max";
+            this.btSetLimitMax.UseVisualStyleBackColor = true;
+            this.btSetLimitMax.Click += new System.EventHandler(this.btSetLimitMax_Click);
+            // 
             // btSendTorque
             // 
             this.btSendTorque.Location = new System.Drawing.Point(366, 2);
@@ -824,17 +835,6 @@
             this.tbMessage.Size = new System.Drawing.Size(253, 451);
             this.tbMessage.TabIndex = 0;
             this.tbMessage.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.tbMessage_KeyPress);
-            // 
-            // btSetLimitMax
-            // 
-            this.btSetLimitMax.Location = new System.Drawing.Point(278, 3);
-            this.btSetLimitMax.Margin = new System.Windows.Forms.Padding(2);
-            this.btSetLimitMax.Name = "btSetLimitMax";
-            this.btSetLimitMax.Size = new System.Drawing.Size(84, 25);
-            this.btSetLimitMax.TabIndex = 1;
-            this.btSetLimitMax.Text = "Set Max";
-            this.btSetLimitMax.UseVisualStyleBackColor = true;
-            this.btSetLimitMax.Click += new System.EventHandler(this.btSetLimitMax_Click);
             // 
             // MainForm
             // 
