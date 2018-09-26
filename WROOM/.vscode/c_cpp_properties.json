@@ -34,7 +34,10 @@
                 "C:/msys32/home/espressif/esp/esp-idf/components/log/include",
                 "C:/msys32/home/espressif/esp/esp-idf/components/nvs_flash/include",
                 "C:/msys32/home/espressif/esp/esp-idf/components/newlib/platform_include",
-                "C:/msys32/home/espressif/esp/esp-idf/components/mdns/include"
+                "C:/msys32/home/espressif/esp/esp-idf/components/mdns/include",
+                "C:/msys32/home/espressif/esp/esp-idf",
+                "C:/msys32/home/espressif/esp/esp-idf/components/esptool_py",
+                "C:/msys32/home/espressif/esp/esp-idf/components/esp_adc_cal/include"
             ],
             "intelliSenseMode": "clang-x64",
             "browse": {

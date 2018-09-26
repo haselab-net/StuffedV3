@@ -20,14 +20,15 @@
 #include "wifiMan.h"
 #include "wifiMan/http_server.h"
 #include "wifiMan/wifi_manager.h"
+#include "../esptool_py/esptool/flasher_stub/rom_functions.h"  // "esptool_py/esptool/flasher_stub/rom_functions.h"
 #include "TouchSensing.h"
 #include "Motor.h"
 #include "../../PIC/boardType.h"
 
 int getch(){
     uint8_t data[1];
-    int l = uart_read_bytes(UART_NUM_0, data, 1, 0);
-    if (l ==1){
+    int rv = uart_rx_one_char(data);
+    if (rv == OK){
         return data[0];
     }else{
         return -1;
@@ -60,13 +61,13 @@ extern "C" void app_main()
     static MotorDriver motor;
     motor.Init();
     motor.AdcRead();
-    float pwm = 0.5f;
+    float pwm = -0.8f;
     while(1){
-        int key = getch();
+/*        int key = getch();
         if (key == 'p'){
             pwm = -pwm;
             printf("pwm = %f\r\n", pwm);
-        }
+        }*/
         for(int i=0; i<3; ++i){
             motor.Pwm(i, pwm);
         }
