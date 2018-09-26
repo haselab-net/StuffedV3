@@ -20,7 +20,7 @@
 #include "wifiMan.h"
 #include "wifiMan/http_server.h"
 #include "wifiMan/wifi_manager.h"
-#include "../esptool_py/esptool/flasher_stub/rom_functions.h"  // "esptool_py/esptool/flasher_stub/rom_functions.h"
+#include "rom/uart.h"
 #include "TouchSensing.h"
 #include "Motor.h"
 #include "../../PIC/boardType.h"
@@ -63,11 +63,11 @@ extern "C" void app_main()
     motor.AdcRead();
     float pwm = -0.8f;
     while(1){
-/*        int key = getch();
+        int key = getch();
         if (key == 'p'){
             pwm = -pwm;
             printf("pwm = %f\r\n", pwm);
-        }*/
+        }
         for(int i=0; i<3; ++i){
             motor.Pwm(i, pwm);
         }
