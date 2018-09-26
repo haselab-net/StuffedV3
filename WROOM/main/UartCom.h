@@ -64,6 +64,7 @@ public:
 	int GetSystemId() { return 0; }
 	Uarts();
 	~Uarts();
+	void ClearMap();
 	void EnumerateBoard();	
 	void Init();
 	bool HasRet(unsigned short id){

@@ -6,7 +6,30 @@
 #include "driver/uart.h"
 #include "esp_log.h"
 #include "board.h"
+#include "Motor.h"
 #include "../../PIC/boardType.h"
+
+//	PIN definition
+#if defined BOARD1_MOTORDRIVER
+#define U1TXPIN	33	
+#define U1RXPIN	32
+#define U2TXPIN	17
+#define U2RXPIN	16
+#elif defined BOARD2_COMBINATION
+#define U1TXPIN	16
+#define U1RXPIN	17	
+#define U2TXPIN	5
+#define U2RXPIN	18
+#elif defined BOARD3_SEPARATE
+#define U1TXPIN	16
+#define U1RXPIN	17	
+#define U2TXPIN	5
+#define U2RXPIN	18
+#else 
+#error
+#endif
+
+
 
 static char zero[80];
 
@@ -141,9 +164,17 @@ void Uart::EnumerateBoard() {
 	}
 	uart_write_bytes(port, zero, 5);
 }
-void Uarts::EnumerateBoard() {
+void Uarts::ClearMap(){
 	motorMap.clear();
 	forceMap.clear();
+	#ifdef BOARD3_SEPARATE
+	for(int i=0; i < NMOTOR_DIRECT; ++i){
+		motorMap.push_back(DeviceMap(-1, i));
+	}
+	#endif
+}
+void Uarts::EnumerateBoard() {
+	ClearMap();	
 	for (int i = 0; i < NUART; ++i) {
 		uart[i]->EnumerateBoard();
 	}
@@ -157,19 +188,6 @@ void Uarts::EnumerateBoard() {
 		}
 	}
 }
-#if defined BOARD1_MOTORDRIVER
-#define U1TXPIN	33	
-#define U1RXPIN	32
-#define U2TXPIN	17
-#define U2RXPIN	16
-#elif defined BOARD2_COMBINATION
-#define U1TXPIN	16
-#define U1RXPIN	17	
-#define U2TXPIN	5
-#define U2RXPIN	18
-#else
-#error
-#endif
 
 void Uarts::Init() {
 	assert(NUART == 2);	//NUART must be much to followings.

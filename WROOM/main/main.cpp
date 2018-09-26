@@ -21,9 +21,18 @@
 #include "wifiMan/http_server.h"
 #include "wifiMan/wifi_manager.h"
 #include "TouchSensing.h"
+#include "Motor.h"
 #include "../../PIC/boardType.h"
 
-
+int getch(){
+    uint8_t data[1];
+    int l = uart_read_bytes(UART_NUM_0, data, 1, 0);
+    if (l ==1){
+        return data[0];
+    }else{
+        return -1;
+    }
+}
 
 
 extern "C" void app_main()
@@ -45,6 +54,29 @@ extern "C" void app_main()
     // Enable next line to clear all nvs enable. Use only when nvs makes trouble. 
 #if 0
     nvs_flash_erase();
+#endif
+
+#if 1   //  pwm / adc test 
+    static MotorDriver motor;
+    motor.Init();
+    motor.AdcRead();
+    float pwm = 0.5f;
+    while(1){
+        int key = getch();
+        if (key == 'p'){
+            pwm = -pwm;
+            printf("pwm = %f\r\n", pwm);
+        }
+        for(int i=0; i<3; ++i){
+            motor.Pwm(i, pwm);
+        }
+        motor.AdcRead();
+        printf("ADC:");
+        for(int i=0; i<6; ++i){
+            printf(" %d", motor.GetAdcRaw(i));
+        }
+        printf("\r\n");
+    }
 #endif
 
     uarts.Init();
