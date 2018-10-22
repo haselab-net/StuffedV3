@@ -1,41 +1,20 @@
 #include "driver/touch_pad.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "TinyContainer.h"
 
-typedef enum : uint16_t
-{
-    TOUCH_PAD_FLAG_NONE = 0x0000,
-    TOUCH_PAD_FLAG0 = 1 << 0,
-    TOUCH_PAD_FLAG1 = 1 << 1,
-    TOUCH_PAD_FLAG2 = 1 << 2,
-    TOUCH_PAD_FLAG3 = 1 << 3,
-    TOUCH_PAD_FLAG4 = 1 << 4,
-    TOUCH_PAD_FLAG5 = 1 << 5,
-    TOUCH_PAD_FLAG6 = 1 << 6,
-    TOUCH_PAD_FLAG7 = 1 << 7,
-    TOUCH_PAD_FLAG8 = 1 << 8,
-    TOUCH_PAD_FLAG9 = 1 << 9,
-    TOUCH_PAD_FLAG_ALL = 0x03FF,
-} touch_pad_flag_t;
-
-class TouchPad
+class TouchPads
 {
   private:
-    touch_pad_t num_touch_pad_;
-    uint16_t raw_value_;
-    uint32_t current_status_;
-
+    tiny::vector<touch_pad_t> pads;
+    int Add(touch_pad_t pad);
   public:
-    TouchPad();
-    TouchPad(touch_pad_t touch_pad) : num_touch_pad_(touch_pad){};
-
-    void init();
-    touch_pad_t num_touch_pad() { return num_touch_pad_; };
-    void set_num_touch_pad(touch_pad_t num) { num_touch_pad_ = num; };
-    uint16_t raw_value();
-    uint32_t current_status();
+    void Init();
+    int NPad(){return pads.size();}
+    uint16_t Raw(int i);
+    uint32_t Status();
 };
-
+/*
 class TouchSensing
 {
   private:
@@ -58,3 +37,4 @@ class TouchSensing
 };
 
 extern TouchSensing touch_sensing;
+*/

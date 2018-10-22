@@ -58,10 +58,13 @@ extern "C" void app_main()
 #endif
 
 #if 1   //  pwm / adc test 
+    static TouchPads touch;
+    touch.Init();
+
     static MotorDriver motor;
     motor.Init();
-    motor.AdcRead();
     float pwm = -0.8f;
+    int count = 0;
     while(1){
         int key = getch();
         if (key == 'p'){
@@ -72,11 +75,18 @@ extern "C" void app_main()
             motor.Pwm(i, pwm);
         }
         motor.AdcRead();
-        printf("ADC:");
-        for(int i=0; i<6; ++i){
-            printf(" %d", motor.GetAdcRaw(i));
+        if (count % 100 == 0){
+            printf("ADC:");
+            for(int i=0; i<6; ++i){
+                printf(" %d", motor.GetAdcVoltage(i));
+            }
+            printf(" Touch:");
+            for(int i=0; i<touch.NPad(); ++i){
+                printf(" %d", touch.Raw(i));
+            }
+            printf("\r\n");        
         }
-        printf("\r\n");
+        count ++;
     }
 #endif
 
