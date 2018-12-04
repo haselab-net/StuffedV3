@@ -15,11 +15,12 @@ extern int adcChs[NMOTOR_DIRECT*2];
 
 class MotorDriver{
     esp_adc_cal_characteristics_t adc_chars;
-    int adcRaws[NMOTOR_DIRECT*2];
 public:
+    int adcRaws[NMOTOR_DIRECT*2];
     void Init();
     void Pwm(int ch, float duty);
     void AdcRead();
     uint32_t GetAdcVoltage(int ch);
     int GetAdcRaw(int ch);
 };
+extern MotorDriver motorDriver;

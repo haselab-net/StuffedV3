@@ -1,4 +1,4 @@
-#include "Motor.h"
+#include "MotorDriver.h"
 #include "driver/mcpwm.h"
 #include "soc/mcpwm_reg.h"
 #include "soc/mcpwm_struct.h"
@@ -66,4 +66,21 @@ int MotorDriver::GetAdcRaw(int ch){
 uint32_t MotorDriver::GetAdcVoltage(int ch){
     uint32_t voltage = esp_adc_cal_raw_to_voltage(adcRaws[ch], &adc_chars);
     return voltage;
+}
+
+MotorDriver motorDriver;
+
+extern "C"{
+    #include "../../PIC/control.h"
+    void readADC(){
+        int i;
+        motorDriver.AdcRead();
+        for(i=0; i<NMOTOR_DIRECT; ++i){
+            mcos[i] = motorDriver.adcRaws[i*2];
+            msin[i] = motorDriver.adcRaws[i*2 + 1];
+        }
+    }
+    void setPwm(int ch, SDEC ratio){
+
+    }	
 }

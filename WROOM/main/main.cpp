@@ -22,7 +22,7 @@
 #include "wifiMan/wifi_manager.h"
 #include "rom/uart.h"
 #include "TouchSensing.h"
-#include "Motor.h"
+#include "MotorDriver.h"
 #include "../../PIC/boardType.h"
 
 int getch(){

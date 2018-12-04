@@ -6,7 +6,7 @@
 #include "driver/uart.h"
 #include "esp_log.h"
 #include "board.h"
-#include "Motor.h"
+#include "MotorDriver.h"
 #include "../../PIC/boardType.h"
 
 //	PIN definition

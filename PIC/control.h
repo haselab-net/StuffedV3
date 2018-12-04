@@ -20,11 +20,10 @@ struct MotorState{
 };
 extern struct MotorState motorTarget, motorState;
 extern SDEC forceControlJK[NFORCE][NMOTOR];
-#define NAXIS	4	//	NAXIS=NMOTOR+NFORCE/2
+#define NAXIS	(NMOTOR+NFORCE/2)	//	NAXIS=NMOTOR+NFORCE/2
 extern SDEC mcos[NAXIS], msin[NAXIS];
 extern const SDEC mcosOffset[NAXIS];
 extern const SDEC msinOffset[NAXIS];
-
 
 struct PdParam{
     SDEC k[NMOTOR];
