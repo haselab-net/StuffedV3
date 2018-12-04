@@ -1,13 +1,17 @@
 #ifndef _CONTROL_H
 #define _CONTROL_H
-#include "env.h"
-#include "decimal.h"
-#include "command.h"
+//	This file works for both PIC and WROOM
 
+#include "env.h"
+#include "fixed.h"
+#include "command.h"
 #ifdef __XC32
 #include "mcc_generated_files/mcc.h"
 #endif
 
+//	device depended functions
+void readADC();						//	read adc and set it to mcos and msin
+void setPwm(int ch, SDEC ratio);	//	set pwm of motor
 
 //  data buffer
 struct MotorState{
@@ -18,6 +22,9 @@ extern struct MotorState motorTarget, motorState;
 extern SDEC forceControlJK[NFORCE][NMOTOR];
 #define NAXIS	4	//	NAXIS=NMOTOR+NFORCE/2
 extern SDEC mcos[NAXIS], msin[NAXIS];
+extern const SDEC mcosOffset[NAXIS];
+extern const SDEC msinOffset[NAXIS];
+
 
 struct PdParam{
     SDEC k[NMOTOR];
@@ -57,7 +64,7 @@ void targetsAddOrUpdate(short* pos, short period, unsigned char count);
 void targetsForceControlAddOrUpdate(SDEC* pos, SDEC JK[NFORCE][NMOTOR] ,short period, unsigned char count);
 void targetsWrite();
 inline unsigned char targetsWriteAvail(){
-	char len = targets.read - targets.write;
+	int len = targets.read - targets.write;
 	if (len < 0) len += NTARGET;
 	return len;
 }
@@ -78,14 +85,23 @@ extern SDEC forceOffset[NFORCE];
 inline SDEC getForceRaw(int ch){
 	if (ch == 0) return mcos[3];
 	if (ch == 1) return msin[3];
+	return 0;
 }
 inline SDEC getForce(int ch){
 	if (ch == 0) return mcos[3] - forceOffset[ch];
 	if (ch == 1) return msin[3] - forceOffset[ch];
+	return 0;
 }
 
+inline short FilterForADC(short prev, short cur){
+    const short IIR = 1;
+    return (prev*(IIR-1) + cur) / IIR;
+}
+
+#ifdef PIC
 extern int coretimerRemainTime;
 extern uint32_t coretimerCompare;
 extern uint32_t controlCount;
+#endif
 
 #endif

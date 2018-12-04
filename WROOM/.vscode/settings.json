@@ -1,5 +1,5 @@
 {
-    "C_Cpp.intelliSenseEngineFallback": "Disabled",
+    "C_Cpp.intelliSenseEngineFallback": "Enabled",
     "files.associations": {
         "stdio.h": "c",
         "freertos.h": "c",
@@ -15,7 +15,9 @@
         "event_groups.h": "c",
         "esp_event_loop.h": "c",
         "condition_variable": "cpp",
-        "future": "cpp"
+        "future": "cpp",
+        "decimal.h": "c",
+        "env.h": "c"
     },
     "terminal.integrated.shell.windows": "c:\\msys32\\usr\\bin\\bash.exe",
     "terminal.integrated.env.windows": {

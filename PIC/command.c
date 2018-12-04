@@ -1,4 +1,4 @@
-#include "decimal.h"
+#include "fixed.h"
 #include "command.h"
 #include "control.h"
 #include "uart.h"

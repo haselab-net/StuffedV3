@@ -7,6 +7,7 @@
 #define BOARD2_COMBINATION		//	2nd board with WROOM
 #else
 #define BOARD3_SEPARATE         //	3nd board WROOM only / pic only New
+#define BOARD1_MOTORDRIVER
 #endif
 
 #if defined BOARD1_MOTORDRIVER

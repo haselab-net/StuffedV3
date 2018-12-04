@@ -27,7 +27,7 @@
 */
 
 #include "env.h"
-#include "decimal.h"
+#include "fixed.h"
 #include "mcc_generated_files/mcc.h"
 #include "control.h"
 #include "command.h"

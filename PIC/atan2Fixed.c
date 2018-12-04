@@ -14,8 +14,8 @@
     Describe the purpose of this file.
  */
 /* ************************************************************************** */
-#include "decimal.h"
-#include "mcc_generated_files/mcc.h"
+#include "fixed.h"
+//#include "mcc_generated_files/mcc.h"
 #include <stdio.h>
 #ifdef DEBUG
 #include <assert.h>

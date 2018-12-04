@@ -11,6 +11,26 @@
 //#define DEBUG
 //#define MODULETEST    //  module test mode for debugging
 
+#ifdef __XC32
+#define PIC	1
+#elif defined __xtensa__
+#define WROOM	1
+#else
+#error processor macro is undefined.
+#endif
+
+#ifdef WROOM
+typedef unsigned int uint32_t;
+#define DISABLE_INTERRUPT
+#define ENABLE_INTERRUPT
+#endif
+
+#ifdef PIC
+#define DISABLE_INTERRUPT 	asm volatile("di") // Disable all interrupts  
+#define ENABLE_INTERRUPT	asm volatile("ei") // Enable all interrupt	
+#endif
+
+
 
 #ifdef MODULETEST
 #define DEBUG

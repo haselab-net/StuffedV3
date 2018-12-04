@@ -4,7 +4,7 @@
 #include "../../PCRoboKey/CommandId.cs"
 #define _COMMANDID_CS
 #include "../../PIC/env.h"
-#include "../../PIC/decimal.h"
+#include "../../PIC/fixed.h"
 #include "../../PIC/commandCommon.h"
 
 enum BD0_PARAM {

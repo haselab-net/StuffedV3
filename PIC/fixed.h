@@ -12,7 +12,7 @@ typedef short SDEC;
 #define F2SDEC(x)       ((short)(SDEC_ONE*(x)))
 #define SDEC2DBL(x)     ((double)(x) / SDEC_ONE)
 
-SDEC atan2S(SDEC s, SDEC c);
+SDEC atan2SDEC(SDEC s, SDEC c);
 
 
 //  Fixed decimal by 32bit long type
