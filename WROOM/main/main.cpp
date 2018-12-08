@@ -74,7 +74,6 @@ extern "C" void app_main()
         for(int i=0; i<3; ++i){
             motor.Pwm(i, pwm);
         }
-        motor.AdcRead();
         if (count % 100 == 0){
             printf("ADC:");
             for(int i=0; i<6; ++i){

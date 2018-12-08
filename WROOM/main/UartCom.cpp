@@ -168,7 +168,7 @@ void Uarts::ClearMap(){
 	motorMap.clear();
 	forceMap.clear();
 	#ifdef BOARD3_SEPARATE
-	for(int i=0; i < NMOTOR_DIRECT; ++i){
+	for(int i=0; i < MotorDriver::NMOTOR_DIRECT; ++i){
 		motorMap.push_back(DeviceMap(-1, i));
 	}
 	#endif
