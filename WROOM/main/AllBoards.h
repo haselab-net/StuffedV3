@@ -1,6 +1,23 @@
 #pragma once
+#include "lwip/err.h"
+#include "lwip/sockets.h"
+#include "lwip/sys.h"
+#include "lwip/netdb.h"
+#include "TinyContainer.h"
+#include "freertos/FreeRTOS.h"
 
-#include "UartForBoards.h"
+class DeviceMap {
+public:
+	int board;
+	int id;
+	DeviceMap(int b, int m): board(b), id(m){
+	}
+};
+
+class UartForBoards;
+class BoardDirect;
+class UdpCmdPacket;
+class UdpRetPacket;
 //
 class AllBoards{
 public:
@@ -19,7 +36,7 @@ public:
 	tiny::vector<DeviceMap> motorMap;
 	tiny::vector<DeviceMap> forceMap;
 	UartForBoards* uart[NUART];
-	BoardDirect boardDirect;
+	BoardDirect* boardDirect;
 	SemaphoreHandle_t seUartFinished;
 	int GetNTotalMotor() { return motorMap.size(); }
 	int GetNTotalForce() { return forceMap.size(); }
@@ -27,17 +44,9 @@ public:
 	int GetSystemId() { return 0; }
 	AllBoards();
 	~AllBoards();
-	void ClearMap();
 	void EnumerateBoard();	
 	void Init();
-	bool HasRet(unsigned short id){
-		for (int i = 0; i < NUART; ++i) {
-			for (int j = 0; j < uart[i]->boards.size(); ++j) {
-				if (uart[i]->boards[j]->retPacketLen[id]) return true;
-			}
-		}
-		return false;
-	}
+	bool HasRet(unsigned short id);
 	///	Write contents of the UdpCmdPacket to all boards. 
 	void WriteCmd(UdpCmdPacket& packet);	
 	///	Read returns of all boards to  UdpRetPacket. 

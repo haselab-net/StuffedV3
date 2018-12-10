@@ -19,18 +19,28 @@ class MotorDriver{
     void AdcReadTask();
     const int DEFAULT_VREF = 1100;        //Use adc2_vref_to_gpio() to obtain a better estimate
     enum {ADC_DMA_LEN = 8};
-#ifdef BOARD3_SEPARATE
     public:
+#ifdef BOARD3_SEPARATE
     enum {
         NTARGET_DIRECT = 12,
         NMOTOR_DIRECT = BoardInfo::NMOTOR,
         NFORCE_DIRECT = 0,
     };
+#else
+    enum {
+        NTARGET_DIRECT = 0xFF,
+        NMOTOR_DIRECT = 0,
+        NFORCE_DIRECT = 0,
+    };
+#endif
     private:
+#ifdef BOARD3_SEPARATE
     const int pwmPins[NMOTOR_DIRECT*2] = {4, 19, 26, 27, 21, 22};    //M2, M3, M0, M1, M4, M5
+#else
+    const int pwmPins[0] = {};
+#endif
     const int adcChs[ADC_DMA_LEN] = {0, 3, 5, 4, 6, 7, 1, 2};
     int adcChsRev[8];   //  must be larger than ch numbers
-#endif
 
 
 public:

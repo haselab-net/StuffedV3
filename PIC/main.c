@@ -50,6 +50,7 @@ int main(void)
 
     controlInit();
 	commandInit();
+	commandUartInit();
 	setPwm(0, SDEC_ONE*0.1);
 	while(1){
 		if (!uartExecCommand()){

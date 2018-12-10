@@ -17,7 +17,8 @@
         "condition_variable": "cpp",
         "future": "cpp",
         "decimal.h": "c",
-        "env.h": "c"
+        "env.h": "c",
+        "command.h": "c"
     },
     "terminal.integrated.shell.windows": "c:\\msys32\\usr\\bin\\bash.exe",
     "terminal.integrated.env.windows": {

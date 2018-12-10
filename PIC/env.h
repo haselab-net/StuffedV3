@@ -26,8 +26,8 @@ typedef unsigned int uint32_t;
 #endif
 
 #ifdef PIC
-#define DISABLE_INTERRUPT 	asm volatile("di") // Disable all interrupts  
-#define ENABLE_INTERRUPT	asm volatile("ei") // Enable all interrupt	
+#define DISABLE_INTERRUPT 	asm volatile("di"); // Disable all interrupts  
+#define ENABLE_INTERRUPT	asm volatile("ei"); // Enable all interrupt	
 #endif
 
 

@@ -2,10 +2,6 @@
 
 #include "BoardBase.h"
 #include "driver/uart.h"
-#include "lwip/err.h"
-#include "lwip/sockets.h"
-#include "lwip/sys.h"
-#include "lwip/netdb.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/queue.h"
@@ -32,10 +28,3 @@ public:
 	void SendTask();
 };
 
-class DeviceMap {
-public:
-	int board;
-	int id;
-	DeviceMap(int b, int m): board(b), id(m){
-	}
-};

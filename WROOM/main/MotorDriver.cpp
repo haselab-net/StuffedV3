@@ -89,7 +89,11 @@ void MotorDriver::Init(){
     i2s_set_adc_mode(ADC_UNIT_1, ADC1_CHANNEL_0);
     i2s_adc_enable(I2S_NUM_0);
 
+#ifdef BOARD3_SEPARATE
     SYSCON.saradc_ctrl.sar1_patt_len = NMOTOR_DIRECT*2-1;   // table length - 1
+#else
+    SYSCON.saradc_ctrl.sar1_patt_len = 0;
+#endif
     SYSCON.saradc_ctrl.data_sar_sel = true;
     //  Making ADC scanning table pattern (WIDTH=11, DB=11) = 7
     //  ADC_WIDTH_BIT_9 = 0, ADC_WIDTH_BIT_12 = 3;

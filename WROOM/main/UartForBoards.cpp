@@ -3,44 +3,23 @@
 #include <stdio.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "driver/uart.h"
 #include "esp_log.h"
 #include "board.h"
 #include "MotorDriver.h"
 #include "../../PIC/boardType.h"
 
-//	PIN definition
-#if defined BOARD1_MOTORDRIVER
-#define U1TXPIN	33	
-#define U1RXPIN	32
-#define U2TXPIN	17
-#define U2RXPIN	16
-#elif defined BOARD2_COMBINATION
-#define U1TXPIN	16
-#define U1RXPIN	17	
-#define U2TXPIN	5
-#define U2RXPIN	18
-#elif defined BOARD3_SEPARATE
-#define U1TXPIN	16
-#define U1RXPIN	17	
-#define U2TXPIN	5
-#define U2RXPIN	18
-#else 
-#error
-#endif
-
 
 
 static char zero[80];
 
-UartForBoards::UartForBoards(uart_port_t ch, AllBoards* u) : port(ch), allBoards(u) {
-	
+UartForBoards::UartForBoards(uart_port_t ch, AllBoards* u) : port(ch), allBoards(u) {	
 }
 void UartForBoards::Init(uart_config_t conf, int txPin, int rxPin){
 	uart_param_config(port, &conf);
 	uart_set_pin(port, txPin, rxPin, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
 	uart_driver_install(port, 512, 512, 10, NULL, 0);
 }
+
 static void recvTask(void* a){
 	((UartForBoards*)a)->RecvTask();
 }
@@ -167,50 +146,3 @@ void UartForBoards::EnumerateBoard() {
 	}
 	uart_write_bytes(port, zero, 5);
 }
-void AllBoards::ClearMap(){
-	motorMap.clear();
-	forceMap.clear();
-	#ifdef BOARD3_SEPARATE
-	for(int i=0; i < MotorDriver::NMOTOR_DIRECT; ++i){
-		motorMap.push_back(DeviceMap(-1, i));
-	}
-	#endif
-}
-void AllBoards::EnumerateBoard() {
-	ClearMap();	
-	for (int i = 0; i < NUART; ++i) {
-		uart[i]->EnumerateBoard();
-	}
-	nTargetMin = 0xFF;
-	nBoard = 0;
-	for (int i = 0; i < NUART; ++i) {
-		nBoard += uart[i]->boards.size();
-		for (int j = 0; j < uart[i]->boards.size(); ++j) {
-			int nt = uart[i]->boards[j]->GetNTarget();
-			nTargetMin = nt < nTargetMin ? nt : nTargetMin;
-		}
-	}
-}
-
-void AllBoards::Init() {
-	assert(NUART == 2);	//NUART must be much to followings.
-	printf("Start allBoards");
-	uart_config_t uconf;
-	uconf.baud_rate = 2000000;
-	uconf.data_bits = UART_DATA_8_BITS;
-    uconf.parity = UART_PARITY_DISABLE;
-    uconf.stop_bits = UART_STOP_BITS_1;
-    uconf.flow_ctrl = UART_HW_FLOWCTRL_DISABLE;
-    uconf.rx_flow_ctrl_thresh = 0;
-    uconf.use_ref_tick = false;
-
-	
-	uart[0]->Init(uconf, U1TXPIN, U1RXPIN); // pin must be changed. IO6-11 are reserved. (RX=32 Yellow, TX=33 Green)
-	printf(".");
-	uart[1]->Init(uconf, U2TXPIN, U2RXPIN);
-	printf(". done.\n");
-	EnumerateBoard();
-	uart[0]->CreateTask();
-	uart[1]->CreateTask();
-}
-

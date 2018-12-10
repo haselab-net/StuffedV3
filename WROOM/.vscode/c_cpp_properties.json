@@ -10,8 +10,6 @@
                 "${workspaceRoot}/build/include",
                 "${workspaceRoot}/../PIC",
                 "${workspaceRoot}/../PCRobokey",
-                "${workspaceRoot}/../../PIC",
-                "${workspaceRoot}/../../PCRobokey",
                 "C:/msys32/home/espressif/esp/esp-idf/components",
                 "C:/msys32/home/espressif/esp/esp-idf/components/freertos/include",
                 "C:/msys32/opt/xtensa-esp32-elf/lib/gcc/xtensa-esp32-elf/5.2.0/include",
@@ -45,6 +43,7 @@
             "browse": {
                 "path": [
                     "${workspaceRoot}",
+                    "${workspaceRoot}/../PIC",
                     "C:/msys32/opt/xtensa-esp32-elf/lib/gcc/xtensa-esp32-elf/5.2.0/include",
                     "C:/msys32/opt/xtensa-esp32-elf/lib/gcc/xtensa-esp32-elf/5.2.0/include-fixed",
                     "C:/msys32/opt/xtensa-esp32-elf/xtensa-esp32-elf/include",

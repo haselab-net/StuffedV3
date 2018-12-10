@@ -1,5 +1,4 @@
 #pragma once
-
 #include "BoardBase.h"
 #include "UdpCom.h"
 #include "esp_log.h"

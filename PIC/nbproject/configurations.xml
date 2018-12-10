@@ -63,6 +63,7 @@
       <itemPath>monitor.c</itemPath>
       <itemPath>env.c</itemPath>
       <itemPath>controlPic.c</itemPath>
+      <itemPath>commandUart.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

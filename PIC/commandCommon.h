@@ -41,5 +41,4 @@ DEFINE_Packets(B1F)
 DEFINE_Packets(B2M)
 DEFINE_Packets(B2F)
 
-
 #endif
