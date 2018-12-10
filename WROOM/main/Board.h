@@ -10,14 +10,9 @@ class Board: public BoardBase{
 public:
 	typedef CMD CmdPacket;
 	typedef RET RetPacket;
-#ifdef _WIN32
-	CommandPacketB1M cmd;
-	ReturnPacketB1M ret;
-#else
 	CmdPacket cmd;
 	uint8_t zero[CMDWAITMAXLEN];	//	zero for UART wait
 	volatile RetPacket ret;
-#endif
 	Board(int bid, const unsigned char * c, const unsigned char * r) {
 		cmd.boardId = bid;
 		cmdPacketLen = c;

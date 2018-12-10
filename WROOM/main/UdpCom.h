@@ -1,10 +1,9 @@
 #pragma once
 
-#include "VCEdit.h"
 #include "ArrayRing.h"
-#include "UartForBoards.h"
 #include "esp_event_loop.h"
-
+#include "UartForBoards.h"
+#include "AllBoards.h"
 
 
 /**	Udp packet from PC
@@ -35,32 +34,32 @@ public:
 		return data[i];
 	}
 	short GetMotorVel(int i) {
-		return data[uarts.GetNTotalMotor() + i];
+		return data[allBoards.GetNTotalMotor() + i];
 	}
 	short GetPeriod() const {
-		return data[uarts.GetNTotalMotor()];
+		return data[allBoards.GetNTotalMotor()];
 	}
 	short GetTargetCount() const {
-		return data[uarts.GetNTotalMotor()+1];
+		return data[allBoards.GetNTotalMotor()+1];
 	}
 	short GetForceControlJacob(int j, int i) const {	//	j: row, i: col,
 		//	The matrix is 2 row x  3 col or 2*nBoard row x 3 col.
 	//	int b = j / 2;
 	//	int r = j % 2;
-	//	return data[uarts.GetNTotalMotor() + 2 + b*6 + r*3 + i];
-		return data[uarts.GetNTotalMotor() + 2 + j*3 + i];
+	//	return data[allBoards.GetNTotalMotor() + 2 + b*6 + r*3 + i];
+		return data[allBoards.GetNTotalMotor() + 2 + j*3 + i];
 	}
 	short GetControlK(int i) const {
 		return data[i];
 	}
 	short GetControlB(int i) const {
-		return data[uarts.GetNTotalMotor() + i];
+		return data[allBoards.GetNTotalMotor() + i];
 	}
 	short GetTorqueMin(int i) const {
 		return data[i];
 	}
 	short GetTorqueMax(int i) const {
-		return data[uarts.GetNTotalMotor() + i];
+		return data[allBoards.GetNTotalMotor() + i];
 	}
 	short GetResetSensorFlags() const {
 		return data[0];
@@ -76,27 +75,27 @@ public:
 		data[i] = p;
 	}
 	void SetMotorVel(short v, int i) {
-		data[uarts.GetNTotalMotor() + i] = v;
+		data[allBoards.GetNTotalMotor() + i] = v;
 	}
 	//	for interpolate and force control
 	void SetTargetCountRead(short c) {
-		data[uarts.GetNTotalMotor()] = c;
+		data[allBoards.GetNTotalMotor()] = c;
 	}
 	void SetTickMin(short t) {
-		data[uarts.GetNTotalMotor()+1] = t;
+		data[allBoards.GetNTotalMotor()+1] = t;
 	}
 	void SetTickMax(short t) {
-		data[uarts.GetNTotalMotor()+2] = t;
+		data[allBoards.GetNTotalMotor()+2] = t;
 	}
 	void SetNTargetRemain(short t){
-		data[uarts.GetNTotalMotor()+3] = t;		
+		data[allBoards.GetNTotalMotor()+3] = t;		
 	}
 	void SetNTargetVacancy(short t){
-		data[uarts.GetNTotalMotor()+4] = t;		
+		data[allBoards.GetNTotalMotor()+4] = t;		
 	}
 	//	sense
 	void SetForce(short f, int i) {
-		data[uarts.GetNTotalMotor() + i] = f;
+		data[allBoards.GetNTotalMotor() + i] = f;
 	}
 	void SetBoardInfo(int systemId, int nTarget, int nMotor, int nForce) {
 		data[0] = systemId;

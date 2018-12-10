@@ -1,8 +1,3 @@
-#include "VCEdit.h"
-#include "UdpCom.h"
-#include "UartCom.h"
-#include "command.h"
-
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/event_groups.h"
@@ -20,6 +15,11 @@
 #include <algorithm>
 #include <string.h>
 
+#include "AllBoards.h"
+#include "UdpCom.h"
+#include "UartForBoards.h"
+#include "command.h"
+
 
 UdpCom udpCom;
 static const char* Tag = "UdpCom";
@@ -34,15 +34,15 @@ int UdpCmdPacket::CommandLen() {
 	case CI_SENSOR:			//	
 		 return NHEADER * 2;
 	case CI_DIRECT:			//	vel pos
-		return (NHEADER + uarts.GetNTotalMotor() * 2) * 2;
+		return (NHEADER + allBoards.GetNTotalMotor() * 2) * 2;
 	case CI_INTERPOLATE: 	//	pos period targetCount
-		return (NHEADER + uarts.GetNTotalMotor() + 2) * 2;
+		return (NHEADER + allBoards.GetNTotalMotor() + 2) * 2;
 	case CI_FORCE_CONTROL: 	//	pos JK period targetCount
-		return (NHEADER + uarts.GetNTotalMotor() + uarts.GetNTotalForce()*3 + 2) * 2;	
+		return (NHEADER + allBoards.GetNTotalMotor() + allBoards.GetNTotalForce()*3 + 2) * 2;	
 	case CI_PDPARAM: 		//	K B
-		return (NHEADER + uarts.GetNTotalMotor() * 2) * 2;
+		return (NHEADER + allBoards.GetNTotalMotor() * 2) * 2;
 	case CI_TORQUE_LIMIT:	//  min max.
-		return (NHEADER + uarts.GetNTotalMotor() * 2) * 2;
+		return (NHEADER + allBoards.GetNTotalMotor() * 2) * 2;
 	case CI_RESET_SENSOR:
 		return (NHEADER + 1) * 2;	//	flags
 	case CIU_SET_IPADDRESS:	//  Set ip address to return the packet: command only
@@ -58,12 +58,12 @@ void UdpRetPacket::SetLength() {
 		length = (NHEADER + 4) * 2 + 6; break;
 	//	case CI_SET_CMDLEN is only for uart
 	case CI_SENSOR:
-		length = (NHEADER + uarts.GetNTotalMotor() + uarts.GetNTotalForce()) * 2; break;
+		length = (NHEADER + allBoards.GetNTotalMotor() + allBoards.GetNTotalForce()) * 2; break;
 	case CI_DIRECT:			//	vel pos
-		length = (NHEADER + uarts.GetNTotalMotor() * 2) * 2; break;
+		length = (NHEADER + allBoards.GetNTotalMotor() * 2) * 2; break;
 	case CI_INTERPOLATE:	//	pos targetCountRead tickMin tickMax remain vacancy
 	case CI_FORCE_CONTROL: 
-		length = (NHEADER + uarts.GetNTotalMotor() + 5) * 2; break;
+		length = (NHEADER + allBoards.GetNTotalMotor() + 5) * 2; break;
 	case CI_PDPARAM:
 	case CI_TORQUE_LIMIT:
 	case CI_RESET_SENSOR:
@@ -174,11 +174,11 @@ void UdpCom::ExecCommandLoop(){
 		while (recvs.ReadAvail()) {
 			UdpCmdPacket* recv = &recvs.Peek();
 			if (CI_BOARD_INFO < recv->command && recv->command < CI_NCOMMAND) {
-				//	send packet to uarts
-				uarts.WriteCmd(*recv);
+				//	send packet to allBoards
+				allBoards.WriteCmd(*recv);
 				PrepareRetPacket(recv->command);
-				if (uarts.HasRet(recv->command)){
-					uarts.ReadRet(send);
+				if (allBoards.HasRet(recv->command)){
+					allBoards.ReadRet(send);
 				}
 				SendRetPacket(recv->returnIp);
 			}
@@ -223,7 +223,7 @@ void UdpCom::ExecUdpCommand(UdpCmdPacket& recv) {
 	{
 	case CI_BOARD_INFO: 
 		PrepareRetPacket(recv.command);
-		send.SetBoardInfo(uarts.GetSystemId(), uarts.GetNTarget(), uarts.GetNTotalMotor(), uarts.GetNTotalForce());
+		send.SetBoardInfo(allBoards.GetSystemId(), allBoards.GetNTarget(), allBoards.GetNTotalMotor(), allBoards.GetNTotalForce());
 		SendRetPacket(recv.returnIp);
 		break;
 	case CIU_SET_IPADDRESS:

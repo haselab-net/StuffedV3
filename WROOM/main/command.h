@@ -1,6 +1,5 @@
 #pragma once
 
-#include "VCEdit.h"
 #include "../../PCRoboKey/CommandId.cs"
 #define _COMMANDID_CS
 #include "../../PIC/env.h"

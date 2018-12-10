@@ -33,7 +33,7 @@
 
 static char zero[80];
 
-UartForBoards::UartForBoards(uart_port_t ch, AllBoards* u) : port(ch), AllBoards(u) {
+UartForBoards::UartForBoards(uart_port_t ch, AllBoards* u) : port(ch), allBoards(u) {
 	
 }
 void UartForBoards::Init(uart_config_t conf, int txPin, int rxPin){
@@ -69,7 +69,7 @@ void UartForBoards::SendTask(){
 				(size_t)boards[cmdCur.board]->CmdLen()+wait);
 		}
 		if (!bRet){
-			xSemaphoreGive(allBorads->seUartFinished);
+			xSemaphoreGive(allBoards->seUartFinished);
 		}
 		xTaskNotifyGive(taskRecv);					//	start to receive.
 //		ESP_LOGI(SendTask, "#%d  end\n", port);
@@ -100,7 +100,7 @@ void UartForBoards::RecvTask(){
 				//	ESP_LOGI("RecvTask", "#%d H:%x L:%d", port, (int)boards[retCur.board]->RetStart()[0], boards[retCur.board]->RetLen());
 			}
 		}
-		xSemaphoreGive(allBorads->seUartFinished);		//	To finish WriteCmd()
+		xSemaphoreGive(allBoards->seUartFinished);		//	To finish WriteCmd()
 		ulTaskNotifyTake(pdFALSE, portMAX_DELAY);	//	Given by ReadRet().
 	}
 }
@@ -131,12 +131,12 @@ void UartForBoards::EnumerateBoard() {
 				if (ret.boardInfo.modelNumber > 0 && (0 < s && s < 100)) {
 					BoardBase* b = boards.Create(ret.boardInfo.modelNumber, i);
 					for (int m = 0; m < b->GetNMotor(); ++m) {
-						b->motorMap.push_back(allBorads->motorMap.size());
-						allBorads->motorMap.push_back(DeviceMap(i, m));
+						b->motorMap.push_back(allBoards->motorMap.size());
+						allBoards->motorMap.push_back(DeviceMap(i, m));
 					}
 					for (int m = 0; m < b->GetNForce(); ++m) {
-						b->forceMap.push_back(allBorads->forceMap.size());
-						allBorads->forceMap.push_back(DeviceMap(i, m));
+						b->forceMap.push_back(allBoards->forceMap.size());
+						allBoards->forceMap.push_back(DeviceMap(i, m));
 					}
 					printf("%dT%dM%dF%d", ret.boardInfo.modelNumber, ret.boardInfo.nTarget,
 						ret.boardInfo.nMotor, ret.boardInfo.nForce);
@@ -167,7 +167,7 @@ void UartForBoards::EnumerateBoard() {
 	}
 	uart_write_bytes(port, zero, 5);
 }
-void AllBorads::ClearMap(){
+void AllBoards::ClearMap(){
 	motorMap.clear();
 	forceMap.clear();
 	#ifdef BOARD3_SEPARATE
@@ -176,7 +176,7 @@ void AllBorads::ClearMap(){
 	}
 	#endif
 }
-void AllBorads::EnumerateBoard() {
+void AllBoards::EnumerateBoard() {
 	ClearMap();	
 	for (int i = 0; i < NUART; ++i) {
 		uart[i]->EnumerateBoard();
@@ -192,9 +192,9 @@ void AllBorads::EnumerateBoard() {
 	}
 }
 
-void AllBorads::Init() {
+void AllBoards::Init() {
 	assert(NUART == 2);	//NUART must be much to followings.
-	printf("Start allBorads");
+	printf("Start allBoards");
 	uart_config_t uconf;
 	uconf.baud_rate = 2000000;
 	uconf.data_bits = UART_DATA_8_BITS;

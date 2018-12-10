@@ -13,6 +13,10 @@
 void readADC();						//	read adc and set it to mcos and msin
 void setPwm(int ch, SDEC ratio);	//	set pwm of motor
 
+//	The control routine. Should be called periodically.
+void onControlTimer();
+
+
 //  data buffer
 struct MotorState{
     LDEC pos[NMOTOR];

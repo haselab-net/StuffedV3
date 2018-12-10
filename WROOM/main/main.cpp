@@ -13,17 +13,17 @@
 #include "esp_system.h"
 #include "esp_spi_flash.h"
 #include "esp_task_wdt.h"
-#include "UdpCom.h"
-#include "UartCom.h"
 #include "esp_log.h"
 #include "nvs_flash.h"
 #include "wifiMan.h"
 #include "wifiMan/http_server.h"
 #include "wifiMan/wifi_manager.h"
 #include "rom/uart.h"
+
+#include "UdpCom.h"
+#include "AllBoards.h"
 #include "TouchSensing.h"
 #include "MotorDriver.h"
-#include "../../PIC/boardType.h"
 
 int getch(){
     uint8_t data[1];
@@ -89,9 +89,9 @@ extern "C" void app_main()
     
     touchPads.Init();
     motorDriver.Init();
-    uarts.Init();
-    printf("Init uarts finished. ");
-    printf("%d motors, %d force sensors found.\n", uarts.GetNTotalMotor(), uarts.GetNTotalForce());
+    allBoards.Init();
+    printf("Init allBoards finished. ");
+    printf("%d motors, %d force sensors found.\n", allBoards.GetNTotalMotor(), allBoards.GetNTotalForce());
 	//wifiSmartConfig();
     //  init udp but not start
     udpCom.Init();

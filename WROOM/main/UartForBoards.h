@@ -1,6 +1,5 @@
 #pragma once
 
-#include "VCEdit.h"
 #include "BoardBase.h"
 #include "driver/uart.h"
 #include "lwip/err.h"
