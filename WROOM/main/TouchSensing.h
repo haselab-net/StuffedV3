@@ -14,6 +14,7 @@ class TouchPads
     uint16_t Raw(int i);
     uint32_t Status();
 };
+extern TouchPads touchPads;
 /*
 class TouchSensing
 {

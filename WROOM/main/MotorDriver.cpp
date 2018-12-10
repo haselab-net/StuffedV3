@@ -13,6 +13,9 @@
 
 #include "MotorDriver.h"
 
+MotorDriver motorDriver;
+
+
 
 void MotorDriver::AdcReadTaskStatic(void* arg){
     MotorDriver* md = (MotorDriver*)arg;
@@ -33,6 +36,7 @@ void MotorDriver::AdcReadTask(){
                     int pos = adcChsRev[ch];
                     adcRaws[pos] = adcRaws[pos]*31/32 + value; 
                 }
+                onControlTimer();
             }
         }
     }
@@ -138,8 +142,6 @@ uint32_t MotorDriver::GetAdcVoltage(int ch){
     uint32_t voltage = esp_adc_cal_raw_to_voltage(adcRaws[ch], &adc_chars);
     return voltage;
 }
-
-MotorDriver motorDriver;
 
 extern "C"{
     #include "../../PIC/control.h"

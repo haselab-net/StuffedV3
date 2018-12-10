@@ -7,6 +7,8 @@ static const char* TAG = "TouchSensing";
 #define TOUCHPAD_FILTER_TOUCH_PERIOD (10)
 #define TOUCH_THRESH_NO_USE   (0)
 
+TouchPads touchPads;
+
 void TouchPads::Init()
 {
     touch_pad_init();

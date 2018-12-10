@@ -6,6 +6,9 @@
 #include "esp_adc_cal.h"
 
 #include "../../PIC/boardType.h"
+extern "C" {
+    #include "../../PIC/control.h"
+}
 
 class MotorDriver{
     esp_adc_cal_characteristics_t adc_chars;
@@ -17,7 +20,11 @@ class MotorDriver{
     enum {ADC_DMA_LEN = 8};
 #ifdef BOARD3_SEPARATE
     public:
-    enum {NMOTOR_DIRECT = 3};
+    enum {
+        NTARGET_DIRECT = 12,
+        NMOTOR_DIRECT = BoardInfo::NMOTOR,
+        NFORCE_DIRECT = 0,
+    };
     private:
     const int pwmPins[NMOTOR_DIRECT*2] = {4, 19, 26, 27, 21, 22};    //M2, M3, M0, M1, M4, M5
     const int adcChs[ADC_DMA_LEN] = {0, 3, 5, 4, 6, 7, 1, 2};

@@ -35,7 +35,6 @@ int getch(){
     }
 }
 
-
 extern "C" void app_main()
 {        
     /* Print chip information */
@@ -57,12 +56,11 @@ extern "C" void app_main()
     nvs_flash_erase();
 #endif
 
-#if 1   //  pwm / adc test 
+#if 0   //  pwm / adc test 
     static TouchPads touch;
     touch.Init();
 
-    static MotorDriver motor;
-    motor.Init();
+    motorDriver.Init();
     float pwm = -0.8f;
     int count = 0;
     while(1){
@@ -72,12 +70,12 @@ extern "C" void app_main()
             printf("pwm = %f\r\n", pwm);
         }
         for(int i=0; i<3; ++i){
-            motor.Pwm(i, pwm);
+            motorDriver.Pwm(i, pwm);
         }
         if (count % 100 == 0){
             printf("ADC:");
             for(int i=0; i<6; ++i){
-                printf(" %d", motor.GetAdcVoltage(i));
+                printf(" %d", motorDriver.GetAdcVoltage(i));
             }
             printf(" Touch:");
             for(int i=0; i<touch.NPad(); ++i){
@@ -88,7 +86,9 @@ extern "C" void app_main()
         count ++;
     }
 #endif
-
+    
+    touchPads.Init();
+    motorDriver.Init();
     uarts.Init();
     printf("Init uarts finished. ");
     printf("%d motors, %d force sensors found.\n", uarts.GetNTotalMotor(), uarts.GetNTotalForce());

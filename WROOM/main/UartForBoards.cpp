@@ -1,4 +1,4 @@
-#include "UartCom.h"
+#include "UartForBoards.h"
 #include "UdpCom.h"
 #include <stdio.h>
 #include "freertos/FreeRTOS.h"
@@ -33,22 +33,25 @@
 
 static char zero[80];
 
-void Uart::Init(uart_config_t conf, int txPin, int rxPin){
+UartForBoards::UartForBoards(uart_port_t ch, AllBoards* u) : port(ch), AllBoards(u) {
+	
+}
+void UartForBoards::Init(uart_config_t conf, int txPin, int rxPin){
 	uart_param_config(port, &conf);
 	uart_set_pin(port, txPin, rxPin, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
 	uart_driver_install(port, 512, 512, 10, NULL, 0);
 }
 static void recvTask(void* a){
-	((Uart*)a)->RecvTask();
+	((UartForBoards*)a)->RecvTask();
 }
 static void sendTask(void* a){
-	((Uart*)a)->SendTask();
+	((UartForBoards*)a)->SendTask();
 }
-void Uart::CreateTask(){
+void UartForBoards::CreateTask(){
 	xTaskCreate(recvTask, "RecvTask", 4*1024, this, 10, &taskRecv);
 	xTaskCreate(sendTask, "SendTask", 4*1024, this, 12, &taskSend);
 }
-void Uart::SendTask(){
+void UartForBoards::SendTask(){
 	while(1){
 		ulTaskNotifyTake(pdFALSE, portMAX_DELAY);	//	given by WriteCmd()
 //		ESP_LOGI("SendTask", "#%d start\n", port);
@@ -66,13 +69,13 @@ void Uart::SendTask(){
 				(size_t)boards[cmdCur.board]->CmdLen()+wait);
 		}
 		if (!bRet){
-			xSemaphoreGive(uarts->seUartFinished);
+			xSemaphoreGive(allBorads->seUartFinished);
 		}
 		xTaskNotifyGive(taskRecv);					//	start to receive.
 //		ESP_LOGI(SendTask, "#%d  end\n", port);
 	}
 }
-void Uart::RecvTask(){
+void UartForBoards::RecvTask(){
 	const ulong READWAIT = 200;	//[ticks(=ms)]
 	while(1){
 		ulTaskNotifyTake(pdFALSE, portMAX_DELAY);	//	Start to receive
@@ -89,7 +92,7 @@ void Uart::RecvTask(){
 							break;
 						}
 					}
-					ESP_LOGE("Uart::RecvTask", "Read %d != ret %d, H%2x C%2x pos%d", readLen, retLen,
+					ESP_LOGE("UartForBoards::RecvTask", "Read %d != ret %d, H%2x C%2x pos%d", readLen, retLen,
 						 (int)boards[retCur.board]->RetStart()[0], (int)boards[retCur.board]->CmdStart()[0], i);
 					ets_delay_us(2000);
 					uart_flush_input(port);
@@ -97,12 +100,12 @@ void Uart::RecvTask(){
 				//	ESP_LOGI("RecvTask", "#%d H:%x L:%d", port, (int)boards[retCur.board]->RetStart()[0], boards[retCur.board]->RetLen());
 			}
 		}
-		xSemaphoreGive(uarts->seUartFinished);		//	To finish WriteCmd()
+		xSemaphoreGive(allBorads->seUartFinished);		//	To finish WriteCmd()
 		ulTaskNotifyTake(pdFALSE, portMAX_DELAY);	//	Given by ReadRet().
 	}
 }
 
-void Uart::EnumerateBoard() {
+void UartForBoards::EnumerateBoard() {
 	boards.clear();
 	CommandPacketBD0 cmd;
 	ReturnPacketBD0 ret;
@@ -128,12 +131,12 @@ void Uart::EnumerateBoard() {
 				if (ret.boardInfo.modelNumber > 0 && (0 < s && s < 100)) {
 					BoardBase* b = boards.Create(ret.boardInfo.modelNumber, i);
 					for (int m = 0; m < b->GetNMotor(); ++m) {
-						b->motorMap.push_back(uarts->motorMap.size());
-						uarts->motorMap.push_back(DeviceMap(i, m));
+						b->motorMap.push_back(allBorads->motorMap.size());
+						allBorads->motorMap.push_back(DeviceMap(i, m));
 					}
 					for (int m = 0; m < b->GetNForce(); ++m) {
-						b->forceMap.push_back(uarts->forceMap.size());
-						uarts->forceMap.push_back(DeviceMap(i, m));
+						b->forceMap.push_back(allBorads->forceMap.size());
+						allBorads->forceMap.push_back(DeviceMap(i, m));
 					}
 					printf("%dT%dM%dF%d", ret.boardInfo.modelNumber, ret.boardInfo.nTarget,
 						ret.boardInfo.nMotor, ret.boardInfo.nForce);
@@ -164,7 +167,7 @@ void Uart::EnumerateBoard() {
 	}
 	uart_write_bytes(port, zero, 5);
 }
-void Uarts::ClearMap(){
+void AllBorads::ClearMap(){
 	motorMap.clear();
 	forceMap.clear();
 	#ifdef BOARD3_SEPARATE
@@ -173,7 +176,7 @@ void Uarts::ClearMap(){
 	}
 	#endif
 }
-void Uarts::EnumerateBoard() {
+void AllBorads::EnumerateBoard() {
 	ClearMap();	
 	for (int i = 0; i < NUART; ++i) {
 		uart[i]->EnumerateBoard();
@@ -189,9 +192,9 @@ void Uarts::EnumerateBoard() {
 	}
 }
 
-void Uarts::Init() {
+void AllBorads::Init() {
 	assert(NUART == 2);	//NUART must be much to followings.
-	printf("Start uarts");
+	printf("Start allBorads");
 	uart_config_t uconf;
 	uconf.baud_rate = 2000000;
 	uconf.data_bits = UART_DATA_8_BITS;
@@ -200,6 +203,8 @@ void Uarts::Init() {
     uconf.flow_ctrl = UART_HW_FLOWCTRL_DISABLE;
     uconf.rx_flow_ctrl_thresh = 0;
     uconf.use_ref_tick = false;
+
+	
 	uart[0]->Init(uconf, U1TXPIN, U1RXPIN); // pin must be changed. IO6-11 are reserved. (RX=32 Yellow, TX=33 Green)
 	printf(".");
 	uart[1]->Init(uconf, U2TXPIN, U2RXPIN);
@@ -209,90 +214,3 @@ void Uarts::Init() {
 	uart[1]->CreateTask();
 }
 
-Uarts uarts;
-Uart uart1(UART_NUM_1, &uarts);
-Uart uart2(UART_NUM_2, &uarts);
-Uarts::Uarts(){
-	uart[0] = &uart1;
-	uart[1] = &uart2;
-	nBoard = 0;
-	nTargetMin = 0;
-	seUartFinished = xSemaphoreCreateCounting(0xFFFF, 0);
-	mode = CM_DIRECT;
-}
-Uarts::~Uarts(){
-	vSemaphoreDelete(seUartFinished);
-}
-void Uarts::WriteCmd(UdpCmdPacket& packet) {
-	//	Update state based on packet
-	if (packet.command == CI_INTERPOLATE || packet.command == CI_FORCE_CONTROL){
-		targetCountWrite = (unsigned char)packet.GetTargetCount();
-		if (mode == CM_DIRECT){
-			mode = CM_INTERPOLATE;
-			assert(packet.GetTargetCount() == 0);
-		} 
-	}else if(packet.command == CI_DIRECT){
-		mode = CM_DIRECT;
-	}
-	//	Write command to borads via uart;
-	for (int i = 0; i < NUART; ++i) {
-		for (int j = 0; j < uart[i]->boards.size(); ++j) {
-			uart[i]->boards[j]->WriteCmd(packet);
-		}
-	}
-	returnIp = packet.returnIp;
-	//	Start uart communications 
-	for (int i = 0; i < NUART; ++i) {
-		xTaskNotifyGive(uart[i]->taskSend);
-	}
-	//	Wait for ending of uart communications
-	for (int i = 0; i < NUART; ++i) {
-		xSemaphoreTake(seUartFinished, portMAX_DELAY);
-	}
-}
-void Uarts::ReadRet(UdpRetPacket& packet){
-	if (packet.command == CI_INTERPOLATE || packet.command == CI_FORCE_CONTROL) {
-		int diffMin = 0x100;
-		int diffMax = -0x100;
-		unsigned short tickMin = 0xFFFF;
-		unsigned short tickMax = 0;
-		int countOfRead[20];
-		int nCoR = 0;
-		memset(countOfRead, 0, sizeof(countOfRead));
-		for (int i = 0; i < NUART; ++i) {
-			for (int j = 0; j < uart[i]->boards.size(); ++j) {
-				uart[i]->boards[j]->ReadRet(packet);
-				countOfRead[nCoR++] = (int)uart[i]->boards[j]->GetTargetCountOfRead();
-				int diff = ((int)targetCountWrite - (int)uart[i]->boards[j]->GetTargetCountOfRead() + 0x100) & 0xFF;
-				if (diff < diffMin) diffMin = diff;
-				if (diff > diffMax) diffMax = diff;
-				unsigned short tick = uart[i]->boards[j]->GetTick();
-				if (tick < tickMin) tickMin = tick;
-				if (tick > tickMax) tickMax = tick;
-			}
-			xTaskNotifyGive(uart[i]->taskRecv);	//	recv next
-		}		
-		targetCountReadMax = targetCountWrite - diffMin;
-		nTargetVacancy = nTargetMin - diffMax;
-		nTargetRemain = diffMin;
-		if (tickMax - tickMin > 0x7FFF){
-			unsigned short temp = tickMin;
-			tickMin = tickMax;
-			tickMax = temp;
-		}
-		ESP_LOGI("TGT", "remain:%d vac:%d cor%d %d %d  cow%d",
-			 (int)nTargetRemain, (int)nTargetVacancy, countOfRead[0], countOfRead[1], countOfRead[2], targetCountWrite);
-		packet.SetTargetCountRead(targetCountReadMax);
-		packet.SetTickMin(tickMin);
-		packet.SetTickMax(tickMax);
-		packet.SetNTargetRemain(nTargetRemain);
-		packet.SetNTargetVacancy(nTargetVacancy);
-	}else{
-		for (int i = 0; i < NUART; ++i) {
-			for (int j = 0; j < uart[i]->boards.size(); ++j) {
-				uart[i]->boards[j]->ReadRet(packet);
-			}
-			xTaskNotifyGive(uart[i]->taskRecv);	//	recv next
-		}		
-	}
-}

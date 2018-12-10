@@ -1,46 +1,8 @@
 #pragma once
 
-#include "VCEdit.h"
-#include "BoardBase.h"
-#include "driver/uart.h"
-#include "lwip/err.h"
-#include "lwip/sockets.h"
-#include "lwip/sys.h"
-#include "lwip/netdb.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "freertos/queue.h"
-#include <stdio.h>
-
-class Uarts;
-class Uart :public UTRefCount {
-	uart_port_t port;
-	Uarts* uarts;
-public:
-	TaskHandle_t taskRecv, taskSend;
-	struct Cur {
-		volatile int board;	//	boards[board]
-	};
-	Cur cmdCur;
-	Cur retCur;
-	Boards boards;
-	Uart(uart_port_t ch, Uarts* u) : port(ch), uarts(u) {}
-	void Init(uart_config_t conf, int rxPin, int txPin);
-	void EnumerateBoard();
-	void CreateTask();
-	void RecvTask();
-	void SendTask();
-};
-
-class DeviceMap {
-public:
-	int board;
-	int id;
-	DeviceMap(int b, int m): board(b), id(m){
-	}
-};
-
-class Uarts{
+#include "UartForBoards.h"
+//
+class AllBoards{
 public:
 	enum ControlMode{
 		CM_DIRECT,
@@ -56,14 +18,15 @@ public:
 	static const int NUART = 2;
 	tiny::vector<DeviceMap> motorMap;
 	tiny::vector<DeviceMap> forceMap;
-	Uart* uart[NUART];
+	UartForBoards* uart[NUART];
+	BoardDirect boardDirect;
 	SemaphoreHandle_t seUartFinished;
 	int GetNTotalMotor() { return motorMap.size(); }
 	int GetNTotalForce() { return forceMap.size(); }
 	int GetNTarget() { return nTargetMin; }
 	int GetSystemId() { return 0; }
-	Uarts();
-	~Uarts();
+	AllBoards();
+	~AllBoards();
 	void ClearMap();
 	void EnumerateBoard();	
 	void Init();
@@ -80,4 +43,4 @@ public:
 	///	Read returns of all boards to  UdpRetPacket. 
 	void ReadRet(UdpRetPacket& packet);
 };
-extern Uarts uarts;
+extern AllBoards allBoards;
