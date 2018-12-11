@@ -18,7 +18,7 @@
 #include "AllBoards.h"
 #include "UdpCom.h"
 #include "UartForBoards.h"
-#include "command.h"
+#include "CommandWROOM.h"
 
 
 UdpCom udpCom;

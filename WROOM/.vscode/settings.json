@@ -18,7 +18,9 @@
         "future": "cpp",
         "decimal.h": "c",
         "env.h": "c",
-        "command.h": "c"
+        "command.h": "c",
+        "*.cs": "c",
+        "boardtype.h": "c"
     },
     "terminal.integrated.shell.windows": "c:\\msys32\\usr\\bin\\bash.exe",
     "terminal.integrated.env.windows": {

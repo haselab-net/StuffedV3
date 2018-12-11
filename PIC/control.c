@@ -1,12 +1,6 @@
 #include "env.h"
-
 #include "fixed.h"
 #include "control.h"
-//#ifdef PIC
-//#include "mcc_generated_files/mcc.h"
-//#endif
-
-
 #include <assert.h>
 
 struct MotorState motorTarget, motorState;
@@ -17,12 +11,21 @@ struct Targets targets;
 enum ControlMode controlMode;
 //	 angle
 SDEC mcos[NAXIS], msin[NAXIS];
+#ifdef PIC
 const SDEC mcosOffset[NAXIS] ={
     2048, 2048, 2048, 2048
 };
 const SDEC msinOffset[NAXIS] ={
     2048, 2048, 2048, 2048
 };
+#elif defined WROOM
+const SDEC mcosOffset[NAXIS] ={
+    2048, 2048, 2048
+};
+const SDEC msinOffset[NAXIS] ={
+    2048, 2048, 2048
+};
+#endif
 SDEC forceOffset[NFORCE];
 
 uint32_t controlCount;

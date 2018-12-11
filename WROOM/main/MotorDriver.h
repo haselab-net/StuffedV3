@@ -5,11 +5,8 @@
 #include <stdio.h>
 #include "driver/adc.h"
 #include "esp_adc_cal.h"
-
 #include "../../PIC/boardType.h"
-extern "C" {
-    #include "../../PIC/control.h"
-}
+#include "commandWROOM.h"
 
 class MotorDriver{
     esp_adc_cal_characteristics_t adc_chars;

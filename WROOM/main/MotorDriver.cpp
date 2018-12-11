@@ -10,8 +10,10 @@
 #include "driver/mcpwm.h"
 #include "driver/i2s.h"
 #include "driver/adc.h"
-
 #include "MotorDriver.h"
+extern "C" {
+#include "../../PIC/control.h"
+}
 
 MotorDriver motorDriver;
 
@@ -115,6 +117,7 @@ void MotorDriver::Init(){
     SYSCON.saradc_sar1_patt_tab[1] = patTab.tab[1];
     SYSCON.saradc_ctrl2.sar1_inv = 1;
     xTaskCreate(AdcReadTaskStatic, "ADC", 1024*10, this, configMAX_PRIORITIES-1, &task);
+#if 0
     while(1){
         for(int ch=0; ch<6; ++ch){
             printf("%3d ", adcRaws[ch]);
@@ -122,9 +125,7 @@ void MotorDriver::Init(){
         printf("\r\n");
         vTaskDelay(50);
     }
-
-    // After running WiFi on esp_wifi_set_mode(), the ADC-I2S scanning is stops. 
-    // init_wifi();
+#endif
 }
 
 void MotorDriver::Pwm(int ch, float duty){
@@ -148,7 +149,6 @@ uint32_t MotorDriver::GetAdcVoltage(int ch){
 }
 
 extern "C"{
-    #include "../../PIC/control.h"
     void readADC(){
         int i;
         for(i=0; i<MotorDriver::NMOTOR_DIRECT; ++i){
@@ -157,6 +157,6 @@ extern "C"{
         }
     }
     void setPwm(int ch, SDEC ratio){
-
+        motorDriver.Pwm(ch, (float)ratio / SDEC_ONE);
     }	
 }

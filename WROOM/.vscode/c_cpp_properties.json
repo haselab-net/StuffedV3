@@ -40,6 +40,7 @@
                 "C:/msys32/home/espressif/esp/esp-idf/components/esp_adc_cal/include"
             ],
             "intelliSenseMode": "clang-x64",
+            "defines": [ "__xtensa__" ],
             "browse": {
                 "path": [
                     "${workspaceRoot}",

@@ -10,16 +10,14 @@
 #define BOARD1_MOTORDRIVER
 #endif
 
+#ifndef WROOM
+
 #if defined BOARD1_MOTORDRIVER
  CHOOSE_BoardInfo(B1F);	//	B1M or B1F
  #define BOARD_ID	1
 #elif defined BOARD2_COMBINATION
  CHOOSE_BoardInfo(B2M);	//	B2M or B2F
  #define BOARD_ID	7
-#elif defined WROOM	//	WROOM board with 3 motors and NO PIC.
- enum BoardInfo{
-    NTARGET = 12
-    NMOTOR = 3
-    NFORCE = 0
- };
+#endif
+
 #endif
