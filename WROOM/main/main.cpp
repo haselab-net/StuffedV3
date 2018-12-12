@@ -57,9 +57,6 @@ extern "C" void app_main()
 #endif
 
 #if 0   //  pwm / adc test 
-    static TouchPads touch;
-    touch.Init();
-
     motorDriver.Init();
     float pwm = -0.8f;
     int count = 0;
@@ -77,17 +74,19 @@ extern "C" void app_main()
             for(int i=0; i<6; ++i){
                 printf(" %d", motorDriver.GetAdcVoltage(i));
             }
-            printf(" Touch:");
+/*            printf(" Touch:");
             for(int i=0; i<touch.NPad(); ++i){
                 printf(" %d", touch.Raw(i));
-            }
+            }*/
             printf("\r\n");        
         }
         count ++;
     }
 #endif
     
+#if 0   //  touchPads can not work with JTAG debugger
     touchPads.Init();
+#endif
     motorDriver.Init();
     allBoards.Init();
     printf("Init allBoards finished. ");
@@ -106,6 +105,16 @@ extern "C" void app_main()
 #endif
     vTaskDelay(1000);
     udpCom.Start();
+    while(1){
+        for(int i=0; i<6; ++i){
+            int raw = motorDriver.GetAdcRaw(i);
+            printf("%d %4x  ", i, raw); // e20-6b43
+        }
+        printf("\r\n");
+        vTaskDelay(30);
+    }
+
+
 #if 0
     while(1){
         xEventGroupWaitBits(wifi_manager_event_group,

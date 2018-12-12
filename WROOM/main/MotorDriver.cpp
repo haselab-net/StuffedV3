@@ -36,7 +36,7 @@ void MotorDriver::AdcReadTask(){
                     int ch = buf[i] >> 11;                    
                     int value = buf[i] &0x7FF;
                     int pos = adcChsRev[ch];
-                    adcRaws[pos] = adcRaws[pos]*31/32 + value; 
+                    adcRaws[pos] = adcRaws[pos]*15/16 + value; 
                 }
                 onControlTimer();
             }
@@ -148,12 +148,20 @@ uint32_t MotorDriver::GetAdcVoltage(int ch){
     return voltage;
 }
 
+#define ADC_CENTER  ((0x700+0x35C0)/2)
+const SDEC mcosOffset[NAXIS] ={
+    ADC_CENTER, ADC_CENTER, ADC_CENTER
+};
+const SDEC msinOffset[NAXIS] ={
+    ADC_CENTER, ADC_CENTER, ADC_CENTER
+};
+
 extern "C"{
     void readADC(){
         int i;
         for(i=0; i<MotorDriver::NMOTOR_DIRECT; ++i){
-            mcos[i] = motorDriver.adcRaws[i*2];
-            msin[i] = motorDriver.adcRaws[i*2 + 1];
+            mcos[i] = motorDriver.adcRaws[i*2] - mcosOffset[i];
+            msin[i] = motorDriver.adcRaws[i*2 + 1] - msinOffset[i];
         }
     }
     void setPwm(int ch, SDEC ratio){

@@ -17,7 +17,7 @@
                 "usr/share/openocd/scripts"
             ],
             "openocdConfigFiles": [
-                "interface/ftdi/um232h.cfg",
+                "interface/ftdi/um2322.cfg",
                 "board/esp-wroom-32.cfg"
             ],
             "debuggerDir": "./opt/xtensa-esp32-elf/bin",

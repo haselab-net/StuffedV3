@@ -23,7 +23,6 @@
         <itemPath>mcc_generated_files/tmr1.h</itemPath>
       </logicalFolder>
       <itemPath>env.h</itemPath>
-      <itemPath>decimal.h</itemPath>
       <itemPath>control.h</itemPath>
       <itemPath>commandTemplate.h</itemPath>
       <itemPath>command.h</itemPath>
@@ -31,6 +30,7 @@
       <itemPath>../PCRobokey/CommandId.cs</itemPath>
       <itemPath>uart.h</itemPath>
       <itemPath>boardType.h</itemPath>
+      <itemPath>Fixed.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"

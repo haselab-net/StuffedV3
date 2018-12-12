@@ -5,6 +5,13 @@
 #include "mcc_generated_files/mcc.h"
 #include <assert.h>
 
+const SDEC mcosOffset[NAXIS] ={
+    2048, 2048, 2048, 2048
+};
+const SDEC msinOffset[NAXIS] ={
+    2048, 2048, 2048, 2048
+};
+
 #ifdef MODULETEST
 #include "math.h"
 double motorAngle[NMOTOR]={0.0,0.0,0.0,0.0};

@@ -11,21 +11,6 @@ struct Targets targets;
 enum ControlMode controlMode;
 //	 angle
 SDEC mcos[NAXIS], msin[NAXIS];
-#ifdef PIC
-const SDEC mcosOffset[NAXIS] ={
-    2048, 2048, 2048, 2048
-};
-const SDEC msinOffset[NAXIS] ={
-    2048, 2048, 2048, 2048
-};
-#elif defined WROOM
-const SDEC mcosOffset[NAXIS] ={
-    2048, 2048, 2048
-};
-const SDEC msinOffset[NAXIS] ={
-    2048, 2048, 2048
-};
-#endif
 SDEC forceOffset[NFORCE];
 
 uint32_t controlCount;

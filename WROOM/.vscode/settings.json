@@ -20,7 +20,13 @@
         "env.h": "c",
         "command.h": "c",
         "*.cs": "c",
-        "boardtype.h": "c"
+        "boardtype.h": "c",
+        "control.h": "c",
+        "commandwroom.h": "c",
+        "commandwroom.h\u0000dwroom.h": "c",
+        "commandwroom.h\u0000mmandwroom.h": "c",
+        "commandwroom.h\u0000room.h": "c",
+        "commandwroom.h\u0000wroom.h": "c"
     },
     "terminal.integrated.shell.windows": "c:\\msys32\\usr\\bin\\bash.exe",
     "terminal.integrated.env.windows": {

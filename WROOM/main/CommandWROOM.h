@@ -17,3 +17,4 @@ enum BD0_PARAM {
 };
 DEFINE_Packets(BD0);
 CHOOSE_BoardInfo(BD0);	//	B2M or B2F
+#define BOARD_ID 0xFF 

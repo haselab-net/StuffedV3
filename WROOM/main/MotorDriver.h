@@ -32,11 +32,11 @@ class MotorDriver{
 #endif
     private:
 #ifdef BOARD3_SEPARATE
-    const int pwmPins[NMOTOR_DIRECT*2] = {4, 19, 26, 27, 21, 22};    //M2, M3, M0, M1, M4, M5
+    const int pwmPins[NMOTOR_DIRECT*2] = {4, 27, 21, 22, 0, 19};    //M0, M1, M2
 #else
     const int pwmPins[0] = {};
 #endif
-    const int adcChs[ADC_DMA_LEN] = {0, 3, 5, 4, 6, 7, 1, 2};
+    const int adcChs[ADC_DMA_LEN] = {0, 3, 5, 4, 6, 7, 1, 2};   //M0, M1, M2, dummy
     int adcChsRev[8];   //  must be larger than ch numbers
 
 
