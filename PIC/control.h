@@ -10,8 +10,10 @@
 #endif
 
 //	device depended functions
-void readADC();						//	read adc and set it to mcos and msin
-void setPwm(int ch, SDEC ratio);	//	set pwm of motor
+void readADC();								//	read adc and set it to mcos and msin
+void setPwm(int ch, SDEC torque);			//	set pwm of motor
+void setPwmWithLimit(int ch, SDEC torque);	//	limit the torque to torqueLimit then call setPwm 
+
 
 //	The control routine. Should be called periodically.
 void onControlTimer();

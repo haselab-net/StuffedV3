@@ -102,8 +102,6 @@ inline void setSpiPwm(SDEC ratio){
 }
 
 void setPwm(int ch, SDEC ratio){
-    if (ratio > torqueLimit.max[ch]) ratio = torqueLimit.max[ch];
-    if (ratio < torqueLimit.min[ch]) ratio = torqueLimit.min[ch];
 	//	Connector at the left most.
     if (ch == 0){
 #if defined BOARD1_MOTORDRIVER

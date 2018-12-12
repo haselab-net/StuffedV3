@@ -7,6 +7,9 @@
 #include "esp_adc_cal.h"
 #include "../../PIC/boardType.h"
 #include "commandWROOM.h"
+extern "C"{
+#include "../../PIC/control.h"
+}
 
 class MotorDriver{
     esp_adc_cal_characteristics_t adc_chars;

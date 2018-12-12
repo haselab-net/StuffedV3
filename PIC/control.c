@@ -44,6 +44,12 @@ void updateMotorState(){
     }
 }
 
+void setPwmWithLimit(int ch, SDEC ratio){
+    if (ratio > torqueLimit.max[ch]) ratio = torqueLimit.max[ch];
+    if (ratio < torqueLimit.min[ch]) ratio = torqueLimit.min[ch];
+	setPwm(ch, ratio);
+}
+
 //	set motor power for PD control
 void pdControl(){
 	int i;
@@ -62,7 +68,7 @@ void pdControl(){
 			if (torque < -LDEC_ONE) torque = -LDEC_ONE;
 			else if (torque > LDEC_ONE) torque = LDEC_ONE;
 		}
-		setPwm(i, L2SDEC(torque));
+		setPwmWithLimit(i, L2SDEC(torque));
 #if 0	//	to check pd control
 		count ++;
 		if (i==2 && count > 1000){

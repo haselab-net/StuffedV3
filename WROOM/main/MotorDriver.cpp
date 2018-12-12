@@ -73,7 +73,7 @@ void MotorDriver::Init(){
 //#if 1   //  ADC & DMA & I2S
     i2s_config_t i2s_config = {
         mode : (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_RX | I2S_MODE_ADC_BUILT_IN),
-        sample_rate : 8000,
+        sample_rate : 8000 * 4,
         bits_per_sample : i2s_bits_per_sample_t(16),
         channel_format : I2S_CHANNEL_FMT_ONLY_LEFT,
         communication_format : I2S_COMM_FORMAT_I2S_LSB,
