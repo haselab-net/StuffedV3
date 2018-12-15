@@ -69,7 +69,7 @@ void MotorDriver::Init(){
     }
     i2s_config_t i2s_config = {
         mode : (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_RX | I2S_MODE_ADC_BUILT_IN),
-        sample_rate : 8000 * 4,
+        sample_rate : ADC_DMA_LEN * 2000,   //  2kHz
         bits_per_sample : i2s_bits_per_sample_t(16),
         channel_format : I2S_CHANNEL_FMT_ONLY_LEFT,
         communication_format : I2S_COMM_FORMAT_I2S_LSB,
@@ -118,8 +118,8 @@ void MotorDriver::Init(){
     controlInit();
     commandInit();
     for(int ch=0; ch<NMOTOR_DIRECT; ++ch){
-        torqueLimit.max[ch] = 0.8*SDEC_ONE;
-        torqueLimit.min[ch] = -0.8*SDEC_ONE;
+        torqueLimit.max[ch] = (SDEC)(0.8*SDEC_ONE);
+        torqueLimit.min[ch] = (SDEC)(-0.8*SDEC_ONE);
         Pwm(ch, 0.0f);
     }
 }
