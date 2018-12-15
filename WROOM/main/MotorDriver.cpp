@@ -45,10 +45,6 @@ void MotorDriver::AdcReadTask(){
 }
 
 void MotorDriver::Init(){
-    for(int i=0; i < sizeof(adcChsRev) / sizeof(adcChsRev[0]);++i){
-        adcChsRev[adcChs[i]] = i;
-    }
-
     //  PWM Init
     mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM0A, pwmPins[0]);
     mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM0B, pwmPins[1]);
@@ -66,11 +62,11 @@ void MotorDriver::Init(){
     mcpwm_init(MCPWM_UNIT_0, MCPWM_TIMER_0, &pwm_config);    //Configure PWM0A & PWM0B with above settings
     mcpwm_init(MCPWM_UNIT_0, MCPWM_TIMER_1, &pwm_config);    //Configure PWM0A & PWM0B with above settings
     mcpwm_init(MCPWM_UNIT_0, MCPWM_TIMER_2, &pwm_config);    //Configure PWM0A & PWM0B with above settings
-    Pwm(0, 0.0f);
-    Pwm(1, 0.0f);
-    Pwm(2, 0.0f);
 
-//#if 1   //  ADC & DMA & I2S
+    //  ADC with DMA and I2S mode init
+    for(int i=0; i < sizeof(adcChsRev) / sizeof(adcChsRev[0]);++i){
+        adcChsRev[adcChs[i]] = i;
+    }
     i2s_config_t i2s_config = {
         mode : (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_RX | I2S_MODE_ADC_BUILT_IN),
         sample_rate : 8000 * 4,
@@ -117,15 +113,15 @@ void MotorDriver::Init(){
     SYSCON.saradc_sar1_patt_tab[1] = patTab.tab[1];
     SYSCON.saradc_ctrl2.sar1_inv = 1;
     xTaskCreate(AdcReadTaskStatic, "ADC", 1024*10, this, configMAX_PRIORITIES-1, &task);
-#if 0
-    while(1){
-        for(int ch=0; ch<6; ++ch){
-            printf("%3d ", adcRaws[ch]);
-        }
-        printf("\r\n");
-        vTaskDelay(50);
+
+    //  Init control/command and set initial values to motors. 
+    controlInit();
+    commandInit();
+    for(int ch=0; ch<NMOTOR_DIRECT; ++ch){
+        torqueLimit.max[ch] = 0.8*SDEC_ONE;
+        torqueLimit.min[ch] = -0.8*SDEC_ONE;
+        Pwm(ch, 0.0f);
     }
-#endif
 }
 
 void MotorDriver::Pwm(int ch, float duty){
@@ -160,8 +156,8 @@ extern "C"{
     void readADC(){
         int i;
         for(i=0; i<MotorDriver::NMOTOR_DIRECT; ++i){
-            mcos[i] = motorDriver.adcRaws[i*2] - mcosOffset[i];
-            msin[i] = motorDriver.adcRaws[i*2 + 1] - msinOffset[i];
+            msin[i] = motorDriver.adcRaws[i*2] - msinOffset[i];
+            mcos[i] = motorDriver.adcRaws[i*2 + 1] - mcosOffset[i];
         }
     }
     void setPwm(int ch, SDEC ratio){

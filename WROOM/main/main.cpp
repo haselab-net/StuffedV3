@@ -106,23 +106,22 @@ extern "C" void app_main()
     vTaskDelay(1000);
     udpCom.Start();
 
-    torqueLimit.max[0] = 0.8*SDEC_ONE;
-    torqueLimit.min[0] = -0.8*SDEC_ONE;
-    while(1){
 #if 1
+    while(1){
+#if 1   //  raw adc
         for(int i=0; i<6; ++i){
             int raw = motorDriver.GetAdcRaw(i);
             printf("%5d\t", raw);
         }
-#else
+#else   //  motor angle
         for(int i=0; i<3; ++i){
             printf("%d %2.2f   ", i, LDEC2DBL(motorState.pos[i]));
         }
 #endif
         printf("\r\n");
-        vTaskDelay(20);
+        vTaskDelay(500);
     }
-
+#endif
 
 #if 0
     while(1){

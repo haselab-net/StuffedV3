@@ -57,14 +57,14 @@ void pdControl(){
 		LDEC torque;
 		LDEC diff = motorTarget.pos[i] - motorState.pos[i];
 		int sign = pdParam.k[i] > 0 ? 1 : -1;
-		if (diff > LDEC_ONE*2){
+		if (diff > LDEC_ONE){
 			torque = sign * LDEC_ONE;
-		}else if (diff < -LDEC_ONE*2){
+		}else if (diff < -LDEC_ONE){
 			torque = -sign * LDEC_ONE;
-		}else{
+		}else{	// diff is less than 16 bits
 			torque = (pdParam.k[i] * diff + 
-				pdParam.b[i] * (motorTarget.vel[i] - motorState.vel[i]) );
-			torque >>= SDEC_BITS;   //  k and b are SDEC
+				pdParam.b[i] * (motorTarget.vel[i] - motorState.vel[i])*32 );	//	b must be large for stability.
+			torque >>= (SDEC_BITS-4);   //  k and b are SDEC. But x16 is done here.
 			if (torque < -LDEC_ONE) torque = -LDEC_ONE;
 			else if (torque > LDEC_ONE) torque = LDEC_ONE;
 		}
