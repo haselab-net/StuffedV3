@@ -51,12 +51,11 @@ extern "C" void app_main()
     //----------------------------------
     printf("!!! Stuffed Robot Start !!!\n");
 
-    // Enable next line to clear all nvs enable. Use only when nvs makes trouble. 
-#if 0
+#if 0    // Enable to clear all nvs enable. Use only when nvs makes trouble. 
     nvs_flash_erase();
 #endif
 
-#if 0   //  pwm / adc test 
+#if 0   //  Code for debugging: pwm / adc test 
     motorDriver.Init();
     float pwm = -0.8f;
     int count = 0;
@@ -95,25 +94,21 @@ extern "C" void app_main()
     //  init udp but not start
     udpCom.Init();
 	printf("Init udp finished.\n");
+
     //  start wifi manager
     wifiMan();
-
-    //  On old board, this prevents UARTs. 
-#if 0    //defined BOARD2_COMBINATION
-    touch_sensing.init();
-    printf("Init Touch Sensing finished.\n");
-#endif
     vTaskDelay(1000);
+    
+    //  start udp server.
     udpCom.Start();
-
-#if 1
+#if 1   //  Code for debugging: show ADC values or motor angles.
     while(1){
-#if 1   //  raw adc
+#if 1   //  for raw ADC
         for(int i=0; i<6; ++i){
             int raw = motorDriver.GetAdcRaw(i);
             printf("%5d\t", raw);
         }
-#else   //  motor angle
+#else   //  for motor angle
         for(int i=0; i<3; ++i){
             printf("%d %2.2f   ", i, LDEC2DBL(motorState.pos[i]));
         }

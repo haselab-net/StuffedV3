@@ -18,7 +18,6 @@ extern "C" {
 MotorDriver motorDriver;
 
 
-
 void MotorDriver::AdcReadTaskStatic(void* arg){
     MotorDriver* md = (MotorDriver*)arg;
     md->AdcReadTask();
@@ -64,6 +63,7 @@ void MotorDriver::Init(){
     mcpwm_init(MCPWM_UNIT_0, MCPWM_TIMER_2, &pwm_config);    //Configure PWM0A & PWM0B with above settings
 
     //  ADC with DMA and I2S mode init
+    //  i2s settings
     for(int i=0; i < sizeof(adcChsRev) / sizeof(adcChsRev[0]);++i){
         adcChsRev[adcChs[i]] = i;
     }
@@ -122,6 +122,27 @@ void MotorDriver::Init(){
         torqueLimit.min[ch] = (SDEC)(-0.8*SDEC_ONE);
         Pwm(ch, 0.0f);
     }
+#if 0   //  Code for debugging: To see ADC values.
+# define READADC
+# ifdef READADC
+    adc1_config_width(ADC_WIDTH_BIT_11);
+    for(int i=0; i<ADC_DMA_LEN; ++i){
+        adc1_config_channel_atten((adc1_channel_t)adcChs[i], ADC_ATTEN_DB_11);
+    }
+# endif
+    while(1){
+        for(int i=0; i<ADC_DMA_LEN; ++i){
+# ifdef READADC
+            int ad = adc1_get_raw((adc1_channel_t)adcChs[i]);
+            printf("%5d\t", ad);
+# else
+            printf("%5d\t", adcRaws[i]);
+# endif
+        }
+        printf("\r\n");
+        vTaskDelay(500);
+    }
+#endif
 }
 
 void MotorDriver::Pwm(int ch, float duty){
