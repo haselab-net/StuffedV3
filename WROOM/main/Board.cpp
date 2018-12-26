@@ -1,4 +1,5 @@
 #include "Board.h"
+const char* TAG = "Board";
 
 BoardFactoryBase* BoardFactories::Find(const char* name) {
 	for(iterator it = begin(); it != end(); ++it){
@@ -10,6 +11,7 @@ BoardFactoryBase* BoardFactories::Find(int modelNum){
 	for (iterator it = begin(); it != end(); ++it) {
 		if ((*it)->GetModelNumber() == modelNum) return &**it;
 	}
+	ESP_LOGE(TAG, "Can not create board for modelNum=%d.", modelNum);
 	return NULL;
 }
 
@@ -36,4 +38,6 @@ BoardFactories::BoardFactories() {
 	push_back(new BOARD_FACTORY(B1F));
 	push_back(new BOARD_FACTORY(B2M));
 	push_back(new BOARD_FACTORY(B2F));
+	push_back(new BOARD_FACTORY(B3M));
+	push_back(new BOARD_FACTORY(B3F));
 }
