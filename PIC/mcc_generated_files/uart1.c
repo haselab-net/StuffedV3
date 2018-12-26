@@ -63,7 +63,7 @@ void UART1_Initialize(void)
 #if defined BOARD1_MOTORDRIVER
     // BaudRate = 2000000; Frequency = 24000000 Hz; BRG 2; 
     U1BRG = 0x2;
-#elif defined BOARD2_COMBINATION
+#elif defined BOARD2_COMBINATION || defined BOARD3_SEPARATE
     // BaudRate = 3000000; Frequency = 24000000 Hz; BRG 1; 
     U1BRG = 0x1;
 #else

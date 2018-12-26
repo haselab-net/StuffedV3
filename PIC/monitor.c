@@ -80,6 +80,11 @@ void showADInMotorOrder(){
 	printf(" %d %d ", ADC1BUF0, ADC1BUF1);
 	printf(" %d %d ", ADC1BUF4, ADC1BUF9);
 	printf(" %d %d\r\n", ADC1BUF10, ADC1BUF11);
+#elif defined BOARD3_SEPARATE
+	printf(" %d %d ", ADC1BUF0, ADC1BUF1);
+	printf(" %d %d ", ADC1BUF7, ADC1BUF8);
+	printf(" %d %d ", ADC1BUF4, ADC1BUF11);
+	printf(" %d %d\r\n", ADC1BUF12, ADC1BUF13);
 #else
 #error
 #endif

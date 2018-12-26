@@ -63,7 +63,7 @@ void UART2_Initialize(void)
 #if defined BOARD1_MOTORDRIVER
     // BaudRate = 3000000; Frequency = 24000000 Hz; BRG 1; 
     U2BRG = 0x1;
-#elif defined BOARD2_COMBINATION
+#elif defined BOARD2_COMBINATION || defined BOARD3_SEPARATE
     // BaudRate = 2000000; Frequency = 24000000 Hz; BRG 2; 
     U2BRG = 0x2;
 #else
@@ -73,7 +73,7 @@ void UART2_Initialize(void)
     //Make sure to set LAT bit corresponding to TxPin as high before UART initialization
 #if defined BOARD1_MOTORDRIVER
     U2STASET = _U2STA_UTXEN_MASK;
-#elif defined BOARD2_COMBINATION
+#elif defined BOARD2_COMBINATION || defined BOARD3_SEPARATE
 	//U2STASET = _U2STA_UTXEN_MASK;	//	Do not on TX until called by master.
 #else
 #error

@@ -31,14 +31,29 @@ enum B2M_PARAM{
 };
 enum B2F_PARAM{
 	B2F_MODEL_NUMBER = 4,
-    B2F_NTARGET = 8,
+    B2F_NTARGET = 12,
     B2F_NMOTOR = 3,
     B2F_NFORCE = 2,
 };
+enum B3M_PARAM{
+	B3M_MODEL_NUMBER = 5,
+	B3M_NTARGET = 12,
+    B3M_NMOTOR = 4,
+    B3M_NFORCE = 4,
+};
+enum B3F_PARAM{
+	B3F_MODEL_NUMBER = 6,
+    B3F_NTARGET = 12,
+    B3F_NMOTOR = 3,
+    B3F_NFORCE = 6,
+};
+
 
 DEFINE_Packets(B1M)
 DEFINE_Packets(B1F)
 DEFINE_Packets(B2M)
 DEFINE_Packets(B2F)
+DEFINE_Packets(B3M)
+DEFINE_Packets(B3F)
 
 #endif

@@ -73,6 +73,18 @@ AN      2 3    5     10
 	msin[2] = FilterForADC(msin[2], ADC1BUF9 - msinOffset[2]);
 	mcos[3] = FilterForADC(mcos[3], ADC1BUF10 - mcosOffset[3]);
 	msin[3] = FilterForADC(msin[3], ADC1BUF11 - msinOffset[3]);
+#elif defined BOARD3_SEPARATE
+/*  BUF 0 1 2 3  4 5 6 7  8   9 10 11
+    AN  0 1 2 3  4 5 7 8 10  11 12 13 
+    AN      2 3    5     10             */
+	mcos[0] = FilterForADC(mcos[0], ADC1BUF11 - mcosOffset[3]);
+	msin[0] = FilterForADC(msin[0], ADC1BUF10 - msinOffset[3]);
+	mcos[1] = FilterForADC(mcos[1], ADC1BUF4 - mcosOffset[2]);
+	msin[1] = FilterForADC(msin[1], ADC1BUF9 - msinOffset[2]);
+    mcos[2] = FilterForADC(mcos[2], ADC1BUF6 - mcosOffset[1]);
+    msin[2] = FilterForADC(msin[2], ADC1BUF7 - msinOffset[1]);
+    mcos[3] = FilterForADC(mcos[3], ADC1BUF0 - mcosOffset[0]);
+    msin[3] = FilterForADC(msin[3], ADC1BUF1 - msinOffset[0]);
 #else
 #error Board type not defined
 #endif
@@ -101,10 +113,10 @@ inline void setSpiPwm(SDEC ratio){
 	}
 }
 
+#if defined BOARD1_MOTORDRIVER
 void setPwm(int ch, SDEC ratio){
 	//	Connector at the left most.
     if (ch == 0){
-#if defined BOARD1_MOTORDRIVER
 		if (ratio < 0){
 			ratio = -ratio;
 			LATBbits.LATB5 = 0;	//	BIN1
@@ -115,20 +127,7 @@ void setPwm(int ch, SDEC ratio){
 		}
 		CCP3RA = 0;
 		CCP3RB = (unsigned)CCP3PR * ratio >> SDEC_BITS;
-#elif defined BOARD2_COMBINATION
-		if (ratio < 0){
-			ratio = -ratio;
-			RPOR1bits.RP6R = 0;		//	NC(PIO))
-			RPOR4bits.RP20R = 6;	//	OCM2
-		}else{
-			RPOR1bits.RP6R = 6;		//	OCM2
-			RPOR4bits.RP20R = 0;	//	NC(PIO))
-		}
-		CCP2RA = 0;
-		CCP2RB = (unsigned)CCP2PR * ratio >> SDEC_BITS;
-#endif
 	}else if (ch == 1){	//	Connector at second position from left
-#if defined BOARD1_MOTORDRIVER
 		if (ratio < 0){
 			ratio = -ratio;
 			LATBbits.LATB6 = 1;	//	AIN1
@@ -139,21 +138,7 @@ void setPwm(int ch, SDEC ratio){
 		}
 		CCP2RA = 0;
 		CCP2RB = (unsigned)CCP2PR * ratio >> SDEC_BITS;
-#elif defined BOARD2_COMBINATION
-		if (ratio < 0){
-			ratio = -ratio;
-			CCP1CON2bits.OCAEN = 0;
-			CCP1CON2bits.OCBEN = 1;
-		}else{
-			CCP1CON2bits.OCAEN = 1;
-			CCP1CON2bits.OCBEN = 0;
-		}
-		CCP1RA = 0;
-		CCP1RB = (unsigned)CCP1PR * ratio >> SDEC_BITS;
-#endif
-	//	Connector at third position from left
 	}else if (ch == 2){
-#if defined BOARD1_MOTORDRIVER
 		if (ratio < 0){
 			ratio = -ratio;
 			LATBbits.LATB10 = 0; // BIN1R
@@ -163,21 +148,7 @@ void setPwm(int ch, SDEC ratio){
 			LATBbits.LATB11 = 0; // BIN2R
 		}
 		setSpiPwm(ratio);
-#elif defined BOARD2_COMBINATION
-		if (ratio < 0){
-			ratio = -ratio;
-			RPOR1bits.RP5R = 7;		//	OCM3
-			RPOR2bits.RP11R = 0;	//	NC(PIO))
-		}else{
-			RPOR1bits.RP5R = 0;		//	NC(PIO))
-			RPOR2bits.RP11R = 7;	//	OCM3
-		}
-		CCP3RA = 0;
-		CCP3RB = (unsigned)CCP3PR * ratio >> SDEC_BITS;
-#endif
-	//	Connector at right most
     }else{	
-#if defined BOARD1_MOTORDRIVER
 		if (ratio < 0){
 			ratio = -ratio;
 			LATCbits.LATC9 = 1;	//	AIN1R
@@ -188,7 +159,44 @@ void setPwm(int ch, SDEC ratio){
 		}
 		CCP1RA = 0;
 		CCP1RB = (unsigned)CCP1PR * ratio >> SDEC_BITS;
+    }
+}
 #elif defined BOARD2_COMBINATION
+void setPwm(int ch, SDEC ratio){
+    if (ch == 0){
+		if (ratio < 0){
+			ratio = -ratio;
+			RPOR1bits.RP6R = 0;		//	NC(PIO))
+			RPOR4bits.RP20R = 6;	//	OCM2
+		}else{
+			RPOR1bits.RP6R = 6;		//	OCM2
+			RPOR4bits.RP20R = 0;	//	NC(PIO))
+		}
+		CCP2RA = 0;
+		CCP2RB = (unsigned)CCP2PR * ratio >> SDEC_BITS;
+	}else if (ch == 1){	//	Connector at second position from left
+		if (ratio < 0){
+			ratio = -ratio;
+			CCP1CON2bits.OCAEN = 0;
+			CCP1CON2bits.OCBEN = 1;
+		}else{
+			CCP1CON2bits.OCAEN = 1;
+			CCP1CON2bits.OCBEN = 0;
+		}
+		CCP1RA = 0;
+		CCP1RB = (unsigned)CCP1PR * ratio >> SDEC_BITS;
+	}else if (ch == 2){
+		if (ratio < 0){
+			ratio = -ratio;
+			RPOR1bits.RP5R = 7;		//	OCM3
+			RPOR2bits.RP11R = 0;	//	NC(PIO))
+		}else{
+			RPOR1bits.RP5R = 0;		//	NC(PIO))
+			RPOR2bits.RP11R = 7;	//	OCM3
+		}
+		CCP3RA = 0;
+		CCP3RB = (unsigned)CCP3PR * ratio >> SDEC_BITS;
+    }else{	
 		if (ratio < 0){
 			ratio = -ratio;
 			RPOR4bits.RP19R = 0;		//	NC(PIO))
@@ -198,9 +206,59 @@ void setPwm(int ch, SDEC ratio){
 			RPOR0bits.RP4R = 0;			//	NC(PIO))
 		}		
 		setSpiPwm(ratio);
-#endif
     }
 }
+#elif defined BOARD3_SEPARATE
+void setPwm(int ch, SDEC ratio){
+    if (ch == 0){   //  M0=LCP4  U2B1/2=OCM1B/A
+		if (ratio < 0){
+			ratio = -ratio;
+			CCP1CON2bits.OCAEN = 0;
+			CCP1CON2bits.OCBEN = 1; //  OCM1B
+		}else{
+			CCP1CON2bits.OCAEN = 1; //  OCM1A
+			CCP1CON2bits.OCBEN = 0;
+		}
+		CCP1RA = 0;
+		CCP1RB = (unsigned)CCP1PR * ratio >> SDEC_BITS;
+	}else if (ch == 1){	//  M1=LCP3  U2A2/1=OCM2A/B
+		if (ratio < 0){
+			ratio = -ratio;
+			RPOR1bits.RP6R = 6;		//	OCM2A
+			RPOR4bits.RP20R = 0;	//	NC(PIO))
+		}else{
+			RPOR1bits.RP6R = 0;		//	NC(PIO))
+			RPOR4bits.RP20R = 6;	//	OCM2B
+		}
+		CCP2RA = 0;
+		CCP2RB = (unsigned)CCP2PR * ratio >> SDEC_BITS;
+	}else if (ch == 2){
+		if (ratio < 0){ //  M2=LCP2  U1B1/2=OCM3A/B
+			ratio = -ratio;
+			RPOR1bits.RP5R = 7;		//	=RB4: OCM3A
+			RPOR2bits.RP11R = 0;	//	NC(PIO))
+		}else{
+			RPOR1bits.RP5R = 0;		//	NC(PIO))
+			RPOR2bits.RP11R = 7;	//	=RB7: OCM3B
+		}
+		CCP3RA = 0;
+		CCP3RB = (unsigned)CCP3PR * ratio >> SDEC_BITS;
+    }else{	
+		if (ratio < 0){ //  M3=LCP1 
+			ratio = -ratio;
+			RPOR4bits.RP19R = 0;	//	NC(PIO))
+			RPOR0bits.RP4R = 3;		//=RA3:	SDO2
+		}else{
+			RPOR4bits.RP19R = 3;	//=RC9:	SDO2
+			RPOR0bits.RP4R = 0;		//	NC(PIO))
+		}		
+		setSpiPwm(ratio);
+    }
+}
+#else
+#error
+#endif
+
 void __attribute__ ((vector(_SPI2_TX_VECTOR), interrupt(IPL6AUTO))) spiEmpty(void)
 {
 	SPI2BUF = spiPwm[0];

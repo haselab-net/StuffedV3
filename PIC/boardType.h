@@ -7,7 +7,6 @@
 #define BOARD2_COMBINATION		//	2nd board with WROOM
 #else
 #define BOARD3_SEPARATE         //	3nd board WROOM only / pic only New
-#define BOARD1_MOTORDRIVER
 #endif
 
 #ifndef WROOM
@@ -18,6 +17,9 @@
 #elif defined BOARD2_COMBINATION
  CHOOSE_BoardInfo(B2M);	//	B2M or B2F
  #define BOARD_ID	7
+#elif defined BOARD3_SEPARATE
+ CHOOSE_BoardInfo(B3M);	//	B3M or B3F
+ #define BOARD_ID	7 
 #endif
 
 #endif

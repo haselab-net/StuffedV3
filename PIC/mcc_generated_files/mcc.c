@@ -54,6 +54,8 @@
 #pragma config ICS = PGx1    // ICE/ICD Communication Channel Selection bits->Communicate on PGEC1/PGED1
 #elif defined BOARD2_COMBINATION
 #pragma config ICS = PGx3    // ICE/ICD Communication Channel Selection bits->Communicate on PGEC3/PGED3
+#elif defined BOARD3_SEPARATE
+#pragma config ICS = PGx3    // ICE/ICD Communication Channel Selection bits->Communicate on PGEC3/PGED3
 #else
 #error
 #endif
