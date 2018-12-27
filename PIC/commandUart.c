@@ -84,6 +84,7 @@ void __attribute__ ((vector(_UARTC_RX_VECTOR), interrupt(IPL4AUTO))) _UARTC_RX_H
 			if (head.boardId == boardId){
 				bRead = true;
 				command.header = head.header;
+                //printf("H%x\n", command.header);
 				retLen = retPacketLen[command.commandId];
 				if (retLen) {	//	start to return.
 					//	Prepare to return

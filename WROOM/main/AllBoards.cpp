@@ -91,6 +91,10 @@ bool AllBoards::HasRet(unsigned short id){
 }
 
 void AllBoards::WriteCmd(UdpCmdPacket& packet) {
+	#if 1
+	printf("AllBoards::WriteCmd %d\r\n", packet.command);
+	#endif
+	
 	//	Update state based on packet
 	if (packet.command == CI_INTERPOLATE || packet.command == CI_FORCE_CONTROL){
 		targetCountWrite = (unsigned char)packet.GetTargetCount();

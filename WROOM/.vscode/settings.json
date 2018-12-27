@@ -26,7 +26,10 @@
         "commandwroom.h\u0000dwroom.h": "c",
         "commandwroom.h\u0000mmandwroom.h": "c",
         "commandwroom.h\u0000room.h": "c",
-        "commandwroom.h\u0000wroom.h": "c"
+        "commandwroom.h\u0000wroom.h": "c",
+        "commandcommon.h": "c",
+        "deque": "cpp",
+        "vector": "cpp"
     },
     "terminal.integrated.shell.windows": "c:\\msys32\\usr\\bin\\bash.exe",
     "terminal.integrated.env.windows": {

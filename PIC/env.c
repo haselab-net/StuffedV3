@@ -1,7 +1,11 @@
 #include "env.h"
 #include <stdarg.h>
 
-int logLevel = LOG_LEVEL_ERROR;
+//int logLevel = LOG_LEVEL_ERROR;
+int logLevel = LOG_LEVEL_INFO;
+
+
+
 
 void vlogPrintf(int lv, const char* format, va_list va){
 	if (lv >= logLevel){

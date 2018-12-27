@@ -46,6 +46,7 @@ void UartForBoards::SendTask(){
 			memset(boards[cmdCur.board]->CmdStart() + boards[cmdCur.board]->CmdLen(), 0, wait);
 			uart_write_bytes(port, (char*)boards[cmdCur.board]->CmdStart(),
 				(size_t)boards[cmdCur.board]->CmdLen()+wait);
+			printf("Send UART to %d H%x\n", cmdCur.board, boards[cmdCur.board]->CmdStart()[0]);
 		}
 		if (!bRet){
 			xSemaphoreGive(allBoards->seUartFinished);
@@ -119,6 +120,11 @@ void UartForBoards::EnumerateBoard() {
 					}
 					printf("%dT%dM%dF%d", ret.boardInfo.modelNumber, ret.boardInfo.nTarget,
 						ret.boardInfo.nMotor, ret.boardInfo.nForce);
+
+					ets_delay_us(10000);
+					cmd.commandId = CI_TORQUE_LIMIT;
+					uart_write_bytes(port, (char*)cmd.bytes, BD0_CLEN_BOARD_INFO);	//	send board info command
+
 					break;
 				}
 			}

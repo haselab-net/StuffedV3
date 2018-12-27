@@ -101,7 +101,7 @@ extern "C" void app_main()
     
     //  start udp server.
     udpCom.Start();
-#if 1   //  Code for debugging: show ADC values or motor angles.
+#if 0   //  Code for debugging: show ADC values or motor angles.
     while(1){
 #if 1   //  for raw ADC
         for(int i=0; i<6; ++i){
