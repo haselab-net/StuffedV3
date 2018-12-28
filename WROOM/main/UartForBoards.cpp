@@ -8,6 +8,7 @@
 #include "MotorDriver.h"
 #include "../../PIC/boardType.h"
 
+#define UART_DEBUG 1
 
 
 static char zero[80];
@@ -30,10 +31,14 @@ void UartForBoards::CreateTask(){
 	xTaskCreate(recvTask, "RecvTask", 4*1024, this, 10, &taskRecv);
 	xTaskCreate(sendTask, "SendTask", 4*1024, this, 12, &taskSend);
 }
+
+
 void UartForBoards::SendTask(){
 	while(1){
 		ulTaskNotifyTake(pdFALSE, portMAX_DELAY);	//	given by WriteCmd()
-//		ESP_LOGI("SendTask", "#%d start\n", port);
+		#if UART_DEBUG
+		ESP_LOGI("SendTask", "#%d start\n", port);
+		#endif
 		int wait = 0;
 		bool bRet = false;
 		for(cmdCur.board=0; cmdCur.board<boards.size(); cmdCur.board++){
@@ -46,17 +51,21 @@ void UartForBoards::SendTask(){
 			memset(boards[cmdCur.board]->CmdStart() + boards[cmdCur.board]->CmdLen(), 0, wait);
 			uart_write_bytes(port, (char*)boards[cmdCur.board]->CmdStart(),
 				(size_t)boards[cmdCur.board]->CmdLen()+wait);
-			printf("Send UART to %d H%x\n", cmdCur.board, boards[cmdCur.board]->CmdStart()[0]);
+			#if UART_DEBUG
+			ESP_LOGI("SendTask", "Send #%d CMD=%x L=%d to Board %d on UART%d \n", port, boards[cmdCur.board]->CmdStart()[0]>>3, boards[cmdCur.board]->CmdLen(), boards[cmdCur.board]->GetBoardId(), this->port);
+			#endif
 		}
 		if (!bRet){
 			xSemaphoreGive(allBoards->seUartFinished);
 		}
 		xTaskNotifyGive(taskRecv);					//	start to receive.
-//		ESP_LOGI(SendTask, "#%d  end\n", port);
+		#if UART_DEBUG
+		ESP_LOGI("SendTask", "#%d  end\n", port);
+		#endif
 	}
 }
 void UartForBoards::RecvTask(){
-	const ulong READWAIT = 200;	//[ticks(=ms)]
+	const ulong READWAIT = 2000;	//[ticks(=ms)]
 	while(1){
 		ulTaskNotifyTake(pdFALSE, portMAX_DELAY);	//	Start to receive
 		for (retCur.board=0; retCur.board < boards.size(); retCur.board++) {
@@ -77,7 +86,9 @@ void UartForBoards::RecvTask(){
 					ets_delay_us(2000);
 					uart_flush_input(port);
 				}
-				//	ESP_LOGI("RecvTask", "#%d H:%x L:%d", port, (int)boards[retCur.board]->RetStart()[0], boards[retCur.board]->RetLen());
+				#if UART_DEBUG
+				ESP_LOGI("RecvTask", "Recv #%d H:%x L:%d", port, (int)boards[retCur.board]->RetStart()[0], boards[retCur.board]->RetLen());
+				#endif
 			}
 		}
 		xSemaphoreGive(allBoards->seUartFinished);		//	To finish WriteCmd()
@@ -120,11 +131,6 @@ void UartForBoards::EnumerateBoard() {
 					}
 					printf("%dT%dM%dF%d", ret.boardInfo.modelNumber, ret.boardInfo.nTarget,
 						ret.boardInfo.nMotor, ret.boardInfo.nForce);
-
-					ets_delay_us(10000);
-					cmd.commandId = CI_TORQUE_LIMIT;
-					uart_write_bytes(port, (char*)cmd.bytes, BD0_CLEN_BOARD_INFO);	//	send board info command
-
 					break;
 				}
 			}
@@ -151,4 +157,12 @@ void UartForBoards::EnumerateBoard() {
 		uart_write_bytes(port, (char*)cmd.bytes, BD0_CLEN_SET_CMDLEN);		//	send board info command
 	}
 	uart_write_bytes(port, zero, 5);
+	#if 0	// For UART command test
+	for (int i = 0; i < boards.size(); ++i) {
+		ets_delay_us(10000);
+		cmd.commandId = CI_TORQUE_LIMIT;
+		uart_write_bytes(port, (char*)cmd.bytes, boards[i]->cmdPacketLen[cmd.commandId]);	//	send board info command
+	}
+	uart_write_bytes(port, zero, 5);
+	#endif
 }

@@ -93,6 +93,7 @@ static void execCommand(void* udpCom){
 	((UdpCom*) udpCom)->ExecCommandLoop();
 }
 void UdpCom::Init() {
+	udp = NULL;
 	recvRest = 0;
 	commandCount = 0;
 	//ConnectWifi();
@@ -212,6 +213,7 @@ void UdpCom::PrepareRetPacket(int cmd) {
 	send.ClearData();
 }
 void UdpCom::SendRetPacket(ip_addr_t& returnIp) {
+	if (!udp) return;
 	struct pbuf* pb = pbuf_alloc(PBUF_TRANSPORT, send.length, PBUF_RAM);
     memcpy (pb->payload, send.bytes, send.length);
 	udp_sendto(udp, pb, &returnIp, port);

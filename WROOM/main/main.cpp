@@ -1,11 +1,3 @@
-/* Hello World Example
-
-   This example code is in the Public Domain (or CC0 licensed, at your option.)
-
-   Unless required by applicable law or agreed to in writing, this
-   software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-   CONDITIONS OF ANY KIND, either express or implied.
-*/
 #include <stdio.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -24,16 +16,7 @@
 #include "AllBoards.h"
 #include "TouchSensing.h"
 #include "MotorDriver.h"
-
-int getch(){
-    uint8_t data[1];
-    int rv = uart_rx_one_char(data);
-    if (rv == OK){
-        return data[0];
-    }else{
-        return -1;
-    }
-}
+#include "monitor.h"
 
 extern "C" void app_main()
 {        
@@ -54,6 +37,7 @@ extern "C" void app_main()
 #if 0    // Enable to clear all nvs enable. Use only when nvs makes trouble. 
     nvs_flash_erase();
 #endif
+    wifiMan();  //  Start wifi manager. There is interference with UART1. Must start before UART init.
 
 #if 0   //  Code for debugging: pwm / adc test 
     motorDriver.Init();
@@ -90,32 +74,21 @@ extern "C" void app_main()
     allBoards.Init();
     printf("Init allBoards finished. ");
     printf("%d motors, %d force sensors found.\n", allBoards.GetNTotalMotor(), allBoards.GetNTotalForce());
-	//wifiSmartConfig();
-    //  init udp but not start
-    udpCom.Init();
-	printf("Init udp finished.\n");
+    udpCom.Init();    //  init command processing for udp.
 
-    //  start wifi manager
-    wifiMan();
+#if 1   //  UDP server and routing commands.
     vTaskDelay(1000);
-    
-    //  start udp server.
-    udpCom.Start();
-#if 0   //  Code for debugging: show ADC values or motor angles.
-    while(1){
-#if 1   //  for raw ADC
-        for(int i=0; i<6; ++i){
-            int raw = motorDriver.GetAdcRaw(i);
-            printf("%5d\t", raw);
-        }
-#else   //  for motor angle
-        for(int i=0; i<3; ++i){
-            printf("%d %2.2f   ", i, LDEC2DBL(motorState.pos[i]));
-        }
+    udpCom.Start();    //  start udp server.
 #endif
-        printf("\r\n");
-        vTaskDelay(500);
-    }
+
+#if 0   //  test to send UART command
+    vTaskDelay(500);
+	UdpCmdPacket* recv = &udpCom.recvs.Poke();
+    recv->command = CI_DIRECT;
+    recv->length = recv->CommandLen();
+    recv->count = udpCom.commandCount + 1;
+    udpCom.recvs.Write();
+    xTaskNotifyGive(udpCom.taskExeCmd);
 #endif
 
 #if 0
@@ -129,4 +102,6 @@ extern "C" void app_main()
         xEventGroupWaitBits(wifi_manager_event_group, WIFI_MANAGER_STA_DISCONNECT_BIT, pdFALSE, pdFALSE, portMAX_DELAY);
     }
 #endif
+    //  monitor start
+    monitor();
 }

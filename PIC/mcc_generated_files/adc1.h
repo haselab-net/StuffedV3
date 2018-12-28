@@ -101,7 +101,7 @@ typedef enum
 /*
 #if defined BOARD1_MOTORDRIVER
     ADC1_MAX_CHANNEL_COUNT = 11
-#elif defined BOARD2_COMBINATION
+#elif defined BOARD2_COMBINATION || defined BOARD3_SEPARATE
     ADC1_MAX_CHANNEL_COUNT = 15
 #else
 #error

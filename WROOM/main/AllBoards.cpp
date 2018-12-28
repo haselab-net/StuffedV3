@@ -3,10 +3,12 @@
 #include "Board.h"
 #include "driver/uart.h"
 
+#define DEBUG_COMMAND	0
+
 //	PIN definition
 #if defined BOARD3_SEPARATE
 #define U1TXPIN	16
-#define U1RXPIN	17	
+#define U1RXPIN	17
 #define U2TXPIN	5
 #define U2RXPIN	18
 #elif defined BOARD2_COMBINATION
@@ -91,8 +93,8 @@ bool AllBoards::HasRet(unsigned short id){
 }
 
 void AllBoards::WriteCmd(UdpCmdPacket& packet) {
-	#if 1
-	printf("AllBoards::WriteCmd %d\r\n", packet.command);
+	#if DEBUG_COMMAND
+	ESP_LOGI("AllBorads::WriteCmd", "cmd=%d\r\n", packet.command);
 	#endif
 	
 	//	Update state based on packet
