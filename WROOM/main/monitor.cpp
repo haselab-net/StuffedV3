@@ -198,6 +198,7 @@ class MCDebugFlag: public MonitorCommandBase{
             for(; i<sizeof(flags)/sizeof(flags[0]); ++i){
                 if (flags[i].msg[0] == ch){
                     *flags[i].flag = !*flags[i].flag;
+                    break;
                 }
             }
             if (i == sizeof(flags)/sizeof(flags[0])) break;
