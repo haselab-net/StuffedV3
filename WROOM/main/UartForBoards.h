@@ -8,11 +8,13 @@
 #include <stdio.h>
 #include "BoardDirect.h"
 
+
 class AllBoards;
 class UartForBoards :public UTRefCount {
 	uart_port_t port;
 	AllBoards* allBoards;
 public:
+	static bool bDebug;
 	TaskHandle_t taskRecv, taskSend;
 	struct Cur {
 		volatile int board;	//	boards[board]

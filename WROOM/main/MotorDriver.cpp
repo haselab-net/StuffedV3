@@ -37,13 +37,14 @@ void MotorDriver::AdcReadTask(){
                     int pos = adcChsRev[ch];
                     adcRaws[pos] = adcRaws[pos]*15/16 + value; 
                 }
-                onControlTimer();
+                if (bControl) onControlTimer();
             }
         }
     }
 }
 
 void MotorDriver::Init(){
+    bControl = true;
     //  PWM Init
     mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM0A, pwmPins[0]);
     mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM0B, pwmPins[1]);

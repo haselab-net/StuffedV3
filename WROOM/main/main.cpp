@@ -34,38 +34,7 @@ extern "C" void app_main()
     //----------------------------------
     printf("!!! Stuffed Robot Start !!!\n");
 
-#if 0    // Enable to clear all nvs enable. Use only when nvs makes trouble. 
-    nvs_flash_erase();
-#endif
     wifiMan();  //  Start wifi manager. There is interference with UART1. Must start before UART init.
-
-#if 0   //  Code for debugging: pwm / adc test 
-    motorDriver.Init();
-    float pwm = -0.8f;
-    int count = 0;
-    while(1){
-        int key = getch();
-        if (key == 'p'){
-            pwm = -pwm;
-            printf("pwm = %f\r\n", pwm);
-        }
-        for(int i=0; i<3; ++i){
-            motorDriver.Pwm(i, pwm);
-        }
-        if (count % 100 == 0){
-            printf("ADC:");
-            for(int i=0; i<6; ++i){
-                printf(" %d", motorDriver.GetAdcVoltage(i));
-            }
-/*            printf(" Touch:");
-            for(int i=0; i<touch.NPad(); ++i){
-                printf(" %d", touch.Raw(i));
-            }*/
-            printf("\r\n");        
-        }
-        count ++;
-    }
-#endif
     
 #if 0   //  touchPads can not work with JTAG debugger
     touchPads.Init();
@@ -79,16 +48,6 @@ extern "C" void app_main()
 #if 1   //  UDP server and routing commands.
     vTaskDelay(1000);
     udpCom.Start();    //  start udp server.
-#endif
-
-#if 0   //  test to send UART command
-    vTaskDelay(500);
-	UdpCmdPacket* recv = &udpCom.recvs.Poke();
-    recv->command = CI_DIRECT;
-    recv->length = recv->CommandLen();
-    recv->count = udpCom.commandCount + 1;
-    udpCom.recvs.Write();
-    xTaskNotifyGive(udpCom.taskExeCmd);
 #endif
 
 #if 0

@@ -3,8 +3,6 @@
 #include "Board.h"
 #include "driver/uart.h"
 
-#define DEBUG_COMMAND	0
-
 //	PIN definition
 #if defined BOARD3_SEPARATE
 #define U1TXPIN	16
@@ -93,10 +91,7 @@ bool AllBoards::HasRet(unsigned short id){
 }
 
 void AllBoards::WriteCmd(UdpCmdPacket& packet) {
-	#if DEBUG_COMMAND
-	ESP_LOGI("AllBorads::WriteCmd", "cmd=%d\r\n", packet.command);
-	#endif
-	
+	if (UartForBoards::bDebug) ESP_LOGI("AllBorads::WriteCmd", "cmd=%d\r\n", packet.command);
 	//	Update state based on packet
 	if (packet.command == CI_INTERPOLATE || packet.command == CI_FORCE_CONTROL){
 		targetCountWrite = (unsigned char)packet.GetTargetCount();

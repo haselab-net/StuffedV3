@@ -12,6 +12,7 @@ public:
     tiny::vector<MonitorCommandBase*> commands;
     void AddCommand(MonitorCommandBase*);
     void Run();
+    void ShowList();
 };
 
 void monitor();

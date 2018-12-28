@@ -20,6 +20,7 @@ class MotorDriver{
     const int DEFAULT_VREF = 1100;        //Use adc2_vref_to_gpio() to obtain a better estimate
     enum {ADC_DMA_LEN = 8};
     public:
+    bool bControl;
 #ifdef BOARD3_SEPARATE
     enum {
         NTARGET_DIRECT = 12,

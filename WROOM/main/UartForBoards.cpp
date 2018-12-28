@@ -8,12 +8,10 @@
 #include "MotorDriver.h"
 #include "../../PIC/boardType.h"
 
-#define UART_DEBUG 1
-
-
 static char zero[80];
 
-UartForBoards::UartForBoards(uart_port_t ch, AllBoards* u) : port(ch), allBoards(u) {	
+bool UartForBoards::bDebug = false;
+UartForBoards::UartForBoards(uart_port_t ch, AllBoards* u) : port(ch), allBoards(u){
 }
 void UartForBoards::Init(uart_config_t conf, int txPin, int rxPin){
 	uart_param_config(port, &conf);
@@ -36,9 +34,7 @@ void UartForBoards::CreateTask(){
 void UartForBoards::SendTask(){
 	while(1){
 		ulTaskNotifyTake(pdFALSE, portMAX_DELAY);	//	given by WriteCmd()
-		#if UART_DEBUG
-		ESP_LOGI("SendTask", "#%d start\n", port);
-		#endif
+		if(bDebug) ESP_LOGI("SendTask", "#%d start\n", port);
 		int wait = 0;
 		bool bRet = false;
 		for(cmdCur.board=0; cmdCur.board<boards.size(); cmdCur.board++){
@@ -51,17 +47,13 @@ void UartForBoards::SendTask(){
 			memset(boards[cmdCur.board]->CmdStart() + boards[cmdCur.board]->CmdLen(), 0, wait);
 			uart_write_bytes(port, (char*)boards[cmdCur.board]->CmdStart(),
 				(size_t)boards[cmdCur.board]->CmdLen()+wait);
-			#if UART_DEBUG
-			ESP_LOGI("SendTask", "Send #%d CMD=%x L=%d to Board %d on UART%d \n", port, boards[cmdCur.board]->CmdStart()[0]>>3, boards[cmdCur.board]->CmdLen(), boards[cmdCur.board]->GetBoardId(), this->port);
-			#endif
+			if(bDebug) ESP_LOGI("SendTask", "Send #%d CMD=%x L=%d to Board %d on UART%d \n", port, boards[cmdCur.board]->CmdStart()[0]>>3, boards[cmdCur.board]->CmdLen(), boards[cmdCur.board]->GetBoardId(), this->port);
 		}
 		if (!bRet){
 			xSemaphoreGive(allBoards->seUartFinished);
 		}
 		xTaskNotifyGive(taskRecv);					//	start to receive.
-		#if UART_DEBUG
-		ESP_LOGI("SendTask", "#%d  end\n", port);
-		#endif
+		if(bDebug) ESP_LOGI("SendTask", "#%d  end\n", port);
 	}
 }
 void UartForBoards::RecvTask(){
@@ -86,9 +78,7 @@ void UartForBoards::RecvTask(){
 					ets_delay_us(2000);
 					uart_flush_input(port);
 				}
-				#if UART_DEBUG
-				ESP_LOGI("RecvTask", "Recv #%d H:%x L:%d", port, (int)boards[retCur.board]->RetStart()[0], boards[retCur.board]->RetLen());
-				#endif
+				if(bDebug) ESP_LOGI("RecvTask", "Recv #%d H:%x L:%d", port, (int)boards[retCur.board]->RetStart()[0], boards[retCur.board]->RetLen());
 			}
 		}
 		xSemaphoreGive(allBoards->seUartFinished);		//	To finish WriteCmd()
