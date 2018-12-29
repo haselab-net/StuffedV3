@@ -12,6 +12,7 @@ enum ControlMode controlMode;
 //	 angle
 SDEC mcos[NAXIS], msin[NAXIS];
 SDEC forceOffset[NFORCE];
+SDEC currentSense[NMOTOR];
 
 uint32_t controlCount;
 
@@ -50,6 +51,7 @@ void setPwmWithLimit(int ch, SDEC ratio){
 	setPwm(ch, ratio);
 }
 
+LDEC lastTorques[NMOTOR];
 //	set motor power for PD control
 void pdControl(){
 	int i;
@@ -68,6 +70,17 @@ void pdControl(){
 			if (torque < -LDEC_ONE) torque = -LDEC_ONE;
 			else if (torque > LDEC_ONE) torque = LDEC_ONE;
 		}
+#if 1	//	This reduce impulsive current
+		const LDEC diffLimit = LDEC_ONE * 0.1;	//	smaller limit makes the control instable.
+		LDEC torqueDiff = torque - lastTorques[i];
+		if (torqueDiff > diffLimit){
+			torque = lastTorques[i] + diffLimit;
+		}
+		if (torqueDiff < -diffLimit){
+			torque = lastTorques[i] - diffLimit;
+		}
+		lastTorques[i] = torque;
+#endif 
 		setPwmWithLimit(i, L2SDEC(torque));
 #if 0	//	to check pd control
 		count ++;
@@ -232,12 +245,8 @@ void controlInit(){
 	int i;
 	controlMode = CM_DIRECT;
 	for(i=0; i<NMOTOR; ++i){
-//		pdParam.k[i] = SDEC_ONE / 20;
-//		pdParam.b[i] = SDEC_ONE * 5;
-
-		pdParam.k[i] = SDEC_ONE * 10;
-		pdParam.b[i] = SDEC_ONE * 5;
-
+		pdParam.k[i] = SDEC_ONE;
+		pdParam.b[i] = (SDEC)(SDEC_ONE * 1.5);
 		torqueLimit.max[i] = SDEC_ONE;
 		torqueLimit.min[i] = -SDEC_ONE;
 	}

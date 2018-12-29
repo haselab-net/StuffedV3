@@ -180,6 +180,7 @@ void monitor(){
 	static int ch = 0;
 	bool bHit = false;
 	int i;
+    //printf("UMSTA %x\r\n", UMSTA);
 	if (UMSTAbits.URXDA){
 		ch = UMRXREG;
 	}

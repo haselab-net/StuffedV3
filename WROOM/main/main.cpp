@@ -32,24 +32,17 @@ extern "C" void app_main()
             (chip_info.features & CHIP_FEATURE_EMB_FLASH) ? "embedded" : "external");
 
     //----------------------------------
-    printf("!!! Stuffed Robot Start !!!\n");
-
-    wifiMan();  //  Start wifi manager. There is interference with UART1. Must start before UART init.
-    
+    printf("!!! Stuffed Robot Start !!!\n");   
+    motorDriver.Init();
+    wifiMan();    //  Start wifi manager. 
 #if 0   //  touchPads can not work with JTAG debugger
     touchPads.Init();
 #endif
-    motorDriver.Init();
     allBoards.Init();
     printf("Init allBoards finished. ");
     printf("%d motors, %d force sensors found.\n", allBoards.GetNTotalMotor(), allBoards.GetNTotalForce());
     udpCom.Init();    //  init command processing for udp.
-
-#if 1   //  UDP server and routing commands.
-    vTaskDelay(1000);
-    udpCom.Start();    //  start udp server.
-#endif
-
+    udpCom.Start();   //  start UDP server.
 #if 0
     while(1){
         xEventGroupWaitBits(wifi_manager_event_group,

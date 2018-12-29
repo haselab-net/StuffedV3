@@ -70,11 +70,8 @@ void monitoring_task(void *pvParameter)
 
 void wifiMan()
 {
-
-
 	// disable the default wifi logging:	!!This changes boudrate!!
-	esp_log_level_set("wifi", ESP_LOG_INFO);	
-	uart_set_baudrate(UART_NUM_1, 921600);
+	esp_log_level_set("wifi", ESP_LOG_WARN);
 
 	/* initialize flash memory */
 	nvs_flash_init();

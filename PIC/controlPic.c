@@ -76,7 +76,7 @@ AN      2 3    5     10
 #elif defined BOARD3_SEPARATE
 /*  BUF 0 1 2 3  4 5 6 7  8   9 10 11
     AN  0 1 2 3  4 5 7 8 10  11 12 13 
-    AN      2 3    5     10             */
+    MT      2 3    5     10             */
 	mcos[0] = FilterForADC(mcos[0], ADC1BUF11 - mcosOffset[3]);
 	msin[0] = FilterForADC(msin[0], ADC1BUF10 - msinOffset[3]);
 	mcos[1] = FilterForADC(mcos[1], ADC1BUF4 - mcosOffset[2]);
@@ -85,6 +85,10 @@ AN      2 3    5     10
     msin[2] = FilterForADC(msin[2], ADC1BUF7 - msinOffset[1]);
     mcos[3] = FilterForADC(mcos[3], ADC1BUF0 - mcosOffset[0]);
     msin[3] = FilterForADC(msin[3], ADC1BUF1 - msinOffset[0]);
+    currentSense[0] = FilterForADC(currentSense[0], ADC1BUF5); //5
+    currentSense[1] = FilterForADC(currentSense[1], ADC1BUF8); //10
+    currentSense[2] = FilterForADC(currentSense[2], ADC1BUF2); //2
+    currentSense[3] = FilterForADC(currentSense[3], ADC1BUF3); //3
 #else
 #error Board type not defined
 #endif
@@ -246,11 +250,11 @@ void setPwm(int ch, SDEC ratio){
     }else{	
 		if (ratio < 0){ //  M3=LCP1 
 			ratio = -ratio;
-			RPOR4bits.RP19R = 0;	//	NC(PIO))
-			RPOR0bits.RP4R = 3;		//=RA3:	SDO2
-		}else{
 			RPOR4bits.RP19R = 3;	//=RC9:	SDO2
 			RPOR0bits.RP4R = 0;		//	NC(PIO))
+		}else{
+			RPOR4bits.RP19R = 0;	//	NC(PIO))
+			RPOR0bits.RP4R = 3;		//=RA3:	SDO2
 		}		
 		setSpiPwm(ratio);
     }

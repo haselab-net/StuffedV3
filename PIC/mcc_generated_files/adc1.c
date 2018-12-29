@@ -102,14 +102,13 @@ void ADC1_Initialize (void)
     // CSS9 disabled; CSS8 enabled; CSS7 enabled; CSS6 disabled; CSS5 disabled; CSS4 enabled; CSS3 disabled; CSS2 disabled; CSS1 enabled; CSS0 enabled; CSS13 enabled; CSS12 enabled; CSS11 enabled; CSS10 disabled; CSS30 disabled; CSS29 disabled; CSS28 disabled; 
    AD1CSS = 0x3993;
 #elif defined BOARD2_COMBINATION || defined BOARD3_SEPARATE
-    // CSS9 disabled; CSS8 enabled; CSS7 enabled; CSS6 disabled; CSS5 enabled; CSS4 enabled; CSS3 enabled; CSS2 enabled; CSS1 enabled; CSS0 enabled; CSS13 enabled; CSS12 enabled; CSS11 enabled; CSS10 enabled; CSS30 disabled; CSS29 disabled; CSS28 disabled;
-    AD1CSS = 0x3DBF;
+   //    AN  0 1 2 3=F   4 5 x 7=B   8 x 10 11=D   12 13 x x=3
+   AD1CSS = 0x3DBF;
 #else
 #error
 #endif
    // CHH9 disabled; CHH8 disabled; CHH7 disabled; CHH6 disabled; CHH5 disabled; CHH4 disabled; CHH3 disabled; CHH2 disabled; CHH1 disabled; CHH0 disabled; CHH11 disabled; CHH10 disabled; CHH13 disabled; CHH12 disabled; 
    AD1CHIT = 0x0;
-
    adc1_obj.intSample = AD1CON2bits.SMPI;
    
 }

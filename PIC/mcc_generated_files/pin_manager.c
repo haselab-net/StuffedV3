@@ -76,9 +76,9 @@ void PIN_MANAGER_Initialize(void)
     TRISB = 0xF00F;
     TRISC = 0x0003;		//	
 #elif defined BOARD2_COMBINATION || defined BOARD3_SEPARATE
-    TRISA = 0x0003;		//					            9o 4o  3210i
-    TRISB = 0xBC6F;		//	U2TX set to input	11i 10i 9o 8o  7o6i5i4o 3210i 
-    TRISC = 0x010B;		//							     9o8i           3i2o10i
+    TRISA = 0x0007;		// RA 012=i, 34=o	9o
+    TRISB = 0xBC6F;		// RB U2TX set to input 15i 14o 13i 12i  11i 10i 9o 8o 7o6i5i4o 3210i 
+    TRISC = 0x010B;		// RC 9o8i           3i2o10i
 #else
 #error
 #endif
@@ -113,7 +113,11 @@ void PIN_MANAGER_Initialize(void)
     ANSELB = 0x300C;
 #elif defined BOARD2_COMBINATION || defined BOARD3_SEPARATE
     ANSELA = 0x000B;
-    ANSELB = 0x300F;	//0xB00F for AD
+#ifdef USE_MONITOR_RX
+    ANSELB = 0x300F;    //for T1RX 15 13 12  3210
+#else
+    ANSELB = 0xB00F;	//for AD
+#endif
 #endif
     ANSELC = 0x0003;
 

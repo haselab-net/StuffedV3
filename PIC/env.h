@@ -28,8 +28,10 @@ typedef unsigned int uint32_t;
 #ifdef PIC
 #define DISABLE_INTERRUPT 	asm volatile("di"); // Disable all interrupts  
 #define ENABLE_INTERRUPT	asm volatile("ei"); // Enable all interrupt	
-#endif
 
+//#define USE_MONITOR_RX   //   for debug monitor
+
+#endif
 
 
 #ifdef MODULETEST

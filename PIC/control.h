@@ -28,6 +28,7 @@ extern struct MotorState motorTarget, motorState;
 extern SDEC forceControlJK[NFORCE][NMOTOR];
 #define NAXIS	(NMOTOR+NFORCE/2)	//	NAXIS=NMOTOR+NFORCE/2
 extern SDEC mcos[NAXIS], msin[NAXIS];
+extern SDEC currentSense[NMOTOR];
 extern const SDEC mcosOffset[NAXIS];
 extern const SDEC msinOffset[NAXIS];
 
@@ -87,6 +88,7 @@ void controlLoop();
 
 extern SDEC forceOffset[NFORCE];
 
+#if defined BOARD1_MOTORDRIVER || BOARD2_COMBINATION
 inline SDEC getForceRaw(int ch){
 	if (ch == 0) return mcos[3];
 	if (ch == 1) return msin[3];
@@ -97,9 +99,31 @@ inline SDEC getForce(int ch){
 	if (ch == 1) return msin[3] - forceOffset[ch];
 	return 0;
 }
+#elif defined BOARD3_SEPARATE
+inline SDEC getForceRaw(int ch){
+    int off = 0;
+#if NFORCE == 6
+	if (ch == 0) return mcos[3];
+	if (ch == 1) return msin[3];
+    off = 2;
+#endif
+	if (ch-off < 4) return currentSense[ch-off];
+	return 0;
+}
+inline SDEC getForce(int ch){
+    int off = 0;
+#if NFORCE == 6
+	if (ch == 0) return mcos[3] - forceOffset[ch];
+	if (ch == 1) return msin[3] - forceOffset[ch];
+    off = 2;
+#endif
+	if (ch-off < 4) return currentSense[ch-off] - forceOffset[ch];
+	return 0;
+}
+#endif
 
 inline short FilterForADC(short prev, short cur){
-    const short IIR = 1;
+    const short IIR = 16;
     return (prev*(IIR-1) + cur) / IIR;
 }
 

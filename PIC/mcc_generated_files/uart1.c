@@ -73,11 +73,16 @@ void UART1_Initialize(void)
     //Make sure to set LAT bit corresponding to TxPin as high before UART initialization
 #if defined BOARD1_MOTORDRIVER
 	//U1STASET = _U1STA_UTXEN_MASK;	//	Do not on TX until called by master.
-#else    
-	U1STASET = _U1STA_UTXEN_MASK;	//	Enable TX.
+#elif defined BOARD2_COMBINATION || defined BOARD3_SEPARATE
+	U1STASET = _U1STA_UTXEN_MASK;    //	Enable TX.
+#else
+#error
 #endif
-    U1MODESET = _U1MODE_ON_MASK;	// enabling UART ON bit
-    U1STASET = _U1STA_URXEN_MASK;
+    U1MODESET = _U1MODE_ON_MASK;	//  Enable UART ON bit
+
+#if defined BOARD1_MOTORDRIVER || defined USE_MONITOR_RX   //  T1RX is used by ADC for current sense. for monitor define this in env.h
+    U1STASET = _U1STA_URXEN_MASK;   //  Enable RX
+#endif
 }
 
 
