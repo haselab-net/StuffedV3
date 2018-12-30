@@ -3,7 +3,7 @@
 This repository contains Motor driver boards'schematics / PCB layouts, their firmwares and PC software.
 
 ## Folder structure
-- __PIC__ Firmware for pic.
+- __PIC__ Firmware for pic. WROOM with motor driver also use part of this code.
 - __WROOM__ Firmware for WROOM.
 - __PCRobokey__ Windows software to control the robot.
 
