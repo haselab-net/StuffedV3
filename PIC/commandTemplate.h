@@ -11,6 +11,7 @@
 	static int GetModelNumber(){ return BOARD##_MODEL_NUMBER;}		\
 	static int GetNTarget(){ return BOARD##_NTARGET;}				\
 	static int GetNMotor(){ return BOARD##_NMOTOR;}					\
+	static int GetNCurrent(){ return BOARD##_NCURRENT;}				\
 	static int GetNForce(){ return BOARD##_NFORCE;}					\
 
 #else
@@ -33,7 +34,7 @@ union CommandPacket##BOARD {										\
 	BOARDINFOFUNCS(BOARD)											\
 	struct {														\
 		unsigned char bytes_pad[3];									\
-		unsigned char bytes[1 + BOARD##_NMOTOR * 2 * 2];			\
+		unsigned char bytes[1 + BOARD##_NMOTOR*2 * 2];      		\
 	} __attribute__((__packed__));									\
 	struct {														\
 		unsigned char header_pad[3];								\
@@ -48,6 +49,16 @@ union CommandPacket##BOARD {										\
 			struct {/*  CI_SET_CMDLEN	*/							\
 				unsigned char len[CI_NCOMMAND];						\
 			} __attribute__((__packed__)) cmdLen;					\
+			struct { /*	 CI_ALL */									\
+				unsigned char controlMode;							\
+				unsigned char count;								\
+				short period;		/*	period to interpolate */	\
+				SDEC pos[BOARD##_NMOTOR];							\
+				union {                                             \
+                    SDEC vel[BOARD##_NMOTOR];						\
+    				SDEC jacob[BOARD##_NFORCE][BOARD##_NMOTOR];		\
+                };                                                  \
+			} __attribute__((__packed__)) all;						\
 			struct {/*  CI_DIRECT	*/								\
 				SDEC pos[BOARD##_NMOTOR];							\
 				SDEC vel[BOARD##_NMOTOR];							\
@@ -59,7 +70,7 @@ union CommandPacket##BOARD {										\
 			} __attribute__((__packed__)) interpolate;				\
 			struct { /*	 CI_FORCE_CONTROL */						\
 				SDEC pos[BOARD##_NMOTOR];							\
-				SDEC Jacob[BOARD##_NFORCE][BOARD##_NMOTOR];			\
+				SDEC jacob[BOARD##_NFORCE][BOARD##_NMOTOR];			\
 				short period;		/*	period to interpolate */	\
 				unsigned char count;								\
 			} __attribute__((__packed__)) forceControl;				\
@@ -81,6 +92,7 @@ enum BOARD##CommandLenEnum{																	\
 	BOARD##_CLEN_NONE = 1,																	\
 	BOARD##_CLEN_BOARD_INFO = 1,															\
 	BOARD##_CLEN_SET_CMDLEN = 1+sizeof_field(union CommandPacket##BOARD, cmdLen),			\
+	BOARD##_CLEN_ALL = 1+sizeof_field(union CommandPacket##BOARD, all),						\
     BOARD##_CLEN_SENSOR = 1,																\
 	BOARD##_CLEN_DIRECT = 1+sizeof_field(union CommandPacket##BOARD, direct),				\
     BOARD##_CLEN_INTERPOLATE = 1+sizeof_field(union CommandPacket##BOARD, interpolate),		\
@@ -93,6 +105,7 @@ const unsigned char cmdPacketLen##BOARD[CI_NCOMMAND] = {			\
     BOARD##_CLEN_NONE,												\
     BOARD##_CLEN_BOARD_INFO,										\
 	BOARD##_CLEN_SET_CMDLEN,										\
+	BOARD##_CLEN_ALL,												\
 	BOARD##_CLEN_SENSOR,											\
     BOARD##_CLEN_DIRECT,											\
     BOARD##_CLEN_INTERPOLATE,										\
@@ -107,7 +120,7 @@ union ReturnPacket##BOARD {										\
 	BOARDINFOFUNCS(BOARD)										\
 	struct {													\
 		unsigned char bytes_pad[3];								\
-		unsigned char bytes[1 + BOARD##_NMOTOR * 2 * 2];		\
+		unsigned char bytes[1 + BOARD##_NMOTOR*2*2 + BOARD##_NCURRENT*2 + BOARD##_NFORCE*2];		\
 	}__attribute__((__packed__));								\
 	struct {													\
 		unsigned char header_pad[3];							\
@@ -123,10 +136,21 @@ union ReturnPacket##BOARD {										\
 				unsigned char modelNumber;						\
 				unsigned char nTarget;							\
 				unsigned char nMotor;							\
+				unsigned char nCurrent;							\
 				unsigned char nForce;							\
 			}__attribute__((__packed__)) boardInfo;				\
+			struct {		 /*	 CI_ALL */						\
+				unsigned char controlMode;						\
+				unsigned char countOfRead;						\
+				unsigned short tick;							\
+				SDEC pos[BOARD##_NMOTOR];						\
+				SDEC vel[BOARD##_NMOTOR];						\
+				SDEC current[BOARD##_NCURRENT];					\
+				SDEC force[BOARD##_NFORCE];						\
+			}__attribute__((__packed__)) all;					\
 			struct {		 /*	 CI_SENSOR */					\
 				SDEC pos[BOARD##_NMOTOR];						\
+				SDEC current[BOARD##_NCURRENT];					\
 				SDEC force[BOARD##_NFORCE];						\
 			}__attribute__((__packed__)) sensor;				\
 			struct {		 /*	 CI_DIRECT */					\
@@ -144,6 +168,7 @@ union ReturnPacket##BOARD {										\
 enum BOARD##ReturnLenEnum{										\
 	BOARD##_RLEN_NONE = 0,										\
 	BOARD##_RLEN_BOARD_INFO = 1+sizeof_field(union ReturnPacket##BOARD, boardInfo),		\
+	BOARD##_RLEN_ALL = 1 + sizeof_field(union ReturnPacket##BOARD, all),				\
 	BOARD##_RLEN_SENSOR = 1 + sizeof_field(union ReturnPacket##BOARD, sensor),			\
 	BOARD##_RLEN_DIRECT = 1+sizeof_field(union ReturnPacket##BOARD, direct),			\
     BOARD##_RLEN_INTERPOLATE = 1+sizeof_field(union ReturnPacket##BOARD, interpolate),	\
@@ -154,6 +179,7 @@ const unsigned char retPacketLen##BOARD[CI_NCOMMAND]={									\
     BOARD##_RLEN_NONE,																	\
     BOARD##_RLEN_BOARD_INFO,															\
     BOARD##_RLEN_NONE,																	\
+	BOARD##_RLEN_ALL,																	\
 	BOARD##_RLEN_SENSOR,																\
     BOARD##_RLEN_DIRECT,																\
     BOARD##_RLEN_INTERPOLATE,															\
@@ -175,6 +201,7 @@ enum BoardInfo{                     							\
     NTARGET = BOARD##_NTARGET,        							\
     NMOTOR = BOARD##_NMOTOR,        							\
     NFORCE = BOARD##_NFORCE,         							\
+    NCURRENT = BOARD##_NCURRENT        							\
 };																\
 typedef union CommandPacket##BOARD CommandPacket;				\
 typedef union ReturnPacket##BOARD ReturnPacket;					\

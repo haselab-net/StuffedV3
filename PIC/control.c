@@ -45,7 +45,7 @@ void updateMotorState(){
     }
 }
 
-void setPwmWithLimit(int ch, SDEC ratio){
+inline void setPwmWithLimit(int ch, SDEC ratio){
     if (ratio > torqueLimit.max[ch]) ratio = torqueLimit.max[ch];
     if (ratio < torqueLimit.min[ch]) ratio = torqueLimit.min[ch];
 	setPwm(ch, ratio);

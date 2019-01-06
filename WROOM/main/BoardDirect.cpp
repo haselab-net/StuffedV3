@@ -6,11 +6,11 @@ extern "C"{
 
 BoardDirect::BoardDirect():Board(-1, cmdPacketLenBD0, retPacketLenBD0){
 }
-void BoardDirect::WriteCmd(UdpCmdPacket& packet){
-    base::WriteCmd(packet);
+void BoardDirect::WriteCmd(unsigned short commandId, BoardCmdBase& packet){
+    base::WriteCmd(commandId, packet);
     ExecCmd(&cmd, sizeof(cmd));
 }
-void BoardDirect::ReadRet(UdpRetPacket& packet){
+void BoardDirect::ReadRet(unsigned short cmd,  BoardRetBase& packet){
     ExecRet((void*)&ret, sizeof(ret));
-    base::ReadRet(packet);
+    base::ReadRet(cmd, packet);
 }

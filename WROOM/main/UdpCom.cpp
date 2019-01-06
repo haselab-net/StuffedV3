@@ -22,6 +22,8 @@
 
 
 UdpCom udpCom;
+bool UdpCom::bDebug = false;
+
 static const char* Tag = "UdpCom";
 
 static const int NHEADER = UdpPacket::HEADERLEN/2;
@@ -31,9 +33,11 @@ int UdpCmdPacket::CommandLen() {
 	case CI_BOARD_INFO:		//	
 		return NHEADER * 2;
 	//	case CI_SET_CMDLEN is only for uart
+	case CI_ALL:			// direct/interpolate/forceControl + controlMode 
+	 	return (NHEADER + allBoards.GetNTotalMotor()*3 + 2 + 1) * 2; 
 	case CI_SENSOR:			//	
-		 return NHEADER * 2;
-	case CI_DIRECT:			//	vel pos
+		return NHEADER * 2;
+	case CI_DIRECT:			//	pos vel
 		return (NHEADER + allBoards.GetNTotalMotor() * 2) * 2;
 	case CI_INTERPOLATE: 	//	pos period targetCount
 		return (NHEADER + allBoards.GetNTotalMotor() + 2) * 2;
@@ -54,12 +58,15 @@ int UdpCmdPacket::CommandLen() {
 }
 void UdpRetPacket::SetLength() {
 	switch (command){
-	case CI_BOARD_INFO:		//	model nTarget nMotor nForce macAddress
-		length = (NHEADER + 4) * 2 + 6; break;
+	case CI_BOARD_INFO:		//	model nTarget nMotor nCurrent nForce macAddress
+		length = (NHEADER + 5) * 2 + 6; break;
 	//	case CI_SET_CMDLEN is only for uart
-	case CI_SENSOR:
-		length = (NHEADER + allBoards.GetNTotalMotor() + allBoards.GetNTotalForce()) * 2; break;
-	case CI_DIRECT:			//	vel pos
+	case CI_ALL:			//	pos vel current force
+		length = (NHEADER + allBoards.GetNTotalMotor()*2 + allBoards.GetNTotalCurrent() + allBoards.GetNTotalForce()) * 2; break;
+	break;
+	case CI_SENSOR:			//	pos force
+		length = (NHEADER + allBoards.GetNTotalMotor() + allBoards.GetNTotalCurrent() + allBoards.GetNTotalForce()) * 2; break;
+	case CI_DIRECT:			//	pos vel
 		length = (NHEADER + allBoards.GetNTotalMotor() * 2) * 2; break;
 	case CI_INTERPOLATE:	//	pos targetCountRead tickMin tickMax remain vacancy
 	case CI_FORCE_CONTROL: 
@@ -89,15 +96,19 @@ static void onReceive(void *arg, struct udp_pcb *pcb, struct pbuf *p, const ip_a
 {
 	((UdpCom*)arg)->OnReceive(pcb, p, addr, port);
 }
+#if !UDP_UART_ASYNC
 static void execCommand(void* udpCom){
 	((UdpCom*) udpCom)->ExecCommandLoop();
 }
+#endif
 void UdpCom::Init() {
 	udp = NULL;
 	recvRest = 0;
 	commandCount = 0;
 	//ConnectWifi();
+	#if !UDP_UART_ASYNC
     xTaskCreate(execCommand, "ExeCmd", 8*1024, &udpCom, tskIDLE_PRIORITY, &taskExeCmd);
+	#endif
 }
 void UdpCom::Start(){
 	udp_init();
@@ -126,9 +137,9 @@ void UdpCom::OnReceive(struct udp_pcb * upcb, struct pbuf * top, const ip_addr_t
 		if (readLen == cmdLen){
 			if (cmdLen == UdpPacket::HEADERLEN){
 				cmdLen = recv->CommandLen();
-#if 0
-				printf("L=%d Cm=%d Ct=%d received from %s.\n", recv->length, recv->command, recv->count, ipaddr_ntoa(addr));
-#endif
+				if (bDebug){
+					printf("L=%d Cm=%d Ct=%d received from %s.\n", recv->length, recv->command, recv->count, ipaddr_ntoa(addr));
+				} 
 			}
 			if (readLen == cmdLen){
 				recv->returnIp = *addr;
@@ -137,14 +148,19 @@ void UdpCom::OnReceive(struct udp_pcb * upcb, struct pbuf * top, const ip_addr_t
 				}
 				if (recv->command == CIU_GET_IPADDRESS) {
 					recvs.Write();
+					#if !UDP_UART_ASYNC
 					xTaskNotifyGive(taskExeCmd);
+					#endif
 				}
 				else if (recv->count == commandCount + 1) {		// check and update counter
 					commandCount++;
 					recvs.Write();
+					#if !UDP_UART_ASYNC
 					xTaskNotifyGive(taskExeCmd);
+					#endif
 				}
 				else {
+					//	Command count is not matched. There was some packet losses. 
 					ESP_LOGI(Tag, "ignore Ct:%d|%d Cm:%d\n", recv->count, commandCount, recv->command);
 				}
 				if (!recvs.WriteAvail()){
@@ -176,10 +192,10 @@ void UdpCom::ExecCommandLoop(){
 			UdpCmdPacket* recv = &recvs.Peek();
 			if (CI_BOARD_INFO < recv->command && recv->command < CI_NCOMMAND) {
 				//	send packet to allBoards
-				allBoards.WriteCmd(*recv);
+				allBoards.WriteCmd(recv->command, *recv);
 				PrepareRetPacket(recv->command);
 				if (allBoards.HasRet(recv->command)){
-					allBoards.ReadRet(send);
+					allBoards.ReadRet(recv->command, send, true);
 				}
 				SendRetPacket(recv->returnIp);
 			}
@@ -225,7 +241,7 @@ void UdpCom::ExecUdpCommand(UdpCmdPacket& recv) {
 	{
 	case CI_BOARD_INFO: 
 		PrepareRetPacket(recv.command);
-		send.SetBoardInfo(allBoards.GetSystemId(), allBoards.GetNTarget(), allBoards.GetNTotalMotor(), allBoards.GetNTotalForce());
+		send.SetBoardInfo(allBoards.GetSystemId(), allBoards.GetNTarget(), allBoards.GetNTotalMotor(), allBoards.GetNTotalCurrent(), allBoards.GetNTotalForce());
 		SendRetPacket(recv.returnIp);
 		break;
 	case CIU_SET_IPADDRESS:
@@ -262,7 +278,7 @@ void UdpCom::ExecUdpCommand(UdpCmdPacket& recv) {
 		SendRetPacket(recv.returnIp);
 		break;
 	default:
-		ESP_LOGI(Tag, "Invalid command %d count %d received from %s at %x.\n", 
+		ESP_LOGE(Tag, "Invalid command %d count %d received from %s at %x.\n", 
 			(int)recv.command, (int)recv.count, ipaddr_ntoa(&recv.returnIp), (unsigned)&recv);
 		break;
 	}

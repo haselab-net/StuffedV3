@@ -59,9 +59,11 @@ struct Targets{
 extern struct Targets targets;
 
 enum ControlMode{
-    CM_DIRECT,
-    CM_INTERPOLATE,
-    CM_FORCE_CONTROL,
+    CM_SKIP,				//	This command dose not contain control information and must be skipped.
+	CM_TORQUE,				//	Torque control mode.
+	CM_DIRECT,				//	Set target position and velocity directly.
+    CM_INTERPOLATE,			//	Interpolate target position.
+    CM_FORCE_CONTROL,		//	Interpolate target position + local feedback loop for force control/
 };
 extern enum ControlMode controlMode;
 
@@ -88,7 +90,6 @@ void controlLoop();
 
 extern SDEC forceOffset[NFORCE];
 
-#if defined BOARD1_MOTORDRIVER || BOARD2_COMBINATION
 inline SDEC getForceRaw(int ch){
 	if (ch == 0) return mcos[3];
 	if (ch == 1) return msin[3];
@@ -99,29 +100,6 @@ inline SDEC getForce(int ch){
 	if (ch == 1) return msin[3] - forceOffset[ch];
 	return 0;
 }
-#elif defined BOARD3_SEPARATE
-inline SDEC getForceRaw(int ch){
-    int off = 0;
-#if NFORCE == 6
-	if (ch == 0) return mcos[3];
-	if (ch == 1) return msin[3];
-    off = 2;
-#endif
-	if (ch-off < 4) return currentSense[ch-off];
-	return 0;
-}
-inline SDEC getForce(int ch){
-    int off = 0;
-#if NFORCE == 6
-	if (ch == 0) return mcos[3] - forceOffset[ch];
-	if (ch == 1) return msin[3] - forceOffset[ch];
-    off = 2;
-#endif
-	if (ch-off < 4) return currentSense[ch-off] - forceOffset[ch];
-	return 0;
-}
-#endif
-
 inline short FilterForADC(short prev, short cur){
     const short IIR = 16;
     return (prev*(IIR-1) + cur) / IIR;

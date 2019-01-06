@@ -26,7 +26,9 @@ public:
 	void Init(uart_config_t conf, int rxPin, int txPin);
 	void EnumerateBoard();
 	void CreateTask();
-	void RecvTask();
-	void SendTask();
+	void RecvUart();
+	void SendUart();
+//	void RecvTask();
+//	void SendTask();
 };
 
