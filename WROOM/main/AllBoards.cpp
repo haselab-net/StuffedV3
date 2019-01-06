@@ -36,16 +36,12 @@ UartForBoards uart1(UART_NUM_1, &allBoards);
 UartForBoards uart2(UART_NUM_2, &allBoards);
 AllBoards::AllBoards(){
 	nBoard = 0;
-	mutex = xSemaphoreCreateMutex();
 	uart[0] = &uart1;
 	uart[1] = &uart2;
 	boardDirect = new BoardDirect();
-	seUartFinished = xSemaphoreCreateCounting(0xFFFF, 0);
 }
 AllBoards::~AllBoards(){
-	vSemaphoreDelete(seUartFinished);
 	delete boardDirect;
-	vSemaphoreDelete(mutex);
 }
 #if UDP_UART_ASYNC
 static void execLoop(void* arg){
@@ -183,15 +179,6 @@ void AllBoards::WriteCmd(unsigned short commandId, BoardCmdBase& packet) {
 	for (int i = 0; i < NUART; ++i) {
 		uart[i]->RecvUart();
 	}
-/*	//	Start uart communications 
-	for (int i = 0; i < NUART; ++i) {
-		xTaskNotifyGive(uart[i]->taskSend);
-	}
-	//	Wait for ending of uart communications
-	for (int i = 0; i < NUART; ++i) {
-		xSemaphoreTake(seUartFinished, portMAX_DELAY);
-	}
-	*/
 }
 void AllBoards::ReadRet(unsigned short commandId, BoardRetBase& packet){
 	boardDirect->ReadRet(commandId, packet);

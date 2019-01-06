@@ -107,7 +107,6 @@ struct RobotState: public BoardRetBase{
 
 //
 class AllBoards{
-	SemaphoreHandle_t mutex;
 public:
 	RobotState state;
 	RobotCommand command;
@@ -118,7 +117,6 @@ public:
 	tiny::vector<DeviceMap> currentMap;
 	UartForBoards* uart[NUART];
 	BoardDirect* boardDirect;
-	SemaphoreHandle_t seUartFinished;
 	#if UDP_UART_ASYNC
 	TaskHandle_t taskExec; 
 	#endif
