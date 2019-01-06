@@ -644,7 +644,7 @@ namespace Robokey
 
         private void btResetMotors_Click(object sender, EventArgs e)
         {
-            udpComm.SendResetSensor(ResetSensorFlag.RSF_MOTOR);
+            udpComm.SendResetSensor(ResetSensorFlags.RSF_MOTOR);
             for (int i = 0; i < motors.Count; ++i)
             {
                 motors[i].Offset = udpComm.pose.values[i];
@@ -758,6 +758,11 @@ namespace Robokey
                 int v = udpComm.pose.values[i] - motors[i].Offset;
                 tbState.Text += string.Format("{0,9}", v.ToString("D"));
             }
+            tbState.Text += "\r\nCurrent:";
+            for (int i = 0; i < udpComm.current.Length; ++i)
+            {
+                tbState.Text += string.Format("{0,9}", udpComm.current[i].ToString("D"));
+            }
             tbState.Text += "\r\nForce:";
             for (int i = 0; i < udpComm.force.Length; ++i)
             {
@@ -827,7 +832,7 @@ namespace Robokey
 
         private void btCalibForce_Click(object sender, EventArgs e)
         {
-            udpComm.SendResetSensor(ResetSensorFlag.RSF_FORCE);
+            udpComm.SendResetSensor(ResetSensorFlags.RSF_FORCE);
         }
 
         private void btSetLimitMax_Click(object sender, EventArgs e)

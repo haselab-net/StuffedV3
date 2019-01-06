@@ -25,18 +25,33 @@ void ecSetCmdLen(){
 		cmdPacketLens[command.boardId][c] = command.cmdLen.len[c];
 	}
 }
+void ecAll(){
+    if (command.all.controlMode == CM_DIRECT){
+        int i;
+        SDEC newPos, diff;
+        controlSetMode(CM_DIRECT);
+        for(i=0; i<NMOTOR; ++i){
+            newPos = command.all.pos[i];
+            diff = newPos - L2SDEC(motorTarget.pos[i]);
+            motorTarget.pos[i] += S2LDEC(diff);
+            motorTarget.vel[i] = S2LDEC(command.all.vel[i]);
+        }
+    }else if (command.all.controlMode == CM_INTERPOLATE){
+        controlSetMode(CM_INTERPOLATE);
+        targetsAddOrUpdate(command.all.pos, command.all.period, command.all.count);
+    }else if (command.all.controlMode == CM_FORCE_CONTROL){
+        controlSetMode(CM_FORCE_CONTROL);
+    	targetsForceControlAddOrUpdate(command.all.pos , command.all.jacob, command.all.period, command.all.count);
+    }
+}
 void ecDirect(){
     int i;
     static SDEC newPos, diff;
     controlSetMode(CM_DIRECT);
     for(i=0; i<NMOTOR; ++i){
-#if 1
         newPos = command.direct.pos[i];
         diff = newPos - L2SDEC(motorTarget.pos[i]);
         motorTarget.pos[i] += S2LDEC(diff);
-#else
-        motorTarget.pos[i] = S2LDEC(command.direct.pos[i]);
-#endif
         motorTarget.vel[i] = S2LDEC(command.direct.vel[i]);
     }
 }
@@ -46,7 +61,7 @@ void ecInterpolate(){
 }
 void ecForceControl(){
     controlSetMode(CM_FORCE_CONTROL);
-	targetsForceControlAddOrUpdate(command.forceControl.pos , command.forceControl.Jacob, command.forceControl.period, command.forceControl.count);
+	targetsForceControlAddOrUpdate(command.forceControl.pos , command.forceControl.jacob, command.forceControl.period, command.forceControl.count);
 }
 void ecPdParam(){
     int i;
@@ -89,10 +104,29 @@ void rcBoardInfo(){
 	retPacket.boardInfo.nMotor = NMOTOR;
 	retPacket.boardInfo.nForce = NFORCE;
 }
+void rcAll(){
+    int i;
+    retPacket.all.controlMode = controlMode;
+    for(i=0; i<NMOTOR; ++i){
+        retPacket.all.pos[i] = L2SDEC(motorState.pos[i]);
+        retPacket.all.vel[i] = L2SDEC(motorState.vel[i]);
+    }
+    for(i=0; i<NCURRENT; ++i){
+		retPacket.all.current[i] = currentSense[i];
+    }
+    for(i=0; i<NFORCE; ++i){
+		retPacket.all.force[i] = getForce(i);
+    }
+    retPacket.all.countOfRead = targets.countOfRead;
+	retPacket.all.tick = targets.tick;
+}
 void rcSensor(){
     int i;
     for(i=0; i<NMOTOR; ++i){
 		retPacket.sensor.pos[i] = L2SDEC(motorState.pos[i]);
+    }
+    for(i=0; i<NCURRENT; ++i){
+		retPacket.sensor.current[i] = currentSense[i];
     }
     for(i=0; i<NFORCE; ++i){
 		retPacket.sensor.force[i] = getForce(i);
@@ -126,7 +160,8 @@ ExecCommand* execCommand[CI_NCOMMAND] = {
 	ecNop,
 	ecNop,		//	board info
 	ecSetCmdLen,
-	ecNop,
+	ecAll,
+    ecNop,
 	ecDirect,
     ecInterpolate,	//	interpolate
 	ecForceControl,	//	force control
@@ -138,6 +173,7 @@ ExecCommand* returnCommand[CI_NCOMMAND] = {
     rcNop,
 	rcBoardInfo,
     rcNop,
+    rcAll,
 	rcSensor,
     rcDirect,
     rcInterpolate,

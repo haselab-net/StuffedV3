@@ -1,8 +1,8 @@
 #include "env.h"
 #include <stdarg.h>
 
-//int logLevel = LOG_LEVEL_ERROR;
-int logLevel = LOG_LEVEL_INFO;
+int logLevel = LOG_LEVEL_ERROR;
+//int logLevel = LOG_LEVEL_INFO;    //  too heavy for real usage.
 
 
 

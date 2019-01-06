@@ -3,7 +3,7 @@
 #include "UdpCom.h"
 #include "esp_log.h"
 
-#define CMDWAITMAXLEN	120
+#define CMDWAITMAXLEN	200
 template <class CMD, class RET>
 class Board: public BoardBase{
 public:
@@ -21,6 +21,7 @@ public:
 	int GetModelNumber() { return CMD::GetModelNumber(); }
 	int GetNTarget() { return CMD::GetNTarget();  }
 	int GetNMotor() { return CMD::GetNMotor(); }
+	int GetNCurrent() { return CMD::GetNCurrent(); }
 	int GetNForce() { return CMD::GetNForce(); }
 	int GetBoardId() { return cmd.boardId;  }
 	int GetRetCommand() { return ret.commandId; }
@@ -35,9 +36,9 @@ public:
 	unsigned short GetTick(){
 		return ret.interpolate.tick;
 	}
-	void WriteCmd(UdpCmdPacket& packet) {
-		cmd.commandId = packet.command;
-		switch (packet.command){
+	void WriteCmd(unsigned short command, BoardCmdBase& packet) {
+		cmd.commandId = command;
+		switch (command){
 		case CI_DIRECT:
 			for (int i = 0; i < GetNMotor(); ++i) {
 				cmd.direct.pos[i] = packet.GetMotorPos(motorMap[i]);
@@ -58,7 +59,7 @@ public:
 					assert(GetNMotor() == 3);
 					assert(GetNForce() == 2);
 					assert(forceMap[j] < 4);
-					cmd.forceControl.Jacob[j][i] = packet.GetForceControlJacob(forceMap[j], i);
+					cmd.forceControl.jacob[j][i] = packet.GetForceControlJacob(forceMap[j], i);
 				}
 				cmd.forceControl.period = packet.GetPeriod();
 				cmd.forceControl.count = packet.GetTargetCount();
@@ -81,8 +82,20 @@ public:
 			break;
 		}
 	}
-	void ReadRet(UdpRetPacket& packet) {
-		switch (packet.command) {
+	void ReadRet(unsigned short cmd, BoardRetBase& packet) {
+		switch (cmd) {
+		case CI_ALL:
+			for (int i = 0; i < GetNMotor(); ++i) {
+				packet.SetMotorPos(ret.all.pos[i], motorMap[i]);
+				packet.SetMotorVel(ret.all.vel[i], motorMap[i]);
+			}
+			for (int i = 0; i < GetNCurrent(); ++i) {
+				packet.SetCurrent(ret.all.current[i], currentMap[i]);
+			}
+			for (int i = 0; i < GetNForce(); ++i) {
+				packet.SetForce(ret.all.force[i], forceMap[i]);
+			}
+			break;
 		case CI_DIRECT:
 			for (int i = 0; i < GetNMotor(); ++i) {
 				packet.SetMotorPos(ret.direct.pos[i], motorMap[i]);
@@ -101,6 +114,9 @@ public:
 			//ESP_LOGI("UART", "M0:%x", (int)ret.sensor.pos[0]);
 			for (int i = 0; i < GetNMotor(); ++i) {
 				packet.SetMotorPos(ret.sensor.pos[i], motorMap[i]);
+			}
+			for (int i = 0; i < GetNCurrent(); ++i) {
+				packet.SetCurrent(ret.sensor.current[i], currentMap[i]);
 			}
 			for (int i = 0; i < GetNForce(); ++i) {
 				packet.SetForce(ret.sensor.force[i], forceMap[i]);

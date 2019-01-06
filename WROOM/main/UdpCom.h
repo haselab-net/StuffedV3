@@ -2,9 +2,10 @@
 
 #include "ArrayRing.h"
 #include "esp_event_loop.h"
-//#include "UartForBoards.h"
+#include "esp_log.h"
+#include "WroomEnv.h"
+#include "BoardBase.h"
 #include "AllBoards.h"
-
 
 /**	Udp packet from PC
 	Each command has sequential counter to detect packet drop.
@@ -26,51 +27,71 @@ public:
 		}__attribute__((__packed__));
 	};
 };
-class UdpCmdPacket: public UdpPacket{
+class UdpCmdPacket: public UdpPacket, public BoardCmdBase{
 public:
 	ip_addr_t returnIp;
 	int CommandLen();	///<	length of packet in bytes
+	short GetControlMode(){
+		if (command == CI_ALL){
+			//	TBW hase
+		}else{
+		}
+		ESP_LOGE("UdpComPacket", "Control mode is not included in a packet of command id %d", command);
+		return -1;
+	}
 	short GetMotorPos(int i) {
 		return data[i];
 	}
 	short GetMotorVel(int i) {
 		return data[allBoards.GetNTotalMotor() + i];
 	}
-	short GetPeriod() const {
+	short GetPeriod() {
 		return data[allBoards.GetNTotalMotor()];
 	}
-	short GetTargetCount() const {
+	short GetTargetCount() {
 		return data[allBoards.GetNTotalMotor()+1];
 	}
-	short GetForceControlJacob(int j, int i) const {	//	j: row, i: col,
+	short GetForceControlJacob(int j, int i) {	//	j: row, i: col,
 		//	The matrix is 2 row x  3 col or 2*nBoard row x 3 col.
 	//	int b = j / 2;
 	//	int r = j % 2;
 	//	return data[allBoards.GetNTotalMotor() + 2 + b*6 + r*3 + i];
 		return data[allBoards.GetNTotalMotor() + 2 + j*3 + i];
 	}
-	short GetControlK(int i) const {
+	short GetControlK(int i) {
 		return data[i];
 	}
-	short GetControlB(int i) const {
+	short GetControlB(int i) {
 		return data[allBoards.GetNTotalMotor() + i];
 	}
-	short GetTorqueMin(int i) const {
+	short GetTorqueMin(int i) {
 		return data[i];
 	}
-	short GetTorqueMax(int i) const {
+	short GetTorqueMax(int i) {
 		return data[allBoards.GetNTotalMotor() + i];
 	}
-	short GetResetSensorFlags() const {
-		return data[0];
+	short GetResetSensorFlags() {
+		if (command == CI_ALL){
+			//TBW hase
+			return data[0];
+		}else if (command == CI_RESET_SENSOR){
+			return data[0];
+		}else{
+			return RSF_NONE;
+		}
 	}
 };
-class UdpRetPacket:public UdpPacket{
+class UdpRetPacket:public UdpPacket, public BoardRetBase{
 public:
 	//	Set length of the packet based on command.
 	void SetLength();
 	void ClearData();
 	void SetCommand(short cmd) { command = cmd; }
+	void SetControlMode(short p){
+		if (command == CI_ALL){
+			//TBW hase	ALLの場合だけ、パケットの中身もずれるので、Robokeyを含めて直す必要あり
+		}
+	}
 	void SetMotorPos(short p, int i) {
 		data[i] = p;
 	}
@@ -94,15 +115,19 @@ public:
 		data[allBoards.GetNTotalMotor()+4] = t;		
 	}
 	//	sense
-	void SetForce(short f, int i) {
-		data[allBoards.GetNTotalMotor() + i] = f;
+	void SetCurrent(short c, int i) {
+		data[allBoards.GetNTotalMotor() + i] = c;
 	}
-	void SetBoardInfo(int systemId, int nTarget, int nMotor, int nForce) {
+	void SetForce(short f, int i) {
+		data[allBoards.GetNTotalMotor() + allBoards.GetNTotalCurrent() + i] = f;
+	}
+	void SetBoardInfo(int systemId, int nTarget, int nMotor, int nCurrent, int nForce) {
 		data[0] = systemId;
 		data[1] = nTarget;
 		data[2] = nMotor;
-		data[3] = nForce;
-		esp_read_mac((uint8_t*)(data+4), ESP_MAC_WIFI_STA);	// 6 bytes
+		data[3] = nCurrent;
+		data[4] = nForce;
+		esp_read_mac((uint8_t*)(data+5), ESP_MAC_WIFI_STA);	// 6 bytes
 	}
 };
 
@@ -111,6 +136,8 @@ class UdpCmdPackets:public ArrayRing<UdpCmdPacket, 20>{
 
 class UdpCom {
 public:
+	static bool bDebug;
+
 	const int port = 9090;
 	struct udp_pcb* udp;
 	ip_addr_t ownerIp;
@@ -119,8 +146,9 @@ public:
 	unsigned short commandCount;
 	int recvRest;
 	UdpRetPacket send;
+	#if !UDP_UART_ASYNC
 	TaskHandle_t taskExeCmd; 
-
+	#endif
 #if 0 
 	void ConnectWifi();
 	void OnWifi(system_event_t* event);

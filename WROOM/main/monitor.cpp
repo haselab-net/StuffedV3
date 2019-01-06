@@ -13,6 +13,7 @@
 #include "rom/uart.h"
 #include "driver/uart.h"
 
+#include "WroomEnv.h"
 #include "UdpCom.h"
 #include "AllBoards.h"
 #include "TouchSensing.h"
@@ -174,7 +175,9 @@ class MCWriteCmd: public MonitorCommandBase{
         recv->length = recv->CommandLen();
         recv->count = udpCom.commandCount + 1;
         udpCom.recvs.Write();
+        #if !UDP_UART_ASYNC
         xTaskNotifyGive(udpCom.taskExeCmd);
+        #endif
     }
 } mcWriteCmd;
 

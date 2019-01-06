@@ -13,6 +13,7 @@ namespace Robokey
         public int systemId;
         public int nTarget;
         public int nMotor;
+        public int nCurrent;
         public int nForce;
         public byte[] macAddress = new byte[6];
         public void Clear()
@@ -27,6 +28,7 @@ namespace Robokey
             rv.systemId = systemId;
             rv.nTarget = nTarget;
             rv.nMotor = nMotor;
+            rv.nCurrent = nCurrent;
             rv.nForce = nForce;
             macAddress.CopyTo(rv.macAddress, 0);
             return rv;
@@ -36,6 +38,7 @@ namespace Robokey
             if (systemId - s.systemId != 0) return systemId - s.systemId;
             if (nTarget - s.nTarget != 0) return nTarget - s.nTarget;
             if (nMotor - s.nMotor != 0) return nMotor - s.nMotor;
+            if (nCurrent - s.nCurrent != 0) return nCurrent - s.nCurrent;
             return nForce - s.nForce;
         }
     };
@@ -65,6 +68,7 @@ namespace Robokey
                 pose = new Pose(robotInfo.nMotor);
                 velocity = new Pose(robotInfo.nMotor);
                 force = new short[robotInfo.nForce];
+                current = new short[robotInfo.nCurrent];
                 nInterpolateTotal = robotInfo.nTarget;
                 nInterpolateVacancy = nInterpolateTotal;
                 if (OnUpdateRobotInfo != null)
@@ -86,7 +90,8 @@ namespace Robokey
         //  robot state
         public PoseData pose = null;                        //  current angles of motors; ReadPose
         public PoseData velocity = null;                    //  current velocities of motors; ReadVelocity
-        public short [] force = null;                       //  force sensor's values
+        public short[] current = null;                      //  current sensor's values
+        public short[] force = null;                       //  force sensor's values
         public int nInterpolateTotal=0;                     //  capacity of interpolation targets.
         public byte interpolateTargetCountOfWrite = 0;      //  count of interpolation at write cursor
         public byte interpolateTargetCountOfRead = 0;       //  count of interpolation at read cursor
@@ -219,6 +224,7 @@ namespace Robokey
             info.systemId = ReadShort(ref cur, buf);
             info.nTarget = ReadShort(ref cur, buf);
             info.nMotor = ReadShort(ref cur, buf);
+            info.nCurrent = ReadShort(ref cur, buf);
             info.nForce = ReadShort(ref cur, buf);
             for (int i = 0; i < 6; ++i)
             {
@@ -231,6 +237,13 @@ namespace Robokey
         {
             for (int i = 0; i < pose.values.Length; ++i) {
                 ReadShortExt(ref pose.values[i], ref cur, buf);
+            }
+        }
+        void ReadCurrent(ref int cur, byte[] buf)
+        {
+            for (int i = 0; i < current.Length; ++i)
+            {
+                current[i] = ReadShort(ref cur, buf);
             }
         }
         void ReadForce(ref int cur, byte[] buf)
@@ -342,6 +355,7 @@ namespace Robokey
                                 break;
                             case CommandId.CI_SENSOR:
                                 ReadPose(ref cur, receiveBytes);
+                                ReadCurrent(ref cur, receiveBytes);
                                 ReadForce(ref cur, receiveBytes);
                                 CallUpdateRobotState();
                                 break;
@@ -537,13 +551,13 @@ namespace Robokey
             }
             PutCommand(packet, p);
         }
-        public void SendResetSensor(ResetSensorFlag f) {
+        public void SendResetSensor(ResetSensorFlags f) {
             byte[] packet = new byte[1000];
             int p = 0;
             WriteHeader((int)CommandId.CI_RESET_SENSOR, ref p, packet);
             WriteShort((short)f, ref p, packet);
             PutCommand(packet, p);
-            if ((f & ResetSensorFlag.RSF_MOTOR) != 0 && pose != null)
+            if ((f & ResetSensorFlags.RSF_MOTOR) != 0 && pose != null)
             {
                 for (int i = 0; i < pose.values.Count(); i++)
                 {
