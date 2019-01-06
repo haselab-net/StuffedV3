@@ -355,6 +355,7 @@ namespace Robokey
                                 break;
                             case CommandId.CI_SENSOR:
                                 ReadPose(ref cur, receiveBytes);
+                                ReadCurrent(ref cur, receiveBytes);
                                 ReadForce(ref cur, receiveBytes);
                                 CallUpdateRobotState();
                                 break;

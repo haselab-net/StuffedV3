@@ -135,7 +135,7 @@ public:
 	///	Write contents of the UdpCmdPacket to all boards. 
 	void WriteCmd(unsigned short commandId, BoardCmdBase& packet);	
 	///	Read returns of all boards to  UdpRetPacket.   bNext: start to read next UART data (send notify to recvTask).
-	void ReadRet(unsigned short commandId, BoardRetBase& packet, bool bNext);
+	void ReadRet(unsigned short commandId, BoardRetBase& packet);
 
 	void ExecLoop();
 };

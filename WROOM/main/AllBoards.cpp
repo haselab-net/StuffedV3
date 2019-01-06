@@ -64,8 +64,8 @@ void AllBoards::ExecLoop(){
 				allBoards.WriteCmd(recv->command, *recv);
 				udpCom.PrepareRetPacket(recv->command);
 				if (HasRet(recv->command)){
-					ReadRet(recv->command, udpCom.send, false);
-					ReadRet(recv->command, state, true);
+					ReadRet(recv->command, udpCom.send);
+					ReadRet(recv->command, state);
 					if (bDebug) ESP_LOGI("AllBoards::ExecLoop", "read ret %d.", recv->command);
 				}
 				udpCom.SendRetPacket(recv->returnIp);
@@ -83,7 +83,7 @@ void AllBoards::ExecLoop(){
 				last = state.position[3];
 				WriteCmd(CI_ALL, command);
 				command.controlMode = CM_SKIP;
-				ReadRet(CI_ALL, state, true);
+				ReadRet(CI_ALL, state);
 				int diff = state.position[3] - last;
 				if (diff < 0) diff = -diff;
 				if (diff > 100){
@@ -112,8 +112,6 @@ void AllBoards::Init() {
 	uart[1]->Init(uconf, U2TXPIN, U2RXPIN);
 	printf(". done.\n");
 	EnumerateBoard();
-	uart[0]->CreateTask();
-	uart[1]->CreateTask();
 	#if UDP_UART_ASYNC
 	xTaskCreate(execLoop, "ExecLoop", 8*1024, this, tskIDLE_PRIORITY, &taskExec);
 	#endif
@@ -195,7 +193,7 @@ void AllBoards::WriteCmd(unsigned short commandId, BoardCmdBase& packet) {
 	}
 	*/
 }
-void AllBoards::ReadRet(unsigned short commandId, BoardRetBase& packet, bool bNext){
+void AllBoards::ReadRet(unsigned short commandId, BoardRetBase& packet){
 	boardDirect->ReadRet(commandId, packet);
 	if (commandId == CI_INTERPOLATE || commandId == CI_FORCE_CONTROL) {
 		int diffMin = 0x100;
@@ -216,7 +214,6 @@ void AllBoards::ReadRet(unsigned short commandId, BoardRetBase& packet, bool bNe
 				if (tick < tickMin) tickMin = tick;
 				if (tick > tickMax) tickMax = tick;
 			}
-			//if (bNext) xTaskNotifyGive(uart[i]->taskRecv);	//	recv next
 		}		
 		state.targetCountReadMax = state.targetCountWrite - diffMin;
 		state.nTargetVacancy = state.nTargetMin - diffMax;
@@ -238,7 +235,6 @@ void AllBoards::ReadRet(unsigned short commandId, BoardRetBase& packet, bool bNe
 			for (int j = 0; j < uart[i]->boards.size(); ++j) {
 				uart[i]->boards[j]->ReadRet(commandId, packet);
 			}
-			//if(bNext) xTaskNotifyGive(uart[i]->taskRecv);	//	recv next
 		}		
 	}
 }

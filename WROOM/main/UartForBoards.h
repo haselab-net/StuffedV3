@@ -15,7 +15,6 @@ class UartForBoards :public UTRefCount {
 	AllBoards* allBoards;
 public:
 	static bool bDebug;
-	TaskHandle_t taskRecv, taskSend;
 	struct Cur {
 		volatile int board;	//	boards[board]
 	};
@@ -25,10 +24,7 @@ public:
 	UartForBoards(uart_port_t ch, AllBoards* u);
 	void Init(uart_config_t conf, int rxPin, int txPin);
 	void EnumerateBoard();
-	void CreateTask();
 	void RecvUart();
 	void SendUart();
-//	void RecvTask();
-//	void SendTask();
 };
 

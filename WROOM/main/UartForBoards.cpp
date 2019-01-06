@@ -18,18 +18,6 @@ void UartForBoards::Init(uart_config_t conf, int txPin, int rxPin){
 	uart_set_pin(port, txPin, rxPin, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
 	uart_driver_install(port, 512, 512, 10, NULL, 0);
 }
-/*
-static void recvTask(void* a){
-	((UartForBoards*)a)->RecvTask();
-}
-static void sendTask(void* a){
-	((UartForBoards*)a)->SendTask();
-}
-*/
-void UartForBoards::CreateTask(){
-//	xTaskCreate(recvTask, "RecvTask", 4*1024, this, 10, &taskRecv);
-//	xTaskCreate(sendTask, "SendTask", 4*1024, this, 12, &taskSend);
-}
 
 void UartForBoards::SendUart(){
 	int wait = 0;

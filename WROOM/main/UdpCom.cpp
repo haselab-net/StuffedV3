@@ -195,7 +195,7 @@ void UdpCom::ExecCommandLoop(){
 				allBoards.WriteCmd(recv->command, *recv);
 				PrepareRetPacket(recv->command);
 				if (allBoards.HasRet(recv->command)){
-					allBoards.ReadRet(recv->command, send, true);
+					allBoards.ReadRet(recv->command, send);
 				}
 				SendRetPacket(recv->returnIp);
 			}

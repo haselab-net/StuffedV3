@@ -86,8 +86,8 @@ int coretimerRemainTime;
 void __attribute__ ((vector(_CORE_TIMER_VECTOR), interrupt(IPL1SOFT))) _CORE_TIMER_ISR(void)
 {
 	// Update the coretimerCompare value
-	coretimerCompare = coretimerCompare + 12000;	//	12MHz/12k = 1kHz
-	//coretimerCompare = coretimerCompare + 4000;		//	12MHz/4k = 3kHz may be maximum.
+	//coretimerCompare = coretimerCompare + 12000;	//	12MHz/12k = 1kHz
+	coretimerCompare = coretimerCompare + 4000;		//	12MHz/4k = 3kHz may be maximum.
 	_CP0_SET_COMPARE(coretimerCompare);
 	IFS0CLR= 1 << _IFS0_CTIF_POSITION;
 	//	Control task
