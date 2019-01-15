@@ -3,7 +3,9 @@
 #include "esp_adc_cal.h"
 #include "esp_event_loop.h"
 #include "esp_log.h"
+extern "C"{
 #include "soc/syscon_struct.h"
+}
 #include "soc/syscon_reg.h"
 #include "soc/mcpwm_struct.h"
 #include "soc/mcpwm_reg.h"
