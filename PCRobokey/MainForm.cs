@@ -482,7 +482,7 @@ namespace Robokey
             Timer tmRun = (Timer)sender;
             if (ckRun.Checked)
             {
-#if true   //  interpolate on motor drivers
+#if false   //  interpolate on motor drivers
                 int remain = (int)(byte)((int)udpComm.interpolateTargetCountOfWrite - (int)udpComm.interpolateTargetCountOfRead);
                 int vacancy = udpComm.nInterpolateTotal - remain;
                 int diff = NINTERPOLATEFILL - remain;

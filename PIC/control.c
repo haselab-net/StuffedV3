@@ -16,6 +16,23 @@ SDEC currentSense[NMOTOR];
 
 uint32_t controlCount;
 
+#ifdef WROOM
+#define DISABLE_INTERRUPT	xSemaphoreTake(mutexForControl, portMAX_DELAY);
+#define ENABLE_INTERRUPT	xSemaphoreGive(mutexForControl);
+#endif
+#ifdef PIC
+#define DISABLE_INTERRUPT 	asm volatile("di"); // Disable all interrupts  
+#define ENABLE_INTERRUPT	asm volatile("ei"); // Enable all interrupt	
+#endif
+
+
+#ifdef WROOM	//	Mutex for control
+#include "freertos/FreeRTOS.h"
+#include <freertos/task.h>
+#include <freertos/semphr.h>
+static SemaphoreHandle_t mutexForControl;
+#endif
+
 //----------------------------------------------------------------------------
 //	Control
 //
@@ -232,6 +249,9 @@ void targetsForceControlProceed(){
 	}
 }
 void controlLoop(){
+	#ifdef WROOM
+	xSemaphoreTake(mutexForControl, portMAX_DELAY);
+	#endif
 	controlCount ++;
     if (controlMode == CM_INTERPOLATE){
         targetsProceed();
@@ -240,6 +260,9 @@ void controlLoop(){
 	}
     updateMotorState();
 	pdControl();
+	#ifdef WROOM
+	xSemaphoreGive(mutexForControl);
+	#endif
 }
 void controlInit(){
 	int i;
@@ -253,23 +276,20 @@ void controlInit(){
 #ifdef PIC
 	controlInitPic();
 #endif
+#ifdef WROOM
+	mutexForControl = xSemaphoreCreateMutex();
+#endif
 }
 void controlSetMode(enum ControlMode m){
-#ifdef PIC
-	asm volatile("di"); // Disable all interrupts 
-#endif
+	DISABLE_INTERRUPT
 	if (controlMode != m){
 		controlMode = m;
-#ifdef PIC
-		asm volatile("ei"); // Enable all interrupts 
-#endif
+		ENABLE_INTERRUPT
 		if (controlMode == CM_INTERPOLATE || controlMode == CM_FORCE_CONTROL){
 			targetsInit();
 		}
 	}else{
-#ifdef PIC
-		asm volatile("ei"); // Enable all interrupts 
-#endif
+		ENABLE_INTERRUPT
 	}
 }
 

@@ -34,13 +34,14 @@ extern "C" void app_main()
     //----------------------------------
     printf("!!! Stuffed Robot Start !!!\n");   
     motorDriver.Init();
-    wifiMan();    //  Start wifi manager. 
 #if 0   //  touchPads can not work with JTAG debugger
     touchPads.Init();
 #endif
     allBoards.Init();
     printf("Init allBoards finished. ");
     printf("%d motors, %d force sensors found.\n", allBoards.GetNTotalMotor(), allBoards.GetNTotalForce());
+
+    wifiMan();    //  Start wifi manager. 
     udpCom.Init();    //  init command processing for udp.
     udpCom.Start();   //  start UDP server.
 #if 0

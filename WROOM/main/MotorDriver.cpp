@@ -65,7 +65,12 @@ void MotorDriver::Init(){
     mcpwm_init(MCPWM_UNIT_0, MCPWM_TIMER_1, &pwm_config);    //Configure PWM0A & PWM0B with above settings
     mcpwm_init(MCPWM_UNIT_0, MCPWM_TIMER_2, &pwm_config);    //Configure PWM0A & PWM0B with above settings
 
-    //  ADC with DMA and I2S mode init
+
+    //  Init control/command and set initial values to motors. 
+    controlInit();
+    commandInit();
+
+    //  ADC with DMA and I2S mode init. This also start periodic interrupt for control.
     //  i2s settings
     for(int i=0; i < sizeof(adcChsRev) / sizeof(adcChsRev[0]);++i){
         adcChsRev[adcChs[i]] = i;
@@ -117,9 +122,6 @@ void MotorDriver::Init(){
     SYSCON.saradc_ctrl2.sar1_inv = 1;
     xTaskCreate(AdcReadTaskStatic, "ADC", 1024*10, this, configMAX_PRIORITIES-1, &task);
 
-    //  Init control/command and set initial values to motors. 
-    controlInit();
-    commandInit();
     for(int ch=0; ch<NMOTOR_DIRECT; ++ch){
         torqueLimit.max[ch] = (SDEC)(0.8*SDEC_ONE);
         torqueLimit.min[ch] = (SDEC)(-0.8*SDEC_ONE);

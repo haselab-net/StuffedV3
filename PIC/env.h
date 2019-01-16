@@ -21,16 +21,9 @@
 
 #ifdef WROOM
 typedef unsigned int uint32_t;
-#define DISABLE_INTERRUPT
-#define ENABLE_INTERRUPT
 #endif
-
 #ifdef PIC
-#define DISABLE_INTERRUPT 	asm volatile("di"); // Disable all interrupts  
-#define ENABLE_INTERRUPT	asm volatile("ei"); // Enable all interrupt	
-
 //#define USE_MONITOR_RX   //   for debug monitor
-
 #endif
 
 
