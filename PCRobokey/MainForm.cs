@@ -473,6 +473,7 @@ namespace Robokey
         private void Form1_Load(object sender, EventArgs e)
         {
             Application.Idle += new EventHandler(AppIdle);
+            runTimer.Interval = (int)udTick.Value;
         }
 
         const int NINTERPOLATEFILL = 6; //  At least two must in buffer for interpolation.

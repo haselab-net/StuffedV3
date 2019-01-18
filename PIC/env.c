@@ -5,13 +5,21 @@
 int logLevel = LOG_LEVEL_INFO;    //  too heavy for real usage.
 
 
-
-
+#ifdef _WIN32
+extern void logVprintf(const char* format, va_list va);
+void vlogPrintf(int lv, const char* format, va_list va) {
+	if (lv >= logLevel) {
+		logVprintf(format, va);
+	}
+}
+#else
 void vlogPrintf(int lv, const char* format, va_list va){
 	if (lv >= logLevel){
 	    vprintf(format, va);
 	}
 }
+#endif
+
 void logPrintfE(const char* format, ...){
 	va_list va;
     va_start(va, format);

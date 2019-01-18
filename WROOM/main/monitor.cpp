@@ -49,7 +49,7 @@ int getchWait() {
 		if (_kbhit()) {
 			return _getch();
 		}
-		vTaskDelay(200);
+		vTaskDelay(20);
 	}
 }
 #endif
@@ -119,7 +119,7 @@ class MCPwmTest: public MonitorCommandBase{
         }
         printf("[ENTER/SPACE]:show state, [%s]:forward, [%s]:backword, other:quit\n" ,up, down);
         while(1){
-            vTaskDelay(100);
+            vTaskDelay(10);
             int ch = getchNoWait();
             if (ch == -1) continue;
             const char* f = NULL;
@@ -168,7 +168,7 @@ class MCShowADC: public MonitorCommandBase{
                 printf("\t%4.2f", LDEC2DBL(motorState.pos[i]));
             }
             printf("\n");
-            vTaskDelay(200);
+            vTaskDelay(20);
             if (getchNoWait() >= 0) break;
         }
     }
@@ -182,7 +182,7 @@ class MCShowTouch: public MonitorCommandBase{
                 printf("%d\t", touchPads.Raw(i));
             }
             printf("\n");
-            vTaskDelay(200);
+            vTaskDelay(20);
             if (getchNoWait() >= 0) break;
         }
     }

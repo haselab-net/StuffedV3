@@ -48,7 +48,7 @@ void MotorDriver::AdcReadTask(){
         }
 #else
 		if (bControl) onControlTimer();
-		vTaskDelay(10);
+		vTaskDelay(1);
 #endif
     }
 }

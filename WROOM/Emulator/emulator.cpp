@@ -6,6 +6,20 @@
 
 
 extern "C" {
+/*	//	hasefone
+	char hostAddress[] = { 192, 168, 43, 253 };
+	char subnetMask[] = { 255, 255, 255,0 };
+//*/
+//*	//	haselab
+	int hostAddress[] = { 192, 168, 91, 253 };
+	int subnetMask[] = { 255, 255, 255,0 };
+	//*/
+
+/*	//	edurome
+int hostAddress[] = { 10, 1, 254, 253 };
+int subnetMask[] = { 255, 255, 252,0 };
+//*/
+
 	void app_main();
 	void mainTask(void*) {
 		app_main();
@@ -97,9 +111,9 @@ extern "C" {
 	}
 
 
-#define LWIP_PORT_INIT_IPADDR(addr)   IP4_ADDR((addr), configIP_ADDR0,configIP_ADDR1,configIP_ADDR2,configIP_ADDR3)
+#define LWIP_PORT_INIT_IPADDR(addr)   IP4_ADDR((addr), hostAddress[0], hostAddress[1], hostAddress[2], hostAddress[3])
 #define LWIP_PORT_INIT_GW(addr)       IP4_ADDR((addr), 192,168,12,1)
-#define LWIP_PORT_INIT_NETMASK(addr)  IP4_ADDR((addr), 255,255,255,0)
+#define LWIP_PORT_INIT_NETMASK(addr)  IP4_ADDR((addr), subnetMask[0], subnetMask[1], subnetMask[2], subnetMask[3])
 
 	/* The period at which the check timer will expire, in ms, provided no errors
 	have been reported by any of the standard demo tasks.  ms are converted to the
@@ -107,7 +121,9 @@ extern "C" {
 #define mainCHECK_TIMER_PERIOD_MS			( 3000UL / portTICK_RATE_MS )
 
 	static xTimerHandle xCheckTimer = NULL;
-
+	void taskPrint(void*);
+	xQueueHandle queuePrint;
+	
 	void main() {
 		tcpip_init(NULL, NULL);
 		/* Create and start the check timer, as described at the top of this file. */
@@ -143,34 +159,59 @@ extern "C" {
 		netif_set_up(&xNetIf);
 
 		xTaskCreate(mainTask, "main", 1024*8, NULL, 2, NULL);
+		queuePrint = xQueueCreate(100, sizeof(char*));
+		xTaskCreate(taskPrint, "print", 1024 * 4, NULL, configMAX_PRIORITIES - 1, NULL);
 
-		/* Start the scheduler itself. */
+
+		/* Start the scheduler itself.	never return */
 		vTaskStartScheduler();
 	}
 }
-
+void taskPrint(void*) {
+	while (1) {
+		char* str;
+		xQueueReceive(queuePrint, &str, portMAX_DELAY);
+		OutputDebugStringA(str);
+		free(str);
+	}
+}
+extern "C" {
+	void logVprintf(const char* format, va_list va) {
+		char buf[1024];
+		vsprintf(buf, format, va);
+		char* str =  (char*)malloc(strlen(buf) + 1);
+		strcpy(str, buf);
+		xQueueSend(queuePrint, &str, 100);
+	}
+	void logPrintf(const char* fmt, ...) {
+		va_list va;
+		va_start(va, fmt);
+		logVprintf(fmt, va);
+		va_end(va);
+	}
+}
+void espVprintf(const char* lv, const char* tag, const char* format, va_list va) {
+	char buf[1024];
+	sprintf(buf, "%s:%s ", lv, tag);
+	vsprintf(buf + strlen(buf), format, va);
+	logPrintf("%s\r\n", buf);
+}
 
 void ESP_LOGI(const char* tag, const char* fmt, ...){
 	va_list va;
     va_start(va, fmt);
-	printf("I:%s", tag);
-	vprintf(fmt, va);
-	printf("\r\n");
+	espVprintf("I", tag, fmt, va);
 	va_end(va);
 }
 void ESP_LOGW(const char* tag, const char* fmt, ...){
 	va_list va;
-    va_start(va, fmt);
-	printf("W:%s", tag);
-	vprintf(fmt, va);
-	printf("\r\n");
+	va_start(va, fmt);
+	espVprintf("W", tag, fmt, va);
 	va_end(va);
 }
 void ESP_LOGE(const char* tag, const char* fmt, ...){
 	va_list va;
-    va_start(va, fmt);
-	printf("E:%s", tag);
-	vprintf(fmt, va);
-	printf("\r\n");
+	va_start(va, fmt);
+	espVprintf("E", tag, fmt, va);
 	va_end(va);
 }

@@ -1,59 +1,26 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="ソース ファイル">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="ヘッダー ファイル">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
-    </Filter>
-    <Filter Include="リソース ファイル">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
     <Filter Include="freertos">
       <UniqueIdentifier>{83c42231-3d98-40a1-9a9c-7487db378879}</UniqueIdentifier>
     </Filter>
     <Filter Include="lwip">
       <UniqueIdentifier>{bffbf4c3-d2a9-4e26-9e5c-3f48de4ee84a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Emulator">
+      <UniqueIdentifier>{9eab5cf5-d453-4427-8f9c-c2f31fed2e4b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="main">
+      <UniqueIdentifier>{441c853e-cbbf-4689-b698-8fec077c039e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="PIC">
+      <UniqueIdentifier>{a9c8f08b-c65d-4931-9647-e27ee5b923ad}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\main\AllBoards.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="..\main\Board.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="..\main\BoardDirect.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="..\main\main.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="..\main\monitor.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="..\main\MotorControl.c">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="..\main\MotorDriver.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="..\main\TouchSensing.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="..\main\UartForBoards.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="..\main\UdpCom.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="freertos\croutine.c">
       <Filter>freertos</Filter>
     </ClCompile>
@@ -195,58 +162,121 @@
     <ClCompile Include="lwip\ethernet\lwip-1.4.0\src\netif\etharp.c">
       <Filter>lwip</Filter>
     </ClCompile>
-    <ClCompile Include="emulator.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="lwip\ethernet\lwip-1.4.0\ports\win32\ethernetif.c">
       <Filter>lwip</Filter>
+    </ClCompile>
+    <ClCompile Include="..\main\AllBoards.cpp">
+      <Filter>main</Filter>
+    </ClCompile>
+    <ClCompile Include="..\main\Board.cpp">
+      <Filter>main</Filter>
+    </ClCompile>
+    <ClCompile Include="..\main\BoardDirect.cpp">
+      <Filter>main</Filter>
+    </ClCompile>
+    <ClCompile Include="emulator.cpp">
+      <Filter>Emulator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\main\main.cpp">
+      <Filter>main</Filter>
+    </ClCompile>
+    <ClCompile Include="..\main\monitor.cpp">
+      <Filter>main</Filter>
+    </ClCompile>
+    <ClCompile Include="..\main\MotorControl.c">
+      <Filter>main</Filter>
+    </ClCompile>
+    <ClCompile Include="..\main\MotorDriver.cpp">
+      <Filter>main</Filter>
+    </ClCompile>
+    <ClCompile Include="..\main\TouchSensing.cpp">
+      <Filter>main</Filter>
+    </ClCompile>
+    <ClCompile Include="..\main\UartForBoards.cpp">
+      <Filter>main</Filter>
+    </ClCompile>
+    <ClCompile Include="..\main\UdpCom.cpp">
+      <Filter>main</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\PIC\control.c">
+      <Filter>PIC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\PIC\command.c">
+      <Filter>PIC</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\main\AllBoards.h">
-      <Filter>ソース ファイル</Filter>
+      <Filter>main</Filter>
     </ClInclude>
     <ClInclude Include="..\main\ArrayRing.h">
-      <Filter>ソース ファイル</Filter>
+      <Filter>main</Filter>
     </ClInclude>
     <ClInclude Include="..\main\Board.h">
-      <Filter>ソース ファイル</Filter>
+      <Filter>main</Filter>
     </ClInclude>
     <ClInclude Include="..\main\BoardBase.h">
-      <Filter>ソース ファイル</Filter>
+      <Filter>main</Filter>
     </ClInclude>
     <ClInclude Include="..\main\BoardDirect.h">
-      <Filter>ソース ファイル</Filter>
+      <Filter>main</Filter>
     </ClInclude>
     <ClInclude Include="..\main\CommandWROOM.h">
-      <Filter>ソース ファイル</Filter>
+      <Filter>main</Filter>
     </ClInclude>
     <ClInclude Include="..\main\monitor.h">
-      <Filter>ソース ファイル</Filter>
+      <Filter>main</Filter>
     </ClInclude>
     <ClInclude Include="..\main\MotorDriver.h">
-      <Filter>ソース ファイル</Filter>
+      <Filter>main</Filter>
     </ClInclude>
     <ClInclude Include="..\main\TinyContainer.h">
-      <Filter>ソース ファイル</Filter>
+      <Filter>main</Filter>
     </ClInclude>
     <ClInclude Include="..\main\TouchSensing.h">
-      <Filter>ソース ファイル</Filter>
+      <Filter>main</Filter>
     </ClInclude>
     <ClInclude Include="..\main\UartForBoards.h">
-      <Filter>ソース ファイル</Filter>
+      <Filter>main</Filter>
     </ClInclude>
     <ClInclude Include="..\main\UdpCom.h">
-      <Filter>ソース ファイル</Filter>
+      <Filter>main</Filter>
     </ClInclude>
     <ClInclude Include="..\main\UTRef.h">
-      <Filter>ソース ファイル</Filter>
+      <Filter>main</Filter>
     </ClInclude>
     <ClInclude Include="..\main\wifiMan.h">
-      <Filter>ソース ファイル</Filter>
+      <Filter>main</Filter>
     </ClInclude>
     <ClInclude Include="..\main\WroomEnv.h">
-      <Filter>ソース ファイル</Filter>
+      <Filter>main</Filter>
+    </ClInclude>
+    <ClInclude Include="esp_event_loop.h">
+      <Filter>Emulator</Filter>
+    </ClInclude>
+    <ClInclude Include="esp_log.h">
+      <Filter>Emulator</Filter>
+    </ClInclude>
+    <ClInclude Include="FreeRTOSConfig.h">
+      <Filter>Emulator</Filter>
+    </ClInclude>
+    <ClInclude Include="lwipcfg_msvc.h">
+      <Filter>Emulator</Filter>
+    </ClInclude>
+    <ClInclude Include="lwipopts.h">
+      <Filter>Emulator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\PIC\control.h">
+      <Filter>PIC</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\PIC\command.h">
+      <Filter>PIC</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\PIC\commandCommon.h">
+      <Filter>PIC</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\PIC\commandTemplate.h">
+      <Filter>PIC</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

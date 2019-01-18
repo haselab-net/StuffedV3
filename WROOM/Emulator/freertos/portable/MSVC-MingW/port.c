@@ -126,16 +126,22 @@ static unsigned long (*ulIsrHandler[ portMAX_INTERRUPTS ])( void ) = { 0 };
 extern void *pxCurrentTCB;
 
 /*-----------------------------------------------------------*/
+int bPrint = 0;
 
 static DWORD WINAPI prvSimulatedPeripheralTimer( LPVOID lpParameter )
 {
-portTickType xMinimumWindowsBlockTime = ( portTickType ) 20;
+	portTickType xMinimumWindowsBlockTime = ( portTickType ) 1;
 
 	/* Just to prevent compiler warnings. */
 	( void ) lpParameter;
 
 	for(;;)
 	{
+		if (bPrint) {
+			char buf[1024];
+			vTaskList(buf);
+			OutputDebugStringA(buf);
+		}
 		/* Wait until the timer expires and we can access the simulated interrupt 
 		variables.  *NOTE* this is not a 'real time' way of generating tick 
 		events as the next wake time should be relative to the previous wake 

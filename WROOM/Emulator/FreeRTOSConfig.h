@@ -139,18 +139,6 @@ extern void vAssertCalled( void );
 #define configMAC_ADDR4	0x15
 #define configMAC_ADDR5	0x16
 
-/* IP address configuration. */
-#define configIP_ADDR0		192
-#define configIP_ADDR1		168
-#define configIP_ADDR2		12
-#define configIP_ADDR3		253
-
-/* Netmask configuration. */
-#define configNET_MASK0		255
-#define configNET_MASK1		255
-#define configNET_MASK2		255
-#define configNET_MASK3		0
-
 /* The size of the global output buffer that is available for use when there
 are multiple command interpreters running at once (for example, one on a UART
 and one on TCP/IP).  This is done to prevent an output buffer being defined by

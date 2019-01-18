@@ -52,6 +52,7 @@
 */
 
 /* WinPCap includes. */
+#define WIN32
 #define HAVE_REMOTE
 #include "pcap.h"
 
@@ -601,6 +602,8 @@ long lResult;
 	}
 }
 /*-----------------------------------------------------------*/
+extern int hostAddress[4];
+extern int subnetMask[4];
 
 static void prvConfigureCaptureBehaviour( void )
 {
@@ -617,9 +620,9 @@ unsigned long ulNetMask;
 	/* Set up a filter so only the packets of interest are passed to the lwIP
 	stack.  cErrorBuffer is used for convenience to create the string.  Don't
 	confuse this with an error message. */
-	sprintf( cErrorBuffer, "broadcast or multicast or host %d.%d.%d.%d", configIP_ADDR0, configIP_ADDR1, configIP_ADDR2, configIP_ADDR3 );
+	sprintf( cErrorBuffer, "broadcast or multicast or host %d.%d.%d.%d", hostAddress[0], hostAddress[1], hostAddress[2], hostAddress[3]);
 
-	ulNetMask = ( configNET_MASK3 << 24UL ) | ( configNET_MASK2 << 16UL ) | ( configNET_MASK1 << 8L ) | configNET_MASK0;
+	ulNetMask = ( (unsigned long)subnetMask[3] << 24UL ) | ((unsigned long)subnetMask[2] << 16UL ) | ((unsigned long)subnetMask[1] << 8L ) | subnetMask[0];
 
 	if( pcap_compile(pxOpenedInterfaceHandle, &xFilterCode, cErrorBuffer, 1, ulNetMask ) < 0 )
 	{

@@ -163,16 +163,17 @@ void UdpCom::OnReceive(struct udp_pcb * upcb, struct pbuf * top, const ip_addr_t
 					#if !UDP_UART_ASYNC
 					xTaskNotifyGive(taskExeCmd);
 					#endif
-					countDiffMax = 0;
+					if (countDiffMax > 0) {
+						ESP_LOGI(Tag, "ignored %d packets Ct:%d Cm:%d", countDiffMax, commandCount, recv->command);
+						countDiffMax = 0;
+					}
 				}
 				else {
 					int diff = (short)((short)commandCount - (short)recv->count);
 					if (countDiffMax < diff) countDiffMax = diff;
 					//	Command count is not matched. There was some packet losses or delay. 
 					//ESP_LOGI(Tag, "ignore Ct:%d<%d Cm:%d\n", recv->count, commandCount+1, recv->command);
-					if (diff == 1){
-						ESP_LOGI(Tag, "ignore %d packets Ct:%d Cm:%d\n", countDiffMax, commandCount+1, recv->command);
-					}
+					//ESP_LOGI(Tag, "ignore %d packets Ct:%d Cm:%d", countDiffMax, commandCount+1, recv->command);
 				}
 				if (!recvs.WriteAvail()){
 					ESP_LOGE(Tag, "Udp recv buffer full.\n");
