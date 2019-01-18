@@ -1,8 +1,8 @@
 #include "env.h"
 #include <stdarg.h>
 
-//int logLevel = LOG_LEVEL_ERROR;
-int logLevel = LOG_LEVEL_INFO;    //  too heavy for real usage.
+int logLevel = LOG_LEVEL_ERROR;
+//int logLevel = LOG_LEVEL_INFO;    //  too heavy for real usage.
 
 
 #ifdef _WIN32
@@ -10,6 +10,21 @@ extern void logVprintf(const char* format, va_list va);
 void vlogPrintf(int lv, const char* format, va_list va) {
 	if (lv >= logLevel) {
 		logVprintf(format, va);
+	}
+}
+#elif defined WROOM
+#include <esp_log.h>
+void vlogPrintf(int lv, const char* format, va_list va){
+	char buf[1024];
+	vsprintf(buf, format, va);
+	if (lv >= logLevel){
+	    if (lv <= LOG_LEVEL_INFO){
+			ESP_LOGI("PIC", "%s", buf);
+		}else if(lv == LOG_LEVEL_WARN){
+			ESP_LOGW("PIC", "%s", buf);
+		}else if (lv == LOG_LEVEL_ERROR){
+			ESP_LOGE("PIC", "%s", buf);
+		}
 	}
 }
 #else

@@ -134,7 +134,8 @@ void rcSensor(){
 }
 void rcDirect(){
     int i;
-    for(i=0; i<NMOTOR; ++i){
+	controlSetMode(CM_DIRECT);
+	for(i=0; i<NMOTOR; ++i){
         retPacket.direct.pos[i] = L2SDEC(motorState.pos[i]);
         retPacket.direct.vel[i] = L2SDEC(motorState.vel[i]);
     }

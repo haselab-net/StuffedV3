@@ -491,10 +491,9 @@ namespace Robokey
                 int v = pose == null ? 0 : pose.values[i];
                 WriteShort(v, ref p, packet);
             }
-/*            //  TODO hase
-            period /= 10;
-            if (period < 1) period = 1;
-            */
+            if (period <= 0) {
+                System.Diagnostics.Debug.Write("Error: period == 0");
+            }
             WriteShort(period, ref p, packet);
             WriteShort(interpolateTargetCountOfWrite, ref p, packet);
             PutCommand(packet, p);

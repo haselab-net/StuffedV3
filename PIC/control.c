@@ -158,7 +158,7 @@ void targetsForceControlAddOrUpdate(SDEC* pos, SDEC JK[NFORCE][NMOTOR] ,short pe
 				}
 			}
 		}
-		LOGI("Write@%d a:%d p:%d c:%d", w, targetsReadAvail(), period, (int)count);
+		LOGI("Write@%d ra:%d p:%d c:%d", w, avail, period, (int)count);
 		if (w == targets.write){
 			LOGI(" Add.\r\n");
 			assert(delta == avail);
@@ -215,6 +215,7 @@ void targetsProceed(){
 	targetsTickProceed();
 	readPlus = (targets.read+1)%NTARGET;
 	period = targets.buf[readPlus].period;
+	assert(period != 0);
 	for(i=0; i<NMOTOR; ++i){
 #if 0
 		motorTarget.pos[i] = ((period - targets.tick)* S2LDEC(targets.buf[targets.read].pos[i])
@@ -284,13 +285,11 @@ void controlSetMode(enum ControlMode m){
 	DISABLE_INTERRUPT
 	if (controlMode != m){
 		controlMode = m;
-		ENABLE_INTERRUPT
 		if (controlMode == CM_INTERPOLATE || controlMode == CM_FORCE_CONTROL){
 			targetsInit();
 		}
-	}else{
-		ENABLE_INTERRUPT
 	}
+	ENABLE_INTERRUPT
 }
 
 void onControlTimer(){

@@ -664,6 +664,7 @@ namespace Robokey
                 udpComm.Close();
                 btFindRobot.Text = "Find Robot";
                 laPort.Text = "Closed";
+                ckRun.Checked = false;
             }
             else
             {
@@ -717,9 +718,9 @@ namespace Robokey
             }
             LoadSetting(udpComm.RobotInfo.macAddress);
             UpdateMotorPanel();
-            SendPd();
             SendTorqueLimit();
             SendPd();
+            udpComm.SendPoseDirect(Interpolate(curTime));
         }
 
         private void tbMessage_KeyPress(object sender, KeyPressEventArgs e)

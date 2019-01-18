@@ -8,6 +8,7 @@
 #ifdef __XC32
 #include "mcc_generated_files/mcc.h"
 #endif
+#include <assert.h>
 
 //	device depended functions
 void readADC();								//	read adc and set it to mcos and msin
@@ -72,13 +73,25 @@ void targetsAddOrUpdate(short* pos, short period, unsigned char count);
 void targetsForceControlAddOrUpdate(SDEC* pos, SDEC JK[NFORCE][NMOTOR],short period, unsigned char count);
 void targetsWrite();
 inline unsigned char targetsWriteAvail(){
-	int len = targets.read - targets.write;
+	signed char len = targets.read - targets.write;
 	if (len < 0) len += NTARGET;
+#if 0
+	if (len > NTARGET){
+		LOGE("targetsWriteAvail() w:%d r:%d len:%d", targets.write, targets.read, len);
+		assert(len <= NTARGET);
+	}
+#endif
 	return len;
 }
 inline unsigned char targetsReadAvail(){
-	char len = targets.write - targets.read;
+	signed char len = targets.write - targets.read;
 	if (len <= 0) len += NTARGET;
+#if 0
+	if (len > NTARGET){
+		LOGE("targetsReadAvail w:%d r:%d len:%d", targets.write, targets.read, len);
+		assert(len <= NTARGET);
+	}
+#endif
 	return len;
 }
 int targetsCountMin();

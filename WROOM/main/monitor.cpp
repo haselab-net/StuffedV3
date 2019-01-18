@@ -26,7 +26,7 @@
 Monitor Monitor::theMonitor;
 
 #ifndef _WIN32
-int getch(){
+int getchNoWait(){
     uint8_t ch;
     if (uart_read_bytes(UART_NUM_0, &ch, 1, 1) == 1){
         return ch;

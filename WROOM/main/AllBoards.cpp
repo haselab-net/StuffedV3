@@ -227,9 +227,11 @@ void AllBoards::ReadRet(unsigned short commandId, BoardRetBase& packet){
 			tickMin = tickMax;
 			tickMax = temp;
 		}
+#if 0
 		ESP_LOGI("TGT", "remain:%d vac:%d cor%d %d %d  cow%d  diff%d",
 			 (int)state.nTargetRemain, (int)state.nTargetVacancy, countOfRead[0], countOfRead[1], countOfRead[2], state.targetCountWrite
 			 , diffMax);
+#endif
 		packet.SetTargetCountRead(state.targetCountReadMax);
 		packet.SetTickMin(tickMin);
 		packet.SetTickMax(tickMax);
