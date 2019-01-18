@@ -54,12 +54,13 @@ enum B3F_PARAM{
     B3F_NFORCE = 2,
 };
 
-
+#ifndef _WIN32
 DEFINE_Packets(B1M)
 DEFINE_Packets(B1F)
 DEFINE_Packets(B2M)
 DEFINE_Packets(B2F)
 DEFINE_Packets(B3M)
 DEFINE_Packets(B3F)
+#endif
 
 #endif

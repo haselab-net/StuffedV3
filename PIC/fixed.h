@@ -22,7 +22,7 @@ typedef long LDEC;
 #define  LDEC_MASK (LDEC_ONE-1)         //  mask for decimal
 #define GetDecimalL(x)   (((x)>=0) ? ((x)&LDEC_MASK) : ((x)|~LDEC_MASK))
 #define GetIntegerL(x)   ((x)&~LDEC_MASK)
-#define L2SDEC(x)       ((long)(x) >> (LDEC_BITS - SDEC_BITS))
+#define L2SDEC(x)       (SDEC)((long)(x) >> (LDEC_BITS - SDEC_BITS))
 #define S2LDEC(x)       ((long)(x) << (LDEC_BITS - SDEC_BITS))
 #define F2LDEC(x)       ((long)(LDEC_ONE*(x)))
 #define LDEC2DBL(x)     (((double)(x)) / LDEC_ONE)

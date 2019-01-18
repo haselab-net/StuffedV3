@@ -432,7 +432,7 @@ namespace Robokey
             if (udp == null || sendPoint == null) return;
             sendQueue.UpdateRead();
             if (sendQueue.readAvail <= 0) return;
-            byte[] buf = new byte[1500];
+            byte[] buf = new byte[1400];    //  MTU is less than 1500.
             int pos = 0;
             for (int i = 0; i < sendQueue.readAvail; ++i)
             {

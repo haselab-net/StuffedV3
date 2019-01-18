@@ -4,13 +4,15 @@
 #include "esp_event_loop.h"
 #include "esp_log.h"
 
-#include "lwip/err.h"
-#include "lwip/sockets.h"
-#include "lwip/sys.h"
+#include "lwip/opt.h"
+#include "lwip/tcpip.h"
 #include "lwip/udp.h"
+#include "lwip/ip_addr.h"
+#ifndef _WIN32
 #include "esp_system.h"
 #include "esp_wifi.h"
 #include "nvs_flash.h"
+#endif
 
 #include <algorithm>
 #include <string.h>
@@ -105,7 +107,8 @@ void UdpCom::Init() {
 	udp = NULL;
 	recvRest = 0;
 	commandCount = 0;
-	//ConnectWifi();
+	sendStart = sendLast = NULL;
+	sendLen = 0;
 	#if !UDP_UART_ASYNC
     xTaskCreate(execCommand, "ExeCmd", 8*1024, &udpCom, tskIDLE_PRIORITY, &taskExeCmd);
 	#endif
@@ -118,6 +121,7 @@ void UdpCom::Start(){
 	udp_recv(udp, onReceive, this);
 }
 void UdpCom::OnReceive(struct udp_pcb * upcb, struct pbuf * top, const ip_addr_t* addr, u16_t port) {
+	//ESP_LOGI("UdpCom::OnReceive", "Start");
 	if (!recvs.WriteAvail()){
 		printf("Udp recv buffer full.\n");
 		pbuf_free(top);
@@ -128,6 +132,7 @@ void UdpCom::OnReceive(struct udp_pcb * upcb, struct pbuf * top, const ip_addr_t
 	int cur = 0;
 	int cmdLen = UdpPacket::HEADERLEN;
 	UdpCmdPacket* recv = &recvs.Poke();
+	int countDiffMax = 0;
 	while(1){
 		int l = p->len - cur;
 		if (l > cmdLen-readLen) l = cmdLen-readLen;
@@ -158,10 +163,16 @@ void UdpCom::OnReceive(struct udp_pcb * upcb, struct pbuf * top, const ip_addr_t
 					#if !UDP_UART_ASYNC
 					xTaskNotifyGive(taskExeCmd);
 					#endif
+					countDiffMax = 0;
 				}
 				else {
-					//	Command count is not matched. There was some packet losses. 
-					ESP_LOGI(Tag, "ignore Ct:%d|%d Cm:%d\n", recv->count, commandCount, recv->command);
+					int diff = (short)((short)commandCount - (short)recv->count);
+					if (countDiffMax < diff) countDiffMax = diff;
+					//	Command count is not matched. There was some packet losses or delay. 
+					//ESP_LOGI(Tag, "ignore Ct:%d<%d Cm:%d\n", recv->count, commandCount+1, recv->command);
+					if (diff == 1){
+						ESP_LOGI(Tag, "ignore %d packets Ct:%d Cm:%d\n", countDiffMax, commandCount+1, recv->command);
+					}
 				}
 				if (!recvs.WriteAvail()){
 					ESP_LOGE(Tag, "Udp recv buffer full.\n");
@@ -185,6 +196,7 @@ void UdpCom::OnReceive(struct udp_pcb * upcb, struct pbuf * top, const ip_addr_t
 	pbuf_free(top);
 }
 
+#if !UDP_UART_ASYNC
 void UdpCom::ExecCommandLoop(){
     while(1){
 		ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
@@ -206,6 +218,7 @@ void UdpCom::ExecCommandLoop(){
 		}
 	}
 }
+#endif
 
 void UdpCom::SendText(char* text, short errorlevel) {
 	send.command = CIU_TEXT;
@@ -230,10 +243,23 @@ void UdpCom::PrepareRetPacket(int cmd) {
 }
 void UdpCom::SendRetPacket(ip_addr_t& returnIp) {
 	if (!udp) return;
-	struct pbuf* pb = pbuf_alloc(PBUF_TRANSPORT, send.length, PBUF_RAM);
-    memcpy (pb->payload, send.bytes, send.length);
-	udp_sendto(udp, pb, &returnIp, port);
-    pbuf_free(pb); //De-allocate packet buffer
+	static char sendBuf[1000];
+	if (sendLen + send.length >= 1000){	//	UDP's MTU < 1500, but usually > 1000. 
+		struct pbuf* pb = pbuf_alloc(PBUF_TRANSPORT, sendLen, PBUF_RAM);
+		memcpy(pb->payload, sendBuf, sendLen);
+		udp_sendto(udp, pb, &returnIp, port);
+    	pbuf_free(pb); //De-allocate packet buffer
+		sendLen = 0;
+	}
+    memcpy(sendBuf+sendLen, send.bytes, send.length);
+	sendLen += send.length;
+	if (recvs.ReadAvail() <= 1){	//	Read() will call after sent. So 1 means no command remaining.
+		struct pbuf* pb = pbuf_alloc(PBUF_TRANSPORT, sendLen, PBUF_RAM);
+		memcpy(pb->payload, sendBuf, sendLen);
+		udp_sendto(udp, pb, &returnIp, port);
+    	pbuf_free(pb); //De-allocate packet buffer
+		sendLen = 0;
+	}
 //	ESP_LOGI(Tag, "Ret%d C%d L%d to %s\n", send.command, send.count, send.length, ipaddr_ntoa(&returnIp));
 }
 void UdpCom::ExecUdpCommand(UdpCmdPacket& recv) {
@@ -251,6 +277,7 @@ void UdpCom::ExecUdpCommand(UdpCmdPacket& recv) {
 		break;
 	case CIU_GET_IPADDRESS:
 		PrepareRetPacket(recv.command);
+#ifndef _WIN32
 		if (ownerIp.type ==IPADDR_TYPE_V4){
 			send.data[0] = (ownerIp.u_addr.ip4.addr>>3*8) &0xFF;
 			send.data[1] = (ownerIp.u_addr.ip4.addr>>2*8) &0xFF;
@@ -265,6 +292,12 @@ void UdpCom::ExecUdpCommand(UdpCmdPacket& recv) {
 				send.data[3+4*i] = a&0xFF;
 			}
 		}
+#else
+		send.data[0] = (ownerIp.addr >> 3 * 8) & 0xFF;
+		send.data[1] = (ownerIp.addr >> 2 * 8) & 0xFF;
+		send.data[2] = (ownerIp.addr >> 1 * 8) & 0xFF;
+		send.data[3] = ownerIp.addr & 0xFF;
+#endif
 #ifdef DEBUG
 		printf("GetIPAddress send to ");
 		Serial.print(recv.returnIp);
@@ -283,85 +316,3 @@ void UdpCom::ExecUdpCommand(UdpCmdPacket& recv) {
 		break;
 	}
 }
-
-
-#if 0
-static char* mac2Str(uint8_t* m){
-	static char buf[256];
-	sprintf(buf, "%02x%02x %02x%02x %02x%02x", MAC2STR(m));
-	return buf;
-}
-
-static const char *TAG = "Wifi";
-/* FreeRTOS event group to signal when we are connected*/
-static EventGroupHandle_t wifi_event_group;
-const int WIFI_CONNECTED_BIT = BIT0;
-
-static esp_err_t onWifiEvent(void *ctx, system_event_t *event){
-    ((UdpCom*)ctx)->OnWifi(event);
-	return ESP_OK;	
-}
-void UdpCom::OnWifi(system_event_t* event){
-	switch(event->event_id) {
-    case SYSTEM_EVENT_STA_START:
-        esp_wifi_connect();
-        break;
-    case SYSTEM_EVENT_STA_GOT_IP:
-        ESP_LOGI(TAG, "got ip:%s",
-                 ip4addr_ntoa(&event->event_info.got_ip.ip_info.ip));
-        xEventGroupSetBits(wifi_event_group, WIFI_CONNECTED_BIT);
-		udp_init();
-		if (udp) udp_remove(udp);
-		udp = udp_new();
-		udp_bind(udp, (ip_addr_t*)IP4_ADDR_ANY, port);
-		udp_recv(udp, onReceive, this);
-        break;
-    case SYSTEM_EVENT_AP_STACONNECTED:
-        ESP_LOGI(TAG, "station:'%s' join, AID=%d",
-                 mac2Str(event->event_info.sta_connected.mac),
-                 event->event_info.sta_connected.aid);
-        break;
-    case SYSTEM_EVENT_AP_STADISCONNECTED:
-        {
-			ESP_LOGI(TAG, "station:'%s'leave, AID=%d",
-                 mac2Str(event->event_info.sta_disconnected.mac),
-                 event->event_info.sta_disconnected.aid);
-		}
-		break;
-    case SYSTEM_EVENT_STA_DISCONNECTED:
-        esp_wifi_connect();
-        xEventGroupClearBits(wifi_event_group, WIFI_CONNECTED_BIT);
-        break;
-    default:
-        break;
-    }
-}
-
-void UdpCom::ConnectWifi() {
-	nvs_flash_init();
-    tcpip_adapter_init();
-	wifi_event_group = xEventGroupCreate();
-    ESP_ERROR_CHECK(esp_event_loop_init(onWifiEvent, this) );
-    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-    ESP_ERROR_CHECK(esp_wifi_init(&cfg));
-    wifi_config_t wifi_config;
-    ESP_ERROR_CHECK( esp_wifi_set_storage(WIFI_STORAGE_RAM) );
-#if 1
-	strcpy((char*)wifi_config.sta.ssid, "hasefone");
-	strcpy((char*)wifi_config.sta.password, "hasevr@gmail.com");
-#elif 0
-	strcpy((char*)wifi_config.sta.ssid, "HOME");
-	strcpy((char*)wifi_config.sta.password, "2human2human2");
-#else
-	strcpy((char*)wifi_config.sta.ssid, "haselab_pi_G");
-	strcpy((char*)wifi_config.sta.password, "2human2human2");
-#endif
-    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA) );
-    ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config) );
-    ESP_ERROR_CHECK(esp_wifi_start() );
-
-    ESP_LOGI(TAG, "wifi_init_sta finished.");
-    ESP_LOGI(TAG, "connect to ap SSID:%s password:%s",
-             wifi_config.sta.ssid, wifi_config.sta.password);
-}
-#endif

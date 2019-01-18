@@ -2,16 +2,16 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/event_groups.h"
+#ifndef _WIN32
 #include "esp_system.h"
 #include "esp_spi_flash.h"
 #include "esp_task_wdt.h"
 #include "esp_log.h"
 #include "nvs_flash.h"
-#include "wifiMan.h"
-#include "wifiMan/http_server.h"
-#include "wifiMan/wifi_manager.h"
 #include "rom/uart.h"
+#endif
 
+#include "wifiMan.h"
 #include "UdpCom.h"
 #include "AllBoards.h"
 #include "TouchSensing.h"
@@ -21,7 +21,8 @@
 extern "C" void app_main()
 {        
     /* Print chip information */
-    esp_chip_info_t chip_info;
+#ifndef _WIN32
+	esp_chip_info_t chip_info;
     esp_chip_info(&chip_info);
     printf("This is ESP32 chip with %d CPU cores, WiFi%s%s, ",
         chip_info.cores,
@@ -30,7 +31,7 @@ extern "C" void app_main()
     printf("silicon revision %d, ", chip_info.revision);
     printf("%dMB %s flash\n", spi_flash_get_chip_size() / (1024 * 1024),
             (chip_info.features & CHIP_FEATURE_EMB_FLASH) ? "embedded" : "external");
-
+#endif
     //----------------------------------
     printf("!!! Stuffed Robot Start !!!\n");   
     motorDriver.Init();
@@ -39,7 +40,7 @@ extern "C" void app_main()
 #endif
     allBoards.Init();
     printf("Init allBoards finished. ");
-    printf("%d motors, %d force sensors found.\n", allBoards.GetNTotalMotor(), allBoards.GetNTotalForce());
+    printf("%d motors, %d current sensors, %d force sensors found.\n", allBoards.GetNTotalMotor(), allBoards.GetNTotalCurrent(), allBoards.GetNTotalForce());
 
     wifiMan();    //  Start wifi manager. 
     udpCom.Init();    //  init command processing for udp.

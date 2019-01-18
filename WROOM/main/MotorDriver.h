@@ -3,8 +3,10 @@
 #include "freertos/task.h"
 #include "freertos/queue.h"
 #include <stdio.h>
+#ifndef _WIN32
 #include "driver/adc.h"
 #include "esp_adc_cal.h"
+#endif
 #include "../../PIC/boardType.h"
 #include "commandWROOM.h"
 extern "C"{
@@ -12,9 +14,11 @@ extern "C"{
 }
 
 class MotorDriver{
-    esp_adc_cal_characteristics_t adc_chars;
-    TaskHandle_t task;
-    QueueHandle_t queue;
+#ifndef _WIN32
+	esp_adc_cal_characteristics_t adc_chars;
+#endif
+	xTaskHandle task;
+    xQueueHandle queue;
     static void AdcReadTaskStatic(void*);
     void AdcReadTask();
     const int DEFAULT_VREF = 1100;        //Use adc2_vref_to_gpio() to obtain a better estimate

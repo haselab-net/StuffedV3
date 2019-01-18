@@ -30,7 +30,7 @@ uint32_t controlCount;
 #include "freertos/FreeRTOS.h"
 #include <freertos/task.h>
 #include <freertos/semphr.h>
-static SemaphoreHandle_t mutexForControl;
+static xSemaphoreHandle mutexForControl;
 #endif
 
 //----------------------------------------------------------------------------
@@ -88,7 +88,7 @@ void pdControl(){
 			else if (torque > LDEC_ONE) torque = LDEC_ONE;
 		}
 #if 1	//	This reduce impulsive current
-		const LDEC diffLimit = LDEC_ONE * 0.1;	//	smaller limit makes the control instable.
+		const LDEC diffLimit = (LDEC)(LDEC_ONE * 0.1);	//	smaller limit makes the control instable.
 		LDEC torqueDiff = torque - lastTorques[i];
 		if (torqueDiff > diffLimit){
 			torque = lastTorques[i] + diffLimit;
@@ -125,8 +125,8 @@ void targetsAddOrUpdate(SDEC* pos, short period, unsigned char count){
 }
 //	Update or add interpolate target with force control
 void targetsForceControlAddOrUpdate(SDEC* pos, SDEC JK[NFORCE][NMOTOR] ,short period, unsigned char count){
-	char delta;
-	unsigned char avail, cor;
+	unsigned char avail, cor;	//
+	char delta;					//	cor - count	
 	LOGI("targetsAdd m0:%d pr:%d c:%d\r\n", (int)pos[0], (int)period, (int)count);
 	if (period == 0) return;	//	for vacancy check
 	

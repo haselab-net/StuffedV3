@@ -1,4 +1,5 @@
 #pragma once
+#include "../../PIC/env.h"
 #include "driver/touch_pad.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -11,7 +12,7 @@ class TouchPads
     int Add(touch_pad_t pad);
   public:
     void Init();
-    int NPad(){return pads.size();}
+    int NPad(){return (int)pads.size();}
     uint16_t Raw(int i);
     uint32_t Status();
 };

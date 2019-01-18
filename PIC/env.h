@@ -12,11 +12,21 @@
 //#define MODULETEST    //  module test mode for debugging
 
 #ifdef __XC32
-#define PIC	1
+ #define PIC	1
 #elif defined __xtensa__
-#define WROOM	1
+ #define WROOM	1
+#elif defined _WIN32
+ #define WROOM	1
+ #define __attribute__(x)
+ #pragma pack(1)
+#pragma warning(disable:4200)
+#pragma warning(disable:4103)
+typedef unsigned char	uint8_t;
+ typedef unsigned short	uint16_t;
+ typedef unsigned int	uint32_t;
+ typedef unsigned long ulong;
 #else
-#error processor macro is undefined.
+ #error processor macro is undefined.
 #endif
 
 #ifdef WROOM

@@ -31,10 +31,18 @@ public:
 	int RetLen() { return retPacketLen[ret.commandId]; }
 	int RetLenForCommand() { return retPacketLen[cmd.commandId]; }
 	unsigned char GetTargetCountOfRead(){
-		return ret.interpolate.countOfRead;
+		if (ret.commandId == CI_ALL){
+			return ret.all.countOfRead;
+		}else{
+			return ret.interpolate.countOfRead;
+		}
 	}
 	unsigned short GetTick(){
-		return ret.interpolate.tick;
+		if (ret.commandId == CI_ALL){
+			return ret.all.tick;
+		}else{
+			return ret.interpolate.tick;
+		}
 	}
 	void WriteCmd(unsigned short command, BoardCmdBase& packet) {
 		cmd.commandId = command;

@@ -2,15 +2,17 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/event_groups.h"
+#ifndef _WIN32
 #include "esp_system.h"
 #include "esp_spi_flash.h"
 #include "esp_task_wdt.h"
-#include "esp_log.h"
 #include "nvs_flash.h"
 #include "wifiMan.h"
 #include "wifiMan/http_server.h"
 #include "wifiMan/wifi_manager.h"
 #include "rom/uart.h"
+#endif
+#include "esp_log.h"
 #include "driver/uart.h"
 
 #include "WroomEnv.h"
@@ -22,6 +24,8 @@
 #include "UartForBoards.h"
 
 Monitor Monitor::theMonitor;
+
+#ifndef _WIN32
 int getch(){
     uint8_t ch;
     if (uart_read_bytes(UART_NUM_0, &ch, 1, 1) == 1){
@@ -34,11 +38,27 @@ int getchWait(){
     uart_read_bytes(UART_NUM_0, &ch, 1, portMAX_DELAY);
     return ch;
 }
+#else
+#include <conio.h>
+int getchNoWait() {
+	if (_kbhit()) return _getch();
+	return -1;
+}
+int getchWait() {
+	while (1) {
+		if (_kbhit()) {
+			return _getch();
+		}
+		vTaskDelay(200);
+	}
+}
+#endif
+
 void Monitor::AddCommand(MonitorCommandBase* c){
     commands.push_back(c);
 }
 void Monitor::ShowList(){
-    for(int i=0; i<commands.size(); ++i){
+    for(int i=0; i<(int)commands.size(); ++i){
         MonitorCommandBase* mc = commands[i];
         printf("%s\n", mc->Desc());
     }
@@ -48,10 +68,9 @@ void Monitor::Run(){
     printf("Monitor start.\n");
     ShowList();
     while(1){
-        uint8_t ch;
-        uart_read_bytes(UART_NUM_0, &ch, 1, portMAX_DELAY);
+        uint8_t ch = getchWait();
         int i=0;
-        for(; i<commands.size();++i){
+        for(; i<(int)commands.size();++i){
             if (commands[i]->Desc()[0] == (char)ch){
                 printf("%s\n", commands[i]->Desc());
                 commands[i]->Func();
@@ -72,10 +91,12 @@ class MCEraseNvs: public MonitorCommandBase{
     void Func(){
         printf("This command erase all NVS flash. Are you sure ? (Y/N)\n");
         while(1){
-            int ch = getch();
+            int ch = getchNoWait();
             if (ch == 'y' || ch == 'Y'){
-                nvs_flash_erase();
-                printf("erased.\n");
+#ifndef _WIN32
+				nvs_flash_erase();
+#endif
+				printf("erased.\n");
                 break;
             }else if(ch > 0){
                 printf("canceled.\n");
@@ -99,7 +120,7 @@ class MCPwmTest: public MonitorCommandBase{
         printf("[ENTER/SPACE]:show state, [%s]:forward, [%s]:backword, other:quit\n" ,up, down);
         while(1){
             vTaskDelay(100);
-            int ch = getch();
+            int ch = getchNoWait();
             if (ch == -1) continue;
             const char* f = NULL;
             if ( (f = strchr(up, ch)) ){
@@ -148,7 +169,7 @@ class MCShowADC: public MonitorCommandBase{
             }
             printf("\n");
             vTaskDelay(200);
-            if (getch() >= 0) break;
+            if (getchNoWait() >= 0) break;
         }
     }
 } mcShowADC;
@@ -162,7 +183,7 @@ class MCShowTouch: public MonitorCommandBase{
             }
             printf("\n");
             vTaskDelay(200);
-            if (getch() >= 0) break;
+            if (getchNoWait() >= 0) break;
         }
     }
 } mcShowTouch;

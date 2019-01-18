@@ -34,10 +34,12 @@ BoardBase* Boards::Create(int modelNum, int boardId) {
 }
 
 BoardFactories::BoardFactories() {
+#ifndef _WIN32
 	push_back(new BOARD_FACTORY(B1M));
 	push_back(new BOARD_FACTORY(B1F));
 	push_back(new BOARD_FACTORY(B2M));
 	push_back(new BOARD_FACTORY(B2F));
 	push_back(new BOARD_FACTORY(B3M));
 	push_back(new BOARD_FACTORY(B3F));
+#endif
 }

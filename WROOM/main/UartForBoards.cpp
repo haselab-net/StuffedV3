@@ -7,6 +7,7 @@
 #include "board.h"
 #include "MotorDriver.h"
 #include "../../PIC/boardType.h"
+#include "../../PIC/env.h"
 
 static char zero[80];
 
@@ -22,7 +23,7 @@ void UartForBoards::Init(uart_config_t conf, int txPin, int rxPin){
 void UartForBoards::SendUart(){
 	int wait = 0;
 	const char* TAG = "SendUart";
-	for(cmdCur.board=0; cmdCur.board<boards.size(); cmdCur.board++){
+	for(cmdCur.board=0; cmdCur.board<(int)boards.size(); cmdCur.board++){
 		int retLen = boards[cmdCur.board]->RetLenForCommand();
 		wait = retLen - boards[cmdCur.board]->CmdLen() + 20;
 		if (wait < 5) wait = 5;
@@ -36,7 +37,7 @@ void UartForBoards::SendUart(){
 }
 void UartForBoards::RecvUart(){
 	const ulong READWAIT = 2000;	//[ticks(=ms)]
-	for (retCur.board=0; retCur.board < boards.size(); retCur.board++) {
+	for (retCur.board=0; retCur.board < (int)boards.size(); retCur.board++) {
 		int retLen = boards[retCur.board]->RetLenForCommand();
 		if (retLen){
 			//	receive the header byte
@@ -51,7 +52,7 @@ void UartForBoards::RecvUart(){
 				}
 				ESP_LOGE("UartForBoards::RecvTask", "#%d ReadLen %d != RetLen %d, H%2x C%2x pos%d", port, readLen, retLen,
 						(int)boards[retCur.board]->RetStart()[0], (int)boards[retCur.board]->CmdStart()[0], i);
-				ets_delay_us(2000);
+				vTaskDelay(2000);
 				uart_flush_input(port);
 			}else{
 				if (boards[retCur.board]->RetStart()[0] != boards[retCur.board]->CmdStart()[0]){
@@ -70,12 +71,12 @@ void UartForBoards::RecvUart(){
 		uart_read_bytes(port, buf, remain, 0);
 		char str[1024];
 		char* ptr = str;
-		for(int i=0; i<remain; ++i){
+		for(int i=0; i<(int)remain; ++i){
 			sprintf(ptr, " %02x", buf[i]);
 			ptr += strlen(ptr);
 		}
 		int i;
-		for(i=0; i<boards.size(); ++i){
+		for(i=0; i<(int)boards.size(); ++i){
 			if (boards[i]->RetLenForCommand() > 0) break;
 		}
 		ESP_LOGE("RecvTask", "Uart #%d %d bytes remains. cmd %x ret %x  remain:%s", port, remain, boards[i]->CmdStart()[0], boards[i]->RetStart()[0], str);
@@ -175,7 +176,9 @@ void UartForBoards::EnumerateBoard() {
 		uart_write_bytes(port, zero, 5);
 		for (int w = 0; w < 20; ++w) {
 			printf(".");
-			ets_delay_us(1000);
+#ifndef _WIN32
+			vTaskDelay(1);
+#endif
 			size_t rxLen;
 			uart_get_buffered_data_len(port, &rxLen);
 			if (rxLen >= BD0_RLEN_BOARD_INFO) {
@@ -209,7 +212,7 @@ void UartForBoards::EnumerateBoard() {
 	cmdCur.board = boards.size();
 	retCur.board = 0;
 	//	set command length for all boards
-	for (int i = 0; i < boards.size(); ++i) {
+	for (int i = 0; i < (int)boards.size(); ++i) {
 		printf("Board %d CLEN:", boards[i]->GetBoardId());
 		for (int c = 0; c < CI_NCOMMAND; ++c) {
 			cmd.cmdLen.len[c] = boards[i]->cmdPacketLen[c];

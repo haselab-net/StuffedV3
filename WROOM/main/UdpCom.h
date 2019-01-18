@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "ArrayRing.h"
 #include "esp_event_loop.h"
@@ -127,7 +127,9 @@ public:
 		data[2] = nMotor;
 		data[3] = nCurrent;
 		data[4] = nForce;
+#ifndef _WIN32
 		esp_read_mac((uint8_t*)(data+5), ESP_MAC_WIFI_STA);	// 6 bytes
+#endif
 	}
 };
 
@@ -146,6 +148,9 @@ public:
 	unsigned short commandCount;
 	int recvRest;
 	UdpRetPacket send;
+	struct pbuf* sendStart;	//	The first udp buffer to send.
+	struct pbuf* sendLast;	//	The last udp buffer to send.
+	int sendLen;			//	total bytes of send buffers.
 	#if !UDP_UART_ASYNC
 	TaskHandle_t taskExeCmd; 
 	#endif
@@ -156,7 +161,9 @@ public:
 	void Init();
 	void Start();
 	void OnReceive(struct udp_pcb * upcb, struct pbuf * p, const ip_addr_t* addr, u16_t port);
+#if !UDP_UART_ASYNC
 	void ExecCommandLoop();
+#endif
 	void PrepareRetPacket(int cmd);
 	void SendRetPacket(ip_addr_t& returnIp);
 	void ExecUdpCommand(UdpCmdPacket& recv);

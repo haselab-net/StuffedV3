@@ -69,7 +69,7 @@ extern enum ControlMode controlMode;
 
 void targetsInit();
 void targetsAddOrUpdate(short* pos, short period, unsigned char count);
-void targetsForceControlAddOrUpdate(SDEC* pos, SDEC JK[NFORCE][NMOTOR] ,short period, unsigned char count);
+void targetsForceControlAddOrUpdate(SDEC* pos, SDEC JK[NFORCE][NMOTOR],short period, unsigned char count);
 void targetsWrite();
 inline unsigned char targetsWriteAvail(){
 	int len = targets.read - targets.write;

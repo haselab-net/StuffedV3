@@ -1,9 +1,8 @@
 #pragma once
-#include "lwip/err.h"
-#include "lwip/sockets.h"
-#include "lwip/sys.h"
-#include "lwip/netdb.h"
+#include "lwip/opt.h"
+#include "lwip/tcpip.h"
 #include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 #include "TinyContainer.h"
 #include "WroomEnv.h"
 #include "BoardBase.h"
@@ -118,11 +117,11 @@ public:
 	UartForBoards* uart[NUART];
 	BoardDirect* boardDirect;
 	#if UDP_UART_ASYNC
-	TaskHandle_t taskExec; 
+	xTaskHandle taskExec;
 	#endif
-	int GetNTotalMotor() { return motorMap.size(); }
-	int GetNTotalCurrent() { return currentMap.size(); }
-	int GetNTotalForce() { return forceMap.size(); }
+	int GetNTotalMotor() { return (int)motorMap.size(); }
+	int GetNTotalCurrent() { return (int)currentMap.size(); }
+	int GetNTotalForce() { return (int)forceMap.size(); }
 	int GetNTarget() { return state.nTargetMin; }
 	int GetSystemId() { return 0; }
 	AllBoards();

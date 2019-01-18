@@ -9,7 +9,8 @@ TouchPads touchPads;
 
 void TouchPads::Init()
 {
-    touch_pad_init();
+#ifndef _WIN32
+	touch_pad_init();
     touch_pad_set_voltage(TOUCH_HVOLT_2V7, TOUCH_LVOLT_0V5, TOUCH_HVOLT_ATTEN_1V);
 #ifdef BOARD3_SEPARATE 
     Add(TOUCH_PAD_NUM2);
@@ -23,9 +24,10 @@ void TouchPads::Init()
         touch_pad_config(pads[i], TOUCH_THRESH_NO_USE);
     }
     touch_pad_filter_start(TOUCHPAD_FILTER_TOUCH_PERIOD);
+#endif
 };
 int TouchPads::Add(touch_pad_t pad){
-    for(int i=0; i<pads.size(); ++i){
+    for(int i=0; i<(int)pads.size(); ++i){
         if (pad == pads[i]) return -1;
     }
     pads.push_back(pad);
@@ -35,8 +37,8 @@ int TouchPads::Add(touch_pad_t pad){
 uint16_t TouchPads::Raw(int i)
 {
     uint16_t raw;
-    ESP_ERROR_CHECK(touch_pad_read(pads[i], &raw));
-    return raw;
+	ESP_ERROR_CHECK(touch_pad_read(pads[i], &raw));
+	return raw;
 };
 uint32_t TouchPads::Status() {
     return touch_pad_get_status();

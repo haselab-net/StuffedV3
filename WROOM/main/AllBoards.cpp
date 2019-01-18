@@ -109,24 +109,34 @@ void AllBoards::Init() {
 	printf(". done.\n");
 	EnumerateBoard();
 	#if UDP_UART_ASYNC
-	xTaskCreate(execLoop, "ExecLoop", 8*1024, this, tskIDLE_PRIORITY, &taskExec);
-	#endif
+	xTaskCreate(execLoop, "ExecLoop", 8 * 1024, this, tskIDLE_PRIORITY, &taskExec);
+#endif
 }
 void AllBoards::EnumerateBoard() {
 	motorMap.clear();
+	currentMap.clear();
 	forceMap.clear();
-	for(int m=0; m<boardDirect->GetNMotor(); ++m){	
-		boardDirect->motorMap.push_back(allBoards.motorMap.size());
+	for(int m=0; m<boardDirect->GetNMotor(); ++m){
+		boardDirect->motorMap.push_back((int)allBoards.motorMap.size());
 		allBoards.motorMap.push_back(DeviceMap(-1, m));
 	}
+	for (int m = 0; m<boardDirect->GetNCurrent(); ++m) {
+		boardDirect->currentMap.push_back((int)allBoards.currentMap.size());
+		allBoards.currentMap.push_back(DeviceMap(-1, m));
+	}
+	for (int m = 0; m<boardDirect->GetNForce(); ++m) {
+		boardDirect->forceMap.push_back((int)allBoards.forceMap.size());
+		allBoards.forceMap.push_back(DeviceMap(-1, m));
+	}
+
 	for (int i = 0; i < NUART; ++i) {
 		uart[i]->EnumerateBoard();
 	}
 	state.nTargetMin = boardDirect->GetNTarget();
 	nBoard = 1;
 	for (int i = 0; i < NUART; ++i) {
-		nBoard += uart[i]->boards.size();
-		for (int j = 0; j < uart[i]->boards.size(); ++j) {
+		nBoard += (int)uart[i]->boards.size();
+		for (int j = 0; j < (int)uart[i]->boards.size(); ++j) {
 			int nt = uart[i]->boards[j]->GetNTarget();
 			state.nTargetMin = nt < state.nTargetMin ? nt : state.nTargetMin;
 		}
@@ -147,7 +157,7 @@ void AllBoards::EnumerateBoard() {
 bool AllBoards::HasRet(unsigned short id){
 	if (boardDirect->retPacketLen[id]) return true;
 	for (int i = 0; i < NUART; ++i) {
-		for (int j = 0; j < uart[i]->boards.size(); ++j) {
+		for (int j = 0; j < (int)uart[i]->boards.size(); ++j) {
 			if (uart[i]->boards[j]->retPacketLen[id]) return true;
 		}
 	}
@@ -169,7 +179,7 @@ void AllBoards::WriteCmd(unsigned short commandId, BoardCmdBase& packet) {
 	//	Write command to borads via uart;
 	boardDirect->WriteCmd(commandId, packet);
 	for (int i = 0; i < NUART; ++i) {
-		for (int j = 0; j < uart[i]->boards.size(); ++j) {
+		for (int j = 0; j < (int)uart[i]->boards.size(); ++j) {
 			uart[i]->boards[j]->WriteCmd(commandId, packet);
 		}
 	}
@@ -180,8 +190,18 @@ void AllBoards::WriteCmd(unsigned short commandId, BoardCmdBase& packet) {
 		uart[i]->RecvUart();
 	}
 }
+inline void readAndGetMinMax(BoardBase* board, unsigned short commandId, 
+	BoardRetBase& packet, RobotState& state,
+	int& diffMin, int& diffMax, unsigned short& tickMin, unsigned short& tickMax){
+	board->ReadRet(commandId, packet);
+	int diff = ((int)state.targetCountWrite - (int)board->GetTargetCountOfRead() + 0x100) & 0xFF;
+	if (diff < diffMin) diffMin = diff;
+	if (diff > diffMax) diffMax = diff;
+	unsigned short tick = board->GetTick();
+	if (tick < tickMin) tickMin = tick;
+	if (tick > tickMax) tickMax = tick;
+}
 void AllBoards::ReadRet(unsigned short commandId, BoardRetBase& packet){
-	boardDirect->ReadRet(commandId, packet);
 	if (commandId == CI_INTERPOLATE || commandId == CI_FORCE_CONTROL) {
 		int diffMin = 0x100;
 		int diffMax = -0x100;
@@ -190,16 +210,13 @@ void AllBoards::ReadRet(unsigned short commandId, BoardRetBase& packet){
 		int countOfRead[20];
 		int nCoR = 0;
 		memset(countOfRead, 0, sizeof(countOfRead));
+
+		readAndGetMinMax(boardDirect, commandId, packet, state, diffMin, diffMax, tickMin, tickMax);
+		countOfRead[nCoR++] = (int)boardDirect->GetTargetCountOfRead();
 		for (int i = 0; i < NUART; ++i) {
-			for (int j = 0; j < uart[i]->boards.size(); ++j) {
-				uart[i]->boards[j]->ReadRet(commandId, packet);
+			for (int j = 0; j < (int)uart[i]->boards.size(); ++j) {
+				readAndGetMinMax(uart[i]->boards[j], commandId, packet, state, diffMin, diffMax, tickMin, tickMax);
 				countOfRead[nCoR++] = (int)uart[i]->boards[j]->GetTargetCountOfRead();
-				int diff = ((int)state.targetCountWrite - (int)uart[i]->boards[j]->GetTargetCountOfRead() + 0x100) & 0xFF;
-				if (diff < diffMin) diffMin = diff;
-				if (diff > diffMax) diffMax = diff;
-				unsigned short tick = uart[i]->boards[j]->GetTick();
-				if (tick < tickMin) tickMin = tick;
-				if (tick > tickMax) tickMax = tick;
 			}
 		}		
 		state.targetCountReadMax = state.targetCountWrite - diffMin;
@@ -210,16 +227,18 @@ void AllBoards::ReadRet(unsigned short commandId, BoardRetBase& packet){
 			tickMin = tickMax;
 			tickMax = temp;
 		}
-		ESP_LOGI("TGT", "remain:%d vac:%d cor%d %d %d  cow%d",
-			 (int)state.nTargetRemain, (int)state.nTargetVacancy, countOfRead[0], countOfRead[1], countOfRead[2], state.targetCountWrite);
+		ESP_LOGI("TGT", "remain:%d vac:%d cor%d %d %d  cow%d  diff%d",
+			 (int)state.nTargetRemain, (int)state.nTargetVacancy, countOfRead[0], countOfRead[1], countOfRead[2], state.targetCountWrite
+			 , diffMax);
 		packet.SetTargetCountRead(state.targetCountReadMax);
 		packet.SetTickMin(tickMin);
 		packet.SetTickMax(tickMax);
 		packet.SetNTargetRemain(state.nTargetRemain);
 		packet.SetNTargetVacancy(state.nTargetVacancy);
 	}else{
+		boardDirect->ReadRet(commandId, packet);
 		for (int i = 0; i < NUART; ++i) {
-			for (int j = 0; j < uart[i]->boards.size(); ++j) {
+			for (int j = 0; j < (int)uart[i]->boards.size(); ++j) {
 				uart[i]->boards[j]->ReadRet(commandId, packet);
 			}
 		}		

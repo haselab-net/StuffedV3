@@ -1,8 +1,9 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/event_groups.h"
-#include "esp_adc_cal.h"
 #include "esp_event_loop.h"
 #include "esp_log.h"
+#ifndef _WIN32
+#include "esp_adc_cal.h"
 extern "C"{
 #include "soc/syscon_struct.h"
 }
@@ -12,6 +13,8 @@ extern "C"{
 #include "driver/mcpwm.h"
 #include "driver/i2s.h"
 #include "driver/adc.h"
+#endif 
+
 #include "MotorDriver.h"
 extern "C" {
 #include "../../PIC/control.h"
@@ -28,7 +31,8 @@ void MotorDriver::AdcReadTask(){
     size_t bufLen = ADC_DMA_LEN * 2;
     uint16_t buf[ADC_DMA_LEN];
     while(1) {
-        system_event_t evt;
+#ifndef _WIN32
+		system_event_t evt;
         if (xQueueReceive(queue, &evt, portMAX_DELAY) == pdPASS) {
             if (evt.event_id==2) {
                 size_t readBytes;
@@ -42,12 +46,17 @@ void MotorDriver::AdcReadTask(){
                 if (bControl) onControlTimer();
             }
         }
+#else
+		if (bControl) onControlTimer();
+		vTaskDelay(10);
+#endif
     }
 }
 
 void MotorDriver::Init(){
     bControl = true;
-    //  PWM Init
+#ifndef _WIN32
+	//  PWM Init
     mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM0A, pwmPins[0]);
     mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM0B, pwmPins[1]);
     mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM1A, pwmPins[2]);
@@ -64,7 +73,7 @@ void MotorDriver::Init(){
     mcpwm_init(MCPWM_UNIT_0, MCPWM_TIMER_0, &pwm_config);    //Configure PWM0A & PWM0B with above settings
     mcpwm_init(MCPWM_UNIT_0, MCPWM_TIMER_1, &pwm_config);    //Configure PWM0A & PWM0B with above settings
     mcpwm_init(MCPWM_UNIT_0, MCPWM_TIMER_2, &pwm_config);    //Configure PWM0A & PWM0B with above settings
-
+#endif
 
     //  Init control/command and set initial values to motors. 
     controlInit();
@@ -75,7 +84,8 @@ void MotorDriver::Init(){
     for(int i=0; i < sizeof(adcChsRev) / sizeof(adcChsRev[0]);++i){
         adcChsRev[adcChs[i]] = i;
     }
-    i2s_config_t i2s_config = {
+#ifndef _WIN32
+	i2s_config_t i2s_config = {
         mode : (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_RX | I2S_MODE_ADC_BUILT_IN),
         sample_rate : ADC_DMA_LEN * 3000,   //  3kHz
         bits_per_sample : i2s_bits_per_sample_t(16),
@@ -120,7 +130,8 @@ void MotorDriver::Init(){
     SYSCON.saradc_sar1_patt_tab[0] = patTab.tab[0];
     SYSCON.saradc_sar1_patt_tab[1] = patTab.tab[1];
     SYSCON.saradc_ctrl2.sar1_inv = 1;
-    xTaskCreate(AdcReadTaskStatic, "ADC", 1024*10, this, configMAX_PRIORITIES-1, &task);
+#endif
+	xTaskCreate(AdcReadTaskStatic, "ADC", 1024*10, this, configMAX_PRIORITIES-1, &task);
 
     for(int ch=0; ch<NMOTOR_DIRECT; ++ch){
         torqueLimit.max[ch] = (SDEC)(0.8*SDEC_ONE);
@@ -151,7 +162,8 @@ void MotorDriver::Init(){
 }
 
 void MotorDriver::Pwm(int ch, float duty){
-    if (duty > 0){
+#ifndef _WIN32
+	if (duty > 0){
         mcpwm_set_signal_low(MCPWM_UNIT_0, (mcpwm_timer_t)ch, MCPWM_OPR_B);
         mcpwm_set_duty(MCPWM_UNIT_0, (mcpwm_timer_t)ch, MCPWM_OPR_A, duty * 100);
         mcpwm_set_duty_type(MCPWM_UNIT_0, (mcpwm_timer_t)ch, MCPWM_OPR_A, MCPWM_DUTY_MODE_0); //call this each time, if operator was previously in low/high state
@@ -161,13 +173,18 @@ void MotorDriver::Pwm(int ch, float duty){
         mcpwm_set_duty(MCPWM_UNIT_0, (mcpwm_timer_t)ch, MCPWM_OPR_B, duty * 100);
         mcpwm_set_duty_type(MCPWM_UNIT_0, (mcpwm_timer_t)ch, MCPWM_OPR_B, MCPWM_DUTY_MODE_0); //call this each time, if operator was previously in low/high state
     }
+#endif
 }
 int MotorDriver::GetAdcRaw(int ch){
     return adcRaws[ch];
 }
 uint32_t MotorDriver::GetAdcVoltage(int ch){
-    uint32_t voltage = esp_adc_cal_raw_to_voltage(adcRaws[ch], &adc_chars);
+#ifndef _WIN32
+	uint32_t voltage = esp_adc_cal_raw_to_voltage(adcRaws[ch], &adc_chars);
     return voltage;
+#else
+	return 0;
+#endif
 }
 
 #define ADC_CENTER  ((0x700+0x35C0)/2)

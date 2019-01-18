@@ -1,0 +1,252 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="ソース ファイル">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="ヘッダー ファイル">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="リソース ファイル">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="freertos">
+      <UniqueIdentifier>{83c42231-3d98-40a1-9a9c-7487db378879}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lwip">
+      <UniqueIdentifier>{bffbf4c3-d2a9-4e26-9e5c-3f48de4ee84a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\main\AllBoards.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\main\Board.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\main\BoardDirect.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\main\main.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\main\monitor.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\main\MotorControl.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\main\MotorDriver.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\main\TouchSensing.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\main\UartForBoards.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\main\UdpCom.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="freertos\croutine.c">
+      <Filter>freertos</Filter>
+    </ClCompile>
+    <ClCompile Include="freertos\list.c">
+      <Filter>freertos</Filter>
+    </ClCompile>
+    <ClCompile Include="freertos\queue.c">
+      <Filter>freertos</Filter>
+    </ClCompile>
+    <ClCompile Include="freertos\tasks.c">
+      <Filter>freertos</Filter>
+    </ClCompile>
+    <ClCompile Include="freertos\timers.c">
+      <Filter>freertos</Filter>
+    </ClCompile>
+    <ClCompile Include="freertos\portable\MemMang\heap_3.c">
+      <Filter>freertos</Filter>
+    </ClCompile>
+    <ClCompile Include="freertos\portable\MSVC-MingW\port.c">
+      <Filter>freertos</Filter>
+    </ClCompile>
+    <ClCompile Include="lwip\ethernet\lwip-1.4.0\ports\win32\sys_arch.c">
+      <Filter>lwip</Filter>
+    </ClCompile>
+    <ClCompile Include="lwip\ethernet\lwip-1.4.0\src\api\api_lib.c">
+      <Filter>lwip</Filter>
+    </ClCompile>
+    <ClCompile Include="lwip\ethernet\lwip-1.4.0\src\api\api_msg.c">
+      <Filter>lwip</Filter>
+    </ClCompile>
+    <ClCompile Include="lwip\ethernet\lwip-1.4.0\src\api\err.c">
+      <Filter>lwip</Filter>
+    </ClCompile>
+    <ClCompile Include="lwip\ethernet\lwip-1.4.0\src\api\netbuf.c">
+      <Filter>lwip</Filter>
+    </ClCompile>
+    <ClCompile Include="lwip\ethernet\lwip-1.4.0\src\api\netdb.c">
+      <Filter>lwip</Filter>
+    </ClCompile>
+    <ClCompile Include="lwip\ethernet\lwip-1.4.0\src\api\netifapi.c">
+      <Filter>lwip</Filter>
+    </ClCompile>
+    <ClCompile Include="lwip\ethernet\lwip-1.4.0\src\api\sockets.c">
+      <Filter>lwip</Filter>
+    </ClCompile>
+    <ClCompile Include="lwip\ethernet\lwip-1.4.0\src\api\tcpip.c">
+      <Filter>lwip</Filter>
+    </ClCompile>
+    <ClCompile Include="lwip\ethernet\lwip-1.4.0\src\core\def.c">
+      <Filter>lwip</Filter>
+    </ClCompile>
+    <ClCompile Include="lwip\ethernet\lwip-1.4.0\src\core\dhcp.c">
+      <Filter>lwip</Filter>
+    </ClCompile>
+    <ClCompile Include="lwip\ethernet\lwip-1.4.0\src\core\dns.c">
+      <Filter>lwip</Filter>
+    </ClCompile>
+    <ClCompile Include="lwip\ethernet\lwip-1.4.0\src\core\init.c">
+      <Filter>lwip</Filter>
+    </ClCompile>
+    <ClCompile Include="lwip\ethernet\lwip-1.4.0\src\core\lwip_timers.c">
+      <Filter>lwip</Filter>
+    </ClCompile>
+    <ClCompile Include="lwip\ethernet\lwip-1.4.0\src\core\mem.c">
+      <Filter>lwip</Filter>
+    </ClCompile>
+    <ClCompile Include="lwip\ethernet\lwip-1.4.0\src\core\memp.c">
+      <Filter>lwip</Filter>
+    </ClCompile>
+    <ClCompile Include="lwip\ethernet\lwip-1.4.0\src\core\netif.c">
+      <Filter>lwip</Filter>
+    </ClCompile>
+    <ClCompile Include="lwip\ethernet\lwip-1.4.0\src\core\pbuf.c">
+      <Filter>lwip</Filter>
+    </ClCompile>
+    <ClCompile Include="lwip\ethernet\lwip-1.4.0\src\core\raw.c">
+      <Filter>lwip</Filter>
+    </ClCompile>
+    <ClCompile Include="lwip\ethernet\lwip-1.4.0\src\core\stats.c">
+      <Filter>lwip</Filter>
+    </ClCompile>
+    <ClCompile Include="lwip\ethernet\lwip-1.4.0\src\core\sys.c">
+      <Filter>lwip</Filter>
+    </ClCompile>
+    <ClCompile Include="lwip\ethernet\lwip-1.4.0\src\core\tcp.c">
+      <Filter>lwip</Filter>
+    </ClCompile>
+    <ClCompile Include="lwip\ethernet\lwip-1.4.0\src\core\tcp_in.c">
+      <Filter>lwip</Filter>
+    </ClCompile>
+    <ClCompile Include="lwip\ethernet\lwip-1.4.0\src\core\tcp_out.c">
+      <Filter>lwip</Filter>
+    </ClCompile>
+    <ClCompile Include="lwip\ethernet\lwip-1.4.0\src\core\udp.c">
+      <Filter>lwip</Filter>
+    </ClCompile>
+    <ClCompile Include="lwip\ethernet\lwip-1.4.0\src\core\ipv4\autoip.c">
+      <Filter>lwip</Filter>
+    </ClCompile>
+    <ClCompile Include="lwip\ethernet\lwip-1.4.0\src\core\ipv4\icmp.c">
+      <Filter>lwip</Filter>
+    </ClCompile>
+    <ClCompile Include="lwip\ethernet\lwip-1.4.0\src\core\ipv4\igmp.c">
+      <Filter>lwip</Filter>
+    </ClCompile>
+    <ClCompile Include="lwip\ethernet\lwip-1.4.0\src\core\ipv4\inet.c">
+      <Filter>lwip</Filter>
+    </ClCompile>
+    <ClCompile Include="lwip\ethernet\lwip-1.4.0\src\core\ipv4\inet_chksum.c">
+      <Filter>lwip</Filter>
+    </ClCompile>
+    <ClCompile Include="lwip\ethernet\lwip-1.4.0\src\core\ipv4\ip.c">
+      <Filter>lwip</Filter>
+    </ClCompile>
+    <ClCompile Include="lwip\ethernet\lwip-1.4.0\src\core\ipv4\ip_addr.c">
+      <Filter>lwip</Filter>
+    </ClCompile>
+    <ClCompile Include="lwip\ethernet\lwip-1.4.0\src\core\ipv4\ip_frag.c">
+      <Filter>lwip</Filter>
+    </ClCompile>
+    <ClCompile Include="lwip\ethernet\lwip-1.4.0\src\core\snmp\asn1_dec.c">
+      <Filter>lwip</Filter>
+    </ClCompile>
+    <ClCompile Include="lwip\ethernet\lwip-1.4.0\src\core\snmp\asn1_enc.c">
+      <Filter>lwip</Filter>
+    </ClCompile>
+    <ClCompile Include="lwip\ethernet\lwip-1.4.0\src\core\snmp\mib_structs.c">
+      <Filter>lwip</Filter>
+    </ClCompile>
+    <ClCompile Include="lwip\ethernet\lwip-1.4.0\src\core\snmp\mib2.c">
+      <Filter>lwip</Filter>
+    </ClCompile>
+    <ClCompile Include="lwip\ethernet\lwip-1.4.0\src\core\snmp\msg_in.c">
+      <Filter>lwip</Filter>
+    </ClCompile>
+    <ClCompile Include="lwip\ethernet\lwip-1.4.0\src\core\snmp\msg_out.c">
+      <Filter>lwip</Filter>
+    </ClCompile>
+    <ClCompile Include="lwip\ethernet\lwip-1.4.0\src\netif\etharp.c">
+      <Filter>lwip</Filter>
+    </ClCompile>
+    <ClCompile Include="emulator.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="lwip\ethernet\lwip-1.4.0\ports\win32\ethernetif.c">
+      <Filter>lwip</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\main\AllBoards.h">
+      <Filter>ソース ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\main\ArrayRing.h">
+      <Filter>ソース ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\main\Board.h">
+      <Filter>ソース ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\main\BoardBase.h">
+      <Filter>ソース ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\main\BoardDirect.h">
+      <Filter>ソース ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\main\CommandWROOM.h">
+      <Filter>ソース ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\main\monitor.h">
+      <Filter>ソース ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\main\MotorDriver.h">
+      <Filter>ソース ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\main\TinyContainer.h">
+      <Filter>ソース ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\main\TouchSensing.h">
+      <Filter>ソース ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\main\UartForBoards.h">
+      <Filter>ソース ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\main\UdpCom.h">
+      <Filter>ソース ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\main\UTRef.h">
+      <Filter>ソース ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\main\wifiMan.h">
+      <Filter>ソース ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="..\main\WroomEnv.h">
+      <Filter>ソース ファイル</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
