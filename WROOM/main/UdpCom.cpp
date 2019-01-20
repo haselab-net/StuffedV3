@@ -157,8 +157,14 @@ void UdpCom::OnReceive(struct udp_pcb * upcb, struct pbuf * top, const ip_addr_t
 					xTaskNotifyGive(taskExeCmd);
 					#endif
 				}
+#if 0			//	check command counter exactly.
 				else if (recv->count == commandCount + 1) {		// check and update counter
 					commandCount++;
+#else			//	Onlt check received command counter > last command counter.
+//				else if (short(recv->count - commandCount) > 0) {		// check and update counter
+				else if(1){
+					commandCount = recv->count;
+#endif
 					recvs.Write();
 					#if !UDP_UART_ASYNC
 					xTaskNotifyGive(taskExeCmd);

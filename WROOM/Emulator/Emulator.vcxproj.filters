@@ -204,6 +204,9 @@
     <ClCompile Include="..\..\PIC\command.c">
       <Filter>PIC</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\PIC\env.c">
+      <Filter>PIC</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\main\AllBoards.h">

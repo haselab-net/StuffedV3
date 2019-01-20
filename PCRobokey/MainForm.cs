@@ -1,4 +1,4 @@
-﻿//#define RUNTICK_DEBUG
+﻿#define RUNTICK_DEBUG
 
 using System;
 using System.IO;
@@ -476,13 +476,20 @@ namespace Robokey
             runTimer.Interval = (int)udTick.Value;
         }
 
-        const int NINTERPOLATEFILL = 6; //  At least two must in buffer for interpolation.
+        const int NINTERPOLATEFILL = 8; //  At least two must in buffer for interpolation.
 
         private void runTimer_Tick(object sender, EventArgs e)
         {
             Timer tmRun = (Timer)sender;
             if (ckRun.Checked)
             {
+                if (ckForce.Checked)
+                {
+                    udpComm.controlMode = UdpComm.ControlMode.CM_FORCE;
+                }
+                else {
+                    udpComm.controlMode = UdpComm.ControlMode.CM_INTERPOLATE;
+                }
 #if true   //  interpolate on motor drivers
                 int remain = (int)(byte)((int)udpComm.interpolateTargetCountOfWrite - (int)udpComm.interpolateTargetCountOfRead);
                 int vacancy = udpComm.nInterpolateTotal - remain;
@@ -505,36 +512,23 @@ namespace Robokey
                 System.Diagnostics.Debug.Write("(");
                 System.Diagnostics.Debug.Write(udpComm.nInterpolateVacancy);
                 System.Diagnostics.Debug.Write(") diff=");
-                System.Diagnostics.Debug.Write(diff);
+                System.Diagnostics.Debug.WriteLine(diff);
 #endif
-                if (diff < 1)
+                if (diff < 0)
                 {
-                    if (diff != 0) {
-                        System.Diagnostics.Debug.WriteLine("Interpolation targets error diff = " + diff);
-                        diff = 0;
-                    }
+                    System.Diagnostics.Debug.WriteLine("Interpolation targets error diff = " + diff);
+                    diff = 0;
                 }
                 if (vacancy < 2)
                 {
                     diff = 0;
                 }
-                if (diff == 0)
-                {
-                    if (ckForce.Checked)
-                    {
-                        short[][] jacob = GetForceControlJacob();
-                        udpComm.SendPoseForceControl(Interpolate(curTime) + motors.Offset(), 1, jacob);
-                    }
-                    else
-                    {
-                        udpComm.SendPoseInterpolate(Interpolate(curTime) + motors.Offset(), 1);
-                    }
-                }
-                else
+                //  send targets
+                if (diff > 0)
                 {
                     for (int i = 0; i < diff; ++i)
                     {
-#if false           //  test for update
+#if false              //  test for update
                         if (runTimer.Enabled)
                         {
                             int len = (int)udpComm.interpolateTargetCountOfWrite - (int)udpComm.interpolateTargetCountOfRead;
@@ -547,27 +541,39 @@ namespace Robokey
 #endif
                         curTime += tmRun.Interval * (int)udStep.Value;
                         UpdateCurTime(curTime, true);
-                        if (runTimer.Enabled)
+                        if (ckForce.Checked)
                         {
-                            if (ckForce.Checked)
-                            {
-                                short[][] jacob = GetForceControlJacob();
-                                udpComm.SendPoseForceControl(Interpolate(curTime) + motors.Offset(), (ushort)runTimer.Interval, jacob);
-                            }
-                            else
-                            {
-                                udpComm.SendPoseInterpolate(Interpolate(curTime) + motors.Offset(), (ushort)runTimer.Interval);
-                            }
-#if RUNTICK_DEBUG
-                            System.Diagnostics.Debug.Write(" pr:");
-                            System.Diagnostics.Debug.Write((ushort)runTimer.Interval);
-                            System.Diagnostics.Debug.Write(" tg:");
-                            if (Interpolate(curTime) != null)
-                            {
-                                System.Diagnostics.Debug.Write(Interpolate(curTime).values[0]);
-                            }
-#endif
+                            short[][] jacob = GetForceControlJacob();
+                            udpComm.SendPoseForceControl(Interpolate(curTime) + motors.Offset(), (ushort)runTimer.Interval, jacob);
                         }
+                        else
+                        {
+                            udpComm.SendPoseInterpolate(Interpolate(curTime) + motors.Offset(), (ushort)runTimer.Interval);
+                        }
+#if RUNTICK_DEBUG
+                        System.Diagnostics.Debug.Write("cor:" + udpComm.interpolateTargetCountOfRead);
+                        System.Diagnostics.Debug.Write(" cow:" + udpComm.interpolateTargetCountOfWrite);
+                        System.Diagnostics.Debug.Write(" pr:");
+                        System.Diagnostics.Debug.Write((ushort)runTimer.Interval);
+                        System.Diagnostics.Debug.Write(" tg:");
+                        if (Interpolate(curTime) != null)
+                        {
+                            System.Diagnostics.Debug.Write(Interpolate(curTime).values[0]);
+                        }
+                        System.Diagnostics.Debug.WriteLine("");
+#endif
+                    }   //  for
+                }
+                else {  //  diff = 0
+                    if (ckForce.Checked)
+                    {
+                        short[][] jacob = GetForceControlJacob();
+                        udpComm.SendPoseForceControl(Interpolate(curTime) + motors.Offset(), (ushort)runTimer.Interval, jacob);
+                    }
+                    else
+                    {
+                        //  send command to receive latest cor and cow.
+                        udpComm.SendPoseInterpolate(Interpolate(curTime) + motors.Offset(), 0);
                     }
                 }
 #else   //  use direct
@@ -580,9 +586,6 @@ namespace Robokey
                 short[][] jacob = GetForceControlJacob();
                 udpComm.SendPoseForceControl(Interpolate(curTime) + motors.Offset(), (ushort)runTimer.Interval, jacob);
             }
-#if RUNTICK_DEBUG
-            System.Diagnostics.Debug.WriteLine(".");
-#endif
             if (ckSense.Checked)
             {
                 udpComm.SendSensor();

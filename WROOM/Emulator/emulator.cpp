@@ -10,7 +10,7 @@ extern "C" {
 	char hostAddress[] = { 192, 168, 43, 253 };
 	char subnetMask[] = { 255, 255, 255,0 };
 //*/
-//*	//	haselab
+/*	//	haselab
 	int hostAddress[] = { 192, 168, 91, 253 };
 	int subnetMask[] = { 255, 255, 255,0 };
 	//*/
@@ -18,6 +18,11 @@ extern "C" {
 /*	//	edurome
 int hostAddress[] = { 10, 1, 254, 253 };
 int subnetMask[] = { 255, 255, 252,0 };
+//*/
+
+//*	//	Home
+int hostAddress[] = { 192, 168, 12, 253 };
+int subnetMask[] = { 255, 255, 255,0 };
 //*/
 
 	void app_main();

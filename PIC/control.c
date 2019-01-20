@@ -3,6 +3,11 @@
 #include "control.h"
 #include <assert.h>
 
+#ifdef _WIN32
+#include <stdio.h>
+FILE* logFile = NULL;
+#endif
+
 struct MotorState motorTarget, motorState;
 SDEC forceControlJK[NFORCE][NMOTOR];
 struct PdParam pdParam;
@@ -127,7 +132,6 @@ void targetsAddOrUpdate(SDEC* pos, short period, unsigned char count){
 void targetsForceControlAddOrUpdate(SDEC* pos, SDEC JK[NFORCE][NMOTOR] ,short period, unsigned char count){
 	unsigned char avail, cor;	//
 	char delta;					//	cor - count	
-	LOGI("targetsAdd m0:%d pr:%d c:%d\r\n", (int)pos[0], (int)period, (int)count);
 	if (period == 0) return;	//	for vacancy check
 	
 	//	check targets delta
@@ -136,6 +140,8 @@ void targetsForceControlAddOrUpdate(SDEC* pos, SDEC JK[NFORCE][NMOTOR] ,short pe
 	cor = targets.countOfRead;
 	ENABLE_INTERRUPT
 	delta = count - cor;
+	LOGI("targetsAdd m0:%d pr:%d c:%d | cor=%d read=%d delta=%d\r\n", (int)pos[0], (int)period, (int)count, 
+		(int)cor, (int)targets.read, (int)delta);
 	if (delta > avail){
 		//	target count jumped. may be communication error.
 		LOGE("CJ\r\n");
@@ -203,9 +209,10 @@ void targetsTickProceed(){
 			}else{
 				targets.read = 0;
 			}
-			LOGI("Read=%d", targets.read);
+			LOGI("TickProceed: Read=%d cor=%d\n", targets.read, targets.countOfRead);
 		}else{
 			targets.tick = targets.buf[(targets.read+1)%NTARGET].period;
+			LOGW("TickProceed: Underflow. Failed to increment read=%d cor=%d\n", targets.read, targets.countOfRead);
 		}
 	}
 }
@@ -225,7 +232,14 @@ void targetsProceed(){
         motorTarget.pos[i] = S2LDEC(targets.buf[(int)targets.read].pos[i]) + S2LDEC((int)diff * (int)targets.tick / period); 
 #endif
 		motorTarget.vel[i] = S2LDEC(targets.buf[readPlus].pos[i] - targets.buf[(int)targets.read].pos[i]) / period;
+#ifdef _WIN32
+		fprintf(logFile, "%d,%d,", motorTarget.pos[i], motorTarget.vel[i]);
+#endif
 	}
+#ifdef _WIN32
+	fprintf(logFile, "\n");
+	fflush(logFile);
+#endif
 }
 
 LDEC deltaPosForceControl[NMOTOR];
@@ -279,6 +293,9 @@ void controlInit(){
 #endif
 #ifdef WROOM
 	mutexForControl = xSemaphoreCreateMutex();
+#endif
+#ifdef _WIN32
+	logFile = fopen("control.csv", "w");
 #endif
 }
 void controlSetMode(enum ControlMode m){

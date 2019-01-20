@@ -91,14 +91,31 @@ namespace Robokey
         public PoseData pose = null;                        //  current angles of motors; ReadPose
         public PoseData velocity = null;                    //  current velocities of motors; ReadVelocity
         public short[] current = null;                      //  current sensor's values
-        public short[] force = null;                       //  force sensor's values
+        public short[] force = null;                        //  force sensor's values
         public int nInterpolateTotal=0;                     //  capacity of interpolation targets.
-        public byte interpolateTargetCountOfWrite = 0;      //  count of interpolation at write cursor
-        public byte interpolateTargetCountOfRead = 0;       //  count of interpolation at read cursor
+        public byte interpolateTargetCountOfWrite;          //  count of interpolation at write cursor
+        public byte interpolateTargetCountOfRead;           //  count of interpolation at read cursor
         public int interpolateTickMin = 0;                  //  tick of interpolation
         public int interpolateTickMax = 0;                  //  tick of interpolation
         public int nInterpolateRemain = 0;                  //  number of data in target buffer 
         public int nInterpolateVacancy =0;                  //  target buffer vacancy
+        public enum ControlMode {
+            CM_DIRECT,
+            CM_INTERPOLATE,
+            CM_FORCE
+        };
+        private ControlMode _controlMode = ControlMode.CM_DIRECT;
+        public ControlMode controlMode {
+            set {
+                if (_controlMode != value)
+                {
+                    interpolateTargetCountOfRead = 0x100-2;
+                    interpolateTargetCountOfWrite = 0;
+                    _controlMode = value;
+                }
+            }
+            get { return _controlMode; }
+        }
         public struct Packet {
             byte[] data;
             int length;
@@ -419,6 +436,9 @@ namespace Robokey
         public void PutCommand(byte[] cmd, int len) {
             if (udp == null || sendPoint == null) return;
             int p = 0;
+#if true    //  No retry 
+            sendQueue.Clear();
+#endif
             WriteShort(len, ref p, cmd);
             for (int i=0; i<100 && !sendQueue.Write(cmd); ++i) {
                 int cur = 2;
@@ -465,6 +485,7 @@ namespace Robokey
         public void SendPoseDirect(PoseData pose)
         {
             if (pose == null) return;
+            controlMode = ControlMode.CM_DIRECT;
             byte[] packet = new byte[1000];
             int p = 0;
             WriteHeader((int)CommandId.CI_DIRECT, ref p, packet);
@@ -478,11 +499,11 @@ namespace Robokey
                 WriteShort(0, ref p, packet);   //  Tentative: set velocity to 0 
             }
             PutCommand(packet, p);
-            interpolateTargetCountOfWrite = 0;
         }
         public void SendPoseInterpolate(PoseData pose, ushort period)
         {
             if (pose == null) return;
+            controlMode = ControlMode.CM_INTERPOLATE;
             byte[] packet = new byte[1000];
             int p = 0;
             WriteHeader((int)CommandId.CI_INTERPOLATE, ref p, packet);
@@ -490,9 +511,6 @@ namespace Robokey
             {
                 int v = pose == null ? 0 : pose.values[i];
                 WriteShort(v, ref p, packet);
-            }
-            if (period <= 0) {
-                System.Diagnostics.Debug.Write("Error: period == 0");
             }
             WriteShort(period, ref p, packet);
             WriteShort(interpolateTargetCountOfWrite, ref p, packet);
@@ -503,6 +521,7 @@ namespace Robokey
         public void SendPoseForceControl(PoseData pose, ushort period, short [][] jacob)
         {
             if (pose == null) return;
+            controlMode = ControlMode.CM_FORCE;
             byte[] packet = new byte[1000];
             int p = 0;
             WriteHeader((int)CommandId.CI_FORCE_CONTROL, ref p, packet);
