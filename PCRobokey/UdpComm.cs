@@ -6,6 +6,8 @@ using System.Text;
 using System.Windows.Forms;
 using System.IO;
 
+//  #define UDP_NORETRY
+
 namespace Robokey
 {
     class RobotInfo : ICloneable, IComparable
@@ -436,7 +438,7 @@ namespace Robokey
         public void PutCommand(byte[] cmd, int len) {
             if (udp == null || sendPoint == null) return;
             int p = 0;
-#if true    //  No retry 
+#if UDP_NORETRY    //  No retry 
             sendQueue.Clear();
 #endif
             WriteShort(len, ref p, cmd);

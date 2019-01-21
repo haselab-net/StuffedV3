@@ -121,9 +121,8 @@ void UdpCom::Start(){
 	udp_recv(udp, onReceive, this);
 }
 void UdpCom::OnReceive(struct udp_pcb * upcb, struct pbuf * top, const ip_addr_t* addr, u16_t port) {
-	//ESP_LOGI("UdpCom::OnReceive", "Start");
 	if (!recvs.WriteAvail()){
-		printf("Udp recv buffer full.\n");
+		ESP_LOGE("UdpCom::OnReceive", "Udp recv buffer full.");
 		pbuf_free(top);
 		return;
 	}
@@ -143,7 +142,7 @@ void UdpCom::OnReceive(struct udp_pcb * upcb, struct pbuf * top, const ip_addr_t
 			if (cmdLen == UdpPacket::HEADERLEN){
 				cmdLen = recv->CommandLen();
 				if (bDebug){
-					printf("L=%d Cm=%d Ct=%d received from %s.\n", recv->length, recv->command, recv->count, ipaddr_ntoa(addr));
+					ESP_LOGI(Tag, "L=%d Cm=%d Ct=%d received from %s.\n", recv->length, recv->command, recv->count, ipaddr_ntoa(addr));
 				} 
 			}
 			if (readLen == cmdLen){
@@ -157,7 +156,7 @@ void UdpCom::OnReceive(struct udp_pcb * upcb, struct pbuf * top, const ip_addr_t
 					xTaskNotifyGive(taskExeCmd);
 					#endif
 				}
-#if 0			//	check command counter exactly.
+#if 1			//	check command counter exactly.
 				else if (recv->count == commandCount + 1) {		// check and update counter
 					commandCount++;
 #else			//	Onlt check received command counter > last command counter.

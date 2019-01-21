@@ -6,7 +6,7 @@
 
 
 extern "C" {
-/*	//	hasefone
+//*	//	hasefone
 	char hostAddress[] = { 192, 168, 43, 253 };
 	char subnetMask[] = { 255, 255, 255,0 };
 //*/
@@ -20,7 +20,7 @@ int hostAddress[] = { 10, 1, 254, 253 };
 int subnetMask[] = { 255, 255, 252,0 };
 //*/
 
-//*	//	Home
+/*	//	Home
 int hostAddress[] = { 192, 168, 12, 253 };
 int subnetMask[] = { 255, 255, 255,0 };
 //*/
