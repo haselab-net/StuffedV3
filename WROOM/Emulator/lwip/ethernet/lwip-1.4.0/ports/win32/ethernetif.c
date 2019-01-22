@@ -77,6 +77,8 @@
 
 #define netifMAX_MTU 1500
 
+extern int newtorkInterfaceToUse;
+
 struct xEthernetIf
 {
 	struct eth_addr *ethaddr;
@@ -112,7 +114,7 @@ static pcap_if_t * prvPrintAvailableNetworkInterfaces( void );
 
 /*
  * Open the network interface.  The number of the interface to be opened is set
- * by the configNETWORK_INTERFACE_TO_USE constant in FreeRTOSConfig.h.
+ * by the newtorkInterfaceToUse constant in emulator.cpp
  */
 static void prvOpenSelectedNetworkInterface( pcap_if_t *pxAllNetworkInterfaces );
 
@@ -172,7 +174,7 @@ pcap_if_t *pxAllNetworkInterfaces;
 	pxAllNetworkInterfaces = prvPrintAvailableNetworkInterfaces();
 	
 	/* Open the network interface.  The number of the interface to be opened is 
-	set by the configNETWORK_INTERFACE_TO_USE constant in FreeRTOSConfig.h.
+	set by the newtorkInterfaceToUse constant in emulator.c.
 	Calling this function will set the pxOpenedInterfaceHandle variable.  If,
 	after calling this function, pxOpenedInterfaceHandle is equal to NULL, then
 	the interface could not be opened. */
@@ -509,12 +511,12 @@ long lInterfaceNumber = 1;
 		pxAllNetworkInterfaces = NULL;
 	}
 
-	printf( "\r\nThe interface that will be opened is set by configNETWORK_INTERFACE_TO_USE which should be defined in FreeRTOSConfig.h\r\n" );
-	printf( "Attempting to open interface number %d.\r\n", configNETWORK_INTERFACE_TO_USE );
+	printf( "\r\nThe interface that will be opened is set by newtorkInterfaceToUse which should be defined in emulator.c\r\n" );
+	printf( "Attempting to open interface number %d.\r\n", newtorkInterfaceToUse );
 	
-	if( ( configNETWORK_INTERFACE_TO_USE < 1L ) || ( configNETWORK_INTERFACE_TO_USE > lInterfaceNumber ) )
+	if( ( newtorkInterfaceToUse < 1L ) || ( newtorkInterfaceToUse > lInterfaceNumber ) )
 	{
-		printf("\r\nconfigNETWORK_INTERFACE_TO_USE is not in the valid range.\r\n" );
+		printf("\r\nnewtorkInterfaceToUse is not in the valid range.\r\n" );
 		
 		if( pxAllNetworkInterfaces != NULL )
 		{
@@ -535,7 +537,7 @@ long x;
 
 	/* Walk the list of devices until the selected device is located. */
 	xInterface = pxAllNetworkInterfaces;
-	for( x = 0L; x < ( configNETWORK_INTERFACE_TO_USE - 1L ); x++ )
+	for( x = 0L; x < ( newtorkInterfaceToUse - 1L ); x++ )
 	{
 		xInterface = xInterface->next;
 	}

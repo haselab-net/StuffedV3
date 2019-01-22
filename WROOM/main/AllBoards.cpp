@@ -28,6 +28,7 @@ RobotState::RobotState(){
 	mode = CM_DIRECT;
 }
 RobotCommand::RobotCommand(){
+	controlMode = CM_SKIP;
 }
 
 
@@ -78,7 +79,7 @@ void AllBoards::ExecLoop(){
 				static int last;
 				last = state.position[3];
 				WriteCmd(CI_ALL, command);
-				command.controlMode = CM_SKIP;
+				command.mode = CM_SKIP;
 				ReadRet(CI_ALL, state);
 				int diff = state.position[3] - last;
 				if (diff < 0) diff = -diff;

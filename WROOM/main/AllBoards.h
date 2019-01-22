@@ -24,20 +24,21 @@ class UdpCmdPacket;
 class UdpRetPacket;
 
 struct RobotCommand: public BoardCmdBase{
-	RobotCommand();
-	tiny::vector<SDEC> targetPosition;	//	motor's target position
-	tiny::vector<SDEC> targetVelocity;	//	motor's target velocitry
-	tiny::vector<SDEC> forceControlJacobian;	
-										//	jacobian for force control
-	short targetPeriod;					//	period to interpolate to acheive the target
-	short targetCount;					//	count of the target to overwrite a target in the queue. 	
+	ControlMode mode;							//	set SKIP not to add target
+	tiny::vector<SDEC> targetPosition;			//	motor's target position
+	tiny::vector<SDEC> targetVelocity;			//	motor's target velocitry
+	tiny::vector<SDEC> forceControlJacobian;	//	jacobian for force control
+	short targetPeriod;							//	period to interpolate to acheive the target
+	short targetCount;							//	count of the target to overwrite a target in the queue. 	
+
+	//	To be implemnented 
 	tiny::vector<SDEC> controlK;
 	tiny::vector<SDEC> controlB;
 	tiny::vector<SDEC> torqueMin;
 	tiny::vector<SDEC> torqueMax;
 	ResetSensorFlags resetSensorFlags;
-	ControlMode controlMode;
 
+	RobotCommand();
 	short GetControlMode(){ return controlMode; }
 	short GetMotorPos(int i){ return targetPosition[i]; }
 	short GetMotorVel(int i){ return targetVelocity[i]; }
@@ -67,6 +68,7 @@ struct RobotState: public BoardRetBase{
 	tiny::vector<SDEC> velocity;		//	motor velocitry
 	tiny::vector<SDEC> current;			//	current sensor for motor;
 	tiny::vector<SDEC> force;			//	force sensor
+
 	void SetControlMode(short cm){
 		mode = (ControlMode)cm;
 	}

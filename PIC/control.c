@@ -2,11 +2,10 @@
 #include "fixed.h"
 #include "control.h"
 #include <assert.h>
-
 #ifdef _WIN32
-#include <stdio.h>
-FILE* logFile = NULL;
+void lprintf(const char* fmt, ...);
 #endif
+
 
 struct MotorState motorTarget, motorState;
 SDEC forceControlJK[NFORCE][NMOTOR];
@@ -130,18 +129,19 @@ void targetsAddOrUpdate(SDEC* pos, short period, unsigned char count){
 }
 //	Update or add interpolate target with force control
 void targetsForceControlAddOrUpdate(SDEC* pos, SDEC JK[NFORCE][NMOTOR] ,short period, unsigned char count){
-	unsigned char avail, cor;	//
+	unsigned char avail, cor, read;	//
 	char delta;					//	cor - count	
 	if (period == 0) return;	//	for vacancy check
 	
 	//	check targets delta
 	DISABLE_INTERRUPT
+	read = targets.read;
 	avail = targetsReadAvail();
 	cor = targets.countOfRead;
 	ENABLE_INTERRUPT
 	delta = count - cor;
 	LOGI("targetsAdd m0:%d pr:%d c:%d | cor=%d read=%d delta=%d\r\n", (int)pos[0], (int)period, (int)count, 
-		(int)cor, (int)targets.read, (int)delta);
+		(int)cor, (int)read, (int)delta);
 	if (delta > avail){
 		//	target count jumped. may be communication error.
 		LOGE("CJ\r\n");
@@ -150,9 +150,9 @@ void targetsForceControlAddOrUpdate(SDEC* pos, SDEC JK[NFORCE][NMOTOR] ,short pe
 	
 	/*	buf[0],[1] is currently used for interpolation. buf[2] will be used in the next step.
 		So, we can update from buf[3] to buf[read + avail-1]. Also we can add to buf[read + avail]	*/
-	if (delta == avail || (3 <= delta && delta < avail)){
+	if (delta == avail || (3 <= delta && delta < avail)){	//	add or update
 		int i, j;
-		int w = (targets.read + delta) % NTARGET;
+		int w = (read + delta) % NTARGET;
 		targets.buf[w].period = period;
 		for(i=0; i<NMOTOR; ++i){
 			targets.buf[w].pos[i] = pos[i];
@@ -171,8 +171,8 @@ void targetsForceControlAddOrUpdate(SDEC* pos, SDEC JK[NFORCE][NMOTOR] ,short pe
 			if (targetsWriteAvail()){
 				targetsWrite();
 			}else{
-				LOGE("Error: overflow of targets readCount shifted\r\n");
-				targets.countOfRead ++;		//
+				LOGE("Error: overflow of targets countOfRead shifted\r\n");
+				targets.countOfRead = cor + 1;
 			}
 		}else{
 			LOGI(" Update.\r\n");		
@@ -233,12 +233,11 @@ void targetsProceed(){
 #endif
 		motorTarget.vel[i] = S2LDEC(targets.buf[readPlus].pos[i] - targets.buf[(int)targets.read].pos[i]) / period;
 #ifdef _WIN32
-		fprintf(logFile, "%d,%d,", motorTarget.pos[i], motorTarget.vel[i]);
+		lprintf("%d,%d,", motorTarget.pos[i], motorTarget.vel[i]);
 #endif
 	}
 #ifdef _WIN32
-	fprintf(logFile, "\n");
-	fflush(logFile);
+	lprintf("\n");
 #endif
 }
 
@@ -293,9 +292,6 @@ void controlInit(){
 #endif
 #ifdef WROOM
 	mutexForControl = xSemaphoreCreateMutex();
-#endif
-#ifdef _WIN32
-	logFile = fopen("control.csv", "w");
 #endif
 }
 void controlSetMode(enum ControlMode m){

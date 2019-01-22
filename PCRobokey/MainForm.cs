@@ -541,27 +541,30 @@ namespace Robokey
 #endif
                         curTime += tmRun.Interval * (int)udStep.Value;
                         UpdateCurTime(curTime, true);
-                        if (ckForce.Checked)
+                        if (ckRun.Checked)  //  onceの場合、UpdateCurTimeでckRunが切れる。
                         {
-                            short[][] jacob = GetForceControlJacob();
-                            udpComm.SendPoseForceControl(Interpolate(curTime) + motors.Offset(), (ushort)runTimer.Interval, jacob);
-                        }
-                        else
-                        {
-                            udpComm.SendPoseInterpolate(Interpolate(curTime) + motors.Offset(), (ushort)runTimer.Interval);
-                        }
+                            if (ckForce.Checked)
+                            {
+                                short[][] jacob = GetForceControlJacob();
+                                udpComm.SendPoseForceControl(Interpolate(curTime) + motors.Offset(), (ushort)runTimer.Interval, jacob);
+                            }
+                            else
+                            {
+                                udpComm.SendPoseInterpolate(Interpolate(curTime) + motors.Offset(), (ushort)runTimer.Interval);
+                            }
 #if RUNTICK_DEBUG
-                        System.Diagnostics.Debug.Write("cor:" + udpComm.interpolateTargetCountOfRead);
-                        System.Diagnostics.Debug.Write(" cow:" + udpComm.interpolateTargetCountOfWrite);
-                        System.Diagnostics.Debug.Write(" pr:");
-                        System.Diagnostics.Debug.Write((ushort)runTimer.Interval);
-                        System.Diagnostics.Debug.Write(" tg:");
-                        if (Interpolate(curTime) != null)
-                        {
-                            System.Diagnostics.Debug.Write(Interpolate(curTime).values[0]);
-                        }
-                        System.Diagnostics.Debug.WriteLine("");
+                            System.Diagnostics.Debug.Write("cor:" + udpComm.interpolateTargetCountOfRead);
+                            System.Diagnostics.Debug.Write(" cow:" + udpComm.interpolateTargetCountOfWrite);
+                            System.Diagnostics.Debug.Write(" pr:");
+                            System.Diagnostics.Debug.Write((ushort)runTimer.Interval);
+                            System.Diagnostics.Debug.Write(" tg:");
+                            if (Interpolate(curTime) != null)
+                            {
+                                System.Diagnostics.Debug.Write(Interpolate(curTime).values[0]);
+                            }
+                            System.Diagnostics.Debug.WriteLine("");
 #endif
+                        }
                     }   //  for
                 }
                 else {  //  diff = 0

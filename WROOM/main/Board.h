@@ -47,6 +47,20 @@ public:
 	void WriteCmd(unsigned short command, BoardCmdBase& packet) {
 		cmd.commandId = command;
 		switch (command){
+		case CI_ALL:
+			cmd.all.controlMode = packet.GetControlMode();
+			cmd.all.count = packet.GetTargetCount();
+			cmd.all.period = packet.GetPeriod();
+			for (int i = 0; i < GetNMotor(); ++i) {
+				cmd.all.pos[i] = packet.GetMotorPos(motorMap[i]);
+				for (int j = 0; j < GetNForce(); ++j) {
+/*					assert(GetNMotor() == 3);
+					assert(GetNForce() == 2);
+					assert(forceMap[j] < 4);
+	*/				cmd.all.jacob[j][i] = packet.GetForceControlJacob(forceMap[j], i);
+				}
+			}
+			break;
 		case CI_DIRECT:
 			for (int i = 0; i < GetNMotor(); ++i) {
 				cmd.direct.pos[i] = packet.GetMotorPos(motorMap[i]);
@@ -88,6 +102,8 @@ public:
 		case CI_RESET_SENSOR:
 			cmd.resetSensor.flags = packet.GetResetSensorFlags();
 			break;
+		default:
+			assert(0);
 		}
 	}
 	void ReadRet(unsigned short cmd, BoardRetBase& packet) {
@@ -130,6 +146,8 @@ public:
 				packet.SetForce(ret.sensor.force[i], forceMap[i]);
 			}
 			break;
+		default:
+			assert(0);
 		}
 	}
 };

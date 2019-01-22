@@ -126,8 +126,6 @@ void vMainConfigureTimerForRunTimeStats( void );
 extern void vAssertCalled( void );
 #define configASSERT( x ) if( ( x ) == 0 ) vAssertCalled()
 
-#define	configNETWORK_INTERFACE_TO_USE	3
-
 #define configMAC_ISR_SIMULATOR_PRIORITY	( 6 )
 #define configLWIP_TASK_PRIORITY			( 5 )
 
