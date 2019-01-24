@@ -35,7 +35,7 @@ int UdpCmdPacket::CommandLen() {
 	case CI_BOARD_INFO:		//	
 		return NHEADER * 2;
 	//	case CI_SET_CMDLEN is only for uart
-	case CI_ALL:			// direct/interpolate/forceControl + controlMode 
+	case CI_ALL:			// direct/interpolate/forceControl + mode 
 	 	return (NHEADER + allBoards.GetNTotalMotor()*3 + 2 + 1) * 2; 
 	case CI_SENSOR:			//	
 		return NHEADER * 2;
@@ -305,7 +305,7 @@ void UdpCom::ExecUdpCommand(UdpCmdPacket& recv) {
 		send.data[3] = ownerIp.addr & 0xFF;
 #endif
 #ifdef DEBUG
-		printf("GetIPAddress send to ");
+		logPrintf("GetIPAddress send to ");
 		Serial.print(recv.returnIp);
 		Serial.print("  ");
 		Serial.print(port);

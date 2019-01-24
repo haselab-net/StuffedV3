@@ -207,6 +207,9 @@
     <ClCompile Include="..\..\PIC\env.c">
       <Filter>PIC</Filter>
     </ClCompile>
+    <ClCompile Include="tsprintf.c">
+      <Filter>Emulator</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\main\AllBoards.h">
@@ -279,6 +282,9 @@
       <Filter>PIC</Filter>
     </ClInclude>
     <ClInclude Include="..\..\PIC\commandTemplate.h">
+      <Filter>PIC</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\PIC\env.h">
       <Filter>PIC</Filter>
     </ClInclude>
   </ItemGroup>

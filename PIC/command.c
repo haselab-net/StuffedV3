@@ -189,14 +189,14 @@ void ExecCmd(void* cmd, int len){
 	assert(sizeof(command) == len);
 	memcpy(&command, cmd, len);
 	execCommand[command.commandId]();
-    //printf("MCID:%d\r\n", command.commandId);
+    //logPrintf("MCID:%d\r\n", command.commandId);
 }
 void ExecRet(void* ret, int len){
 	retPacket.header = command.header;
 	returnCommand[retPacket.commandId]();
 	assert(sizeof(retPacket) == len);
 	memcpy(ret, &retPacket, len);
-    //printf("MRID:%d\r\n", command.commandId);
+    //logPrintf("MRID:%d\r\n", command.commandId);
 }
 #endif
 

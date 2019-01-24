@@ -3,11 +3,12 @@
 #include "freertos/task.h"
 #include "freertos/event_groups.h"
 #include "../main/UdpCom.h"
+#include "tsprintf.h"
 
 
 extern "C" {
 	int newtorkInterfaceToUse = 3;
-	/*	//	hasefone
+	//*	//	hasefone
 	int hostAddress[] = { 192, 168, 43, 253 };
 	int subnetMask[] = { 255, 255, 255,0 };
 	//*/
@@ -19,7 +20,7 @@ extern "C" {
 	int hostAddress[] = { 10, 1, 254, 253 };
 	int subnetMask[] = { 255, 255, 252,0 };
 	//*/
-	//*	//	Home
+	/*	//	Home
 	int hostAddress[] = { 192, 168, 12, 253 };
 	int subnetMask[] = { 255, 255, 255,0 };
 	//*/
@@ -125,9 +126,11 @@ extern "C" {
 #define mainCHECK_TIMER_PERIOD_MS			( 3000UL / portTICK_RATE_MS )
 
 	static xTimerHandle xCheckTimer = NULL;
-	void taskPrint(void*);
+	void taskLog(void*);
+	void taskCon(void*);
 	void taskFile(void*);
-	xQueueHandle queuePrint;
+	xQueueHandle queueLog;
+	xQueueHandle queueCon;
 	xQueueHandle queueFile;
 	FILE* logFile = NULL;
 
@@ -168,14 +171,33 @@ extern "C" {
 		logFile = fopen("control.csv", "w");
 
 		xTaskCreate(mainTask, "main", 1024 * 8, NULL, 2, NULL);
-		queuePrint = xQueueCreate(100, sizeof(char*));
-		xTaskCreate(taskPrint, "print", 1024 * 4, NULL, configMAX_PRIORITIES - 1, NULL);
-		queueFile = xQueueCreate(1000, sizeof(char*));
+		queueLog = xQueueCreate(100, sizeof(char*));
+		xTaskCreate(taskLog, "print", 1024 * 4, NULL, configMAX_PRIORITIES - 1, NULL);
+		queueCon = xQueueCreate(100, sizeof(char*));
+		xTaskCreate(taskCon, "con", 1024 * 4, NULL, configMAX_PRIORITIES - 1, NULL);
+		queueFile = xQueueCreate(100, sizeof(char*));
 		xTaskCreate(taskFile, "file", 1024 * 4, NULL, configMAX_PRIORITIES - 1, NULL);
 
 
 		/* Start the scheduler itself.	never return */
 		vTaskStartScheduler();
+	}
+	void taskLog(void*) {
+		while (1) {
+			char* str;
+			xQueueReceive(queueLog, &str, portMAX_DELAY);
+			OutputDebugStringA(str);
+			free(str);
+		}
+	}
+	void taskCon(void*) {
+		while (1) {
+			char* str;
+			xQueueReceive(queueCon, &str, portMAX_DELAY);
+			fwrite(str, strlen(str), 1, stdout);
+			fflush(stdout);
+			free(str);
+		}
 	}
 	void taskFile(void*) {
 		while (1) {
@@ -186,11 +208,11 @@ extern "C" {
 			free(str);
 		}
 	}
-	void lprintf(const char* fmt, ...) {
+	void filePrintf(const char* fmt, ...) {
 		va_list va;
 		char buf[1024];
 		va_start(va, fmt);
-		vsprintf(buf, fmt, va);
+		vtsprintf(buf, fmt, va);
 		char* str = (char*)malloc(strlen(buf) + 1);
 		strcpy(str, buf);
 		xQueueSend(queueFile, &str, 100);
@@ -198,24 +220,16 @@ extern "C" {
 	}
 
 
-	void taskPrint(void*) {
-		while (1) {
-			char* str;
-			xQueueReceive(queuePrint, &str, portMAX_DELAY);
-			OutputDebugStringA(str);
-			free(str);
-		}
-	}
 	void logVprintf(const char* format, va_list va) {
 		char buf[1024];
-		vsprintf(buf, format, va);
+		vtsprintf(buf, format, va);
 		char* str = (char*)malloc(strlen(buf) + 1);
 		strcpy(str, buf);
-		xQueueSend(queuePrint, &str, 100);
+		xQueueSend(queueLog, &str, 100);
 	}
 	void logVfprintf(const char* format, va_list va) {
 		char buf[1024];
-		vsprintf(buf, format, va);
+		vtsprintf(buf, format, va);
 		char* str = (char*)malloc(strlen(buf) + 1);
 		strcpy(str, buf);
 		xQueueSend(queueFile, &str, 100);
@@ -226,10 +240,23 @@ extern "C" {
 		logVprintf(fmt, va);
 		va_end(va);
 	}
+	void conVprintf(const char* format, va_list va) {
+		char buf[1024];
+		vtsprintf(buf, format, va);
+		char* str = (char*)malloc(strlen(buf) + 1);
+		strcpy(str, buf);
+		xQueueSend(queueCon, &str, 100);
+	}
+	void conPrintf(const char* fmt, ...) {
+		va_list va;
+		va_start(va, fmt);
+		conVprintf(fmt, va);
+		va_end(va);
+	}
 	void espVprintf(const char* lv, const char* tag, const char* format, va_list va) {
 		char buf[1024];
-		sprintf(buf, "%s:%s ", lv, tag);
-		vsprintf(buf + strlen(buf), format, va);
+		tsprintf(buf, "%s:%s ", lv, tag);
+		vtsprintf(buf + strlen(buf), format, va);
 		logPrintf("%s\r\n", buf);
 	}
 

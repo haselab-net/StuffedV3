@@ -72,7 +72,7 @@ void UartForBoards::RecvUart(){
 		char str[1024];
 		char* ptr = str;
 		for(int i=0; i<(int)remain; ++i){
-			sprintf(ptr, " %02x", buf[i]);
+			logPrintf(ptr, " %02x", buf[i]);
 			ptr += strlen(ptr);
 		}
 		int i;
@@ -147,7 +147,7 @@ void UartForBoards::RecvTask(){
 			char str[1024];
 			char* ptr = str;
 			for(int i=0; i<remain; ++i){
-				sprintf(ptr, " %02x", buf[i]);
+				slogPrintf(ptr, " %02x", buf[i]);
 				ptr += strlen(ptr);
 			}
 			int i;
@@ -167,7 +167,7 @@ void UartForBoards::EnumerateBoard() {
 	CommandPacketBD0 cmd;
 	ReturnPacketBD0 ret;
 	for (int i = 0; i <= MAXBOARDID; ++i) {
-		printf("Enumerate borad on uart #%d-%d.", port, i);
+		logPrintf("Enumerate borad on uart #%d-%d.", port, i);
 		cmd.commandId = CI_BOARD_INFO;
 		cmd.boardId = i;
 		uart_write_bytes(port, zero, 40);	//	clear pending command
@@ -175,7 +175,7 @@ void UartForBoards::EnumerateBoard() {
 		uart_write_bytes(port, (char*)cmd.bytes, BD0_CLEN_BOARD_INFO);	//	send board info command
 		uart_write_bytes(port, zero, 5);
 		for (int w = 0; w < 20; ++w) {
-			printf(".");
+			logPrintf(".");
 #ifndef _WIN32
 			vTaskDelay(1);
 #endif
@@ -201,28 +201,28 @@ void UartForBoards::EnumerateBoard() {
 						b->forceMap.push_back(allBoards->forceMap.size());
 						allBoards->forceMap.push_back(DeviceMap(i, m));
 					}
-					printf("%dT%dM%dC%dF%d", ret.boardInfo.modelNumber, ret.boardInfo.nTarget,
+					logPrintf("%dT%dM%dC%dF%d", ret.boardInfo.modelNumber, ret.boardInfo.nTarget,
 						ret.boardInfo.nMotor, ret.boardInfo.nCurrent, ret.boardInfo.nForce);
 					break;
 				}
 			}
 		}
-		printf("\n");
+		logPrintf("\n");
 	}
 	cmdCur.board = boards.size();
 	retCur.board = 0;
 	//	set command length for all boards
 	for (int i = 0; i < (int)boards.size(); ++i) {
-		printf("Board %d CLEN:", boards[i]->GetBoardId());
+		logPrintf("Board %d CLEN:", boards[i]->GetBoardId());
 		for (int c = 0; c < CI_NCOMMAND; ++c) {
 			cmd.cmdLen.len[c] = boards[i]->cmdPacketLen[c];
-			printf(" %d", (int) boards[i]->cmdPacketLen[c]);
+			logPrintf(" %d", (int) boards[i]->cmdPacketLen[c]);
 		}
-		printf(" RLEN:");
+		logPrintf(" RLEN:");
 		for (int c = 0; c < CI_NCOMMAND; ++c) {
-			printf(" %d", (int) boards[i]->retPacketLen[c]);
+			logPrintf(" %d", (int) boards[i]->retPacketLen[c]);
 		}
-		printf("\n");
+		logPrintf("\n");
 		cmd.commandId = CI_SET_CMDLEN;
 		cmd.boardId = boards[i]->GetBoardId();
 		uart_flush_input(port);												//	clear input buffer

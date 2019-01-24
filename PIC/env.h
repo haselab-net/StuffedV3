@@ -57,4 +57,19 @@ void logPrintfE(const char* fmt,  ...);
 void logPrintfW(const char* fmt,  ...);
 void logPrintfI(const char* fmt,  ...);
 
+#ifdef _WIN32
+#ifdef __cplusplus
+extern "C"{
+#endif
+	void logPrintf(const char* fmt, ...);
+	void conPrintf(const char* fmt, ...);
+	void filePrintf(const char* fmt, ...);
+#ifdef __cplusplus
+}
+#endif
+#else
+#define  logPrintf	printf
+#define  conPrintf	printf
+#endif
+
 #endif

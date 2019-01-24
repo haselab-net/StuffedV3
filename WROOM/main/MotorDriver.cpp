@@ -20,6 +20,12 @@ extern "C" {
 #include "../../PIC/control.h"
 }
 
+#ifdef _WIN32
+#include <math.h>
+float pwm[NMOTOR];
+float theta[NMOTOR];
+#endif
+
 MotorDriver motorDriver;
 
 
@@ -125,8 +131,8 @@ void MotorDriver::Init(){
     for(int i=0; i<8; ++i){
         patTab.pat[i] = patterns[(i-i%4) + (3-i%4)];
     }
-    printf("%08x ", patTab.tab[0]);
-    printf("%08x ", patTab.tab[1]);
+    logPrintf("%08x ", patTab.tab[0]);
+    logPrintf("%08x ", patTab.tab[1]);
     SYSCON.saradc_sar1_patt_tab[0] = patTab.tab[0];
     SYSCON.saradc_sar1_patt_tab[1] = patTab.tab[1];
     SYSCON.saradc_ctrl2.sar1_inv = 1;
@@ -150,12 +156,12 @@ void MotorDriver::Init(){
         for(int i=0; i<ADC_DMA_LEN; ++i){
 # ifdef READADC
             int ad = adc1_get_raw((adc1_channel_t)adcChs[i]);
-            printf("%5d\t", ad);
+            logPrintf("%5d\t", ad);
 # else
-            printf("%5d\t", adcRaws[i]);
+            logPrintf("%5d\t", adcRaws[i]);
 # endif
         }
-        printf("\r\n");
+        logPrintf("\r\n");
         vTaskDelay(500);
     }
 #endif
@@ -173,6 +179,12 @@ void MotorDriver::Pwm(int ch, float duty){
         mcpwm_set_duty(MCPWM_UNIT_0, (mcpwm_timer_t)ch, MCPWM_OPR_B, duty * 100);
         mcpwm_set_duty_type(MCPWM_UNIT_0, (mcpwm_timer_t)ch, MCPWM_OPR_B, MCPWM_DUTY_MODE_0); //call this each time, if operator was previously in low/high state
     }
+#else
+	pwm[ch] = duty;
+	float dt = 0.1;
+	theta[ch] = theta[ch] + pwm[ch] * dt;
+	motorDriver.adcRaws[ch * 2] = (1+sin(theta[ch])) * msinOffset[ch];
+	motorDriver.adcRaws[ch * 2 + 1] = (1 + cos(theta[ch])) * mcosOffset[ch];
 #endif
 }
 int MotorDriver::GetAdcRaw(int ch){

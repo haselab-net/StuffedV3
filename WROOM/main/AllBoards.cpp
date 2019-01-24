@@ -28,7 +28,7 @@ RobotState::RobotState(){
 	mode = CM_DIRECT;
 }
 RobotCommand::RobotCommand(){
-	controlMode = CM_SKIP;
+	mode = CM_SKIP;
 }
 
 
@@ -94,7 +94,7 @@ void AllBoards::ExecLoop(){
 }
 void AllBoards::Init() {
 	assert(NUART == 2);	//NUART must be much to followings.
-	printf("Start allBoards");
+	logPrintf("Start allBoards");
 	uart_config_t uconf;
 	uconf.baud_rate = 2000000;
 	uconf.data_bits = UART_DATA_8_BITS;
@@ -105,9 +105,9 @@ void AllBoards::Init() {
     uconf.use_ref_tick = false;
 	
 	uart[0]->Init(uconf, U1TXPIN, U1RXPIN); // pin must be changed. IO6-11 are reserved. (RX=32 Yellow, TX=33 Green)
-	printf(".");
+	logPrintf(".");
 	uart[1]->Init(uconf, U2TXPIN, U2RXPIN);
-	printf(". done.\n");
+	logPrintf(". done.\n");
 	EnumerateBoard();
 	#if UDP_UART_ASYNC
 	xTaskCreate(execLoop, "ExecLoop", 8 * 1024, this, tskIDLE_PRIORITY, &taskExec);

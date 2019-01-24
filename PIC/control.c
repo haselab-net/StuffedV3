@@ -2,9 +2,6 @@
 #include "fixed.h"
 #include "control.h"
 #include <assert.h>
-#ifdef _WIN32
-void lprintf(const char* fmt, ...);
-#endif
 
 
 struct MotorState motorTarget, motorState;
@@ -60,7 +57,7 @@ void updateMotorState(){
 		}
 #if 0
 		if (i==0){
-			printf("p %f,  s %f, (%d,%d) %d\r\n", LDEC2DBL(motorState.pos[i]), LDEC2DBL(sense), msin[i], mcos[i], diff);
+			logPrintf("p %f,  s %f, (%d,%d) %d\r\n", LDEC2DBL(motorState.pos[i]), LDEC2DBL(sense), msin[i], mcos[i], diff);
 		}
 #endif
     }
@@ -107,7 +104,7 @@ void pdControl(){
 		count ++;
 		if (i==2 && count > 1000){
 			count = 0;
-			printf("G:%d  C:%d  T:%d\r\n", motorTarget.pos[i], motorState.pos[i], torque);
+			logPrintf("G:%d  C:%d  T:%d\r\n", motorTarget.pos[i], motorState.pos[i], torque);
 		}
 #endif
 	}
@@ -233,11 +230,11 @@ void targetsProceed(){
 #endif
 		motorTarget.vel[i] = S2LDEC(targets.buf[readPlus].pos[i] - targets.buf[(int)targets.read].pos[i]) / period;
 #ifdef _WIN32
-		lprintf("%d,%d,", motorTarget.pos[i], motorTarget.vel[i]);
+		filePrintf("%d,%d,", motorTarget.pos[i], motorTarget.vel[i]);
 #endif
 	}
 #ifdef _WIN32
-	lprintf("\n");
+	filePrintf("\n");
 #endif
 }
 
@@ -320,34 +317,34 @@ void printMotorState(){
 #if 1
     int i;
 	for(i=0; i<NMOTOR; ++i){
-        printf("%f\t", LDEC2DBL(motorState.pos[i]) );
+        logPrintf("%f\t", LDEC2DBL(motorState.pos[i]) );
     }
 	for(i=0; i<NMOTOR; ++i){
-        printf("%f\t", LDEC2DBL(motorState.vel[i]) );
+        logPrintf("%f\t", LDEC2DBL(motorState.vel[i]) );
     }
-    printf("\n");
+    logPrintf("\n");
 #endif
 }
 void printMotorTarget(){
     int i;
 	for(i=0; i<NMOTOR; ++i){
-        printf("%f\t", LDEC2DBL(motorTarget.pos[i]) );
+        logPrintf("%f\t", LDEC2DBL(motorTarget.pos[i]) );
     }
 	for(i=0; i<NMOTOR; ++i){
-        printf("%f\t", LDEC2DBL(motorTarget.vel[i]) );
+        logPrintf("%f\t", LDEC2DBL(motorTarget.vel[i]) );
     }
-    printf("\n");
+    logPrintf("\n");
 }
 void printMotorControl(){
     int i;
 	for(i=0; i<1; ++i){
-        printf("%f\t", LDEC2DBL(motorTarget.pos[i]));
-        printf("%f\t", LDEC2DBL(motorTarget.vel[i]));
-        printf("%f\t", LDEC2DBL(motorState.pos[i]));
-        printf("%f\t", LDEC2DBL(motorState.vel[i]));
-        printf("%f\t", LDEC2DBL(motorTorques[i]) );
+        logPrintf("%f\t", LDEC2DBL(motorTarget.pos[i]));
+        logPrintf("%f\t", LDEC2DBL(motorTarget.vel[i]));
+        logPrintf("%f\t", LDEC2DBL(motorState.pos[i]));
+        logPrintf("%f\t", LDEC2DBL(motorState.vel[i]));
+        logPrintf("%f\t", LDEC2DBL(motorTorques[i]) );
     }
-    printf("\n");
+    logPrintf("\n");
 }
 #endif
 

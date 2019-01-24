@@ -1309,7 +1309,7 @@ unsigned portBASE_TYPE uxTaskGetNumberOfTasks( void )
 
 #if ( configUSE_TRACE_FACILITY == 1 )
 
-	void vTaskList( signed char *pcWriteBuffer )
+	void vTaskList( char *pcWriteBuffer )
 	{
 	unsigned portBASE_TYPE uxQueue;
 

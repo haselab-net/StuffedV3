@@ -102,7 +102,10 @@ public:
 		case CI_RESET_SENSOR:
 			cmd.resetSensor.flags = packet.GetResetSensorFlags();
 			break;
+		case CI_SENSOR:
+			break;	//	nothing todo
 		default:
+			ESP_LOGE("Board::WriteCmd", "Command Id error %d",  command);
 			assert(0);
 		}
 	}
@@ -147,6 +150,7 @@ public:
 			}
 			break;
 		default:
+			ESP_LOGE("Board::ReadRet", "Command Id error %d", cmd);
 			assert(0);
 		}
 	}

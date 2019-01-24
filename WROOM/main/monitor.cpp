@@ -60,19 +60,19 @@ void Monitor::AddCommand(MonitorCommandBase* c){
 void Monitor::ShowList(){
     for(int i=0; i<(int)commands.size(); ++i){
         MonitorCommandBase* mc = commands[i];
-        printf("%s\n", mc->Desc());
+        conPrintf("%s\n", mc->Desc());
     }
 }
 void Monitor::Run(){
     uart_driver_install(UART_NUM_0, 1024, 1024, 10, NULL, 0);
-    printf("Monitor start.\n");
+    conPrintf("Monitor start.\n");
     ShowList();
     while(1){
         uint8_t ch = getchWait();
         int i=0;
         for(; i<(int)commands.size();++i){
             if (commands[i]->Desc()[0] == (char)ch){
-                printf("%s\n", commands[i]->Desc());
+                conPrintf("%s\n", commands[i]->Desc());
                 commands[i]->Func();
                 break;
             }
@@ -89,17 +89,17 @@ MonitorCommandBase::MonitorCommandBase(){
 class MCEraseNvs: public MonitorCommandBase{
     const char* Desc(){ return "E Erase NVS flash"; }
     void Func(){
-        printf("This command erase all NVS flash. Are you sure ? (Y/N)\n");
+        conPrintf("This command erase all NVS flash. Are you sure ? (Y/N)\n");
         while(1){
             int ch = getchNoWait();
             if (ch == 'y' || ch == 'Y'){
 #ifndef _WIN32
 				nvs_flash_erase();
 #endif
-				printf("erased.\n");
+				conPrintf("erased.\n");
                 break;
             }else if(ch > 0){
-                printf("canceled.\n");
+                conPrintf("canceled.\n");
                 break;
             }
         }
@@ -117,7 +117,7 @@ class MCPwmTest: public MonitorCommandBase{
         for(int i=0; i<MotorDriver::NMOTOR_DIRECT; ++i){
             duty[i] = 0.0f;
         }
-        printf("[ENTER/SPACE]:show state, [%s]:forward, [%s]:backword, other:quit\n" ,up, down);
+        conPrintf("[ENTER/SPACE]:show state, [%s]:forward, [%s]:backword, other:quit\n" ,up, down);
         while(1){
             vTaskDelay(10);
             int ch = getchNoWait();
@@ -136,15 +136,15 @@ class MCPwmTest: public MonitorCommandBase{
                     if (duty[channel] < -1.0f) duty[channel] = -1.0f;
                 }
             }else if (ch == '\r' || ch == ' '){
-                printf("PWM duty = ");
+                conPrintf("PWM duty = ");
                 for(int i=0; i<MotorDriver::NMOTOR_DIRECT; ++i){
-                    printf("  %8.1f", duty[i]);
+                    conPrintf("  %8.1f", duty[i]);
                 }
-                printf("   Angle =");
+                conPrintf("   Angle =");
                 for(int i=0; i<MotorDriver::NMOTOR_DIRECT; ++i){
-                    printf("  %8.2f", LDEC2DBL(motorState.pos[i]));
+                    conPrintf("  %8.2f", LDEC2DBL(motorState.pos[i]));
                 }
-                printf("\n");
+                conPrintf("\n");
             }else{
                 break;
             }
@@ -162,12 +162,12 @@ class MCShowADC: public MonitorCommandBase{
         while(1){
             for(int i=0; i<MotorDriver::NMOTOR_DIRECT*2; ++i){
                 int raw = motorDriver.GetAdcRaw(i);
-                printf("%5d\t", raw);
+                conPrintf("%5d\t", raw);
             }
             for(int i=0; i<MotorDriver::NMOTOR_DIRECT; ++i){
-                printf("\t%4.2f", LDEC2DBL(motorState.pos[i]));
+                conPrintf("\t%4.2f", LDEC2DBL(motorState.pos[i]));
             }
-            printf("\n");
+            conPrintf("\n");
             vTaskDelay(20);
             if (getchNoWait() >= 0) break;
         }
@@ -179,9 +179,9 @@ class MCShowTouch: public MonitorCommandBase{
     void Func(){
         while(1){
             for(int i=0; i<touchPads.NPad(); ++i){
-                printf("%d\t", touchPads.Raw(i));
+                conPrintf("%d\t", touchPads.Raw(i));
             }
-            printf("\n");
+            conPrintf("\n");
             vTaskDelay(20);
             if (getchNoWait() >= 0) break;
         }
@@ -202,6 +202,16 @@ class MCWriteCmd: public MonitorCommandBase{
     }
 } mcWriteCmd;
 
+#ifdef _WIN32
+class MCShowTask : public MonitorCommandBase {
+	const char* Desc() { return "f Show FreeRTOS tasks"; }
+	void Func() {
+		char buf[1024];
+		vTaskList(buf);
+		conPrintf("%s", buf);
+	}
+} mcShowTask;
+#endif
 
 struct DebugFlag{
     bool* flag;
@@ -215,7 +225,7 @@ class MCDebugFlag: public MonitorCommandBase{
     void Func(){
         while(1){
             for(int i=0; i<sizeof(flags)/sizeof(flags[0]); ++i){
-                printf ("%s = %s\n", flags[i].msg, *flags[i].flag ? "true" : "false");
+                conPrintf ("%s = %s\n", flags[i].msg, *flags[i].flag ? "true" : "false");
             }
             int ch = getchWait();
             int i=0;

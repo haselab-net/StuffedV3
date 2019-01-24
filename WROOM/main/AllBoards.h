@@ -39,7 +39,7 @@ struct RobotCommand: public BoardCmdBase{
 	ResetSensorFlags resetSensorFlags;
 
 	RobotCommand();
-	short GetControlMode(){ return controlMode; }
+	short GetControlMode(){ return mode; }
 	short GetMotorPos(int i){ return targetPosition[i]; }
 	short GetMotorVel(int i){ return targetVelocity[i]; }
 	short GetPeriod(){ return targetPeriod; }

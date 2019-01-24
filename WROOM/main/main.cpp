@@ -24,23 +24,23 @@ extern "C" void app_main()
 #ifndef _WIN32
 	esp_chip_info_t chip_info;
     esp_chip_info(&chip_info);
-    printf("This is ESP32 chip with %d CPU cores, WiFi%s%s, ",
+    logPrintf("This is ESP32 chip with %d CPU cores, WiFi%s%s, ",
         chip_info.cores,
         (chip_info.features & CHIP_FEATURE_BT) ? "/BT" : "",
         (chip_info.features & CHIP_FEATURE_BLE) ? "/BLE" : "");
-    printf("silicon revision %d, ", chip_info.revision);
-    printf("%dMB %s flash\n", spi_flash_get_chip_size() / (1024 * 1024),
+    logPrintf("silicon revision %d, ", chip_info.revision);
+    logPrintf("%dMB %s flash\n", spi_flash_get_chip_size() / (1024 * 1024),
             (chip_info.features & CHIP_FEATURE_EMB_FLASH) ? "embedded" : "external");
 #endif
     //----------------------------------
-    printf("!!! Stuffed Robot Start !!!\n");   
+    logPrintf("!!! Stuffed Robot Start !!!\n");   
     motorDriver.Init();
 #if 0   //  touchPads can not work with JTAG debugger
     touchPads.Init();
 #endif
     allBoards.Init();
-    printf("Init allBoards finished. ");
-    printf("%d motors, %d current sensors, %d force sensors found.\n", allBoards.GetNTotalMotor(), allBoards.GetNTotalCurrent(), allBoards.GetNTotalForce());
+    logPrintf("Init allBoards finished. ");
+    logPrintf("%d motors, %d current sensors, %d force sensors found.\n", allBoards.GetNTotalMotor(), allBoards.GetNTotalCurrent(), allBoards.GetNTotalForce());
 
     wifiMan();    //  Start wifi manager. 
     udpCom.Init();    //  init command processing for udp.

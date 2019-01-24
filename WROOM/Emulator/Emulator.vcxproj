@@ -234,6 +234,7 @@
     <ClCompile Include="lwip\ethernet\lwip-1.4.0\src\core\tcp_out.c" />
     <ClCompile Include="lwip\ethernet\lwip-1.4.0\src\core\udp.c" />
     <ClCompile Include="lwip\ethernet\lwip-1.4.0\src\netif\etharp.c" />
+    <ClCompile Include="tsprintf.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\PIC\command.h">
@@ -260,6 +261,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="..\..\PIC\env.h" />
     <ClInclude Include="..\main\AllBoards.h" />
     <ClInclude Include="..\main\ArrayRing.h" />
     <ClInclude Include="..\main\Board.h" />
