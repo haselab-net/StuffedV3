@@ -20,6 +20,10 @@ extern "C" {
 	int hostAddress[] = { 10, 1, 254, 253 };
 	int subnetMask[] = { 255, 255, 252,0 };
 	//*/
+	/*	//	edurome u-tokyo
+	int hostAddress[] = { 10, 209, 5, 250 };
+	int subnetMask[] = { 255, 255, 240,0 };
+	//*/
 	/*	//	Home
 	int hostAddress[] = { 192, 168, 12, 253 };
 	int subnetMask[] = { 255, 255, 255,0 };

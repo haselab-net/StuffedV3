@@ -115,7 +115,7 @@ a lot of data that needs to be copied, this should be set high. */
 /* MEMP_NUM_PBUF: the number of memp struct pbufs. If the application
    sends a lot of data out of ROM (or other static memory), this
    should be set high. */
-#define MEMP_NUM_PBUF			10
+#define MEMP_NUM_PBUF			40
 
 /* MEMP_NUM_RAW_PCB: the number of UDP protocol control blocks. One
    per active RAW "connection". */
@@ -153,10 +153,10 @@ a lot of data that needs to be copied, this should be set high. */
 /* MEMP_NUM_TCPIP_MSG_*: the number of struct tcpip_msg, which is used
    for sequential API communication and incoming packets. Used in
    src/api/tcpip.c. */
-#define MEMP_NUM_TCPIP_MSG_API   4
-#define MEMP_NUM_TCPIP_MSG_INPKT 4
+#define MEMP_NUM_TCPIP_MSG_API   40
+#define MEMP_NUM_TCPIP_MSG_INPKT 40
 
-#define MEMP_NUM_ARP_QUEUE		5
+#define MEMP_NUM_ARP_QUEUE		50
 
 /* ---------- Pbuf options ---------- */
 /* PBUF_POOL_SIZE: the number of buffers in the pbuf pool. */

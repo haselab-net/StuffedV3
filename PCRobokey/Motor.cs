@@ -200,8 +200,8 @@ namespace Robokey
             panel = new Panel();
             udMax.Minimum = udMin.Minimum = -SDEC.ONE;
             udMax.Maximum = udMin.Maximum = SDEC.ONE;
-            Minimum = -SDEC.ONE / 3;
-            Maximum = SDEC.ONE / 3;
+            Minimum = -SDEC.ONE;
+            Maximum = SDEC.ONE;
 
             udMin.Top = 0;
             Label la = new Label();
@@ -254,8 +254,8 @@ namespace Robokey
             panel = new Panel();
             udK.Minimum = udB.Minimum = -32000;
             udK.Maximum = udB.Maximum = 32000;
-            K = 1024*10;
-            B = 1024*5;
+            K = 1024*4;
+            B = 1024*2;
             udK.Top = 0;
             Label la = new Label();
             la.Width = 20;
