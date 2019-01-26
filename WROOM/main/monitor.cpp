@@ -213,6 +213,23 @@ class MCShowTask : public MonitorCommandBase {
 } mcShowTask;
 #endif
 
+extern "C"{
+    extern int underflowCount;
+}
+class MCTargetUnderflow: public MonitorCommandBase{
+    const char* Desc(){ return "u Show target underflow"; }
+    void Func(){
+        while(1){
+            int uc = underflowCount;
+            underflowCount = 0;
+            conPrintf("Underflow count = %d\n", uc);
+            vTaskDelay(100);
+            if (getchNoWait() >= 0) break;
+        }
+    }
+} mcShowTargetUnderflow;
+
+
 struct DebugFlag{
     bool* flag;
     const char* msg;

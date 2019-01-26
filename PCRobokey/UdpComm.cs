@@ -51,6 +51,7 @@ namespace Robokey
         const int remotePort = 9090;
         const int localPort = 9090;
         bool bFindRobot = false;
+        const ushort CONTROLFREQ = 3;   //  3kHz
         public StreamWriter log;
 
         //  board info
@@ -447,7 +448,6 @@ namespace Robokey
                 ushort ct = (ushort)ReadShort(ref cur, sendQueue.Peek());
                 sendQueue.FreeTo(ct);
             }
-            SendPackets();
         }
         public void SendPackets()
         {
@@ -502,8 +502,9 @@ namespace Robokey
             }
             PutCommand(packet, p);
         }
-        public void SendPoseInterpolate(PoseData pose, ushort period)
+        public void SendPoseInterpolate(PoseData pose, ushort peri)
         {
+            ushort period = (ushort)(peri * CONTROLFREQ);
             if (pose == null) return;
             controlMode = ControlMode.CM_INTERPOLATE;
             byte[] packet = new byte[1000];
@@ -520,8 +521,9 @@ namespace Robokey
 //            System.Diagnostics.Debug.Write("IntCoW=" + interpolateTargetCountOfWrite);
             if (period != 0) interpolateTargetCountOfWrite++;
         }
-        public void SendPoseForceControl(PoseData pose, ushort period, short [][] jacob)
+        public void SendPoseForceControl(PoseData pose, ushort peri, short [][] jacob)
         {
+            ushort period = (ushort)(peri * CONTROLFREQ);
             if (pose == null) return;
             controlMode = ControlMode.CM_FORCE;
             byte[] packet = new byte[1000];

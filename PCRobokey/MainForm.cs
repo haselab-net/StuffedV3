@@ -176,6 +176,7 @@ namespace Robokey
             if (!ckRun.Checked)
             {
                 udpComm.SendPoseDirect(pose + motors.Offset());
+                udpComm.SendPackets();
             }
         }
 
@@ -311,6 +312,7 @@ namespace Robokey
                     udpComm.SendPoseDirect(p + motors.Offset());
                 }
             }
+            udpComm.SendPackets();
         }
         private void btLoad_Click(object sender, EventArgs e)
         {
@@ -369,6 +371,7 @@ namespace Robokey
                 {
                     ckRun.Checked = false;
                     udpComm.SendPoseDirect(Interpolate(curTime) + motors.Offset());
+                    udpComm.SendPackets();
                 }
             }
             laCurTime.Left = (int)(curTime * TrackScale() + TrackOffset() + laCurTime.Width / 2);
@@ -394,6 +397,7 @@ namespace Robokey
             if (!ckRun.Checked)
             {
                 udpComm.SendPoseDirect(Interpolate(curTime) + motors.Offset());
+                udpComm.SendPackets();
             }
         }
         private void udTime_KeyPress(object sender, KeyPressEventArgs e)
@@ -401,6 +405,7 @@ namespace Robokey
             if (e.KeyChar == '\r')
                 UpdateCurTime((int)udTime.Value);
             udpComm.SendPoseDirect(Interpolate(curTime) + motors.Offset());
+            udpComm.SendPackets();
         }
 
         private void btCopy_Click(object sender, EventArgs e)
@@ -476,7 +481,7 @@ namespace Robokey
             runTimer.Interval = (int)udTick.Value;
         }
 
-        const int NINTERPOLATEFILL = 6; //  At least two must in buffer for interpolation.
+        const int NINTERPOLATEFILL = 8; //  At least two must in buffer for interpolation.
 
         private void runTimer_Tick(object sender, EventArgs e)
         {
@@ -582,6 +587,7 @@ namespace Robokey
 #else   //  use direct
                 UpdateCurTime(curTime += tmRun.Interval * (int)udStep.Value);
                 udpComm.SendPoseDirect(Interpolate(curTime) + motors.Offset());
+                udpComm.SendPackets();
 #endif
             }
             else if (ckForce.Checked) // !ckRun.Checked && ckForce.Checked
@@ -593,6 +599,7 @@ namespace Robokey
             {
                 udpComm.SendSensor();
             }
+            udpComm.SendPackets();
         }
         short[][] GetForceControlJacob() {
             double[] mpos = new double[motors.Count];
@@ -630,6 +637,7 @@ namespace Robokey
                 maxT[i] = motors[i].torque.Maximum;
             }
             udpComm.SendTorqueLimit(motors.Count, minT, maxT);
+            udpComm.SendPackets();
         }
         private void ckMotor_CheckedChanged(object sender, EventArgs e)
         {
@@ -643,15 +651,18 @@ namespace Robokey
                 int[] zeros = new int[motors.Count];
                 for (int i = 0; i < motors.Count; ++i)
                 {
+                    zeros[i] = 0;
                 }
                 udpComm.SendTorqueLimit(motors.Count, zeros, zeros);
             }
+            udpComm.SendPackets();
         }
 
 
         private void btResetMotors_Click(object sender, EventArgs e)
         {
             udpComm.SendResetSensor(ResetSensorFlags.RSF_MOTOR);
+            udpComm.SendPackets();
             for (int i = 0; i < motors.Count; ++i)
             {
                 motors[i].Offset = udpComm.pose.values[i];
@@ -690,6 +701,7 @@ namespace Robokey
             udpComm.Open();
             udpComm.SendSetIp();
             udpComm.SendGetBoardInfo();
+            udpComm.SendPackets();
         }
 
         internal void OnRobotFound(System.Net.IPAddress adr)
@@ -727,6 +739,7 @@ namespace Robokey
             SendTorqueLimit();
             SendPd();
             udpComm.SendPoseDirect(Interpolate(curTime));
+            udpComm.SendPackets();
         }
 
         private void tbMessage_KeyPress(object sender, KeyPressEventArgs e)
@@ -756,6 +769,7 @@ namespace Robokey
                 b[i] = motors[i].pd.B;
             }
             udpComm.SendPdParam(n, k, b);
+            udpComm.SendPackets();
         }
 
         void OnUpdateRobotState()

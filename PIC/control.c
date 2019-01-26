@@ -16,6 +16,7 @@ SDEC forceOffset[NFORCE];
 SDEC currentSense[NMOTOR];
 
 uint32_t controlCount;
+int underflowCount;
 
 #ifdef WROOM
 #define DISABLE_INTERRUPT	xSemaphoreTake(mutexForControl, portMAX_DELAY);
@@ -210,6 +211,7 @@ void targetsTickProceed(){
 		}else{
 			targets.tick = targets.buf[(targets.read+1)%NTARGET].period;
 			LOGW("TickProceed: Underflow. Failed to increment read=%d cor=%d\n", targets.read, targets.countOfRead);
+			underflowCount ++;
 		}
 	}
 }
