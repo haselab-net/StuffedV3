@@ -103,7 +103,7 @@ void MotorDriver::Init(){
         use_apll : false,
         fixed_mclk : 0,
     };
-    vTaskDelay(10);    //  Wait for wake up of ADC.
+    vTaskDelay(50);    //  Wait for wake up of ADC.
     adc_set_i2s_data_source(ADC_I2S_DATA_SRC_ADC);
     adc_i2s_mode_init(ADC_UNIT_1, ADC_CHANNEL_0);
     //  Install and start I2S driver

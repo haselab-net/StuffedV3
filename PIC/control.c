@@ -89,7 +89,7 @@ void pdControl(){
 			else if (torque > LDEC_ONE) torque = LDEC_ONE;
 		}
 #if 1	//	This reduce impulsive current
-		const LDEC diffLimit = (LDEC)(LDEC_ONE * 0.1);	//	smaller limit makes the control instable.
+		const LDEC diffLimit = (LDEC)(LDEC_ONE * 1);	//	smaller limit makes the control instable.
 		LDEC torqueDiff = torque - lastTorques[i];
 		if (torqueDiff > diffLimit){
 			torque = lastTorques[i] + diffLimit;

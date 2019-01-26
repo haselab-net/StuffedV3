@@ -168,7 +168,7 @@ class MCShowADC: public MonitorCommandBase{
                 conPrintf("\t%4.2f", LDEC2DBL(motorState.pos[i]));
             }
             conPrintf("\n");
-            vTaskDelay(20);
+            vTaskDelay(100);
             if (getchNoWait() >= 0) break;
         }
     }
