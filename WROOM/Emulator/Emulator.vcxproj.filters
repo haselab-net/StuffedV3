@@ -210,6 +210,12 @@
     <ClCompile Include="tsprintf.c">
       <Filter>Emulator</Filter>
     </ClCompile>
+    <ClCompile Include="..\main\RobotCommand.cpp">
+      <Filter>main</Filter>
+    </ClCompile>
+    <ClCompile Include="..\main\RobotState.cpp">
+      <Filter>main</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\main\AllBoards.h">
@@ -286,6 +292,12 @@
     </ClInclude>
     <ClInclude Include="..\..\PIC\env.h">
       <Filter>PIC</Filter>
+    </ClInclude>
+    <ClInclude Include="..\main\RobotCommand.h">
+      <Filter>main</Filter>
+    </ClInclude>
+    <ClInclude Include="..\main\RobotState.h">
+      <Filter>main</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

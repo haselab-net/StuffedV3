@@ -6,9 +6,8 @@
 #include "TinyContainer.h"
 #include "WroomEnv.h"
 #include "BoardBase.h"
-extern "C"{
-#include "../../PIC/control.h"
-}
+#include "RobotState.h"
+#include "RobotCommand.h"
 
 class DeviceMap {
 public:
@@ -23,88 +22,6 @@ class BoardDirect;
 class UdpCmdPacket;
 class UdpRetPacket;
 
-struct RobotCommand: public BoardCmdBase{
-	ControlMode mode;							//	set SKIP not to add target
-	tiny::vector<SDEC> targetPosition;			//	motor's target position
-	tiny::vector<SDEC> targetVelocity;			//	motor's target velocitry
-	tiny::vector<SDEC> forceControlJacobian;	//	jacobian for force control
-	short targetPeriod;							//	period to interpolate to acheive the target
-	short targetCount;							//	count of the target to overwrite a target in the queue. 	
-
-	//	To be implemnented 
-	tiny::vector<SDEC> controlK;
-	tiny::vector<SDEC> controlB;
-	tiny::vector<SDEC> torqueMin;
-	tiny::vector<SDEC> torqueMax;
-	ResetSensorFlags resetSensorFlags;
-
-	RobotCommand();
-	short GetControlMode(){ return mode; }
-	short GetMotorPos(int i){ return targetPosition[i]; }
-	short GetMotorVel(int i){ return targetVelocity[i]; }
-	short GetPeriod(){ return targetPeriod; }
-	short GetTargetCount(){ return targetCount; }
-	short GetForceControlJacob(int j, int i) { return  forceControlJacobian[j*3+i]; }
-	short GetControlK(int i){ return controlK[i]; }
-	short GetControlB(int i){ return controlB[i]; }
-	short GetTorqueMin(int i){ return torqueMin[i]; }
-	short GetTorqueMax(int i){ return torqueMax[i]; }
-	short GetResetSensorFlags(){
-		return resetSensorFlags;
-	}
-};
-struct RobotState: public BoardRetBase{
-	RobotState();
-	//	robot's state
-	enum ControlMode mode;				//	PIC/control.h
-	unsigned char nTargetMin;			//	nTaret for all board
-	unsigned char nTargetVacancy;		//	nTargetVecancy for all board
-	unsigned char nTargetRemain;		//	minimum remaining targets in the board. Must be >= 3.
-	unsigned char targetCountWrite;		//	targetCount for next writing. 
-	unsigned char targetCountReadMax;	//	targetCount for read of one of the board.
-	unsigned short tickMin;
-	unsigned short tickMax;
-	tiny::vector<SDEC> position;		//	motor position
-	tiny::vector<SDEC> velocity;		//	motor velocitry
-	tiny::vector<SDEC> current;			//	current sensor for motor;
-	tiny::vector<SDEC> force;			//	force sensor
-
-	void SetControlMode(short cm){
-		mode = (ControlMode)cm;
-	}
-	void SetMotorPos(short p, int i) {
-		position[i] = p;
-	}
-	void SetMotorVel(short v, int i) {
-		velocity[i] = v;
-	}
-	//	for interpolate and force control
-	void SetTargetCountRead(short c) {
-		targetCountReadMax = c;
-	}
-	void SetTickMin(short t) {
-		tickMin = t;
-	}
-	void SetTickMax(short t) {
-		tickMax = t;
-	}
-	void SetNTargetRemain(short t){
-		nTargetRemain = t;
-	}
-	void SetNTargetVacancy(short t){
-		nTargetVacancy = t;
-	}
-	//	sense
-	void SetCurrent(short c, int i) {
-		current[i] = c;
-	}
-	void SetForce(short f, int i) {
-		force[i] = f;
-	}
-	void SetBoardInfo(int systemId, int nTarget, int nMotor, int nCurrent, int nForce) {
-		// nothing to be done.
-	}
-};
 
 //
 class AllBoards{

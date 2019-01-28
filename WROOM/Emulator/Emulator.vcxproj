@@ -182,6 +182,8 @@
     <ClCompile Include="..\main\monitor.cpp" />
     <ClCompile Include="..\main\MotorControl.c" />
     <ClCompile Include="..\main\MotorDriver.cpp" />
+    <ClCompile Include="..\main\RobotCommand.cpp" />
+    <ClCompile Include="..\main\RobotState.cpp" />
     <ClCompile Include="..\main\TouchSensing.cpp" />
     <ClCompile Include="..\main\UartForBoards.cpp" />
     <ClCompile Include="..\main\UdpCom.cpp" />
@@ -270,6 +272,8 @@
     <ClInclude Include="..\main\CommandWROOM.h" />
     <ClInclude Include="..\main\monitor.h" />
     <ClInclude Include="..\main\MotorDriver.h" />
+    <ClInclude Include="..\main\RobotCommand.h" />
+    <ClInclude Include="..\main\RobotState.h" />
     <ClInclude Include="..\main\TinyContainer.h" />
     <ClInclude Include="..\main\TouchSensing.h" />
     <ClInclude Include="..\main\UartForBoards.h" />

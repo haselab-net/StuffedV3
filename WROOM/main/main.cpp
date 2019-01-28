@@ -34,6 +34,8 @@ extern "C" void app_main()
 #endif
     //----------------------------------
     logPrintf("!!! Stuffed Robot Start !!!\n");   
+	//nvs_flash_erase();
+
     motorDriver.Init();
 #if 0   //  touchPads can not work with JTAG debugger
     touchPads.Init();

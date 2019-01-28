@@ -481,7 +481,7 @@ namespace Robokey
             runTimer.Interval = (int)udTick.Value;
         }
 
-        const int NINTERPOLATEFILL = 8; //  At least two must in buffer for interpolation.
+        const int NINTERPOLATEFILL = 10; //  At least two must in buffer for interpolation.
 
         private void runTimer_Tick(object sender, EventArgs e)
         {
