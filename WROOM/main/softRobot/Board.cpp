@@ -1,5 +1,5 @@
 #include "Board.h"
-const char* TAG = "Board";
+static const char* TAG = "Board";
 
 BoardFactoryBase* BoardFactories::Find(const char* name) {
 	for(iterator it = begin(); it != end(); ++it){
