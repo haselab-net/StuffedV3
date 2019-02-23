@@ -1,7 +1,7 @@
 #pragma once
 #include "BoardBase.h"
 extern "C" {
-#include "../../PIC/control.h"
+#include "../../../PIC/control.h"
 }
 
 struct RobotState: public BoardRetBase{

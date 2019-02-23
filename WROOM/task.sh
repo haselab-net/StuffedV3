@@ -1,13 +1,13 @@
 #!/bin/sh
 case "$1" in
     "app-run") 
-    make app -j4&&make app-flash -j4&&make monitor -j4
+    make app -j8&&make app-flash -j8&&make monitor -j8
     ;;
     "monitor") 
-	make monitor -j4
+	make monitor -j8
     ;;
     "app-flash") 
-	make app-flash -j4
+	make app-flash -j8
     ;;
     "openocd") 
     taskkill -f -im openocd.exe 

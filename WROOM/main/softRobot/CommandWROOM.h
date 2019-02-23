@@ -1,13 +1,13 @@
 #pragma once
-#include "../../PIC/env.h"
+#include "../../../PIC/env.h"
 
 #ifndef _COMMANDID_CS
-#include "../../PCRoboKey/CommandId.cs"
+#include "../../../PCRoboKey/CommandId.cs"
 #define _COMMANDID_CS
 #endif
 
-#include "../../PIC/fixed.h"
-#include "../../PIC/commandCommon.h"
+#include "../../../PIC/fixed.h"
+#include "../../../PIC/commandCommon.h"
 
 enum BD0_PARAM {
 	BD0_MODEL_NUMBER = -1,

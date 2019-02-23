@@ -17,7 +17,7 @@ extern "C"{
 
 #include "MotorDriver.h"
 extern "C" {
-#include "../../PIC/control.h"
+#include "../../../PIC/control.h"
 }
 
 #ifdef _WIN32

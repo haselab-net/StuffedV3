@@ -6,8 +6,8 @@
 #include "esp_log.h"
 #include "board.h"
 #include "MotorDriver.h"
-#include "../../PIC/boardType.h"
-#include "../../PIC/env.h"
+#include "../../../PIC/boardType.h"
+#include "../../../PIC/env.h"
 
 static char zero[80];
 

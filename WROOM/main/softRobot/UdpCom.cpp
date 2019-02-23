@@ -277,7 +277,7 @@ void UdpCom::PrepareRetPacket(UdpCmdPacket& recv) {
 	send.ClearData();
 }
 void UdpCom::SendReturn(UdpCmdPacket& recv) {
-	if (recv.returnIp.addr == 0) {
+	if (recv.returnIp.u_addr.ip4.addr == 0) {
 		SendReturnServer(recv);
 	}
 	else {

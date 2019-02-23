@@ -7,10 +7,10 @@
 #include "driver/adc.h"
 #include "esp_adc_cal.h"
 #endif
-#include "../../PIC/boardType.h"
+#include "../../../PIC/boardType.h"
 #include "commandWROOM.h"
 extern "C"{
-#include "../../PIC/control.h"
+#include "../../../PIC/control.h"
 }
 
 class MotorDriver{

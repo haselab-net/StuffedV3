@@ -4,7 +4,7 @@
 #include "UTRef.h"
 #include "TinyContainer.h"
 extern "C"{
-#include "../../PIC/fixed.h"
+#include "../../../PIC/fixed.h"
 }
 
 class BoardCmdBase{
