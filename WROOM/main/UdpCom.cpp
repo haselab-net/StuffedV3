@@ -104,9 +104,9 @@ void UdpCmdPackets::Unlock() {
 	xSemaphoreGive(mutex);
 }
 
-static void onReceive(void *arg, struct udp_pcb *pcb, struct pbuf *p, const ip_addr_t *addr, u16_t port)
+static void onReceiveUdp(void *arg, struct udp_pcb *pcb, struct pbuf *p, const ip_addr_t *addr, u16_t port)
 {
-	((UdpCom*)arg)->OnReceive(pcb, p, addr, port);
+	((UdpCom*)arg)->OnReceiveUdp(pcb, p, addr, port);
 }
 #if !UDP_UART_ASYNC
 static void execCommand(void* udpCom){
@@ -128,59 +128,60 @@ void UdpCom::Start(){
 	if (udp) udp_remove(udp);
 	udp = udp_new();
 	udp_bind(udp, (ip_addr_t*)IP4_ADDR_ANY, port);
-	udp_recv(udp, onReceive, this);
+	udp_recv(udp, onReceiveUdp, this);
 }
-void UdpCom::OnReceive(struct udp_pcb * upcb, struct pbuf * top, const ip_addr_t* addr, u16_t port) {
-	if (!recvs.WriteAvail()){
-		ESP_LOGE("UdpCom::OnReceive", "IP command receive buffer is full.");
+
+void UdpCom::OnReceiveUdp(struct udp_pcb * upcb, struct pbuf * top, const ip_addr_t* addr, u16_t port) {
+	if (!recvs.WriteAvail()) {
+		ESP_LOGE("UdpCom::OnReceiveUdp", "Udp command receive buffer is full.");
 		pbuf_free(top);
 		return;
 	}
 	//	 read buffer and put it on recvs.
 	struct pbuf* p = top;
-	int readLen = 0; 
+	int readLen = 0;
 	int cur = 0;
 	int cmdLen = UdpPacket::HEADERLEN;
 
 	recvs.Lock();
 	UdpCmdPacket* recv = &recvs.Poke();
 	int countDiffMax = 0;
-	while(1){
+	while (1) {
 		int l = p->len - cur;
-		if (l > cmdLen-readLen) l = cmdLen-readLen;
-		memcpy(recv->bytes + readLen, ((char*)p->payload)+cur, l);
+		if (l > cmdLen - readLen) l = cmdLen - readLen;
+		memcpy(recv->bytes + readLen, ((char*)p->payload) + cur, l);
 		readLen += l;
 		cur += l;
-		if (readLen == cmdLen){
-			if (cmdLen == UdpPacket::HEADERLEN){
+		if (readLen == cmdLen) {
+			if (cmdLen == UdpPacket::HEADERLEN) {
 				cmdLen = recv->CommandLen();
-				if (bDebug){
+				if (bDebug) {
 					ESP_LOGI(Tag, "L=%d Cm=%d Ct=%d received from %s.\n", recv->length, recv->command, recv->count, ipaddr_ntoa(addr));
-				} 
-			}
-			if (readLen == cmdLen){
+				}
+}
+			if (readLen == cmdLen) {
 				recv->returnIp = *addr;
 				if (recv->length != cmdLen - 2) {
 					ESP_LOGE(Tag, "cmdLen %d != recvLen %d - 2 in cmd:%d \n", cmdLen, recv->length, recv->command);
 				}
 				if (recv->command == CIU_GET_IPADDRESS) {
 					recvs.Write();
-					#if !UDP_UART_ASYNC
+#if !UDP_UART_ASYNC
 					xTaskNotifyGive(taskExeCmd);
-					#endif
+#endif
 				}
 #if 1			//	check command counter exactly.
 				else if (recv->count == commandCount + 1) {		// check and update counter
 					commandCount++;
-#else			//	Onlt check received command counter > last command counter.
-//				else if (short(recv->count - commandCount) > 0) {		// check and update counter
-				else if(1){
+#else			//	Only check received command counter > last command counter.
+				//				else if (short(recv->count - commandCount) > 0) {		// check and update counter
+				else if (1) {
 					commandCount = recv->count;
 #endif
 					recvs.Write();
-					#if !UDP_UART_ASYNC
+#if !UDP_UART_ASYNC
 					xTaskNotifyGive(taskExeCmd);
-					#endif
+#endif
 					if (countDiffMax > 0) {
 						ESP_LOGI(Tag, "ignored %d packets Ct:%d Cm:%d", countDiffMax, commandCount, recv->command);
 						countDiffMax = 0;
@@ -193,7 +194,7 @@ void UdpCom::OnReceive(struct udp_pcb * upcb, struct pbuf * top, const ip_addr_t
 					//ESP_LOGI(Tag, "ignore Ct:%d<%d Cm:%d\n", recv->count, commandCount+1, recv->command);
 					//ESP_LOGI(Tag, "ignore %d packets Ct:%d Cm:%d", countDiffMax, commandCount+1, recv->command);
 				}
-				if (!recvs.WriteAvail()){
+				if (!recvs.WriteAvail()) {
 					ESP_LOGE(Tag, "Udp recv buffer full.\n");
 					pbuf_free(top);
 					recvs.Unlock();
@@ -202,19 +203,32 @@ void UdpCom::OnReceive(struct udp_pcb * upcb, struct pbuf * top, const ip_addr_t
 				recv = &recvs.Poke();
 				cmdLen = UdpPacket::HEADERLEN;
 				readLen = 0;
+				}
 			}
-		}
-		if (p->len == cur){
-			if (p->len != p->tot_len){
+		if (p->len == cur) {
+			if (p->len != p->tot_len) {
 				p = p->next;
 				cur = 0;
-			}else{
+			}
+			else {
 				break;
 			}
 		}
 	}
 	recvs.Unlock();
 	pbuf_free(top);
+}
+void UdpCom::OnReceiveServer(void* payload, int len) {
+	if (!recvs.WriteAvail()) {
+		ESP_LOGE("UdpCom::OnReceiveServer", "Udp command receive buffer is full.");
+		return;
+	}
+	recvs.Lock();
+	UdpCmdPacket* recv = &recvs.Poke();
+	memcpy(recv->bytes + 2, payload, len);
+	recv->count = commandCount;
+	recvs.Write();
+	recvs.Unlock();
 }
 
 #if !UDP_UART_ASYNC
@@ -257,18 +271,29 @@ void UdpCom::SendText(char* text, short errorlevel) {
     pbuf_free(pb); //De-allocate packet buffer
 //	ESP_LOGI(Tag, "Ret%d C%d L%d to %s\n", send.command, send.count, send.length, ipaddr_ntoa(&ownerIp));
 }
-void UdpCom::PrepareRetPacket(int cmd) {
-	send.command = cmd;
+void UdpCom::PrepareRetPacket(UdpCmdPacket& recv) {
+	send.command = recv.command;
 	send.count = commandCount;
 	send.ClearData();
 }
-void UdpCom::SendRetPacket(ip_addr_t& returnIp) {
+void UdpCom::SendReturn(UdpCmdPacket& recv) {
+	if (recv.returnIp.addr == 0) {
+		SendReturnServer(recv);
+	}
+	else {
+		SendReturnUdp(recv);
+	}
+}
+void UdpCom::SendReturnServer(UdpCmdPacket& recv) {
+	//	TBW		hase
+}
+void UdpCom::SendReturnUdp(UdpCmdPacket& recv) {
 	if (!udp) return;
 	static char sendBuf[1000];
 	if (sendLen + send.length >= 1000){	//	UDP's MTU < 1500, but usually > 1000. 
 		struct pbuf* pb = pbuf_alloc(PBUF_TRANSPORT, sendLen, PBUF_RAM);
 		memcpy(pb->payload, sendBuf, sendLen);
-		udp_sendto(udp, pb, &returnIp, port);
+		udp_sendto(udp, pb, &recv.returnIp, port);
     	pbuf_free(pb); //De-allocate packet buffer
 		sendLen = 0;
 	}
@@ -277,7 +302,7 @@ void UdpCom::SendRetPacket(ip_addr_t& returnIp) {
 	if (recvs.ReadAvail() <= 1){	//	Read() will call after sent. So 1 means no command remaining.
 		struct pbuf* pb = pbuf_alloc(PBUF_TRANSPORT, sendLen, PBUF_RAM);
 		memcpy(pb->payload, sendBuf, sendLen);
-		udp_sendto(udp, pb, &returnIp, port);
+		udp_sendto(udp, pb, &recv.returnIp, port);
     	pbuf_free(pb); //De-allocate packet buffer
 		sendLen = 0;
 	}
@@ -287,17 +312,17 @@ void UdpCom::ExecUdpCommand(UdpCmdPacket& recv) {
 	switch (recv.command)
 	{
 	case CI_BOARD_INFO: 
-		PrepareRetPacket(recv.command);
+		PrepareRetPacket(recv);
 		send.SetBoardInfo(allBoards.GetSystemId(), allBoards.GetNTarget(), allBoards.GetNTotalMotor(), allBoards.GetNTotalCurrent(), allBoards.GetNTotalForce());
-		SendRetPacket(recv.returnIp);
+		SendReturn(recv);
 		break;
 	case CIU_SET_IPADDRESS:
 		ownerIp = recv.returnIp;
-		PrepareRetPacket(recv.command);
-		SendRetPacket(recv.returnIp);
+		PrepareRetPacket(recv);
+		SendReturn(recv);
 		break;
 	case CIU_GET_IPADDRESS:
-		PrepareRetPacket(recv.command);
+		PrepareRetPacket(recv);
 #ifndef _WIN32
 		if (ownerIp.type ==IPADDR_TYPE_V4){
 			send.data[0] = (ownerIp.u_addr.ip4.addr>>3*8) &0xFF;
@@ -329,7 +354,7 @@ void UdpCom::ExecUdpCommand(UdpCmdPacket& recv) {
 		Serial.println(".");
 		Serial.println();
 #endif
-		SendRetPacket(recv.returnIp);
+		SendReturn(recv);
 		break;
 	default:
 		ESP_LOGE(Tag, "Invalid command %d count %d received from %s at %x.\n", 

@@ -29,7 +29,7 @@ public:
 };
 class UdpCmdPacket: public UdpPacket, public BoardCmdBase{
 public:
-	ip_addr_t returnIp;
+	ip_addr_t returnIp;	///<	IP address to send return packet, 0.0.0.0 means return to web server (duktape)
 	int CommandLen();	///<	length of packet in bytes
 	short GetControlMode(){
 		if (command == CI_ALL){
@@ -165,13 +165,21 @@ public:
 #endif
 	void Init();
 	void Start();
-	void OnReceive(struct udp_pcb * upcb, struct pbuf * p, const ip_addr_t* addr, u16_t port);
+	void OnReceiveUdp(struct udp_pcb * upcb, struct pbuf * top, const ip_addr_t* addr, u16_t port);
+	void OnReceiveServer(void* payload, int len);
 #if !UDP_UART_ASYNC
 	void ExecCommandLoop();
 #endif
-	void PrepareRetPacket(int cmd);
-	void SendRetPacket(ip_addr_t& returnIp);
+	///	execute udp command
 	void ExecUdpCommand(UdpCmdPacket& recv);
+	///	send return packet correspond to UdpCmdPacket recv.
+	void SendReturn(UdpCmdPacket& recv);
+	///	send return packet to web server (duktape)
+	void SendReturnServer(UdpCmdPacket& recv);
+	///	send return packet to udp
+	void SendReturnUdp(UdpCmdPacket& recv);
+	///	prepare return packet for command cmd
+	void PrepareRetPacket(UdpCmdPacket& recv);
 	void SendText(char* text, short errorlevel=0);
 };
 extern UdpCom udpCom;
