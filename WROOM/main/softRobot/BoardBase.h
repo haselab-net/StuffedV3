@@ -27,11 +27,11 @@ public:
 	virtual void SetControlMode(short cm)=0;
 	virtual void SetMotorPos(short p, int i)=0;
 	virtual void SetMotorVel(short v, int i)=0;
-	virtual void SetTargetCountRead(short c)=0;
+	virtual void SetTargetCountRead(unsigned char c)=0;
 	virtual void SetTickMin(short t)=0;
 	virtual void SetTickMax(short t)=0;
-	virtual void SetNTargetRemain(short t)=0;
-	virtual void SetNTargetVacancy(short t)=0;
+	virtual void SetNTargetRemain(unsigned char t)=0;
+	virtual void SetNTargetVacancy(unsigned char t)=0;
 	virtual void SetCurrent(short c, int i)=0;
 	virtual void SetForce(short f, int i)=0;
 	virtual void SetBoardInfo(int systemId, int nTarget, int nMotor, int nCurrent, int nForce)=0;

@@ -99,7 +99,7 @@ public:
 		data[allBoards.GetNTotalMotor() + i] = v;
 	}
 	//	for interpolate and force control
-	void SetTargetCountRead(short c) {
+	void SetTargetCountRead(unsigned char c) {
 		data[allBoards.GetNTotalMotor()] = c;
 	}
 	void SetTickMin(short t) {
@@ -108,10 +108,10 @@ public:
 	void SetTickMax(short t) {
 		data[allBoards.GetNTotalMotor()+2] = t;
 	}
-	void SetNTargetRemain(short t){
+	void SetNTargetRemain(unsigned char t){
 		data[allBoards.GetNTotalMotor()+3] = t;		
 	}
-	void SetNTargetVacancy(short t){
+	void SetNTargetVacancy(unsigned char t){
 		data[allBoards.GetNTotalMotor()+4] = t;		
 	}
 	//	sense

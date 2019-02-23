@@ -16,6 +16,9 @@
     <Filter Include="PIC">
       <UniqueIdentifier>{a9c8f08b-c65d-4931-9647-e27ee5b923ad}</UniqueIdentifier>
     </Filter>
+    <Filter Include="main\softRobot">
+      <UniqueIdentifier>{9d5ec3ff-5aff-40b9-a78d-6fffff02b4ba}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -165,38 +168,8 @@
     <ClCompile Include="lwip\ethernet\lwip-1.4.0\ports\win32\ethernetif.c">
       <Filter>lwip</Filter>
     </ClCompile>
-    <ClCompile Include="..\main\AllBoards.cpp">
-      <Filter>main</Filter>
-    </ClCompile>
-    <ClCompile Include="..\main\Board.cpp">
-      <Filter>main</Filter>
-    </ClCompile>
-    <ClCompile Include="..\main\BoardDirect.cpp">
-      <Filter>main</Filter>
-    </ClCompile>
     <ClCompile Include="emulator.cpp">
       <Filter>Emulator</Filter>
-    </ClCompile>
-    <ClCompile Include="..\main\main.cpp">
-      <Filter>main</Filter>
-    </ClCompile>
-    <ClCompile Include="..\main\monitor.cpp">
-      <Filter>main</Filter>
-    </ClCompile>
-    <ClCompile Include="..\main\MotorControl.c">
-      <Filter>main</Filter>
-    </ClCompile>
-    <ClCompile Include="..\main\MotorDriver.cpp">
-      <Filter>main</Filter>
-    </ClCompile>
-    <ClCompile Include="..\main\TouchSensing.cpp">
-      <Filter>main</Filter>
-    </ClCompile>
-    <ClCompile Include="..\main\UartForBoards.cpp">
-      <Filter>main</Filter>
-    </ClCompile>
-    <ClCompile Include="..\main\UdpCom.cpp">
-      <Filter>main</Filter>
     </ClCompile>
     <ClCompile Include="..\..\PIC\control.c">
       <Filter>PIC</Filter>
@@ -210,59 +183,44 @@
     <ClCompile Include="tsprintf.c">
       <Filter>Emulator</Filter>
     </ClCompile>
-    <ClCompile Include="..\main\RobotState.cpp">
-      <Filter>main</Filter>
+    <ClCompile Include="..\main\softRobot\AllBoards.cpp">
+      <Filter>main\softRobot</Filter>
     </ClCompile>
-    <ClCompile Include="..\main\lw">
-      <Filter>main</Filter>
+    <ClCompile Include="..\main\softRobot\Board.cpp">
+      <Filter>main\softRobot</Filter>
+    </ClCompile>
+    <ClCompile Include="..\main\softRobot\BoardDirect.cpp">
+      <Filter>main\softRobot</Filter>
+    </ClCompile>
+    <ClCompile Include="..\main\softRobot\main.cpp">
+      <Filter>main\softRobot</Filter>
+    </ClCompile>
+    <ClCompile Include="..\main\softRobot\monitor.cpp">
+      <Filter>main\softRobot</Filter>
+    </ClCompile>
+    <ClCompile Include="..\main\softRobot\MotorControl.c">
+      <Filter>main\softRobot</Filter>
+    </ClCompile>
+    <ClCompile Include="..\main\softRobot\MotorDriver.cpp">
+      <Filter>main\softRobot</Filter>
+    </ClCompile>
+    <ClCompile Include="..\main\softRobot\RobotCommand.cpp">
+      <Filter>main\softRobot</Filter>
+    </ClCompile>
+    <ClCompile Include="..\main\softRobot\RobotState.cpp">
+      <Filter>main\softRobot</Filter>
+    </ClCompile>
+    <ClCompile Include="..\main\softRobot\TouchSensing.cpp">
+      <Filter>main\softRobot</Filter>
+    </ClCompile>
+    <ClCompile Include="..\main\softRobot\UartForBoards.cpp">
+      <Filter>main\softRobot</Filter>
+    </ClCompile>
+    <ClCompile Include="..\main\softRobot\UdpCom.cpp">
+      <Filter>main\softRobot</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\main\AllBoards.h">
-      <Filter>main</Filter>
-    </ClInclude>
-    <ClInclude Include="..\main\ArrayRing.h">
-      <Filter>main</Filter>
-    </ClInclude>
-    <ClInclude Include="..\main\Board.h">
-      <Filter>main</Filter>
-    </ClInclude>
-    <ClInclude Include="..\main\BoardBase.h">
-      <Filter>main</Filter>
-    </ClInclude>
-    <ClInclude Include="..\main\BoardDirect.h">
-      <Filter>main</Filter>
-    </ClInclude>
-    <ClInclude Include="..\main\CommandWROOM.h">
-      <Filter>main</Filter>
-    </ClInclude>
-    <ClInclude Include="..\main\monitor.h">
-      <Filter>main</Filter>
-    </ClInclude>
-    <ClInclude Include="..\main\MotorDriver.h">
-      <Filter>main</Filter>
-    </ClInclude>
-    <ClInclude Include="..\main\TinyContainer.h">
-      <Filter>main</Filter>
-    </ClInclude>
-    <ClInclude Include="..\main\TouchSensing.h">
-      <Filter>main</Filter>
-    </ClInclude>
-    <ClInclude Include="..\main\UartForBoards.h">
-      <Filter>main</Filter>
-    </ClInclude>
-    <ClInclude Include="..\main\UdpCom.h">
-      <Filter>main</Filter>
-    </ClInclude>
-    <ClInclude Include="..\main\UTRef.h">
-      <Filter>main</Filter>
-    </ClInclude>
-    <ClInclude Include="..\main\wifiMan.h">
-      <Filter>main</Filter>
-    </ClInclude>
-    <ClInclude Include="..\main\WroomEnv.h">
-      <Filter>main</Filter>
-    </ClInclude>
     <ClInclude Include="esp_event_loop.h">
       <Filter>Emulator</Filter>
     </ClInclude>
@@ -293,11 +251,58 @@
     <ClInclude Include="..\..\PIC\env.h">
       <Filter>PIC</Filter>
     </ClInclude>
-    <ClInclude Include="..\main\RobotCommand.h">
-      <Filter>main</Filter>
+    <ClInclude Include="..\main\softRobot\AllBoards.h">
+      <Filter>main\softRobot</Filter>
     </ClInclude>
-    <ClInclude Include="..\main\RobotState.h">
-      <Filter>main</Filter>
+    <ClInclude Include="..\main\softRobot\ArrayRing.h">
+      <Filter>main\softRobot</Filter>
     </ClInclude>
+    <ClInclude Include="..\main\softRobot\Board.h">
+      <Filter>main\softRobot</Filter>
+    </ClInclude>
+    <ClInclude Include="..\main\softRobot\BoardBase.h">
+      <Filter>main\softRobot</Filter>
+    </ClInclude>
+    <ClInclude Include="..\main\softRobot\BoardDirect.h">
+      <Filter>main\softRobot</Filter>
+    </ClInclude>
+    <ClInclude Include="..\main\softRobot\CommandWROOM.h">
+      <Filter>main\softRobot</Filter>
+    </ClInclude>
+    <ClInclude Include="..\main\softRobot\monitor.h">
+      <Filter>main\softRobot</Filter>
+    </ClInclude>
+    <ClInclude Include="..\main\softRobot\MotorDriver.h">
+      <Filter>main\softRobot</Filter>
+    </ClInclude>
+    <ClInclude Include="..\main\softRobot\RobotCommand.h">
+      <Filter>main\softRobot</Filter>
+    </ClInclude>
+    <ClInclude Include="..\main\softRobot\RobotState.h">
+      <Filter>main\softRobot</Filter>
+    </ClInclude>
+    <ClInclude Include="..\main\softRobot\TinyContainer.h">
+      <Filter>main\softRobot</Filter>
+    </ClInclude>
+    <ClInclude Include="..\main\softRobot\TouchSensing.h">
+      <Filter>main\softRobot</Filter>
+    </ClInclude>
+    <ClInclude Include="..\main\softRobot\UartForBoards.h">
+      <Filter>main\softRobot</Filter>
+    </ClInclude>
+    <ClInclude Include="..\main\softRobot\UdpCom.h">
+      <Filter>main\softRobot</Filter>
+    </ClInclude>
+    <ClInclude Include="..\main\softRobot\UTRef.h">
+      <Filter>main\softRobot</Filter>
+    </ClInclude>
+    <ClInclude Include="..\main\softRobot\WroomEnv.h">
+      <Filter>main\softRobot</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\main\softRobot\component.mk">
+      <Filter>main\softRobot</Filter>
+    </None>
   </ItemGroup>
 </Project>

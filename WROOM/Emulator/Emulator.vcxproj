@@ -175,18 +175,18 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\main\AllBoards.cpp" />
-    <ClCompile Include="..\main\Board.cpp" />
-    <ClCompile Include="..\main\BoardDirect.cpp" />
-    <ClCompile Include="..\main\main.cpp" />
-    <ClCompile Include="..\main\monitor.cpp" />
-    <ClCompile Include="..\main\MotorControl.c" />
-    <ClCompile Include="..\main\MotorDriver.cpp" />
-    <ClCompile Include="..\main\lw" />
-    <ClCompile Include="..\main\RobotState.cpp" />
-    <ClCompile Include="..\main\TouchSensing.cpp" />
-    <ClCompile Include="..\main\UartForBoards.cpp" />
-    <ClCompile Include="..\main\UdpCom.cpp" />
+    <ClCompile Include="..\main\softRobot\AllBoards.cpp" />
+    <ClCompile Include="..\main\softRobot\Board.cpp" />
+    <ClCompile Include="..\main\softRobot\BoardDirect.cpp" />
+    <ClCompile Include="..\main\softRobot\main.cpp" />
+    <ClCompile Include="..\main\softRobot\monitor.cpp" />
+    <ClCompile Include="..\main\softRobot\MotorControl.c" />
+    <ClCompile Include="..\main\softRobot\MotorDriver.cpp" />
+    <ClCompile Include="..\main\softRobot\RobotCommand.cpp" />
+    <ClCompile Include="..\main\softRobot\RobotState.cpp" />
+    <ClCompile Include="..\main\softRobot\TouchSensing.cpp" />
+    <ClCompile Include="..\main\softRobot\UartForBoards.cpp" />
+    <ClCompile Include="..\main\softRobot\UdpCom.cpp" />
     <ClCompile Include="emulator.cpp" />
     <ClCompile Include="freertos\croutine.c" />
     <ClCompile Include="freertos\list.c" />
@@ -264,28 +264,30 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\..\PIC\env.h" />
-    <ClInclude Include="..\main\AllBoards.h" />
-    <ClInclude Include="..\main\ArrayRing.h" />
-    <ClInclude Include="..\main\Board.h" />
-    <ClInclude Include="..\main\BoardBase.h" />
-    <ClInclude Include="..\main\BoardDirect.h" />
-    <ClInclude Include="..\main\CommandWROOM.h" />
-    <ClInclude Include="..\main\monitor.h" />
-    <ClInclude Include="..\main\MotorDriver.h" />
-    <ClInclude Include="..\main\RobotCommand.h" />
-    <ClInclude Include="..\main\RobotState.h" />
-    <ClInclude Include="..\main\TinyContainer.h" />
-    <ClInclude Include="..\main\TouchSensing.h" />
-    <ClInclude Include="..\main\UartForBoards.h" />
-    <ClInclude Include="..\main\UdpCom.h" />
-    <ClInclude Include="..\main\UTRef.h" />
-    <ClInclude Include="..\main\wifiMan.h" />
-    <ClInclude Include="..\main\WroomEnv.h" />
+    <ClInclude Include="..\main\softRobot\AllBoards.h" />
+    <ClInclude Include="..\main\softRobot\ArrayRing.h" />
+    <ClInclude Include="..\main\softRobot\Board.h" />
+    <ClInclude Include="..\main\softRobot\BoardBase.h" />
+    <ClInclude Include="..\main\softRobot\BoardDirect.h" />
+    <ClInclude Include="..\main\softRobot\CommandWROOM.h" />
+    <ClInclude Include="..\main\softRobot\monitor.h" />
+    <ClInclude Include="..\main\softRobot\MotorDriver.h" />
+    <ClInclude Include="..\main\softRobot\RobotCommand.h" />
+    <ClInclude Include="..\main\softRobot\RobotState.h" />
+    <ClInclude Include="..\main\softRobot\TinyContainer.h" />
+    <ClInclude Include="..\main\softRobot\TouchSensing.h" />
+    <ClInclude Include="..\main\softRobot\UartForBoards.h" />
+    <ClInclude Include="..\main\softRobot\UdpCom.h" />
+    <ClInclude Include="..\main\softRobot\UTRef.h" />
+    <ClInclude Include="..\main\softRobot\WroomEnv.h" />
     <ClInclude Include="esp_event_loop.h" />
     <ClInclude Include="esp_log.h" />
     <ClInclude Include="FreeRTOSConfig.h" />
     <ClInclude Include="lwipcfg_msvc.h" />
     <ClInclude Include="lwipopts.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\main\softRobot\component.mk" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

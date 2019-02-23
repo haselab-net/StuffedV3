@@ -30,7 +30,7 @@ struct RobotState: public BoardRetBase{
 		velocity[i] = v;
 	}
 	//	for interpolate and force control
-	void SetTargetCountRead(short c) {
+	void SetTargetCountRead(unsigned char c) {
 		targetCountReadMax = c;
 	}
 	void SetTickMin(short t) {
@@ -39,10 +39,10 @@ struct RobotState: public BoardRetBase{
 	void SetTickMax(short t) {
 		tickMax = t;
 	}
-	void SetNTargetRemain(short t){
+	void SetNTargetRemain(unsigned char t){
 		nTargetRemain = t;
 	}
-	void SetNTargetVacancy(short t){
+	void SetNTargetVacancy(unsigned char t){
 		nTargetVacancy = t;
 	}
 	//	sense

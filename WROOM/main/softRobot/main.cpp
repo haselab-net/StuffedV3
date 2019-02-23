@@ -11,7 +11,6 @@
 #include "rom/uart.h"
 #endif
 
-#include "wifiMan.h"
 #include "UdpCom.h"
 #include "AllBoards.h"
 #include "TouchSensing.h"
@@ -44,7 +43,6 @@ extern "C" void app_main()
     logPrintf("Init allBoards finished. ");
     logPrintf("%d motors, %d current sensors, %d force sensors found.\n", allBoards.GetNTotalMotor(), allBoards.GetNTotalCurrent(), allBoards.GetNTotalForce());
 
-    wifiMan();    //  Start wifi manager. 
     udpCom.Init();    //  init command processing for udp.
     udpCom.Start();   //  start UDP server.
 #if 0

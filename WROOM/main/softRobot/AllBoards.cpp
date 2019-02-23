@@ -59,13 +59,13 @@ void AllBoards::ExecLoop(){
 				//	send packet to allBoards
 				if (bDebug) ESP_LOGI("AllBoards::ExecLoop", "write cmd %d.", recv->command);
 				allBoards.WriteCmd(recv->command, *recv);
-				udpCom.PrepareRetPacket(recv->command);
+				udpCom.PrepareRetPacket(*recv);
 				if (HasRet(recv->command)){
 					ReadRet(recv->command, udpCom.send);
 					ReadRet(recv->command, state);
 					if (bDebug) ESP_LOGI("AllBoards::ExecLoop", "read ret %d.", recv->command);
 				}
-				udpCom.SendRetPacket(recv->returnIp);
+				udpCom.SendReturn(*recv);
 			}
 			else {
 				udpCom.ExecUdpCommand(*recv);

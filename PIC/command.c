@@ -4,7 +4,7 @@
 #include "boardType.h"
 #include <string.h>
 #ifdef WROOM
-#include "../WROOM/main/commandWROOM.h"
+#include "../WROOM/main/SoftRobot/commandWROOM.h"
 #endif
 
 unsigned char boardId = BOARD_ID;
