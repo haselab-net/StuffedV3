@@ -17,7 +17,7 @@
 #include "MotorDriver.h"
 #include "monitor.h"
 
-extern "C" void softRobot_main()    //  called from app_main in duktape_main.c 
+extern "C" void softRobot_main()    //  called from app_main in main.cpp 
 {        
     //----------------------------------
     logPrintf("!!! Stuffed Robot Start !!!\n");   
