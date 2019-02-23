@@ -175,15 +175,16 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\main\main.cpp" />
     <ClCompile Include="..\main\softRobot\AllBoards.cpp" />
     <ClCompile Include="..\main\softRobot\Board.cpp" />
     <ClCompile Include="..\main\softRobot\BoardDirect.cpp" />
-    <ClCompile Include="..\main\softRobot\main.cpp" />
     <ClCompile Include="..\main\softRobot\monitor.cpp" />
     <ClCompile Include="..\main\softRobot\MotorControl.c" />
     <ClCompile Include="..\main\softRobot\MotorDriver.cpp" />
     <ClCompile Include="..\main\softRobot\RobotCommand.cpp" />
     <ClCompile Include="..\main\softRobot\RobotState.cpp" />
+    <ClCompile Include="..\main\softRobot\softRobot_main.cpp" />
     <ClCompile Include="..\main\softRobot\TouchSensing.cpp" />
     <ClCompile Include="..\main\softRobot\UartForBoards.cpp" />
     <ClCompile Include="..\main\softRobot\UdpCom.cpp" />

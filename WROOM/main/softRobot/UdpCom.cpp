@@ -277,7 +277,13 @@ void UdpCom::PrepareRetPacket(UdpCmdPacket& recv) {
 	send.ClearData();
 }
 void UdpCom::SendReturn(UdpCmdPacket& recv) {
+#ifdef _WIN32
+	if (recv.returnIp.addr == 0) {
+#elif defined WROOM
 	if (recv.returnIp.u_addr.ip4.addr == 0) {
+#else
+#error
+#endif
 		SendReturnServer(recv);
 	}
 	else {

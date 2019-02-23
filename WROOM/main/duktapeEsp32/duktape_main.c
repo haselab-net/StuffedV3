@@ -106,5 +106,4 @@ void duktape_main(void)
 	ESP_ERROR_CHECK(esp_wifi_set_storage(WIFI_STORAGE_RAM));
 	//bootWiFi(init);
 	init();
-	softRobot_main();
 } // app_main

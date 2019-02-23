@@ -192,9 +192,6 @@
     <ClCompile Include="..\main\softRobot\BoardDirect.cpp">
       <Filter>main\softRobot</Filter>
     </ClCompile>
-    <ClCompile Include="..\main\softRobot\main.cpp">
-      <Filter>main\softRobot</Filter>
-    </ClCompile>
     <ClCompile Include="..\main\softRobot\monitor.cpp">
       <Filter>main\softRobot</Filter>
     </ClCompile>
@@ -218,6 +215,12 @@
     </ClCompile>
     <ClCompile Include="..\main\softRobot\UdpCom.cpp">
       <Filter>main\softRobot</Filter>
+    </ClCompile>
+    <ClCompile Include="..\main\softRobot\softRobot_main.cpp">
+      <Filter>main</Filter>
+    </ClCompile>
+    <ClCompile Include="..\main\main.cpp">
+      <Filter>main</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
