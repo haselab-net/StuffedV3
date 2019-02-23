@@ -35,8 +35,10 @@ void MotorDriver::AdcReadTaskStatic(void* arg){
 }
 void MotorDriver::AdcReadTask(){
     size_t bufLen = ADC_DMA_LEN * 2;
-    uint16_t buf[ADC_DMA_LEN];
-    while(1) {
+#ifndef _WIN32
+	uint16_t buf[ADC_DMA_LEN];
+#endif
+	while(1) {
 #ifndef _WIN32
 		system_event_t evt;
         if (xQueueReceive(queue, &evt, portMAX_DELAY) == pdPASS) {
@@ -181,10 +183,10 @@ void MotorDriver::Pwm(int ch, float duty){
     }
 #else
 	pwm[ch] = duty;
-	float dt = 0.1;
+	float dt = 0.1f;
 	theta[ch] = theta[ch] + pwm[ch] * dt;
-	motorDriver.adcRaws[ch * 2] = (1+sin(theta[ch])) * msinOffset[ch];
-	motorDriver.adcRaws[ch * 2 + 1] = (1 + cos(theta[ch])) * mcosOffset[ch];
+	motorDriver.adcRaws[ch * 2] = (int) ((1+sin(theta[ch])) * msinOffset[ch]);
+	motorDriver.adcRaws[ch * 2 + 1] = (int) ((1 + cos(theta[ch])) * mcosOffset[ch]);
 #endif
 }
 int MotorDriver::GetAdcRaw(int ch){

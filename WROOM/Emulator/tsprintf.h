@@ -14,8 +14,8 @@
 extern "C"{
 #endif
 
-extern int tsprintf(const char* ,char* , ...);
-extern int vtsprintf(char* buff,const char* fmt,va_list arg);
+extern int tsprintf(char* buf, const char* fmt, ...);
+extern int vtsprintf(char* buff, const char* fmt, va_list arg);
 
 #ifdef __cplusplus
 }

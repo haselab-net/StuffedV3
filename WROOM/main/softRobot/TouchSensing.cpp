@@ -36,7 +36,7 @@ int TouchPads::Add(touch_pad_t pad){
 
 uint16_t TouchPads::Raw(int i)
 {
-    uint16_t raw;
+    uint16_t raw=0;
 	ESP_ERROR_CHECK(touch_pad_read(pads[i], &raw));
 	return raw;
 };

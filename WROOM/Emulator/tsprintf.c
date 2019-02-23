@@ -22,9 +22,8 @@
 */
 
 #include <stdarg.h>
+#include "tsprintf.h"
 
-int tsprintf(const char* ,char* , ...);
-int vtsprintf(char* buff,const char* fmt,va_list arg);
 
 static int tsprintf_string(char* ,char* );
 static int tsprintf_char(int ,char* );
@@ -34,22 +33,15 @@ static int tsprintf_hexadecimal(unsigned long ,char* ,int ,int ,int );
 /*
   Tiny sprintfŠÖ”
 */
-int tsprintf(char* buff,char* fmt, ...){
+int tsprintf(char* buff, const char* fmt, ...){
 	va_list arg;
-	int len;
-	int size;
-	int zeroflag,width;
-
-	size = 0;
-	len = 0;
 	va_start(arg, fmt);
-
-	vtsprintf(buff,fmt,arg);
-	
+	int rv = vtsprintf(buff,fmt,arg);
 	va_end(arg);
+	return rv;
 }
 
-int vtsprintf(char* buff,char* fmt,va_list arg){
+int vtsprintf(char* buff, const char* fmt, va_list arg){
 	int len;
 	int size;
 	int zeroflag,width;
