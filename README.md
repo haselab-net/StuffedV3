@@ -1,6 +1,7 @@
 # Stuffed toy robot version 3 (Starts from 2017) 
 
-This repository contains Motor driver boards'schematics / PCB layouts, their firmwares and PC software.
+* This repository contains Motor driver boards'schematics / PCB layouts, their firmwares and PC software.
+* See the wiki (http://git.haselab.net/hasevr/StuffedV3/wikis/home) also.
 
 ## Folder structure
 - __PIC__ Firmware for pic. WROOM with motor driver also use part of this code.

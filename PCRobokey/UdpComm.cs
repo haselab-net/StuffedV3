@@ -145,9 +145,8 @@ namespace Robokey
             public bool Write(byte[] b)
             {
                 if (writeAvail == 0) return false;
-                int p = 2;
                 commandCount++;
-                UdpComm.WriteShort(commandCount, ref p, b);
+                UdpComm.OverwriteCounter(commandCount, 0, b);
                 buffers[write] = b;
                 if (write < bufferLen - 1) write++;
                 else write = 0;
@@ -220,24 +219,38 @@ namespace Robokey
             cur += 2;
             return (short)s;
         }
-        void ReadShortExt(ref int s, ref int cur, byte[] buf)
+        static void ReadShortExt(ref int s, ref int cur, byte[] buf)
         {
             int t = buf[cur] | (buf[cur + 1] << 8);
             short diff = (short)(t - (s & 0xFFFF));
             s += diff;
             cur += 2;
         }
-        void WriteHeader(int cmd, ref int cur, byte[] buf)
+        static void OverwriteLengthAtHeader(int len, int start, byte[] buf)
+        {
+            int cur = start + 2;
+            WriteShort(len, ref cur, buf);
+        }
+        static void OverwriteCounter(int ct, int start, byte[] buf)
+        {
+            int cur = start;
+            WriteShort(ct, ref cur, buf);
+        }
+        static void WriteHeader(int cmd, ref int cur, byte[] buf)
         {
             WriteShort(0, ref cur, buf);
             WriteShort(0, ref cur, buf);
             WriteShort(cmd, ref cur, buf);
         }
-        void ReadHeader(ref ushort len, ref ushort ct, ref ushort cmd, ref int cur, byte[] buf)
+        static void ReadHeader(ref ushort len, ref ushort ct, ref ushort cmd, ref int cur, byte[] buf)
         {
-            len = (ushort)ReadShort(ref cur, buf);
             ct = (ushort)ReadShort(ref cur, buf);
+            len = (ushort)ReadShort(ref cur, buf);
             cmd = (ushort)ReadShort(ref cur, buf);
+        }
+        static int ReadLength(int start, byte[] buf) {
+            int cur = start+2;
+            return ReadShort(ref cur, buf);
         }
         void ReadBoard(ref int cur, byte[] buf){
             RobotInfo info = new RobotInfo();
@@ -438,11 +451,10 @@ namespace Robokey
         }
         public void PutCommand(byte[] cmd, int len) {
             if (udp == null || sendPoint == null) return;
-            int p = 0;
 #if UDP_NORETRY    //  No retry 
             sendQueue.Clear();
 #endif
-            WriteShort(len, ref p, cmd);
+            OverwriteLengthAtHeader(len-2, 0, cmd);
             for (int i=0; i<100 && !sendQueue.Write(cmd); ++i) {
                 int cur = 2;
                 ushort ct = (ushort)ReadShort(ref cur, sendQueue.Peek());
@@ -459,8 +471,7 @@ namespace Robokey
             for (int i = 0; i < sendQueue.readAvail; ++i)
             {
                 byte[] cmd = sendQueue.Peek(i);
-                int p = 0;
-                int len = ReadShort(ref p, cmd);
+                int len = ReadLength(0, cmd) + 2;
                 if (pos + len > buf.Length)
                 {
                     udp.Send(buf, pos, sendPoint);
@@ -471,7 +482,7 @@ namespace Robokey
                 {
                     i = 0;
                 } else {
-                    for (p = 0; p < len; ++p)
+                    for (int p = 0; p < len; ++p)
                     {
                         buf[pos + p] = cmd[p];
                     }

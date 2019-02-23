@@ -20,8 +20,8 @@ public:
 	union {
 		unsigned char bytes[MAXLEN];
 		struct {
-			unsigned short length;	//	length of this command
 			unsigned short count;	//	counter to detect packet drop.
+			unsigned short length;	//	length of this command
 			unsigned short command;	//	command id
 			short data[(MAXLEN-2*3)/2];
 		}__attribute__((__packed__));

@@ -122,11 +122,10 @@ void UdpCom::Start(){
 }
 void UdpCom::OnReceive(struct udp_pcb * upcb, struct pbuf * top, const ip_addr_t* addr, u16_t port) {
 	if (!recvs.WriteAvail()){
-		ESP_LOGE("UdpCom::OnReceive", "IP command receive buffer is full.");
+		ESP_LOGE("UdpCom::OnReceive", "Udp recv buffer full.");
 		pbuf_free(top);
 		return;
 	}
-	//	 read buffer and put it on recvs.
 	struct pbuf* p = top;
 	int readLen = 0; 
 	int cur = 0;

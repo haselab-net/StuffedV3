@@ -210,10 +210,10 @@
     <ClCompile Include="tsprintf.c">
       <Filter>Emulator</Filter>
     </ClCompile>
-    <ClCompile Include="..\main\RobotCommand.cpp">
+    <ClCompile Include="..\main\RobotState.cpp">
       <Filter>main</Filter>
     </ClCompile>
-    <ClCompile Include="..\main\RobotState.cpp">
+    <ClCompile Include="..\main\lw">
       <Filter>main</Filter>
     </ClCompile>
   </ItemGroup>

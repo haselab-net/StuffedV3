@@ -182,7 +182,7 @@
     <ClCompile Include="..\main\monitor.cpp" />
     <ClCompile Include="..\main\MotorControl.c" />
     <ClCompile Include="..\main\MotorDriver.cpp" />
-    <ClCompile Include="..\main\RobotCommand.cpp" />
+    <ClCompile Include="..\main\lw" />
     <ClCompile Include="..\main\RobotState.cpp" />
     <ClCompile Include="..\main\TouchSensing.cpp" />
     <ClCompile Include="..\main\UartForBoards.cpp" />
