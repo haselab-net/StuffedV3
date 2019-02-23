@@ -134,6 +134,11 @@ public:
 };
 
 class UdpCmdPackets:public ArrayRing<UdpCmdPacket, 20>{
+	xSemaphoreHandle mutex;
+public:
+	UdpCmdPackets();
+	void Lock();
+	void Unlock();
 };
 
 class UdpCom {

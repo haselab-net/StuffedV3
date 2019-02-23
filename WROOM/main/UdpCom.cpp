@@ -94,6 +94,16 @@ void UdpRetPacket::ClearData() {
 	memset(data, 0, length);
 }
 
+UdpCmdPackets::UdpCmdPackets() {
+	mutex = xSemaphoreCreateMutex();
+}
+void UdpCmdPackets::Lock() {
+	xSemaphoreTake(mutex, portMAX_DELAY);
+}
+void UdpCmdPackets::Unlock() {
+	xSemaphoreGive(mutex);
+}
+
 static void onReceive(void *arg, struct udp_pcb *pcb, struct pbuf *p, const ip_addr_t *addr, u16_t port)
 {
 	((UdpCom*)arg)->OnReceive(pcb, p, addr, port);
@@ -131,6 +141,8 @@ void UdpCom::OnReceive(struct udp_pcb * upcb, struct pbuf * top, const ip_addr_t
 	int readLen = 0; 
 	int cur = 0;
 	int cmdLen = UdpPacket::HEADERLEN;
+
+	recvs.Lock();
 	UdpCmdPacket* recv = &recvs.Poke();
 	int countDiffMax = 0;
 	while(1){
@@ -148,8 +160,8 @@ void UdpCom::OnReceive(struct udp_pcb * upcb, struct pbuf * top, const ip_addr_t
 			}
 			if (readLen == cmdLen){
 				recv->returnIp = *addr;
-				if (recv->length != cmdLen) {
-					ESP_LOGE(Tag, "cmdLen %d != recvLen %d in cmd:%d \n", cmdLen, recv->length, recv->command);
+				if (recv->length != cmdLen - 2) {
+					ESP_LOGE(Tag, "cmdLen %d != recvLen %d - 2 in cmd:%d \n", cmdLen, recv->length, recv->command);
 				}
 				if (recv->command == CIU_GET_IPADDRESS) {
 					recvs.Write();
@@ -184,6 +196,7 @@ void UdpCom::OnReceive(struct udp_pcb * upcb, struct pbuf * top, const ip_addr_t
 				if (!recvs.WriteAvail()){
 					ESP_LOGE(Tag, "Udp recv buffer full.\n");
 					pbuf_free(top);
+					recvs.Unlock();
 					return;
 				}
 				recv = &recvs.Poke();
@@ -200,6 +213,7 @@ void UdpCom::OnReceive(struct udp_pcb * upcb, struct pbuf * top, const ip_addr_t
 			}
 		}
 	}
+	recvs.Unlock();
 	pbuf_free(top);
 }
 
