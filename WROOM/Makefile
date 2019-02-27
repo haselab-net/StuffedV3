@@ -49,7 +49,30 @@ images:
 	echo "+---------------------+"
 	./bin/mkspiffs -c filesystem -b 4096 -p 256 -s 0x80000 build/spiffs.img
 	
+
+
 #
+#  Update duktape-esp32 from local source tree (from ../../duktape-esp32)
+#
+folders = main/duktapeEsp32 components/duktape components/espfs 
+duk32_update:
+	echo "Update duktape-esp32 from local source tree (../../duktape-esp32)"
+	rm -rf $(folders)
+	mkdir $(folders)
+	cp -R ../../duktape-esp32/main/* main/duktapeEsp32/
+	cp -R ../../duktape-esp32/components/espfs components/
+	cp -R ../../duktape-esp32/components/duktape/src components/duktape/
+	cp -f ../../duktape-esp32/components/duktape/component.mk components/duktape/
+	mkdir components/duktape/extras
+	cp -R ../../duktape-esp32/components/duktape/extras/module-duktape components/duktape/extras/
+	mkdir components/duktape/examples
+	cp -R ../../duktape-esp32/components/duktape/examples/debug-trans-socket components/duktape/examples/
+	cp -Rf ../../duktape-esp32/bin/* bin/
+	cp -Rf ../../duktape-esp32/data/* data/
+	cp -Rf ../../duktape-esp32/filesystem/* filesystem/
+	cp -f ../../duktape-esp32/partitions.csv .
+
+#  This is not needed. All files are added to git.
 #  Perform a clean install of duktape.
 #
 duktape_install:
@@ -59,7 +82,7 @@ duktape_install:
 	cp ./data/duktape/component.mk ./components/duktape/
 	rm ./components/duktape/examples/debug-trans-socket/duk_trans_socket_windows.c
 
-#
+#  This is not needed. Configurated files are added to git.
 #  Perform a configuration of duktape.
 #  See the following Duktape documentation for details.
 #  https://github.com/svaarala/duktape/blob/master/doc/duk-config.rst

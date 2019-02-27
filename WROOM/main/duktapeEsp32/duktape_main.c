@@ -90,10 +90,15 @@ static void init() {
 	xTaskCreatePinnedToCore(&duktape_task, "duktape_task", 16*1024, NULL, 5, NULL, tskNO_AFFINITY);
 } // init
 
+
 /*
  *  Main entry point into the application.
  */
-void duktape_main(void)
+#ifndef DEFINE_APP_MAIN
+#define app_main duktape_main
+#endif
+
+void app_main(void)
 {
 	LOGD("Free heap at start: %d", esp_get_free_heap_size());
 	//LOGD("Free IRAM: %d",  xPortGetFreeHeapSizeTagged(MALLOC_CAP_32BIT));
@@ -107,3 +112,7 @@ void duktape_main(void)
 	//bootWiFi(init);
 	init();
 } // app_main
+
+#ifndef DEFINE_APP_MAIN
+#undef app_main
+#endif

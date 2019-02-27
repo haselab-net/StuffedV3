@@ -27,6 +27,8 @@
 #include "module_wifi.h"
 #include "sdkconfig.h"
 
+#include <string.h>
+
 LOG_TAG("module_wifi");
 
 static uint32_t g_scanCallbackStashKey = -1;
@@ -282,13 +284,17 @@ static duk_ret_t js_wifi_connect(duk_context* ctx) {
 	vTaskDelay(2000/portTICK_PERIOD_MS);
 
 	LOGD(" - Connecting to access point: \"%s\" with \"%s\"", ssid, "<Password hidden>");
-  wifi_config_t sta_config;
-  strcpy((char *)sta_config.sta.ssid, ssid);
-  strcpy((char *)sta_config.sta.password, password);
-  sta_config.sta.bssid_set = 0;
+	wifi_config_t sta_config;
+
+	// ISSUE: ESP32 can not connect to AP as a STA.
+	// FIXED: Clear memory of sta_config before using.
+	memset(&sta_config, 0x00, sizeof(wifi_config_t));
+	strcpy((char *)sta_config.sta.ssid, ssid);
+	strcpy((char *)sta_config.sta.password, password);
+	sta_config.sta.bssid_set = 0;
 
 	LOGD("Calling esp_wifi_set_config()");
-  errRc = esp_wifi_set_config(WIFI_IF_STA, &sta_config);
+  	errRc = esp_wifi_set_config(WIFI_IF_STA, &sta_config);
 	if (errRc != ESP_OK) {
 		LOGE("esp_wifi_set_config() rc=%d", errRc);
 		duk_error(ctx, 1, "esp_wifi_set_config rc=%s", esp32_errToString(errRc));
