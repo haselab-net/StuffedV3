@@ -1,0 +1,124 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.IO.Ports;
+
+
+namespace PCController
+{
+    public partial class MainForm : Form
+    {
+        Boards boards;
+        public MainForm()
+        {
+            InitializeComponent();
+            boards = new Boards();
+            boards.Serial = uartBin;
+            cmbPortBin.Items.AddRange(SerialPort.GetPortNames());
+            if (cmbPortBin.Items.Count > 0)
+            {
+                cmbPortBin.Text = cmbPortBin.Items[0].ToString();
+            }
+        }
+        private void cmbPortBin_TextChanged(object sender, EventArgs e)
+        {
+            foreach (Object item in cmbPortBin.Items) {
+                if (item.ToString().Contains(cmbPortBin.Text))
+                {
+                    cmbPortBin.Text = item.ToString();
+                    return;
+                }
+            }
+            cmbPortBin.Text = "";
+        }
+        private void ResetPanels() {
+            ResetCurrentTab();
+        }
+        List<CurrentControl> currentControls = new List<CurrentControl>();
+        private void ResetCurrentTab()
+        {
+            flCurrent.Controls.Clear();
+            currentControls.Clear();
+            for (int i = 0; i < boards.NMotor; ++i) {
+                CurrentControl cc = new CurrentControl();
+                cc.Init();
+                flCurrent.Controls.Add(cc.panel);
+                currentControls.Add(cc);
+            }
+        }
+        private void btListBoards_Click(object sender, EventArgs e)
+        {
+            if (uartBin.IsOpen) uartBin.Close();
+            if (cmbPortBin.Text.Length == 0) return;
+            uartBin.PortName = cmbPortBin.Text;
+            uartBin.BaudRate = 2000000;
+            uartBin.Open();
+            if (uartBin.IsOpen) {
+                trBoards.Nodes.Clear();
+                boards.Clear();
+                boards.ListBoard();
+                foreach (Board b in boards)
+                {
+                    TreeNode nb = trBoards.Nodes.Add("#" + b.boardId
+                        + "M" + b.nMotor + "C" + b.nCurrent + "F" + b.nForce
+                        );
+                    nb.Nodes.Add("model " + b.modelNumber);
+                    nb.Nodes.Add("nTarget " + b.nTarget);
+                    nb.Nodes.Add("nMotor " + b.nMotor);
+                    nb.Nodes.Add("nCurrent " + b.nCurrent);
+                    nb.Nodes.Add("nForce " + b.nForce);
+                }
+                ResetPanels();
+            }
+        }
+
+        private void UpdateCurrent() {
+            short[] currents = new short[boards.NMotor];
+            for(int i=0; i<currentControls.Count; ++i)
+            {
+                currents[i] = (short)currentControls[i].udTargetCurrent.Value; 
+            }
+            short[] curCurrents = boards.SendCurrent(currents);
+            for (int i = 0; i < currentControls.Count; ++i)
+            {
+                currentControls[i].lbCurrent.Text = "" + curCurrents[i];
+            }
+        }
+
+        private void timer_Tick(object sender, EventArgs e)
+        {
+            if (tbControl.SelectedTab == tpCurrent)
+            {
+                UpdateCurrent();
+            }
+        }
+    }
+    public class CurrentControl
+    {
+        public Panel panel;
+        public NumericUpDown udTargetCurrent;
+        public Label lbCurrent;
+        public void Init()
+        {
+            panel = new Panel();
+            lbCurrent = new Label();
+            udTargetCurrent = new NumericUpDown();
+            lbCurrent.Width = 80;
+            lbCurrent.Height = 16;
+            udTargetCurrent.Maximum = 1024 * 2;
+            udTargetCurrent.Minimum = -1024 * 2;
+            udTargetCurrent.Width = lbCurrent.Width;
+            udTargetCurrent.Top = lbCurrent.Height;
+            panel.Width = udTargetCurrent.Width;
+            panel.Height = udTargetCurrent.Height + lbCurrent.Height;
+            panel.Controls.Add(lbCurrent);
+            panel.Controls.Add(udTargetCurrent);
+        }
+    }
+}

@@ -26,6 +26,7 @@ struct MotorState{
     LDEC vel[NMOTOR];
 };
 extern struct MotorState motorTarget, motorState;
+extern SDEC currentTarget[NMOTOR];
 extern SDEC forceControlJK[NFORCE][NMOTOR];
 #define NAXIS	(NMOTOR+NFORCE/2)	//	NAXIS=NMOTOR+NFORCE/2
 extern SDEC mcos[NAXIS], msin[NAXIS];
@@ -62,9 +63,10 @@ extern struct Targets targets;
 enum ControlMode{
     CM_SKIP,				//	This command dose not contain control information and must be skipped.
 	CM_TORQUE,				//	Torque control mode.
-	CM_DIRECT,				//	Set target position and velocity directly.
-    CM_INTERPOLATE,			//	Interpolate target position.
-    CM_FORCE_CONTROL,		//	Interpolate target position + local feedback loop for force control/
+	CM_DIRECT,				//	Set target positions and velocities directly.
+	CM_CURRENT,				//	Set target currents.
+    CM_INTERPOLATE,			//	Interpolate target positions.
+    CM_FORCE_CONTROL,		//	Interpolate target positions + local feedback loop for force control/
 };
 extern enum ControlMode controlMode;
 

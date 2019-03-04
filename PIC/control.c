@@ -5,6 +5,7 @@
 
 
 struct MotorState motorTarget, motorState;
+SDEC currentTarget[NMOTOR];
 SDEC forceControlJK[NFORCE][NMOTOR];
 struct PdParam pdParam;
 struct TorqueLimit torqueLimit;
@@ -109,6 +110,25 @@ void pdControl(){
 		}
 #endif
 	}
+}
+SDEC targetTorque[NMOTOR];
+inline int truncate(int min, int val, int max){
+    if (val < min) val = min;
+    if (val > max) val = max;
+    return val;
+}
+void currentControl(){
+	int i;
+	for(i=0; i<NCURRENT && i < NMOTOR; ++i){
+        int diff = currentTarget[i] - currentSense[i];
+        diff = truncate(-5, diff, 5);
+        targetTorque[i] += diff;
+		setPwmWithLimit(i, targetTorque[i]);        
+    }
+	for(; i < NMOTOR; ++i){
+        targetTorque[i] = currentTarget[i];
+		setPwmWithLimit(i, targetTorque[i]);        
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -272,7 +292,11 @@ void controlLoop(){
         targetsForceControlProceed();
 	}
     updateMotorState();
-	pdControl();
+	if (controlMode == CM_CURRENT){
+        currentControl();
+    }else{
+        pdControl();
+    }
 	#ifdef WROOM
 	xSemaphoreGive(mutexForControl);
 	#endif

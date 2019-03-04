@@ -176,6 +176,8 @@ void AllBoards::WriteCmd(unsigned short commandId, BoardCmdBase& packet) {
 		state.mode = CM_FORCE_CONTROL;
 	}else if(commandId == CI_DIRECT){
 		state.mode = CM_DIRECT;
+	}else if(commandId == CI_CURRENT){
+		state.mode = CM_CURRENT;
 	}
 	//	Write command to borads via uart;
 	boardDirect->WriteCmd(commandId, packet);

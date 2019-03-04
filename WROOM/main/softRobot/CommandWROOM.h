@@ -16,8 +16,8 @@ enum BD0_PARAM {
 #ifndef _WIN32
 	BD0_NCURRENT = 0,
 	BD0_NFORCE = 0,
-#else
-	BD0_NCURRENT = 1,
+#else	// VC++ do not permit array of size 0.
+	BD0_NCURRENT = 1,	
 	BD0_NFORCE = 1,
 #endif
 };

@@ -67,6 +67,11 @@ public:
 				cmd.direct.vel[i] = packet.GetMotorVel(motorMap[i]);
 			}
 			break;
+		case CI_CURRENT:
+			for (int i = 0; i < GetNMotor(); ++i) {
+				cmd.current.current[i] = packet.GetMotorPos(motorMap[i]);
+			}
+			break;
 		case CI_INTERPOLATE:
 			for (int i = 0; i < GetNMotor(); ++i) {
 				cmd.interpolate.pos[i] = packet.GetMotorPos(motorMap[i]);
@@ -124,6 +129,13 @@ public:
 			}
 			break;
 		case CI_DIRECT:
+			for (int i = 0; i < GetNMotor(); ++i) {
+				packet.SetMotorPos(ret.direct.pos[i], motorMap[i]);
+				packet.SetMotorVel(ret.direct.vel[i], motorMap[i]);
+			}
+			//ESP_LOGI("Board", "Direct Motor Pos: %d %d %d %d\n", packet.MotorPos(0),  packet.MotorPos(1), packet.MotorPos(2),  packet.MotorPos(3));
+			break;
+		case CI_CURRENT:
 			for (int i = 0; i < GetNMotor(); ++i) {
 				packet.SetMotorPos(ret.direct.pos[i], motorMap[i]);
 				packet.SetMotorVel(ret.direct.vel[i], motorMap[i]);

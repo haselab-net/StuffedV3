@@ -41,6 +41,8 @@ int UdpCmdPacket::CommandLen() {
 		return NHEADER * 2;
 	case CI_DIRECT:			//	pos vel
 		return (NHEADER + allBoards.GetNTotalMotor() * 2) * 2;
+	case CI_CURRENT:		//	current
+		return (NHEADER + allBoards.GetNTotalMotor() ) * 2;
 	case CI_INTERPOLATE: 	//	pos period targetCount
 		return (NHEADER + allBoards.GetNTotalMotor() + 2) * 2;
 	case CI_FORCE_CONTROL: 	//	pos JK period targetCount
@@ -70,6 +72,8 @@ void UdpRetPacket::SetLength() {
 		length = (NHEADER + allBoards.GetNTotalMotor() + allBoards.GetNTotalCurrent() + allBoards.GetNTotalForce()) * 2; break;
 	case CI_DIRECT:			//	pos vel
 		length = (NHEADER + allBoards.GetNTotalMotor() * 2) * 2; break;
+	case CI_CURRENT:			//	pos vel current
+		length = (NHEADER + allBoards.GetNTotalMotor() * 2 + allBoards.GetNTotalCurrent()) * 2; break;
 	case CI_INTERPOLATE:	//	pos targetCountRead tickMin tickMax remain vacancy
 	case CI_FORCE_CONTROL: 
 		length = (NHEADER + allBoards.GetNTotalMotor() + 5) * 2; break;
