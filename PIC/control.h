@@ -37,6 +37,7 @@ extern const SDEC msinOffset[NAXIS];
 struct PdParam{
     SDEC k[NMOTOR];
     SDEC b[NMOTOR];
+    SDEC a[NMOTOR];
 };
 extern struct PdParam pdParam;
 
@@ -114,10 +115,6 @@ inline SDEC getForce(int ch){
 	if (ch == 0) return mcos[3] - forceOffset[ch];
 	if (ch == 1) return msin[3] - forceOffset[ch];
 	return 0;
-}
-inline short FilterForADC(short prev, short cur){
-    const short IIR = 16;
-    return (prev*(IIR-1) + cur) / IIR;
 }
 
 #ifdef PIC

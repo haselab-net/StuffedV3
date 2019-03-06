@@ -83,8 +83,9 @@ union CommandPacket##BOARD {										\
 				unsigned char count;								\
 			} __attribute__((__packed__)) forceControl;				\
 			struct {				 /*	 CI_PDPARAM */				\
-				SDEC k[BOARD##_NMOTOR];								\
-				SDEC b[BOARD##_NMOTOR];								\
+				SDEC k[BOARD##_NMOTOR];	/* P */                     \
+				SDEC b[BOARD##_NMOTOR];	/* D */						\
+				SDEC a[BOARD##_NMOTOR];	/* Current */				\
 			} __attribute__((__packed__)) pdParam;					\
 			struct {				 /*	 CI_TORQUE_LIMIT	 */		\
 				SDEC min[BOARD##_NMOTOR];							\

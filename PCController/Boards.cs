@@ -78,6 +78,36 @@ namespace PCController
             }
             return rv;
         }
+        public void SendParam(short[] k, short[] b, short[] a)
+        {
+            int ki = 0;
+            int bi = 0;
+            int ai = 0;
+            foreach (Board board in this)
+            {
+                //  compute length
+                int wait = board.GetWaitLen(CommandId.CI_PDPARAM);
+                int bufLen = wait + board.CommandLen(CommandId.CI_PDPARAM);
+                int retLen = board.ReturnLen(CommandId.CI_PDPARAM);
+                byte[] sendBuf = Enumerable.Repeat((byte)0, bufLen).ToArray();
+                byte[] recvBuf = new byte[retLen];
+                sendBuf[0] = Board.MakeHeader(CommandId.CI_PDPARAM, board.boardId);
+                int cur = 1;
+                for (int i = 0; i < board.nMotor; ++i)
+                {
+                    WriteShort(sendBuf, ref cur, k[ki++]);
+                }
+                for (int i = 0; i < board.nMotor; ++i)
+                {
+                    WriteShort(sendBuf, ref cur, b[bi++]);
+                }
+                for (int i = 0; i < board.nMotor; ++i)
+                {
+                    WriteShort(sendBuf, ref cur, a[ai++]);
+                }
+                Serial.Write(sendBuf, 0, bufLen);
+            }
+        }
         public void ListBoard() {
             if (serial == null) return;
             byte[] tempInit = { 0, 0, 0, 0, 0, 0 };

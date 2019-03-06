@@ -5,16 +5,16 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO.Ports;
-
+using Robokey;
 
 namespace PCController
 {
     public partial class MainForm : Form
     {
         Boards boards;
+        Motors motors;
         public MainForm()
         {
             InitializeComponent();
@@ -25,6 +25,7 @@ namespace PCController
             {
                 cmbPortBin.Text = cmbPortBin.Items[0].ToString();
             }
+            motors = new Motors();
         }
         private void cmbPortBin_TextChanged(object sender, EventArgs e)
         {
@@ -39,6 +40,7 @@ namespace PCController
         }
         private void ResetPanels() {
             ResetCurrentTab();
+            ResetMotor();
         }
         List<CurrentControl> currentControls = new List<CurrentControl>();
         private void ResetCurrentTab()
@@ -50,6 +52,15 @@ namespace PCController
                 cc.Init();
                 flCurrent.Controls.Add(cc.panel);
                 currentControls.Add(cc);
+            }
+        }
+        void ResetMotor() {
+            motors.Clear();
+            flParam.Controls.Clear();
+            for (int i = 0; i < boards.NMotor; ++i) {
+                Motor m = new Motor();
+                motors.Add(m);
+                flParam.Controls.Add(m.pd.panel);
             }
         }
         private void btListBoards_Click(object sender, EventArgs e)
@@ -77,7 +88,18 @@ namespace PCController
                 ResetPanels();
             }
         }
-
+        private void UpdateParam()
+        {
+            short[] k = new short[boards.NMotor];
+            short[] b = new short[boards.NMotor];
+            short[] a = new short[boards.NMotor];
+            for (int i = 0; i < motors.Count; ++i) {
+                k[i] = (short)motors[i].pd.K;
+                b[i] = (short)motors[i].pd.B;
+                a[i] = (short)motors[i].pd.A;
+            }
+            boards.SendParam(k,b,a);
+        }
         private void UpdateCurrent() {
             short[] currents = new short[boards.NMotor];
             for(int i=0; i<currentControls.Count; ++i)
@@ -96,6 +118,10 @@ namespace PCController
             if (tbControl.SelectedTab == tpCurrent)
             {
                 UpdateCurrent();
+            }
+            if (tbControl.SelectedTab == tpParam)
+            {
+                UpdateParam();
             }
         }
     }

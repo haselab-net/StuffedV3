@@ -558,7 +558,7 @@ namespace Robokey
             PutCommand(packet, p);
             if (period != 0) interpolateTargetCountOfWrite++;
         }
-        public void SendPdParam(int nMotor, int[] k, int[] b)
+        public void SendPdParam(int nMotor, int[] k, int[] b, int[] a)
         {
             byte[] packet = new byte[1000];
             int p = 0;
@@ -570,6 +570,11 @@ namespace Robokey
             for (int i = 0; i < nMotor; ++i)
             {
                 WriteShort(b[i], ref p, packet);
+            }
+            // a is the coefficient for current control
+            for (int i = 0; i < nMotor; ++i)
+            {
+                WriteShort(a[i], ref p, packet);
             }
             PutCommand(packet, p);
         }

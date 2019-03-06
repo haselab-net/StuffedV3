@@ -5,7 +5,8 @@
 
 
 struct MotorState motorTarget, motorState;
-SDEC currentTarget[NMOTOR];
+SDEC currentTarget[NMOTOR]; //  Current target sent from host.
+SDEC targetTorque[NMOTOR];  //  Previous target torque to fit the current to the target.
 SDEC forceControlJK[NFORCE][NMOTOR];
 struct PdParam pdParam;
 struct TorqueLimit torqueLimit;
@@ -111,7 +112,6 @@ void pdControl(){
 #endif
 	}
 }
-SDEC targetTorque[NMOTOR];
 inline int truncate(int min, int val, int max){
     if (val < min) val = min;
     if (val > max) val = max;
@@ -119,11 +119,25 @@ inline int truncate(int min, int val, int max){
 }
 void currentControl(){
 	int i;
-	for(i=0; i<NCURRENT && i < NMOTOR; ++i){
-        int diff = currentTarget[i] - currentSense[i];
-        diff = truncate(-5, diff, 5);
+    SDEC diff;
+    int sign;
+	for(i=0; i<NCURRENT && i<NMOTOR; ++i){
+        if (currentTarget[i] > 0){
+            diff = currentTarget[i] - currentSense[i];
+            sign = 1;
+        }else{
+            diff = -currentTarget[i] - currentSense[i];
+            sign = -1;
+        }
+        diff = (diff * pdParam.a[i]) >> SDEC_BITS;
+        if (currentTarget[i] < 0) diff = -diff;
         targetTorque[i] += diff;
-		setPwmWithLimit(i, targetTorque[i]);        
+        if (sign > 0){
+            if (targetTorque[i] < 0) targetTorque[i] = 0;
+        }else{
+            if (targetTorque[i] > 0) targetTorque[i] = 0;
+        }
+		setPwmWithLimit(i, targetTorque[i]);
     }
 	for(; i < NMOTOR; ++i){
         targetTorque[i] = currentTarget[i];
@@ -303,12 +317,15 @@ void controlLoop(){
 }
 void controlInit(){
 	int i;
-	controlMode = CM_DIRECT;
+	controlMode = CM_CURRENT;
 	for(i=0; i<NMOTOR; ++i){
 		pdParam.k[i] = SDEC_ONE;
 		pdParam.b[i] = (SDEC)(SDEC_ONE * 1.5);
+		pdParam.a[i] = (SDEC)(SDEC_ONE * 0.5);
 		torqueLimit.max[i] = SDEC_ONE;
 		torqueLimit.min[i] = -SDEC_ONE;
+        currentTarget[i] = 0;
+        targetTorque[i] = 0;
 	}
 #ifdef PIC
 	controlInitPic();

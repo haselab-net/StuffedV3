@@ -12,6 +12,17 @@ const SDEC msinOffset[NAXIS] ={
     2048, 2048, 2048, 2048
 };
 
+inline short FilterForAngle(short prev, short cur){
+    const short IIR = 16;
+    return (prev*(IIR-1) + cur) / IIR;
+}
+inline short FilterForCurrent(short prev, short cur){
+    const short IIR = 4;
+    return (prev*(IIR-1) + cur) / IIR;
+}
+
+
+
 #ifdef MODULETEST
 #include "math.h"
 double motorAngle[NMOTOR]={0.0,0.0,0.0,0.0};
@@ -22,8 +33,8 @@ long motorTorques[NMOTOR];
 void readADC(){
     int i;
     for(i=0; i<NMOTOR;++i){
-        mcos[i] = FilterForADC(mcos[i], cos(motorAngle[i])*2000);
-        msin[i] = FilterForADC(msin[i], sin(motorAngle[i])*2000);
+        mcos[i] = FilterForAngle(mcos[i], cos(motorAngle[i])*2000);
+        msin[i] = FilterForAngle(msin[i], sin(motorAngle[i])*2000);
 #if 1	// control test
 		const double dt = 0.001;
         motorVelocity[i] += LDEC2DBL(motorTorques[i]) * dt * 10000;
@@ -43,14 +54,14 @@ void readADC(){
     /*  ADC connection
      M1:  AN11, AN4 (cos, sin)
      M2:  AN13, AN12,    M3:  AN8, AN7,    M4:  AN1, AN0    */
-    mcos[0] = FilterForADC(mcos[0], ADC1BUF5 - mcosOffset[0]);
-    msin[0] = FilterForADC(msin[0], ADC1BUF2 - msinOffset[0]);
-    mcos[1] = FilterForADC(mcos[1], ADC1BUF7 - mcosOffset[1]);
-    msin[1] = FilterForADC(msin[1], ADC1BUF6 - msinOffset[1]);
-	mcos[2] = FilterForADC(mcos[2], ADC1BUF1 - mcosOffset[2]);
-	msin[2] = FilterForADC(msin[2], ADC1BUF0 - msinOffset[2]);
-	mcos[3] = FilterForADC(mcos[3], ADC1BUF4 - mcosOffset[3]);
-	msin[3] = FilterForADC(msin[3], ADC1BUF3 - msinOffset[3]);
+    mcos[0] = FilterForAngle(mcos[0], ADC1BUF5 - mcosOffset[0]);
+    msin[0] = FilterForAngle(msin[0], ADC1BUF2 - msinOffset[0]);
+    mcos[1] = FilterForAngle(mcos[1], ADC1BUF7 - mcosOffset[1]);
+    msin[1] = FilterForAngle(msin[1], ADC1BUF6 - msinOffset[1]);
+	mcos[2] = FilterForAngle(mcos[2], ADC1BUF1 - mcosOffset[2]);
+	msin[2] = FilterForAngle(msin[2], ADC1BUF0 - msinOffset[2]);
+	mcos[3] = FilterForAngle(mcos[3], ADC1BUF4 - mcosOffset[3]);
+	msin[3] = FilterForAngle(msin[3], ADC1BUF3 - msinOffset[3]);
 #elif defined BOARD2_COMBINATION
     /*  ADC connection
      M1:  AN11, AN4 (cos, sin)
@@ -65,30 +76,30 @@ BUF 0 1 2 3  4 5 6 7  8   9 10 11
 AN  0 1 2 3  4 5 7 8 10  11 12 13 
 AN      2 3    5     10         
 */
-    mcos[0] = FilterForADC(mcos[0], ADC1BUF6 - mcosOffset[0]);
-    msin[0] = FilterForADC(msin[0], ADC1BUF7 - msinOffset[0]);
-    mcos[1] = FilterForADC(mcos[1], ADC1BUF0 - mcosOffset[1]);
-    msin[1] = FilterForADC(msin[1], ADC1BUF1 - msinOffset[1]);
-	mcos[2] = FilterForADC(mcos[2], ADC1BUF4 - mcosOffset[2]);
-	msin[2] = FilterForADC(msin[2], ADC1BUF9 - msinOffset[2]);
-	mcos[3] = FilterForADC(mcos[3], ADC1BUF10 - mcosOffset[3]);
-	msin[3] = FilterForADC(msin[3], ADC1BUF11 - msinOffset[3]);
+    mcos[0] = FilterForAngle(mcos[0], ADC1BUF6 - mcosOffset[0]);
+    msin[0] = FilterForAngle(msin[0], ADC1BUF7 - msinOffset[0]);
+    mcos[1] = FilterForAngle(mcos[1], ADC1BUF0 - mcosOffset[1]);
+    msin[1] = FilterForAngle(msin[1], ADC1BUF1 - msinOffset[1]);
+	mcos[2] = FilterForAngle(mcos[2], ADC1BUF4 - mcosOffset[2]);
+	msin[2] = FilterForAngle(msin[2], ADC1BUF9 - msinOffset[2]);
+	mcos[3] = FilterForAngle(mcos[3], ADC1BUF10 - mcosOffset[3]);
+	msin[3] = FilterForAngle(msin[3], ADC1BUF11 - msinOffset[3]);
 #elif defined BOARD3_SEPARATE
 /*  BUF 0 1 2 3  4 5 6 7  8   9 10 11
     AN  0 1 2 3  4 5 7 8 10  11 12 13 
     MT      2 3    5     10             */
-	mcos[0] = FilterForADC(mcos[0], ADC1BUF11 - mcosOffset[3]);
-	msin[0] = FilterForADC(msin[0], ADC1BUF10 - msinOffset[3]);
-	mcos[1] = FilterForADC(mcos[1], ADC1BUF4 - mcosOffset[2]);
-	msin[1] = FilterForADC(msin[1], ADC1BUF9 - msinOffset[2]);
-    mcos[2] = FilterForADC(mcos[2], ADC1BUF6 - mcosOffset[1]);
-    msin[2] = FilterForADC(msin[2], ADC1BUF7 - msinOffset[1]);
-    mcos[3] = FilterForADC(mcos[3], ADC1BUF0 - mcosOffset[0]);
-    msin[3] = FilterForADC(msin[3], ADC1BUF1 - msinOffset[0]);
-    currentSense[0] = FilterForADC(currentSense[0], ADC1BUF5); //5
-    currentSense[1] = FilterForADC(currentSense[1], ADC1BUF8); //10
-    currentSense[2] = FilterForADC(currentSense[2], ADC1BUF2); //2
-    currentSense[3] = FilterForADC(currentSense[3], ADC1BUF3); //3
+	mcos[0] = FilterForAngle(mcos[0], ADC1BUF11 - mcosOffset[3]);
+	msin[0] = FilterForAngle(msin[0], ADC1BUF10 - msinOffset[3]);
+	mcos[1] = FilterForAngle(mcos[1], ADC1BUF4 - mcosOffset[2]);
+	msin[1] = FilterForAngle(msin[1], ADC1BUF9 - msinOffset[2]);
+    mcos[2] = FilterForAngle(mcos[2], ADC1BUF6 - mcosOffset[1]);
+    msin[2] = FilterForAngle(msin[2], ADC1BUF7 - msinOffset[1]);
+    mcos[3] = FilterForAngle(mcos[3], ADC1BUF0 - mcosOffset[0]);
+    msin[3] = FilterForAngle(msin[3], ADC1BUF1 - msinOffset[0]);
+    currentSense[0] = FilterForCurrent(currentSense[0], ADC1BUF5); //5
+    currentSense[1] = FilterForCurrent(currentSense[1], ADC1BUF8); //10
+    currentSense[2] = FilterForCurrent(currentSense[2], ADC1BUF2); //2
+    currentSense[3] = FilterForCurrent(currentSense[3], ADC1BUF3); //3
 #else
 #error Board type not defined
 #endif

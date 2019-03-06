@@ -16,6 +16,7 @@ public:
 	//	To be implemnented 
 	tiny::vector<SDEC> controlK;
 	tiny::vector<SDEC> controlB;
+	tiny::vector<SDEC> controlA;
 	tiny::vector<SDEC> torqueMin;
 	tiny::vector<SDEC> torqueMax;
 	ResetSensorFlags resetSensorFlags;
@@ -40,6 +41,7 @@ public:
 	short GetForceControlJacob(int j, int i) { return  forceControlJacobian[j*3+i]; }
 	short GetControlK(int i){ return controlK[i]; }
 	short GetControlB(int i){ return controlB[i]; }
+	short GetControlA(int i){ return controlA[i]; }
 	short GetTorqueMin(int i){ return torqueMin[i]; }
 	short GetTorqueMax(int i){ return torqueMax[i]; }
 	short GetResetSensorFlags(){

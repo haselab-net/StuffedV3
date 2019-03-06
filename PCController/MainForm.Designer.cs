@@ -39,9 +39,12 @@
             this.flCurrent = new System.Windows.Forms.FlowLayoutPanel();
             this.panel1 = new System.Windows.Forms.Panel();
             this.timer = new System.Windows.Forms.Timer(this.components);
+            this.tpParam = new System.Windows.Forms.TabPage();
+            this.flParam = new System.Windows.Forms.FlowLayoutPanel();
             this.tbControl.SuspendLayout();
             this.tpCurrent.SuspendLayout();
             this.panel1.SuspendLayout();
+            this.tpParam.SuspendLayout();
             this.SuspendLayout();
             // 
             // uartBin
@@ -87,6 +90,7 @@
             // tbControl
             // 
             this.tbControl.Controls.Add(this.tpCurrent);
+            this.tbControl.Controls.Add(this.tpParam);
             this.tbControl.Dock = System.Windows.Forms.DockStyle.Left;
             this.tbControl.Location = new System.Drawing.Point(0, 0);
             this.tbControl.Name = "tbControl";
@@ -129,6 +133,25 @@
             this.timer.Enabled = true;
             this.timer.Tick += new System.EventHandler(this.timer_Tick);
             // 
+            // tpParam
+            // 
+            this.tpParam.Controls.Add(this.flParam);
+            this.tpParam.Location = new System.Drawing.Point(4, 25);
+            this.tpParam.Name = "tpParam";
+            this.tpParam.Padding = new System.Windows.Forms.Padding(3);
+            this.tpParam.Size = new System.Drawing.Size(397, 347);
+            this.tpParam.TabIndex = 2;
+            this.tpParam.Text = "Param";
+            this.tpParam.UseVisualStyleBackColor = true;
+            // 
+            // flParam
+            // 
+            this.flParam.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.flParam.Location = new System.Drawing.Point(3, 3);
+            this.flParam.Name = "flParam";
+            this.flParam.Size = new System.Drawing.Size(391, 341);
+            this.flParam.TabIndex = 0;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
@@ -143,6 +166,7 @@
             this.tpCurrent.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
+            this.tpParam.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -158,6 +182,8 @@
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.FlowLayoutPanel flCurrent;
         private System.Windows.Forms.Timer timer;
+        private System.Windows.Forms.TabPage tpParam;
+        private System.Windows.Forms.FlowLayoutPanel flParam;
     }
 }
 

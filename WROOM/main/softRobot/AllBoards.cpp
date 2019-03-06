@@ -153,6 +153,7 @@ void AllBoards::EnumerateBoard() {
 	command.torqueMax.resize(motorMap.size());
 	command.controlK.resize(motorMap.size());
 	command.controlB.resize(motorMap.size());
+	command.controlA.resize(motorMap.size());
 }
 
 bool AllBoards::HasRet(unsigned short id){

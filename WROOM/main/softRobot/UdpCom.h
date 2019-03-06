@@ -64,6 +64,9 @@ public:
 	short GetControlB(int i) {
 		return data[allBoards.GetNTotalMotor() + i];
 	}
+	short GetControlA(int i) {
+		return data[allBoards.GetNTotalMotor()*2 + i];
+	}
 	short GetTorqueMin(int i) {
 		return data[i];
 	}

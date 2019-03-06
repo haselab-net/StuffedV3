@@ -82,6 +82,7 @@ void ecPdParam(){
     for(i=0; i<NMOTOR; ++i){
         pdParam.k[i] = command.pdParam.k[i];
         pdParam.b[i] = command.pdParam.b[i];
+        pdParam.a[i] = command.pdParam.a[i];
     }
 }
 void ecTorqueLimit(){

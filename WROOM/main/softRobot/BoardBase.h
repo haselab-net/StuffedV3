@@ -17,6 +17,7 @@ public:
 	virtual short GetForceControlJacob(int j, int i)=0;
 	virtual short GetControlK(int i)=0;
 	virtual short GetControlB(int i)=0;
+	virtual short GetControlA(int i)=0;
 	virtual short GetTorqueMin(int i)=0;
 	virtual short GetTorqueMax(int i)=0;
 	typedef ::ResetSensorFlags ResetSensorFlags;		//	in CommandIDs.cs

@@ -96,6 +96,7 @@ public:
 			for (int i = 0; i < GetNMotor(); ++i) {
 				cmd.pdParam.k[i] = packet.GetControlK(motorMap[i]);
 				cmd.pdParam.b[i] = packet.GetControlB(motorMap[i]);
+				cmd.pdParam.a[i] = packet.GetControlA(motorMap[i]);
 			}
 			break;
 		case CI_TORQUE_LIMIT:
