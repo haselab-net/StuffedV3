@@ -106,6 +106,7 @@ functionTableEntry_t functionTable[] = {
 	{ "ModuleSerialVFS",  ModuleSerialVFS,  1},
 	{ "ModuleSPI",        ModuleSPI,        1},
 	{ "ModuleSSL",        ModuleSSL,        1},
+	{ "ModuleSoftrobot",  ModuleSoftrobot,	1},			// register softrobot module
 #endif // ESP_PLATFORM
 	// Must be last entry
 	{NULL, NULL, 0 } // *** DO NOT DELETE *** - MUST BE LAST ENTRY.

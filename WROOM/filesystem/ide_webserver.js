@@ -156,7 +156,7 @@ function startIde() {
 	log("IDE_WebServer listening on port " + WEBSERVER_PORT);
 
 
-   if (ws !== null) {
+   if (false) {
 		var webSocketServer = ws.Server();
 	
 		webSocketServer.on("connection", function(wsConnection) {
