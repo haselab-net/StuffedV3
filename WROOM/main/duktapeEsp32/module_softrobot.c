@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <duktape.h>
 
+#include "duktape_utils.h"
+#include "module_softrobot.h"
+
 /*
 * handle content in the buffer
 * recognize command in the buffer from JS and send instructions to hardware (motors,... etc)
@@ -18,7 +21,7 @@ static duk_ret_t handle_packet(duk_context *ctx){
     }
 
     // do something with the buffer recieved (buffer, out_size)
-    printf("handle_packet: a buffer received");
+    printf("handle_packet: a buffer received.\n");
     // ...
 
     // free buffer
@@ -35,7 +38,7 @@ static duk_ret_t register_packet_callback(duk_context *ctx){
     duk_dup(ctx, -1);
     duk_put_global_string(ctx, "send_packet");
 
-    printf("register_packet_callback: an callback function received");
+    printf("register_packet_callback: an callback function received.\n");
 
     duk_pop(ctx);
     return 0;
@@ -47,5 +50,7 @@ static duk_ret_t register_packet_callback(duk_context *ctx){
  */
 duk_ret_t ModuleSoftrobot(duk_context *ctx) {
     ADD_FUNCTION("handle_packet",   handle_packet,  1);             // parameter: 1. buffer content
-    ADD_FUNCTION("register_callback", register_packet_callback, 1)  // parameter: 1. callback function
+    ADD_FUNCTION("register_callback", register_packet_callback, 1); // parameter: 1. callback function
+
+    return 0;
 }

@@ -41,6 +41,7 @@
 #include "module_spi.h"
 #include "module_ssl.h"
 #include "module_wifi.h"
+#include "module_softrobot.h"
 LOG_TAG("modules");
 
 /**

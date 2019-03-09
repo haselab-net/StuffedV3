@@ -22,3 +22,5 @@ var _ret = {
         internalSoftrobot.register_callback(callback);
     }
 }
+
+module.exports = _ret;
