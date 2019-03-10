@@ -7,7 +7,6 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.IO.Ports;
-using Robokey;
 
 namespace PCController
 {
@@ -57,10 +56,12 @@ namespace PCController
         void ResetMotor() {
             motors.Clear();
             flParam.Controls.Clear();
+            flPos.Controls.Clear();
             for (int i = 0; i < boards.NMotor; ++i) {
                 Motor m = new Motor();
                 motors.Add(m);
                 flParam.Controls.Add(m.pd.panel);
+                flPos.Controls.Add(m.position.panel);
             }
         }
         private void btListBoards_Click(object sender, EventArgs e)
@@ -88,23 +89,12 @@ namespace PCController
                 ResetPanels();
             }
         }
-        private void UpdateParam()
+        private void UpdateCurrent()
         {
-            short[] k = new short[boards.NMotor];
-            short[] b = new short[boards.NMotor];
-            short[] a = new short[boards.NMotor];
-            for (int i = 0; i < motors.Count; ++i) {
-                k[i] = (short)motors[i].pd.K;
-                b[i] = (short)motors[i].pd.B;
-                a[i] = (short)motors[i].pd.A;
-            }
-            boards.SendParam(k,b,a);
-        }
-        private void UpdateCurrent() {
             short[] currents = new short[boards.NMotor];
-            for(int i=0; i<currentControls.Count; ++i)
+            for (int i = 0; i < currentControls.Count; ++i)
             {
-                currents[i] = (short)currentControls[i].udTargetCurrent.Value; 
+                currents[i] = (short)currentControls[i].udTargetCurrent.Value;
             }
             short[] curCurrents = boards.SendCurrent(currents);
             for (int i = 0; i < currentControls.Count; ++i)
@@ -112,9 +102,26 @@ namespace PCController
                 currentControls[i].lbCurrent.Text = "" + curCurrents[i];
             }
         }
+        private void UpdateParam()
+        {
+            short[] k = new short[boards.NMotor];
+            short[] b = new short[boards.NMotor];
+            short[] a = new short[boards.NMotor];
+            for (int i = 0; i < motors.Count; ++i)
+            {
+                k[i] = (short)motors[i].pd.K;
+                b[i] = (short)motors[i].pd.B;
+                a[i] = (short)motors[i].pd.A;
+            }
+            boards.SendParam(k, b, a);
+        }
 
         private void timer_Tick(object sender, EventArgs e)
         {
+            if (tbControl.SelectedTab == tpPos)
+            {
+                UpdatePos();
+            }
             if (tbControl.SelectedTab == tpCurrent)
             {
                 UpdateCurrent();
@@ -124,6 +131,7 @@ namespace PCController
                 UpdateParam();
             }
         }
+
     }
     public class CurrentControl
     {

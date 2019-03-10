@@ -14,10 +14,15 @@ namespace PCController
             get { return serial; }
             set { serial = value; }
         }
+        ushort interpolateTargetCountOfWrite;
+        ushort interpolateTargetCountOfRead;
+        public ushort InterpolateTargetCountOfWrite { get { return InterpolateTargetCountOfWrite; } }
+        public ushort InterpolateTargetCountOfRead { get { return InterpolateTargetCountOfRead; } }
         int nMotor;
         int nCurrent;
         int nForce;
         int nTarget;
+        public void SetNMotor(int i) { nMotor = i; }
         public int NMotor { get { return nMotor; } }
         public int NCurrent { get { return nCurrent; } }
         public int NForce { get { return nForce; } }
@@ -38,6 +43,77 @@ namespace PCController
             v = (short) (v | (short)(buf[cur++] << 8));
             return v;
         }
+        public void SendPosDirect(short[] targets)
+        {
+            int mi = 0;
+            foreach (Board board in this)
+            {
+                //  compute length
+                int wait = board.GetWaitLen(CommandId.CI_DIRECT);
+                int bufLen = wait + board.CommandLen(CommandId.CI_DIRECT);
+                int retLen = board.ReturnLen(CommandId.CI_DIRECT);
+                byte[] sendBuf = Enumerable.Repeat((byte)0, bufLen).ToArray();
+                byte[] recvBuf = new byte[retLen];
+                sendBuf[0] = Board.MakeHeader(CommandId.CI_DIRECT, board.boardId);
+                int cur = 1;
+                for (int i = 0; i < board.nMotor; ++i)
+                {
+                    WriteShort(sendBuf, ref cur, targets[mi++]);
+                }
+                Serial.Write(sendBuf, 0, bufLen);
+                int nRead = 0;
+                while (nRead < retLen)
+                {
+                    nRead += Serial.Read(recvBuf, nRead, retLen - nRead);
+                }
+                cur = 1;
+                for (int i = 0; i < board.nMotor; ++i)
+                {
+                    pos[board.motorMap[i]] = ReadShort(recvBuf, ref cur);
+                }
+                for (int i = 0; i < board.nMotor; ++i)
+                {
+                    vel[board.motorMap[i]] = ReadShort(recvBuf, ref cur);
+                }
+            }
+        }
+        public void SendPosInterpolate(short[] targets, ushort period)
+        {
+            int mi = 0;
+            int tickRead = 0;
+            foreach (Board board in this)
+            {
+                //  compute length
+                int wait = board.GetWaitLen(CommandId.CI_DIRECT);
+                int bufLen = wait + board.CommandLen(CommandId.CI_DIRECT);
+                int retLen = board.ReturnLen(CommandId.CI_DIRECT);
+                byte[] sendBuf = Enumerable.Repeat((byte)0, bufLen).ToArray();
+                byte[] recvBuf = new byte[retLen];
+                sendBuf[0] = Board.MakeHeader(CommandId.CI_INTERPOLATE, board.boardId);
+                int cur = 1;
+                for (int i = 0; i < board.nMotor; ++i)
+                {
+                    WriteShort(sendBuf, ref cur, targets[mi++]);
+                }
+                WriteShort(sendBuf, ref cur, (short)period);
+                WriteShort(sendBuf, ref cur, (short)interpolateTargetCountOfWrite);
+                interpolateTargetCountOfWrite++;
+                Serial.Write(sendBuf, 0, bufLen);
+                int nRead = 0;
+                while (nRead < retLen)
+                {
+                    nRead += Serial.Read(recvBuf, nRead, retLen - nRead);
+                }
+                cur = 1;
+                for (int i = 0; i < board.nMotor; ++i)
+                {
+                    pos[board.motorMap[i]] = ReadShort(recvBuf, ref cur);
+                }
+                tickRead = ReadShort(recvBuf, ref cur);
+                interpolateTargetCountOfRead = recvBuf[cur];
+            }
+        }
+
         //  return received currents;
         public short[] SendCurrent(short[] currents)
         {
