@@ -16,8 +16,8 @@ namespace PCController
         }
         ushort interpolateTargetCountOfWrite;
         ushort interpolateTargetCountOfRead;
-        public ushort InterpolateTargetCountOfWrite { get { return InterpolateTargetCountOfWrite; } }
-        public ushort InterpolateTargetCountOfRead { get { return InterpolateTargetCountOfRead; } }
+        public ushort InterpolateTargetCountOfWrite { get { return interpolateTargetCountOfWrite; } }
+        public ushort InterpolateTargetCountOfRead { get { return interpolateTargetCountOfRead; } }
         int nMotor;
         int nCurrent;
         int nForce;
@@ -84,9 +84,9 @@ namespace PCController
             foreach (Board board in this)
             {
                 //  compute length
-                int wait = board.GetWaitLen(CommandId.CI_DIRECT);
-                int bufLen = wait + board.CommandLen(CommandId.CI_DIRECT);
-                int retLen = board.ReturnLen(CommandId.CI_DIRECT);
+                int wait = board.GetWaitLen(CommandId.CI_INTERPOLATE);
+                int bufLen = wait + board.CommandLen(CommandId.CI_INTERPOLATE);
+                int retLen = board.ReturnLen(CommandId.CI_INTERPOLATE);
                 byte[] sendBuf = Enumerable.Repeat((byte)0, bufLen).ToArray();
                 byte[] recvBuf = new byte[retLen];
                 sendBuf[0] = Board.MakeHeader(CommandId.CI_INTERPOLATE, board.boardId);

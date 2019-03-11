@@ -114,9 +114,9 @@
             // flPos
             // 
             this.flPos.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.flPos.Location = new System.Drawing.Point(3, 99);
+            this.flPos.Location = new System.Drawing.Point(3, 98);
             this.flPos.Name = "flPos";
-            this.flPos.Size = new System.Drawing.Size(449, 333);
+            this.flPos.Size = new System.Drawing.Size(449, 334);
             this.flPos.TabIndex = 98;
             // 
             // panel2
@@ -138,7 +138,7 @@
             this.panel2.Controls.Add(this.ckRun);
             this.panel2.Controls.Add(this.ckRunOnce);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panel2.Location = new System.Drawing.Point(3, 43);
+            this.panel2.Location = new System.Drawing.Point(3, 42);
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(449, 56);
             this.panel2.TabIndex = 99;
@@ -272,6 +272,7 @@
             0,
             0,
             0});
+            this.udLoopTime.ValueChanged += new System.EventHandler(this.udLoopTime_ValueChanged);
             // 
             // label2
             // 
@@ -356,9 +357,10 @@
             this.track.Margin = new System.Windows.Forms.Padding(0);
             this.track.Maximum = 10000;
             this.track.Name = "track";
-            this.track.Size = new System.Drawing.Size(449, 40);
+            this.track.Size = new System.Drawing.Size(449, 39);
             this.track.TabIndex = 1;
             this.track.TickStyle = System.Windows.Forms.TickStyle.None;
+            this.track.ValueChanged += new System.EventHandler(this.track_ValueChanged);
             // 
             // tpCurrent
             // 

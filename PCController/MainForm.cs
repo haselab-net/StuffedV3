@@ -25,17 +25,11 @@ namespace PCController
                 cmbPortBin.Text = cmbPortBin.Items[0].ToString();
             }
             motors = new Motors();
+            udLoopTime_ValueChanged(udLoopTime, null);
         }
         private void cmbPortBin_TextChanged(object sender, EventArgs e)
         {
-            foreach (Object item in cmbPortBin.Items) {
-                if (item.ToString().Contains(cmbPortBin.Text))
-                {
-                    cmbPortBin.Text = item.ToString();
-                    return;
-                }
-            }
-            cmbPortBin.Text = "";
+
         }
         private void ResetPanels() {
             ResetCurrentTab();
@@ -62,6 +56,7 @@ namespace PCController
                 motors.Add(m);
                 flParam.Controls.Add(m.pd.panel);
                 flPos.Controls.Add(m.position.panel);
+                m.position.ValueChanged += GetEditedValue;
             }
         }
         private void btListBoards_Click(object sender, EventArgs e)
@@ -131,7 +126,6 @@ namespace PCController
                 UpdateParam();
             }
         }
-
     }
     public class CurrentControl
     {

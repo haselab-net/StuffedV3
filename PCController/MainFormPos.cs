@@ -7,13 +7,13 @@ namespace PCController
 {
     public partial class MainForm : Form
     {
-        List<Pose> poses;
+        List<Pose> poses = new List<Pose>();
         int curTime = 0;
         //  新しいPoseを作る。青いインジケータ(ボタン)も作る
         Pose NewPose()
         {
             Pose pose = new Pose(boards.NMotor);
-            Controls.Add(pose.button);
+            tpPos.Controls.Add(pose.button);
             pose.Time = track.Value;
             pose.button.BringToFront();
             pose.button.Click += pose_Click;
@@ -53,7 +53,7 @@ namespace PCController
             }
             if (find != null)
             {
-                Controls.Remove(find.button);
+                tpPos.Controls.Remove(find.button);
                 poses.Remove(find);
                 PoseData p = Interpolate(track.Value);
                 if (p != null) LoadToEditor(p);
@@ -242,7 +242,10 @@ namespace PCController
                     boards.SendPosDirect(Interpolate(curTime) + motors.Offset());
                 }
             }
-            laCurTime.Left = (int)(curTime * TrackScale() + TrackOffset() + laCurTime.Width / 2);
+            if (poses.Count > 0) {
+                Pose pose = poses[0];
+                laCurTime.Left = (int)(curTime * pose.TrackScale() + pose.TrackOffset() + laCurTime.Width / 2);
+            }
             lbCurTime.Text = curTime.ToString();
         }
         //  motorsにposeの値をロード
@@ -328,16 +331,6 @@ namespace PCController
             }
             rv.Time = (int)time % track.Maximum;
             return rv;
-        }
-        //  時間とトラックバーの座標変換
-        public double TrackScale()
-        {
-            return (double)(track.Width - 27) / (double)track.Maximum;
-        }
-        //  時間とトラックバーの座標変換
-        public double TrackOffset()
-        {
-            return track.Left + 13;
         }
         private void UpdatePos()
         {

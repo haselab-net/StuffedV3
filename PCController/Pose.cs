@@ -17,10 +17,10 @@ namespace PCController
                 time_ = value;
                 if (button.Parent != null)
                 {
-                    MainForm f = (MainForm)button.Parent;
+                    Control f = button.Parent;
                     TrackBar track = (TrackBar)f.Controls.Find("track", true)[0];
-                    button.Left = (int)(Time * Scale + Offset);
-                    button.Top = track.Top + track.Height / 2 - 5;
+                    button.Left = (int)(Time * Scale + Offset) + 1;
+                    button.Top = track.Top + (int)(track.Height * 0.8) - 5;
                 }
             }
             get
@@ -28,22 +28,35 @@ namespace PCController
                 return time_;
             }
         }
+
+        //  時間とトラックバーの座標変換
+        public double TrackScale()
+        {
+            if (button.Parent == null) return 1;
+            Control f = button.Parent;
+            TrackBar track = (TrackBar)f.Controls.Find("track", true)[0];
+            return (double)(track.Width - 27) / (double)track.Maximum;
+        }
+        //  時間とトラックバーの座標変換
+        public double TrackOffset()
+        {
+            if (button.Parent == null) return 13;
+            Control f = button.Parent;
+            TrackBar track = (TrackBar)f.Controls.Find("track", true)[0];
+            return track.Left + 13;
+        }
         public double Scale
         {
             get
             {
-                if (button.Parent == null) return 1;
-                MainForm f = (MainForm)button.Parent;
-                return f.TrackScale();
+                return TrackScale();
             }
         }
         public double Offset
         {
             get
             {
-                if (button.Parent == null) return 0;
-                MainForm f = (MainForm)button.Parent;
-                return f.TrackOffset() - button.Size.Width / 2.0;
+                return TrackOffset() - button.Size.Width / 2.0;
             }
         }
         public Button button;
@@ -53,7 +66,7 @@ namespace PCController
             button.FlatStyle = FlatStyle.Flat;
             button.FlatAppearance.BorderSize = 10;
             button.FlatAppearance.BorderColor = Color.Blue;
-            button.Size = new Size(5, 12);
+            button.Size = new Size(5, 8);
         }
     }
 }
