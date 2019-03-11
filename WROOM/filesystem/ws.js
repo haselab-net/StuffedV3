@@ -318,7 +318,8 @@ function requestHandler(request, response) {
 
       if (connectionCallback !== null) {
    		var closeSent = false;
-   		var newConnection;
+		var newConnection;
+		var onOpenCallback = null;
    		var onMessageCallback = null;
    		var onCloseCallback = null;
    		
@@ -352,7 +353,10 @@ function requestHandler(request, response) {
       		// on
       		//
       		on: function(eventType, callback) {
-      			if (eventType == "message") {
+				if (eventType == "open") {
+					onOpenCallback = callback;
+				}
+      			else if (eventType == "message") {
       				onMessageCallback = callback;			
       			} // eventType == message
       			else if (eventType == "close") {
@@ -377,7 +381,11 @@ function requestHandler(request, response) {
       			}
       		}
       	};
-      	connectionCallback(newConnection);
+		connectionCallback(newConnection);
+		
+		if (onOpenCallback != null) {
+			onOpenCallback();
+		}
       } // connectionCallback != null
    }); // Request on end.
 } // requestHandler

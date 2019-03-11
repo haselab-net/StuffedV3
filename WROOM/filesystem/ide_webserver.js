@@ -158,12 +158,18 @@ function startIde() {
 
    if (ws !== null) {
 		var webSocketServer = ws.Server();
+		var conn = null;
 	
 		webSocketServer.on("connection", function(wsConnection) {
-			log("We have received a new WebSocket connection.  The path is \"" + wsConnection.path + "\"");
+			//log("We have received a new WebSocket connection.  The path is \"" + wsConnection.path + "\"");
+			
+			wsConnection.on("open", function() {
+				log("We have open a new connection");
+			});
+			
 			wsConnection.on("message", function(data) {
 				log("We have received an incoming message: " + data);
-				wsConnection.close();
+				// wsConnection.close();
 			});
 			
 			wsConnection.on("close", function() {
