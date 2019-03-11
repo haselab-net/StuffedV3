@@ -44,6 +44,25 @@ static duk_ret_t register_packet_callback(duk_context *ctx){
     return 0;
 }
 
+/*
+* call registered callback
+* [0] - context
+* [1] - buffer of command packet
+* [2] - size of the buffer
+*/
+void return_packet(duk_context* ctx, void* buffer, size_t buffer_size) {
+    duk_get_global_string(ctx, "send_packet");
+    void* p = duk_push_buffer(ctx, buffer_size, 0);
+    memcpy(p, buffer, buffer_size);
+    rc = duk_pcall(ctx, 1);
+    if(rc!=0){
+    printf("Send packet failed: %s\n", duk_safe_to_string(ctx, -1));
+    }else {
+    printf("Send packet success\n");
+    }
+    duk_pop(ctx); // clear return value
+}
+
 /**
  * Add native methods to the Softrobot object.
  * [0] - Softrobot Object
