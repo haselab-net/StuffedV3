@@ -8,6 +8,8 @@
 uint32_t stash_key_callback = 0;    // stash key for callback function: send_packet
 size_t return_packet_buffer_size;             // the size of buffer we want to send
 
+extern void UdpCom_OnReceiveServer(void * payload, int len);
+
 /*
 * handle content in the buffer
 * recognize command in the buffer from JS and send instructions to hardware (motors,... etc)
@@ -23,10 +25,9 @@ static duk_ret_t handle_packet(duk_context *ctx){
         printf("Something wrong with the buffer received.\n");
         return DUK_RET_ERROR;
     }
-
     // do something with the buffer recieved (buffer, out_size)
     printf("handle_packet: a buffer received.\n");
-    // ...
+    UdpCom_OnReceiveServer(buffer, out_size);
 
     // free buffer
     duk_pop(ctx);
