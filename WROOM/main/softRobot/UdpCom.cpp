@@ -23,7 +23,6 @@
 #include "CommandWROOM.h"
 extern "C" {
 #include "../duktapeEsp32/include/module_softrobot.h"
-#include "../duktapeEsp32/include/duktape_task.h"
 }
 
 
@@ -304,7 +303,7 @@ void UdpCom::SendReturn(UdpCmdPacket& recv) {
 	}
 }
 void UdpCom::SendReturnServer(UdpCmdPacket& recv) {
-	return_packet(esp32_duk_context, sendBuf, sendLen);
+	return_packet(send.bytes+2, send.length-2);
 }
 void UdpCom::SendReturnUdp(UdpCmdPacket& recv) {
 	if (!udp) return;
