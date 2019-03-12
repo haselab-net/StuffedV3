@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <duktape.h>
 
+#include "duktape_event.h"
 #include "duktape_utils.h"
 #include "module_softrobot.h"
 
@@ -45,7 +46,7 @@ static duk_ret_t register_packet_callback(duk_context *ctx){
 
     duk_pop(ctx);*/
 
-    if(stash_key_callback!=0) esp32_duktape_stash_delete(duk_context *ctx, uint32_t key);             // delete last registered callback
+    if(stash_key_callback!=0) esp32_duktape_stash_delete(ctx, stash_key_callback);             // delete last registered callback
     printf("register_packet_callback: an callback function received.\n");
     stash_key_callback = esp32_duktape_stash_object(ctx);
     if(stash_key_callback) printf("register_packet_callback: register callback failed.\n");
