@@ -21,6 +21,10 @@
 #include "UdpCom.h"
 #include "UartForBoards.h"
 #include "CommandWROOM.h"
+extern "C" {
+#include "../duktapeEsp32/include/module_softrobot.h"
+#include "../duktapeEsp32/include/duktape_task.h"
+}
 
 
 UdpCom udpCom;
@@ -234,6 +238,11 @@ void UdpCom::OnReceiveServer(void* payload, int len) {
 	recvs.Write();
 	recvs.Unlock();
 }
+extern "C" void UdpCom_OnReceiveServer(void* payload, int len){
+	udpCom.OnReceiveServer(payload, len);
+}
+
+
 
 #if !UDP_UART_ASYNC
 void UdpCom::ExecCommandLoop(){
@@ -295,7 +304,7 @@ void UdpCom::SendReturn(UdpCmdPacket& recv) {
 	}
 }
 void UdpCom::SendReturnServer(UdpCmdPacket& recv) {
-	//	TBW		hase
+	return_packet(esp32_duk_context, sendBuf, sendLen);
 }
 void UdpCom::SendReturnUdp(UdpCmdPacket& recv) {
 	if (!udp) return;
