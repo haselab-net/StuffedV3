@@ -174,7 +174,8 @@ void processEvent(esp32_duktape_event_t *pEvent) {
 				pEvent->callbackRequested.stashKey
 			);
 			if (pEvent->callbackRequested.callbackType == ESP32_DUKTAPE_CALLBACK_TYPE_FUNCTION ||
-					pEvent->callbackRequested.callbackType == ESP32_DUKTAPE_CALLBACK_TYPE_ISR_FUNCTION) {
+					pEvent->callbackRequested.callbackType == ESP32_DUKTAPE_CALLBACK_TYPE_ISR_FUNCTION ||
+					pEvent->callbackRequested.callbackType == ESP32_DUKTAPE_CALLBACK_STATIC_TYPE_FUNCTION) {
 
 				int topStart = duk_get_top(esp32_duk_context);
 

@@ -115,7 +115,8 @@ void event_newCallbackRequestedEvent(
 	esp32_duktape_event_t event;
 	event.type = ESP32_DUKTAPE_EVENT_CALLBACK_REQUESTED;
 	if (callbackType != ESP32_DUKTAPE_CALLBACK_TYPE_FUNCTION &&
-			callbackType != ESP32_DUKTAPE_CALLBACK_TYPE_ISR_FUNCTION) {
+			callbackType != ESP32_DUKTAPE_CALLBACK_TYPE_ISR_FUNCTION &&
+			callbackType != ESP32_DUKTAPE_CALLBACK_STATIC_TYPE_FUNCTION) {
 		LOGE("event_newCallbackRequestedEvent: Unknown callbackType: %d", callbackType);
 		return;
 	}

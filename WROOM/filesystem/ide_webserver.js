@@ -15,6 +15,7 @@
 var http = require("http");
 var ws = require("ws");
 var FS = require("fs");
+var sr = require("softrobot");
 
 
 /**
@@ -168,7 +169,42 @@ function startIde() {
 			});
 			
 			wsConnection.on("message", function(data) {
-				log("We have received an incoming message: " + data);
+				//var d = JSON.parse(data);
+				// log("data.type: " + d.type);
+				// log("data.content: " + d.content);
+
+				// var str = d.content;
+				// var buf = new ArrayBuffer(str.length*2);
+				// var bufView = new Uint16Array(buf);
+				// for (var i=0, strLen=str.length; i<strLen; i++) {
+				// 	bufView[i] = str.charCodeAt(i);
+				// 	log(bufView[i]);
+				// }
+				// for(var i=0; i<view.getUint16(0); i++) {
+
+				// }
+				var arrayBuffer = data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength);
+				var bufView = new Int16Array(arrayBuffer);
+				switch(bufView[0]) {
+					case 1: {
+						break;
+					}
+					case 2: {
+						log("length: " + bufView[1]);
+						log("commandId: " + bufView[2]);
+						var num_array = [];
+						for(var i=0; i<bufView[1]/2-2; i++) {
+							num_array.push(bufView[3+i]);
+						}
+						log("numArray: " + num_array);
+						sr.handlePacket(arrayBuffer.slice(2));
+						break;
+					}
+					default: {
+						log("Unrecognized packet");
+						break;
+					}
+				}
 				// wsConnection.close();
 			});
 			
@@ -186,6 +222,11 @@ function startIde() {
 		});
 		webSocketServer.listen(WEBSOCKET_PORT);
 		log("Being a WebSocket server on port " + WEBSOCKET_PORT);
+
+		function send_packet_call_back(buffer) {
+			log("Send packet call back");
+		}
+		sr.registerCallback(send_packet_call_back);
    }
 } // startIde
 

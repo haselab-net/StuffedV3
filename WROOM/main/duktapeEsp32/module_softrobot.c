@@ -48,9 +48,16 @@ static duk_ret_t register_packet_callback(duk_context *ctx){
     duk_pop(ctx);*/
 
     if(stash_key_callback!=0) esp32_duktape_stash_delete(ctx, stash_key_callback);             // delete last registered callback
-    printf("register_packet_callback: an callback function received.\n");
-    stash_key_callback = esp32_duktape_stash_object(ctx);
-    if(stash_key_callback) printf("register_packet_callback: register callback failed.\n");
+    if(!duk_is_function(ctx, -1)) {
+        printf("register_packet_callback: not a function\n");
+        duk_pop(ctx);
+        return 0;
+    }
+    
+    stash_key_callback = esp32_duktape_stash_array(ctx, 1);
+    
+    if(stash_key_callback==0) printf("register_packet_callback: register callback failed.\n");
+    else printf("register_packet_callback: register callback success with stash key - %d\n", stash_key_callback);
 
     return 0;
 }
@@ -83,7 +90,7 @@ void return_packet(void* buffer, size_t buffer_size) {
     return_packet_buffer_size = buffer_size;
 
     event_newCallbackRequestedEvent(
-      ESP32_DUKTAPE_CALLBACK_TYPE_FUNCTION,
+      ESP32_DUKTAPE_CALLBACK_STATIC_TYPE_FUNCTION,
       stash_key_callback, // Stash key for stashed callback array
       return_packet_dataProvider, // Data provider parameter
       buffer // Context parameter
