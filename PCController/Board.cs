@@ -80,7 +80,7 @@ namespace PCController
         {
             switch (r)
             {
-                case CommandId.CI_BOARD_INFO: return 1 + 5;
+                case CommandId.CI_BOARD_INFO: return 1 + 6;
                 case CommandId.CI_CURRENT: return 1 + nMotor*3*2;
             }
             return 0;

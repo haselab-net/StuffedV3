@@ -117,6 +117,7 @@ void AllBoards::EnumerateBoard() {
 	motorMap.clear();
 	currentMap.clear();
 	forceMap.clear();
+	touchMap.clear();
 	for(int m=0; m<boardDirect->GetNMotor(); ++m){
 		boardDirect->motorMap.push_back((int)allBoards.motorMap.size());
 		allBoards.motorMap.push_back(DeviceMap(-1, m));
@@ -128,6 +129,10 @@ void AllBoards::EnumerateBoard() {
 	for (int m = 0; m<boardDirect->GetNForce(); ++m) {
 		boardDirect->forceMap.push_back((int)allBoards.forceMap.size());
 		allBoards.forceMap.push_back(DeviceMap(-1, m));
+	}
+	for (int m = 0; m<boardDirect->GetNTouch(); ++m) {
+		boardDirect->touchMap.push_back((int)allBoards.touchMap.size());
+		allBoards.touchMap.push_back(DeviceMap(-1, m));
 	}
 
 	for (int i = 0; i < NUART; ++i) {
@@ -146,6 +151,7 @@ void AllBoards::EnumerateBoard() {
 	state.velocity.resize(motorMap.size());
 	state.current.resize(currentMap.size());
 	state.force.resize(forceMap.size());
+	state.touch.resize(touchMap.size());
 	command.forceControlJacobian.resize(forceMap.size() * 3);
 	command.targetPosition.resize(motorMap.size());
 	command.targetVelocity.resize(motorMap.size());

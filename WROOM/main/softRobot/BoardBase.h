@@ -35,7 +35,8 @@ public:
 	virtual void SetNTargetVacancy(unsigned char t)=0;
 	virtual void SetCurrent(short c, int i)=0;
 	virtual void SetForce(short f, int i)=0;
-	virtual void SetBoardInfo(int systemId, int nTarget, int nMotor, int nCurrent, int nForce)=0;
+	virtual void SetTouch(short t, int i)=0;
+	virtual void SetBoardInfo(int systemId, int nTarget, int nMotor, int nCurrent, int nForce, int nTouch)=0;
 };
 
 struct RobotState;
@@ -48,6 +49,7 @@ public:
 	tiny::vector<int> motorMap;
 	tiny::vector<int> currentMap;
 	tiny::vector<int> forceMap;
+	tiny::vector<int> touchMap;
 	virtual ~BoardBase(){}
 	virtual const char* GetName() = 0;
 	virtual int GetModelNumber() = 0;
@@ -55,6 +57,7 @@ public:
 	virtual int GetNMotor() = 0;
 	virtual int GetNCurrent() = 0;
 	virtual int GetNForce() = 0;
+	virtual int GetNTouch() = 0;
 	virtual int GetBoardId() = 0;
 	virtual unsigned char GetTargetCountOfRead() = 0;
 	virtual unsigned short GetTick() = 0;

@@ -124,12 +124,16 @@ public:
 	void SetForce(short f, int i) {
 		data[allBoards.GetNTotalMotor() + allBoards.GetNTotalCurrent() + i] = f;
 	}
-	void SetBoardInfo(int systemId, int nTarget, int nMotor, int nCurrent, int nForce) {
+	void SetTouch(short t, int i) {
+		data[allBoards.GetNTotalMotor() + allBoards.GetNTotalCurrent() + allBoards.GetNTotalForce() + i] = t;
+	}
+	void SetBoardInfo(int systemId, int nTarget, int nMotor, int nCurrent, int nForce, int nTouch) {
 		data[0] = systemId;
 		data[1] = nTarget;
 		data[2] = nMotor;
 		data[3] = nCurrent;
 		data[4] = nForce;
+		data[5] = nTouch;
 #ifndef _WIN32
 		esp_read_mac((uint8_t*)(data+5), ESP_MAC_WIFI_STA);	// 6 bytes
 #endif

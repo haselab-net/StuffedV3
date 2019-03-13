@@ -18,10 +18,12 @@ namespace PCController
         int nCurrent;
         int nForce;
         int nTarget;
+        int nTouch;
         public int NMotor { get { return nMotor; } }
         public int NCurrent { get { return nCurrent; } }
         public int NForce { get { return nForce; } }
         public int NTarget { get { return nTarget; } }
+        public int NTouch { get { return nTouch; } }
         short[] pos;
         short[] vel;
         short[] current;

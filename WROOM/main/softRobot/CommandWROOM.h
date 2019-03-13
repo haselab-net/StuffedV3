@@ -20,8 +20,9 @@ enum BD0_PARAM {
 	BD0_NCURRENT = 1,	
 	BD0_NFORCE = 1,
 #endif
+	BD0_NTOUCH = 5,	//	Touch2 to Touch6
 };
 DEFINE_Packets(BD0)
 
-CHOOSE_BoardInfo(BD0);	//	B2M or B2F
+CHOOSE_BoardInfo(BD0);
 #define BOARD_ID 0xFF 

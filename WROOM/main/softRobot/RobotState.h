@@ -19,6 +19,7 @@ struct RobotState: public BoardRetBase{
 	tiny::vector<SDEC> velocity;		//	motor velocitry
 	tiny::vector<SDEC> current;			//	current sensor for motor;
 	tiny::vector<SDEC> force;			//	force sensor
+	tiny::vector<SDEC> touch;			//	touch sensor
 
 	void SetControlMode(short cm){
 		mode = (ControlMode)cm;
@@ -52,7 +53,14 @@ struct RobotState: public BoardRetBase{
 	void SetForce(short f, int i) {
 		force[i] = f;
 	}
-	void SetBoardInfo(int systemId, int nTarget, int nMotor, int nCurrent, int nForce) {
-		// nothing to be done.
+	void SetTouch(short t, int i) {
+		touch[i] = t;
+	}
+	void SetBoardInfo(int systemId, int nTarget, int nMotor, int nCurrent, int nForce, int nTouch) {
+		position.resize(nMotor);
+		velocity.resize(nMotor);
+		current.resize(nCurrent);
+		force.resize(nForce);
+		touch.resize(nTouch);
 	}
 };

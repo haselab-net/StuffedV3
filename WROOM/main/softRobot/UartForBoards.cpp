@@ -201,6 +201,10 @@ void UartForBoards::EnumerateBoard() {
 						b->forceMap.push_back(allBoards->forceMap.size());
 						allBoards->forceMap.push_back(DeviceMap(i, m));
 					}
+					for (int m = 0; m < b->GetNTouch(); ++m) {
+						b->touchMap.push_back(allBoards->touchMap.size());
+						allBoards->touchMap.push_back(DeviceMap(i, m));
+					}
 					logPrintf("%dT%dM%dC%dF%d", ret.boardInfo.modelNumber, ret.boardInfo.nTarget,
 						ret.boardInfo.nMotor, ret.boardInfo.nCurrent, ret.boardInfo.nForce);
 					break;

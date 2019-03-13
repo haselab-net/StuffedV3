@@ -7,6 +7,12 @@
 
 TouchPads touchPads;
 
+extern "C"{
+    SDEC getTouch(int i){
+        return (SDEC)touchPads.Raw(i);
+    }
+}
+
 void TouchPads::Init()
 {
 #ifndef _WIN32
