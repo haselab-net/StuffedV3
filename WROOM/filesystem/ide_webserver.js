@@ -159,30 +159,16 @@ function startIde() {
 
    if (ws !== null) {
 		var webSocketServer = ws.Server();
-		var conn = null;
 	
 		webSocketServer.on("connection", function(wsConnection) {
 			//log("We have received a new WebSocket connection.  The path is \"" + wsConnection.path + "\"");
 			
 			wsConnection.on("open", function() {
 				log("We have open a new connection");
+				sr.wsConnection = wsConnection;
 			});
 			
 			wsConnection.on("message", function(data) {
-				//var d = JSON.parse(data);
-				// log("data.type: " + d.type);
-				// log("data.content: " + d.content);
-
-				// var str = d.content;
-				// var buf = new ArrayBuffer(str.length*2);
-				// var bufView = new Uint16Array(buf);
-				// for (var i=0, strLen=str.length; i<strLen; i++) {
-				// 	bufView[i] = str.charCodeAt(i);
-				// 	log(bufView[i]);
-				// }
-				// for(var i=0; i<view.getUint16(0); i++) {
-
-				// }
 				var arrayBuffer = data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength);
 				var bufView = new Int16Array(arrayBuffer);
 				switch(bufView[0]) {
@@ -190,13 +176,8 @@ function startIde() {
 						break;
 					}
 					case 2: {
-						log("length: " + bufView[1]);
-						log("commandId: " + bufView[2]);
-						var num_array = [];
-						for(var i=0; i<bufView[1]/2-2; i++) {
-							num_array.push(bufView[3+i]);
-						}
-						log("numArray: " + num_array);
+						log("Command packet received: ")
+						sr.logCommand(arrayBuffer.slice(2));
 						sr.handlePacket(arrayBuffer.slice(2));
 						break;
 					}
@@ -211,6 +192,7 @@ function startIde() {
 			wsConnection.on("close", function() {
 				log("Web Socket connection closed, ending handler!");
 				console.handler = null;
+				sr.wsConnection = null;
 			});
 			
 			// Register a console.log() handler that will send the logged message to
@@ -223,8 +205,20 @@ function startIde() {
 		webSocketServer.listen(WEBSOCKET_PORT);
 		log("Being a WebSocket server on port " + WEBSOCKET_PORT);
 
-		function send_packet_call_back(buffer) {
-			log("Send packet call back");
+		function send_packet_call_back(arrayBuffer, bufferSize) {
+			log("Command packet prepare to send: ");
+			sr.logCommand(arrayBuffer);
+
+			var packet = new ArrayBuffer(2+bufferSize);
+			var typeArray = new Int16Array(packet);
+			typeArray[0] = 2;
+			typeArray.set(new Int16Array(arrayBuffer), 1);
+			if(sr.wsConnection) {
+				log(sr.wsConnection.send);
+				sr.wsConnection.send(packet);
+				log("- packet send success");
+			}
+			else log("- browser NOT connected");
 		}
 		sr.registerCallback(send_packet_call_back);
    }

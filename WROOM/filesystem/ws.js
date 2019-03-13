@@ -141,6 +141,12 @@ function constructFrame(options) {
 	if (options.hasOwnProperty("payload")) {
 		if (typeof options.payload == "string") {
 			payload = new Buffer(options.payload);
+		} else if (options.payload instanceof ArrayBuffer) {
+			payload = new Buffer(options.payload.byteLength);
+    		var view = new Uint8Array(options.payload);
+			for (var i = 0; i < payload.length; ++i) {
+				payload[i] = view[i];
+			}
 		} else {
 			payload = options.payload;
 		}
@@ -151,7 +157,6 @@ function constructFrame(options) {
 		payloadLen = 0;
 	}
 	// If the payload we wish to send is a string, convert it to a Buffer.
-	
 	
 	// Calculate the size of the frame.
 	var frameSize = 2 + payloadLen;
@@ -170,7 +175,7 @@ function constructFrame(options) {
 	if (options.close) {
 		frame[i] = 0x80 | OPCODE.CLOSE; // FIN + CLOSE
 	} else {
-		frame[i] = 0x80 | OPCODE.TEXT_FRAME; // FIN + TEXT
+		frame[i] = 0x80 | OPCODE.BINARY_FRAME; // FIN + TEXT
 	}
 
 	i++;
@@ -368,7 +373,7 @@ function requestHandler(request, response) {
       		// send
       		//
       		send: function(data) {
-            	sock.write(constructFrame({ payload: data }));
+				sock.write(constructFrame({ payload: data }));
       		}, // send
       		
       		//

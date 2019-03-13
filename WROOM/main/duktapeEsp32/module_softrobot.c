@@ -6,7 +6,7 @@
 #include "module_softrobot.h"
 
 uint32_t stash_key_callback = 0;    // stash key for callback function: send_packet
-size_t return_packet_buffer_size;             // the size of buffer we want to send
+size_t return_packet_buffer_size;   // the size of buffer we want to send
 
 extern void UdpCom_OnReceiveServer(void * payload, int len);
 
@@ -65,8 +65,11 @@ static duk_ret_t register_packet_callback(duk_context *ctx){
 int return_packet_dataProvider(duk_context *ctx, void *context) {
     void* p = duk_push_buffer(ctx, return_packet_buffer_size, 0);
     memcpy(p, context, return_packet_buffer_size);
+    duk_push_buffer_object(ctx, -1, 0, return_packet_buffer_size, DUK_BUFOBJ_ARRAYBUFFER);
+    duk_replace(ctx, -2);
+    duk_push_uint(ctx, return_packet_buffer_size);
 
-    return 1;
+    return 2;
 }
 
 /*
