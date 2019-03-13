@@ -1,4 +1,4 @@
-ï»¿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,46 +6,67 @@ using System.Collections;
 using System.Windows.Forms;
 using System.Drawing;
 
-namespace Robokey
+namespace PCController
 {
-    public class PoseData : IComparable
+    public class Pose : PoseData
     {
-        public int nMotor;
-        public int[] values;
-        protected int time_ = 0;
-        public PoseData(int nM) {
-            nMotor = nM;
-            values = new int[nMotor];
-        }
-        public int Time
+        public new int Time
         {
-            set { time_ = value; }
-            get { return time_; }
-        }
-        public int CompareTo(object o)
-        {
-            return time_ - ((PoseData)o).time_;
-        }
-        public static PoseData operator +(PoseData a, PoseData b)
-        {
-            if (a == null || b == null) return null;
-            PoseData rv = new PoseData(a.nMotor);
-            for (int i = 0; i < rv.nMotor; i++)
+            set
             {
-                rv.values[i] = a.values[i] + b.values[i];
-                rv.time_ = a.time_;
+                time_ = value;
+                if (button.Parent != null)
+                {
+                    Control f = button.Parent;
+                    TrackBar track = (TrackBar)f.Controls.Find("track", true)[0];
+                    button.Left = (int)(Time * Scale + Offset) + 1;
+                    button.Top = track.Top + (int)(track.Height * 0.8) - 5;
+                }
             }
-            return rv;
-        }
-        public static PoseData operator +(PoseData a, int [] b)
-        {
-            PoseData rv = new PoseData(a.nMotor);
-            for (int i = 0; i < rv.nMotor; i++)
+            get
             {
-                rv.values[i] = a.values[i] + b[i];
-                rv.time_ = a.time_;
+                return time_;
             }
-            return rv;
+        }
+
+        //  ŽžŠÔ‚Æƒgƒ‰ƒbƒNƒo[‚ÌÀ•W•ÏŠ·
+        public double TrackScale()
+        {
+            if (button.Parent == null) return 1;
+            Control f = button.Parent;
+            TrackBar track = (TrackBar)f.Controls.Find("track", true)[0];
+            return (double)(track.Width - 27) / (double)track.Maximum;
+        }
+        //  ŽžŠÔ‚Æƒgƒ‰ƒbƒNƒo[‚ÌÀ•W•ÏŠ·
+        public double TrackOffset()
+        {
+            if (button.Parent == null) return 13;
+            Control f = button.Parent;
+            TrackBar track = (TrackBar)f.Controls.Find("track", true)[0];
+            return track.Left + 13;
+        }
+        public double Scale
+        {
+            get
+            {
+                return TrackScale();
+            }
+        }
+        public double Offset
+        {
+            get
+            {
+                return TrackOffset() - button.Size.Width / 2.0;
+            }
+        }
+        public Button button;
+        public Pose(int nMotor) : base(nMotor)
+        {
+            button = new Button();
+            button.FlatStyle = FlatStyle.Flat;
+            button.FlatAppearance.BorderSize = 10;
+            button.FlatAppearance.BorderColor = Color.Blue;
+            button.Size = new Size(5, 8);
         }
     }
 }

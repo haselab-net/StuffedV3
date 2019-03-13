@@ -31,8 +31,9 @@ public:
 	int nBoard;
 	static const int NUART = 2;
 	tiny::vector<DeviceMap> motorMap;
-	tiny::vector<DeviceMap> forceMap;
 	tiny::vector<DeviceMap> currentMap;
+	tiny::vector<DeviceMap> forceMap;
+	tiny::vector<DeviceMap> touchMap;
 	UartForBoards* uart[NUART];
 	BoardDirect* boardDirect;
 	#if UDP_UART_ASYNC
@@ -41,6 +42,7 @@ public:
 	int GetNTotalMotor() { return (int)motorMap.size(); }
 	int GetNTotalCurrent() { return (int)currentMap.size(); }
 	int GetNTotalForce() { return (int)forceMap.size(); }
+	int GetNTotalTouch() { return (int)touchMap.size(); }
 	int GetNTarget() { return state.nTargetMin; }
 	int GetSystemId() { return 0; }
 	AllBoards();

@@ -24,7 +24,7 @@ extern "C" void softRobot_main()    //  called from app_main in main.cpp
 	//nvs_flash_erase();
 
     motorDriver.Init();
-#if 0   //  touchPads can not work with JTAG debugger
+#if 1   //  touchPads can not work with JTAG debugger
     touchPads.Init();
 #endif
     allBoards.Init();

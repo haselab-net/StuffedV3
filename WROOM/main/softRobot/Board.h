@@ -9,20 +9,21 @@ class Board: public BoardBase{
 public:
 	typedef CMD CmdPacket;
 	typedef RET RetPacket;
-	CmdPacket cmd;
-	uint8_t zero[CMDWAITMAXLEN];	//	zero for UART wait
-	volatile RetPacket ret;
+	CmdPacket cmd;						//	UART command packet for this board. 
+	volatile RET ret;				//	UART return packet for this board.
+	uint8_t zero[CMDWAITMAXLEN];	//	Zeros to put wait time in UART.
 	Board(int bid, const unsigned char * c, const unsigned char * r) {
 		cmd.boardId = bid;
 		cmdPacketLen = c;
 		retPacketLen = r;
 	}
-	const char* GetName() { return CMD::GetBoardName(); }
-	int GetModelNumber() { return CMD::GetModelNumber(); }
-	int GetNTarget() { return CMD::GetNTarget();  }
-	int GetNMotor() { return CMD::GetNMotor(); }
-	int GetNCurrent() { return CMD::GetNCurrent(); }
-	int GetNForce() { return CMD::GetNForce(); }
+	const char* GetName() { return CmdPacket::GetBoardName(); }
+	int GetModelNumber() { return CmdPacket::GetModelNumber(); }
+	int GetNTarget() { return CmdPacket::GetNTarget();  }
+	int GetNMotor() { return CmdPacket::GetNMotor(); }
+	int GetNCurrent() { return CmdPacket::GetNCurrent(); }
+	int GetNForce() { return CmdPacket::GetNForce(); }
+	int GetNTouch() { return CmdPacket::GetNTouch(); }
 	int GetBoardId() { return cmd.boardId;  }
 	int GetRetCommand() { return ret.commandId; }
 	unsigned char* CmdStart() { return cmd.bytes;  }
@@ -128,6 +129,9 @@ public:
 			for (int i = 0; i < GetNForce(); ++i) {
 				packet.SetForce(ret.all.force[i], forceMap[i]);
 			}
+			for (int i = 0; i < GetNTouch(); ++i) {
+				packet.SetTouch(ret.all.touch[i], touchMap[i]);
+			}
 			break;
 		case CI_DIRECT:
 			for (int i = 0; i < GetNMotor(); ++i) {
@@ -160,6 +164,9 @@ public:
 			}
 			for (int i = 0; i < GetNForce(); ++i) {
 				packet.SetForce(ret.sensor.force[i], forceMap[i]);
+			}
+			for (int i = 0; i < GetNTouch(); ++i) {
+				packet.SetTouch(ret.sensor.touch[i], touchMap[i]);
 			}
 			break;
 		default:

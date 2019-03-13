@@ -71,8 +71,8 @@ void UdpRetPacket::SetLength() {
 	case CI_ALL:			//	pos vel current force
 		length = (NHEADER + allBoards.GetNTotalMotor()*2 + allBoards.GetNTotalCurrent() + allBoards.GetNTotalForce()) * 2; break;
 	break;
-	case CI_SENSOR:			//	pos force
-		length = (NHEADER + allBoards.GetNTotalMotor() + allBoards.GetNTotalCurrent() + allBoards.GetNTotalForce()) * 2; break;
+	case CI_SENSOR:			//	pos force touch
+		length = (NHEADER + allBoards.GetNTotalMotor() + allBoards.GetNTotalCurrent() + allBoards.GetNTotalForce() + allBoards.GetNTotalTouch()) * 2; break;
 	case CI_DIRECT:			//	pos vel
 		length = (NHEADER + allBoards.GetNTotalMotor() * 2) * 2; break;
 	case CI_CURRENT:			//	pos vel current
@@ -331,7 +331,7 @@ void UdpCom::ExecUdpCommand(UdpCmdPacket& recv) {
 	{
 	case CI_BOARD_INFO: 
 		PrepareRetPacket(recv);
-		send.SetBoardInfo(allBoards.GetSystemId(), allBoards.GetNTarget(), allBoards.GetNTotalMotor(), allBoards.GetNTotalCurrent(), allBoards.GetNTotalForce());
+		send.SetBoardInfo(allBoards.GetSystemId(), allBoards.GetNTarget(), allBoards.GetNTotalMotor(), allBoards.GetNTotalCurrent(), allBoards.GetNTotalForce(), allBoards.GetNTotalTouch());
 		SendReturn(recv);
 		break;
 	case CIU_SET_IPADDRESS:

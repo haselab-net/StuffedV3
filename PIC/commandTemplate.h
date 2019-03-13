@@ -13,6 +13,7 @@
 	static int GetNMotor(){ return BOARD##_NMOTOR;}					\
 	static int GetNCurrent(){ return BOARD##_NCURRENT;}				\
 	static int GetNForce(){ return BOARD##_NFORCE;}					\
+	static int GetNTouch(){ return BOARD##_NTOUCH;}					\
 
 #else
 #define BOARDINFOFUNCS(BOARD)
@@ -149,6 +150,7 @@ union ReturnPacket##BOARD {										\
 				unsigned char nMotor;							\
 				unsigned char nCurrent;							\
 				unsigned char nForce;							\
+				unsigned char nTouch;							\
 			}__attribute__((__packed__)) boardInfo;				\
 			struct {		 /*	 CI_ALL */						\
 				unsigned char controlMode;						\
@@ -158,11 +160,13 @@ union ReturnPacket##BOARD {										\
 				SDEC vel[BOARD##_NMOTOR];						\
 				SDEC current[BOARD##_NCURRENT];					\
 				SDEC force[BOARD##_NFORCE];						\
+				SDEC touch[BOARD##_NTOUCH];						\
 			}__attribute__((__packed__)) all;					\
 			struct {		 /*	 CI_SENSOR */					\
 				SDEC pos[BOARD##_NMOTOR];						\
 				SDEC current[BOARD##_NCURRENT];					\
 				SDEC force[BOARD##_NFORCE];						\
+				SDEC touch[BOARD##_NTOUCH];						\
 			}__attribute__((__packed__)) sensor;				\
 			struct {		 /*	 CI_DIRECT */					\
 				SDEC pos[BOARD##_NMOTOR];						\
@@ -219,7 +223,8 @@ enum BoardInfo{                     							\
     NTARGET = BOARD##_NTARGET,        							\
     NMOTOR = BOARD##_NMOTOR,        							\
     NFORCE = BOARD##_NFORCE,         							\
-    NCURRENT = BOARD##_NCURRENT        							\
+    NCURRENT = BOARD##_NCURRENT,       							\
+    NTOUCH = BOARD##_NTOUCH        								\
 };																\
 typedef union CommandPacket##BOARD CommandPacket;				\
 typedef union ReturnPacket##BOARD ReturnPacket;					\

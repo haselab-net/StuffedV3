@@ -13,7 +13,7 @@ class TouchPads
   public:
     void Init();
     int NPad(){return (int)pads.size();}
-    uint16_t Raw(int i);
+    uint16_t Filtered(int i);
     uint32_t Status();
 };
 extern TouchPads touchPads;

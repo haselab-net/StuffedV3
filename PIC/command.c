@@ -14,6 +14,16 @@ int cmdCur;
 int cmdLen;
 int retLen;
 
+//  implementation for getTouch() (read touch sensor value).
+#ifdef WROOM
+extern SDEC getTouch(int i);
+#else
+static inline SDEC getTouch(int i){
+    assert(0);
+    exit(0);
+}
+#endif
+
 //	command packet length for all boards
 unsigned char cmdPacketLens[MAXBOARDID+1][CI_NCOMMAND];
 
@@ -119,6 +129,7 @@ void rcBoardInfo(){
 	retPacket.boardInfo.nMotor = NMOTOR;
 	retPacket.boardInfo.nCurrent = NCURRENT;
 	retPacket.boardInfo.nForce = NFORCE;
+	retPacket.boardInfo.nTouch = NTOUCH;
 }
 void rcAll(){
     int i;
@@ -133,6 +144,9 @@ void rcAll(){
     for(i=0; i<NFORCE; ++i){
 		retPacket.all.force[i] = getForce(i);
     }
+    for(i=0; i<NTOUCH; ++i){
+		retPacket.all.touch[i] = getTouch(i);
+    }
     retPacket.all.countOfRead = targets.countOfRead;
 	retPacket.all.tick = targets.tick;
 }
@@ -146,6 +160,9 @@ void rcSensor(){
     }
     for(i=0; i<NFORCE; ++i){
 		retPacket.sensor.force[i] = getForce(i);
+    }
+    for(i=0; i<NTOUCH; ++i){
+		retPacket.sensor.touch[i] = getTouch(i);
     }
 }
 void rcDirect(){
