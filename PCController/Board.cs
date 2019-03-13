@@ -15,9 +15,11 @@ namespace PCController
         public int nMotor;
         public int nCurrent;
         public int nForce;
+        public int nTouch;
         public List<int> motorMap = new List<int>();
         public List<int> currentMap = new List<int>();
         public List<int> forceMap = new List<int>();
+        public List<int> touchMap = new List<int>();
         public Board(byte[] info, Board prev) {
             int cur = 0;
             boardId = GetBoardId(info[cur++]);
@@ -26,6 +28,7 @@ namespace PCController
             nMotor = info[cur++];
             nCurrent = info[cur++];
             nForce = info[cur++];
+            nTouch = info[cur++];
             int c = 0;
             if (prev != null) c = prev.motorMap[prev.motorMap.Count - 1] + 1;
             for (int i = 0; i < nMotor; ++i)
@@ -43,6 +46,12 @@ namespace PCController
             for (int i = 0; i < nForce; ++i)
             {
                 forceMap.Add(c++);
+            }
+            c = 0;
+            if (prev != null) c = prev.touchMap[prev.touchMap.Count - 1] + 1;
+            for (int i = 0; i < nTouch; ++i)
+            {
+                touchMap.Add(c++);
             }
         }
         public int CommandLen(CommandId c) {
@@ -81,7 +90,9 @@ namespace PCController
             switch (r)
             {
                 case CommandId.CI_BOARD_INFO: return 1 + 6;
-                case CommandId.CI_CURRENT: return 1 + nMotor*3*2;
+                case CommandId.CI_DIRECT: return 1 + nMotor * 2 * 2;
+                case CommandId.CI_INTERPOLATE: return 1 + nMotor * 2 + 2 + 1;
+                case CommandId.CI_CURRENT: return 1 + nMotor * 3 * 2;
             }
             return 0;
         }

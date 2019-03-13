@@ -125,17 +125,21 @@ void currentControl(){
         if (currentTarget[i] > 0){
             diff = currentTarget[i] - currentSense[i];
             sign = 1;
-        }else{
+        }else if (currentTarget[i] < 0){
             diff = -currentTarget[i] - currentSense[i];
             sign = -1;
+        }else{
+            sign = 0;
         }
         diff = (diff * pdParam.a[i]) >> SDEC_BITS;
         if (currentTarget[i] < 0) diff = -diff;
         targetTorque[i] += diff;
         if (sign > 0){
             if (targetTorque[i] < 0) targetTorque[i] = 0;
-        }else{
+        }else if (sign < 0){
             if (targetTorque[i] > 0) targetTorque[i] = 0;
+        }else{
+            targetTorque[i] = 0;
         }
 		setPwmWithLimit(i, targetTorque[i]);
     }

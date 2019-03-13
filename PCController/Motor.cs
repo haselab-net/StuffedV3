@@ -4,7 +4,7 @@ using System.Linq;
 using System.Windows.Forms;
 using System.Runtime.Serialization;
 
-namespace Robokey
+namespace PCController
 {
     public class SDEC
     {
