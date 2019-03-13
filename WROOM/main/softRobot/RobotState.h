@@ -57,10 +57,6 @@ struct RobotState: public BoardRetBase{
 		touch[i] = t;
 	}
 	void SetBoardInfo(int systemId, int nTarget, int nMotor, int nCurrent, int nForce, int nTouch) {
-		position.resize(nMotor);
-		velocity.resize(nMotor);
-		current.resize(nCurrent);
-		force.resize(nForce);
-		touch.resize(nTouch);
+		//	Do nothing. Only one instance (AllBoards::state is initialzed in AllBoards::EnumerateBoards() ). 
 	}
 };

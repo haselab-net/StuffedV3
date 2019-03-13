@@ -130,7 +130,7 @@ public:
 				packet.SetForce(ret.all.force[i], forceMap[i]);
 			}
 			for (int i = 0; i < GetNTouch(); ++i) {
-				packet.SetForce(ret.all.force[i], touchMap[i]);
+				packet.SetTouch(ret.all.touch[i], touchMap[i]);
 			}
 			break;
 		case CI_DIRECT:

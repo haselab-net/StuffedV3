@@ -176,7 +176,7 @@ class MCShowTouch: public MonitorCommandBase{
     void Func(){
         while(1){
             for(int i=0; i<touchPads.NPad(); ++i){
-                conPrintf("%d\t", touchPads.Raw(i));
+                conPrintf("%d\t", touchPads.Filtered(i));
             }
             conPrintf("\n");
             vTaskDelay(20);

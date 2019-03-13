@@ -9,7 +9,7 @@ TouchPads touchPads;
 
 extern "C"{
     SDEC getTouch(int i){
-        return (SDEC)touchPads.Raw(i);
+        return (SDEC)touchPads.Filtered(i);
     }
 }
 
@@ -24,7 +24,6 @@ void TouchPads::Init()
     Add(TOUCH_PAD_NUM4);
     Add(TOUCH_PAD_NUM5);
     Add(TOUCH_PAD_NUM6);
-    Add(TOUCH_PAD_NUM7);
 #endif
     for(int i=0; i<pads.size(); ++i){
         touch_pad_config(pads[i], TOUCH_THRESH_NO_USE);
@@ -40,11 +39,18 @@ int TouchPads::Add(touch_pad_t pad){
     return pads.size()-1;
 }
 
-uint16_t TouchPads::Raw(int i)
+uint16_t TouchPads::Filtered(int i)
 {
-    uint16_t raw=0;
-	ESP_ERROR_CHECK(touch_pad_read(pads[i], &raw));
-	return raw;
+    uint16_t value=0;
+	esp_err_t e = touch_pad_read_filtered(pads[i], &value);
+    if (e == ESP_OK) return value;
+    if (e == ESP_ERR_INVALID_STATE){
+        //ESP_LOGW("Touch", "touch_pad_read_filtered(i=%d pads[i]=%d) returns ESP_ERR_INVALID_STATE.", i, pads[i]);
+        return value;
+    }else{
+        ESP_ERROR_CHECK(e);
+    }
+	return value;
 };
 uint32_t TouchPads::Status() {
     return touch_pad_get_status();
