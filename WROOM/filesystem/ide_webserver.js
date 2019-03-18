@@ -173,16 +173,24 @@ function startIde() {
 				var bufView = new Int16Array(arrayBuffer);
 				switch(bufView[0]) {
 					case 1: {
+						log("JSFile packet received: ");
+						var codeStr = sr.ab2str(arrayBuffer.slice(2))
+						log("- script: " + codeStr);
+						try {
+							eval(codeStr);
+						} catch (e) {
+							log(e.stack);
+						}
 						break;
 					}
 					case 2: {
-						log("Command packet received: ")
+						log("Command packet received: ");
 						sr.logCommand(arrayBuffer.slice(2));
 						sr.handlePacket(arrayBuffer.slice(2));
 						break;
 					}
 					default: {
-						log("Unrecognized packet");
+						log("Unrecognized packet: "+bufView[0]);
 						break;
 					}
 				}
@@ -213,11 +221,7 @@ function startIde() {
 			var typeArray = new Int16Array(packet);
 			typeArray[0] = 2;
 			typeArray.set(new Int16Array(arrayBuffer), 1);
-			if(sr.wsConnection) {
-				log(sr.wsConnection.send);
-				sr.wsConnection.send(packet);
-				log("- packet send success");
-			}
+			if(sr.wsConnection) sr.wsConnection.send(packet);
 			else log("- browser NOT connected");
 		}
 		sr.registerCallback(send_packet_call_back);
