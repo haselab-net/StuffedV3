@@ -22,6 +22,7 @@ extern "C" void softRobot_main()    //  called from app_main in main.cpp
     //----------------------------------
     logPrintf("!!! Stuffed Robot Start !!!\n");   
 	//nvs_flash_erase();
+    esp_log_level_set("phy_init", ESP_LOG_INFO);
 
     motorDriver.Init();
 #if 1   //  touchPads can not work with JTAG debugger
