@@ -36,6 +36,10 @@ var _ret = {
         log("- numArray: " + num_array);
     },
 
+    ab2str: function(arrayBuffer) {
+        return String.fromCharCode.apply(null, new Uint16Array(arrayBuffer))
+    },
+
     wsConnection: null
 }
 
