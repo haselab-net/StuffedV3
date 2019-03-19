@@ -16,6 +16,7 @@ var http = require("http");
 var ws = require("ws");
 var FS = require("fs");
 var sr = require("softrobot");
+var jsfile = require("jsfile");
 
 
 /**
@@ -176,11 +177,12 @@ function startIde() {
 						log("JSFile packet received: ");
 						var codeStr = sr.ab2str(arrayBuffer.slice(2))
 						log("- script: " + codeStr);
-						try {
-							eval(codeStr);
-						} catch (e) {
-							log(e.stack);
-						}
+						// try {
+						// 	eval(codeStr);
+						// } catch (e) {
+						// 	log(e.stack);
+						// }
+						jsfile.runFile("main.js");
 						break;
 					}
 					case 2: {

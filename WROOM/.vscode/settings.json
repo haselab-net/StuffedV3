@@ -34,7 +34,10 @@
         "commandcommon.h\u0000ommandcommon.h": "c",
         "semphr.h": "c",
         "module_softrobot.h": "c",
-        "duktape.h": "c"
+        "duktape.h": "c",
+        "duktape_event.h": "c",
+        "sstream": "c",
+        "module_jsfile.h": "c"
     },
     "terminal.integrated.shell.windows": "c:\\msys32\\usr\\bin\\bash.exe",
     "terminal.integrated.env.windows": {
