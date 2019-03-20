@@ -1,4 +1,11 @@
 ﻿#pragma once
+#ifndef __cplusplus
+
+extern void UdpCom_OnReceiveServer(void* payload, int len);
+extern void UdpCom_Lock();
+extern void UdpCom_Unlock();
+
+#else
 
 #include "ArrayRing.h"
 #include "esp_event_loop.h"
@@ -190,3 +197,4 @@ public:
 	void SendText(char* text, short errorlevel=0);
 };
 extern UdpCom udpCom;
+#endif
