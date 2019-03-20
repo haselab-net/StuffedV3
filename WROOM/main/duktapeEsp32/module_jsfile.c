@@ -6,7 +6,6 @@
 
 TaskHandle_t xHandle = NULL;
 
-extern duk_context *esp32_duk_context;
 duk_context *esp32_duk_jsfile_context = NULL;
 
 /**
@@ -15,7 +14,13 @@ duk_context *esp32_duk_jsfile_context = NULL;
 static duk_ret_t stopFile(duk_context* ctx) {
     if( xHandle != NULL )
     {
+        // delete task
         vTaskDelete( xHandle );
+        xHandle = NULL;
+
+        // destroy heap
+        duk_destroy_heap( esp32_duk_jsfile_context );
+        esp32_duk_jsfile_context = NULL;
     }
 
     return 0;
@@ -30,17 +35,22 @@ static duk_ret_t runFile(duk_context* ctx) {
     str = duk_get_string(ctx, -1);
     size_t str_len = duk_get_length(ctx, -1);
 
-    void* pvParameters = (void*)malloc(sizeof(size_t)+sizeof(char)*str_len);
-    memcpy(pvParameters, &str_len, sizeof(size_t));
-    memcpy(pvParameters+sizeof(size_t), str, str_len);
+    // void* pvParameters = (void*)malloc(sizeof(size_t)+sizeof(char)*str_len);
+    // memcpy(pvParameters, &str_len, sizeof(size_t));
+    // memcpy(pvParameters+sizeof(size_t), str, str_len);
 
     duk_pop(ctx);
 
     if(!esp32_duk_jsfile_context) {
-        (void)duk_push_thread(esp32_duk_context);
-        esp32_duk_jsfile_context = duk_get_context(esp32_duk_context, -1);
+        createJSFileHeap();
     }
-    xTaskCreate(runFileTask, "run_jsfile_task", 6*1024, pvParameters, tskIDLE_PRIORITY + 1, &xHandle);
+
+    void* pvParameters = malloc(0);
+
+    //test(pvParameters);
+
+    //xTaskCreate(runFileTask, "run_jsfile_task", 6*1024, pvParameters, tskIDLE_PRIORITY + 1, &xHandle);
+    xTaskCreate(test, "test", 6*1024, NULL, tskIDLE_PRIORITY + 1, &xHandle);
 
     return 0;
 }
@@ -57,6 +67,46 @@ void runFileTask(void* pvParameters) {
     dukf_runFile(esp32_duk_jsfile_context, file_name);
 
     printf("end running file\n");
+}
+
+void test(void* pvParameters) {
+    char *file_name = "main.js";
+    printf("run file: %s\n", file_name);
+
+    dukf_runFile(esp32_duk_jsfile_context, file_name);
+
+    while(1) {
+        vTaskDelay(pdMS_TO_TICKS(1000));
+        printf("wait 1s\n");
+    }
+
+    printf("end running file\n");
+}
+
+void createJSFileHeap() {
+    if (esp32_duk_jsfile_context != NULL) {
+		duk_destroy_heap(esp32_duk_jsfile_context);
+	}
+
+    LOGD("About to create jsfile heap");
+    esp32_duk_jsfile_context = duk_create_heap_default();
+
+    if (!esp32_duk_jsfile_context) { exit(1); }
+    dukf_log_heap("Heap after duk create heap");
+    
+	duk_eval_string_noresult(esp32_duk_jsfile_context, "new Function('return this')().Duktape = Object.create(Duktape);");
+
+	duk_module_duktape_init(esp32_duk_jsfile_context); // Initialize the duktape module functions.
+	dukf_log_heap("Heap after duk_module_duktape_init");
+
+	esp32_duktape_stash_init(esp32_duk_jsfile_context); // Initialize the stash environment.
+
+	registerModules(esp32_duk_jsfile_context); // Register the built-in modules
+	dukf_log_heap("Heap after duk register modules");
+
+	dukf_runFile(esp32_duk_jsfile_context, "/init.js");	// Load and run the script called "init.js"
+
+	dukf_log_heap("Heap after init.js");
 }
 
 /**
