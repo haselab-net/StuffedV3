@@ -38,7 +38,12 @@
         "duktape_event.h": "c",
         "sstream": "c",
         "module_jsfile.h": "c",
-        "dukf_utils.h": "c"
+        "dukf_utils.h": "c",
+        "duktape_task.h": "c",
+        "duktape_utils.h": "c",
+        "duk_module_duktape.h": "c",
+        "module_jslib.h": "c",
+        "modules.h": "c"
     },
     "terminal.integrated.shell.windows": "c:\\msys32\\usr\\bin\\bash.exe",
     "terminal.integrated.env.windows": {

@@ -43,6 +43,7 @@
 #include "module_wifi.h"
 #include "module_softrobot.h"
 #include "module_jsfile.h"
+#include "module_jslib.h"
 LOG_TAG("modules");
 
 /**
@@ -110,6 +111,7 @@ functionTableEntry_t functionTable[] = {
 	{ "ModuleSSL",        ModuleSSL,        1},
 	{ "ModuleSoftrobot",  ModuleSoftrobot,	1},			// register softrobot module
 	{ "ModuleJSFile",	  ModuleJSFile,		1},			// register jsfile module
+	{ "ModuleJSLib",	  ModuleJSLib,		1},			// register jslib module
 #endif // ESP_PLATFORM
 	// Must be last entry
 	{NULL, NULL, 0 } // *** DO NOT DELETE *** - MUST BE LAST ENTRY.

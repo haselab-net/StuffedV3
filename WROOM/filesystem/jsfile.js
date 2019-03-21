@@ -19,6 +19,10 @@ var _ret = {
 
     runFile: function (fileName) {
         internalJSFile.run_file(fileName);
+    },
+
+    handleEvent: function() {
+        internalJSFile.handle_event();
     }
 }
 
