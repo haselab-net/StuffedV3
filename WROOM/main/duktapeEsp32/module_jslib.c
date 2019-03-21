@@ -8,6 +8,7 @@
 #include <stdio.h>
 
 #include "module_jslib.h"
+#include "duktape_utils.h"
 
  static duk_ret_t block_pause(duk_context* ctx){
      duk_int_t t = duk_get_int(ctx, -1);
@@ -21,4 +22,6 @@
 
  duk_ret_t ModuleJSLib(duk_context *ctx){
      ADD_FUNCTION("block_pause",    block_pause,    0);
+
+     return 0;
  }

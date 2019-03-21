@@ -95,7 +95,7 @@ void return_packet(void* buffer, size_t buffer_size) {
    );
 
    // call jsfile callback
-   jsfile_exec_packet_callback();
+   jsfile_exec_packet_callback(buffer, buffer_size);
 }
 
 /**
