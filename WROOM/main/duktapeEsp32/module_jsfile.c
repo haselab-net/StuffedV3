@@ -257,17 +257,8 @@ static duk_ret_t stopFile(duk_context* ctx) {
 
 /**
  * run js file
- * [0] - file name
  */
 static duk_ret_t runFile(duk_context* ctx) {
-    const char *str;
-    str = duk_get_string(ctx, -1);
-    size_t str_len = duk_get_length(ctx, -1);
-
-    // void* pvParameters = (void*)malloc(sizeof(size_t)+sizeof(char)*str_len);
-    // memcpy(pvParameters, &str_len, sizeof(size_t));
-    // memcpy(pvParameters+sizeof(size_t), str, str_len);
-
     duk_pop(ctx);
 
     jsfile_initEvents();
@@ -282,36 +273,19 @@ static duk_ret_t runFile(duk_context* ctx) {
     return 0;
 }
 
-/**
- * task for run file
- */
 void runFileTask(void* pvParameters) {
-    char *file_name;
-    file_name = pvParameters+sizeof(size_t);
+    LOGD("Start runing JSFile");
 
-    printf("run file: %s\n", file_name);
-
-    dukf_runFile(esp32_duk_jsfile_context, file_name);
-
-    while(1) {
-        vTaskDelay(pdMS_TO_TICKS(10000));
-    }
-
-    printf("end running file\n");
-}
-
-void test(void* pvParameters) {
-    char *file_name = "main.js";
-    printf("run file: %s\n", file_name);
-
-    dukf_runFile(esp32_duk_jsfile_context, file_name);
+    dukf_runFile(esp32_duk_jsfile_context, "main/main_init/js");
+    dukf_runFile(esp32_duk_jsfile_context, "main/main.js");
+    dukf_runFile(esp32_duk_jsfile_context, "main/main_end.js");
 
     while(1) {
         vTaskDelay(pdMS_TO_TICKS(1000));
         printf("wait 1s\n");
     }
 
-    printf("end running file\n");
+    LOGD("End running JSFile");
 }
 
 /**
@@ -348,11 +322,11 @@ void createJSFileHeap() {
  * Add native methods to the JSFile object.
  */
 duk_ret_t ModuleJSFile(duk_context *ctx) {
-    ADD_FUNCTION("stop_file",   stopFile,  0);
-    ADD_FUNCTION("run_file",    runFile, 1);    
+    ADD_FUNCTION("stop_file",   stopFile,   0);
+    ADD_FUNCTION("run_file",    runFile,    0);    
 
-    ADD_FUNCTION("register_callback", jsfile_register_packet_callback, 1);
-    ADD_FUNCTION("handle_event", jsfile_handle_event, 0);
+    ADD_FUNCTION("register_callback",   jsfile_register_packet_callback,    1);
+    ADD_FUNCTION("handle_event",        jsfile_handle_event,                0);
 
     return 0;
 }

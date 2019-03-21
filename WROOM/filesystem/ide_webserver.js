@@ -177,12 +177,9 @@ function startIde() {
 						log("JSFile packet received: ");
 						var codeStr = sr.ab2str(arrayBuffer.slice(2))
 						log("- script: " + codeStr);
-						// try {
-						// 	eval(codeStr);
-						// } catch (e) {
-						// 	log(e.stack);
-						// }
-						jsfile.runFile("main.js");
+						
+						FS.createWithContent("main/main.js", codeStr);
+						jsfile.runFile();
 						break;
 					}
 					case 2: {

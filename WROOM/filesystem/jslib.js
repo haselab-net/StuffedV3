@@ -22,7 +22,7 @@ var _ret = {
 var _core = {
     blockPause: function(ms) {
         internalJSLib.block_pause(ms);
-    }
+    } 
 }
 
 var _loops = {

@@ -17,8 +17,8 @@ var _ret = {
         internalJSFile.stop_file();
     },
 
-    runFile: function (fileName) {
-        internalJSFile.run_file(fileName);
+    runFile: function () {
+        internalJSFile.run_file();
     },
 
     registerCallback: function(callback) {
