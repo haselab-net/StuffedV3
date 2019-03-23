@@ -65,20 +65,26 @@ public:
 	//	return data[allBoards.GetNTotalMotor() + 2 + b*6 + r*3 + i];
 		return data[allBoards.GetNTotalMotor() + 2 + j*3 + i];
 	}
+	short GetParamType(){
+		return data[0];
+	}
 	short GetControlK(int i) {
-		return data[i];
+		return data[1 + i];
 	}
 	short GetControlB(int i) {
-		return data[allBoards.GetNTotalMotor() + i];
+		return data[1 + allBoards.GetNTotalMotor() + i];
 	}
 	short GetControlA(int i) {
-		return data[allBoards.GetNTotalMotor()*2 + i];
+		return data[1 + i];
 	}
 	short GetTorqueMin(int i) {
-		return data[i];
+		return data[1 + i];
 	}
 	short GetTorqueMax(int i) {
-		return data[allBoards.GetNTotalMotor() + i];
+		return data[1 + allBoards.GetNTotalMotor() + i];
+	}
+	short GetBoardId() {
+		return data[1];
 	}
 	short GetResetSensorFlags() {
 		if (command == CI_ALL){

@@ -50,16 +50,16 @@ int UdpCmdPacket::CommandLen() {
 		return (NHEADER + allBoards.GetNTotalMotor() + 2) * 2;
 	case CI_FORCE_CONTROL: 	//	pos JK period targetCount
 		return (NHEADER + allBoards.GetNTotalMotor() + allBoards.GetNTotalForce()*3 + 2) * 2;	
-	case CI_PDPARAM: 		//	K B
-		return (NHEADER + allBoards.GetNTotalMotor() * 2) * 2;
-	case CI_TORQUE_LIMIT:	//  min max.
-		return (NHEADER + allBoards.GetNTotalMotor() * 2) * 2;
+	case CI_SETPARAM: 		//	KB, torque min/max, a, boardId ...
+		return (NHEADER + 1 + allBoards.GetNTotalMotor() * 2) * 2;
 	case CI_RESET_SENSOR:
 		return (NHEADER + 1) * 2;	//	flags
 	case CIU_SET_IPADDRESS:	//  Set ip address to return the packet: command only
 		return NHEADER * 2;
 	case CIU_GET_IPADDRESS:	//  Get ip address to return the packet: command only
 		return NHEADER * 2;
+	case CIU_GET_SUBBOARD_INFO:	//	index
+		return (NHEADER + 1) * 2;
 	}
 	return 0;
 }
@@ -80,8 +80,7 @@ void UdpRetPacket::SetLength() {
 	case CI_INTERPOLATE:	//	pos targetCountRead tickMin tickMax remain vacancy
 	case CI_FORCE_CONTROL: 
 		length = (NHEADER + allBoards.GetNTotalMotor() + 5) * 2; break;
-	case CI_PDPARAM:
-	case CI_TORQUE_LIMIT:
+	case CI_SETPARAM:
 	case CI_RESET_SENSOR:
 		length = NHEADER*2; break;
 	case CIU_TEXT:			//	return text message: cmd, type, length, bytes
@@ -90,6 +89,8 @@ void UdpRetPacket::SetLength() {
 		length = NHEADER * 2; break;
 	case CIU_GET_IPADDRESS:	//  Get ip address to return the packet
 		length = (NHEADER + 16) * 2; break;
+	case CIU_GET_SUBBOARD_INFO:	//	uart id model nTarget nMotor nCurrent nForce
+		length = (NHEADER + 7) * 2 ; break;
 	default:				//	error
 		ESP_LOGE("UdpRetPacket", "Undefined command %d set lentgh to 0", command);
 		length = 0;
@@ -110,7 +111,6 @@ void UdpCmdPackets::Lock() {
 void UdpCmdPackets::Unlock() {
 	xSemaphoreGive(mutex);
 }
-
 static void onReceiveUdp(void *arg, struct udp_pcb *pcb, struct pbuf *p, const ip_addr_t *addr, u16_t port)
 {
 	((UdpCom*)arg)->OnReceiveUdp(pcb, p, addr, port);
@@ -382,6 +382,30 @@ void UdpCom::ExecUdpCommand(UdpCmdPacket& recv) {
 #endif
 		SendReturn(recv);
 		break;
+	case CIU_GET_SUBBOARD_INFO:{
+		int index = recv.data[0];
+		int iu;
+		for(iu=0; iu<allBoards.NUART; ++iu){
+			if (index > allBoards.uart[iu]->boards.size()){
+				index -= allBoards.uart[iu]->boards.size();
+			}else{
+				break;
+			}
+		}
+		PrepareRetPacket(recv);
+		if (iu < allBoards.NUART){
+			recv.data[0] = iu;
+			recv.data[1] = index;
+			recv.data[2] = allBoards.uart[iu]->boards[index]->GetModelNumber();
+			recv.data[3] = allBoards.uart[iu]->boards[index]->GetNTarget();
+			recv.data[4] = allBoards.uart[iu]->boards[index]->GetNMotor();
+			recv.data[5] = allBoards.uart[iu]->boards[index]->GetNCurrent();
+			recv.data[6] = allBoards.uart[iu]->boards[index]->GetNForce();
+		}else{
+			recv.data[0] = recv.data[1] = -1;
+		}
+		SendReturn(recv);
+	}	break;
 	default:
 		ESP_LOGE(Tag, "Invalid command %d count %d received from %s at %x.\n", 
 			(int)recv.command, (int)recv.count, ipaddr_ntoa(&recv.returnIp), (unsigned)&recv);

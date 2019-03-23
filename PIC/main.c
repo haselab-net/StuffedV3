@@ -32,26 +32,38 @@
 #include "control.h"
 #include "command.h"
 #include "uart.h"
+#include "nvm.h"
 #include <stdio.h>
+#include <string.h>
 
 void monitor();
 /*
                          Main application
  */
 extern int timerRestTime;
+
 int main(void)
-{
+{    
     int i = 0;
     SYSTEM_Initialize();
     UMTXREG = 'S';
     printf("tart.\r\n");
-	extern unsigned char boardId;
-    printf("Borad ID:%d Model:%d nTargets:%d nMotor:%d nForce:%d\r\n", (int)boardId, MODEL_NUMBER, NTARGET, NMOTOR, NFORCE);
-
+    boardId = PNVDATA->boardId;
+    if (boardId > 7) boardId = 7;
+    printf("Borad ID:%d Model:%d nTargets:%d nMotor:%d nCurrent:%d nForce:%d\r\n", boardId, MODEL_NUMBER, NTARGET, NMOTOR, NCURRENT, NFORCE);
     controlInit();
 	commandInit();
 	commandUartInit();
 	setPwm(0, SDEC_ONE*0.1);
+#if 0
+    printf("UMRXREG=%x ", UMRXREG);
+    printf("UMSTA=%x\r\n", UMSTA);
+    while(1){
+        if (UMSTAbits.URXDA){
+            printf("UMSTA=%x, RX=%x\r\n", UMSTA, UMRXREG);            
+        }
+    }
+#endif
 	while(1){
 		if (!uartExecCommand()){
 			uint32_t now = _CP0_GET_COUNT();

@@ -464,10 +464,13 @@
             // trBoards
             // 
             this.trBoards.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.trBoards.LabelEdit = true;
             this.trBoards.Location = new System.Drawing.Point(0, 0);
             this.trBoards.Name = "trBoards";
             this.trBoards.Size = new System.Drawing.Size(127, 228);
             this.trBoards.TabIndex = 4;
+            this.trBoards.BeforeLabelEdit += new System.Windows.Forms.NodeLabelEditEventHandler(this.trBoards_BeforeLabelEdit);
+            this.trBoards.AfterLabelEdit += new System.Windows.Forms.NodeLabelEditEventHandler(this.trBoards_AfterLabelEdit);
             // 
             // openPose
             // 

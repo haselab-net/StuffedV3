@@ -558,11 +558,28 @@ namespace Robokey
             PutCommand(packet, p);
             if (period != 0) interpolateTargetCountOfWrite++;
         }
-        public void SendPdParam(int nMotor, int[] k, int[] b, int[] a)
+        public void SendParamCurrent(int nMotor, int[] a)
         {
             byte[] packet = new byte[1000];
             int p = 0;
-            WriteHeader((int)CommandId.CI_PDPARAM, ref p, packet);
+            WriteHeader((int)CommandId.CI_SETPARAM, ref p, packet);
+            WriteShort((int)SetParamType.PT_CURRENT, ref p, packet);
+            for (int i = 0; i < nMotor; ++i)
+            {
+                WriteShort(a[i], ref p, packet);
+            }
+            for (int i = 0; i < nMotor; ++i)
+            {
+                WriteShort(0, ref p, packet);    //  padding
+            }
+            PutCommand(packet, p);
+        }
+        public void SendParamPd(int nMotor, int[] k, int[] b)
+        {
+            byte[] packet = new byte[1000];
+            int p = 0;
+            WriteHeader((int)CommandId.CI_SETPARAM, ref p, packet);
+            WriteShort((int)SetParamType.PT_PD, ref p, packet);
             for (int i = 0; i < nMotor; ++i)
             {
                 WriteShort(k[i], ref p, packet);
@@ -571,18 +588,14 @@ namespace Robokey
             {
                 WriteShort(b[i], ref p, packet);
             }
-            // a is the coefficient for current control
-            for (int i = 0; i < nMotor; ++i)
-            {
-                WriteShort(a[i], ref p, packet);
-            }
             PutCommand(packet, p);
         }
-        public void SendTorqueLimit(int nMotor, int[] minT, int[] maxT)
+        public void SendParamTorqueLimit(int nMotor, int[] minT, int[] maxT)
         {
             byte[] packet = new byte[1000];
             int p = 0;
-            WriteHeader((int)CommandId.CI_TORQUE_LIMIT, ref p, packet);
+            WriteHeader((int)CommandId.CI_SETPARAM, ref p, packet);
+            WriteShort((int)SetParamType.PT_TORQUE_LIMIT, ref p, packet);
             for (int i = 0; i < nMotor; ++i)
             {
                 WriteShort(minT[i], ref p, packet);
@@ -590,6 +603,25 @@ namespace Robokey
             for (int i = 0; i < nMotor; ++i)
             {
                 WriteShort(maxT[i], ref p, packet);
+            }
+            PutCommand(packet, p);
+        }
+        public void SendParamBoardId(int nMotor, int[] bids)
+        {
+            byte[] packet = new byte[1000];
+            int p = 0;
+            WriteHeader((int)CommandId.CI_SETPARAM, ref p, packet);
+            WriteShort((int)SetParamType.PT_TORQUE_LIMIT, ref p, packet);
+            //  padding
+            int tmp = p;
+            for (int i = 0; i < 2*nMotor; ++i)
+            {
+                WriteShort(0, ref tmp, packet);
+            }
+            //  boardIds
+            for (int i = 0; i < bids.Length; ++i)
+            {
+                WriteShort(bids[i], ref p, packet);
             }
             PutCommand(packet, p);
         }

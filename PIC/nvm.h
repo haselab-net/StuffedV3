@@ -1,0 +1,26 @@
+#ifndef NVM_H
+#define NVM_H
+
+//  NVM (Flash Program Memory) Utilities
+unsigned int NVMUnlock (unsigned int nvmop);
+unsigned int NVMErasePage(unsigned int address);
+unsigned int NVMWriteWord(void* address, unsigned int data_l, unsigned int data_h);
+void NVMUnprotectPFM(unsigned int address);
+
+//  page size = 512 x 32bit words = 2048 bytes = 0x800 bytes
+//  row size = 64 x 32bit words = 256 bytes = 0x100 bytes
+//  64kb = 0x0000-0xFFFF flash. The last page is 0xE800-0xFFFF
+//  Virtual memory addrsss starts from 0x9D00:E800.
+//  Non volatile memory data structre. Add variable here to add nv variables.
+typedef struct {
+    unsigned char boardId;
+} __attribute__((__packed__)) NvData;
+
+#define NVPAGE      0x9D00F800
+#define NVPAGESIZE  0x800
+#define NVROWSIZE   0x100
+#define PNVDATA     ((NvData*)NVPAGE)
+unsigned int NVMWrite(NvData* p);
+void NVMRead(NvData* p);
+
+#endif

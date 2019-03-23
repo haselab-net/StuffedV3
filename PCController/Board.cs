@@ -75,10 +75,8 @@ namespace PCController
                     return 1 + nMotor*2 + 2 + 1;
                 case CommandId.CI_FORCE_CONTROL:
                     return 1 + nMotor*(2 + 2 * nForce) + 2 + 1;    //  nMotor * pos jacob
-                case CommandId.CI_PDPARAM:
-                    return 1 + nMotor * 3 * 2;
-                case CommandId.CI_TORQUE_LIMIT:
-                    return 1 + nMotor * 2 * 2;
+                case CommandId.CI_SETPARAM:
+                    return 1 + 1 + nMotor * 2 * 2;
                 case CommandId.CI_RESET_SENSOR:
                     return 1 + 2;
             }

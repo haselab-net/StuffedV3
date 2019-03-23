@@ -3,6 +3,7 @@
 #include "control.h"
 #include "boardType.h"
 #include "uart.h"
+#include "nvm.h"
 
 #ifdef WROOM
 #error This is a source file for PIC only. 

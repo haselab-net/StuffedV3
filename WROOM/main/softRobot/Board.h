@@ -93,17 +93,22 @@ public:
 				cmd.forceControl.count = packet.GetTargetCount();
 			}
 			break;
-		case CI_PDPARAM:
-			for (int i = 0; i < GetNMotor(); ++i) {
-				cmd.pdParam.k[i] = packet.GetControlK(motorMap[i]);
-				cmd.pdParam.b[i] = packet.GetControlB(motorMap[i]);
-				cmd.pdParam.a[i] = packet.GetControlA(motorMap[i]);
-			}
-			break;
-		case CI_TORQUE_LIMIT:
-			for (int i = 0; i < GetNMotor(); ++i) {
-				cmd.torqueLimit.min[i] = packet.GetTorqueMin(motorMap[i]);
-				cmd.torqueLimit.max[i] = packet.GetTorqueMax(motorMap[i]);
+		case CI_SETPARAM:
+			cmd.param.type = packet.GetParamType();
+			if (cmd.param.type == PT_PD){
+				for (int i = 0; i < GetNMotor(); ++i) {
+					cmd.param.pd.k[i] = packet.GetControlK(motorMap[i]);
+					cmd.param.pd.b[i] = packet.GetControlB(motorMap[i]);
+				}
+			}else if (cmd.param.type == PT_CURRENT){
+				for (int i = 0; i < GetNMotor(); ++i) {
+					cmd.param.a[i] = packet.GetControlA(motorMap[i]);
+				}
+			}else if (cmd.param.type == PT_TORQUE_LIMIT){
+				for (int i = 0; i < GetNMotor(); ++i) {
+					cmd.param.torque.min[i] = packet.GetTorqueMin(motorMap[i]);
+					cmd.param.torque.max[i] = packet.GetTorqueMax(motorMap[i]);
+				}
 			}
 			break;
 		case CI_RESET_SENSOR:

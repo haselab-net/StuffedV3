@@ -17,7 +17,7 @@ inline short FilterForAngle(short prev, short cur){
     return (prev*(IIR-1) + cur) / IIR;
 }
 inline short FilterForCurrent(short prev, short cur){
-    const short IIR = 4;
+    const short IIR = 2;
     return (prev*(IIR-1) + cur) / IIR;
 }
 

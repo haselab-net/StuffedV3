@@ -14,6 +14,8 @@ public:
 	short targetCount;							//	count of the target to overwrite a target in the queue.
 
 	//	To be implemnented 
+	short paramType;
+	short boardIdToSet;
 	tiny::vector<SDEC> controlK;
 	tiny::vector<SDEC> controlB;
 	tiny::vector<SDEC> controlA;
@@ -39,6 +41,8 @@ public:
 	short GetPeriod(){ return targetPeriod; }
 	short GetTargetCount(){ return targetCount; }
 	short GetForceControlJacob(int j, int i) { return  forceControlJacobian[j*3+i]; }
+	short GetParamType(){ return paramType;}
+	short GetBoardId(){ return boardIdToSet;}
 	short GetControlK(int i){ return controlK[i]; }
 	short GetControlB(int i){ return controlB[i]; }
 	short GetControlA(int i){ return controlA[i]; }

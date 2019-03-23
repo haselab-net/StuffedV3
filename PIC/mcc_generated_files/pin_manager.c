@@ -51,6 +51,7 @@
 #include <xc.h>
 #include "pin_manager.h"
 #include "mcc.h"
+#include "../env.h"
 
 /**
     void PIN_MANAGER_Initialize(void)
@@ -114,7 +115,7 @@ void PIN_MANAGER_Initialize(void)
 #elif defined BOARD2_COMBINATION || defined BOARD3_SEPARATE
     ANSELA = 0x000B;
 #ifdef USE_MONITOR_RX
-    ANSELB = 0x300F;    //for T1RX 15 13 12  3210
+    ANSELB = 0x300F; //U1RX=AN10=RB15, U1TX=RB14, AN8=RB13, AN7=RB12, RB3210=AN11 AN4 AN3 AN2
 #else
     ANSELB = 0xB00F;	//for AD
 #endif
@@ -134,10 +135,10 @@ void PIN_MANAGER_Initialize(void)
     RPOR1bits.RP8R = 0x0003;   //RB9->SPI2:SDO2;
     RPOR4bits.RP20R = 0x0007;  //RA9->SCCP3:OCM3;
 #elif defined BOARD2_COMBINATION || defined BOARD3_SEPARATE
-    RPINR9bits.U2RXR = 0x0011;   //RB10->UART2:U2RX;
+    RPINR9bits.U2RXR = 0x0011;  //RB10->UART2:U2RX;
     RPOR4bits.RP18R = 0x0001;   //RB11->UART2:U2TX;
-    RPOR1bits.RP5R = 0x0007;   //RB4->SCCP3:OCM3;
-    RPOR1bits.RP6R = 0x0006;   //RA4->SCCP2:OCM2;
+    RPOR1bits.RP5R = 0x0007;    //RB4->SCCP3:OCM3;
+    RPOR1bits.RP6R = 0x0006;    //RA4->SCCP2:OCM2;
     RPOR4bits.RP19R = 0x0003;   //RC9->SPI2:SDO2;
     RPOR4bits.RP20R = 0x0006;   //RA9->SCCP2:OCM2;
     RPOR2bits.RP11R = 0x0007;   //RB7->SCCP3:OCM3;

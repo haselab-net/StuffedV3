@@ -16,10 +16,10 @@
  #define BOARD_ID	1
 #elif defined BOARD2_COMBINATION
  CHOOSE_BoardInfo(B2M);	//	B2M or B2F
- #define BOARD_ID	7
+ #define BOARD_ID	1
 #elif defined BOARD3_SEPARATE
  CHOOSE_BoardInfo(B3M);	//	B3M or B3F
- #define BOARD_ID	4 
+ #define BOARD_ID	1
 #endif
 
 #endif

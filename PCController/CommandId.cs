@@ -9,16 +9,22 @@ enum CommandId {
 	CI_CURRENT,             //6 Set currents as servo targets.
 	CI_INTERPOLATE,         //7 Send new frame for interpolation.
 	CI_FORCE_CONTROL,		//8	Position and force control with interpolation.
-	CI_PDPARAM,             //9 Set control parameter.
-	CI_TORQUE_LIMIT,        //10 Set min and max torques.
-    CI_RESET_SENSOR,        //11 Reset sensor.
+	CI_SETPARAM,            //9 Set parameter.
+    CI_RESET_SENSOR,        //10 Reset sensor.
     CI_NCOMMAND,
-    CIU_TEXT = CI_NCOMMAND,	//11 return text message: cmd, type, length, bytes
-	CIU_SET_IPADDRESS,		//12 Set ip address to return the packet
-    CIU_GET_IPADDRESS,      //13 Get ip address to return the packet
+    CIU_TEXT = CI_NCOMMAND,	//10 return text message: cmd, type, length, bytes
+	CIU_SET_IPADDRESS,		//11 Set ip address to return the packet
+    CIU_GET_IPADDRESS,      //12 Get ip address to return the packet
+    CIU_GET_SUBBOARD_INFO,  //13 Get sub board info
 
 	CIU_NCOMMAND,           //14 number of commands
 	CIU_NONE = -1           //  no command is in receiving state.
+};
+enum SetParamType{
+	PT_PD,
+    PT_CURRENT,
+	PT_TORQUE_LIMIT,
+	PT_BOARD_ID,
 };
 enum ResetSensorFlags {
 	RSF_NONE=0,

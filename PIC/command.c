@@ -2,13 +2,13 @@
 #include "command.h"
 #include "control.h"
 #include "boardType.h"
+#include "nvm.h"
 #include <string.h>
 #ifdef WROOM
 #include "../WROOM/main/SoftRobot/commandWROOM.h"
 #endif
 
-unsigned char boardId = BOARD_ID;
-
+unsigned char boardId;
 CommandPacket command;
 int cmdCur;
 int cmdLen;
@@ -87,19 +87,36 @@ void ecForceControl(){
     controlSetMode(CM_FORCE_CONTROL);
 	targetsForceControlAddOrUpdate(command.forceControl.pos , command.forceControl.jacob, command.forceControl.period, command.forceControl.count);
 }
-void ecPdParam(){
+void ecSetParam(){
     int i;
-    for(i=0; i<NMOTOR; ++i){
-        pdParam.k[i] = command.pdParam.k[i];
-        pdParam.b[i] = command.pdParam.b[i];
-        pdParam.a[i] = command.pdParam.a[i];
-    }
-}
-void ecTorqueLimit(){
-    int i;
-    for(i=0; i<NMOTOR; ++i){
-        torqueLimit.min[i] = command.torqueLimit.min[i];
-        torqueLimit.max[i] = command.torqueLimit.max[i];
+    switch(command.param.type){
+    case PT_PD:
+        for(i=0; i<NMOTOR; ++i){
+            pdParam.k[i] = command.param.pd.k[i];
+            pdParam.b[i] = command.param.pd.b[i];
+        }
+        break;
+    case PT_CURRENT:
+        for(i=0; i<NMOTOR; ++i){
+            pdParam.a[i] = command.param.a[i];
+        }
+        break;
+    case PT_TORQUE_LIMIT:
+        for(i=0; i<NMOTOR; ++i){
+            torqueLimit.min[i] = command.param.torque.min[i];
+            torqueLimit.max[i] = command.param.torque.max[i];
+        }
+        break;
+    case PT_BOARD_ID:{
+#ifndef WROOM
+        NvData nvData;
+        NVMRead(&nvData);
+        nvData.boardId = command.param.boardId;
+        NVMWrite(&nvData);
+        boardId = PNVDATA->boardId;
+        if (boardId > 7) boardId = 7;
+#endif
+        } break;
     }
 }
 void ecResetSensor(){
@@ -214,8 +231,7 @@ ExecCommand* execCommand[CI_NCOMMAND] = {
 	ecCurrent,
     ecInterpolate,	//	interpolate
 	ecForceControl,	//	force control
-    ecPdParam,
-    ecTorqueLimit,
+    ecSetParam,
     ecResetSensor,
 };
 ExecCommand* returnCommand[CI_NCOMMAND] = {
@@ -228,8 +244,7 @@ ExecCommand* returnCommand[CI_NCOMMAND] = {
     rcCurrent,
     rcInterpolate,
     rcForceControl,
-	rcNop,	//	pdParam
-    rcNop,	//	torqueLimit
+	rcNop,	//	setParam
     rcNop,	//	resetSensor
 };
 

@@ -83,15 +83,21 @@ union CommandPacket##BOARD {										\
 				short period;		/*	period to interpolate */	\
 				unsigned char count;								\
 			} __attribute__((__packed__)) forceControl;				\
-			struct {				 /*	 CI_PDPARAM */				\
-				SDEC k[BOARD##_NMOTOR];	/* P */                     \
-				SDEC b[BOARD##_NMOTOR];	/* D */						\
-				SDEC a[BOARD##_NMOTOR];	/* Current */				\
-			} __attribute__((__packed__)) pdParam;					\
-			struct {				 /*	 CI_TORQUE_LIMIT	 */		\
-				SDEC min[BOARD##_NMOTOR];							\
-				SDEC max[BOARD##_NMOTOR];							\
-			} __attribute__((__packed__)) torqueLimit;				\
+			struct {    /*	 CI_SETPARAM */                         \
+				unsigned char type;                                 \
+                union {                                             \
+                    struct {                                        \
+                        SDEC k[BOARD##_NMOTOR];	/* P */             \
+                        SDEC b[BOARD##_NMOTOR];	/* D */     		\
+                    }__attribute__((__packed__)) pd;                \
+                    struct {                                        \
+                        SDEC min[BOARD##_NMOTOR];	/* Tq min */    \
+                        SDEC max[BOARD##_NMOTOR];	/* Tq max */    \
+                    }__attribute__((__packed__)) torque;            \
+                    SDEC a[BOARD##_NMOTOR];	/* Current */           \
+                    unsigned char boardId;	/* boardId */           \
+                } __attribute__((__packed__));                      \
+			} __attribute__((__packed__)) param;					\
 			struct {				 /*	 CI_RESET_SENSOR	 */		\
                 short flags;                                        \
 			} __attribute__((__packed__)) resetSensor;				\
@@ -108,8 +114,7 @@ enum BOARD##CommandLenEnum{																	\
 	BOARD##_CLEN_CURRENT = 1+sizeof_field(union CommandPacket##BOARD, current),				\
     BOARD##_CLEN_INTERPOLATE = 1+sizeof_field(union CommandPacket##BOARD, interpolate),		\
     BOARD##_CLEN_FORCE_CONTROL = 1+sizeof_field(union CommandPacket##BOARD, forceControl),	\
-    BOARD##_CLEN_PD_PARAM = 1+sizeof_field(union CommandPacket##BOARD, pdParam),			\
-    BOARD##_CLEN_TORQUE_LIMIT = 1+sizeof_field(union CommandPacket##BOARD, torqueLimit),	\
+    BOARD##_CLEN_SET_PARAM = 1+sizeof_field(union CommandPacket##BOARD, param),             \
 	BOARD##_CLEN_RESET_SENSOR = 1+sizeof_field(union CommandPacket##BOARD, resetSensor),	\
 };																	\
 const unsigned char cmdPacketLen##BOARD[CI_NCOMMAND] = {			\
@@ -122,8 +127,7 @@ const unsigned char cmdPacketLen##BOARD[CI_NCOMMAND] = {			\
     BOARD##_CLEN_CURRENT,											\
     BOARD##_CLEN_INTERPOLATE,										\
     BOARD##_CLEN_FORCE_CONTROL,										\
-    BOARD##_CLEN_PD_PARAM,											\
-    BOARD##_CLEN_TORQUE_LIMIT,										\
+    BOARD##_CLEN_SET_PARAM,											\
 	BOARD##_CLEN_RESET_SENSOR,  									\
 };																	\
 
@@ -206,7 +210,6 @@ const unsigned char retPacketLen##BOARD[CI_NCOMMAND]={									\
     BOARD##_RLEN_CURRENT,																\
     BOARD##_RLEN_INTERPOLATE,															\
     BOARD##_RLEN_FORCE_CONTROL,															\
-    BOARD##_RLEN_NORETURN,																\
     BOARD##_RLEN_NORETURN,																\
     BOARD##_RLEN_NORETURN,																\
 };

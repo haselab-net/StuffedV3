@@ -19,7 +19,9 @@ namespace PCController
             InitializeComponent();
             boards = new Boards();
             boards.Serial = uartBin;
-            cmbPortBin.Items.AddRange(SerialPort.GetPortNames());
+            string[] ports = SerialPort.GetPortNames();
+            Array.Sort(ports);
+            cmbPortBin.Items.AddRange(ports);
             if (cmbPortBin.Items.Count > 0)
             {
                 cmbPortBin.Text = cmbPortBin.Items[0].ToString();
@@ -65,7 +67,13 @@ namespace PCController
             if (cmbPortBin.Text.Length == 0) return;
             uartBin.PortName = cmbPortBin.Text;
             uartBin.BaudRate = 2000000;
-            uartBin.Open();
+            try
+            {
+                uartBin.Open();
+            }
+            catch {
+                return;
+            }
             if (uartBin.IsOpen) {
                 trBoards.Nodes.Clear();
                 boards.Clear();
@@ -75,6 +83,7 @@ namespace PCController
                     TreeNode nb = trBoards.Nodes.Add("#" + b.boardId
                         + "M" + b.nMotor + "C" + b.nCurrent + "F" + b.nForce
                         );
+                    nb.Nodes.Add("ID " + b.boardId);
                     nb.Nodes.Add("model " + b.modelNumber);
                     nb.Nodes.Add("nTarget " + b.nTarget);
                     nb.Nodes.Add("nMotor " + b.nMotor);
@@ -108,7 +117,8 @@ namespace PCController
                 b[i] = (short)motors[i].pd.B;
                 a[i] = (short)motors[i].pd.A;
             }
-            boards.SendParam(k, b, a);
+            boards.SendParamPd(k, b);
+            boards.SendParamCurrent(a);
         }
 
         private void timer_Tick(object sender, EventArgs e)
@@ -124,6 +134,54 @@ namespace PCController
             if (tbControl.SelectedTab == tpParam)
             {
                 UpdateParam();
+            }
+        }
+
+        private void trBoards_AfterLabelEdit(object sender, NodeLabelEditEventArgs e)
+        {
+            if (e.Label != null)
+            {
+                int id;
+                if (!int.TryParse(e.Label, out id)) {
+                    if (!int.TryParse(e.Label.Substring(2), out id))
+                    {
+                        e.CancelEdit = true;
+                    }
+                }
+                if (!e.CancelEdit)
+                {
+                    foreach (Board b in boards)
+                    {
+                        if (b.boardId == id)
+                        {
+                            e.CancelEdit = true;
+                        }
+                    }
+                }
+                if (!e.CancelEdit) {
+                    int oid;
+                    int.TryParse(e.Node.Text.Substring(2), out oid);
+                    byte[] ids = new byte[boards.Count];
+                    for (int i = 0; i < boards.Count; ++i) {
+                        ids[i] = (byte)boards[i].boardId;
+                        if (ids[i] == oid)
+                        {
+                            ids[i] = (byte)id;
+                        }
+                    }
+                    boards.SendParamBoardId(ids);
+                }
+            }
+        }
+
+        private void trBoards_BeforeLabelEdit(object sender, NodeLabelEditEventArgs e)
+        {
+            if (e.Node != null)
+            {
+                if (!e.Node.Text.Contains("ID"))
+                {
+                    e.CancelEdit = true;
+                }
             }
         }
     }

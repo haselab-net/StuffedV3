@@ -530,7 +530,7 @@ namespace Robokey
                 minT[i] = motors[i].torque.Minimum;
                 maxT[i] = motors[i].torque.Maximum;
             }
-            udpComm.SendTorqueLimit(motors.Count, minT, maxT);
+            udpComm.SendParamTorqueLimit(motors.Count, minT, maxT);
             udpComm.SendPackets();
         }
         private void ckMotor_CheckedChanged(object sender, EventArgs e)
@@ -547,7 +547,7 @@ namespace Robokey
                 {
                     zeros[i] = 0;
                 }
-                udpComm.SendTorqueLimit(motors.Count, zeros, zeros);
+                udpComm.SendParamTorqueLimit(motors.Count, zeros, zeros);
             }
             udpComm.SendPackets();
         }
@@ -664,7 +664,8 @@ namespace Robokey
                 b[i] = motors[i].pd.B;
                 a[i] = motors[i].pd.A;
             }
-            udpComm.SendPdParam(n, k, b, a);
+            udpComm.SendParamPd(n, k, b);
+            udpComm.SendParamCurrent(n, a);
             udpComm.SendPackets();
         }
 

@@ -4,6 +4,7 @@
 #include "control.h"
 #include "command.h"
 #include "uart.h"
+#include "nvm.h"
 #include <stdio.h>
 
 void outTest(int dir){
@@ -155,6 +156,38 @@ void pwmDown(){
 	printf("Set pwm %d to motor %d \r\n", pwm[motorCh], motorCh);
 	setPwm(motorCh, pwm[motorCh] * (SDEC_ONE/10));
 }
+static unsigned short useRx = 0;
+void enableRx(){
+    useRx = 0xFFFF;
+#ifdef BOARD3_SEPARATE
+    printf("RX enabled. Baud rate will be changed into 1200 bps.\r\n");
+#else
+    printf("RX enabled.\r\n");
+#endif
+    U1MODE = (0x8008 & ~(1<<15)); // disabling UART ON bit  
+    ANSELB = 0x300F; //U1RX=AN10=RB15, U1TX=RB14, AN8=RB13, AN7=RB12, RB3210=AN11 AN4 AN3 AN2
+#ifdef BOARD3_SEPARATE
+    U1BRG = 0x1387; // 1200bps 1uF requires 1ms.
+#endif
+    U1STASET = _U1STA_URXEN_MASK;   //  Enable RX
+    U1MODESET = _U1MODE_ON_MASK;	//  Enable UART ON bit
+}
+void disableRx(){
+    useRx = 0;
+#ifdef BOARD3_SEPARATE
+    printf("RX disabled. Baud rate will be changed into 3000000 bps.\r\n");
+    while(!U1STAbits.TRMT) monOut();
+#else
+    printf("RX enabled.\r\n");
+#endif
+    U1MODE = (0x8008 & ~(1<<15)); // disabling UART ON bit  
+    ANSELB = 0xB00F; //AN10=RB15, U1TX=RB14, AN8=RB13, AN7=RB12, RB3210=AN11 AN4 AN3 AN2
+#ifdef BOARD3_SEPARATE
+    U1BRG = 0x1;    // 3000000
+#endif
+    U1STASET = _U1STA_URXEN_MASK;   //  Enable RX
+    U1MODESET = _U1MODE_ON_MASK;	//  Enable UART ON bit
+}
 struct MonitorFunc monitors[] = {
 	{'a', "Show all A/D value", showAD, true},
 	{'A', "Show A/D value in motor order", showADInMotorOrder, true},
@@ -168,6 +201,7 @@ struct MonitorFunc monitors[] = {
 	{'m', "Select motor", selectMotor, false},
 	{'P', "Pwm up", pwmUp, false},
 	{'p', "Pwm down", pwmDown, false},
+	{'E', "End monitor", disableRx, false},
 };
 void showHelp(){
 	int i;
@@ -180,7 +214,20 @@ void monitor(){
 	static int ch = 0;
 	bool bHit = false;
 	int i;
-    //printf("UMSTA %x\r\n", UMSTA);
+#if  !defined BOARD1_MOTORDRIVER && !defined USE_MONITOR_RX
+    //  Enable U1RX when break signal is sent.
+    if (NCURRENT == 4 && useRx != 0xFFFF){
+        if (useRx < 10){
+            if (currentSense[1] > 3000){
+                useRx ++;
+            }
+        }else if (useRx < 20){
+            if (currentSense[1] < 2000) useRx ++;
+        }else{
+            enableRx();
+        }
+    }
+#endif    
 	if (UMSTAbits.URXDA){
 		ch = UMRXREG;
 	}

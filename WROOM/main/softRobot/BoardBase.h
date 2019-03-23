@@ -15,11 +15,13 @@ public:
 	virtual short GetPeriod()=0;
 	virtual short GetTargetCount()=0;
 	virtual short GetForceControlJacob(int j, int i)=0;
+	virtual short GetParamType()=0;
 	virtual short GetControlK(int i)=0;
 	virtual short GetControlB(int i)=0;
 	virtual short GetControlA(int i)=0;
 	virtual short GetTorqueMin(int i)=0;
 	virtual short GetTorqueMax(int i)=0;
+	virtual short GetBoardId()=0;
 	typedef ::ResetSensorFlags ResetSensorFlags;		//	in CommandIDs.cs
 	virtual short GetResetSensorFlags()=0;	//	
 };

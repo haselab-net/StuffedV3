@@ -45,6 +45,7 @@
 /**
   Section: Included Files
 */
+#include "../env.h"
 #include "uart1.h"
 #include "../uart.h"
 
@@ -66,6 +67,14 @@ void UART1_Initialize(void)
 #elif defined BOARD2_COMBINATION || defined BOARD3_SEPARATE
     // BaudRate = 3000000; Frequency = 24000000 Hz; BRG 1; 
     U1BRG = 0x1;
+#if defined USE_MONITOR_RX && defined BOARD3_SEPARATE
+    U1BRG = 0x1387; //      1200bps //  1uF requires 1ms.
+//    U1BRG = 0x9C3;   //  2400bps
+//    U1BRG = 0x4E1;  //  4800bps
+//    U1BRG = 0x270;  //      9600bps
+//    U1BRG = 0x138;  //      19200bps   
+#endif
+
 #else
 #error
 #endif
@@ -78,11 +87,11 @@ void UART1_Initialize(void)
 #else
 #error
 #endif
-    U1MODESET = _U1MODE_ON_MASK;	//  Enable UART ON bit
-
 #if defined BOARD1_MOTORDRIVER || defined USE_MONITOR_RX   //  T1RX is used by ADC for current sense. for monitor define this in env.h
     U1STASET = _U1STA_URXEN_MASK;   //  Enable RX
 #endif
+
+    U1MODESET = _U1MODE_ON_MASK;	//  Enable UART ON bit
 }
 
 
