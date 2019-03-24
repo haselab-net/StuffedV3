@@ -14,7 +14,7 @@
 static const char* LOG_TAG = "ws_main";
 
 void init() {
-    createWsServer();
+    createServer();
 }
 
 class MyWifiEventHandler: public WiFiEventHandler {
