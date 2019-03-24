@@ -1,5 +1,4 @@
 /* globals Duktape, log, DUKF, require */
-/* exported _sockets, cancelInterval, cancelTimeout, setInterval, setTimeout, _loop */
 
 StringUtils = {
 	endsWith: function(subjectString, searchString, position) {

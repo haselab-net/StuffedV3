@@ -72,6 +72,7 @@ typedef union {
 void  event_newISREvent(int isrType, void* data);
 void  esp32_duktape_freeEvent(duk_context* ctx, esp32_duktape_event_t* pEvent);
 void  esp32_duktape_initEvents();
+void  esp32_duktape_endEvents();
 int   esp32_duktape_waitForEvent();
 char* event_eventTypeToString(int eventType);
 void  event_newCallbackRequestedEvent(

@@ -22,7 +22,19 @@ var _ret = {
 var _core = {
     blockPause: function(ms) {
         internalJSLib.block_pause(ms);
-    } 
+    },
+
+    registerCallback: function(func) {
+        internalJSLib.register_callback(func);
+    },
+
+    sendCommand: function(arrayBuffer) {
+        internalJSLib.send_command(arrayBuffer);
+    },
+
+    handleEvent: function() {
+        internalJSLib.handleEvent();
+    }
 }
 
 var _loops = {
@@ -31,14 +43,14 @@ var _loops = {
 
         var start_time = (new Date).getMilliseconds();
         while((new Date).getMilliseconds()-start_time<ms) {
-            jf.handleEvent();
+            _core.handleEvent();
         }
     },
 
     forever: function (func) {
         while(1) {
             func();
-            jf.handleEvent();
+            _core.handleEvent();
         }
     }
 }

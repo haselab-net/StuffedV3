@@ -109,8 +109,8 @@ functionTableEntry_t functionTable[] = {
 	{ "ModuleSerialVFS",  ModuleSerialVFS,  1},
 	{ "ModuleSPI",        ModuleSPI,        1},
 	{ "ModuleSSL",        ModuleSSL,        1},
-	{ "ModuleSoftrobot",  ModuleSoftrobot,	1},			// register softrobot module
-	{ "ModuleJSFile",	  ModuleJSFile,		1},			// register jsfile module
+	//{ "ModuleSoftrobot",  ModuleSoftrobot,	1},			// register softrobot module
+	//{ "ModuleJSFile",	  ModuleJSFile,		1},			// register jsfile module
 	{ "ModuleJSLib",	  ModuleJSLib,		1},			// register jslib module
 #endif // ESP_PLATFORM
 	// Must be last entry
@@ -545,8 +545,8 @@ void registerModules(duk_context *ctx) {
 	ModuleESP32(ctx);
 	assert(top == duk_get_top(ctx));
 
-	ModuleWIFI(ctx); // Load the WiFi module
-	assert(top == duk_get_top(ctx));
+	// ModuleWIFI(ctx); // Load the WiFi module
+	// assert(top == duk_get_top(ctx));
 
 	//ModuleTIMERS(ctx);
 	//assert(top == duk_get_top(ctx));

@@ -4,17 +4,19 @@
 #include <freertos/task.h>
 
 #include "logging.h"
+#include "duktape_jsfile.h"
 
 static TaskHandle_t* xHandle = NULL;
 
-extern void duktape_main();
+extern void UdpCom_Lock();
+extern void UdpCom_Unlock();
 
 LOG_TAG("ws_task");
 
 static void duktapeTask(void* pvParameters) {
     LOGD("Start running JSFile");
 
-    duktape_main();
+    duktape_start();
 
     LOGD("Finished running JSFile");
 
@@ -25,9 +27,11 @@ static void duktapeTask(void* pvParameters) {
 }
 
 void wsCreateJsfileTask() {
+    LOGD("Create new jsfile task");
+
     xTaskCreate(
         duktapeTask,
-        "duktape_main",
+        "duktape_task",
         16*1024,
         NULL,
         tskIDLE_PRIORITY+1,
@@ -36,5 +40,15 @@ void wsCreateJsfileTask() {
 }
 
 void wsDeleteJsfileTask() {
+    if(!xHandle) return;
+    LOGD("Delete old jsfile task");
 
+    UdpCom_Lock();
+    
+    vTaskDelete(xHandle);
+    xHandle = NULL;
+
+    duktape_end();
+
+    UdpCom_Unlock();
 }

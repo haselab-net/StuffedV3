@@ -9,6 +9,7 @@
 #include <fstream>
 
 #include "logging.h"
+#include "module_jslib.h"
 
 #include "ws_command.h"
 #include "ws_task.h"
@@ -40,9 +41,9 @@ void wsOnConnected(WebSocket* pWS){
 static void saveToMainJs(const WebSocketInputStreambuf *content) {
     std::ofstream m_ofStream;
 
-    m_ofStream.open("/main/main.js", std::ofstream::out | std::ofstream::binary | std::ofstream::trunc);
+    m_ofStream.open("/spiffs/main/main.js", std::ofstream::out | std::ofstream::binary | std::ofstream::trunc);
     if (!m_ofStream.is_open()) {
-        LOGD("Failed to open file /main.main,js for writing");
+        LOGD("Failed to open file /spiffs/main/main.js for writing");
         return;
     }
 
@@ -86,7 +87,11 @@ static void wsSend(std::string data) {
     pWebSocket->send(data, WebSocket::SEND_TYPE_BINARY);
 }
 
+/**
+ * send command to browser and jsfile task
+ */
 void wsSendCommand(void* buffer, size_t buffer_size) {
+    // send packet to browser
     void* data_buffer = (void*)malloc(sizeof(int16_t)+buffer_size);
     *(int16_t*)data_buffer = PacketId::PI_COMMAND;
     memcpy((int16_t*)data_buffer+1, buffer, buffer_size);
@@ -97,20 +102,24 @@ void wsSendCommand(void* buffer, size_t buffer_size) {
     free(data_buffer);
 
     wsSend(s);
+
+    // send packet to jsfile task
+    return_packet_to_jsfile(buffer, buffer_size);
 }
 
 void printPacket(const void* pBuffer) {
     const int16_t* pBufferI16 = (const int16_t*)pBuffer;
     switch (*pBufferI16)
     {
-        case PacketId::PI_JSFILE:
+        case PacketId::PI_JSFILE: {
             printf("- PacketId: PI_JSFILE \r\n");
             const char* pBufferChar = (const char*)pBuffer;
             printf("- Content: \r\n");
             printf("%s", pBufferChar);
             break;
+        }
 
-        case PacketId::PI_COMMAND:
+        case PacketId::PI_COMMAND: {
             printf("- PacketId: PI_COMMAND \r\n");
 
             pBufferI16 = pBufferI16+1;
@@ -126,6 +135,7 @@ void printPacket(const void* pBuffer) {
             }
             printf("\r\n");
             break;
+        }
     
         default:
             printf("- PacketId: UNRECOGNIZED");

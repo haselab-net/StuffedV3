@@ -20,6 +20,6 @@ std::string getPacketIdStr(int id){
         case PacketId::PI_COMMAND:
             return "PI_COMMAND";
         default:
-            return "UNRECOGNIZED"
+            return "UNRECOGNIZED";
     }
 }
