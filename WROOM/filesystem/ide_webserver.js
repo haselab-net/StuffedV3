@@ -158,7 +158,7 @@ function startIde() {
 	log("IDE_WebServer listening on port " + WEBSERVER_PORT);
 
 
-   if (ws !== null) {
+   if (false) {
 		var webSocketServer = ws.Server();
 	
 		webSocketServer.on("connection", function(wsConnection) {
@@ -178,8 +178,9 @@ function startIde() {
 						var codeStr = sr.ab2str(arrayBuffer.slice(2))
 						log("- script: " + codeStr);
 						
-						FS.createWithContent("main/main.js", codeStr);
+						//FS.createWithContent("/main/main.js", codeStr);
 						jsfile.runFile();
+
 						break;
 					}
 					case 2: {

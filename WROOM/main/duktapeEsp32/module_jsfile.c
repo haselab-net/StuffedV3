@@ -234,6 +234,8 @@ TaskHandle_t xHandle = NULL;
  * stop running the current file
  */
 static duk_ret_t stopFile(duk_context* ctx) {
+    LOGD(">> stop file");
+
     if( xHandle != NULL )
     {
         UdpCom_Lock();
@@ -252,6 +254,8 @@ static duk_ret_t stopFile(duk_context* ctx) {
         UdpCom_Unlock();
     }
 
+    LOGD("<< stop file");
+
     return 0;
 }
 
@@ -259,16 +263,13 @@ static duk_ret_t stopFile(duk_context* ctx) {
  * run js file
  */
 static duk_ret_t runFile(duk_context* ctx) {
-    duk_pop(ctx);
-
     jsfile_initEvents();
     
     if(!esp32_duk_jsfile_context) {
         createJSFileHeap();
     }
 
-    //xTaskCreate(runFileTask, "run_jsfile_task", 6*1024, pvParameters, tskIDLE_PRIORITY + 1, &xHandle);
-    xTaskCreate(test, "test", 6*1024, NULL, tskIDLE_PRIORITY + 1, &xHandle);
+    xTaskCreate(runFileTask, "run_file_task", 6*1024, NULL, tskIDLE_PRIORITY + 1, &xHandle);
 
     return 0;
 }
@@ -276,9 +277,9 @@ static duk_ret_t runFile(duk_context* ctx) {
 void runFileTask(void* pvParameters) {
     LOGD("Start runing JSFile");
 
-    dukf_runFile(esp32_duk_jsfile_context, "main/main_init/js");
-    dukf_runFile(esp32_duk_jsfile_context, "main/main.js");
-    dukf_runFile(esp32_duk_jsfile_context, "main/main_end.js");
+    //dukf_runFile(esp32_duk_jsfile_context, "/main/main_init.js");
+    dukf_runFile(esp32_duk_jsfile_context, "/main/main.js");
+    //dukf_runFile(esp32_duk_jsfile_context, "/main/main_end.js");
 
     while(1) {
         vTaskDelay(pdMS_TO_TICKS(1000));
@@ -312,6 +313,13 @@ void createJSFileHeap() {
 
 	registerModules(esp32_duk_jsfile_context); // Register the built-in modules
 	dukf_log_heap("Heap after duk register modules");
+
+    dukf_runFile(esp32_duk_jsfile_context, "/main/init.js");
+    dukf_log_heap("Heap after init.js");
+
+    #if defined(ESP_PLATFORM)
+	    LOGD("Free heap at start of JavaScript main loop: %d", esp_get_free_heap_size());
+    #endif /* ESP_PLATFORM */
 }
 
  ////////////////////////

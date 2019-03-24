@@ -2,8 +2,8 @@
  * JSLib module
  */
 
- var jf = import("jsfile")
- var sr = import("softrobot")
+ var jf = require("jsfile")
+ var sr = require("softrobot")
 
 var moduleJSLib = ESP32.getNativeFunction("ModuleJSLib");
 if (moduleJSLib === null) {
