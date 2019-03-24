@@ -160,7 +160,7 @@ void duktape_start() {
 
     createJSFileHeap();
 
-    duk_idx_t lastStackTop = duk_get_top(esp32_duk_context); // Get the last top value of the stack from which we will use to check for leaks.
+    //duk_idx_t lastStackTop = duk_get_top(esp32_duk_context); // Get the last top value of the stack from which we will use to check for leaks.
 
     runJsFile();
 }

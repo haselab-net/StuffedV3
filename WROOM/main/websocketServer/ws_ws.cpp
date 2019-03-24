@@ -13,6 +13,7 @@
 
 #include "ws_command.h"
 #include "ws_task.h"
+#include "ws_fs.h"
 
 extern void UdpCom_OnReceiveServer(void* payload, int len);
 
@@ -41,7 +42,8 @@ void wsOnConnected(WebSocket* pWS){
 static void saveToMainJs(const WebSocketInputStreambuf *content) {
     std::ofstream m_ofStream;
 
-    m_ofStream.open("/spiffs/main/main.js", std::ofstream::out | std::ofstream::binary | std::ofstream::trunc);
+    std::string root_path = SPIFFS_MOUNTPOINT;
+    m_ofStream.open(root_path + "/main/main.js", std::ofstream::out | std::ofstream::binary | std::ofstream::trunc);
     if (!m_ofStream.is_open()) {
         LOGD("Failed to open file /spiffs/main/main.js for writing");
         return;
