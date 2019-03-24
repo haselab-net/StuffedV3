@@ -16,6 +16,8 @@ namespace PCController
         public int nCurrent;
         public int nForce;
         public int nTouch;
+        public ushort tickRead;    //  tick read from board
+        public byte interpolateTargetCountOfRead;
         public List<int> motorMap = new List<int>();
         public List<int> currentMap = new List<int>();
         public List<int> forceMap = new List<int>();

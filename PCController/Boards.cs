@@ -14,10 +14,53 @@ namespace PCController
             get { return serial; }
             set { serial = value; }
         }
-        ushort interpolateTargetCountOfWrite;
-        ushort interpolateTargetCountOfRead;
-        public ushort InterpolateTargetCountOfWrite { get { return interpolateTargetCountOfWrite; } }
-        public ushort InterpolateTargetCountOfRead { get { return interpolateTargetCountOfRead; } }
+        public enum ControlMode {
+            CM_DIRECT,
+            CM_CURRENT,
+            CM_INTERPOLATE
+        };
+        ControlMode controlMode = ControlMode.CM_DIRECT;
+        byte interpolateTargetCountOfWrite;
+        public byte InterpolateTargetCountOfWrite { get { return interpolateTargetCountOfWrite; } }
+        public byte InterpolateTargetCountOfRead { get {
+                if (Count == 0) return 0;
+                byte rv = this[0].interpolateTargetCountOfRead;
+                foreach (Board b in this)
+                {
+                    int diff = b.interpolateTargetCountOfRead - rv;
+                    if (diff < 0) rv = (byte)(rv + diff);
+                }
+                return rv;
+            }
+        }
+        public ushort TickMin
+        {
+            get
+            {
+                if (Count == 0) return 0;
+                ushort rv = this[0].tickRead;
+                foreach (Board b in this)
+                {
+                    int diff = b.tickRead - rv;
+                    if (diff < 0) rv = (ushort)(rv + diff);
+                }
+                return rv;
+            }
+        }
+        public ushort TickMax
+        {
+            get
+            {
+                if (this.Count == 0) return 0;
+                ushort rv = this[0].tickRead;
+                foreach (Board b in this)
+                {
+                    int diff = b.tickRead - rv;
+                    if (diff > 0) rv = (ushort)(rv + diff);
+                }
+                return rv;
+            }
+        }
         int nMotor;
         int nCurrent;
         int nForce;
@@ -38,6 +81,10 @@ namespace PCController
             buf[cur++] = (byte)(v & 0xFF);
             buf[cur++] = (byte)(v >> 8);
         }
+        public static void WriteByte(byte[] buf, ref int cur, byte v)
+        {
+            buf[cur++] = v;
+        }
         public static short ReadShort(byte[] buf, ref int cur)
         {
             short v;
@@ -47,6 +94,7 @@ namespace PCController
         }
         public void SendPosDirect(short[] targets)
         {
+            SetControlMode(ControlMode.CM_DIRECT);
             int mi = 0;
             foreach (Board board in this)
             {
@@ -79,10 +127,23 @@ namespace PCController
                 }
             }
         }
+        public void SetControlMode(ControlMode m) {
+            if (m != controlMode) {
+                if (m == ControlMode.CM_INTERPOLATE)
+                {
+                    interpolateTargetCountOfWrite = 0;
+                    foreach (Board b in this)
+                    {
+                        b.interpolateTargetCountOfRead = 0x100 - 2;
+                    }
+                }
+                controlMode = m;
+            }
+        }
         public void SendPosInterpolate(short[] targets, ushort period)
         {
             int mi = 0;
-            int tickRead = 0;
+            SetControlMode(ControlMode.CM_INTERPOLATE);
             foreach (Board board in this)
             {
                 //  compute length
@@ -98,7 +159,7 @@ namespace PCController
                     WriteShort(sendBuf, ref cur, targets[mi++]);
                 }
                 WriteShort(sendBuf, ref cur, (short)period);
-                WriteShort(sendBuf, ref cur, (short)interpolateTargetCountOfWrite);
+                WriteByte(sendBuf, ref cur, interpolateTargetCountOfWrite);
                 interpolateTargetCountOfWrite++;
                 Serial.Write(sendBuf, 0, bufLen);
                 int nRead = 0;
@@ -111,14 +172,15 @@ namespace PCController
                 {
                     pos[board.motorMap[i]] = ReadShort(recvBuf, ref cur);
                 }
-                tickRead = ReadShort(recvBuf, ref cur);
-                interpolateTargetCountOfRead = recvBuf[cur];
+                board.tickRead = (ushort)ReadShort(recvBuf, ref cur);
+                board.interpolateTargetCountOfRead = recvBuf[cur];
             }
         }
 
         //  return received currents;
         public short[] SendCurrent(short[] currents)
         {
+            SetControlMode(ControlMode.CM_CURRENT);
             int mi = 0;
             short[] rv = new short [currents.Length];
             foreach(Board board in this)

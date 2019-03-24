@@ -53,10 +53,10 @@ struct Target{
 	SDEC Jacob[NFORCE][NMOTOR];
 };
 struct Targets{
-	unsigned short tick;		//	current tick count
+	volatile unsigned short tick;		//	current tick count
 	volatile unsigned char countOfRead;	//	couner value of buf[read]
-	volatile char read;         //	interpolation works between "pos[read]" and "pos[read+1]".
-	volatile char write;		//	cursor to add new data. pos[write] = newdata.
+	volatile char read;                 //	interpolation works between "pos[read]" and "pos[read+1]".
+	volatile char write;                //	cursor to add new data. pos[write] = newdata.
 	volatile struct Target buf[NTARGET];
 };
 extern struct Targets targets;

@@ -1,3 +1,5 @@
+#define RUNTICK_DEBUG
+
 using System;
 using System.Windows.Forms;
 using System.Collections.Generic;
@@ -345,6 +347,7 @@ namespace PCController
         const int NINTERPOLATEFILL = 6;
         private void UpdatePosInterpolate() {
 #if true   //  interpolate on motor drivers
+            boards.SetControlMode(Boards.ControlMode.CM_INTERPOLATE);
             int remain = (int)(byte)((int)boards.InterpolateTargetCountOfWrite - (int)boards.InterpolateTargetCountOfRead);
             int vacancy = boards.NTarget - remain;
             int diff = NINTERPOLATEFILL - remain;
@@ -352,19 +355,19 @@ namespace PCController
             System.Diagnostics.Debug.Write("RunTimer: Remain=");
             System.Diagnostics.Debug.Write(remain);
             System.Diagnostics.Debug.Write("(");
-            System.Diagnostics.Debug.Write(udpComm.nInterpolateRemain);
+            System.Diagnostics.Debug.Write(remain);
             System.Diagnostics.Debug.Write(") Cw=");
-            System.Diagnostics.Debug.Write(udpComm.interpolateTargetCountOfWrite);
+            System.Diagnostics.Debug.Write(boards.InterpolateTargetCountOfWrite);
             System.Diagnostics.Debug.Write(" Cr=");
-            System.Diagnostics.Debug.Write(udpComm.interpolateTargetCountOfRead);
+            System.Diagnostics.Debug.Write(boards.InterpolateTargetCountOfRead);
             System.Diagnostics.Debug.Write(" tMin=");
-            System.Diagnostics.Debug.Write(udpComm.interpolateTickMin);
+            System.Diagnostics.Debug.Write(boards.TickMin);
             System.Diagnostics.Debug.Write(" tMax=");
-            System.Diagnostics.Debug.Write(udpComm.interpolateTickMax);
+            System.Diagnostics.Debug.Write(boards.TickMax);
             System.Diagnostics.Debug.Write(" vac=");
             System.Diagnostics.Debug.Write(vacancy);
             System.Diagnostics.Debug.Write("(");
-            System.Diagnostics.Debug.Write(udpComm.nInterpolateVacancy);
+            System.Diagnostics.Debug.Write(vacancy);
             System.Diagnostics.Debug.Write(") diff=");
             System.Diagnostics.Debug.WriteLine(diff);
 #endif
@@ -380,6 +383,7 @@ namespace PCController
             //  send targets
             if (diff > 0)
             {
+                //  Send targets
                 for (int i = 0; i < diff; ++i)
                 {
 #if false              //  test for update
@@ -397,12 +401,13 @@ namespace PCController
                     UpdateCurTime(curTime, true);
                     if (ckRun.Checked)  //  once‚Ìê‡AUpdateCurTime‚ÅckRun‚ªØ‚ê‚éB
                     {
-                        boards.SendPosInterpolate(Interpolate(curTime) + motors.Offset(), (ushort)timer.Interval);
+                        boards.SendPosInterpolate(Interpolate(curTime) + motors.Offset(), (ushort)(timer.Interval*3));
 #if RUNTICK_DEBUG
-                        System.Diagnostics.Debug.Write("cor:" + udpComm.interpolateTargetCountOfRead);
-                        System.Diagnostics.Debug.Write(" cow:" + udpComm.interpolateTargetCountOfWrite);
-                        System.Diagnostics.Debug.Write(" pr:");
-                        System.Diagnostics.Debug.Write((ushort)runTimer.Interval);
+                        System.Diagnostics.Debug.Write("cor:" + boards.InterpolateTargetCountOfRead);
+                        System.Diagnostics.Debug.Write(" cow:" + boards.InterpolateTargetCountOfWrite);
+                        System.Diagnostics.Debug.Write(" diff:" + diff);
+                        System.Diagnostics.Debug.Write(" period:");
+                        System.Diagnostics.Debug.Write((ushort)timer.Interval*3);
                         System.Diagnostics.Debug.Write(" tg:");
                         if (Interpolate(curTime) != null)
                         {
@@ -415,6 +420,7 @@ namespace PCController
             }
             else
             {  
+                //  Get current status of interpolation
                 boards.SendPosInterpolate(Interpolate(curTime) + motors.Offset(), 0);
             }
 #else   //  use direct

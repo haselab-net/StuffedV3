@@ -216,9 +216,15 @@ void targetsForceControlAddOrUpdate(SDEC* pos, SDEC JK[NFORCE][NMOTOR] ,short pe
 	}
 }
 void targetsInit(){
-	int i, j;
+	/*
+     * Initial state
+     * buf[0] = buf[1] current position, period = 1.
+     * interpolate between 0 and 1, ie. read=0, write=2
+     * countOfWrite start from 0. So countOfRead start from -2.
+     */
+    int i, j;
 	targets.tick = 1;
-	targets.read = 0;
+	targets.read = 0; 
 	targets.write = 2;
 	targets.countOfRead = 0x100 - 2;
 	updateMotorState();
@@ -245,10 +251,10 @@ void targetsTickProceed(){
 			}else{
 				targets.read = 0;
 			}
-			LOGI("TickProceed: Read=%d cor=%d\n", targets.read, targets.countOfRead);
+			LOGI("TickProceed: Read=%d cor=%d\r\n", targets.read, targets.countOfRead);
 		}else{
 			targets.tick = targets.buf[(targets.read+1)%NTARGET].period;
-			LOGW("TickProceed: Underflow. Failed to increment read=%d cor=%d\n", targets.read, targets.countOfRead);
+			LOGW("TickProceed: Underflow. Failed to increment read=%d cor=%d\r\n", targets.read, targets.countOfRead);
 			underflowCount ++;
 		}
 	}
@@ -339,14 +345,14 @@ void controlInit(){
 #endif
 }
 void controlSetMode(enum ControlMode m){
-	DISABLE_INTERRUPT
 	if (controlMode != m){
-		controlMode = m;
-		if (controlMode == CM_INTERPOLATE || controlMode == CM_FORCE_CONTROL){
+		if (m == CM_INTERPOLATE || m == CM_FORCE_CONTROL){
 			targetsInit();
 		}
+    	DISABLE_INTERRUPT
+		controlMode = m;
+    	ENABLE_INTERRUPT
 	}
-	ENABLE_INTERRUPT
 }
 
 void onControlTimer(){
