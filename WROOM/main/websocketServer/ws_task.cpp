@@ -4,7 +4,9 @@
 #include <freertos/task.h>
 
 #include "esp_log.h"
-#include "duktape_jsfile.h"
+extern "C" {
+    #include "duktape_jsfile.h"
+}
 #include "UdpCom.h"
 
 static TaskHandle_t* xHandle = NULL;

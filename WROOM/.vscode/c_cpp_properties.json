@@ -40,7 +40,10 @@
                 "C:/msys32/home/12707/esp/esp-idf/components/mbedtls/mbedtls/include",
                 "${workspaceFolder}/components/esp32snippets",
                 "${workspaceFolder}/main/duktapeEsp32/include",
-                "${workspaceFolder}/main/softRobot"
+                "${workspaceFolder}/main/softRobot",
+                "${workspaceFolder}/main/websocketServer",
+                "C:/msys32/home/12707/esp/esp-idf/components/esp_http_client/include",
+                "C:/msys32/home/12707/esp/esp-idf/components/nghttp/nghttp2/third-party/http-parser"
             ],
             "intelliSenseMode": "clang-x64",
             "defines": [

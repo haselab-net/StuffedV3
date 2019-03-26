@@ -40,7 +40,8 @@ void wsOnConnected(WebSocket* pWS){
     pWebSocket->setHandler(&webSocketHandler);
 }
 
-static void saveToMainJs(const WebSocketInputStreambuf *content) {
+/*
+static void saveToMainJsStream(const WebSocketInputStreambuf *content) {
     std::ofstream m_ofStream;
 
     std::string root_path = SPIFFS_MOUNTPOINT;
@@ -54,22 +55,44 @@ static void saveToMainJs(const WebSocketInputStreambuf *content) {
 
     m_ofStream.close();
 }
+*/
+
+static void saveToMainJs(const char *content, size_t length){
+    std::ofstream m_ofStream;
+
+    std::string root_path = SPIFFS_MOUNTPOINT;
+    m_ofStream.open(root_path + "/main/main.js", std::ofstream::out | std::ofstream::binary | std::ofstream::trunc);
+    if (!m_ofStream.is_open()) {
+        ESP_LOGD(LOG_TAG, "Failed to open file /spiffs/main/main.js for writing");
+        return;
+    }
+
+    m_ofStream.write(content, length);
+    m_ofStream.close();
+
+    ESP_LOGD(LOG_TAG, "File main.js written to /spiffs/main/main.js");
+}
 
 void wsOnMessage(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket* pWebSocket) {
-    std::stringstream buffer;
-    buffer << pWebSocketInputStreambuf;
-    const char* pBuffer = buffer.str().c_str();
+    int16_t packetId = pWebSocketInputStreambuf->sgetc();
+    ESP_LOGD(LOG_TAG, "type: %i", packetId);
+
+    size_t bufferSize = 4096;
+    char* pBuffer = new char[bufferSize];
+    std::streamsize ssize = pWebSocketInputStreambuf->sgetn(pBuffer, bufferSize);
+    if(ssize>=bufferSize) ESP_LOGD(LOG_TAG ,"File main.js to large!!!!!!!!!");
+
     ESP_LOGD(LOG_TAG, "Received a ws packet");
-    printPacket((const void*)pBuffer);
+    printPacket((const void*)pBuffer, ssize);
 
-    const int16_t* pBufferI16 = (const int16_t*)pBuffer;
+    //const int16_t* pBufferI16 = (const int16_t*)pBuffer;
 
-    switch (*pBufferI16)
+    switch (packetId)
     {
         case PacketId::PI_JSFILE: {
             wsDeleteJsfileTask();
             
-            saveToMainJs(pWebSocketInputStreambuf);
+            saveToMainJs(pBuffer+2, ssize-2);
             wsCreateJsfileTask();
             
             break;
@@ -83,12 +106,14 @@ void wsOnMessage(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket* p
         default:
             break;
     }
+
+    delete[] pBuffer;
 }
 
 static void wsSend(std::string data) {
     if(!pWebSocket) return;
     ESP_LOGD(LOG_TAG, "Prepare to send a ws packet");
-    printPacket((const void*)data.c_str());
+    printPacket((const void*)data.c_str(), data.size());
     pWebSocket->send(data, WebSocket::SEND_TYPE_BINARY);
 }
 
@@ -112,7 +137,7 @@ void wsSendCommand(void* buffer, size_t buffer_size) {
     return_packet_to_jsfile(buffer, buffer_size);
 }
 
-void printPacket(const void* pBuffer) {
+void printPacket(const void* pBuffer, size_t len) {
     const int16_t* pBufferI16 = (const int16_t*)pBuffer;
     switch (*pBufferI16)
     {
@@ -120,7 +145,10 @@ void printPacket(const void* pBuffer) {
             printf("- PacketId: PI_JSFILE \r\n");
             const char* pBufferChar = (const char*)pBuffer;
             printf("- Content: \r\n");
-            printf("%s", pBufferChar);
+            for(int i=2; i<len; i++) {
+                std::cout << pBufferChar[i];
+            }
+            printf("\r\n");
             break;
         }
 
@@ -133,7 +161,7 @@ void printPacket(const void* pBuffer) {
             printf("   |- Length: %i \r\n", pBufferI16[0]);
             printf("   |- CommandId: %i \r\n", pBufferI16[1]);
 
-            printf("   |- Command: ");
+            printf("   |- Command: \r\n");
             for(size_t i = 0; i < length; i++)
             {
                 printf("%i ", pBufferI16[2+i]);
@@ -142,8 +170,9 @@ void printPacket(const void* pBuffer) {
             break;
         }
     
-        default:
-            printf("- PacketId: UNRECOGNIZED");
+        default: {
+            printf("- PacketId: UNRECOGNIZED (%i) \r\n", pBufferI16[0]);
             break;
+        }
     }
 }

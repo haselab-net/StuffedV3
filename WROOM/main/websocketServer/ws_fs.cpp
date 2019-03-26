@@ -1,5 +1,7 @@
 #include "ws_fs.h"
 
+#include <fstream>
+
 #include "logging.h"
 #include "duktape_spiffs.h"
 

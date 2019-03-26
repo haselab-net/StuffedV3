@@ -7,7 +7,4 @@
 # please read the ESP-IDF documents if you need to do this.
 #
 
-COMPONENT_ADD_INCLUDEDIRS := . ../softRobot ../duktapeEsp32/include
-
-COMPONENT_ADD_LDFLAGS := -L$(BUILD_DIR_BASE)/softRobot -lsoftRobot \
-							-L$(BUILD_DIR_BASE)/duktapeEsp32 -lduktapeEsp32
+COMPONENT_ADD_INCLUDEDIRS := . 

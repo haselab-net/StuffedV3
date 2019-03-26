@@ -78,7 +78,8 @@
         "type_traits": "cpp",
         "tuple": "cpp",
         "typeinfo": "cpp",
-        "duktape_jsfile.h": "c"
+        "duktape_jsfile.h": "c",
+        "udpcom.h": "c"
     },
     "terminal.integrated.shell.windows": "c:\\msys32\\usr\\bin\\bash.exe",
     "terminal.integrated.env.windows": {

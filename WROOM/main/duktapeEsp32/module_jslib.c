@@ -11,8 +11,7 @@
 #include "duktape_utils.h"
 #include "duktape_event.h"
 #include "duktape_jsfile.h"
-
-extern void UdpCom_OnReceiveServer_C(void* payload, int len);
+#include "UdpCom.h"
 
 static uint32_t stash_key_callback = 0;    // stash key for packet callback function
 static size_t return_packet_buffer_size;   // the size of buffer we want to send
@@ -88,7 +87,7 @@ static duk_ret_t send_command(duk_context* ctx) {
 
     void* data = duk_get_buffer_data(ctx, -2, &length);
 
-    UdpCom_OnReceiveServer_C(data, length);
+    UdpCom_OnReceiveServer(data, length);
 
     duk_pop_2(ctx);
 

@@ -19,6 +19,8 @@
 #include "ws_fs.h"
 #include "ws_wifi.h"
 
+LOG_TAG("ws_http");
+
 static HttpServer* pHttpServer;
 
 static void wsHandshakeHandler(HttpRequest* pRequest, HttpResponse* pResponse) {
@@ -32,10 +34,18 @@ static void httpWifiHtmlHandler(HttpRequest* pRequest, HttpResponse* pResponse) 
     std::string root_path = SPIFFS_MOUNTPOINT;
     fr.open(root_path+"/web/selectAP.html");
 
-    std::string html_content;
-    fr >> html_content;
-    pResponse->setStatus(200, html_content);
+    if(!fr.is_open()) {
+        LOGD("Failed to open html file");
+        return;
+    }
+
+    std::stringstream html_content;
+    html_content << fr.rdbuf();
+    pResponse->setStatus(200, "OK");
+    pResponse->sendData(html_content.str());
     pResponse->close();
+
+    std::cout << "html_file: " << html_content.str() << std::endl;
 }
 
 static void httpWifiSetHandler(HttpRequest* pRequest, HttpResponse* pResponse) {

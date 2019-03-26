@@ -5,11 +5,10 @@
 #include "duktape_utils.h"
 #include "module_softrobot.h"
 #include "module_jsfile.h"
+#include "UdpCom.h"
 
 static uint32_t stash_key_callback = 0;    // stash key for callback function: send_packet
 static size_t return_packet_buffer_size;   // the size of buffer we want to send
-
-extern void UdpCom_OnReceiveServer_C(void* payload, int len);
 
 /*
 * handle content in the buffer
@@ -28,7 +27,7 @@ static duk_ret_t handle_packet(duk_context *ctx){
     }
     // do something with the buffer recieved (buffer, out_size)
     printf("handle_packet: a buffer received.\n");
-    UdpCom_OnReceiveServer_C(buffer, out_size);
+    UdpCom_OnReceiveServer(buffer, out_size);
 
     // free buffer
     duk_pop(ctx);

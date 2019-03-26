@@ -41,6 +41,8 @@ var _loops = {
     pause: function (ms) {
         if(ms<=0) return;
 
+        console.log("pause for " + ms + " ms");
+
         var start_time = (new Date).getMilliseconds();
         while((new Date).getMilliseconds()-start_time<ms) {
             _core.handleEvent();

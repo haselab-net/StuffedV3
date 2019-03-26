@@ -2,15 +2,15 @@
 
 #ifndef __cplusplus
 
-extern void UdpCom_OnReceiveServer_C(void* payload, int len);
-extern void UdpCom_Lock_C();
-extern void UdpCom_Unlock_C();
-
-#else
-
 void UdpCom_OnReceiveServer(void* payload, int len);
 void UdpCom_Lock();
 void UdpCom_Unlock();
+
+#else
+
+extern "C" void UdpCom_OnReceiveServer(void* payload, int len);
+extern "C" void UdpCom_Lock();
+extern "C" void UdpCom_Unlock();
 
 #include "ArrayRing.h"
 #include "esp_event_loop.h"

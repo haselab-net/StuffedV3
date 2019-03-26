@@ -15,6 +15,6 @@ void wsOnMessage(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket* p
 
 void wsSendCommand(void* buffer, size_t buffer_size);
 
-void printPacket(const void* pBuffer);
+void printPacket(const void* pBuffer, size_t len);
 
 #endif
