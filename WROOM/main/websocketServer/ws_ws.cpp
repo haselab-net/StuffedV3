@@ -8,35 +8,36 @@
 #include <sstream>
 #include <fstream>
 
-#include "logging.h"
+#include "esp_log.h"
 #include "module_jslib.h"
+#include "UdpCom.h"
 
 #include "ws_command.h"
 #include "ws_task.h"
 #include "ws_fs.h"
 
-extern void UdpCom_OnReceiveServer(void* payload, int len);
-
-LOG_TAG("ws_ws");
+static char LOG_TAG[] = "ws_ws";
 
 static WebSocket* pWebSocket = NULL;
+static SRWebSocketHandler webSocketHandler = SRWebSocketHandler();
 
 void SRWebSocketHandler::onClose() {
-    LOGD("on close");
+    ESP_LOGD(LOG_TAG, "on close");
     pWebSocket = NULL;
 }
 void SRWebSocketHandler::onMessage(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket* pWebSocket){
-    LOGD("on message");
+    ESP_LOGD(LOG_TAG, "on message");
     wsOnMessage(pWebSocketInputStreambuf, pWebSocket);
 }
 void SRWebSocketHandler::onError(std::string error){
-    LOGD("on error");
+    ESP_LOGD(LOG_TAG, "on error");
     pWebSocket = NULL;
 }
 
 void wsOnConnected(WebSocket* pWS){
-    LOGD("Opened a Websocket connenction");
+    ESP_LOGD(LOG_TAG, "Opened a Websocket connenction");
     pWebSocket = pWS;
+    pWebSocket->setHandler(&webSocketHandler);
 }
 
 static void saveToMainJs(const WebSocketInputStreambuf *content) {
@@ -45,7 +46,7 @@ static void saveToMainJs(const WebSocketInputStreambuf *content) {
     std::string root_path = SPIFFS_MOUNTPOINT;
     m_ofStream.open(root_path + "/main/main.js", std::ofstream::out | std::ofstream::binary | std::ofstream::trunc);
     if (!m_ofStream.is_open()) {
-        LOGD("Failed to open file /spiffs/main/main.js for writing");
+        ESP_LOGD(LOG_TAG, "Failed to open file /spiffs/main/main.js for writing");
         return;
     }
 
@@ -58,24 +59,26 @@ void wsOnMessage(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket* p
     std::stringstream buffer;
     buffer << pWebSocketInputStreambuf;
     const char* pBuffer = buffer.str().c_str();
-    LOGD("Received a ws packet");
+    ESP_LOGD(LOG_TAG, "Received a ws packet");
     printPacket((const void*)pBuffer);
 
     const int16_t* pBufferI16 = (const int16_t*)pBuffer;
 
     switch (*pBufferI16)
     {
-        case PacketId::PI_JSFILE:
+        case PacketId::PI_JSFILE: {
             wsDeleteJsfileTask();
             
             saveToMainJs(pWebSocketInputStreambuf);
             wsCreateJsfileTask();
             
             break;
+        }
 
-        case PacketId::PI_COMMAND:
+        case PacketId::PI_COMMAND: {
             UdpCom_OnReceiveServer((void*)(pBuffer+1), pBuffer[1]);
             break;
+        }
     
         default:
             break;
@@ -84,7 +87,7 @@ void wsOnMessage(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket* p
 
 static void wsSend(std::string data) {
     if(!pWebSocket) return;
-    LOGD("Prepare to send a ws packet");
+    ESP_LOGD(LOG_TAG, "Prepare to send a ws packet");
     printPacket((const void*)data.c_str());
     pWebSocket->send(data, WebSocket::SEND_TYPE_BINARY);
 }

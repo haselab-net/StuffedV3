@@ -3,22 +3,23 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 
-#include "logging.h"
+#include "esp_log.h"
 #include "duktape_jsfile.h"
+#include "UdpCom.h"
 
 static TaskHandle_t* xHandle = NULL;
 
 extern void UdpCom_Lock();
 extern void UdpCom_Unlock();
 
-LOG_TAG("ws_task");
+static char LOG_TAG[] = "ws_task";
 
 static void duktapeTask(void* pvParameters) {
-    LOGD("Start running JSFile");
+    ESP_LOGD(LOG_TAG, "Start running JSFile");
 
     duktape_start();
 
-    LOGD("Finished running JSFile");
+    ESP_LOGD(LOG_TAG, "Finished running JSFile");
 
     while(1) {
         vTaskDelay(pdMS_TO_TICKS(1000));
@@ -27,7 +28,7 @@ static void duktapeTask(void* pvParameters) {
 }
 
 void wsCreateJsfileTask() {
-    LOGD("Create new jsfile task");
+    ESP_LOGD(LOG_TAG, "Create new jsfile task");
 
     xTaskCreate(
         duktapeTask,
@@ -41,7 +42,7 @@ void wsCreateJsfileTask() {
 
 void wsDeleteJsfileTask() {
     if(!xHandle) return;
-    LOGD("Delete old jsfile task");
+    ESP_LOGD(LOG_TAG, "Delete old jsfile task");
 
     UdpCom_Lock();
     

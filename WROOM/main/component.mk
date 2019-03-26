@@ -6,3 +6,5 @@
 # lib(subdirectory_name).a in the build directory. This behaviour is entirely configurable,
 # please read the ESP-IDF documents if you need to do this.
 #
+
+COMPONENT_ADD_LDFLAGS := -L$(BUILD_DIR_BASE)/websocketServer -lwebsocketServer

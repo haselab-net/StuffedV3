@@ -239,13 +239,22 @@ void UdpCom::OnReceiveServer(void* payload, int len) {
 	recvs.Write();
 	recvs.Unlock();
 }
-extern "C" void UdpCom_OnReceiveServer(void* payload, int len){
+extern "C" void UdpCom_OnReceiveServer_C(void* payload, int len){
 	udpCom.OnReceiveServer(payload, len);
 }
-extern "C" void UdpCom_Lock(){
+extern "C" void UdpCom_Lock_C(){
 	udpCom.recvs.Lock();
 }
-extern "C" void UdpCom_Unlock(){
+extern "C" void UdpCom_Unlock_C(){
+	udpCom.recvs.Unlock();
+}
+void UdpCom_OnReceiveServer(void* payload, int len){
+	udpCom.OnReceiveServer(payload, len);
+}
+void UdpCom_Lock(){
+	udpCom.recvs.Lock();
+}
+void UdpCom_Unlock(){
 	udpCom.recvs.Unlock();
 }
 

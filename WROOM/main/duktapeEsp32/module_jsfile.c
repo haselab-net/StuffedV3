@@ -19,8 +19,8 @@
 
 #include "duktape_event.h"
 
-extern void UdpCom_Lock();
-extern void UdpCom_Unlock();
+extern void UdpCom_Lock_C();
+extern void UdpCom_Unlock_C();
 
 LOG_TAG("jsfile");
 
@@ -238,7 +238,7 @@ static duk_ret_t stopFile(duk_context* ctx) {
 
     if( xHandle != NULL )
     {
-        UdpCom_Lock();
+        UdpCom_Lock_C();
 
         // delete task
         vTaskDelete( xHandle );
@@ -251,7 +251,7 @@ static duk_ret_t stopFile(duk_context* ctx) {
         // stop event handling
         jsfile_stopEvents();
 
-        UdpCom_Unlock();
+        UdpCom_Unlock_C();
     }
 
     LOGD("<< stop file");

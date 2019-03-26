@@ -61,7 +61,7 @@ void createHttpServer() {
     pHttpServer = new HttpServer();
     pHttpServer->addPathHandler(
         HttpRequest::HTTP_METHOD_GET,
-        "",
+        "/",
         wsHandshakeHandler
     );
     pHttpServer->addPathHandler(
