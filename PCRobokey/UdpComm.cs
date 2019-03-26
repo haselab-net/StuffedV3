@@ -80,8 +80,6 @@ namespace Robokey
                 }
             }
         }
-
-
         //  network
         volatile System.Net.Sockets.UdpClient udp = null;
         volatile System.Net.Sockets.UdpClient udpBc = null;
@@ -105,15 +103,20 @@ namespace Robokey
         public enum ControlMode {
             CM_DIRECT,
             CM_INTERPOLATE,
+            CM_CURRENT,
             CM_FORCE
         };
+
         private ControlMode _controlMode = ControlMode.CM_DIRECT;
         public ControlMode controlMode {
             set {
                 if (_controlMode != value)
                 {
-                    interpolateTargetCountOfRead = 0x100-2;
-                    interpolateTargetCountOfWrite = 0;
+                    if (value == ControlMode.CM_INTERPOLATE || value == ControlMode.CM_FORCE)
+                    {
+                        interpolateTargetCountOfRead = 0x100 - 2;
+                        interpolateTargetCountOfWrite = 0;
+                    }
                     _controlMode = value;
                 }
             }

@@ -62,7 +62,9 @@
             this.cmbPortBin = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
             this.btListBoards = new System.Windows.Forms.Button();
+            this.splitContainer2 = new System.Windows.Forms.SplitContainer();
             this.trBoards = new System.Windows.Forms.TreeView();
+            this.txMsg = new System.Windows.Forms.TextBox();
             this.openPose = new System.Windows.Forms.OpenFileDialog();
             this.savePose = new System.Windows.Forms.SaveFileDialog();
             this.tbControl.SuspendLayout();
@@ -79,6 +81,9 @@
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
             this.panel1.SuspendLayout();
+            this.splitContainer2.Panel1.SuspendLayout();
+            this.splitContainer2.Panel2.SuspendLayout();
+            this.splitContainer2.SuspendLayout();
             this.SuspendLayout();
             // 
             // uartBin
@@ -146,12 +151,12 @@
             // btCopy
             // 
             this.btCopy.AutoSize = true;
-            this.btCopy.Location = new System.Drawing.Point(271, 25);
+            this.btCopy.Location = new System.Drawing.Point(274, 25);
             this.btCopy.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.btCopy.Name = "btCopy";
             this.btCopy.Size = new System.Drawing.Size(56, 26);
             this.btCopy.TabIndex = 113;
-            this.btCopy.Text = "&Copy";
+            this.btCopy.Text = "&Clip";
             this.btCopy.UseVisualStyleBackColor = true;
             this.btCopy.Click += new System.EventHandler(this.btCopy_Click);
             // 
@@ -208,7 +213,7 @@
             // 
             // add
             // 
-            this.add.Location = new System.Drawing.Point(331, 25);
+            this.add.Location = new System.Drawing.Point(333, 25);
             this.add.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.add.Name = "add";
             this.add.Size = new System.Drawing.Size(56, 26);
@@ -249,6 +254,7 @@
             0,
             0,
             0});
+            this.udTick.ValueChanged += new System.EventHandler(this.udTick_ValueChanged);
             // 
             // udLoopTime
             // 
@@ -418,7 +424,7 @@
             // 
             // splitContainer1.Panel2
             // 
-            this.splitContainer1.Panel2.Controls.Add(this.trBoards);
+            this.splitContainer1.Panel2.Controls.Add(this.splitContainer2);
             this.splitContainer1.Size = new System.Drawing.Size(127, 464);
             this.splitContainer1.SplitterDistance = 232;
             this.splitContainer1.TabIndex = 3;
@@ -461,27 +467,57 @@
             this.btListBoards.UseVisualStyleBackColor = true;
             this.btListBoards.Click += new System.EventHandler(this.btListBoards_Click);
             // 
+            // splitContainer2
+            // 
+            this.splitContainer2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer2.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer2.Name = "splitContainer2";
+            this.splitContainer2.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            // 
+            // splitContainer2.Panel1
+            // 
+            this.splitContainer2.Panel1.Controls.Add(this.trBoards);
+            // 
+            // splitContainer2.Panel2
+            // 
+            this.splitContainer2.Panel2.Controls.Add(this.txMsg);
+            this.splitContainer2.Size = new System.Drawing.Size(127, 228);
+            this.splitContainer2.SplitterDistance = 124;
+            this.splitContainer2.TabIndex = 5;
+            // 
             // trBoards
             // 
             this.trBoards.Dock = System.Windows.Forms.DockStyle.Fill;
             this.trBoards.LabelEdit = true;
             this.trBoards.Location = new System.Drawing.Point(0, 0);
             this.trBoards.Name = "trBoards";
-            this.trBoards.Size = new System.Drawing.Size(127, 228);
+            this.trBoards.Size = new System.Drawing.Size(127, 124);
             this.trBoards.TabIndex = 4;
             this.trBoards.BeforeLabelEdit += new System.Windows.Forms.NodeLabelEditEventHandler(this.trBoards_BeforeLabelEdit);
             this.trBoards.AfterLabelEdit += new System.Windows.Forms.NodeLabelEditEventHandler(this.trBoards_AfterLabelEdit);
+            // 
+            // txMsg
+            // 
+            this.txMsg.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.txMsg.Location = new System.Drawing.Point(0, 0);
+            this.txMsg.Multiline = true;
+            this.txMsg.Name = "txMsg";
+            this.txMsg.ReadOnly = true;
+            this.txMsg.Size = new System.Drawing.Size(127, 100);
+            this.txMsg.TabIndex = 0;
             // 
             // openPose
             // 
             this.openPose.FileName = "pose.txt";
             this.openPose.Filter = "姿勢ファイル|*.txt|姿勢CSV|*.csv|すべてのファイル|*.*";
+            this.openPose.FileOk += new System.ComponentModel.CancelEventHandler(this.openPose_FileOk);
             // 
             // savePose
             // 
             this.savePose.DefaultExt = "txt";
             this.savePose.FileName = "pose.txt";
             this.savePose.Filter = "姿勢ファイル|*.txt|姿勢ファイル(csv)|*.csv|すべてのファイル|*.*";
+            this.savePose.FileOk += new System.ComponentModel.CancelEventHandler(this.savePose_FileOk);
             // 
             // MainForm
             // 
@@ -508,6 +544,10 @@
             this.splitContainer1.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
+            this.splitContainer2.Panel1.ResumeLayout(false);
+            this.splitContainer2.Panel2.ResumeLayout(false);
+            this.splitContainer2.Panel2.PerformLayout();
+            this.splitContainer2.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -549,6 +589,8 @@
         private System.Windows.Forms.CheckBox ckRunOnce;
         private System.Windows.Forms.OpenFileDialog openPose;
         private System.Windows.Forms.SaveFileDialog savePose;
+        private System.Windows.Forms.SplitContainer splitContainer2;
+        private System.Windows.Forms.TextBox txMsg;
     }
 }
 

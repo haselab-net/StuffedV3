@@ -160,7 +160,10 @@ namespace PCController
                 }
                 WriteShort(sendBuf, ref cur, (short)period);
                 WriteByte(sendBuf, ref cur, interpolateTargetCountOfWrite);
-                interpolateTargetCountOfWrite++;
+                if (period > 0) //  period == 0 means no target is sent but get the state.
+                {
+                    interpolateTargetCountOfWrite++;
+                }
                 Serial.Write(sendBuf, 0, bufLen);
                 int nRead = 0;
                 while (nRead < retLen)

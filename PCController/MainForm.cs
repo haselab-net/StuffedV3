@@ -29,6 +29,10 @@ namespace PCController
             motors = new Motors();
             udLoopTime_ValueChanged(udLoopTime, null);
         }
+        void SetTextMessage(string msg)
+        {
+            txMsg.Text = msg;
+        }
         private void cmbPortBin_TextChanged(object sender, EventArgs e)
         {
 
@@ -183,6 +187,13 @@ namespace PCController
                     e.CancelEdit = true;
                 }
             }
+        }
+
+        private void udTick_ValueChanged(object sender, EventArgs e)
+        {
+            int tick = (int)udTick.Value;
+            if (tick < 1) tick = 1;
+            timer.Interval = tick;
         }
     }
     public class CurrentControl
