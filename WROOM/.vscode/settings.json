@@ -48,4 +48,5 @@
     "terminal.integrated.shellArgs.windows": [
         "-l"
     ],
+    "C_Cpp.dimInactiveRegions": false,
 }

@@ -17,7 +17,7 @@ extern "C" void duktape_main();
 #endif
 
 extern "C" void app_main(){
-#ifdef WROOM
+#ifdef WROOM 
 	esp_chip_info_t chip_info;
     esp_chip_info(&chip_info);
     printf("This is ESP32 chip with %d CPU cores, WiFi%s%s, ",
