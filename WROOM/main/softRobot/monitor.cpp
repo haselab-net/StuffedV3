@@ -12,7 +12,7 @@
 #include "esp_log.h"
 #include "driver/uart.h"
 
-#include "WroomEnv.h"
+#include "../WroomEnv.h"
 #include "UdpCom.h"
 #include "AllBoards.h"
 #include "TouchSensing.h"

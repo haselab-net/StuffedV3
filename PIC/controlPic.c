@@ -310,7 +310,7 @@ void controlInitPic(){
 	SPI2BUF = 0;
 }
 void onControlTimer(){
-	LATCbits.LATC2 = 1;
+	LATCbits.LATC2 = 1;	//	LED ON
 	controlLoop();
-	LATCbits.LATC2 = 0;
+	LATCbits.LATC2 = 0;	//	LED OFF
 }

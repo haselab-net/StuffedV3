@@ -174,9 +174,9 @@ void UartForBoards::EnumerateBoard() {
 		uart_flush_input(port);	//	clear input buffer
 		uart_write_bytes(port, (char*)cmd.bytes, BD0_CLEN_BOARD_INFO);	//	send board info command
 		uart_write_bytes(port, zero, 5);
-		for (int w = 0; w < 20; ++w) {
+		for (int w = 0; w < 10; ++w) {
 			logPrintf(".");
-#ifndef _WIN32
+#ifdef WROOM
 			vTaskDelay(1);
 #endif
 			size_t rxLen;

@@ -17,7 +17,7 @@ void setPwmWithLimit(int ch, SDEC torque);	//	limit the torque to torqueLimit th
 
 
 //	The control routine. Should be called periodically.
-void onControlTimer();
+void controlLoop();
 
 
 //  data buffer

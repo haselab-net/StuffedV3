@@ -35,11 +35,12 @@ void MotorDriver::AdcReadTaskStatic(void* arg){
 }
 void MotorDriver::AdcReadTask(){
     size_t bufLen = ADC_DMA_LEN * 2;
-#ifndef _WIN32
+#ifdef WROOM
 	uint16_t buf[ADC_DMA_LEN];
-#endif
+    const gpio_num_t GPIO_LED = GPIO_NUM_26;
+    gpio_reset_pin(GPIO_LED);
+    gpio_set_direction(GPIO_LED, GPIO_MODE_OUTPUT);
 	while(1) {
-#ifndef _WIN32
 		system_event_t evt;
         if (xQueueReceive(queue, &evt, portMAX_DELAY) == pdPASS) {
             if (evt.event_id==2) {
@@ -51,14 +52,22 @@ void MotorDriver::AdcReadTask(){
                     int pos = adcChsRev[ch];
                     adcRaws[pos] = adcRaws[pos]*15/16 + value; 
                 }
-                if (bControl) onControlTimer();
+                if (bControl){
+                    gpio_set_level(GPIO_LED, 1);
+                    controlLoop();
+                    gpio_set_level(GPIO_LED, 0);
+                }
             }
         }
-#else
-		if (bControl) onControlTimer();
-		vTaskDelay(1);
-#endif
     }
+#elif defined _WIN32
+	while(1) {
+		if (bControl) onControlLoop();
+		vTaskDelay(1);
+    }
+#else
+#error
+#endif
 }
 
 void MotorDriver::Init(){

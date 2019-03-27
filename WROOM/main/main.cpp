@@ -1,3 +1,4 @@
+#include "WroomEnv.h"
 #include <stdio.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -10,12 +11,13 @@
 #include "nvs_flash.h"
 #include "rom/uart.h"
 #endif
-
 extern "C" void softRobot_main();
+#ifdef USE_DUKTAPE
 extern "C" void duktape_main();
+#endif
 
 extern "C" void app_main(){
-#ifndef _WIN32
+#ifdef WROOM
 	esp_chip_info_t chip_info;
     esp_chip_info(&chip_info);
     printf("This is ESP32 chip with %d CPU cores, WiFi%s%s, ",
@@ -25,7 +27,9 @@ extern "C" void app_main(){
     printf("silicon revision %d, ", chip_info.revision);
     printf("%dMB %s flash\n", spi_flash_get_chip_size() / (1024 * 1024),
             (chip_info.features & CHIP_FEATURE_EMB_FLASH) ? "embedded" : "external");
+#ifdef USE_DUKTAPE
 	duktape_main();
+#endif
 #endif 
 	softRobot_main();
 }

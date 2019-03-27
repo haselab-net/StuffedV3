@@ -4,7 +4,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "TinyContainer.h"
-#include "WroomEnv.h"
+#include "../WroomEnv.h"
 #include "BoardBase.h"
 #include "RobotState.h"
 #include "RobotCommand.h"

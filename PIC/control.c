@@ -355,16 +355,6 @@ void controlSetMode(enum ControlMode m){
 	}
 }
 
-void onControlTimer(){
-#ifdef PIC
-	LATCbits.LATC2 = 1;
-#endif
-	controlLoop();
-#ifdef PIC
-	LATCbits.LATC2 = 0;
-#endif
-}
-
 #ifdef MODULETEST
 void printMotorState(){
 #if 1

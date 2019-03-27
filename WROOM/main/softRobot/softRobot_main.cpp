@@ -16,6 +16,9 @@
 #include "TouchSensing.h"
 #include "MotorDriver.h"
 #include "monitor.h"
+#ifndef USE_DUKTAPE
+#include "../wifiMan/wifiMan.h"
+#endif
 
 extern "C" void softRobot_main()    //  called from app_main in main.cpp 
 {        
@@ -31,6 +34,10 @@ extern "C" void softRobot_main()    //  called from app_main in main.cpp
     allBoards.Init();
     logPrintf("Init allBoards finished. ");
     logPrintf("%d motors, %d current sensors, %d force sensors found.\n", allBoards.GetNTotalMotor(), allBoards.GetNTotalCurrent(), allBoards.GetNTotalForce());
+
+#ifndef USE_DUKTAPE
+    wifiMan();    //  Start wifi manager. 
+#endif
 
     udpCom.Init();    //  init command processing for udp.
     udpCom.Start();   //  start UDP server.
