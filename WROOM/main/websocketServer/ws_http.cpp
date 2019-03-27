@@ -8,6 +8,7 @@
 
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
+// #include <freertos/projdefs.h>
 #include <fstream>
 
 #include "logging.h"
@@ -22,6 +23,11 @@
 LOG_TAG("ws_http");
 
 static HttpServer* pHttpServer;
+
+static void restartin5s(FreeRTOSTimer* pTimer) {
+    LOGD("restart in 5s");
+    esp_restart();
+}
 
 static void wsHandshakeHandler(HttpRequest* pRequest, HttpResponse* pResponse) {
     if(pRequest->isWebsocket()) {
@@ -45,7 +51,7 @@ static void httpWifiHtmlHandler(HttpRequest* pRequest, HttpResponse* pResponse) 
     pResponse->sendData(html_content.str());
     pResponse->close();
 
-    std::cout << "html_file: " << html_content.str() << std::endl;
+    fr.close();
 }
 
 static void httpWifiSetHandler(HttpRequest* pRequest, HttpResponse* pResponse) {
@@ -58,13 +64,13 @@ static void httpWifiSetHandler(HttpRequest* pRequest, HttpResponse* pResponse) {
     wifiNvs.set("gw", jo.getString("gw"));
     wifiNvs.set("netmask", jo.getString("netmask"));
 
-    pResponse->setStatus(200, "Got data - rebooting in 5s");
+    pResponse->setStatus(200, "OK");
+    pResponse->sendData("Got data - rebooting in 5s");
     pResponse->close();
 
-    // TODO fix reboot
-    vTaskDelay(500000);
-    esp_restart();
-    // FreeRTOSTimer timer("rebootin5s", pdMs_TO_TICKS(5000), false, NULL, esp_restart);
+    char timer_name[] = "rebootin5s";
+    FreeRTOSTimer timer(timer_name, (TickType_t)5000/10, false, NULL, restartin5s);
+    timer.start();
 }
 
 void createHttpServer() {

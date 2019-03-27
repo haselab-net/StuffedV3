@@ -11,10 +11,11 @@ class SRWebSocketHandler: public WebSocketHandler {
 
 void wsOnConnected(WebSocket* pWS);
 
-void wsOnMessage(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket* pWebSocket);
+void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket* pWebSocket);
+void wsOnMessageSr(void* buffer, size_t buffer_size);
 
-void wsSendCommand(void* buffer, size_t buffer_size);
-
+void printPacketJsfile(const void* pBuffer, size_t len);
+void printPacketCommand(const void* pBuffer, size_t len);
 void printPacket(const void* pBuffer, size_t len);
 
 #endif

@@ -21,9 +21,7 @@
 #include "UdpCom.h"
 #include "UartForBoards.h"
 #include "CommandWROOM.h"
-extern "C" {
-#include "../duktapeEsp32/include/module_softrobot.h"
-}
+#include "ws_ws.h"
 
 
 UdpCom udpCom;
@@ -226,6 +224,8 @@ void UdpCom::OnReceiveUdp(struct udp_pcb * upcb, struct pbuf * top, const ip_add
 	pbuf_free(top);
 }
 void UdpCom::OnReceiveServer(void* payload, int len) {
+	ESP_LOGE("UdpCom::OnReceiveServer", "OnReceiveServer");
+
 	recvs.Lock();
 	if (!recvs.WriteAvail()) {
 		ESP_LOGE("UdpCom::OnReceiveServer", "Udp command receive buffer is full.");
@@ -309,7 +309,7 @@ void UdpCom::SendReturn(UdpCmdPacket& recv) {
 	}
 }
 void UdpCom::SendReturnServer(UdpCmdPacket& recv) {
-	return_packet(send.bytes+2, send.length-2);
+	wsOnMessageSr(send.bytes+2, send.length-2);
 }
 void UdpCom::SendReturnUdp(UdpCmdPacket& recv) {
 	if (!udp) return;

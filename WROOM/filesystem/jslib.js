@@ -15,10 +15,6 @@ if (moduleJSLib === null) {
 var internalJSLib = {};
 moduleJSLib(internalJSLib);
 
-var _ret = {
-    loops: _loops
-}
-
 var _core = {
     blockPause: function(ms) {
         internalJSLib.block_pause(ms);
@@ -33,28 +29,10 @@ var _core = {
     },
 
     handleEvent: function() {
-        internalJSLib.handleEvent();
+        internalJSLib.handle_event();
     }
 }
 
-var _loops = {
-    pause: function (ms) {
-        if(ms<=0) return;
-
-        console.log("pause for " + ms + " ms");
-
-        var start_time = (new Date).getMilliseconds();
-        while((new Date).getMilliseconds()-start_time<ms) {
-            _core.handleEvent();
-        }
-    },
-
-    forever: function (func) {
-        while(1) {
-            func();
-            _core.handleEvent();
-        }
-    }
-}
+var _ret = _core
 
 module.exports = _ret;

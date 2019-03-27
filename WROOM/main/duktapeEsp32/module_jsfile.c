@@ -155,7 +155,7 @@ static duk_ret_t jsfile_handle_event(duk_context* ctx){
 
     /** wait for event */
     #if defined(ESP_PLATFORM)
-	BaseType_t rc = xQueueReceive(jsfile_event_queue, &jsfile_event, 0);
+	BaseType_t rc = xQueueReceive(jsfile_event_queue, &jsfile_event, (TickType_t)1);
     #else /* ESP_PLATFORM */
 	int rc = 0;
     #endif /* ESP_PLATFORM */

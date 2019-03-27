@@ -2,12 +2,12 @@
  * API for controlling hardware
  */
 
+#include "module_jslib.h"
+
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
-
 #include <stdio.h>
 
-#include "module_jslib.h"
 #include "duktape_utils.h"
 #include "duktape_event.h"
 #include "duktape_jsfile.h"

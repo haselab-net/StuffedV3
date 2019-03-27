@@ -32,7 +32,7 @@ static void duktapeTask(void* pvParameters) {
 void wsCreateJsfileTask() {
     ESP_LOGD(LOG_TAG, "Create new jsfile task");
 
-    xTaskCreate(
+    BaseType_t xReturned = xTaskCreate(
         duktapeTask,
         "duktape_task",
         16*1024,
@@ -40,10 +40,20 @@ void wsCreateJsfileTask() {
         tskIDLE_PRIORITY+1,
         xHandle
     );
+
+    if (xReturned != pdPASS) {
+        ESP_LOGD(LOG_TAG, "xTaskCreate failed");
+    }
+
+    if(xHandle==NULL) ESP_LOGD(LOG_TAG, "NULL handle");
+    else ESP_LOGD(LOG_TAG, "Not NULL handle");
 }
 
 void wsDeleteJsfileTask() {
-    if(!xHandle) return;
+    if(xHandle==NULL) ESP_LOGD(LOG_TAG, "NULL handle");
+    else ESP_LOGD(LOG_TAG, "Not NULL handle");
+
+    if(xHandle==NULL) return;
     ESP_LOGD(LOG_TAG, "Delete old jsfile task");
 
     UdpCom_Lock();
