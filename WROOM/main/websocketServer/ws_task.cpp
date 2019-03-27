@@ -9,7 +9,7 @@ extern "C" {
 }
 #include "UdpCom.h"
 
-static TaskHandle_t* xHandle = NULL;
+static TaskHandle_t xHandle = NULL;
 
 extern void UdpCom_Lock();
 extern void UdpCom_Unlock();
@@ -38,21 +38,15 @@ void wsCreateJsfileTask() {
         16*1024,
         NULL,
         tskIDLE_PRIORITY+1,
-        xHandle
+        &xHandle
     );
 
     if (xReturned != pdPASS) {
-        ESP_LOGD(LOG_TAG, "xTaskCreate failed");
+        ESP_LOGD(LOG_TAG, "ERROR: xTaskCreate failed");
     }
-
-    if(xHandle==NULL) ESP_LOGD(LOG_TAG, "NULL handle");
-    else ESP_LOGD(LOG_TAG, "Not NULL handle");
 }
 
 void wsDeleteJsfileTask() {
-    if(xHandle==NULL) ESP_LOGD(LOG_TAG, "NULL handle");
-    else ESP_LOGD(LOG_TAG, "Not NULL handle");
-
     if(xHandle==NULL) return;
     ESP_LOGD(LOG_TAG, "Delete old jsfile task");
 
