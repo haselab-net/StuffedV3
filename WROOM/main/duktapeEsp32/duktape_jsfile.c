@@ -18,6 +18,7 @@ LOG_TAG("duktape_jsfile");
 // The Duktape context.
 duk_context *esp32_duk_context;
 
+// force to read from posix (espfs can not read the file altered in runtime)
 static void runFileFromPosix(duk_context *ctx, const char *fileName) {
 	LOGD(">> dukf_runFile: %s", fileName);
 	size_t fileSize;
@@ -47,7 +48,9 @@ static void runFileFromPosix(duk_context *ctx, const char *fileName) {
 }
 
 static void runJsFile(){
+	dukf_runFile(esp32_duk_context, "spiffs/main/maininit.js");
     runFileFromPosix(esp32_duk_context, "/spiffs/main/main.js");
+	dukf_runFile(esp32_duk_context, "spiffs/main/mainend.js");
 }
 
 /**

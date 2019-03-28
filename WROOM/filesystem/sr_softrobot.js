@@ -828,3 +828,5 @@ var softrobot;
         util.str2ab = str2ab;
     })(util = softrobot.util || (softrobot.util = {}));
 })(softrobot || (softrobot = {}));
+
+module.export = softrobot;
