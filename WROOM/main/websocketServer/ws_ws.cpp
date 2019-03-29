@@ -60,17 +60,9 @@ static void saveToMainJsStream(const WebSocketInputStreambuf *content) {
 */
 
 static void saveToMainJs(const char *content, size_t length){
-    std::ifstream m_ifStream;
-    std::string str;
-    m_ifStream.open(std::string("/spiffs") + "/main/main.js", std::ofstream::in);
-    m_ifStream >> str;
-    std::cout << "/spiffs/main/main.js: " << str << std::endl;
-    m_ifStream.close(); 
-
     std::ofstream m_ofStream;
 
-    std::string root_path = SPIFFS_MOUNTPOINT;
-    m_ofStream.open(root_path + "/main/main.js", std::ofstream::out | std::ofstream::binary | std::ofstream::trunc);
+    m_ofStream.open(std::string(SPIFFS_MOUNTPOINT) + "/main/main.js", std::ofstream::out | std::ofstream::binary | std::ofstream::trunc);
     if (!m_ofStream.is_open()) {
         ESP_LOGD(LOG_TAG, "Failed to open file /spiffs/main/main.js for writing");
         return;
@@ -80,6 +72,25 @@ static void saveToMainJs(const char *content, size_t length){
     m_ofStream.close();
 
     ESP_LOGD(LOG_TAG, "File main.js written to /spiffs/main/main.js");
+}
+
+static void combineMainFiles() {
+    std::ifstream m_ifStream;
+    std::ofstream m_ofStream;
+
+    m_ofStream.open(std::string(SPIFFS_MOUNTPOINT) + "/main/runtime.js", std::ofstream::out | std::ofstream::binary | std::ofstream::trunc);
+
+    m_ifStream.open(std::string(SPIFFS_MOUNTPOINT) + "/main/maininit.js", std::ofstream::in | std::ofstream::binary);
+    m_ofStream << m_ifStream.rdbuf() << std::endl;
+    m_ifStream.close();
+    m_ifStream.open(std::string(SPIFFS_MOUNTPOINT) + "/main/main.js", std::ofstream::in | std::ofstream::binary);
+    m_ofStream << m_ifStream.rdbuf() << std::endl;
+    m_ifStream.close();
+    m_ifStream.open(std::string(SPIFFS_MOUNTPOINT) + "/main/mainend.js", std::ofstream::in | std::ofstream::binary);
+    m_ofStream << m_ifStream.rdbuf() << std::endl;
+    m_ifStream.close();
+
+    m_ofStream.close();
 }
 
 static void wsSend(void* data, size_t length) {
@@ -112,7 +123,14 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
         case PacketId::PI_JSFILE: {
             wsDeleteJsfileTask();
             
-            //saveToMainJs(pBuffer+2, ssize-2);
+            // saveToMainJs(pBuffer+2, ssize-2);
+            // combineMainFiles();
+
+            // std::ifstream m_ifstream("/spiffs/main/runtime.js");
+            // std::string str((std::istreambuf_iterator<char>(m_ifstream)),
+            //      std::istreambuf_iterator<char>());
+            // printf("Start runtime file: \r\n %s", str.c_str());
+            // m_ifstream.close();
             wsCreateJsfileTask();
             
             break;

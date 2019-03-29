@@ -48,9 +48,8 @@ static void runFileFromPosix(duk_context *ctx, const char *fileName) {
 }
 
 static void runJsFile(){
-	dukf_runFile(esp32_duk_context, "spiffs/main/maininit.js");
-    runFileFromPosix(esp32_duk_context, "/spiffs/main/main.js");
-	dukf_runFile(esp32_duk_context, "spiffs/main/mainend.js");
+	// run main.js
+    runFileFromPosix(esp32_duk_context, "/spiffs/main/runtime.js");		// file in espfs would be rewrite from user
 }
 
 /**

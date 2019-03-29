@@ -20,7 +20,7 @@ var softrobot;
             CommandId[CommandId["CIU_SET_IPADDRESS"] = 12] = "CIU_SET_IPADDRESS";
             CommandId[CommandId["CIU_GET_IPADDRESS"] = 13] = "CIU_GET_IPADDRESS";
             CommandId[CommandId["CIU_NCOMMAND"] = 14] = "CIU_NCOMMAND";
-            CommandId[CommandId["CIU_NONE"] = -1] = "CIU_NONE"; //  no command is in receiving state.
+            CommandId[CommandId["CIU_NONE"] = -1] = "CIU_NONE";
         })(CommandId = command.CommandId || (command.CommandId = {}));
         ;
         var ResetSensorFlags;
@@ -37,27 +37,14 @@ var softrobot;
         })(PacketId = command.PacketId || (command.PacketId = {}));
     })(command = softrobot.command || (softrobot.command = {}));
 })(softrobot || (softrobot = {}));
-/**
- * Store the information of softrobot
- */
 var softrobot;
 (function (softrobot) {
     var device;
     (function (device) {
-        /////////////////////////////////////////////////////////////////
-        /////////////////////////    State    ///////////////////////////
-        /////////////////////////////////////////////////////////////////
-        /**
-         * information of robot hardware
-         * @description (can not be changed on web side)
-         */
-        var RobotInfo = /** @class */ (function () {
+        var RobotInfo = (function () {
             function RobotInfo() {
                 this.initialize();
             }
-            /**
-             * initialize parameters with default value
-             */
             RobotInfo.prototype.initialize = function () {
                 this.systemId = 0;
                 this.nTarget = 1;
@@ -70,16 +57,10 @@ var softrobot;
         }());
         device.RobotInfo = RobotInfo;
         device.robotInfo = new RobotInfo();
-        /**
-         * state/parameter of a single motor
-         */
-        var MotorState = /** @class */ (function () {
+        var MotorState = (function () {
             function MotorState() {
                 this.initialize();
             }
-            /**
-             * initialize parameters with default value
-             */
             MotorState.prototype.initialize = function () {
                 this.pose = 0;
                 this.velocity = 0;
@@ -93,16 +74,10 @@ var softrobot;
             return MotorState;
         }());
         device.MotorState = MotorState;
-        /**
-         * state/parameter of robot
-         */
-        var RobotState = /** @class */ (function () {
+        var RobotState = (function () {
             function RobotState() {
                 this.initialize();
             }
-            /**
-             * initialize parameters with default value
-             */
             RobotState.prototype.initialize = function () {
                 this.motor = new Array(device.robotInfo.nMotor);
                 for (var index = 0; index < this.motor.length; index++) {
@@ -124,12 +99,6 @@ var softrobot;
                 this.nInterpolateRemain = 0;
                 this.nInterpolateVacancy = 3;
             };
-            /**
-             * combine props of an object array to an prop array
-             * @description assume object have property p, this function convert object[] into p[]
-             * @param name one property (type T) name of object
-             * @param array array of object
-             */
             RobotState.prototype.getPropArray = function (name, array) {
                 if (!(name in array[0])) {
                     console.log("ERROR: No property named " + name + "in array");
@@ -141,12 +110,6 @@ var softrobot;
                 });
                 return res;
             };
-            /**
-             * set props of an object array to an prop array
-             * @param name name of the property
-             * @param pArray property value array
-             * @param oArray object array
-             */
             RobotState.prototype.setPropArray = function (name, pArray, oArray) {
                 if (pArray.length != oArray.length) {
                     console.log("Error: Not equivalent length array");
@@ -165,10 +128,6 @@ var softrobot;
         }());
         device.RobotState = RobotState;
         device.robotState = new RobotState();
-        /**
-         * check the length of pose/velocity/current/force array in robot state is the same as corresponding value in robot info
-         * @description if current array length is less than target length, the insufficient part of array will be initialized with array[0]
-         */
         function checkRobotState() {
             function resizeArray(array, size) {
                 if (array.length <= size) {
@@ -192,22 +151,12 @@ var softrobot;
         device.checkRobotState = checkRobotState;
     })(device = softrobot.device || (softrobot.device = {}));
 })(softrobot || (softrobot = {}));
-/**
- * Provide API for send/receive command message to/from softrobot
- * @author gzl
- */
 var softrobot;
 (function (softrobot) {
     var message_command;
     (function (message_command) {
-        /////////////////////////////////////////////////////////////////
-        /////////////////////////    Callback    ////////////////////////
-        /////////////////////////////////////////////////////////////////
         message_command.onRcvCIBoardInfoMessage = function () { };
         message_command.onRcvCISensorMessage = function () { };
-        /////////////////////////////////////////////////////////////////
-        /////////////////////////    Receive    /////////////////////////
-        /////////////////////////////////////////////////////////////////
         function messageHandler(packet) {
             switch (packet.command) {
                 case softrobot.command.CommandId.CI_BOARD_INFO:
@@ -220,7 +169,7 @@ var softrobot;
                 case softrobot.command.CommandId.CI_SENSOR:
                     {
                         var data = packet.data.data;
-                        if (data.pose.length != softrobot.device.robotInfo.nMotor) { // number of motors does not match
+                        if (data.pose.length != softrobot.device.robotInfo.nMotor) {
                             requireBoardInfo();
                             break;
                         }
@@ -233,7 +182,7 @@ var softrobot;
                 case softrobot.command.CommandId.CI_DIRECT:
                     {
                         var data = packet.data.data;
-                        if (data.pose.length != softrobot.device.robotInfo.nMotor) { // number of motors does not match
+                        if (data.pose.length != softrobot.device.robotInfo.nMotor) {
                             requireBoardInfo();
                             break;
                         }
@@ -244,7 +193,7 @@ var softrobot;
                 case softrobot.command.CommandId.CI_FORCE_CONTROL:
                     {
                         var data = packet.data.data;
-                        if (data.pose.length != softrobot.device.robotInfo.nMotor) { // number of motors does not match
+                        if (data.pose.length != softrobot.device.robotInfo.nMotor) {
                             requireBoardInfo();
                             break;
                         }
@@ -264,15 +213,7 @@ var softrobot;
             }
         }
         message_command.messageHandler = messageHandler;
-        /////////////////////////////////////////////////////////////////
-        /////////////////////////    Send    ////////////////////////////
-        /////////////////////////////////////////////////////////////////
         message_command.sendMessage = function (packet) { };
-        /**
-         * update motor state 'to' with instruction in 'from'
-         * @param to robot state in which motor state will be altered later
-         * @param from motor instruction which to be used to change motor state
-         */
         function setMotorState(to, from) {
             var id = from.motorId;
             if (id >= to.motor.length)
@@ -296,10 +237,6 @@ var softrobot;
             to.motor[id].pose = softrobot.util.limitNum(to.motor[id].pose, to.motor[id].lengthMin, to.motor[id].lengthMax);
         }
         message_command.setMotorState = setMotorState;
-        /**
-         * set local motor state and update it to remote hardware
-         * @param inst motor instruction
-         */
         function updateRemoteMotorState(inst) {
             if (inst.motorId >= softrobot.device.robotInfo.nMotor) {
                 console.log("motorId larger than motor number");
@@ -354,10 +291,6 @@ var softrobot;
             }
         }
         message_command.updateRemoteMotorState = updateRemoteMotorState;
-        /**
-         * only set local motor state
-         * @param inst motor instruction
-         */
         function updateLocalMotorState(inst) {
             if (inst.motorId >= softrobot.device.robotInfo.nMotor) {
                 console.log("motorId larger than motor number");
@@ -391,9 +324,6 @@ var softrobot;
             }
         }
         message_command.updateLocalMotorState = updateLocalMotorState;
-        /**
-         * update remote motor pose and velocity (direct mode) by local robot state
-         */
         function updateMotorPVDirect() {
             var pose = softrobot.device.robotState.getPropArray("pose", softrobot.device.robotState.motor);
             var velocity = softrobot.device.robotState.getPropArray("velocity", softrobot.device.robotState.motor);
@@ -409,10 +339,6 @@ var softrobot;
             message_command.sendMessage(p);
         }
         message_command.updateMotorPVDirect = updateMotorPVDirect;
-        /**
-         * update remote motor pose and velocity (interpolate mode) by local robot state
-         * @param period period to interpolate
-         */
         function updateMotorPVInterpolate(period) {
             var pose = softrobot.device.robotState.getPropArray("pose", softrobot.device.robotState.motor);
             console.log("update remote interpolate");
@@ -430,17 +356,11 @@ var softrobot;
                 softrobot.device.robotState.interpolateTargetCountOfWrite++;
         }
         message_command.updateMotorPVInterpolate = updateMotorPVInterpolate;
-        /**
-         * require for board info
-         */
         function requireBoardInfo() {
             var p = new softrobot.packet_command.Packet(softrobot.command.CommandId.CI_BOARD_INFO, new softrobot.packet_command.PacketBoardInfoData({}));
             message_command.sendMessage(p);
         }
         message_command.requireBoardInfo = requireBoardInfo;
-        /**
-         * require for sensor info
-         */
         function requireSensorInfo() {
             var p = new softrobot.packet_command.Packet(softrobot.command.CommandId.CI_SENSOR, new softrobot.packet_command.PacketSensorInfoData({}));
             message_command.sendMessage(p);
@@ -448,22 +368,11 @@ var softrobot;
         message_command.requireSensorInfo = requireSensorInfo;
     })(message_command = softrobot.message_command || (softrobot.message_command = {}));
 })(softrobot || (softrobot = {}));
-/**
- * Provide interface of command packet for websocket communication between web and softrobot
- * @author gzl
- */
 var softrobot;
 (function (softrobot) {
     var packet_command;
     (function (packet_command) {
-        /////////////////////////////////////////////////////////////////
-        /////////////////////////    Packet    //////////////////////////
-        /////////////////////////////////////////////////////////////////
-        /**
-         * generate count for packet
-         * @deprecated
-         */
-        var PacketCount = /** @class */ (function () {
+        var PacketCount = (function () {
             function PacketCount() {
             }
             PacketCount.getId = function () {
@@ -473,14 +382,11 @@ var softrobot;
                 return tmp;
             };
             PacketCount.next_id = 0;
-            PacketCount.max_id = 3000; // must smaller than MAX_SHORT
+            PacketCount.max_id = 3000;
             return PacketCount;
         }());
         packet_command.PacketCount = PacketCount;
-        /**
-         * content of a websocket packet
-         */
-        var Packet = /** @class */ (function () {
+        var Packet = (function () {
             function Packet(com, da, len) {
                 this.command = com;
                 this.data = da;
@@ -492,19 +398,13 @@ var softrobot;
             Packet.prototype.getPacketLength = function () {
                 return Packet.HEADERLEN + this.data.getDataLength();
             };
-            /**
-             * convert this packet object to binary buffer
-             * @returns ArrayBuffer | null (if convert to binary failed)
-             */
             Packet.prototype.toBinary = function () {
                 if (!this.toBinaryCheck())
                     return null;
-                // fill header
                 var buf = new ArrayBuffer(this.length);
                 var dataview = new Int16Array(buf);
                 dataview[0] = this.length;
                 dataview[1] = this.command;
-                // fill data
                 var dataPV = new Int16Array(buf, Packet.HEADERLEN);
                 var dataBi = this.data.toBinary();
                 if (!dataBi)
@@ -516,18 +416,12 @@ var softrobot;
             Packet.prototype.toBinaryCheck = function () {
                 return true;
             };
-            /**
-             * convert binary buffer to packet object
-             * @returns Packet | null (if convert to Packet failed)
-             */
             Packet.fromBinary = function (bin) {
-                // get header
                 var dataview = new Int16Array(bin);
                 var len = dataview[0];
                 if (len > this.MAXLEN)
                     return null;
                 var com = dataview[1];
-                // get data
                 var comStr = softrobot.command.CommandId[com];
                 var dataArray = bin.slice(Packet.HEADERLEN, len);
                 var da = null;
@@ -567,8 +461,7 @@ var softrobot;
             return Packet;
         }());
         packet_command.Packet = Packet;
-        // 1 CI_BOARD_INFO
-        var PacketBoardInfoData = /** @class */ (function () {
+        var PacketBoardInfoData = (function () {
             function PacketBoardInfoData(da) {
                 this.data = da;
             }
@@ -595,7 +488,7 @@ var softrobot;
             return PacketBoardInfoData;
         }());
         packet_command.PacketBoardInfoData = PacketBoardInfoData;
-        var PacketSensorInfoData = /** @class */ (function () {
+        var PacketSensorInfoData = (function () {
             function PacketSensorInfoData(data) {
                 this.data = data;
             }
@@ -631,7 +524,7 @@ var softrobot;
             return PacketSensorInfoData;
         }());
         packet_command.PacketSensorInfoData = PacketSensorInfoData;
-        var PacketPoseDirectData = /** @class */ (function () {
+        var PacketPoseDirectData = (function () {
             function PacketPoseDirectData(da) {
                 this.data = da;
             }
@@ -673,7 +566,7 @@ var softrobot;
             return PacketPoseDirectData;
         }());
         packet_command.PacketPoseDirectData = PacketPoseDirectData;
-        var PacketPoseInterpolateData = /** @class */ (function () {
+        var PacketPoseInterpolateData = (function () {
             function PacketPoseInterpolateData(da) {
                 this.data = da;
             }
@@ -697,7 +590,7 @@ var softrobot;
             return PacketPoseInterpolateData;
         }());
         packet_command.PacketPoseInterpolateData = PacketPoseInterpolateData;
-        var PacketPoseForceControlData = /** @class */ (function () {
+        var PacketPoseForceControlData = (function () {
             function PacketPoseForceControlData(da) {
                 this.data = da;
             }
@@ -743,7 +636,7 @@ var softrobot;
             return PacketPoseForceControlData;
         }());
         packet_command.PacketPoseForceControlData = PacketPoseForceControlData;
-        var PacketPdParamData = /** @class */ (function () {
+        var PacketPdParamData = (function () {
             function PacketPdParamData(da) {
                 this.data = da;
             }
@@ -768,7 +661,7 @@ var softrobot;
             return PacketPdParamData;
         }());
         packet_command.PacketPdParamData = PacketPdParamData;
-        var PacketTorqueLimitData = /** @class */ (function () {
+        var PacketTorqueLimitData = (function () {
             function PacketTorqueLimitData(da) {
                 this.data = da;
             }
@@ -798,12 +691,10 @@ var softrobot;
 (function (softrobot) {
     var util;
     (function (util) {
-        // judge wether obj exists (not undefined and not null)
         function haveProp(obj) {
             return !!obj || obj == 0;
         }
         util.haveProp = haveProp;
-        // limit num between min and max
         function limitNum(num, min, max) {
             var res = num;
             res > max ? res = max : res = res;
@@ -811,14 +702,12 @@ var softrobot;
             return res;
         }
         util.limitNum = limitNum;
-        // convert array buffer to string
         function ab2str(buf) {
             return String.fromCharCode.apply(null, new Uint16Array(buf));
         }
         util.ab2str = ab2str;
-        // convert string to array buffer
         function str2ab(str) {
-            var buf = new ArrayBuffer(str.length * 2); // 2 bytes for each char
+            var buf = new ArrayBuffer(str.length * 2);
             var bufView = new Uint16Array(buf);
             for (var i = 0, strLen = str.length; i < strLen; i++) {
                 bufView[i] = str.charCodeAt(i);
@@ -829,4 +718,4 @@ var softrobot;
     })(util = softrobot.util || (softrobot.util = {}));
 })(softrobot || (softrobot = {}));
 
-module.export = softrobot;
+//module.export = softrobot;

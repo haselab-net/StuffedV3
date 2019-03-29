@@ -1,6 +1,6 @@
 var jslib = require("jslib");
 
-var _ret = {
+var loops = {
     pause: function (ms) {
         if(ms<=0) return;
 
@@ -13,11 +13,20 @@ var _ret = {
     },
 
     forever: function (func) {
+        loops._foreverFunc = func;
+    },
+
+    _foreverFunc: function() {
+        console.log("default forever");
+        jslib.blockPause(1000);
+    },
+
+    doForever: function () {
         while(1) {
-            func();
+            loops._foreverFunc();
             jslib.handleEvent();
         }
     }
 }
 
-module.exports = _ret;
+module.exports = loops;
