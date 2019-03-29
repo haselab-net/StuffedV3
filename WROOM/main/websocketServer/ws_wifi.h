@@ -11,6 +11,7 @@ class SRWifiEventHandler: public WiFiEventHandler {
     esp_err_t apStart();
     esp_err_t staConnected(system_event_sta_connected_t info);
     esp_err_t staGotIp(system_event_sta_got_ip_t info);
+    esp_err_t staDisconnected(system_event_sta_disconnected_t info);
 };
 
 extern NVS wifiNvs;

@@ -19,15 +19,16 @@
 #include "ws_ws.h"
 #include "ws_fs.h"
 #include "ws_wifi.h"
+#include "ws_urlParser.h"
 
 LOG_TAG("ws_http");
 
 static HttpServer* pHttpServer;
 
-static void restartin5s(FreeRTOSTimer* pTimer) {
-    LOGD("restart in 5s");
-    esp_restart();
-}
+// static void restartin5s(FreeRTOSTimer* pTimer) {
+//     LOGD("restart in 5s");
+//     esp_restart();
+// }
 
 static void wsHandshakeHandler(HttpRequest* pRequest, HttpResponse* pResponse) {
     if(pRequest->isWebsocket()) {
@@ -56,21 +57,26 @@ static void httpWifiHtmlHandler(HttpRequest* pRequest, HttpResponse* pResponse) 
 
 static void httpWifiSetHandler(HttpRequest* pRequest, HttpResponse* pResponse) {
     std::string body = pRequest->getBody();
-    JsonObject jo = JSON::parseObject(body);
+    urlParser up(body);
 
-    wifiNvs.set("ssid", jo.getString("ssid"));
-    wifiNvs.set("password", jo.getString("password"));
-    wifiNvs.set("ip", jo.getString("ip"));
-    wifiNvs.set("gw", jo.getString("gw"));
-    wifiNvs.set("netmask", jo.getString("netmask"));
+    printf("body: %s", body.c_str());
+    printf("ssif: %s", up.getString("ssid").c_str());
+
+    wifiNvs.set("ssid", up.getString("ssid"));
+    wifiNvs.set("password", up.getString("password"));
+    wifiNvs.set("ip", up.getString("ip"));
+    wifiNvs.set("gw", up.getString("gw"));
+    wifiNvs.set("netmask", up.getString("netmask"));
 
     pResponse->setStatus(200, "OK");
     pResponse->sendData("Got data - rebooting in 5s");
     pResponse->close();
 
-    char timer_name[] = "rebootin5s";
-    FreeRTOSTimer timer(timer_name, (TickType_t)5000/10, false, NULL, restartin5s);
-    timer.start();
+    esp_restart();
+
+    // char timer_name[] = "rebootin5s";
+    // FreeRTOSTimer timer(timer_name, (TickType_t)5000/10, false, NULL, restartin5s);
+    // timer.start();
 }
 
 void createHttpServer() {
