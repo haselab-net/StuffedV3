@@ -82,11 +82,12 @@ static void saveToMainJs(const char *content, size_t length){
     ESP_LOGD(LOG_TAG, "File main.js written to /spiffs/main/main.js");
 }
 
-static void wsSend(std::string data) {
-    if(!pWebSocket) return;
-    ESP_LOGD(LOG_TAG, "Prepare to send a ws packet");
-    printPacket((const void*)data.c_str(), data.size());
-    pWebSocket->send(data, WebSocket::SEND_TYPE_BINARY);
+static void wsSend(void* data, size_t length) {
+    if(!pWebSocket) {
+        ESP_LOGD(LOG_TAG, "Unable to send packet, websocket is not connected");
+        return;
+    }
+    pWebSocket->send((uint8_t*)data, length , WebSocket::SEND_TYPE_BINARY);
 }
 
 /**
@@ -101,7 +102,7 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
     std::streamsize ssize = pWebSocketInputStreambuf->sgetn(pBuffer, bufferSize);
     if(ssize>=bufferSize) ESP_LOGD(LOG_TAG ,"File main.js to large!!!!!!!!!");
 
-    ESP_LOGD(LOG_TAG, "Received a ws packet");
+    ESP_LOGD(LOG_TAG, "Received a packet from websocket: ");
     printPacket((const void*)pBuffer, ssize);
 
     //const int16_t* pBufferI16 = (const int16_t*)pBuffer;
@@ -134,7 +135,7 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
  * send command to browser and jsfile task
  */
 void wsOnMessageSr(void* buffer, size_t buffer_size) {
-    ESP_LOGD(LOG_TAG, "A packet from softrobot: ");
+    ESP_LOGD(LOG_TAG, "Received a packet from softrobot: ");
     printPacketCommand(buffer, buffer_size);
     
     // send packet to browser
@@ -142,21 +143,20 @@ void wsOnMessageSr(void* buffer, size_t buffer_size) {
     *(int16_t*)data_buffer = PacketId::PI_COMMAND;
     memcpy((int16_t*)data_buffer+1, buffer, buffer_size);
 
-    std::string* sp = static_cast<std::string*>(data_buffer);
-    std::string s = *sp;
-    
-    free(data_buffer);
+    wsSend(data_buffer, buffer_size+2);
+    ESP_LOGD(LOG_TAG, "Packet from softrobot sent to websocket");
 
-    wsSend(s);
+    free(data_buffer);
 
     // send packet to jsfile task
     return_packet_to_jsfile(buffer, buffer_size);
+    ESP_LOGD(LOG_TAG, "Packet from softrobot sent to jsfile");
 }
 
 void printPacketJsfile(const void* pBuffer, size_t len) {
-    printf("- PacketId: PI_JSFILE \r\n");
+    printf("|- PacketId: PI_JSFILE \r\n");
     const char* pBufferChar = (const char*)pBuffer;
-    printf("- Content: \r\n");
+    printf("|- Content: \r\n");
     for(int i=0; i<len; i++) {
         std::cout << pBufferChar[i];
     }
@@ -165,10 +165,10 @@ void printPacketJsfile(const void* pBuffer, size_t len) {
 
 void printPacketCommand(const void* pBuffer, size_t len) {
     int16_t* pBufferI16 = (int16_t*)pBuffer;
-    printf("- PacketId: PI_COMMAND \r\n");
+    printf("|- PacketId: PI_COMMAND \r\n");
 
     uint16_t length = pBufferI16[0];
-    printf("- Content: \r\n");
+    printf("|- Content: \r\n");
     printf("   |- Length: %i \r\n", length);
     printf("   |- CommandId: %i \r\n", pBufferI16[1]);
 

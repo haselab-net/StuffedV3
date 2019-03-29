@@ -224,15 +224,12 @@ void UdpCom::OnReceiveUdp(struct udp_pcb * upcb, struct pbuf * top, const ip_add
 	pbuf_free(top);
 }
 void UdpCom::OnReceiveServer(void* payload, int len) {
-	ESP_LOGE("UdpCom::OnReceiveServer", "OnReceiveServer");
-
 	recvs.Lock();
 	if (!recvs.WriteAvail()) {
 		ESP_LOGE("UdpCom::OnReceiveServer", "Udp command receive buffer is full.");
 		recvs.Unlock();
 		return;
 	}
-	recvs.Lock();
 	UdpCmdPacket* recv = &recvs.Poke();
 	memcpy(recv->bytes + 2, payload, len);
 	recv->count = commandCount;
