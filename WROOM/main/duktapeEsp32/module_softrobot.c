@@ -4,11 +4,11 @@
 #include "duktape_event.h"
 #include "duktape_utils.h"
 #include "module_softrobot.h"
+#include "module_jsfile.h"
+#include "UdpCom.h"
 
-uint32_t stash_key_callback = 0;    // stash key for callback function: send_packet
-size_t return_packet_buffer_size;   // the size of buffer we want to send
-
-extern void UdpCom_OnReceiveServer(void * payload, int len);
+static uint32_t stash_key_callback = 0;    // stash key for callback function: send_packet
+static size_t return_packet_buffer_size;   // the size of buffer we want to send
 
 /*
 * handle content in the buffer
@@ -62,7 +62,10 @@ static duk_ret_t register_packet_callback(duk_context *ctx){
     return 0;
 }
 
-int return_packet_dataProvider(duk_context *ctx, void *context) {
+/**
+ * Provide callback function with 2 parameters: buffer + buffersize
+ */
+static int return_packet_dataProvider(duk_context *ctx, void *context) {
     void* p = duk_push_buffer(ctx, return_packet_buffer_size, 0);
     memcpy(p, context, return_packet_buffer_size);
     duk_push_buffer_object(ctx, -1, 0, return_packet_buffer_size, DUK_BUFOBJ_ARRAYBUFFER);
@@ -79,16 +82,7 @@ int return_packet_dataProvider(duk_context *ctx, void *context) {
 * [2] - size of the buffer
 */
 void return_packet(void* buffer, size_t buffer_size) {
-    /* duk_get_global_string(ctx, "send_packet");
-    void* p = duk_push_buffer(ctx, buffer_size, 0);
-    memcpy(p, buffer, buffer_size);
-    rc = duk_pcall(ctx, 1);
-    if(rc!=0){
-    printf("Send packet failed: %s\n", duk_safe_to_string(ctx, -1));
-    }else {
-    printf("Send packet success\n");
-    }
-    duk_pop(ctx); // clear return value */
+    if(stash_key_callback==0) return;
 
     return_packet_buffer_size = buffer_size;
 
@@ -98,6 +92,9 @@ void return_packet(void* buffer, size_t buffer_size) {
       return_packet_dataProvider, // Data provider parameter
       buffer // Context parameter
    );
+
+   // call jsfile callback
+   jsfile_exec_packet_callback(buffer, buffer_size);
 }
 
 /**

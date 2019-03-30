@@ -43,6 +43,7 @@
 #include "module_wifi.h"
 #include "module_softrobot.h"
 #include "module_jsfile.h"
+#include "module_jslib.h"
 LOG_TAG("modules");
 
 /**
@@ -108,8 +109,9 @@ functionTableEntry_t functionTable[] = {
 	{ "ModuleSerialVFS",  ModuleSerialVFS,  1},
 	{ "ModuleSPI",        ModuleSPI,        1},
 	{ "ModuleSSL",        ModuleSSL,        1},
-	{ "ModuleSoftrobot",  ModuleSoftrobot,	1},			// register softrobot module
-	{ "ModuleJSFile",	  ModuleJSFile,		1},			// register jsfile module
+	//{ "ModuleSoftrobot",  ModuleSoftrobot,	1},			// register softrobot module
+	//{ "ModuleJSFile",	  ModuleJSFile,		1},			// register jsfile module
+	{ "ModuleJSLib",	  ModuleJSLib,		1},			// register jslib module
 #endif // ESP_PLATFORM
 	// Must be last entry
 	{NULL, NULL, 0 } // *** DO NOT DELETE *** - MUST BE LAST ENTRY.
@@ -543,8 +545,8 @@ void registerModules(duk_context *ctx) {
 	ModuleESP32(ctx);
 	assert(top == duk_get_top(ctx));
 
-	ModuleWIFI(ctx); // Load the WiFi module
-	assert(top == duk_get_top(ctx));
+	// ModuleWIFI(ctx); // Load the WiFi module
+	// assert(top == duk_get_top(ctx));
 
 	//ModuleTIMERS(ctx);
 	//assert(top == duk_get_top(ctx));

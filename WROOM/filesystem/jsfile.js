@@ -17,8 +17,16 @@ var _ret = {
         internalJSFile.stop_file();
     },
 
-    runFile: function (fileName) {
-        internalJSFile.run_file(fileName);
+    runFile: function () {
+        internalJSFile.run_file();
+    },
+
+    registerCallback: function(callback) {
+        internalJSFile.register_callback(callback);
+    },
+
+    handleEvent: function() {
+        internalJSFile.handle_event();
     }
 }
 

@@ -21,9 +21,7 @@
 #include "UdpCom.h"
 #include "UartForBoards.h"
 #include "CommandWROOM.h"
-extern "C" {
-#include "../duktapeEsp32/include/module_softrobot.h"
-}
+#include "ws_ws.h"
 
 
 UdpCom udpCom;
@@ -264,7 +262,6 @@ void UdpCom::OnReceiveServer(void* payload, int len) {
 		recvs.Unlock();
 		return;
 	}
-	recvs.Lock();
 	UdpCmdPacket* recv = &recvs.Poke();
 	memcpy(recv->bytes + 2, payload, len);
 	recv->count = commandCount;
@@ -280,8 +277,6 @@ extern "C" void UdpCom_Lock(){
 extern "C" void UdpCom_Unlock(){
 	udpCom.recvs.Unlock();
 }
-
-
 
 #if !UDP_UART_ASYNC
 void UdpCom::ExecCommandLoop(){
@@ -343,7 +338,7 @@ void UdpCom::SendReturn(UdpCmdPacket& recv) {
 	}
 }
 void UdpCom::SendReturnServer(UdpCmdPacket& recv) {
-	return_packet(send.bytes+2, send.length-2);
+	wsOnMessageSr(send.bytes+2, send.length-2);
 }
 void UdpCom::SendReturnUdp(UdpCmdPacket& recv) {
 	if (!udp) return;

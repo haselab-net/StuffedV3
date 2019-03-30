@@ -59,6 +59,17 @@ void esp32_duktape_initEvents() {
 #endif
 } // esp32_duktape_initEvents
 
+/**
+ * End the event handling.
+ */
+void esp32_duktape_endEvents() {
+	// Initialize the FreeRTOS queue.
+#ifdef ESP_PLATFORM
+	if(!esp32_duktape_event_queue) return;
+	vQueueDelete(esp32_duktape_event_queue);
+#endif
+} // esp32_duktape_initEvents
+
 
 /**
  * Check to see if there is an event to process.

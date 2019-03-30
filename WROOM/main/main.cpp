@@ -11,9 +11,11 @@
 #include "nvs_flash.h"
 #include "rom/uart.h"
 #endif
+
 extern "C" void softRobot_main();
 #ifdef USE_DUKTAPE
 extern "C" void duktape_main();
+extern "C" void ws_main();
 #endif
 
 extern "C" void app_main(){
@@ -27,9 +29,11 @@ extern "C" void app_main(){
     printf("silicon revision %d, ", chip_info.revision);
     printf("%dMB %s flash\n", spi_flash_get_chip_size() / (1024 * 1024),
             (chip_info.features & CHIP_FEATURE_EMB_FLASH) ? "embedded" : "external");
-#ifdef USE_DUKTAPE
-	duktape_main();
-#endif
 #endif 
+
+#ifdef USE_DUKTAPE
+	//duktape_main();
+    ws_main();
+#endif
 	softRobot_main();
 }
