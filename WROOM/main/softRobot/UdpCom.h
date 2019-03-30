@@ -27,9 +27,9 @@ public:
 	union {
 		unsigned char bytes[MAXLEN];
 		struct {
-			unsigned short count;	//	counter to detect packet drop.
-			unsigned short length;	//	length of this command
-			unsigned short command;	//	command id
+			ushort count;	//	counter to detect packet drop.
+			ushort length;	//	length of this command
+			ushort command;	//	command id
 			short data[(MAXLEN-2*3)/2];
 		}__attribute__((__packed__));
 	};
@@ -52,10 +52,10 @@ public:
 	short GetMotorVel(int i) {
 		return data[allBoards.GetNTotalMotor() + i];
 	}
-	short GetPeriod() {
+	ushort GetPeriod() {
 		return data[allBoards.GetNTotalMotor()];
 	}
-	short GetTargetCount() {
+	ushort GetCountOfWrite() {
 		return data[allBoards.GetNTotalMotor()+1];
 	}
 	short GetForceControlJacob(int j, int i) {	//	j: row, i: col,
@@ -103,11 +103,9 @@ public:
 	void SetLength();
 	void ClearData();
 	void SetCommand(short cmd) { command = cmd; }
-	void SetControlMode(short p){
-		if (command == CI_ALL){
-			//TBW hase	ALLの場合だけ、パケットの中身もずれるので、Robokeyを含めて直す必要あり
-		}
-	}
+	virtual void SetAll(ControlMode controlMode, unsigned char countOfReadMin, unsigned char countOfReadMax,
+		unsigned short tickMin, unsigned short tickMax, 
+		SDEC* pos, SDEC* vel, SDEC* current, SDEC* force, SDEC* touch);
 	void SetMotorPos(short p, int i) {
 		data[i] = p;
 	}
@@ -115,20 +113,17 @@ public:
 		data[allBoards.GetNTotalMotor() + i] = v;
 	}
 	//	for interpolate and force control
-	void SetTargetCountRead(unsigned char c) {
+	void SetTargetCountOfReadMin(unsigned char c) {
 		data[allBoards.GetNTotalMotor()] = c;
 	}
-	void SetTickMin(short t) {
-		data[allBoards.GetNTotalMotor()+1] = t;
+	void SetTargetCountOfReadMax(unsigned char c) {
+		data[allBoards.GetNTotalMotor()+1] = c;
 	}
-	void SetTickMax(short t) {
+	void SetTickMin(unsigned short t) {
 		data[allBoards.GetNTotalMotor()+2] = t;
 	}
-	void SetNTargetRemain(unsigned char t){
-		data[allBoards.GetNTotalMotor()+3] = t;		
-	}
-	void SetNTargetVacancy(unsigned char t){
-		data[allBoards.GetNTotalMotor()+4] = t;		
+	void SetTickMax(unsigned short t) {
+		data[allBoards.GetNTotalMotor()+3] = t;
 	}
 	//	sense
 	void SetCurrent(short c, int i) {

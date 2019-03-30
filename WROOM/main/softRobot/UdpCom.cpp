@@ -79,7 +79,7 @@ void UdpRetPacket::SetLength() {
 		length = (NHEADER + allBoards.GetNTotalMotor() * 2 + allBoards.GetNTotalCurrent()) * 2; break;
 	case CI_INTERPOLATE:	//	pos targetCountRead tickMin tickMax remain vacancy
 	case CI_FORCE_CONTROL: 
-		length = (NHEADER + allBoards.GetNTotalMotor() + 5) * 2; break;
+		length = (NHEADER + allBoards.GetNTotalMotor() + 4) * 2; break;
 	case CI_SETPARAM:
 	case CI_RESET_SENSOR:
 		length = NHEADER*2; break;
@@ -100,6 +100,37 @@ void UdpRetPacket::SetLength() {
 void UdpRetPacket::ClearData() {
 	SetLength();
 	memset(data, 0, length);
+}
+void UdpRetPacket::SetAll(ControlMode controlMode, unsigned char countOfReadMin, unsigned char countOfReadMax,
+		unsigned short tickMin, unsigned short tickMax, 
+		SDEC* pos, SDEC* vel, SDEC* current, SDEC* force, SDEC* touch)
+	{
+	assert(command == CI_ALL);
+	int cur = 0;
+	data[cur++] = controlMode;
+	data[cur++] = countOfReadMin;
+	data[cur++] = countOfReadMax;
+	data[cur++] = tickMin;
+	data[cur++] = tickMax;
+	int nMotor = allBoards.GetNTotalMotor();
+	int nCurrent = allBoards.GetNTotalCurrent();
+	int nForce = allBoards.GetNTotalForce();
+	int nTouch = allBoards.GetNTotalTouch();
+	for(int i=0; i!=nMotor; ++i){
+		data[cur++] = pos ? pos[i] : 0;
+	}
+	for(int i=0; i!=nMotor; ++i){
+		data[cur++] = vel ? vel[i] : 0;
+	}
+	for(int i=0; i!=nCurrent; ++i){
+		data[cur++] = current ? current[i] : 0;
+	}
+	for(int i=0; i!=nForce; ++i){
+		data[cur++] = force ? force[i] : 0;
+	}
+	for(int i=0; i!=nTouch; ++i){
+		data[cur++] = touch ? touch[i] : 0;
+	}
 }
 
 UdpCmdPackets::UdpCmdPackets() {
@@ -165,26 +196,28 @@ void UdpCom::OnReceiveUdp(struct udp_pcb * upcb, struct pbuf * top, const ip_add
 				if (bDebug) {
 					ESP_LOGI(Tag, "L=%d Cm=%d Ct=%d received from %s.\n", recv->length, recv->command, recv->count, ipaddr_ntoa(addr));
 				}
-}
+			}
 			if (readLen == cmdLen) {
 				recv->returnIp = *addr;
 				if (recv->length != cmdLen - 2) {
 					ESP_LOGE(Tag, "cmdLen %d != recvLen %d - 2 in cmd:%d \n", cmdLen, recv->length, recv->command);
 				}
-				if (recv->command == CIU_GET_IPADDRESS) {
+				if (recv->command == CIU_GET_IPADDRESS 
+					|| (recv->command == CI_INTERPOLATE && recv->GetPeriod() == 0)
+					|| (recv->command == CI_FORCE_CONTROL && recv->GetPeriod() == 0) ){
+					if (recv->command == CI_INTERPOLATE){
+						ESP_LOGI("UdpCom", "CI_INT Cow:%d, peri=%d, ct=%d", recv->GetCountOfWrite(), recv->GetPeriod(), recv->count);
+					}
 					recvs.Write();
 #if !UDP_UART_ASYNC
 					xTaskNotifyGive(taskExeCmd);
 #endif
 				}
-#if 1			//	check command counter exactly.
 				else if (recv->count == commandCount + 1) {		// check and update counter
 					commandCount++;
-#else			//	Only check received command counter > last command counter.
-				//				else if (short(recv->count - commandCount) > 0) {		// check and update counter
-				else if (1) {
-					commandCount = recv->count;
-#endif
+					if (recv->command == CI_INTERPOLATE){
+						ESP_LOGI("UdpCom", "CI_INT Cow:%d, peri=%d, ct=%d", recv->GetCountOfWrite(), recv->GetPeriod(), recv->count);
+					}
 					recvs.Write();
 #if !UDP_UART_ASYNC
 					xTaskNotifyGive(taskExeCmd);
@@ -198,7 +231,7 @@ void UdpCom::OnReceiveUdp(struct udp_pcb * upcb, struct pbuf * top, const ip_add
 					int diff = (short)((short)commandCount - (short)recv->count);
 					if (countDiffMax < diff) countDiffMax = diff;
 					//	Command count is not matched. There was some packet losses or delay. 
-					//ESP_LOGI(Tag, "ignore Ct:%d<%d Cm:%d\n", recv->count, commandCount+1, recv->command);
+					ESP_LOGI(Tag, "ignore Ct:%d!=%d Cm:%d", recv->count, commandCount+1, recv->command);
 					//ESP_LOGI(Tag, "ignore %d packets Ct:%d Cm:%d", countDiffMax, commandCount+1, recv->command);
 				}
 				if (!recvs.WriteAvail()) {

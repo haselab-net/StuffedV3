@@ -36,6 +36,9 @@
             this.panelCom = new System.Windows.Forms.Panel();
             this.txErrorMsg = new System.Windows.Forms.TextBox();
             this.panel2 = new System.Windows.Forms.Panel();
+            this.lbRecvCount = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
+            this.lbSendCount = new System.Windows.Forms.Label();
             this.btCalibForce = new System.Windows.Forms.Button();
             this.ckLog = new System.Windows.Forms.CheckBox();
             this.ckSense = new System.Windows.Forms.CheckBox();
@@ -179,6 +182,9 @@
             // 
             // panel2
             // 
+            this.panel2.Controls.Add(this.lbRecvCount);
+            this.panel2.Controls.Add(this.label5);
+            this.panel2.Controls.Add(this.lbSendCount);
             this.panel2.Controls.Add(this.btCalibForce);
             this.panel2.Controls.Add(this.ckLog);
             this.panel2.Controls.Add(this.ckSense);
@@ -192,6 +198,33 @@
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(138, 312);
             this.panel2.TabIndex = 69;
+            // 
+            // lbRecvCount
+            // 
+            this.lbRecvCount.AutoSize = true;
+            this.lbRecvCount.Location = new System.Drawing.Point(68, 176);
+            this.lbRecvCount.Name = "lbRecvCount";
+            this.lbRecvCount.Size = new System.Drawing.Size(15, 15);
+            this.lbRecvCount.TabIndex = 84;
+            this.lbRecvCount.Text = "0";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(47, 176);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(15, 15);
+            this.label5.TabIndex = 83;
+            this.label5.Text = ">";
+            // 
+            // lbSendCount
+            // 
+            this.lbSendCount.AutoSize = true;
+            this.lbSendCount.Location = new System.Drawing.Point(5, 176);
+            this.lbSendCount.Name = "lbSendCount";
+            this.lbSendCount.Size = new System.Drawing.Size(15, 15);
+            this.lbSendCount.TabIndex = 82;
+            this.lbSendCount.Text = "0";
             // 
             // btCalibForce
             // 
@@ -234,7 +267,7 @@
             this.fpFoundRobot.Location = new System.Drawing.Point(0, 32);
             this.fpFoundRobot.Margin = new System.Windows.Forms.Padding(2);
             this.fpFoundRobot.Name = "fpFoundRobot";
-            this.fpFoundRobot.Size = new System.Drawing.Size(138, 158);
+            this.fpFoundRobot.Size = new System.Drawing.Size(138, 142);
             this.fpFoundRobot.TabIndex = 45;
             // 
             // btFindRobot
@@ -275,6 +308,7 @@
             // 
             // runTimer
             // 
+            this.runTimer.Enabled = true;
             this.runTimer.Interval = 50;
             this.runTimer.Tick += new System.EventHandler(this.runTimer_Tick);
             // 
@@ -953,6 +987,9 @@
         private UCJacobianEditor jeRight;
         private System.Windows.Forms.Button btCalibForce;
         private System.Windows.Forms.Button btSetLimitMax;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Label lbSendCount;
+        private System.Windows.Forms.Label lbRecvCount;
     }
 }
 

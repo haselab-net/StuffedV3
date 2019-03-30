@@ -9,9 +9,8 @@ struct RobotState: public BoardRetBase{
 	//	robot's state
 	ControlMode mode;				//	PIC/control.h
 	unsigned char nTargetMin;			//	nTaret for all board
-	unsigned char nTargetVacancy;		//	nTargetVecancy for all board
-	unsigned char nTargetRemain;		//	minimum remaining targets in the board. Must be >= 3.
 	unsigned char targetCountWrite;		//	targetCount for next writing. 
+	unsigned char targetCountReadMin;	//	targetCount for read of one of the board.
 	unsigned char targetCountReadMax;	//	targetCount for read of one of the board.
 	unsigned short tickMin;
 	unsigned short tickMax;
@@ -21,8 +20,33 @@ struct RobotState: public BoardRetBase{
 	tiny::vector<SDEC> force;			//	force sensor
 	tiny::vector<SDEC> touch;			//	touch sensor
 
-	void SetControlMode(short cm){
-		mode = (ControlMode)cm;
+	virtual void SetAll(ControlMode cm, unsigned char corMin, unsigned char corMax, 
+		unsigned short tkMin, unsigned short tkMax, 
+		SDEC* pos, SDEC* vel, SDEC* current, SDEC* f, SDEC* t){
+		mode = cm;
+		targetCountReadMax = corMax;
+		targetCountReadMin = corMin;
+		tickMin = tkMin; tickMax = tkMax;
+		if (pos){
+			for(int i=0; i!=position.size(); ++i){
+				position[i] = pos[i];
+			}
+		}
+		if (vel){
+			for(int i=0; i!=velocity.size(); ++i){
+				velocity[i] = vel[i];
+			}
+		}
+		if (f){
+			for(int i=0; i!=force.size(); ++i){
+				force[i] = f[i];
+			}
+		}
+		if (t){
+			for(int i=0; i!=touch.size(); ++i){
+				touch[i] = t[i];
+			}
+		}		
 	}
 	void SetMotorPos(short p, int i) {
 		position[i] = p;
@@ -31,20 +55,17 @@ struct RobotState: public BoardRetBase{
 		velocity[i] = v;
 	}
 	//	for interpolate and force control
-	void SetTargetCountRead(unsigned char c) {
-		targetCountReadMax = c;
+	virtual void SetTargetCountOfReadMin(unsigned char c){
+		targetCountReadMin = c;
 	}
-	void SetTickMin(short t) {
+	virtual void SetTargetCountOfReadMax(unsigned char c){
+		targetCountReadMax = c;
+	}	
+	void SetTickMin(unsigned short t) {
 		tickMin = t;
 	}
-	void SetTickMax(short t) {
+	void SetTickMax(unsigned short t) {
 		tickMax = t;
-	}
-	void SetNTargetRemain(unsigned char t){
-		nTargetRemain = t;
-	}
-	void SetNTargetVacancy(unsigned char t){
-		nTargetVacancy = t;
 	}
 	//	sense
 	void SetCurrent(short c, int i) {

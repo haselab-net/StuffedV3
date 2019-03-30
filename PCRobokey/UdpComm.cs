@@ -53,6 +53,7 @@ namespace Robokey
         bool bFindRobot = false;
         const ushort CONTROLFREQ = 3;   //  3kHz
         public StreamWriter log;
+        public ushort recvCount;
 
         //  board info
         RobotInfo robotInfo = new RobotInfo();
@@ -73,7 +74,6 @@ namespace Robokey
                 force = new short[robotInfo.nForce];
                 current = new short[robotInfo.nCurrent];
                 nInterpolateTotal = robotInfo.nTarget;
-                nInterpolateVacancy = nInterpolateTotal;
                 if (OnUpdateRobotInfo != null)
                 {
                     owner.Invoke(new UpdateRobotInfoHandlerType(OnUpdateRobotInfo), prevMacAddress);
@@ -95,11 +95,10 @@ namespace Robokey
         public short[] force = null;                        //  force sensor's values
         public int nInterpolateTotal=0;                     //  capacity of interpolation targets.
         public byte interpolateTargetCountOfWrite;          //  count of interpolation at write cursor
-        public byte interpolateTargetCountOfRead;           //  count of interpolation at read cursor
+        public byte interpolateTargetCountOfReadMin;        //  count of interpolation at read cursor
+        public byte interpolateTargetCountOfReadMax;        //  count of interpolation at read cursor
         public int interpolateTickMin = 0;                  //  tick of interpolation
         public int interpolateTickMax = 0;                  //  tick of interpolation
-        public int nInterpolateRemain = 0;                  //  number of data in target buffer 
-        public int nInterpolateVacancy =0;                  //  target buffer vacancy
         public enum ControlMode {
             CM_DIRECT,
             CM_INTERPOLATE,
@@ -114,7 +113,7 @@ namespace Robokey
                 {
                     if (value == ControlMode.CM_INTERPOLATE || value == ControlMode.CM_FORCE)
                     {
-                        interpolateTargetCountOfRead = 0x100 - 2;
+                        interpolateTargetCountOfReadMin = interpolateTargetCountOfReadMax = 0x100 - 2;
                         interpolateTargetCountOfWrite = 0;
                     }
                     _controlMode = value;
@@ -149,7 +148,7 @@ namespace Robokey
             {
                 if (writeAvail == 0) return false;
                 commandCount++;
-                UdpComm.OverwriteCounter(commandCount, 0, b);
+                UdpComm.PokeCounter(commandCount, 0, b);
                 buffers[write] = b;
                 if (write < bufferLen - 1) write++;
                 else write = 0;
@@ -161,8 +160,7 @@ namespace Robokey
             }
             public void FreeTo(ushort ct) {
                 while (sent != write) {
-                    int p = 2;
-                    ushort cmdCount = (ushort)ReadShort(ref p, buffers[sent]);
+                    ushort cmdCount = PeekCount(0, buffers[sent]);
                     if (ct >= cmdCount)
                     {   //  erase command
                         if (sent < bufferLen - 1) sent++;
@@ -179,7 +177,7 @@ namespace Robokey
                 else return null;
             }
         } 
-        CommandQueue sendQueue = new CommandQueue();
+        public CommandQueue sendQueue = new CommandQueue();
         public UdpComm(Control o)
         {
             owner = o;
@@ -229,12 +227,12 @@ namespace Robokey
             s += diff;
             cur += 2;
         }
-        static void OverwriteLengthAtHeader(int len, int start, byte[] buf)
+        static void PokeLengthAtHeader(int len, int start, byte[] buf)
         {
             int cur = start + 2;
             WriteShort(len, ref cur, buf);
         }
-        static void OverwriteCounter(int ct, int start, byte[] buf)
+        static void PokeCounter(int ct, int start, byte[] buf)
         {
             int cur = start;
             WriteShort(ct, ref cur, buf);
@@ -250,6 +248,20 @@ namespace Robokey
             ct = (ushort)ReadShort(ref cur, buf);
             len = (ushort)ReadShort(ref cur, buf);
             cmd = (ushort)ReadShort(ref cur, buf);
+        }
+        static ushort PeekCount(int st, byte[] buf)
+        {
+            return (ushort)ReadShort(ref st, buf);
+        }
+        static ushort PeekLength(int st, byte[] buf)
+        {
+            int cur = st + 2;
+            return (ushort)ReadShort(ref st, buf);
+        }
+        static ushort PeekCommand(int st, byte[] buf)
+        {
+            int cur = st + 4;
+            return (ushort)ReadShort(ref st, buf);
         }
         static int ReadLength(int start, byte[] buf) {
             int cur = start+2;
@@ -298,11 +310,10 @@ namespace Robokey
         }
         void ReadTick(ref int cur, byte[] buf)
         {
-            interpolateTargetCountOfRead = (byte)ReadShort(ref cur, buf);
+            interpolateTargetCountOfReadMin = (byte)ReadShort(ref cur, buf);
+            interpolateTargetCountOfReadMax = (byte)ReadShort(ref cur, buf);
             interpolateTickMin = ReadShort(ref cur, buf);
             interpolateTickMax = ReadShort(ref cur, buf);
-            nInterpolateRemain = ReadShort(ref cur, buf);
-            nInterpolateVacancy = ReadShort(ref cur, buf);
         }
         void CallUpdateRobotState() {
             if (OnUpdateRobotState != null)
@@ -356,12 +367,12 @@ namespace Robokey
                 {
                     int cur = 0;
                     ushort length = 0;
-                    ushort count = 0;
                     ushort commandId = 0;
                     while (cur < receiveBytes.Length)
                     {
                         int start = cur;
-                        ReadHeader(ref length, ref count, ref commandId, ref cur, receiveBytes);
+                        ReadHeader(ref length, ref recvCount, ref commandId, ref cur, receiveBytes);
+                        //System.Diagnostics.Debug.WriteLine("Receive cmd=" + commandId + "  count=" + recvCount + "  len="+length);
                         if (log != null)
                         {
                             log.Write("L" + length + " C" + commandId);
@@ -372,7 +383,7 @@ namespace Robokey
                             }
                             log.Write("\r\n");
                         }
-                        sendQueue.FreeTo(count);
+                        sendQueue.FreeTo(recvCount);
                         switch ((CommandId)commandId)
                         {
                             case CommandId.CI_BOARD_INFO:
@@ -387,6 +398,7 @@ namespace Robokey
                             case CommandId.CI_FORCE_CONTROL:
                                 ReadPose(ref cur, receiveBytes);
                                 ReadTick(ref cur, receiveBytes);
+                                //System.Diagnostics.Debug.WriteLine("Receive CorMax:" + (int)interpolateTargetCountOfReadMax);
                                 CallUpdateRobotState();
                                 break;
                             case CommandId.CI_SENSOR:
@@ -402,7 +414,7 @@ namespace Robokey
                                     lock (sendQueue)
                                     {
                                         sendQueue.Clear();
-                                        sendQueue.commandCount = count;
+                                        sendQueue.commandCount = recvCount;
                                     }
                                     if (OnRobotFound != null)
                                     {
@@ -457,10 +469,9 @@ namespace Robokey
 #if UDP_NORETRY    //  No retry 
             sendQueue.Clear();
 #endif
-            OverwriteLengthAtHeader(len-2, 0, cmd);
+            PokeLengthAtHeader(len-2, 0, cmd);
             for (int i=0; i<100 && !sendQueue.Write(cmd); ++i) {
-                int cur = 2;
-                ushort ct = (ushort)ReadShort(ref cur, sendQueue.Peek());
+                ushort ct = PeekCommand(0, sendQueue.Peek());
                 sendQueue.FreeTo(ct);
             }
         }
@@ -531,8 +542,13 @@ namespace Robokey
             }
             WriteShort(period, ref p, packet);
             WriteShort(interpolateTargetCountOfWrite, ref p, packet);
+            //  In case "period == 0" commandCount is ignored and not incremented in robot side. 
+            if (peri == 0) sendQueue.commandCount--;
             PutCommand(packet, p);
-//            System.Diagnostics.Debug.Write("IntCoW=" + interpolateTargetCountOfWrite);
+#if true
+            System.Diagnostics.Debug.WriteLine("SendPoseInterpolate  tcw=" + interpolateTargetCountOfWrite
+                + "  peri=" + peri);
+#endif
             if (period != 0) interpolateTargetCountOfWrite++;
         }
         public void SendPoseForceControl(PoseData pose, ushort peri, short [][] jacob)
@@ -677,9 +693,9 @@ namespace Robokey
             }
             byte[] packet = new byte[10];
             int p = 0;
-            WriteShort(6, ref p, packet);   //  len
-            WriteShort(0, ref p, packet);   //  count
-            WriteShort((int)CommandId.CIU_GET_IPADDRESS, ref p, packet);    // cmd
+            WriteHeader((int)CommandId.CIU_GET_IPADDRESS, ref p, packet);
+            PokeCounter(0, 0, packet);         //  count
+            PokeLengthAtHeader(4, 0, packet);  //  len
             udpBc.EnableBroadcast = true;
             System.Net.IPEndPoint ep = new System.Net.IPEndPoint(System.Net.IPAddress.Broadcast, remotePort);
             udpBc.Send(packet, p, ep);

@@ -346,10 +346,15 @@ void controlInit(){
 }
 void controlSetMode(enum ControlMode m){
 	if (controlMode != m){
+#ifdef WROOM
+    	DISABLE_INTERRUPT
+#endif
 		if (m == CM_INTERPOLATE || m == CM_FORCE_CONTROL){
 			targetsInit();
 		}
+#ifdef PIC
     	DISABLE_INTERRUPT
+#endif
 		controlMode = m;
     	ENABLE_INTERRUPT
 	}

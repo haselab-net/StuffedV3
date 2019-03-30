@@ -38,8 +38,8 @@ public:
 	short GetControlMode(){ return mode; }
 	short GetMotorPos(int i){ return targetPosition[i]; }
 	short GetMotorVel(int i){ return targetVelocity[i]; }
-	short GetPeriod(){ return targetPeriod; }
-	short GetTargetCount(){ return targetCount; }
+	unsigned short GetPeriod(){ return targetPeriod; }
+	unsigned short GetCountOfWrite(){ return targetCount; }
 	short GetForceControlJacob(int j, int i) { return  forceControlJacobian[j*3+i]; }
 	short GetParamType(){ return paramType;}
 	short GetBoardId(){ return boardIdToSet;}

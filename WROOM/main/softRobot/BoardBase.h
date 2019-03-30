@@ -5,6 +5,7 @@
 #include "TinyContainer.h"
 extern "C"{
 #include "../../../PIC/fixed.h"
+#include "../../../PIC/Control.h"
 }
 
 class BoardCmdBase{
@@ -12,8 +13,8 @@ public:
 	virtual short GetControlMode()=0;
 	virtual short GetMotorPos(int i)=0;
 	virtual short GetMotorVel(int i)=0;
-	virtual short GetPeriod()=0;
-	virtual short GetTargetCount()=0;
+	virtual unsigned short GetPeriod()=0;
+	virtual unsigned short GetCountOfWrite()=0;
 	virtual short GetForceControlJacob(int j, int i)=0;
 	virtual short GetParamType()=0;
 	virtual short GetControlK(int i)=0;
@@ -27,14 +28,15 @@ public:
 };
 class BoardRetBase{
 public:
-	virtual void SetControlMode(short cm)=0;
+	virtual void SetAll(ControlMode controlMode, unsigned char countOfReadMin, unsigned char countOfReadMax,
+		unsigned short tickMin, unsigned short tickMax, 
+		SDEC* pos, SDEC* vel, SDEC* current, SDEC* force, SDEC* touch)=0;
 	virtual void SetMotorPos(short p, int i)=0;
 	virtual void SetMotorVel(short v, int i)=0;
-	virtual void SetTargetCountRead(unsigned char c)=0;
-	virtual void SetTickMin(short t)=0;
-	virtual void SetTickMax(short t)=0;
-	virtual void SetNTargetRemain(unsigned char t)=0;
-	virtual void SetNTargetVacancy(unsigned char t)=0;
+	virtual void SetTargetCountOfReadMin(unsigned char c)=0;
+	virtual void SetTargetCountOfReadMax(unsigned char c)=0;
+	virtual void SetTickMin(unsigned short t)=0;
+	virtual void SetTickMax(unsigned short t)=0;
 	virtual void SetCurrent(short c, int i)=0;
 	virtual void SetForce(short f, int i)=0;
 	virtual void SetTouch(short t, int i)=0;

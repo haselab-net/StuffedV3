@@ -176,10 +176,15 @@ void AllBoards::WriteCmd(unsigned short commandId, BoardCmdBase& packet) {
 	if (UartForBoards::bDebug) ESP_LOGI("AllBorads::WriteCmd", "cmd=%d\r\n", commandId);
 	//	Update state based on packet
 	if (commandId == CI_INTERPOLATE){
-		state.targetCountWrite = (unsigned char)packet.GetTargetCount();
+		//ESP_LOGI("AllBoards_RecvCmd", "Peri:%d  Cow:%d", packet.GetPeriod(), packet.GetCountOfWrite());
+		if (packet.GetPeriod() > 0){
+			state.targetCountWrite = (unsigned char)packet.GetCountOfWrite();
+		} 
 		state.mode = CM_INTERPOLATE;
 	}else if(commandId == CI_FORCE_CONTROL){
-		state.targetCountWrite = (unsigned char)packet.GetTargetCount();
+		if (packet.GetPeriod() > 0){
+			state.targetCountWrite = (unsigned char)packet.GetCountOfWrite();
+		}
 		state.mode = CM_FORCE_CONTROL;
 	}else if(commandId == CI_DIRECT){
 		state.mode = CM_DIRECT;
@@ -200,53 +205,39 @@ void AllBoards::WriteCmd(unsigned short commandId, BoardCmdBase& packet) {
 		uart[i]->RecvUart();
 	}
 }
-inline void readAndGetMinMax(BoardBase* board, unsigned short commandId, 
+inline void readAndGetMinMax(bool bFirst, BoardBase* board, unsigned short commandId, 
 	BoardRetBase& packet, RobotState& state,
-	int& diffMin, int& diffMax, unsigned short& tickMin, unsigned short& tickMax){
+	unsigned char& corMin, unsigned char& corMax, unsigned short& tickMin, unsigned short& tickMax){
 	board->ReadRet(commandId, packet);
-	int diff = ((int)state.targetCountWrite - (int)board->GetTargetCountOfRead() + 0x100) & 0xFF;
-	if (diff < diffMin) diffMin = diff;
-	if (diff > diffMax) diffMax = diff;
-	unsigned short tick = board->GetTick();
-	if (tick < tickMin) tickMin = tick;
-	if (tick > tickMax) tickMax = tick;
+	if (bFirst){
+		corMin = corMax = board->GetTargetCountOfRead();
+		tickMin = tickMax = board->GetTick();
+	}else{
+		unsigned char cor = board->GetTargetCountOfRead();
+		if (cor - corMin < 0) corMin = cor;
+		if (cor - corMax > 0) corMax = cor;
+		unsigned short tick = board->GetTick();
+		if (tick - tickMin < 0) tickMin = tick;
+		if (tick - tickMax > 0) tickMax = tick;
+	}
 }
 void AllBoards::ReadRet(unsigned short commandId, BoardRetBase& packet){
 	if (commandId == CI_INTERPOLATE || commandId == CI_FORCE_CONTROL) {
-		int diffMin = 0x100;
-		int diffMax = -0x100;
-		unsigned short tickMin = 0xFFFF;
-		unsigned short tickMax = 0;
-		int countOfRead[20];
-		int nCoR = 0;
-		memset(countOfRead, 0, sizeof(countOfRead));
-
-		readAndGetMinMax(boardDirect, commandId, packet, state, diffMin, diffMax, tickMin, tickMax);
-		countOfRead[nCoR++] = (int)boardDirect->GetTargetCountOfRead();
+		unsigned char corMin, corMax;
+		unsigned short tickMin, tickMax;
+		readAndGetMinMax(true, boardDirect, commandId, packet, state, corMin, corMax, tickMin, tickMax);
 		for (int i = 0; i < NUART; ++i) {
 			for (int j = 0; j < (int)uart[i]->boards.size(); ++j) {
-				readAndGetMinMax(uart[i]->boards[j], commandId, packet, state, diffMin, diffMax, tickMin, tickMax);
-				countOfRead[nCoR++] = (int)uart[i]->boards[j]->GetTargetCountOfRead();
+				readAndGetMinMax(false, uart[i]->boards[j], commandId, packet, state, corMin, corMax, tickMin, tickMax);
 			}
-		}		
-		state.targetCountReadMax = state.targetCountWrite - diffMin;
-		state.nTargetVacancy = state.nTargetMin - diffMax;
-		state.nTargetRemain = diffMin;
-		if (tickMax - tickMin > 0x7FFF){
-			unsigned short temp = tickMin;
-			tickMin = tickMax;
-			tickMax = temp;
 		}
-#if 0
-		ESP_LOGI("TGT", "remain:%d vac:%d cor%d %d %d  cow%d  diff%d",
-			 (int)state.nTargetRemain, (int)state.nTargetVacancy, countOfRead[0], countOfRead[1], countOfRead[2], state.targetCountWrite
-			 , diffMax);
-#endif
-		packet.SetTargetCountRead(state.targetCountReadMax);
+		packet.SetTargetCountOfReadMin(corMin);
+		packet.SetTargetCountOfReadMax(corMax);
 		packet.SetTickMin(tickMin);
 		packet.SetTickMax(tickMax);
-		packet.SetNTargetRemain(state.nTargetRemain);
-		packet.SetNTargetVacancy(state.nTargetVacancy);
+//		if (&packet == &state){
+			//ESP_LOGI("ReadRet", "Cor:%d--%d, Cow:%d", (int)corMin, (int) corMax, state.targetCountWrite);
+//		}
 	}else{
 		boardDirect->ReadRet(commandId, packet);
 		for (int i = 0; i < NUART; ++i) {
