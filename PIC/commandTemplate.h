@@ -52,7 +52,7 @@ union CommandPacket##BOARD {										\
 			} __attribute__((__packed__)) cmdLen;					\
 			struct { /*	 CI_ALL */									\
 				unsigned char controlMode;							\
-				unsigned char count;								\
+				unsigned char targetCountWrite; 					\
 				short period;		/*	period to interpolate */	\
 				union {                                             \
                     SDEC current[BOARD##_NMOTOR];					\
@@ -75,13 +75,13 @@ union CommandPacket##BOARD {										\
 			struct { /*	 CI_INTERPOLATE */							\
 				SDEC pos[BOARD##_NMOTOR];							\
 				short period;		/*	period to interpolate */	\
-				unsigned char count;								\
+				unsigned char targetCountWrite;						\
 			} __attribute__((__packed__)) interpolate;				\
 			struct { /*	 CI_FORCE_CONTROL */						\
 				SDEC pos[BOARD##_NMOTOR];							\
 				SDEC jacob[BOARD##_NFORCE][BOARD##_NMOTOR];			\
 				short period;		/*	period to interpolate */	\
-				unsigned char count;								\
+				unsigned char targetCountWrite;						\
 			} __attribute__((__packed__)) forceControl;				\
 			struct {    /*	 CI_SETPARAM */                         \
 				unsigned char type;                                 \
@@ -158,7 +158,7 @@ union ReturnPacket##BOARD {										\
 			}__attribute__((__packed__)) boardInfo;				\
 			struct {		 /*	 CI_ALL */						\
 				unsigned char controlMode;						\
-				unsigned char targetCountRead;						\
+				unsigned char targetCountRead;					\
 				unsigned short tick;							\
 				SDEC pos[BOARD##_NMOTOR];						\
 				SDEC vel[BOARD##_NMOTOR];						\
@@ -181,10 +181,10 @@ union ReturnPacket##BOARD {										\
 				SDEC vel[BOARD##_NMOTOR];						\
 				SDEC current[BOARD##_NMOTOR];					\
 			}__attribute__((__packed__)) current;				\
-			struct {		 /*	 CI_INTERPOLATE */				\
+			struct {    /* CI_INTERPOLATE, CI_FORCE_CONTROL */	\
 				SDEC pos[BOARD##_NMOTOR];						\
 				unsigned short tick;							\
-				unsigned char targetCountRead;						\
+				unsigned char targetCountRead;					\
 			}__attribute__((__packed__)) interpolate;			\
 		};														\
 	};															\

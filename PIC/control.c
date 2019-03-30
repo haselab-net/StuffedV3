@@ -104,9 +104,9 @@ void pdControl(){
 #endif 
 		setPwmWithLimit(i, L2SDEC(torque));
 #if 0	//	to check pd control
-		count ++;
-		if (i==2 && count > 1000){
-			count = 0;
+		tcw ++;
+		if (i==2 && tcw > 1000){
+			tcw = 0;
 			logPrintf("G:%d  C:%d  T:%d\r\n", motorTarget.pos[i], motorState.pos[i], torque);
 		}
 #endif
@@ -160,13 +160,13 @@ void targetsWrite(){
 	}
 }
 //	Update or add interpolate target
-void targetsAddOrUpdate(SDEC* pos, short period, unsigned char count){
-	targetsForceControlAddOrUpdate(pos, NULL, period, count);
+void targetsAddOrUpdate(SDEC* pos, short period, unsigned char tcw){
+	targetsForceControlAddOrUpdate(pos, NULL, period, tcw);
 }
 //	Update or add interpolate target with force control
-void targetsForceControlAddOrUpdate(SDEC* pos, SDEC JK[NFORCE][NMOTOR] ,short period, unsigned char count){
+void targetsForceControlAddOrUpdate(SDEC* pos, SDEC JK[NFORCE][NMOTOR] ,short period, unsigned char tcw){
 	unsigned char avail, tcr, read;	//
-	char delta;					//	tcr - count	
+	char delta;					//	tcr - tcw	
 	if (period == 0) return;	//	for vacancy check
 	
 	//	check targets delta
@@ -175,13 +175,13 @@ void targetsForceControlAddOrUpdate(SDEC* pos, SDEC JK[NFORCE][NMOTOR] ,short pe
 	avail = targetsReadAvail();
 	tcr = targets.targetCountRead;
 	ENABLE_INTERRUPT
-	delta = count - tcr;
-	LOGI("targetsAdd m0:%d pr:%d c:%d | tcr=%d read=%d delta=%d\r\n", (int)pos[0], (int)period, (int)count, 
+	delta = tcw - tcr;
+	LOGI("targetsAdd m0:%d pr:%d c:%d | tcr=%d read=%d delta=%d\r\n", (int)pos[0], (int)period, (int)tcw, 
 		(int)tcr, (int)read, (int)delta);
 	if (delta > avail){
 		//	target count jumped. may be communication error.
 		LOGE("CJ\r\n");
-		targets.targetCountRead = count - (avail-1);
+		targets.targetCountRead = tcw - (avail-1);
 	}
 	
 	/*	buf[0],[1] is currently used for interpolation. buf[2] will be used in the next step.
@@ -200,7 +200,7 @@ void targetsForceControlAddOrUpdate(SDEC* pos, SDEC JK[NFORCE][NMOTOR] ,short pe
 				}
 			}
 		}
-		LOGI("Write@%d ra:%d p:%d c:%d", w, avail, period, (int)count);
+		LOGI("Write@%d ra:%d p:%d c:%d", w, avail, period, (int)tcw);
 		if (w == targets.write){
 			LOGI(" Add.\r\n");
 			assert(delta == avail);

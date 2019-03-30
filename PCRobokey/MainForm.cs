@@ -437,13 +437,11 @@ namespace Robokey
                             }
                             else
                             {
-#if true                       //  test for update target sent later.
-                                if (remain > 3)
-                                {
-                                    //  1個前の値を送る
-                                    udpComm.interpolateTargetCountWrite--;
-                                    udpComm.SendPoseInterpolate(Interpolate(curTime - runTimer.Interval) + motors.Offset(), (ushort)runTimer.Interval);
-                                }
+#if false                       //  test for update target sent later.
+                                //  send last two data.
+                                udpComm.interpolateTargetCountWrite-=2;
+                                udpComm.SendPoseInterpolate(Interpolate(curTime - 2*runTimer.Interval) + motors.Offset(), (ushort)runTimer.Interval);
+                                udpComm.SendPoseInterpolate(Interpolate(curTime - runTimer.Interval) + motors.Offset(), (ushort)runTimer.Interval);
 #endif
                                 udpComm.SendPoseInterpolate(Interpolate(curTime) + motors.Offset(), (ushort)runTimer.Interval);
                             }

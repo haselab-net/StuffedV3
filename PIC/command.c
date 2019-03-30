@@ -55,10 +55,10 @@ void ecAll(){
 		}
 	}else if (command.all.controlMode == CM_INTERPOLATE){
         controlSetMode(CM_INTERPOLATE);
-        targetsAddOrUpdate(command.all.pos, command.all.period, command.all.count);
+        targetsAddOrUpdate(command.all.pos, command.all.period, command.all.targetCountWrite);
     }else if (command.all.controlMode == CM_FORCE_CONTROL){
         controlSetMode(CM_FORCE_CONTROL);
-    	targetsForceControlAddOrUpdate(command.all.pos , command.all.jacob, command.all.period, command.all.count);
+    	targetsForceControlAddOrUpdate(command.all.pos , command.all.jacob, command.all.period, command.all.targetCountWrite);
     }
 }
 void ecDirect(){
@@ -81,11 +81,11 @@ void ecCurrent(){
 }
 void ecInterpolate(){
     controlSetMode(CM_INTERPOLATE);
-	targetsAddOrUpdate(command.interpolate.pos, command.interpolate.period, command.interpolate.count);
+	targetsAddOrUpdate(command.interpolate.pos, command.interpolate.period, command.interpolate.targetCountWrite);
 }
 void ecForceControl(){
     controlSetMode(CM_FORCE_CONTROL);
-	targetsForceControlAddOrUpdate(command.forceControl.pos , command.forceControl.jacob, command.forceControl.period, command.forceControl.count);
+	targetsForceControlAddOrUpdate(command.forceControl.pos , command.forceControl.jacob, command.forceControl.period, command.forceControl.targetCountWrite);
 }
 void ecSetParam(){
     int i;
