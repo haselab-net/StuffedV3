@@ -158,7 +158,7 @@ union ReturnPacket##BOARD {										\
 			}__attribute__((__packed__)) boardInfo;				\
 			struct {		 /*	 CI_ALL */						\
 				unsigned char controlMode;						\
-				unsigned char countOfRead;						\
+				unsigned char targetCountRead;						\
 				unsigned short tick;							\
 				SDEC pos[BOARD##_NMOTOR];						\
 				SDEC vel[BOARD##_NMOTOR];						\
@@ -184,7 +184,7 @@ union ReturnPacket##BOARD {										\
 			struct {		 /*	 CI_INTERPOLATE */				\
 				SDEC pos[BOARD##_NMOTOR];						\
 				unsigned short tick;							\
-				unsigned char countOfRead;						\
+				unsigned char targetCountRead;						\
 			}__attribute__((__packed__)) interpolate;			\
 		};														\
 	};															\

@@ -94,9 +94,9 @@ namespace Robokey
         public short[] current = null;                      //  current sensor's values
         public short[] force = null;                        //  force sensor's values
         public int nInterpolateTotal=0;                     //  capacity of interpolation targets.
-        public byte interpolateTargetCountOfWrite;          //  count of interpolation at write cursor
-        public byte interpolateTargetCountOfReadMin;        //  count of interpolation at read cursor
-        public byte interpolateTargetCountOfReadMax;        //  count of interpolation at read cursor
+        public byte interpolateTargetCountWrite;          //  count of interpolation at write cursor
+        public byte interpolateTargetCountReadMin;        //  count of interpolation at read cursor
+        public byte interpolateTargetCountReadMax;        //  count of interpolation at read cursor
         public int interpolateTickMin = 0;                  //  tick of interpolation
         public int interpolateTickMax = 0;                  //  tick of interpolation
         public enum ControlMode {
@@ -113,8 +113,8 @@ namespace Robokey
                 {
                     if (value == ControlMode.CM_INTERPOLATE || value == ControlMode.CM_FORCE)
                     {
-                        interpolateTargetCountOfReadMin = interpolateTargetCountOfReadMax = 0x100 - 2;
-                        interpolateTargetCountOfWrite = 0;
+                        interpolateTargetCountReadMin = interpolateTargetCountReadMax = 0x100 - 2;
+                        interpolateTargetCountWrite = 0;
                     }
                     _controlMode = value;
                 }
@@ -310,8 +310,8 @@ namespace Robokey
         }
         void ReadTick(ref int cur, byte[] buf)
         {
-            interpolateTargetCountOfReadMin = (byte)ReadShort(ref cur, buf);
-            interpolateTargetCountOfReadMax = (byte)ReadShort(ref cur, buf);
+            interpolateTargetCountReadMin = (byte)ReadShort(ref cur, buf);
+            interpolateTargetCountReadMax = (byte)ReadShort(ref cur, buf);
             interpolateTickMin = ReadShort(ref cur, buf);
             interpolateTickMax = ReadShort(ref cur, buf);
         }
@@ -398,7 +398,7 @@ namespace Robokey
                             case CommandId.CI_FORCE_CONTROL:
                                 ReadPose(ref cur, receiveBytes);
                                 ReadTick(ref cur, receiveBytes);
-                                //System.Diagnostics.Debug.WriteLine("Receive CorMax:" + (int)interpolateTargetCountOfReadMax);
+                                //System.Diagnostics.Debug.WriteLine("Receive CorMax:" + (int)interpolateTargetCountReadMax);
                                 CallUpdateRobotState();
                                 break;
                             case CommandId.CI_SENSOR:
@@ -541,15 +541,15 @@ namespace Robokey
                 WriteShort(v, ref p, packet);
             }
             WriteShort(period, ref p, packet);
-            WriteShort(interpolateTargetCountOfWrite, ref p, packet);
+            WriteShort(interpolateTargetCountWrite, ref p, packet);
             //  In case "period == 0" commandCount is ignored and not incremented in robot side. 
             if (peri == 0) sendQueue.commandCount--;
             PutCommand(packet, p);
-#if true
-            System.Diagnostics.Debug.WriteLine("SendPoseInterpolate  tcw=" + interpolateTargetCountOfWrite
+#if false
+            System.Diagnostics.Debug.WriteLine("SendPoseInterpolate  tcw=" + interpolateTargetCountWrite
                 + "  peri=" + peri);
 #endif
-            if (period != 0) interpolateTargetCountOfWrite++;
+            if (period != 0) interpolateTargetCountWrite++;
         }
         public void SendPoseForceControl(PoseData pose, ushort peri, short [][] jacob)
         {
@@ -565,7 +565,7 @@ namespace Robokey
                 WriteShort(v, ref p, packet);
             }
             WriteShort(period, ref p, packet);
-            WriteShort(interpolateTargetCountOfWrite, ref p, packet);
+            WriteShort(interpolateTargetCountWrite, ref p, packet);
             //  same as interpolate until here. Add jacobian
             for(int f=0; f<robotInfo.nForce; ++f)
             {
@@ -575,7 +575,7 @@ namespace Robokey
                 }
             }
             PutCommand(packet, p);
-            if (period != 0) interpolateTargetCountOfWrite++;
+            if (period != 0) interpolateTargetCountWrite++;
         }
         public void SendParamCurrent(int nMotor, int[] a)
         {

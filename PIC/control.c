@@ -165,23 +165,23 @@ void targetsAddOrUpdate(SDEC* pos, short period, unsigned char count){
 }
 //	Update or add interpolate target with force control
 void targetsForceControlAddOrUpdate(SDEC* pos, SDEC JK[NFORCE][NMOTOR] ,short period, unsigned char count){
-	unsigned char avail, cor, read;	//
-	char delta;					//	cor - count	
+	unsigned char avail, tcr, read;	//
+	char delta;					//	tcr - count	
 	if (period == 0) return;	//	for vacancy check
 	
 	//	check targets delta
 	DISABLE_INTERRUPT
 	read = targets.read;
 	avail = targetsReadAvail();
-	cor = targets.countOfRead;
+	tcr = targets.targetCountRead;
 	ENABLE_INTERRUPT
-	delta = count - cor;
-	LOGI("targetsAdd m0:%d pr:%d c:%d | cor=%d read=%d delta=%d\r\n", (int)pos[0], (int)period, (int)count, 
-		(int)cor, (int)read, (int)delta);
+	delta = count - tcr;
+	LOGI("targetsAdd m0:%d pr:%d c:%d | tcr=%d read=%d delta=%d\r\n", (int)pos[0], (int)period, (int)count, 
+		(int)tcr, (int)read, (int)delta);
 	if (delta > avail){
 		//	target count jumped. may be communication error.
 		LOGE("CJ\r\n");
-		targets.countOfRead = count - (avail-1);
+		targets.targetCountRead = count - (avail-1);
 	}
 	
 	/*	buf[0],[1] is currently used for interpolation. buf[2] will be used in the next step.
@@ -207,8 +207,8 @@ void targetsForceControlAddOrUpdate(SDEC* pos, SDEC JK[NFORCE][NMOTOR] ,short pe
 			if (targetsWriteAvail()){
 				targetsWrite();
 			}else{
-				LOGE("Error: overflow of targets countOfRead shifted\r\n");
-				targets.countOfRead = cor + 1;
+				LOGE("Error: overflow of targets targetCountRead shifted\r\n");
+				targets.targetCountRead = tcr + 1;
 			}
 		}else{
 			LOGI(" Update.\r\n");		
@@ -220,13 +220,13 @@ void targetsInit(){
      * Initial state
      * buf[0] = buf[1] current position, period = 1.
      * interpolate between 0 and 1, ie. read=0, write=2
-     * countOfWrite start from 0. So countOfRead start from -2.
+     * targetCountWrite start from 0. So targetCountRead start from -2.
      */
     int i, j;
 	targets.tick = 1;
 	targets.read = 0; 
 	targets.write = 2;
-	targets.countOfRead = 0x100 - 2;
+	targets.targetCountRead = 0x100 - 2;
 	updateMotorState();
 	targets.buf[0].period = 1;
 	targets.buf[1].period = 1;
@@ -245,16 +245,16 @@ void targetsTickProceed(){
 	if (targets.tick >= targets.buf[(targets.read+1)%NTARGET].period){
 		if (targetsReadAvail() > 2){
 			targets.tick = 0;
-			targets.countOfRead ++;
+			targets.targetCountRead ++;
 			if (targets.read < NTARGET-1){
 				targets.read ++;
 			}else{
 				targets.read = 0;
 			}
-			LOGI("TickProceed: Read=%d cor=%d\r\n", targets.read, targets.countOfRead);
+			LOGI("TickProceed: Read=%d tcr=%d\r\n", targets.read, targets.targetCountRead);
 		}else{
 			targets.tick = targets.buf[(targets.read+1)%NTARGET].period;
-			LOGW("TickProceed: Underflow. Failed to increment read=%d cor=%d\r\n", targets.read, targets.countOfRead);
+			LOGW("TickProceed: Underflow. Failed to increment read=%d tcr=%d\r\n", targets.read, targets.targetCountRead);
 			underflowCount ++;
 		}
 	}

@@ -101,15 +101,15 @@ void UdpRetPacket::ClearData() {
 	SetLength();
 	memset(data, 0, length);
 }
-void UdpRetPacket::SetAll(ControlMode controlMode, unsigned char countOfReadMin, unsigned char countOfReadMax,
+void UdpRetPacket::SetAll(ControlMode controlMode, unsigned char targetCountReadMin, unsigned char targetCountReadMax,
 		unsigned short tickMin, unsigned short tickMax, 
 		SDEC* pos, SDEC* vel, SDEC* current, SDEC* force, SDEC* touch)
 	{
 	assert(command == CI_ALL);
 	int cur = 0;
 	data[cur++] = controlMode;
-	data[cur++] = countOfReadMin;
-	data[cur++] = countOfReadMax;
+	data[cur++] = targetCountReadMin;
+	data[cur++] = targetCountReadMax;
 	data[cur++] = tickMin;
 	data[cur++] = tickMax;
 	int nMotor = allBoards.GetNTotalMotor();
@@ -205,9 +205,9 @@ void UdpCom::OnReceiveUdp(struct udp_pcb * upcb, struct pbuf * top, const ip_add
 				if (recv->command == CIU_GET_IPADDRESS 
 					|| (recv->command == CI_INTERPOLATE && recv->GetPeriod() == 0)
 					|| (recv->command == CI_FORCE_CONTROL && recv->GetPeriod() == 0) ){
-					if (recv->command == CI_INTERPOLATE){
-						ESP_LOGI("UdpCom", "CI_INT Cow:%d, peri=%d, ct=%d", recv->GetCountOfWrite(), recv->GetPeriod(), recv->count);
-					}
+					/*if (recv->command == CI_INTERPOLATE){
+						ESP_LOGI("UdpCom", "CI_INT tcw:%d, peri=%d, ct=%d", recv->GetTargetCountWrite(), recv->GetPeriod(), recv->count);
+					}*/
 					recvs.Write();
 #if !UDP_UART_ASYNC
 					xTaskNotifyGive(taskExeCmd);
@@ -215,9 +215,9 @@ void UdpCom::OnReceiveUdp(struct udp_pcb * upcb, struct pbuf * top, const ip_add
 				}
 				else if (recv->count == commandCount + 1) {		// check and update counter
 					commandCount++;
-					if (recv->command == CI_INTERPOLATE){
-						ESP_LOGI("UdpCom", "CI_INT Cow:%d, peri=%d, ct=%d", recv->GetCountOfWrite(), recv->GetPeriod(), recv->count);
-					}
+					/*if (recv->command == CI_INTERPOLATE){
+						ESP_LOGI("UdpCom", "CI_INT tcw:%d, peri=%d, ct=%d", recv->GetTargetCountWrite(), recv->GetPeriod(), recv->count);
+					}*/
 					recvs.Write();
 #if !UDP_UART_ASYNC
 					xTaskNotifyGive(taskExeCmd);
@@ -231,8 +231,7 @@ void UdpCom::OnReceiveUdp(struct udp_pcb * upcb, struct pbuf * top, const ip_add
 					int diff = (short)((short)commandCount - (short)recv->count);
 					if (countDiffMax < diff) countDiffMax = diff;
 					//	Command count is not matched. There was some packet losses or delay. 
-					ESP_LOGI(Tag, "ignore Ct:%d!=%d Cm:%d", recv->count, commandCount+1, recv->command);
-					//ESP_LOGI(Tag, "ignore %d packets Ct:%d Cm:%d", countDiffMax, commandCount+1, recv->command);
+					ESP_LOGV(Tag, "ignore packet with Count:%d!=%d, Cmd:%d", recv->count, commandCount+1, recv->command);
 				}
 				if (!recvs.WriteAvail()) {
 					ESP_LOGE(Tag, "Udp recv buffer full.\n");

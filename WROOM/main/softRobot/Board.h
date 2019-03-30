@@ -31,11 +31,11 @@ public:
 	volatile unsigned char* RetStart() { return ret.bytes; }
 	int RetLen() { return retPacketLen[ret.commandId]; }
 	int RetLenForCommand() { return retPacketLen[cmd.commandId]; }
-	unsigned char GetTargetCountOfRead(){
+	unsigned char GetTargetCountRead(){
 		if (ret.commandId == CI_ALL){
-			return ret.all.countOfRead;
+			return ret.all.targetCountRead;
 		}else{
-			return ret.interpolate.countOfRead;
+			return ret.interpolate.targetCountRead;
 		}
 	}
 	unsigned short GetTick(){
@@ -50,7 +50,7 @@ public:
 		switch (command){
 		case CI_ALL:
 			cmd.all.controlMode = packet.GetControlMode();
-			cmd.all.count = packet.GetCountOfWrite();
+			cmd.all.count = packet.GetTargetCountWrite();
 			cmd.all.period = packet.GetPeriod();
 			for (int i = 0; i < GetNMotor(); ++i) {
 				cmd.all.pos[i] = packet.GetMotorPos(motorMap[i]);
@@ -78,7 +78,7 @@ public:
 				cmd.interpolate.pos[i] = packet.GetMotorPos(motorMap[i]);
 			}
 			cmd.interpolate.period = packet.GetPeriod();
-			cmd.interpolate.count = packet.GetCountOfWrite();
+			cmd.interpolate.count = packet.GetTargetCountWrite();
 			break;
 		case CI_FORCE_CONTROL:
 			for (int i = 0; i < GetNMotor(); ++i) {
@@ -90,7 +90,7 @@ public:
 					cmd.forceControl.jacob[j][i] = packet.GetForceControlJacob(forceMap[j], i);
 				}
 				cmd.forceControl.period = packet.GetPeriod();
-				cmd.forceControl.count = packet.GetCountOfWrite();
+				cmd.forceControl.count = packet.GetTargetCountWrite();
 			}
 			break;
 		case CI_SETPARAM:

@@ -20,14 +20,14 @@ namespace PCController
             CM_INTERPOLATE
         };
         ControlMode controlMode = ControlMode.CM_DIRECT;
-        byte interpolateTargetCountOfWrite;
-        public byte InterpolateTargetCountOfWrite { get { return interpolateTargetCountOfWrite; } }
-        public byte InterpolateTargetCountOfRead { get {
+        byte interpolateTargetCountWrite;
+        public byte InterpolateTargetCountWrite { get { return interpolateTargetCountWrite; } }
+        public byte InterpolateTargetCountRead { get {
                 if (Count == 0) return 0;
-                byte rv = this[0].interpolateTargetCountOfRead;
+                byte rv = this[0].interpolateTargetCountRead;
                 foreach (Board b in this)
                 {
-                    int diff = b.interpolateTargetCountOfRead - rv;
+                    int diff = b.interpolateTargetCountRead - rv;
                     if (diff < 0) rv = (byte)(rv + diff);
                 }
                 return rv;
@@ -131,10 +131,10 @@ namespace PCController
             if (m != controlMode) {
                 if (m == ControlMode.CM_INTERPOLATE)
                 {
-                    interpolateTargetCountOfWrite = 0;
+                    interpolateTargetCountWrite = 0;
                     foreach (Board b in this)
                     {
-                        b.interpolateTargetCountOfRead = 0x100 - 2;
+                        b.interpolateTargetCountRead = 0x100 - 2;
                     }
                 }
                 controlMode = m;
@@ -159,10 +159,10 @@ namespace PCController
                     WriteShort(sendBuf, ref cur, targets[mi++]);
                 }
                 WriteShort(sendBuf, ref cur, (short)period);
-                WriteByte(sendBuf, ref cur, interpolateTargetCountOfWrite);
+                WriteByte(sendBuf, ref cur, interpolateTargetCountWrite);
                 if (period > 0) //  period == 0 means no target is sent but get the state.
                 {
-                    interpolateTargetCountOfWrite++;
+                    interpolateTargetCountWrite++;
                 }
                 Serial.Write(sendBuf, 0, bufLen);
                 int nRead = 0;
@@ -176,7 +176,7 @@ namespace PCController
                     pos[board.motorMap[i]] = ReadShort(recvBuf, ref cur);
                 }
                 board.tickRead = (ushort)ReadShort(recvBuf, ref cur);
-                board.interpolateTargetCountOfRead = recvBuf[cur];
+                board.interpolateTargetCountRead = recvBuf[cur];
             }
         }
 

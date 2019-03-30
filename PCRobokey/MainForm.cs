@@ -392,21 +392,9 @@ namespace Robokey
                     udpComm.controlMode = UdpComm.ControlMode.CM_INTERPOLATE;
                 }
 #if true   //  interpolate on motor drivers
-                int remain = (byte)(udpComm.interpolateTargetCountOfWrite - udpComm.interpolateTargetCountOfReadMax);
-                int vacancy = udpComm.nInterpolateTotal - (byte)(udpComm.interpolateTargetCountOfWrite - udpComm.interpolateTargetCountOfReadMin);
+                int remain = (byte)(udpComm.interpolateTargetCountWrite - udpComm.interpolateTargetCountReadMax);
+                int vacancy = udpComm.nInterpolateTotal - (byte)(udpComm.interpolateTargetCountWrite - udpComm.interpolateTargetCountReadMin);
                 int diff = NINTERPOLATEFILL - remain;
-#if false //RUNTICK_DEBUG
-                System.Diagnostics.Debug.Write("RunTimer: Remain=");
-                System.Diagnostics.Debug.Write(remain);
-                System.Diagnostics.Debug.Write(" Cow=" + udpComm.interpolateTargetCountOfWrite);
-                System.Diagnostics.Debug.Write(" Cor=" + udpComm.interpolateTargetCountOfReadMin);
-                System.Diagnostics.Debug.Write("~" + udpComm.interpolateTargetCountOfReadMax);
-                System.Diagnostics.Debug.Write(" tMin=" + udpComm.interpolateTickMin);
-                System.Diagnostics.Debug.Write(" tMax=" + udpComm.interpolateTickMax);
-                System.Diagnostics.Debug.Write(" vac=" + vacancy);
-                System.Diagnostics.Debug.Write(" diff=" + diff);
-                System.Diagnostics.Debug.WriteLine(" InQueue:" + bCheckCorInQueue);
-#endif
                 if (diff < 0)
                 {
                     System.Diagnostics.Debug.WriteLine("Interpolation targets error diff = " + diff);
@@ -422,32 +410,25 @@ namespace Robokey
                     bCheckCorInQueue = false;
                     for (int i = 0; i < diff; ++i)
                     {
-#if false              //  test for update
-                        if (runTimer.Enabled)
-                        {
-                            int len = (int)udpComm.interpolateTargetCountOfWrite - (int)udpComm.interpolateTargetCountOfRead;
-                            if (len > 3)
-                            {
-                                udpComm.interpolateTargetCountOfWrite--;
-                                udpComm.SendPoseInterpolate(Interpolate(curTime), (ushort)runTimer.Interval);
-                            }
-                        }
-#endif
                         curTime += tmRun.Interval * (int)udStep.Value;
                         UpdateCurTime(curTime, true);
                         if (ckRun.Checked)  //  onceの場合、UpdateCurTimeでckRunが切れる。
                         {
-#if false //RUNTICK_DEBUG
-                            System.Diagnostics.Debug.Write("CallSendPoseI cor:" + udpComm.interpolateTargetCountOfReadMin + "--" + udpComm.interpolateTargetCountOfReadMax);
-                            System.Diagnostics.Debug.Write(" cow:" + udpComm.interpolateTargetCountOfWrite);
-                            System.Diagnostics.Debug.Write(" pr:");
-                            System.Diagnostics.Debug.Write((ushort)runTimer.Interval);
-                            System.Diagnostics.Debug.Write(" tg:");
+#if RUNTICK_DEBUG
+                            System.Diagnostics.Debug.Write("CI_INT: tcr=" + udpComm.interpolateTargetCountReadMin);
+                            System.Diagnostics.Debug.Write("-" + udpComm.interpolateTargetCountReadMax);
+                            System.Diagnostics.Debug.Write(" tcw=" + udpComm.interpolateTargetCountWrite);
+                            System.Diagnostics.Debug.Write("\tdiff=" + diff);
+                            System.Diagnostics.Debug.Write("\tremain=" + remain);
+                            System.Diagnostics.Debug.Write(" vac=" + vacancy);
+                            System.Diagnostics.Debug.Write("\ttick=" + udpComm.interpolateTickMin);
+                            System.Diagnostics.Debug.Write("-" + udpComm.interpolateTickMax);
+                            System.Diagnostics.Debug.Write(" pr:" + (ushort)runTimer.Interval*3);
                             if (Interpolate(curTime) != null)
                             {
-                                System.Diagnostics.Debug.Write(Interpolate(curTime).values[0]);
+                                System.Diagnostics.Debug.Write("\tval[0]=" + Interpolate(curTime).values[0]);
                             }
-                            System.Diagnostics.Debug.WriteLine("");
+                            System.Diagnostics.Debug.WriteLine(bCheckCorInQueue ? " chk" : "");
 #endif
                             if (ckForce.Checked)
                             {
@@ -456,6 +437,14 @@ namespace Robokey
                             }
                             else
                             {
+#if true                       //  test for update target sent later.
+                                if (remain > 3)
+                                {
+                                    //  1個前の値を送る
+                                    udpComm.interpolateTargetCountWrite--;
+                                    udpComm.SendPoseInterpolate(Interpolate(curTime - runTimer.Interval) + motors.Offset(), (ushort)runTimer.Interval);
+                                }
+#endif
                                 udpComm.SendPoseInterpolate(Interpolate(curTime) + motors.Offset(), (ushort)runTimer.Interval);
                             }
                         }
@@ -485,7 +474,6 @@ namespace Robokey
                         {
                             //  send command to receive latest cor and cow.
                             udpComm.SendPoseInterpolate(Interpolate(curTime) + motors.Offset(), 0);
-                            System.Diagnostics.Debug.WriteLine("SendPoseInerpolate tick=0 sent");
                         }
                     }
                 }

@@ -356,7 +356,7 @@ namespace PCController
         private void UpdatePosInterpolate() {
 #if true   //  interpolate on motor drivers
             boards.SetControlMode(Boards.ControlMode.CM_INTERPOLATE);
-            int remain = (int)(byte)((int)boards.InterpolateTargetCountOfWrite - (int)boards.InterpolateTargetCountOfRead);
+            int remain = (int)(byte)((int)boards.InterpolateTargetCountWrite - (int)boards.InterpolateTargetCountRead);
             int vacancy = boards.NTarget - remain;
             int diff = NINTERPOLATEFILL - remain;
 #if RUNTICK_DEBUG
@@ -365,9 +365,9 @@ namespace PCController
             System.Diagnostics.Debug.Write("(");
             System.Diagnostics.Debug.Write(remain);
             System.Diagnostics.Debug.Write(") Cw=");
-            System.Diagnostics.Debug.Write(boards.InterpolateTargetCountOfWrite);
+            System.Diagnostics.Debug.Write(boards.InterpolateTargetCountWrite);
             System.Diagnostics.Debug.Write(" Cr=");
-            System.Diagnostics.Debug.Write(boards.InterpolateTargetCountOfRead);
+            System.Diagnostics.Debug.Write(boards.InterpolateTargetCountRead);
             System.Diagnostics.Debug.Write(" tMin=");
             System.Diagnostics.Debug.Write(boards.TickMin);
             System.Diagnostics.Debug.Write(" tMax=");
@@ -397,10 +397,10 @@ namespace PCController
 #if false              //  test for update
                     if (runTimer.Enabled)
                     {
-                        int len = (int)udpComm.interpolateTargetCountOfWrite - (int)udpComm.interpolateTargetCountOfRead;
+                        int len = (int)udpComm.interpolateTargetCountWrite - (int)udpComm.interpolateTargetCountRead;
                         if (len > 3)
                         {
-                            udpComm.interpolateTargetCountOfWrite--;
+                            udpComm.interpolateTargetCountWrite--;
                             udpComm.SendPoseInterpolate(Interpolate(curTime), (ushort)runTimer.Interval);
                         }
                     }
@@ -411,8 +411,8 @@ namespace PCController
                     {
                         boards.SendPosInterpolate(Interpolate(curTime) + motors.Offset(), (ushort)(timer.Interval*3));
 #if RUNTICK_DEBUG
-                        System.Diagnostics.Debug.Write("cor:" + boards.InterpolateTargetCountOfRead);
-                        System.Diagnostics.Debug.Write(" cow:" + boards.InterpolateTargetCountOfWrite);
+                        System.Diagnostics.Debug.Write("cor:" + boards.InterpolateTargetCountRead);
+                        System.Diagnostics.Debug.Write(" cow:" + boards.InterpolateTargetCountWrite);
                         System.Diagnostics.Debug.Write(" diff:" + diff);
                         System.Diagnostics.Debug.Write(" period:");
                         System.Diagnostics.Debug.Write((ushort)timer.Interval*3);

@@ -14,7 +14,7 @@ public:
 	virtual short GetMotorPos(int i)=0;
 	virtual short GetMotorVel(int i)=0;
 	virtual unsigned short GetPeriod()=0;
-	virtual unsigned short GetCountOfWrite()=0;
+	virtual unsigned short GetTargetCountWrite()=0;
 	virtual short GetForceControlJacob(int j, int i)=0;
 	virtual short GetParamType()=0;
 	virtual short GetControlK(int i)=0;
@@ -28,13 +28,13 @@ public:
 };
 class BoardRetBase{
 public:
-	virtual void SetAll(ControlMode controlMode, unsigned char countOfReadMin, unsigned char countOfReadMax,
+	virtual void SetAll(ControlMode controlMode, unsigned char targetCountReadMin, unsigned char targetCountReadMax,
 		unsigned short tickMin, unsigned short tickMax, 
 		SDEC* pos, SDEC* vel, SDEC* current, SDEC* force, SDEC* touch)=0;
 	virtual void SetMotorPos(short p, int i)=0;
 	virtual void SetMotorVel(short v, int i)=0;
-	virtual void SetTargetCountOfReadMin(unsigned char c)=0;
-	virtual void SetTargetCountOfReadMax(unsigned char c)=0;
+	virtual void SetTargetCountReadMin(unsigned char c)=0;
+	virtual void SetTargetCountReadMax(unsigned char c)=0;
 	virtual void SetTickMin(unsigned short t)=0;
 	virtual void SetTickMax(unsigned short t)=0;
 	virtual void SetCurrent(short c, int i)=0;
@@ -63,7 +63,7 @@ public:
 	virtual int GetNForce() = 0;
 	virtual int GetNTouch() = 0;
 	virtual int GetBoardId() = 0;
-	virtual unsigned char GetTargetCountOfRead() = 0;
+	virtual unsigned char GetTargetCountRead() = 0;
 	virtual unsigned short GetTick() = 0;
 	virtual void WriteCmd(unsigned short command, BoardCmdBase& packet) = 0;
 	virtual void ReadRet(unsigned short command, BoardRetBase& packet) = 0;

@@ -164,7 +164,7 @@ void rcAll(){
     for(i=0; i<NTOUCH; ++i){
 		retPacket.all.touch[i] = getTouch(i);
     }
-    retPacket.all.countOfRead = targets.countOfRead;
+    retPacket.all.targetCountRead = targets.targetCountRead;
 	retPacket.all.tick = targets.tick;
 }
 void rcSensor(){
@@ -209,7 +209,7 @@ inline void returnInterpolateParam(){
     for(i=0; i<NMOTOR; ++i){
         retPacket.interpolate.pos[i] = L2SDEC(motorState.pos[i]);
     }
-    retPacket.interpolate.countOfRead = targets.countOfRead;
+    retPacket.interpolate.targetCountRead = targets.targetCountRead;
 	retPacket.interpolate.tick = targets.tick;
 }
 void rcInterpolate(){

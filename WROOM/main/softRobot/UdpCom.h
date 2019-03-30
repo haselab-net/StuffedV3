@@ -55,7 +55,7 @@ public:
 	ushort GetPeriod() {
 		return data[allBoards.GetNTotalMotor()];
 	}
-	ushort GetCountOfWrite() {
+	ushort GetTargetCountWrite() {
 		return data[allBoards.GetNTotalMotor()+1];
 	}
 	short GetForceControlJacob(int j, int i) {	//	j: row, i: col,
@@ -103,7 +103,7 @@ public:
 	void SetLength();
 	void ClearData();
 	void SetCommand(short cmd) { command = cmd; }
-	virtual void SetAll(ControlMode controlMode, unsigned char countOfReadMin, unsigned char countOfReadMax,
+	virtual void SetAll(ControlMode controlMode, unsigned char targetCountReadMin, unsigned char targetCountReadMax,
 		unsigned short tickMin, unsigned short tickMax, 
 		SDEC* pos, SDEC* vel, SDEC* current, SDEC* force, SDEC* touch);
 	void SetMotorPos(short p, int i) {
@@ -113,10 +113,10 @@ public:
 		data[allBoards.GetNTotalMotor() + i] = v;
 	}
 	//	for interpolate and force control
-	void SetTargetCountOfReadMin(unsigned char c) {
+	void SetTargetCountReadMin(unsigned char c) {
 		data[allBoards.GetNTotalMotor()] = c;
 	}
-	void SetTargetCountOfReadMax(unsigned char c) {
+	void SetTargetCountReadMax(unsigned char c) {
 		data[allBoards.GetNTotalMotor()+1] = c;
 	}
 	void SetTickMin(unsigned short t) {

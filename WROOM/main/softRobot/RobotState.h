@@ -20,12 +20,12 @@ struct RobotState: public BoardRetBase{
 	tiny::vector<SDEC> force;			//	force sensor
 	tiny::vector<SDEC> touch;			//	touch sensor
 
-	virtual void SetAll(ControlMode cm, unsigned char corMin, unsigned char corMax, 
+	virtual void SetAll(ControlMode cm, unsigned char tcrMin, unsigned char tcrMax, 
 		unsigned short tkMin, unsigned short tkMax, 
 		SDEC* pos, SDEC* vel, SDEC* current, SDEC* f, SDEC* t){
 		mode = cm;
-		targetCountReadMax = corMax;
-		targetCountReadMin = corMin;
+		targetCountReadMax = tcrMax;
+		targetCountReadMin = tcrMin;
 		tickMin = tkMin; tickMax = tkMax;
 		if (pos){
 			for(int i=0; i!=position.size(); ++i){
@@ -55,10 +55,10 @@ struct RobotState: public BoardRetBase{
 		velocity[i] = v;
 	}
 	//	for interpolate and force control
-	virtual void SetTargetCountOfReadMin(unsigned char c){
+	virtual void SetTargetCountReadMin(unsigned char c){
 		targetCountReadMin = c;
 	}
-	virtual void SetTargetCountOfReadMax(unsigned char c){
+	virtual void SetTargetCountReadMax(unsigned char c){
 		targetCountReadMax = c;
 	}	
 	void SetTickMin(unsigned short t) {
