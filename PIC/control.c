@@ -11,7 +11,7 @@ SDEC forceControlJK[NFORCE][NMOTOR];
 struct PdParam pdParam;
 struct TorqueLimit torqueLimit;
 struct Targets targets;
-enum ControlMode controlMode;
+enum ControlMode controlMode, nextControlMode;
 //	 angle
 SDEC mcos[NAXIS], msin[NAXIS];
 SDEC forceOffset[NFORCE];
@@ -306,24 +306,27 @@ void targetsForceControlProceed(){
 	}
 }
 void controlLoop(){
+	controlCount ++;
+	controlMode = nextControlMode;
+	
 	#ifdef WROOM
 	xSemaphoreTake(mutexForControl, portMAX_DELAY);
 	#endif
-	controlCount ++;
     if (controlMode == CM_INTERPOLATE){
         targetsProceed();
     }else if (controlMode == CM_FORCE_CONTROL){
         targetsForceControlProceed();
 	}
+	#ifdef WROOM
+	xSemaphoreGive(mutexForControl);
+	#endif
+
     updateMotorState();
 	if (controlMode == CM_CURRENT){
         currentControl();
     }else{
         pdControl();
     }
-	#ifdef WROOM
-	xSemaphoreGive(mutexForControl);
-	#endif
 }
 void controlInit(){
 	int i;
@@ -346,17 +349,13 @@ void controlInit(){
 }
 void controlSetMode(enum ControlMode m){
 	if (controlMode != m){
-#ifdef WROOM
-    	DISABLE_INTERRUPT
-#endif
-		if (m == CM_INTERPOLATE || m == CM_FORCE_CONTROL){
+		if ((m == CM_INTERPOLATE || m == CM_FORCE_CONTROL) 
+			&& (controlMode != CM_INTERPOLATE && controlMode != CM_FORCE_CONTROL)){
+			//	current mode is not interpolate or force control.
+			//	So targets and targetCounts can be initialized without locking.
 			targetsInit();
 		}
-#ifdef PIC
-    	DISABLE_INTERRUPT
-#endif
-		controlMode = m;
-    	ENABLE_INTERRUPT
+		nextControlMode = m;
 	}
 }
 
