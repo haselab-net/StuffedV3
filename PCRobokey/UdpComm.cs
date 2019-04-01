@@ -17,6 +17,7 @@ namespace Robokey
         public int nMotor;
         public int nCurrent;
         public int nForce;
+        public int nTouch;
         public byte[] macAddress = new byte[6];
         public void Clear()
         {
@@ -32,6 +33,7 @@ namespace Robokey
             rv.nMotor = nMotor;
             rv.nCurrent = nCurrent;
             rv.nForce = nForce;
+            rv.nTouch = nTouch;
             macAddress.CopyTo(rv.macAddress, 0);
             return rv;
         }
@@ -41,7 +43,8 @@ namespace Robokey
             if (nTarget - s.nTarget != 0) return nTarget - s.nTarget;
             if (nMotor - s.nMotor != 0) return nMotor - s.nMotor;
             if (nCurrent - s.nCurrent != 0) return nCurrent - s.nCurrent;
-            return nForce - s.nForce;
+            if (nForce - s.nForce != 0) return nForce - s.nForce;
+            return nTouch - s.nTouch;
         }
     };
 
@@ -71,8 +74,9 @@ namespace Robokey
                 robotInfo = info;
                 pose = new Pose(robotInfo.nMotor);
                 velocity = new Pose(robotInfo.nMotor);
-                force = new short[robotInfo.nForce];
                 current = new short[robotInfo.nCurrent];
+                force = new short[robotInfo.nForce];
+                touch = new short[robotInfo.nTouch];
                 nInterpolateTotal = robotInfo.nTarget;
                 if (OnUpdateRobotInfo != null)
                 {
@@ -93,6 +97,7 @@ namespace Robokey
         public PoseData velocity = null;                    //  current velocities of motors; ReadVelocity
         public short[] current = null;                      //  current sensor's values
         public short[] force = null;                        //  force sensor's values
+        public short[] touch = null;                        //  touch sensor's values
         public int nInterpolateTotal=0;                     //  capacity of interpolation targets.
         public byte interpolateTargetCountWrite;          //  count of interpolation at write cursor
         public byte interpolateTargetCountReadMin;        //  count of interpolation at read cursor
@@ -274,6 +279,7 @@ namespace Robokey
             info.nMotor = ReadShort(ref cur, buf);
             info.nCurrent = ReadShort(ref cur, buf);
             info.nForce = ReadShort(ref cur, buf);
+            info.nTouch = ReadShort(ref cur, buf);
             for (int i = 0; i < 6; ++i)
             {
                 info.macAddress[i] = ReadByte(ref cur, buf);
@@ -299,6 +305,13 @@ namespace Robokey
             for (int i = 0; i < force.Length; ++i)
             {
                 force[i] = ReadShort(ref cur, buf);
+            }
+        }
+        void ReadTouch(ref int cur, byte[] buf)
+        {
+            for (int i = 0; i < touch.Length; ++i)
+            {
+                touch[i] = ReadShort(ref cur, buf);
             }
         }
         void ReadVelocity(ref int cur, byte[] buf)
@@ -405,6 +418,7 @@ namespace Robokey
                                 ReadPose(ref cur, receiveBytes);
                                 ReadCurrent(ref cur, receiveBytes);
                                 ReadForce(ref cur, receiveBytes);
+                                ReadTouch(ref cur, receiveBytes);
                                 CallUpdateRobotState();
                                 break;
                             case CommandId.CIU_GET_IPADDRESS:

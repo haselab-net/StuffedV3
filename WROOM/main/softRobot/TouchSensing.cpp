@@ -42,6 +42,7 @@ int TouchPads::Add(touch_pad_t pad){
 uint16_t TouchPads::Filtered(int i)
 {
     uint16_t value=0;
+#ifndef _WIN32
 	esp_err_t e = touch_pad_read_filtered(pads[i], &value);
     if (e == ESP_OK) return value;
     if (e == ESP_ERR_INVALID_STATE){
@@ -50,6 +51,7 @@ uint16_t TouchPads::Filtered(int i)
     }else{
         ESP_ERROR_CHECK(e);
     }
+#endif
 	return value;
 };
 uint32_t TouchPads::Status() {

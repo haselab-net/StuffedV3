@@ -264,6 +264,18 @@ extern "C" {
 		logPrintf("%s\r\n", buf);
 	}
 
+	void ESP_LOGV(const char* tag, const char* fmt, ...) {
+		va_list va;
+		va_start(va, fmt);
+		espVprintf("V", tag, fmt, va);
+		va_end(va);
+	}
+	void ESP_LOGD(const char* tag, const char* fmt, ...) {
+		va_list va;
+		va_start(va, fmt);
+		espVprintf("D", tag, fmt, va);
+		va_end(va);
+	}
 	void ESP_LOGI(const char* tag, const char* fmt, ...) {
 		va_list va;
 		va_start(va, fmt);

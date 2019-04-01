@@ -35,7 +35,7 @@ void MotorDriver::AdcReadTaskStatic(void* arg){
 }
 void MotorDriver::AdcReadTask(){
     size_t bufLen = ADC_DMA_LEN * 2;
-#ifdef WROOM
+#ifndef _WIN32
 	uint16_t buf[ADC_DMA_LEN];
     const gpio_num_t GPIO_LED = GPIO_NUM_26;
     gpio_reset_pin(GPIO_LED);
@@ -62,7 +62,7 @@ void MotorDriver::AdcReadTask(){
     }
 #elif defined _WIN32
 	while(1) {
-		if (bControl) onControlLoop();
+		if (bControl) controlLoop();
 		vTaskDelay(1);
     }
 #else

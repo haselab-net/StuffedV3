@@ -21,8 +21,9 @@
 #include "UdpCom.h"
 #include "UartForBoards.h"
 #include "CommandWROOM.h"
+#ifndef _WIN32
 #include "ws_ws.h"
-
+#endif
 
 UdpCom udpCom;
 bool UdpCom::bDebug = false;
@@ -63,8 +64,8 @@ int UdpCmdPacket::CommandLen() {
 }
 void UdpRetPacket::SetLength() {
 	switch (command){
-	case CI_BOARD_INFO:		//	model nTarget nMotor nCurrent nForce macAddress
-		length = (NHEADER + 5) * 2 + 6; break;
+	case CI_BOARD_INFO:		//	model nTarget nMotor nCurrent nForce nTouch macAddress
+		length = (NHEADER + 6) * 2 + 6; break;
 	//	case CI_SET_CMDLEN is only for uart
 	case CI_ALL:			//	pos vel current force
 		length = (NHEADER + allBoards.GetNTotalMotor()*2 + allBoards.GetNTotalCurrent() + allBoards.GetNTotalForce()) * 2; break;
@@ -338,7 +339,9 @@ void UdpCom::SendReturn(UdpCmdPacket& recv) {
 	}
 }
 void UdpCom::SendReturnServer(UdpCmdPacket& recv) {
+#ifndef _WIN32
 	wsOnMessageSr(send.bytes+2, send.length-2);
+#endif
 }
 void UdpCom::SendReturnUdp(UdpCmdPacket& recv) {
 	if (!udp) return;
@@ -413,7 +416,7 @@ void UdpCom::ExecUdpCommand(UdpCmdPacket& recv) {
 		int index = recv.data[0];
 		int iu;
 		for(iu=0; iu<allBoards.NUART; ++iu){
-			if (index > allBoards.uart[iu]->boards.size()){
+			if (index > (int)(allBoards.uart[iu]->boards.size())){
 				index -= allBoards.uart[iu]->boards.size();
 			}else{
 				break;

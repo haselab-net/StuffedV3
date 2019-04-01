@@ -32,9 +32,9 @@ public:
 	union {
 		unsigned char bytes[MAXLEN];
 		struct {
-			ushort count;	//	counter to detect packet drop.
-			ushort length;	//	length of this command
-			ushort command;	//	command id
+			unsigned short count;	//	counter to detect packet drop.
+			unsigned short length;	//	length of this command
+			unsigned short command;	//	command id
 			short data[(MAXLEN-2*3)/2];
 		}__attribute__((__packed__));
 	};
@@ -57,10 +57,10 @@ public:
 	short GetMotorVel(int i) {
 		return data[allBoards.GetNTotalMotor() + i];
 	}
-	ushort GetPeriod() {
+	unsigned short GetPeriod() {
 		return data[allBoards.GetNTotalMotor()];
 	}
-	ushort GetTargetCountWrite() {
+	unsigned short GetTargetCountWrite() {
 		return data[allBoards.GetNTotalMotor()+1];
 	}
 	short GetForceControlJacob(int j, int i) {	//	j: row, i: col,
@@ -148,7 +148,7 @@ public:
 		data[4] = nForce;
 		data[5] = nTouch;
 #ifndef _WIN32
-		esp_read_mac((uint8_t*)(data+5), ESP_MAC_WIFI_STA);	// 6 bytes
+		esp_read_mac((uint8_t*)(data+6), ESP_MAC_WIFI_STA);	// 6 bytes
 #endif
 	}
 };

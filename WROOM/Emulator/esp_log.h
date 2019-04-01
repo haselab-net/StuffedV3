@@ -1,6 +1,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+	void ESP_LOGD(const char* tag, const char* fmt, ...);
+	void ESP_LOGV(const char* tag, const char* fmt, ...);
 	void ESP_LOGI(const char* tag, const char* fmt, ...);
 	void ESP_LOGW(const char* tag, const char* fmt, ...);
 	void ESP_LOGE(const char* tag, const char* fmt, ...);

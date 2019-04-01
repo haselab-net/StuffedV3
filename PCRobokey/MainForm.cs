@@ -693,6 +693,11 @@ namespace Robokey
             {
                 jeRight.SetCurForce(udpComm.force[0], udpComm.force[1]);
             }
+            tbState.Text += "\r\nTouch:";
+            for (int i = 0; i < udpComm.touch.Length; ++i)
+            {
+                tbState.Text += string.Format("{0,9}", udpComm.touch[i].ToString("D"));
+            }
         }
 
         void SaveSetting(byte[] adr)
