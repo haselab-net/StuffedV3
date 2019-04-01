@@ -27,6 +27,10 @@ var _core = {
 
     handleEvent: function() {
         internalJSLib.handle_event();
+    },
+
+    printHeap: function(str) {
+        internalJSLib.print_heap(str);
     }
 }
 

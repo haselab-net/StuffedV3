@@ -105,13 +105,20 @@ static void wsSend(void* data, size_t length) {
  * Handle message from websocket
  */
 void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket* pWebSocket) {
+    printf("before wsOnMessageWs heap size: %d \n", esp_get_free_heap_size());
+
     int16_t packetId = pWebSocketInputStreambuf->sgetc();
     ESP_LOGD(LOG_TAG, "type: %i", packetId);
 
     size_t bufferSize = 4096;
     char* pBuffer = new char[bufferSize];
     std::streamsize ssize = pWebSocketInputStreambuf->sgetn(pBuffer, bufferSize);
-    if(ssize>=bufferSize) ESP_LOGD(LOG_TAG ,"File main.js to large!!!!!!!!!");
+    if(ssize>=bufferSize) {
+        ESP_LOGD(LOG_TAG ,"File main.js to large!!!!!!!!!");
+        return;
+    }
+
+    pWebSocketInputStreambuf->discard();
 
     ESP_LOGD(LOG_TAG, "Received a packet from websocket: ");
     printPacket((const void*)pBuffer, ssize);
@@ -123,14 +130,20 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
         case PacketId::PI_JSFILE: {
             wsDeleteJsfileTask();
             
-            // saveToMainJs(pBuffer+2, ssize-2);
-            // combineMainFiles();
+            //saveToMainJs(pBuffer+2, ssize-2);
+            //combineMainFiles();
 
-            // std::ifstream m_ifstream("/spiffs/main/runtime.js");
-            // std::string str((std::istreambuf_iterator<char>(m_ifstream)),
-            //      std::istreambuf_iterator<char>());
-            // printf("Start runtime file: \r\n %s", str.c_str());
-            // m_ifstream.close();
+            delete[] pBuffer;       // delete buffer to provide more space for jsfile task
+            pBuffer = NULL;
+
+            std::ifstream m_ifstream("/spiffs/main/runtime.js");
+            std::string str((std::istreambuf_iterator<char>(m_ifstream)),
+                 std::istreambuf_iterator<char>());
+            printf("Start runtime file: \r\n %s", str.c_str());
+            m_ifstream.close();
+
+            printf("before wsCreateJsfileTask heap size: %d \n", esp_get_free_heap_size());
+
             wsCreateJsfileTask();
             
             break;
@@ -145,7 +158,7 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
             break;
     }
 
-    delete[] pBuffer;
+    if(pBuffer) delete[] pBuffer;
 }
 
 /**
