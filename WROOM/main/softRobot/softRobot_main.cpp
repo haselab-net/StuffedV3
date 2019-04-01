@@ -54,8 +54,6 @@ extern "C" void softRobot_main()    //  called from app_main in main.cpp
         xEventGroupWaitBits(wifi_manager_event_group, WIFI_MANAGER_STA_DISCONNECT_BIT, pdFALSE, pdFALSE, portMAX_DELAY);
     }
 #endif
-    printf("after softRobot_main heap size: %d \n", esp_get_free_heap_size());
-
     //  monitor start
     monitor();
 }

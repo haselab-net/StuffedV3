@@ -3,7 +3,6 @@
 #include "UdpCom.h"
 #include "esp_log.h"
 
-#define CMDWAITMAXLEN	200
 template <class CMD, class RET>
 class Board: public BoardBase{
 public:
@@ -11,7 +10,6 @@ public:
 	typedef RET RetPacket;
 	CmdPacket cmd;						//	UART command packet for this board. 
 	volatile RET ret;				//	UART return packet for this board.
-	uint8_t zero[CMDWAITMAXLEN];	//	Zeros to put wait time in UART.
 	Board(int bid, const unsigned char * c, const unsigned char * r) {
 		cmd.boardId = bid;
 		cmdPacketLen = c;

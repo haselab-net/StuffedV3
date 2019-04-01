@@ -27,7 +27,6 @@ void UartForBoards::SendUart(){
 		int retLen = boards[cmdCur.board]->RetLenForCommand();
 		wait = retLen - boards[cmdCur.board]->CmdLen() + 20;
 		if (wait < 5) wait = 5;
-		assert(wait < CMDWAITMAXLEN);
 		memset(boards[cmdCur.board]->CmdStart() + boards[cmdCur.board]->CmdLen(), 0, wait);
 		uart_write_bytes(port, (char*)boards[cmdCur.board]->CmdStart(),
 			(size_t)boards[cmdCur.board]->CmdLen()+wait);

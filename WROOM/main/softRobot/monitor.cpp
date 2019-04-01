@@ -185,6 +185,15 @@ class MCShowTouch: public MonitorCommandBase{
     }
 } mcShowTouch;
 
+#ifndef _WIN32
+class MCShowHeap: public MonitorCommandBase{
+    const char* Desc(){ return "m Show heap memory"; }
+    void Func(){
+		conPrintf("Heap free size: %d bytes", esp_get_free_heap_size());
+	}
+} mcShowHeap;
+#endif
+
 class MCWriteCmd: public MonitorCommandBase{
     const char* Desc(){ return "w Write command to UART"; }
     void Func(){

@@ -28,7 +28,10 @@ extern "C" void UdpCom_Unlock();
 */
 class UdpPacket {
 public:
-	enum { MAXLEN=1500, HEADERLEN=6};	//	packet/command size must smaller than 1500
+	enum {
+		HEADERLEN = 6,
+		MAXLEN = 512	//	command size must smaller than MAXLEN
+	};
 	union {
 		unsigned char bytes[MAXLEN];
 		struct {
@@ -153,7 +156,7 @@ public:
 	}
 };
 
-class UdpCmdPackets:public ArrayRing<UdpCmdPacket, 20>{
+class UdpCmdPackets:public ArrayRing<UdpCmdPacket, 10>{
 	xSemaphoreHandle mutex;
 public:
 	UdpCmdPackets();

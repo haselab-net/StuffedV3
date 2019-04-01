@@ -29,14 +29,16 @@ extern "C" void app_main(){
     printf("silicon revision %d, ", chip_info.revision);
     printf("%dMB %s flash\n", spi_flash_get_chip_size() / (1024 * 1024),
             (chip_info.features & CHIP_FEATURE_EMB_FLASH) ? "embedded" : "external");
+	printf("before ws_main heap size: %d \n", esp_get_free_heap_size());
 #endif 
-    printf("before ws_main heap size: %d \n", esp_get_free_heap_size());
 
 #ifdef USE_DUKTAPE
 	//duktape_main();
     ws_main();
 
-    printf("after ws_main heap size: %d \n", esp_get_free_heap_size());
+#ifndef _WIN32
+	printf("after ws_main heap size: %d \n", esp_get_free_heap_size());
+#endif
 #endif
 	softRobot_main();
 }
