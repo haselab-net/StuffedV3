@@ -1,3 +1,5 @@
+//var softrobot = require("sr_softrobot");
+
 var motor;
 (function (motor_1) {
     function changeLocalStringLengthAsync(motor, length) {

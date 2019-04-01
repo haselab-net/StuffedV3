@@ -30,10 +30,13 @@ extern "C" void app_main(){
     printf("%dMB %s flash\n", spi_flash_get_chip_size() / (1024 * 1024),
             (chip_info.features & CHIP_FEATURE_EMB_FLASH) ? "embedded" : "external");
 #endif 
+    printf("before ws_main heap size: %d \n", esp_get_free_heap_size());
 
 #ifdef USE_DUKTAPE
 	//duktape_main();
     ws_main();
+
+    printf("after ws_main heap size: %d \n", esp_get_free_heap_size());
 #endif
 	softRobot_main();
 }
