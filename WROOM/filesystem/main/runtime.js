@@ -1,24 +1,16 @@
 var loops = require("sr_loops");
 var jslib = require("jslib");
-var softrobot = require("sr_softrobot");
+var motor = require("sr_motor")
 
 jslib.printHeap("heap size after require: ");
 
-console.log("1");
-
-var instruction = {
-    motorId: 0,
-    pose: 100
-};
-softrobot.message_command.updateRemoteMotorState(instruction);
-
 loops.forever(function () {
-    loops.pause(100)
-    loops.pause(100)
-    loops.pause(100)
-    loops.pause(100)
+    motor.changeLocalStringLength(0, 200)
+    motor.pushLocalMotorPVToRemoteDirect()
+    loops.pause(2000)
+    motor.changeLocalStringLength(0, 100)
+    motor.pushLocalMotorPVToRemoteDirect()
+    loops.pause(2000)
 })
-
-console.log("2");
 
 loops.doForever();
