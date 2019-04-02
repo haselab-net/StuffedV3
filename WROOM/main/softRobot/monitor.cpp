@@ -187,7 +187,7 @@ class MCShowTouch: public MonitorCommandBase{
 
 #ifndef _WIN32
 class MCShowHeap: public MonitorCommandBase{
-    const char* Desc(){ return "m Show heap memory"; }
+    const char* Desc(){ return "h Show heap memory"; }
     void Func(){
 		conPrintf("Heap free size: %d bytes", esp_get_free_heap_size());
 	}
