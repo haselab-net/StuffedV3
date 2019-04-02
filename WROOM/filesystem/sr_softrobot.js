@@ -1,5 +1,46 @@
 var softrobot;
 (function (softrobot) {
+    var util;
+    (function (util) {
+        function haveProp(obj) {
+            return !!obj || obj == 0;
+        }
+        util.haveProp = haveProp;
+        function limitNum(num, min, max) {
+            var res = num;
+            res > max ? res = max : res = res;
+            res < min ? res = min : res = res;
+            return res;
+        }
+        util.limitNum = limitNum;
+        function ab2str(buf) {
+            return String.fromCharCode.apply(null, new Uint16Array(buf));
+        }
+        util.ab2str = ab2str;
+        function str2ab(str) {
+            var buf = new ArrayBuffer(str.length * 2);
+            var bufView = new Uint16Array(buf);
+            for (var i = 0, strLen = str.length; i < strLen; i++) {
+                bufView[i] = str.charCodeAt(i);
+            }
+            return buf;
+        }
+        util.str2ab = str2ab;
+        function str2abAscii(str) {
+            var buf = new ArrayBuffer(str.length);
+            var bufView = new Uint8Array(buf);
+            for (var i = 0, strLen = str.length; i < strLen; i++) {
+                bufView[i] = str.charCodeAt(i) >= 128 ? 63 : str.charCodeAt(i);
+            }
+            return buf;
+        }
+        util.str2abAscii = str2abAscii;
+    })(util = softrobot.util || (softrobot.util = {}));
+})(softrobot || (softrobot = {}));
+
+console.log("util loaded");
+
+(function (softrobot) {
     var command;
     (function (command) {
         var CommandId;
@@ -10,18 +51,27 @@ var softrobot;
             CommandId[CommandId["CI_ALL"] = 3] = "CI_ALL";
             CommandId[CommandId["CI_SENSOR"] = 4] = "CI_SENSOR";
             CommandId[CommandId["CI_DIRECT"] = 5] = "CI_DIRECT";
-            CommandId[CommandId["CI_INTERPOLATE"] = 6] = "CI_INTERPOLATE";
-            CommandId[CommandId["CI_FORCE_CONTROL"] = 7] = "CI_FORCE_CONTROL";
-            CommandId[CommandId["CI_PDPARAM"] = 8] = "CI_PDPARAM";
-            CommandId[CommandId["CI_TORQUE_LIMIT"] = 9] = "CI_TORQUE_LIMIT";
+            CommandId[CommandId["CI_CURRENT"] = 6] = "CI_CURRENT";
+            CommandId[CommandId["CI_INTERPOLATE"] = 7] = "CI_INTERPOLATE";
+            CommandId[CommandId["CI_FORCE_CONTROL"] = 8] = "CI_FORCE_CONTROL";
+            CommandId[CommandId["CI_SETPARAM"] = 9] = "CI_SETPARAM";
             CommandId[CommandId["CI_RESET_SENSOR"] = 10] = "CI_RESET_SENSOR";
             CommandId[CommandId["CI_NCOMMAND"] = 11] = "CI_NCOMMAND";
             CommandId[CommandId["CIU_TEXT"] = 11] = "CIU_TEXT";
             CommandId[CommandId["CIU_SET_IPADDRESS"] = 12] = "CIU_SET_IPADDRESS";
             CommandId[CommandId["CIU_GET_IPADDRESS"] = 13] = "CIU_GET_IPADDRESS";
+            CommandId[CommandId["CIU_GET_SUBBOARD_INFO"] = 14] = "CIU_GET_SUBBOARD_INFO";
             CommandId[CommandId["CIU_NCOMMAND"] = 14] = "CIU_NCOMMAND";
             CommandId[CommandId["CIU_NONE"] = -1] = "CIU_NONE";
         })(CommandId = command.CommandId || (command.CommandId = {}));
+        ;
+        var SetParamType;
+        (function (SetParamType) {
+            SetParamType[SetParamType["PT_PD"] = 0] = "PT_PD";
+            SetParamType[SetParamType["PT_CURRENT"] = 1] = "PT_CURRENT";
+            SetParamType[SetParamType["PT_TORQUE_LIMIT"] = 2] = "PT_TORQUE_LIMIT";
+            SetParamType[SetParamType["PT_BOARD_ID"] = 3] = "PT_BOARD_ID";
+        })(SetParamType = command.SetParamType || (command.SetParamType = {}));
         ;
         var ResetSensorFlags;
         (function (ResetSensorFlags) {
@@ -37,7 +87,9 @@ var softrobot;
         })(PacketId = command.PacketId || (command.PacketId = {}));
     })(command = softrobot.command || (softrobot.command = {}));
 })(softrobot || (softrobot = {}));
-var softrobot;
+
+console.log("command loaded");
+
 (function (softrobot) {
     var device;
     (function (device) {
@@ -151,224 +203,9 @@ var softrobot;
         device.checkRobotState = checkRobotState;
     })(device = softrobot.device || (softrobot.device = {}));
 })(softrobot || (softrobot = {}));
-var softrobot;
-(function (softrobot) {
-    var message_command;
-    (function (message_command) {
-        message_command.onRcvCIBoardInfoMessage = function () { };
-        message_command.onRcvCISensorMessage = function () { };
-        function messageHandler(packet) {
-            switch (packet.command) {
-                case softrobot.command.CommandId.CI_BOARD_INFO:
-                    {
-                        softrobot.device.robotInfo = packet.data.data;
-                        softrobot.device.checkRobotState();
-                        message_command.onRcvCIBoardInfoMessage();
-                        break;
-                    }
-                case softrobot.command.CommandId.CI_SENSOR:
-                    {
-                        var data = packet.data.data;
-                        if (data.pose.length != softrobot.device.robotInfo.nMotor) {
-                            requireBoardInfo();
-                            break;
-                        }
-                        softrobot.device.robotState.setPropArray("pose", data.pose, softrobot.device.robotState.motor);
-                        softrobot.device.robotState.current = data.current;
-                        softrobot.device.robotState.force = data.force;
-                        message_command.onRcvCISensorMessage();
-                        break;
-                    }
-                case softrobot.command.CommandId.CI_DIRECT:
-                    {
-                        var data = packet.data.data;
-                        if (data.pose.length != softrobot.device.robotInfo.nMotor) {
-                            requireBoardInfo();
-                            break;
-                        }
-                        softrobot.device.robotState.setPropArray("pose", data.pose, softrobot.device.robotState.motor);
-                        softrobot.device.robotState.setPropArray("velocity", data.velocity, softrobot.device.robotState.motor);
-                        break;
-                    }
-                case softrobot.command.CommandId.CI_FORCE_CONTROL:
-                    {
-                        var data = packet.data.data;
-                        if (data.pose.length != softrobot.device.robotInfo.nMotor) {
-                            requireBoardInfo();
-                            break;
-                        }
-                        softrobot.device.robotState.setPropArray("pose", data.pose, softrobot.device.robotState.motor);
-                        softrobot.device.robotState.interpolateTargetCountOfRead = data.targetCountRead;
-                        softrobot.device.robotState.interpolateTickMin = data.tickMin;
-                        softrobot.device.robotState.interpolateTickMax = data.tickMax;
-                        softrobot.device.robotState.interpolateTargetCountOfRead = data.nRemain;
-                        softrobot.device.robotState.nInterpolateVacancy = data.nVacancy;
-                        break;
-                    }
-                default:
-                    {
-                        console.log("softrobot.message::messageHandler: unrecognized command");
-                        break;
-                    }
-            }
-        }
-        message_command.messageHandler = messageHandler;
-        message_command.sendMessage = function (packet) { };
-        function setMotorState(to, from) {
-            var id = from.motorId;
-            if (id >= to.motor.length)
-                return;
-            if (softrobot.util.haveProp(from.pose))
-                to.motor[id].pose = from.pose;
-            if (softrobot.util.haveProp(from.velocity))
-                to.motor[id].velocity = from.velocity;
-            if (softrobot.util.haveProp(from.lengthMin))
-                to.motor[id].lengthMin = from.lengthMin;
-            if (softrobot.util.haveProp(from.lengthMax))
-                to.motor[id].lengthMax = from.lengthMax;
-            if (softrobot.util.haveProp(from.controlK))
-                to.motor[id].controlK = from.controlK;
-            if (softrobot.util.haveProp(from.controlB))
-                to.motor[id].controlB = from.controlB;
-            if (softrobot.util.haveProp(from.torqueMin))
-                to.motor[id].torqueMin = from.torqueMin;
-            if (softrobot.util.haveProp(from.torqueMax))
-                to.motor[id].torqueMax = from.torqueMax;
-            to.motor[id].pose = softrobot.util.limitNum(to.motor[id].pose, to.motor[id].lengthMin, to.motor[id].lengthMax);
-        }
-        message_command.setMotorState = setMotorState;
-        function updateRemoteMotorState(inst) {
-            if (inst.motorId >= softrobot.device.robotInfo.nMotor) {
-                console.log("motorId larger than motor number");
-                return;
-            }
-            console.log("update remote motor state");
-            console.log(inst);
-            if (softrobot.util.haveProp(inst.pose) || softrobot.util.haveProp(inst.velocity)) {
-                if (softrobot.util.haveProp(inst.pose))
-                    softrobot.device.robotState.motor[inst.motorId].pose = softrobot.util.limitNum(inst.pose, softrobot.device.robotState.motor[inst.motorId].lengthMin, softrobot.device.robotState.motor[inst.motorId].lengthMax);
-                if (softrobot.util.haveProp(inst.velocity))
-                    softrobot.device.robotState.motor[inst.motorId].velocity = inst.velocity;
-                var pose = softrobot.device.robotState.getPropArray("pose", softrobot.device.robotState.motor);
-                var velocity = softrobot.device.robotState.getPropArray("velocity", softrobot.device.robotState.motor);
-                var p = new softrobot.packet_command.Packet(softrobot.command.CommandId.CI_DIRECT, new softrobot.packet_command.PacketPoseDirectData({
-                    pose: pose,
-                    velocity: velocity
-                }));
-                message_command.sendMessage(p);
-            }
-            if (softrobot.util.haveProp(inst.lengthMin) || softrobot.util.haveProp(inst.lengthMax)) {
-                if (softrobot.util.haveProp(inst.lengthMin))
-                    softrobot.device.robotState.motor[inst.motorId].lengthMin = inst.lengthMin;
-                if (softrobot.util.haveProp(inst.lengthMax))
-                    softrobot.device.robotState.motor[inst.motorId].lengthMax = inst.lengthMax;
-            }
-            if (softrobot.util.haveProp(inst.controlK) || softrobot.util.haveProp(inst.controlB)) {
-                if (softrobot.util.haveProp(inst.controlK))
-                    softrobot.device.robotState.motor[inst.motorId].controlK = inst.controlK;
-                if (softrobot.util.haveProp(inst.controlB))
-                    softrobot.device.robotState.motor[inst.motorId].controlB = inst.controlB;
-                var controlK = softrobot.device.robotState.getPropArray("controlK", softrobot.device.robotState.motor);
-                var controlB = softrobot.device.robotState.getPropArray("controlB", softrobot.device.robotState.motor);
-                var p = new softrobot.packet_command.Packet(softrobot.command.CommandId.CI_PDPARAM, new softrobot.packet_command.PacketPdParamData({
-                    controlK: controlK,
-                    controlB: controlB
-                }));
-                message_command.sendMessage(p);
-            }
-            if (softrobot.util.haveProp(inst.torqueMin) || softrobot.util.haveProp(inst.torqueMax)) {
-                if (softrobot.util.haveProp(inst.torqueMin))
-                    softrobot.device.robotState.motor[inst.motorId].torqueMin = inst.torqueMin;
-                if (softrobot.util.haveProp(inst.torqueMax))
-                    softrobot.device.robotState.motor[inst.motorId].torqueMax = inst.torqueMax;
-                var torqueMin = softrobot.device.robotState.getPropArray("torqueMin", softrobot.device.robotState.motor);
-                var torqueMax = softrobot.device.robotState.getPropArray("torqueMax", softrobot.device.robotState.motor);
-                var p = new softrobot.packet_command.Packet(softrobot.command.CommandId.CI_TORQUE_LIMIT, new softrobot.packet_command.PacketTorqueLimitData({
-                    torqueMin: torqueMin,
-                    torqueMax: torqueMax
-                }));
-                message_command.sendMessage(p);
-            }
-        }
-        message_command.updateRemoteMotorState = updateRemoteMotorState;
-        function updateLocalMotorState(inst) {
-            if (inst.motorId >= softrobot.device.robotInfo.nMotor) {
-                console.log("motorId larger than motor number");
-                return;
-            }
-            console.log("update local motor state");
-            console.log(inst);
-            if (softrobot.util.haveProp(inst.pose) || softrobot.util.haveProp(inst.velocity)) {
-                if (softrobot.util.haveProp(inst.pose))
-                    softrobot.device.robotState.motor[inst.motorId].pose = softrobot.util.limitNum(inst.pose, softrobot.device.robotState.motor[inst.motorId].lengthMin, softrobot.device.robotState.motor[inst.motorId].lengthMax);
-                if (softrobot.util.haveProp(inst.velocity))
-                    softrobot.device.robotState.motor[inst.motorId].velocity = inst.velocity;
-            }
-            if (softrobot.util.haveProp(inst.lengthMin) || softrobot.util.haveProp(inst.lengthMax)) {
-                if (softrobot.util.haveProp(inst.lengthMin))
-                    softrobot.device.robotState.motor[inst.motorId].lengthMin = inst.lengthMin;
-                if (softrobot.util.haveProp(inst.lengthMax))
-                    softrobot.device.robotState.motor[inst.motorId].lengthMax = inst.lengthMax;
-            }
-            if (softrobot.util.haveProp(inst.controlK) || softrobot.util.haveProp(inst.controlB)) {
-                if (softrobot.util.haveProp(inst.controlK))
-                    softrobot.device.robotState.motor[inst.motorId].controlK = inst.controlK;
-                if (softrobot.util.haveProp(inst.controlB))
-                    softrobot.device.robotState.motor[inst.motorId].controlB = inst.controlB;
-            }
-            if (softrobot.util.haveProp(inst.torqueMin) || softrobot.util.haveProp(inst.torqueMax)) {
-                if (softrobot.util.haveProp(inst.torqueMin))
-                    softrobot.device.robotState.motor[inst.motorId].torqueMin = inst.torqueMin;
-                if (softrobot.util.haveProp(inst.torqueMax))
-                    softrobot.device.robotState.motor[inst.motorId].torqueMax = inst.torqueMax;
-            }
-        }
-        message_command.updateLocalMotorState = updateLocalMotorState;
-        function updateMotorPVDirect() {
-            var pose = softrobot.device.robotState.getPropArray("pose", softrobot.device.robotState.motor);
-            var velocity = softrobot.device.robotState.getPropArray("velocity", softrobot.device.robotState.motor);
-            console.log("update remote direct");
-            console.log({
-                pose: pose,
-                velocity: velocity
-            });
-            var p = new softrobot.packet_command.Packet(softrobot.command.CommandId.CI_DIRECT, new softrobot.packet_command.PacketPoseDirectData({
-                pose: pose,
-                velocity: velocity
-            }));
-            message_command.sendMessage(p);
-        }
-        message_command.updateMotorPVDirect = updateMotorPVDirect;
-        function updateMotorPVInterpolate(period) {
-            var pose = softrobot.device.robotState.getPropArray("pose", softrobot.device.robotState.motor);
-            console.log("update remote interpolate");
-            console.log({
-                pose: pose,
-                period: period
-            });
-            var p = new softrobot.packet_command.Packet(softrobot.command.CommandId.CI_INTERPOLATE, new softrobot.packet_command.PacketPoseInterpolateData({
-                pose: pose,
-                period: period,
-                targetCount: softrobot.device.robotState.interpolateTargetCountOfWrite
-            }));
-            message_command.sendMessage(p);
-            if (period != 0)
-                softrobot.device.robotState.interpolateTargetCountOfWrite++;
-        }
-        message_command.updateMotorPVInterpolate = updateMotorPVInterpolate;
-        function requireBoardInfo() {
-            var p = new softrobot.packet_command.Packet(softrobot.command.CommandId.CI_BOARD_INFO, new softrobot.packet_command.PacketBoardInfoData({}));
-            message_command.sendMessage(p);
-        }
-        message_command.requireBoardInfo = requireBoardInfo;
-        function requireSensorInfo() {
-            var p = new softrobot.packet_command.Packet(softrobot.command.CommandId.CI_SENSOR, new softrobot.packet_command.PacketSensorInfoData({}));
-            message_command.sendMessage(p);
-        }
-        message_command.requireSensorInfo = requireSensorInfo;
-    })(message_command = softrobot.message_command || (softrobot.message_command = {}));
-})(softrobot || (softrobot = {}));
-var softrobot;
+
+console.log("device loaded");
+
 (function (softrobot) {
     var packet_command;
     (function (packet_command) {
@@ -636,86 +473,285 @@ var softrobot;
             return PacketPoseForceControlData;
         }());
         packet_command.PacketPoseForceControlData = PacketPoseForceControlData;
-        var PacketPdParamData = (function () {
-            function PacketPdParamData(da) {
+        var PacketParamData = (function () {
+            function PacketParamData(da) {
                 this.data = da;
             }
-            PacketPdParamData.prototype.getDataLength = function () {
-                return softrobot.device.robotInfo.nMotor * 2 * 2;
-            };
-            PacketPdParamData.prototype.toBinary = function () {
-                var res = new ArrayBuffer(this.getDataLength());
-                console.log(res.byteLength);
-                var dataView = new Int16Array(res);
-                for (var i = 0; i < softrobot.device.robotInfo.nMotor; i++) {
-                    dataView[i] = this.data.controlK[i];
+            PacketParamData.prototype.getDataLength = function () {
+                switch (this.data.paramType) {
+                    case softrobot.command.SetParamType.PT_PD:
+                    case softrobot.command.SetParamType.PT_TORQUE_LIMIT: {
+                        return (1 + softrobot.device.robotInfo.nMotor * 2) * 2;
+                    }
+                    case softrobot.command.SetParamType.PT_CURRENT: {
+                        return (1 + softrobot.device.robotInfo.nMotor) * 2;
+                    }
+                    default: {
+                        console.log("Wrong type of enum SetParamType");
+                        return 0;
+                    }
                 }
-                for (var i = 0; i < softrobot.device.robotInfo.nMotor; i++) {
-                    dataView[i + softrobot.device.robotInfo.nMotor] = this.data.controlB[i];
+            };
+            PacketParamData.prototype.toBinary = function () {
+                var len = this.getDataLength();
+                if (!len)
+                    return null;
+                var res = new ArrayBuffer(len);
+                var dataView = new Int16Array(res);
+                var p = 0;
+                dataView[p++] = this.data.paramType;
+                for (var i = 0; i < softrobot.device.robotInfo.nMotor; i++, p++) {
+                    dataView[p] = this.data.params1[i];
+                }
+                if (p == len)
+                    return res;
+                for (var i = 0; i < softrobot.device.robotInfo.nMotor; i++, p++) {
+                    dataView[p] = this.data.params2[i];
                 }
                 return res;
             };
-            PacketPdParamData.fromBinary = function (bin) {
+            PacketParamData.fromBinary = function (bin) {
                 return null;
             };
-            return PacketPdParamData;
+            return PacketParamData;
         }());
-        packet_command.PacketPdParamData = PacketPdParamData;
-        var PacketTorqueLimitData = (function () {
-            function PacketTorqueLimitData(da) {
-                this.data = da;
-            }
-            PacketTorqueLimitData.prototype.getDataLength = function () {
-                return softrobot.device.robotInfo.nMotor * 2 * 2;
-            };
-            PacketTorqueLimitData.prototype.toBinary = function () {
-                var res = new ArrayBuffer(this.getDataLength());
-                var dataView = new Int16Array(res);
-                for (var i = 0; i < softrobot.device.robotInfo.nMotor; i++) {
-                    dataView[i] = this.data.torqueMin[i];
-                }
-                for (var i = 0; i < softrobot.device.robotInfo.nMotor; i++) {
-                    dataView[i + softrobot.device.robotInfo.nMotor] = this.data.torqueMax[i];
-                }
-                return res;
-            };
-            PacketTorqueLimitData.fromBinary = function (bin) {
-                return null;
-            };
-            return PacketTorqueLimitData;
-        }());
-        packet_command.PacketTorqueLimitData = PacketTorqueLimitData;
+        packet_command.PacketParamData = PacketParamData;
     })(packet_command = softrobot.packet_command || (softrobot.packet_command = {}));
 })(softrobot || (softrobot = {}));
-var softrobot;
+
+console.log("packet_command loaded");
+
 (function (softrobot) {
-    var util;
-    (function (util) {
-        function haveProp(obj) {
-            return !!obj || obj == 0;
-        }
-        util.haveProp = haveProp;
-        function limitNum(num, min, max) {
-            var res = num;
-            res > max ? res = max : res = res;
-            res < min ? res = min : res = res;
-            return res;
-        }
-        util.limitNum = limitNum;
-        function ab2str(buf) {
-            return String.fromCharCode.apply(null, new Uint16Array(buf));
-        }
-        util.ab2str = ab2str;
-        function str2ab(str) {
-            var buf = new ArrayBuffer(str.length * 2);
-            var bufView = new Uint16Array(buf);
-            for (var i = 0, strLen = str.length; i < strLen; i++) {
-                bufView[i] = str.charCodeAt(i);
+    var message_command;
+    (function (message_command) {
+        message_command.onRcvCIBoardInfoMessage = function () { };
+        message_command.onRcvCISensorMessage = function () { };
+        function messageHandler(packet) {
+            switch (packet.command) {
+                case softrobot.command.CommandId.CI_BOARD_INFO:
+                    {
+                        softrobot.device.robotInfo = packet.data.data;
+                        softrobot.device.checkRobotState();
+                        message_command.onRcvCIBoardInfoMessage();
+                        break;
+                    }
+                case softrobot.command.CommandId.CI_SENSOR:
+                    {
+                        var data = packet.data.data;
+                        if (data.pose.length != softrobot.device.robotInfo.nMotor) {
+                            requireBoardInfo();
+                            break;
+                        }
+                        softrobot.device.robotState.setPropArray("pose", data.pose, softrobot.device.robotState.motor);
+                        softrobot.device.robotState.current = data.current;
+                        softrobot.device.robotState.force = data.force;
+                        message_command.onRcvCISensorMessage();
+                        break;
+                    }
+                case softrobot.command.CommandId.CI_DIRECT:
+                    {
+                        var data = packet.data.data;
+                        if (data.pose.length != softrobot.device.robotInfo.nMotor) {
+                            requireBoardInfo();
+                            break;
+                        }
+                        softrobot.device.robotState.setPropArray("pose", data.pose, softrobot.device.robotState.motor);
+                        softrobot.device.robotState.setPropArray("velocity", data.velocity, softrobot.device.robotState.motor);
+                        break;
+                    }
+                case softrobot.command.CommandId.CI_FORCE_CONTROL:
+                    {
+                        var data = packet.data.data;
+                        if (data.pose.length != softrobot.device.robotInfo.nMotor) {
+                            requireBoardInfo();
+                            break;
+                        }
+                        softrobot.device.robotState.setPropArray("pose", data.pose, softrobot.device.robotState.motor);
+                        softrobot.device.robotState.interpolateTargetCountOfRead = data.targetCountRead;
+                        softrobot.device.robotState.interpolateTickMin = data.tickMin;
+                        softrobot.device.robotState.interpolateTickMax = data.tickMax;
+                        softrobot.device.robotState.interpolateTargetCountOfRead = data.nRemain;
+                        softrobot.device.robotState.nInterpolateVacancy = data.nVacancy;
+                        break;
+                    }
+                default:
+                    {
+                        console.log("softrobot.message::messageHandler: unrecognized command");
+                        break;
+                    }
             }
-            return buf;
         }
-        util.str2ab = str2ab;
-    })(util = softrobot.util || (softrobot.util = {}));
+        message_command.messageHandler = messageHandler;
+        message_command.sendArrayBuffer = function (buffer) { };
+        function sendMessage(packet) {
+            var bin = packet.toBinary();
+            if (!bin) {
+                console.log("sofrobot.message_command::sendMessage: can not convert Packet to Arraybuffer");
+                return;
+            }
+            message_command.sendArrayBuffer(bin);
+        }
+        message_command.sendMessage = sendMessage;
+        ;
+        function setMotorState(to, from) {
+            var id = from.motorId;
+            if (id >= to.motor.length)
+                return;
+            if (softrobot.util.haveProp(from.pose))
+                to.motor[id].pose = from.pose;
+            if (softrobot.util.haveProp(from.velocity))
+                to.motor[id].velocity = from.velocity;
+            if (softrobot.util.haveProp(from.lengthMin))
+                to.motor[id].lengthMin = from.lengthMin;
+            if (softrobot.util.haveProp(from.lengthMax))
+                to.motor[id].lengthMax = from.lengthMax;
+            if (softrobot.util.haveProp(from.controlK))
+                to.motor[id].controlK = from.controlK;
+            if (softrobot.util.haveProp(from.controlB))
+                to.motor[id].controlB = from.controlB;
+            if (softrobot.util.haveProp(from.torqueMin))
+                to.motor[id].torqueMin = from.torqueMin;
+            if (softrobot.util.haveProp(from.torqueMax))
+                to.motor[id].torqueMax = from.torqueMax;
+            to.motor[id].pose = softrobot.util.limitNum(to.motor[id].pose, to.motor[id].lengthMin, to.motor[id].lengthMax);
+        }
+        message_command.setMotorState = setMotorState;
+        function updateRemoteMotorState(inst) {
+            if (inst.motorId >= softrobot.device.robotInfo.nMotor) {
+                console.log("motorId larger than motor number");
+                return;
+            }
+            console.log("update remote motor state");
+            console.log(inst);
+            if (softrobot.util.haveProp(inst.pose) || softrobot.util.haveProp(inst.velocity)) {
+                if (softrobot.util.haveProp(inst.pose))
+                    softrobot.device.robotState.motor[inst.motorId].pose = softrobot.util.limitNum(inst.pose, softrobot.device.robotState.motor[inst.motorId].lengthMin, softrobot.device.robotState.motor[inst.motorId].lengthMax);
+                if (softrobot.util.haveProp(inst.velocity))
+                    softrobot.device.robotState.motor[inst.motorId].velocity = inst.velocity;
+                var pose = softrobot.device.robotState.getPropArray("pose", softrobot.device.robotState.motor);
+                var velocity = softrobot.device.robotState.getPropArray("velocity", softrobot.device.robotState.motor);
+                var p = new softrobot.packet_command.Packet(softrobot.command.CommandId.CI_DIRECT, new softrobot.packet_command.PacketPoseDirectData({
+                    pose: pose,
+                    velocity: velocity
+                }));
+                sendMessage(p);
+            }
+            if (softrobot.util.haveProp(inst.lengthMin) || softrobot.util.haveProp(inst.lengthMax)) {
+                if (softrobot.util.haveProp(inst.lengthMin))
+                    softrobot.device.robotState.motor[inst.motorId].lengthMin = inst.lengthMin;
+                if (softrobot.util.haveProp(inst.lengthMax))
+                    softrobot.device.robotState.motor[inst.motorId].lengthMax = inst.lengthMax;
+            }
+            if (softrobot.util.haveProp(inst.controlK) || softrobot.util.haveProp(inst.controlB)) {
+                if (softrobot.util.haveProp(inst.controlK))
+                    softrobot.device.robotState.motor[inst.motorId].controlK = inst.controlK;
+                if (softrobot.util.haveProp(inst.controlB))
+                    softrobot.device.robotState.motor[inst.motorId].controlB = inst.controlB;
+                var controlK = softrobot.device.robotState.getPropArray("controlK", softrobot.device.robotState.motor);
+                var controlB = softrobot.device.robotState.getPropArray("controlB", softrobot.device.robotState.motor);
+                var p = new softrobot.packet_command.Packet(softrobot.command.CommandId.CI_SETPARAM, new softrobot.packet_command.PacketParamData({
+                    paramType: softrobot.command.SetParamType.PT_PD,
+                    params1: controlK,
+                    params2: controlB
+                }));
+                sendMessage(p);
+            }
+            if (softrobot.util.haveProp(inst.torqueMin) || softrobot.util.haveProp(inst.torqueMax)) {
+                if (softrobot.util.haveProp(inst.torqueMin))
+                    softrobot.device.robotState.motor[inst.motorId].torqueMin = inst.torqueMin;
+                if (softrobot.util.haveProp(inst.torqueMax))
+                    softrobot.device.robotState.motor[inst.motorId].torqueMax = inst.torqueMax;
+                var torqueMin = softrobot.device.robotState.getPropArray("torqueMin", softrobot.device.robotState.motor);
+                var torqueMax = softrobot.device.robotState.getPropArray("torqueMax", softrobot.device.robotState.motor);
+                var p = new softrobot.packet_command.Packet(softrobot.command.CommandId.CI_SETPARAM, new softrobot.packet_command.PacketParamData({
+                    paramType: softrobot.command.SetParamType.PT_TORQUE_LIMIT,
+                    params1: torqueMin,
+                    params2: torqueMax
+                }));
+                sendMessage(p);
+            }
+        }
+        message_command.updateRemoteMotorState = updateRemoteMotorState;
+        function updateLocalMotorState(inst) {
+            if (inst.motorId >= softrobot.device.robotInfo.nMotor) {
+                console.log("motorId larger than motor number");
+                return;
+            }
+            console.log("update local motor state");
+            console.log(inst);
+            if (softrobot.util.haveProp(inst.pose) || softrobot.util.haveProp(inst.velocity)) {
+                if (softrobot.util.haveProp(inst.pose))
+                    softrobot.device.robotState.motor[inst.motorId].pose = softrobot.util.limitNum(inst.pose, softrobot.device.robotState.motor[inst.motorId].lengthMin, softrobot.device.robotState.motor[inst.motorId].lengthMax);
+                if (softrobot.util.haveProp(inst.velocity))
+                    softrobot.device.robotState.motor[inst.motorId].velocity = inst.velocity;
+            }
+            if (softrobot.util.haveProp(inst.lengthMin) || softrobot.util.haveProp(inst.lengthMax)) {
+                if (softrobot.util.haveProp(inst.lengthMin))
+                    softrobot.device.robotState.motor[inst.motorId].lengthMin = inst.lengthMin;
+                if (softrobot.util.haveProp(inst.lengthMax))
+                    softrobot.device.robotState.motor[inst.motorId].lengthMax = inst.lengthMax;
+            }
+            if (softrobot.util.haveProp(inst.controlK) || softrobot.util.haveProp(inst.controlB)) {
+                if (softrobot.util.haveProp(inst.controlK))
+                    softrobot.device.robotState.motor[inst.motorId].controlK = inst.controlK;
+                if (softrobot.util.haveProp(inst.controlB))
+                    softrobot.device.robotState.motor[inst.motorId].controlB = inst.controlB;
+            }
+            if (softrobot.util.haveProp(inst.torqueMin) || softrobot.util.haveProp(inst.torqueMax)) {
+                if (softrobot.util.haveProp(inst.torqueMin))
+                    softrobot.device.robotState.motor[inst.motorId].torqueMin = inst.torqueMin;
+                if (softrobot.util.haveProp(inst.torqueMax))
+                    softrobot.device.robotState.motor[inst.motorId].torqueMax = inst.torqueMax;
+            }
+        }
+        message_command.updateLocalMotorState = updateLocalMotorState;
+        function updateMotorPVDirect() {
+            var pose = softrobot.device.robotState.getPropArray("pose", softrobot.device.robotState.motor);
+            var velocity = softrobot.device.robotState.getPropArray("velocity", softrobot.device.robotState.motor);
+            console.log("update remote direct");
+            console.log({
+                pose: pose,
+                velocity: velocity
+            });
+            var p = new softrobot.packet_command.Packet(softrobot.command.CommandId.CI_DIRECT, new softrobot.packet_command.PacketPoseDirectData({
+                pose: pose,
+                velocity: velocity
+            }));
+            sendMessage(p);
+        }
+        message_command.updateMotorPVDirect = updateMotorPVDirect;
+        function updateMotorPVInterpolate(period) {
+            var pose = softrobot.device.robotState.getPropArray("pose", softrobot.device.robotState.motor);
+            console.log("update remote interpolate");
+            console.log({
+                pose: pose,
+                period: period
+            });
+            var p = new softrobot.packet_command.Packet(softrobot.command.CommandId.CI_INTERPOLATE, new softrobot.packet_command.PacketPoseInterpolateData({
+                pose: pose,
+                period: period,
+                targetCount: softrobot.device.robotState.interpolateTargetCountOfWrite
+            }));
+            sendMessage(p);
+            if (period != 0)
+                softrobot.device.robotState.interpolateTargetCountOfWrite++;
+        }
+        message_command.updateMotorPVInterpolate = updateMotorPVInterpolate;
+        function requireBoardInfo() {
+            var p = new softrobot.packet_command.Packet(softrobot.command.CommandId.CI_BOARD_INFO, new softrobot.packet_command.PacketBoardInfoData({}));
+            sendMessage(p);
+        }
+        message_command.requireBoardInfo = requireBoardInfo;
+        function requireSensorInfo() {
+            var p = new softrobot.packet_command.Packet(softrobot.command.CommandId.CI_SENSOR, new softrobot.packet_command.PacketSensorInfoData({}));
+            sendMessage(p);
+        }
+        message_command.requireSensorInfo = requireSensorInfo;
+    })(message_command = softrobot.message_command || (softrobot.message_command = {}));
 })(softrobot || (softrobot = {}));
 
-//module.export = softrobot;
+console.log("message_command loaded");
+
+module.exports = softrobot;
+
+

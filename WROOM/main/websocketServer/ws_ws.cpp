@@ -130,8 +130,8 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
         case PacketId::PI_JSFILE: {
             wsDeleteJsfileTask();
             
-            //saveToMainJs(pBuffer+2, ssize-2);
-            //combineMainFiles();
+            saveToMainJs(pBuffer+2, ssize-2);
+            combineMainFiles();
 
             delete[] pBuffer;       // delete buffer to provide more space for jsfile task
             pBuffer = NULL;
@@ -139,7 +139,7 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
             std::ifstream m_ifstream("/spiffs/main/runtime.js");
             std::string str((std::istreambuf_iterator<char>(m_ifstream)),
                  std::istreambuf_iterator<char>());
-            printf("Start runtime file: \r\n %s", str.c_str());
+            printf("Start runtime file: \n %s", str.c_str());
             m_ifstream.close();
 
             printf("before wsCreateJsfileTask heap size: %d \n", esp_get_free_heap_size());

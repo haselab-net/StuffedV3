@@ -1,95 +1,97 @@
-//var softrobot = require("sr_softrobot");
+var softrobot = require("sr_softrobot");
 
 var motor;
 (function (motor_1) {
-    function changeLocalStringLengthAsync(motor, length) {
+    function changeLocalStringLength(motor, length) {
         var instruction = {
             motorId: motor,
             pose: length
         };
         softrobot.message_command.updateLocalMotorState(instruction);
     }
-    motor_1.changeLocalStringLengthAsync = changeLocalStringLengthAsync;
-    function changeLocalStringVelocityAsync(motor, velocity) {
+    motor_1.changeLocalStringLength = changeLocalStringLength;
+    function changeLocalStringVelocity(motor, velocity) {
         var instruction = {
             motorId: motor,
             velocity: velocity
         };
         softrobot.message_command.updateLocalMotorState(instruction);
     }
-    motor_1.changeLocalStringVelocityAsync = changeLocalStringVelocityAsync;
-    function pushLocalMotorPVToRemoteDirectAsync() {
+    motor_1.changeLocalStringVelocity = changeLocalStringVelocity;
+    function pushLocalMotorPVToRemoteDirect() {
         softrobot.message_command.updateMotorPVDirect();
     }
-    motor_1.pushLocalMotorPVToRemoteDirectAsync = pushLocalMotorPVToRemoteDirectAsync;
-    function pushLocalMotorPVToRemoteInterpolateAsync(period) {
+    motor_1.pushLocalMotorPVToRemoteDirect = pushLocalMotorPVToRemoteDirect;
+    function pushLocalMotorPVToRemoteInterpolate(period) {
         softrobot.message_command.updateMotorPVInterpolate(period);
     }
-    motor_1.pushLocalMotorPVToRemoteInterpolateAsync = pushLocalMotorPVToRemoteInterpolateAsync;
-    function changeRemoteStringLengthAsync(motor, length) {
+    motor_1.pushLocalMotorPVToRemoteInterpolate = pushLocalMotorPVToRemoteInterpolate;
+    function changeRemoteStringLength(motor, length) {
         var instruction = {
             motorId: motor,
             pose: length
         };
         softrobot.message_command.updateRemoteMotorState(instruction);
     }
-    motor_1.changeRemoteStringLengthAsync = changeRemoteStringLengthAsync;
-    function changeRemoteStringVelocityAsync(motor, velocity) {
+    motor_1.changeRemoteStringLength = changeRemoteStringLength;
+    function changeRemoteStringVelocity(motor, velocity) {
         var instruction = {
             motorId: motor,
             velocity: velocity
         };
         softrobot.message_command.updateRemoteMotorState(instruction);
     }
-    motor_1.changeRemoteStringVelocityAsync = changeRemoteStringVelocityAsync;
-    function changeRemoteMotorLengthMinAsync(motor, lengthMin) {
+    motor_1.changeRemoteStringVelocity = changeRemoteStringVelocity;
+    function changeRemoteMotorLengthMin(motor, lengthMin) {
         var instruction = {
             motorId: motor,
             lengthMin: lengthMin
         };
         softrobot.message_command.updateRemoteMotorState(instruction);
     }
-    motor_1.changeRemoteMotorLengthMinAsync = changeRemoteMotorLengthMinAsync;
-    function changeRemoteMotorLengthMaxAsync(motor, lengthMax) {
+    motor_1.changeRemoteMotorLengthMin = changeRemoteMotorLengthMin;
+    function changeRemoteMotorLengthMax(motor, lengthMax) {
         var instruction = {
             motorId: motor,
             lengthMax: lengthMax
         };
         softrobot.message_command.updateRemoteMotorState(instruction);
     }
-    motor_1.changeRemoteMotorLengthMaxAsync = changeRemoteMotorLengthMaxAsync;
-    function changeRemoteMotorControlKAsync(motor, controlK) {
+    motor_1.changeRemoteMotorLengthMax = changeRemoteMotorLengthMax;
+    function changeRemoteMotorControlK(motor, controlK) {
         var instruction = {
             motorId: motor,
             controlK: controlK
         };
         softrobot.message_command.updateRemoteMotorState(instruction);
     }
-    motor_1.changeRemoteMotorControlKAsync = changeRemoteMotorControlKAsync;
-    function changeRemoteMotorControlBAsync(motor, controlB) {
+    motor_1.changeRemoteMotorControlK = changeRemoteMotorControlK;
+    function changeRemoteMotorControlB(motor, controlB) {
         var instruction = {
             motorId: motor,
             controlB: controlB
         };
         softrobot.message_command.updateRemoteMotorState(instruction);
     }
-    motor_1.changeRemoteMotorControlBAsync = changeRemoteMotorControlBAsync;
-    function changeRemoteMotorTorqueMinAsync(motor, torqueMin) {
+    motor_1.changeRemoteMotorControlB = changeRemoteMotorControlB;
+    function changeRemoteMotorTorqueMin(motor, torqueMin) {
         var instruction = {
             motorId: motor,
             torqueMin: torqueMin
         };
         softrobot.message_command.updateRemoteMotorState(instruction);
     }
-    motor_1.changeRemoteMotorTorqueMinAsync = changeRemoteMotorTorqueMinAsync;
-    function changeRemoteMotorTorqueMaxAsync(motor, torqueMax) {
+    motor_1.changeRemoteMotorTorqueMin = changeRemoteMotorTorqueMin;
+    function changeRemoteMotorTorqueMax(motor, torqueMax) {
         var instruction = {
             motorId: motor,
             torqueMax: torqueMax
         };
         softrobot.message_command.updateRemoteMotorState(instruction);
     }
-    motor_1.changeRemoteMotorTorqueMaxAsync = changeRemoteMotorTorqueMaxAsync;
+    motor_1.changeRemoteMotorTorqueMax = changeRemoteMotorTorqueMax;
 })(motor || (motor = {}));
 
-module.export = motor;
+console.log("motor loaded");
+
+module.exports = motor;
