@@ -50,12 +50,8 @@ void wsDeleteJsfileTask() {
     if(xHandle==NULL) return;
     ESP_LOGD(LOG_TAG, "Delete old jsfile task");
 
-    UdpCom_Lock();
-    
     vTaskDelete(xHandle);
     xHandle = NULL;
 
     duktape_end();
-
-    UdpCom_Unlock();
 }

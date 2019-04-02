@@ -26,9 +26,10 @@ class UdpRetPacket;
 //
 class AllBoards{
 public:
-	RobotState state;
-	RobotCommand command;
+//	RobotState state;
+//	RobotCommand command;
 	int nBoard;
+	int nTargetMin;
 	static const int NUART = 2;
 	tiny::vector<DeviceMap> motorMap;
 	tiny::vector<DeviceMap> currentMap;
@@ -36,14 +37,12 @@ public:
 	tiny::vector<DeviceMap> touchMap;
 	UartForBoards* uart[NUART];
 	BoardDirect* boardDirect;
-	#if UDP_UART_ASYNC
 	xTaskHandle taskExec;
-	#endif
 	int GetNTotalMotor() { return (int)motorMap.size(); }
 	int GetNTotalCurrent() { return (int)currentMap.size(); }
 	int GetNTotalForce() { return (int)forceMap.size(); }
 	int GetNTotalTouch() { return (int)touchMap.size(); }
-	int GetNTarget() { return state.nTargetMin; }
+	int GetNTarget() { return nTargetMin; }
 	int GetSystemId() { return 0; }
 	AllBoards();
 	~AllBoards();

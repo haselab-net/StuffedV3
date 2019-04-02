@@ -202,9 +202,6 @@ class MCWriteCmd: public MonitorCommandBase{
         recv->length = recv->CommandLen();
         recv->count = udpCom.commandCount + 1;
         udpCom.recvs.Write();
-        #if !UDP_UART_ASYNC
-        xTaskNotifyGive(udpCom.taskExeCmd);
-        #endif
     }
 } mcWriteCmd;
 

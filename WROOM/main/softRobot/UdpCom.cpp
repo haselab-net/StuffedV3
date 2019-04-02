@@ -133,32 +133,40 @@ void UdpRetPacket::SetAll(ControlMode controlMode, unsigned char targetCountRead
 }
 
 UdpCmdPackets::UdpCmdPackets() {
-	mutex = xSemaphoreCreateMutex();
+	smAvail = xSemaphoreCreateCounting(sizeof(buf) / sizeof(buf[0]), 0);
+	smFree = xSemaphoreCreateCounting(sizeof(buf) / sizeof(buf[0]), sizeof(buf) / sizeof(buf[0]));
 }
-void UdpCmdPackets::Lock() {
-	xSemaphoreTake(mutex, portMAX_DELAY);
+UdpCmdPacket& UdpCmdPackets::Peek() {
+	xSemaphoreTake(smAvail, portMAX_DELAY);
+	xSemaphoreGive(smAvail);
+	return base::Peek();
 }
-void UdpCmdPackets::Unlock() {
-	xSemaphoreGive(mutex);
+void UdpCmdPackets::Read() {
+	xSemaphoreTake(smAvail, portMAX_DELAY);
+	base::Read();
+	xSemaphoreGive(smFree);
 }
+UdpCmdPacket& UdpCmdPackets::Poke() {
+	xSemaphoreTake(smFree, portMAX_DELAY);
+	xSemaphoreGive(smFree);
+	return base::Poke();
+}
+void UdpCmdPackets::Write() {
+	xSemaphoreTake(smFree, portMAX_DELAY);
+	base::Write();
+	xSemaphoreGive(smAvail);
+}
+
 static void onReceiveUdp(void *arg, struct udp_pcb *pcb, struct pbuf *p, const ip_addr_t *addr, u16_t port)
 {
 	((UdpCom*)arg)->OnReceiveUdp(pcb, p, addr, port);
 }
-#if !UDP_UART_ASYNC
-static void execCommand(void* udpCom){
-	((UdpCom*) udpCom)->ExecCommandLoop();
-}
-#endif
 void UdpCom::Init() {
 	udp = NULL;
 	recvRest = 0;
 	commandCount = 0;
 	sendStart = sendLast = NULL;
 	sendLen = 0;
-	#if !UDP_UART_ASYNC
-    xTaskCreate(execCommand, "ExeCmd", 8*1024, &udpCom, tskIDLE_PRIORITY, &taskExeCmd);
-	#endif
 }
 void UdpCom::Start(){
 	udp_init();
@@ -170,7 +178,7 @@ void UdpCom::Start(){
 
 void UdpCom::OnReceiveUdp(struct udp_pcb * upcb, struct pbuf * top, const ip_addr_t* addr, u16_t port) {
 	if (!recvs.WriteAvail()) {
-		ESP_LOGE("UdpCom::OnReceiveUdp", "Udp command receive buffer is full.");
+		ESP_LOGE("Tag", "Udp command receive buffer is full.");
 		pbuf_free(top);
 		return;
 	}
@@ -179,8 +187,6 @@ void UdpCom::OnReceiveUdp(struct udp_pcb * upcb, struct pbuf * top, const ip_add
 	int readLen = 0;
 	int cur = 0;
 	int cmdLen = UdpPacket::HEADERLEN;
-
-	recvs.Lock();
 	UdpCmdPacket* recv = &recvs.Poke();
 	int countDiffMax = 0;
 	while (1) {
@@ -193,7 +199,7 @@ void UdpCom::OnReceiveUdp(struct udp_pcb * upcb, struct pbuf * top, const ip_add
 			if (cmdLen == UdpPacket::HEADERLEN) {
 				cmdLen = recv->CommandLen();
 				if (bDebug) {
-					ESP_LOGI(Tag, "L=%d Cm=%d Ct=%d received from %s.\n", recv->length, recv->command, recv->count, ipaddr_ntoa(addr));
+					ESP_LOGI(Tag, "L=%d Cm=%d Ct=%d received from %s.", recv->length, recv->command, recv->count, ipaddr_ntoa(addr));
 				}
 			}
 			if (readLen == cmdLen) {
@@ -208,9 +214,6 @@ void UdpCom::OnReceiveUdp(struct udp_pcb * upcb, struct pbuf * top, const ip_add
 						ESP_LOGI("UdpCom", "CI_INT tcw:%d, peri=%d, ct=%d", recv->GetTargetCountWrite(), recv->GetPeriod(), recv->count);
 					}*/
 					recvs.Write();
-#if !UDP_UART_ASYNC
-					xTaskNotifyGive(taskExeCmd);
-#endif
 				}
 				else if (recv->count == commandCount + 1) {		// check and update counter
 					commandCount++;
@@ -218,9 +221,6 @@ void UdpCom::OnReceiveUdp(struct udp_pcb * upcb, struct pbuf * top, const ip_add
 						ESP_LOGI("UdpCom", "CI_INT tcw:%d, peri=%d, ct=%d", recv->GetTargetCountWrite(), recv->GetPeriod(), recv->count);
 					}*/
 					recvs.Write();
-#if !UDP_UART_ASYNC
-					xTaskNotifyGive(taskExeCmd);
-#endif
 					if (countDiffMax > 0) {
 						ESP_LOGI(Tag, "ignored %d packets Ct:%d Cm:%d", countDiffMax, commandCount, recv->command);
 						countDiffMax = 0;
@@ -235,7 +235,6 @@ void UdpCom::OnReceiveUdp(struct udp_pcb * upcb, struct pbuf * top, const ip_add
 				if (!recvs.WriteAvail()) {
 					ESP_LOGE(Tag, "Udp recv buffer full.\n");
 					pbuf_free(top);
-					recvs.Unlock();
 					return;
 				}
 				recv = &recvs.Poke();
@@ -253,55 +252,21 @@ void UdpCom::OnReceiveUdp(struct udp_pcb * upcb, struct pbuf * top, const ip_add
 			}
 		}
 	}
-	recvs.Unlock();
 	pbuf_free(top);
 }
 void UdpCom::OnReceiveServer(void* payload, int len) {
-	recvs.Lock();
 	if (!recvs.WriteAvail()) {
 		ESP_LOGE("UdpCom::OnReceiveServer", "Udp command receive buffer is full.");
-		recvs.Unlock();
 		return;
 	}
 	UdpCmdPacket* recv = &recvs.Poke();
 	memcpy(recv->bytes + 2, payload, len);
 	recv->count = commandCount;
 	recvs.Write();
-	recvs.Unlock();
 }
 extern "C" void UdpCom_OnReceiveServer(void* payload, int len){
 	udpCom.OnReceiveServer(payload, len);
 }
-extern "C" void UdpCom_Lock(){
-	udpCom.recvs.Lock();
-}
-extern "C" void UdpCom_Unlock(){
-	udpCom.recvs.Unlock();
-}
-
-#if !UDP_UART_ASYNC
-void UdpCom::ExecCommandLoop(){
-    while(1){
-		ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
-		while (recvs.ReadAvail()) {
-			UdpCmdPacket* recv = &recvs.Peek();
-			if (CI_BOARD_INFO < recv->command && recv->command < CI_NCOMMAND) {
-				//	send packet to allBoards
-				allBoards.WriteCmd(recv->command, *recv);
-				PrepareRetPacket(recv->command);
-				if (allBoards.HasRet(recv->command)){
-					allBoards.ReadRet(recv->command, send);
-				}
-				SendRetPacket(recv->returnIp);
-			}
-			else {
-				ExecUdpCommand(*recv);
-			}
-			recvs.Read();
-		}
-	}
-}
-#endif
 
 void UdpCom::SendText(char* text, short errorlevel) {
 	send.command = CIU_TEXT;
