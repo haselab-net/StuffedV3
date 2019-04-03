@@ -40,7 +40,9 @@ void MotorDriver::AdcReadTask(){
     const gpio_num_t GPIO_LED = GPIO_NUM_26;
     gpio_reset_pin(GPIO_LED);
     gpio_set_direction(GPIO_LED, GPIO_MODE_OUTPUT);
+    int count=0;
 	while(1) {
+        count ++;
 		system_event_t evt;
         if (xQueueReceive(queue, &evt, portMAX_DELAY) == pdPASS) {
             if (evt.event_id==2) {
@@ -50,9 +52,10 @@ void MotorDriver::AdcReadTask(){
                     int ch = buf[i] >> 11;                    
                     int value = buf[i] &0x7FF;
                     int pos = adcChsRev[ch];
-                    adcRaws[pos] = adcRaws[pos]*15/16 + value; 
+#define FILTER_TIME 16
+                    adcRaws[pos] = adcRaws[pos]*(FILTER_TIME-1)/FILTER_TIME + value; 
                 }
-                if (bControl){
+                if (bControl && count % 4 == 0){
                     gpio_set_level(GPIO_LED, 1);
                     controlLoop();
                     gpio_set_level(GPIO_LED, 0);
@@ -104,7 +107,7 @@ void MotorDriver::Init(){
 #ifndef _WIN32
 	i2s_config_t i2s_config = {
         mode : (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_RX | I2S_MODE_ADC_BUILT_IN),
-        sample_rate : ADC_DMA_LEN * 3000,   //  3kHz
+        sample_rate : ADC_DMA_LEN * 3000 * 4,   //  3kHz * 4
         bits_per_sample : i2s_bits_per_sample_t(16),
         channel_format : I2S_CHANNEL_FMT_ONLY_LEFT,
         communication_format : I2S_COMM_FORMAT_I2S_LSB,

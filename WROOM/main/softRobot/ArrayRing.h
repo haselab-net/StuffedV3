@@ -4,6 +4,7 @@
 
 template <class T, int N>
 class ArrayRing {
+protected:
 	T buf[N];
 	volatile int read, write;
 public:

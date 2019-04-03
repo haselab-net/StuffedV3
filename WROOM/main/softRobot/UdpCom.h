@@ -156,12 +156,17 @@ public:
 	}
 };
 
-class UdpCmdPackets:public ArrayRing<UdpCmdPacket, 10>{
-	xSemaphoreHandle mutex;
+#define NUDPCMDPACKETS	10
+class UdpCmdPackets:public ArrayRing<UdpCmdPacket, NUDPCMDPACKETS>{
+	xSemaphoreHandle smAvail, smFree;
 public:
+	typedef ArrayRing<UdpCmdPacket, NUDPCMDPACKETS> base;
 	UdpCmdPackets();
-	void Lock();
-	void Unlock();
+	//	blocking read, write peek poke
+	void Read();
+	void Write();
+	UdpCmdPacket& Peek();
+	UdpCmdPacket& Poke();
 };
 
 class UdpCom {
