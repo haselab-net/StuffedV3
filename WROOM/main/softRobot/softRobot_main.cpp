@@ -20,6 +20,8 @@
 #include "../wifiMan/wifiMan.h"
 #endif
 
+#include "ws_task.h"
+
 extern "C" void softRobot_main()    //  called from app_main in main.cpp 
 {        
     //----------------------------------
@@ -54,6 +56,12 @@ extern "C" void softRobot_main()    //  called from app_main in main.cpp
         xEventGroupWaitBits(wifi_manager_event_group, WIFI_MANAGER_STA_DISCONNECT_BIT, pdFALSE, pdFALSE, portMAX_DELAY);
     }
 #endif
+
+    if(!wsIsJsfileTaskRunning()) {
+        wsCreateJsfileTask();
+        logPrintf("Start running default jsfile task");
+    }
+
     //  monitor start
     monitor();
 }

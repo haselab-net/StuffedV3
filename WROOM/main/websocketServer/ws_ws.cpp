@@ -23,6 +23,8 @@ static char LOG_TAG[] = "ws_ws";
 static WebSocket* pWebSocket = NULL;
 static SRWebSocketHandler webSocketHandler = SRWebSocketHandler();
 
+static bool development_mode = false;
+
 void SRWebSocketHandler::onClose() {
     ESP_LOGD(LOG_TAG, "on close");
     pWebSocket = NULL;

@@ -59,3 +59,7 @@ void wsDeleteJsfileTask() {
 
     UdpCom_Unlock();
 }
+
+bool wsIsJsfileTaskRunning() {
+    return !!xHandle;
+}
