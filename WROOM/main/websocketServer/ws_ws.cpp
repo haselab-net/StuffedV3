@@ -161,22 +161,23 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
 
         case PacketId::PI_SETTINGS: {
             uint16_t* pBufferI16 = (uint16_t*)pBuffer;
-            uint16_t id = pBufferI16[0];
+            uint16_t id = pBufferI16[1];
             switch (id)
             {
                 case PacketSettingsId::DEVELOPMENT_MODE:
-                    development_mode = pBufferI16[1];
+                    development_mode = pBufferI16[2];
                     if(development_mode) {
-                        ESP_LOGD("switch to development mode, stop running jsfile task");
+                        ESP_LOGD(LOG_TAG, "switch to development mode, stop running jsfile task");
                         wsDeleteJsfileTask();
                         wsCreateJsfileTask();
                     }else{
-                        ESP_LOGD("switch to jsfile mode, start running jsfile task");
+                        ESP_LOGD(LOG_TAG, "switch to jsfile mode, start running jsfile task");
                         wsDeleteJsfileTask();
                     }
                     break;
             
                 default:
+                    ESP_LOGD(LOG_TAG, "Unknown packet settings id (%i)", pBufferI16[1]);
                     break;
             }
             break;
