@@ -5,4 +5,6 @@ void wsCreateJsfileTask();
 
 void wsDeleteJsfileTask();
 
+bool wsIsJsfileTaskRunning();
+
 #endif

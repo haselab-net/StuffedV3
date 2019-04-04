@@ -236,8 +236,6 @@ static duk_ret_t stopFile(duk_context* ctx) {
 
     if( xHandle != NULL )
     {
-        UdpCom_Lock();
-
         // delete task
         vTaskDelete( xHandle );
         xHandle = NULL;
@@ -248,8 +246,6 @@ static duk_ret_t stopFile(duk_context* ctx) {
 
         // stop event handling
         jsfile_stopEvents();
-
-        UdpCom_Unlock();
     }
 
     LOGD("<< stop file");

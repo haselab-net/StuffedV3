@@ -11,9 +11,6 @@ extern "C" {
 
 static TaskHandle_t xHandle = NULL;
 
-extern void UdpCom_Lock();
-extern void UdpCom_Unlock();
-
 static char LOG_TAG[] = "ws_task";
 
 static void duktapeTask(void* pvParameters) {
@@ -54,4 +51,8 @@ void wsDeleteJsfileTask() {
     xHandle = NULL;
 
     duktape_end();
+}
+
+bool wsIsJsfileTaskRunning() {
+    return !!xHandle;
 }
