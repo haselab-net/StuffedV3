@@ -203,7 +203,7 @@ public:
 	///	send return packet correspond to UdpCmdPacket recv.
 	void SendReturn(UdpCmdPacket& recv);
 	///	send return packet to web server (duktape)
-	void SendReturnServer(UdpCmdPacket& recv);
+	void SendReturnServer();
 	///	send return packet to udp
 	void SendReturnUdp(UdpCmdPacket& recv);
 	///	prepare return packet for command cmd

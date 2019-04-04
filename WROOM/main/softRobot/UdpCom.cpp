@@ -215,7 +215,7 @@ void UdpCom::OnReceiveUdp(struct udp_pcb * upcb, struct pbuf * top, const ip_add
 					}*/
 					recvs.Write();
 				}
-				else if (recv->count == commandCount + 1) {		// check and update counter
+				else if (recv->count == (unsigned short)(commandCount + 1) ){		// check and update counter
 					commandCount++;
 					/*if (recv->command == CI_INTERPOLATE){
 						ESP_LOGI("UdpCom", "CI_INT tcw:%d, peri=%d, ct=%d", recv->GetTargetCountWrite(), recv->GetPeriod(), recv->count);
@@ -297,15 +297,16 @@ void UdpCom::SendReturn(UdpCmdPacket& recv) {
 #else
 #error
 #endif
-		SendReturnServer(recv);
+		SendReturnServer();
 	}
 	else {
 		SendReturnUdp(recv);
 	}
 }
-void UdpCom::SendReturnServer(UdpCmdPacket& recv) {
+void UdpCom::SendReturnServer() {
 #ifndef _WIN32
-	wsOnMessageSr(send.bytes+2, send.length-2);
+	send.length -= 2;
+	wsOnMessageSr(send.bytes+2, send.length);
 #endif
 }
 void UdpCom::SendReturnUdp(UdpCmdPacket& recv) {
