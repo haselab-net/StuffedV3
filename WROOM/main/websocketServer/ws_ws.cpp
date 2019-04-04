@@ -167,9 +167,11 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
                 case PacketSettingsId::DEVELOPMENT_MODE:
                     development_mode = pBufferI16[1];
                     if(development_mode) {
+                        ESP_LOGD("switch to development mode, stop running jsfile task");
                         wsDeleteJsfileTask();
                         wsCreateJsfileTask();
                     }else{
+                        ESP_LOGD("switch to jsfile mode, start running jsfile task");
                         wsDeleteJsfileTask();
                     }
                     break;
