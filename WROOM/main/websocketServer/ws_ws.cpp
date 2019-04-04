@@ -125,8 +125,6 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
     ESP_LOGD(LOG_TAG, "Received a packet from websocket: ");
     printPacket((const void*)pBuffer, ssize);
 
-    //const int16_t* pBufferI16 = (const int16_t*)pBuffer;
-
     switch (packetId)
     {
         case PacketId::PI_JSFILE: {
@@ -138,21 +136,47 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
             delete[] pBuffer;       // delete buffer to provide more space for jsfile task
             pBuffer = NULL;
 
-            std::ifstream m_ifstream("/spiffs/main/runtime.js");
-            std::string str((std::istreambuf_iterator<char>(m_ifstream)),
-                 std::istreambuf_iterator<char>());
-            printf("Start runtime file: \n %s", str.c_str());
-            m_ifstream.close();
+            if(development_mode) {  // do not run file in development mode
+                break;
+            }
+            else {                  // run file
+                std::ifstream m_ifstream("/spiffs/main/runtime.js");
+                std::string str((std::istreambuf_iterator<char>(m_ifstream)),
+                    std::istreambuf_iterator<char>());
+                printf("Start runtime file: \n %s", str.c_str());
+                m_ifstream.close();
 
-            printf("before wsCreateJsfileTask heap size: %d \n", esp_get_free_heap_size());
+                printf("before wsCreateJsfileTask heap size: %d \n", esp_get_free_heap_size());
 
-            wsCreateJsfileTask();
+                wsCreateJsfileTask();
+            }
             
             break;
         }
 
         case PacketId::PI_COMMAND: {
             UdpCom_OnReceiveServer((void*)(pBuffer+2), *(int16_t*)(&pBuffer[2]));
+            break;
+        }
+
+        case PacketId::PI_SETTINGS: {
+            uint16_t* pBufferI16 = (uint16_t*)pBuffer;
+            uint16_t id = pBufferI16[0];
+            switch (id)
+            {
+                case PacketSettingsId::DEVELOPMENT_MODE:
+                    development_mode = pBufferI16[1];
+                    if(development_mode) {
+                        wsDeleteJsfileTask();
+                        wsCreateJsfileTask();
+                    }else{
+                        wsDeleteJsfileTask();
+                    }
+                    break;
+            
+                default:
+                    break;
+            }
             break;
         }
     
@@ -213,6 +237,26 @@ void printPacketCommand(const void* pBuffer, size_t len) {
     printf("\r\n");
 }
 
+void printPacketSettings(const void* pBuffer, size_t len) {
+    int16_t* pBufferI16 = (int16_t*)pBuffer;
+    printf("|- PacketId: PI_SETTINGS \r\n");
+
+    uint16_t id = pBufferI16[0];
+    printf("   |- Setting type: %s \r\n", getPacketSettingsIdStr(id).c_str());
+
+    printf("   |- Value: ");
+    switch (id)
+    {
+        case PacketSettingsId::DEVELOPMENT_MODE:
+            printf("%i ", pBufferI16[1]);
+            break;
+    
+        default:
+            break;
+    }
+    printf("\r\n");
+}
+
 void printPacket(const void* pBuffer, size_t len) {
     const int16_t* pBufferI16 = (const int16_t*)pBuffer;
     switch (*pBufferI16)
@@ -224,6 +268,11 @@ void printPacket(const void* pBuffer, size_t len) {
 
         case PacketId::PI_COMMAND: {
             printPacketCommand((char*)pBuffer+2, len-2);
+            break;
+        }
+
+        case PacketId::PI_SETTINGS: {
+            printPacketSettings((char*)pBuffer+2, len-2);
             break;
         }
     
