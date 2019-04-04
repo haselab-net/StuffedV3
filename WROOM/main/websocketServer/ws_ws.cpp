@@ -233,7 +233,7 @@ void printPacketCommand(const void* pBuffer, size_t len) {
     printf("   |- CommandId: %i \r\n", pBufferI16[1]);
 
     printf("   |- Command: ");
-    for(size_t i = 2; i < length/2; i++)
+    for(size_t i = 2; i < len/2; i++)
     {
         printf("%i, ", pBufferI16[i]);
     }
