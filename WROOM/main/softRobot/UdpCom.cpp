@@ -82,7 +82,7 @@ void UdpRetPacket::SetLength() {
 	case CI_SETPARAM:
 	case CI_RESET_SENSOR:
 		length = NHEADER*2; break;
-	case CIU_TEXT:			//	return text message: cmd, type, length, bytes
+	case CIU_TEXT:			//	return text message: type, len, str.
 		length = (NHEADER + 1 + 1) * 2 + data[1]; break;
 	case CIU_SET_IPADDRESS:	//  Set ip address to return the packet
 		length = NHEADER * 2; break;
@@ -98,7 +98,7 @@ void UdpRetPacket::SetLength() {
 }
 void UdpRetPacket::ClearData() {
 	SetLength();
-	memset(data, 0, length);
+	memset(data, 0, length - NHEADER);
 }
 void UdpRetPacket::SetAll(ControlMode controlMode, unsigned char targetCountReadMin, unsigned char targetCountReadMax,
 		unsigned short tickMin, unsigned short tickMax, 
@@ -191,21 +191,21 @@ void UdpCom::OnReceiveUdp(struct udp_pcb * upcb, struct pbuf * top, const ip_add
 	int countDiffMax = 0;
 	while (1) {
 		int l = p->len - cur;
-		if (l > cmdLen - readLen) l = cmdLen - readLen;
+		if (l > cmdLen+2 - readLen) l = cmdLen+2 - readLen;
 		memcpy(recv->bytes + readLen, ((char*)p->payload) + cur, l);
 		readLen += l;
 		cur += l;
-		if (readLen == cmdLen) {
+		if (readLen == cmdLen+2) {
 			if (cmdLen == UdpPacket::HEADERLEN) {
 				cmdLen = recv->CommandLen();
 				if (bDebug) {
 					ESP_LOGI(Tag, "L=%d Cm=%d Ct=%d received from %s.", recv->length, recv->command, recv->count, ipaddr_ntoa(addr));
 				}
 			}
-			if (readLen == cmdLen) {
+			if (readLen == cmdLen+2) {
 				recv->returnIp = *addr;
-				if (recv->length != cmdLen - 2) {
-					ESP_LOGE(Tag, "cmdLen %d != recvLen %d - 2 in cmd:%d \n", cmdLen, recv->length, recv->command);
+				if (recv->length != cmdLen) {
+					ESP_LOGE(Tag, "cmdLen %d != recvLen %d in cmd:%d \n", cmdLen, recv->length, recv->command);
 				}
 				if (recv->command == CIU_GET_IPADDRESS 
 					|| (recv->command == CI_INTERPOLATE && recv->GetPeriod() == 0)
@@ -273,14 +273,20 @@ void UdpCom::SendText(char* text, short errorlevel) {
 	send.count = commandCount;
 	send.data[0] = errorlevel;
 	int len = strlen(text);
-	if (len > 1000) len = 1000;
+	const int MAXSTRLEN = UdpCmdPacket::MAXLEN - UdpCmdPacket::HEADERLEN - 2; 
+	if (len > MAXSTRLEN) len = MAXSTRLEN;
 	send.data[1] = len;
 	send.SetLength();
 	char* str = (char*)(send.data + 2);
 	memcpy(str, text, len);
-	struct pbuf* pb = pbuf_alloc(PBUF_TRANSPORT, send.length, PBUF_RAM);
-    memcpy (pb->payload, send.bytes, send.length);
-	udp_sendto(udp, pb, &ownerIp, port);
+	struct pbuf* pb = pbuf_alloc(PBUF_TRANSPORT, send.length+2, PBUF_RAM);
+    memcpy (pb->payload, send.bytes, send.length+2);
+	//	send to server
+	wsOnMessageSr(send.bytes+2, send.length);
+	//	send to UDP
+	if (ownerIp.u_addr.ip4.addr != 0){
+		udp_sendto(udp, pb, &ownerIp, port);
+	}
     pbuf_free(pb); //De-allocate packet buffer
 //	ESP_LOGI(Tag, "Ret%d C%d L%d to %s\n", send.command, send.count, send.length, ipaddr_ntoa(&ownerIp));
 }
@@ -305,30 +311,37 @@ void UdpCom::SendReturn(UdpCmdPacket& recv) {
 }
 void UdpCom::SendReturnServer() {
 #ifndef _WIN32
-	send.length -= 2;
 	wsOnMessageSr(send.bytes+2, send.length);
 #endif
 }
 void UdpCom::SendReturnUdp(UdpCmdPacket& recv) {
 	if (!udp) return;
-	static char sendBuf[1000];
-	if (sendLen + send.length >= 1000){	//	UDP's MTU < 1500, but usually > 1000. 
-		struct pbuf* pb = pbuf_alloc(PBUF_TRANSPORT, sendLen, PBUF_RAM);
-		memcpy(pb->payload, sendBuf, sendLen);
-		udp_sendto(udp, pb, &recv.returnIp, port);
-    	pbuf_free(pb); //De-allocate packet buffer
+	static int sendLen = 0;
+	static struct pbuf* pbStart = NULL;
+	//	Send packet if buffer is full
+	if (sendLen + send.length + 2 > 1000){	// udp packet length should be smaller than 1000.
+		udp_sendto(udp, pbStart, &recv.returnIp, port);
+    	pbuf_free(pbStart); //De-allocate packet buffer
+		pbStart = NULL;
 		sendLen = 0;
 	}
-    memcpy(sendBuf+sendLen, send.bytes, send.length);
-	sendLen += send.length;
+	//	Copy command to buffer
+	struct pbuf* pbNext = pbuf_alloc(PBUF_TRANSPORT, send.length + 2, PBUF_RAM);
+	memcpy(pbNext->payload, send.bytes, send.length + 2);
+	if (pbStart == NULL){
+		pbStart = pbNext;
+	}else{
+		pbuf_cat(pbStart, pbNext);
+	}
+	sendLen += send.length + 2;
+	//	Send buffer if there is no resting command to process.
 	if (recvs.ReadAvail() <= 1){	//	Read() will call after sent. So 1 means no command remaining.
-		struct pbuf* pb = pbuf_alloc(PBUF_TRANSPORT, sendLen, PBUF_RAM);
-		memcpy(pb->payload, sendBuf, sendLen);
-		udp_sendto(udp, pb, &recv.returnIp, port);
-    	pbuf_free(pb); //De-allocate packet buffer
+		udp_sendto(udp, pbStart, &recv.returnIp, port);
+    	pbuf_free(pbStart); //De-allocate packet buffer
+		pbStart = NULL;
 		sendLen = 0;
-	}
-//	ESP_LOGI(Tag, "Ret%d C%d L%d to %s\n", send.command, send.count, send.length, ipaddr_ntoa(&returnIp));
+	}	
+	//	ESP_LOGI(Tag, "Ret%d C%d L%d to %s\n", send.command, send.count, send.length, ipaddr_ntoa(&returnIp));
 }
 void UdpCom::ExecUdpCommand(UdpCmdPacket& recv) {
 	switch (recv.command)

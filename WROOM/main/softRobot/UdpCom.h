@@ -29,16 +29,16 @@ extern "C" void UdpCom_Unlock();
 class UdpPacket {
 public:
 	enum {
-		HEADERLEN = 6,
-		MAXLEN = 512	//	command size must smaller than MAXLEN
+		HEADERLEN = 4,		//	does not include count. 
+		MAXLEN = 512		//	hole packet size include count must equal or smaller than MAXLEN.
 	};
 	union {
-		unsigned char bytes[MAXLEN];
+		unsigned char bytes[MAXLEN];	//	hole packet
 		struct {
-			unsigned short count;	//	counter to detect packet drop.
-			unsigned short length;	//	length of this command
-			unsigned short command;	//	command id
-			short data[(MAXLEN-2*3)/2];
+			unsigned short count;		//	counter to detect packet drop.
+			unsigned short length;		//	length of packet from here. i.e. without count.
+			unsigned short command;		//	command id.
+			short data[(MAXLEN-2*3)/2];	//	data of the command.
 		}__attribute__((__packed__));
 	};
 };
@@ -184,9 +184,6 @@ public:
 	struct pbuf* sendStart;	//	The first udp buffer to send.
 	struct pbuf* sendLast;	//	The last udp buffer to send.
 	int sendLen;			//	total bytes of send buffers.
-	#if !UDP_UART_ASYNC
-	TaskHandle_t taskExeCmd; 
-	#endif
 #if 0 
 	void ConnectWifi();
 	void OnWifi(system_event_t* event);
@@ -195,9 +192,6 @@ public:
 	void Start();
 	void OnReceiveUdp(struct udp_pcb * upcb, struct pbuf * top, const ip_addr_t* addr, u16_t port);
 	void OnReceiveServer(void* payload, int len);
-#if !UDP_UART_ASYNC
-	void ExecCommandLoop();
-#endif
 	///	execute udp command
 	void ExecUdpCommand(UdpCmdPacket& recv);
 	///	send return packet correspond to UdpCmdPacket recv.

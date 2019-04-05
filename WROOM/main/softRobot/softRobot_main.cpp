@@ -30,7 +30,6 @@ extern "C" void softRobot_main()    //  called from app_main in main.cpp
 #ifndef _WIN32
 	esp_log_level_set("phy_init", ESP_LOG_INFO);
 #endif
-
     motorDriver.Init();
 #if 1   //  touchPads can not work with JTAG debugger
     touchPads.Init();
@@ -42,7 +41,6 @@ extern "C" void softRobot_main()    //  called from app_main in main.cpp
 #ifndef USE_DUKTAPE
     wifiMan();    //  Start wifi manager. 
 #endif
-
     udpCom.Init();    //  init command processing for udp.
     udpCom.Start();   //  start UDP server.
 #if 0
@@ -56,12 +54,12 @@ extern "C" void softRobot_main()    //  called from app_main in main.cpp
         xEventGroupWaitBits(wifi_manager_event_group, WIFI_MANAGER_STA_DISCONNECT_BIT, pdFALSE, pdFALSE, portMAX_DELAY);
     }
 #endif
-
+#ifdef USE_DUKTAPE
     if(!wsIsJsfileTaskRunning()) {
         wsCreateJsfileTask();
         logPrintf("Start running default jsfile task");
     }
-
+#endif
     //  monitor start
     monitor();
 }

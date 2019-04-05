@@ -385,6 +385,12 @@ namespace Robokey
                     {
                         int start = cur;
                         ReadHeader(ref length, ref recvCount, ref commandId, ref cur, receiveBytes);
+                        if (length+2 != receiveBytes.Length) {
+                            if (receiveBytes.Length < (length + 2) + 6) {   //  current packet(length+2) + next header(6)
+                                System.Diagnostics.Debug.WriteLine("Ct:" + recvCount + " Cmd:" + commandId + " received length:" + receiveBytes.Length + "  not match to the length in packet:" + (length+2));
+                            }
+                        }
+
                         //System.Diagnostics.Debug.WriteLine("Receive cmd=" + commandId + "  count=" + recvCount + "  len="+length);
                         if (log != null)
                         {
@@ -447,10 +453,10 @@ namespace Robokey
                                 }
                                 break;
                         }
-                        if (cur != start + length) {
+                        if (cur != start + length + 2) {
                             System.Diagnostics.Debug.WriteLine("Recv lengths not match !");
                         }
-                        cur = start + length;
+                        cur = start + length + 2;
                     }
                 }
                 if (uc.udp != null)
