@@ -169,10 +169,10 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
                     if(development_mode) {
                         ESP_LOGD(LOG_TAG, "switch to development mode, stop running jsfile task");
                         wsDeleteJsfileTask();
-                        wsCreateJsfileTask();
-                    }else{
+                    }else if(!wsIsJsfileTaskRunning()){
                         ESP_LOGD(LOG_TAG, "switch to jsfile mode, start running jsfile task");
                         wsDeleteJsfileTask();
+                        wsCreateJsfileTask();
                     }
                     break;
             
