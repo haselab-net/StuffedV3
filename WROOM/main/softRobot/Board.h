@@ -115,7 +115,7 @@ public:
 		case CI_SENSOR:
 			break;	//	nothing todo
 		default:
-			ESP_LOGE("Board::WriteCmd", "Command Id error %d",  command);
+			ESP_LOGE(Tag(), "WriteCmd(): Command Id error %d",  command);
 			assert(0);
 		}
 	}
@@ -141,24 +141,24 @@ public:
 				packet.SetMotorPos(ret.direct.pos[i], motorMap[i]);
 				packet.SetMotorVel(ret.direct.vel[i], motorMap[i]);
 			}
-			//ESP_LOGI("Board", "Direct Motor Pos: %d %d %d %d\n", packet.MotorPos(0),  packet.MotorPos(1), packet.MotorPos(2),  packet.MotorPos(3));
+			//ESP_LOGI(Tag(), "Direct Motor Pos: %d %d %d %d\n", packet.MotorPos(0),  packet.MotorPos(1), packet.MotorPos(2),  packet.MotorPos(3));
 			break;
 		case CI_CURRENT:
 			for (int i = 0; i < GetNMotor(); ++i) {
 				packet.SetMotorPos(ret.direct.pos[i], motorMap[i]);
 				packet.SetMotorVel(ret.direct.vel[i], motorMap[i]);
 			}
-			//ESP_LOGI("Board", "Direct Motor Pos: %d %d %d %d\n", packet.MotorPos(0),  packet.MotorPos(1), packet.MotorPos(2),  packet.MotorPos(3));
+			//ESP_LOGI(Tag(), "Direct Motor Pos: %d %d %d %d\n", packet.MotorPos(0),  packet.MotorPos(1), packet.MotorPos(2),  packet.MotorPos(3));
 			break;
 		case CI_INTERPOLATE:
 		case CI_FORCE_CONTROL:
 			for (int i = 0; i < GetNMotor(); ++i) {
 				packet.SetMotorPos(ret.interpolate.pos[i], motorMap[i]);
 			}
-			//ESP_LOGI("Board", "Motor Pos: %d %d %d %d\n", packet.MotorPos(0),  packet.MotorPos(1), packet.MotorPos(2),  packet.MotorPos(3));
+			//ESP_LOGI(Tag(), "Motor Pos: %d %d %d %d\n", packet.MotorPos(0),  packet.MotorPos(1), packet.MotorPos(2),  packet.MotorPos(3));
 			break;
 		case CI_SENSOR:
-			//ESP_LOGI("UART", "M0:%x", (int)ret.sensor.pos[0]);
+			//ESP_LOGI(Tag(), "M0:%x", (int)ret.sensor.pos[0]);
 			for (int i = 0; i < GetNMotor(); ++i) {
 				packet.SetMotorPos(ret.sensor.pos[i], motorMap[i]);
 			}
@@ -173,7 +173,7 @@ public:
 			}
 			break;
 		default:
-			ESP_LOGE("Board::ReadRet", "Command Id error %d", cmd);
+			ESP_LOGE(Tag(), "ReadRet(): Command Id error %d", cmd);
 			assert(0);
 		}
 	}

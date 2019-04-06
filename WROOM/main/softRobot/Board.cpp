@@ -1,5 +1,4 @@
 #include "Board.h"
-static const char* TAG = "Board";
 
 BoardFactoryBase* BoardFactories::Find(const char* name) {
 	for(iterator it = begin(); it != end(); ++it){
@@ -11,7 +10,7 @@ BoardFactoryBase* BoardFactories::Find(int modelNum){
 	for (iterator it = begin(); it != end(); ++it) {
 		if ((*it)->GetModelNumber() == modelNum) return &**it;
 	}
-	ESP_LOGE(TAG, "Can not create board for modelNum=%d.", modelNum);
+	ESP_LOGE(Tag(), "Can not create board for modelNum=%d.", modelNum);
 	return NULL;
 }
 

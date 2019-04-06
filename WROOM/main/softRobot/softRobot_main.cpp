@@ -20,7 +20,9 @@
 #include "../wifiMan/wifiMan.h"
 #endif
 
+#ifndef _WIN32
 #include "ws_task.h"
+#endif
 
 extern "C" void softRobot_main()    //  called from app_main in main.cpp 
 {        
@@ -43,17 +45,6 @@ extern "C" void softRobot_main()    //  called from app_main in main.cpp
 #endif
     udpCom.Init();    //  init command processing for udp.
     udpCom.Start();   //  start UDP server.
-#if 0
-    while(1){
-        xEventGroupWaitBits(wifi_manager_event_group,
-             WIFI_MANAGER_WIFI_CONNECTED_BIT, pdFALSE, pdFALSE, portMAX_DELAY);
-             // WIFI_MANAGER_AP_STA_CONNECTED_BIT
-        udpCom.Start();
-        ESP_LOGI("udpCom", "Wifi Connected udpCom Start.\n");
-        udpCom.Start();
-        xEventGroupWaitBits(wifi_manager_event_group, WIFI_MANAGER_STA_DISCONNECT_BIT, pdFALSE, pdFALSE, portMAX_DELAY);
-    }
-#endif
 #ifdef USE_DUKTAPE
     if(!wsIsJsfileTaskRunning()) {
         wsCreateJsfileTask();

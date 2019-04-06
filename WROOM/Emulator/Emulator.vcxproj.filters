@@ -201,12 +201,6 @@
     <ClCompile Include="..\main\softRobot\MotorDriver.cpp">
       <Filter>main\softRobot</Filter>
     </ClCompile>
-    <ClCompile Include="..\main\softRobot\RobotCommand.cpp">
-      <Filter>main\softRobot</Filter>
-    </ClCompile>
-    <ClCompile Include="..\main\softRobot\RobotState.cpp">
-      <Filter>main\softRobot</Filter>
-    </ClCompile>
     <ClCompile Include="..\main\softRobot\TouchSensing.cpp">
       <Filter>main\softRobot</Filter>
     </ClCompile>
@@ -276,12 +270,6 @@
       <Filter>main\softRobot</Filter>
     </ClInclude>
     <ClInclude Include="..\main\softRobot\MotorDriver.h">
-      <Filter>main\softRobot</Filter>
-    </ClInclude>
-    <ClInclude Include="..\main\softRobot\RobotCommand.h">
-      <Filter>main\softRobot</Filter>
-    </ClInclude>
-    <ClInclude Include="..\main\softRobot\RobotState.h">
       <Filter>main\softRobot</Filter>
     </ClInclude>
     <ClInclude Include="..\main\softRobot\TinyContainer.h">

@@ -55,9 +55,10 @@ void Monitor::AddCommand(MonitorCommandBase* c){
     commands.push_back(c);
 }
 void Monitor::ShowList(){
-    for(int i=0; i<(int)commands.size(); ++i){
+	conPrintf("Top level commands:\n");
+	for(int i=0; i<(int)commands.size(); ++i){
         MonitorCommandBase* mc = commands[i];
-        conPrintf("%s\n", mc->Desc());
+        conPrintf(" %s\n", mc->Desc());
     }
 }
 void Monitor::Run(){
@@ -232,34 +233,96 @@ class MCTargetUnderflow: public MonitorCommandBase{
     }
 } mcShowTargetUnderflow;
 
+inline char toLower(char c){
+    if ('A' <= c && c <= 'Z'){
+        c += 'a'-'A';
+    }
+    return c;
+}
+inline char toUpper(char c){
+    if ('a' <= c && c <= 'z'){
+        c += 'A'-'a';
+    }
+    return c;
+}
 
-struct DebugFlag{
-    bool* flag;
-    const char* msg;
-};
-static struct DebugFlag flags[] = {
-    {&UartForBoards::bDebug, "u UartForBoards"},
-};
-class MCDebugFlag: public MonitorCommandBase{
-    const char* Desc(){ return "d change debug flags"; }
-    void Func(){
-        while(1){
-            for(int i=0; i<sizeof(flags)/sizeof(flags[0]); ++i){
-                conPrintf ("%s = %s\n", flags[i].msg, *flags[i].flag ? "true" : "false");
+class MCLogLevel: public MonitorCommandBase{
+    struct Tag{
+        const char* tag;
+        const char* msg;
+        int logLevel;
+        Tag(const char* t, const char* m):tag(t), msg(m), logLevel(ESP_LOG_INFO){};
+    };
+    tiny::vector<Tag> tags;
+	tiny::vector<char> keys;
+public:
+    MCLogLevel(){
+        tags.push_back(Tag(AllBoards::Tag(), "AllBoards"));
+        tags.push_back(Tag(UartForBoards::Tag(), "UartForBoards"));
+        tags.push_back(Tag(BoardBase::Tag(), "Board"));
+        tags.push_back(Tag(BoardFactoryBase::Tag(), "BoardFactory"));
+        Init();
+    }
+    void Init(){
+        for(int i=0; i<tags.size(); ++i){
+            char key = toLower(tags[i].tag[0]);
+            for(int k=0; k<keys.size(); ++k){
+                if (key == keys[k]){
+                    if (toUpper(key) != key){
+                        key = toUpper(key);
+                        k = 0;
+                        continue;
+                    }else if (key < '~'){
+                        key ++;
+                        k = 0;
+                        continue;
+                    }else{
+                        key = '!';
+                        k = 0;
+                        continue;
+                    }
+                }
             }
+            keys.push_back(key);
+        }
+        assert(tags.size() == keys.size());
+    }
+    const char* Desc(){ return "l change log level"; }
+    void Func(){
+        const char levels [] = "NEWIDV";
+		conPrintf("Log level tags:\n");
+		for (int i = 0; i<tags.size(); ++i) {
+			conPrintf(" %c %s\t= %c (%s)\n", (int)keys[i], tags[i].tag, (int)levels[tags[i].logLevel], tags[i].msg);
+		}
+		while(1){
             int ch = getchWait();
-            int i=0;
-            for(; i<sizeof(flags)/sizeof(flags[0]); ++i){
-                if (flags[i].msg[0] == ch){
-                    *flags[i].flag = !*flags[i].flag;
+            int i;
+            for(i=0; i<tags.size(); ++i){
+                if (keys[i] == ch){
+					conPrintf("%c %s (%s) = ? choose from %s\n", (int)keys[i], tags[i].tag, tags[i].msg, levels);
+                    ch = getchWait();
+                    for(int l=0; l < sizeof(levels)/sizeof(levels[0]) - 1; ++l){
+                        if (toUpper(ch) == levels[l]){
+                            tags[i].logLevel = l;
+                            if (l > CONFIG_LOG_DEFAULT_LEVEL){
+                                conPrintf("Log level %d must be lower than CONFIG_LOG_DEFAULT_LEVEL %d.\n", l, CONFIG_LOG_DEFAULT_LEVEL);
+                            }
+#ifndef _WIN32
+                            esp_log_level_set(tags[i].tag, (esp_log_level_t)tags[i].logLevel);
+#endif
+							conPrintf("%c %s\t= %c (%s)\n", (int)keys[i], tags[i].tag, (int)levels[tags[i].logLevel], tags[i].msg);
+						}
+                    }
                     break;
                 }
             }
-            if (i == sizeof(flags)/sizeof(flags[0])) break;
+			if (i == tags.size()) {
+				conPrintf("Back to 'main menu' from 'log level'\n");
+				break;
+			}
         }
     }
-} mcDebugFlag;
-
+} mcLogLevel;
 
 void monitor(){
     Monitor::theMonitor.Run();    

@@ -28,8 +28,6 @@
 UdpCom udpCom;
 bool UdpCom::bDebug = false;
 
-static const char* Tag = "UdpCom";
-
 static const int NHEADER = UdpPacket::HEADERLEN/2;
 int UdpCmdPacket::CommandLen() {
 	switch (command)
@@ -91,7 +89,7 @@ void UdpRetPacket::SetLength() {
 	case CIU_GET_SUBBOARD_INFO:	//	uart id model nTarget nMotor nCurrent nForce
 		length = (NHEADER + 7) * 2 ; break;
 	default:				//	error
-		ESP_LOGE("UdpRetPacket", "Undefined command %d set lentgh to 0", command);
+		ESP_LOGE(Tag, "Undefined command %d set lentgh to 0", command);
 		length = 0;
 		break;
 	}
@@ -178,7 +176,7 @@ void UdpCom::Start(){
 
 void UdpCom::OnReceiveUdp(struct udp_pcb * upcb, struct pbuf * top, const ip_addr_t* addr, u16_t port) {
 	if (!recvs.WriteAvail()) {
-		ESP_LOGE("Tag", "Udp command receive buffer is full.");
+		ESP_LOGE(Tag, "Udp command receive buffer is full.");
 		pbuf_free(top);
 		return;
 	}
@@ -211,14 +209,14 @@ void UdpCom::OnReceiveUdp(struct udp_pcb * upcb, struct pbuf * top, const ip_add
 					|| (recv->command == CI_INTERPOLATE && recv->GetPeriod() == 0)
 					|| (recv->command == CI_FORCE_CONTROL && recv->GetPeriod() == 0) ){
 					/*if (recv->command == CI_INTERPOLATE){
-						ESP_LOGI("UdpCom", "CI_INT tcw:%d, peri=%d, ct=%d", recv->GetTargetCountWrite(), recv->GetPeriod(), recv->count);
+						ESP_LOGI(Tag, "CI_INT tcw:%d, peri=%d, ct=%d", recv->GetTargetCountWrite(), recv->GetPeriod(), recv->count);
 					}*/
 					recvs.Write();
 				}
 				else if (recv->count == (unsigned short)(commandCount + 1) ){		// check and update counter
 					commandCount++;
 					/*if (recv->command == CI_INTERPOLATE){
-						ESP_LOGI("UdpCom", "CI_INT tcw:%d, peri=%d, ct=%d", recv->GetTargetCountWrite(), recv->GetPeriod(), recv->count);
+						ESP_LOGI(Tag, "CI_INT tcw:%d, peri=%d, ct=%d", recv->GetTargetCountWrite(), recv->GetPeriod(), recv->count);
 					}*/
 					recvs.Write();
 					if (countDiffMax > 0) {
@@ -256,7 +254,7 @@ void UdpCom::OnReceiveUdp(struct udp_pcb * upcb, struct pbuf * top, const ip_add
 }
 void UdpCom::OnReceiveServer(void* payload, int len) {
 	if (!recvs.WriteAvail()) {
-		ESP_LOGE("UdpCom::OnReceiveServer", "Udp command receive buffer is full.");
+		ESP_LOGE(Tag, "OnReceiveServer(): Udp command receive buffer is full.");
 		return;
 	}
 	UdpCmdPacket* recv = &recvs.Poke();
@@ -281,10 +279,18 @@ void UdpCom::SendText(char* text, short errorlevel) {
 	memcpy(str, text, len);
 	struct pbuf* pb = pbuf_alloc(PBUF_TRANSPORT, send.length+2, PBUF_RAM);
     memcpy (pb->payload, send.bytes, send.length+2);
+#ifndef _WIN32
 	//	send to server
 	wsOnMessageSr(send.bytes+2, send.length);
+#endif
 	//	send to UDP
-	if (ownerIp.u_addr.ip4.addr != 0){
+#ifdef _WIN32
+	if (ownerIp.addr == 0) {
+#elif defined WROOM
+	if (ownerIp.u_addr.ip4.addr == 0) {
+#else
+#error
+#endif
 		udp_sendto(udp, pb, &ownerIp, port);
 	}
     pbuf_free(pb); //De-allocate packet buffer

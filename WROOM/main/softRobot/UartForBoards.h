@@ -14,7 +14,7 @@ class UartForBoards :public UTRefCount {
 	uart_port_t port;
 	AllBoards* allBoards;
 public:
-	static bool bDebug;
+	static const char* Tag(){ return "Uart"; };
 	struct Cur {
 		volatile int board;	//	boards[board]
 	};

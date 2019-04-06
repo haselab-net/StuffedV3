@@ -48,6 +48,7 @@ class UdpCmdPacket;
 class UdpRetPacket;
 class BoardBase:public UTRefCount{
 public:
+	static const char* Tag(){ return "Board"; };
 	const unsigned char * cmdPacketLen;
 	const unsigned char * retPacketLen;
 	tiny::vector<int> motorMap;
@@ -77,6 +78,7 @@ public:
 
 class BoardFactoryBase :public UTRefCount {
 public:
+	static const char* Tag() { return "BFac"; }
 	const unsigned char * cmdPacketLen;
 	const unsigned char * retPacketLen;
 	BoardFactoryBase(const unsigned char * c, const unsigned char * r) : cmdPacketLen(c), retPacketLen(r) {}
@@ -87,6 +89,7 @@ public:
 };
 class BoardFactories :public tiny::vector< UTRef<BoardFactoryBase> > {
 public:
+	static const char* Tag(){ return "BFac"; };
 	BoardFactories();
 	BoardFactoryBase* Find(const char* name);
 	BoardFactoryBase* Find(int modelNum);
@@ -95,6 +98,7 @@ public:
 class Boards :public tiny::vector< UTRef<BoardBase> > {	
 	static BoardFactories factories;
 public:
+	static const char* Tag(){ return BoardBase::Tag(); };
 	BoardBase* Create(const char* name, int boardId);
 	BoardBase* Create(int modelNum, int boardId);
 };

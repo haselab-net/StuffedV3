@@ -11,7 +11,6 @@
 
 static char zero[80];
 
-bool UartForBoards::bDebug = false;
 UartForBoards::UartForBoards(uart_port_t ch, AllBoards* u) : port(ch), allBoards(u){
 }
 void UartForBoards::Init(uart_config_t conf, int txPin, int rxPin){
@@ -22,7 +21,6 @@ void UartForBoards::Init(uart_config_t conf, int txPin, int rxPin){
 
 void UartForBoards::SendUart(){
 	int wait = 0;
-	const char* TAG = "SendUart";
 	for(cmdCur.board=0; cmdCur.board<(int)boards.size(); cmdCur.board++){
 		int retLen = boards[cmdCur.board]->RetLenForCommand();
 		wait = retLen - boards[cmdCur.board]->CmdLen() + 20;
@@ -30,9 +28,9 @@ void UartForBoards::SendUart(){
 		memset(boards[cmdCur.board]->CmdStart() + boards[cmdCur.board]->CmdLen(), 0, wait);
 		uart_write_bytes(port, (char*)boards[cmdCur.board]->CmdStart(),
 			(size_t)boards[cmdCur.board]->CmdLen()+wait);
-		if(bDebug) ESP_LOGI(TAG, "Send #%d CMD=%x L=%d to Board %d on UART%d \n", port, boards[cmdCur.board]->CmdStart()[0]>>3, boards[cmdCur.board]->CmdLen(), boards[cmdCur.board]->GetBoardId(), this->port);
+		ESP_LOGV(Tag(), "Send #%d CMD=%x L=%d to Board %d on UART%d \n", port, boards[cmdCur.board]->CmdStart()[0]>>3, boards[cmdCur.board]->CmdLen(), boards[cmdCur.board]->GetBoardId(), this->port);
 	}
-	if(bDebug) ESP_LOGI(TAG, "#%d  end\n", port);
+	ESP_LOGV(Tag(), "#%d  end\n", port);
 }
 void UartForBoards::RecvUart(){
 	const ulong READWAIT = 2000;	//[ticks(=ms)]
@@ -49,17 +47,17 @@ void UartForBoards::RecvUart(){
 						break;
 					}
 				}
-				ESP_LOGE("UartForBoards::RecvTask", "#%d ReadLen %d != RetLen %d, H%2x C%2x pos%d", port, readLen, retLen,
+				ESP_LOGE(Tag(), "RecvTask(): #%d ReadLen %d != RetLen %d, H%2x C%2x pos%d", port, readLen, retLen,
 						(int)boards[retCur.board]->RetStart()[0], (int)boards[retCur.board]->CmdStart()[0], i);
 				vTaskDelay(2000);
 				uart_flush_input(port);
 			}else{
 				if (boards[retCur.board]->RetStart()[0] != boards[retCur.board]->CmdStart()[0]){
-					ESP_LOGW("RecvTask", "Recv #%d H:%x L:%d for Cmd H:%x", port, (int)boards[retCur.board]->RetStart()[0], 
+					ESP_LOGW(Tag(), "Recv #%d H:%x L:%d for Cmd H:%x", port, (int)boards[retCur.board]->RetStart()[0], 
 						boards[retCur.board]->RetLen(), (int)boards[retCur.board]->CmdStart()[0]);
 				}
 			}
-			if(bDebug) ESP_LOGI("RecvTask", "Recv #%d H:%x L:%d", port, (int)boards[retCur.board]->RetStart()[0], boards[retCur.board]->RetLen());
+			ESP_LOGV(Tag(), "Recv #%d H:%x L:%d", port, (int)boards[retCur.board]->RetStart()[0], boards[retCur.board]->RetLen());
 		}
 	}
 	//	check if the buffer is empty
@@ -78,88 +76,9 @@ void UartForBoards::RecvUart(){
 		for(i=0; i<(int)boards.size(); ++i){
 			if (boards[i]->RetLenForCommand() > 0) break;
 		}
-		ESP_LOGE("RecvTask", "Uart #%d %d bytes remains. cmd %x ret %x  remain:%s", port, remain, boards[i]->CmdStart()[0], boards[i]->RetStart()[0], str);
+		ESP_LOGE(Tag(), "Uart #%d %d bytes remains. cmd %x ret %x  remain:%s", port, remain, boards[i]->CmdStart()[0], boards[i]->RetStart()[0], str);
 	}
 }
-
-#if 0
-void UartForBoards::SendTask(){
-	while(1){
-		ulTaskNotifyTake(pdFALSE, portMAX_DELAY);	//	given by WriteCmd()
-		if(bDebug) ESP_LOGI("SendTask", "#%d start\n", port);
-		int wait = 0;
-		bool bRet = false;
-		for(cmdCur.board=0; cmdCur.board<boards.size(); cmdCur.board++){
-			int retLen = boards[cmdCur.board]->RetLenForCommand();
-			if (retLen) bRet = true;
-			wait = retLen - boards[cmdCur.board]->CmdLen() + 20;
-			if (wait < 5) wait = 5;
-			assert(wait < CMDWAITMAXLEN);
-			memset(boards[cmdCur.board]->CmdStart() + boards[cmdCur.board]->CmdLen(), 0, wait);
-			uart_write_bytes(port, (char*)boards[cmdCur.board]->CmdStart(),
-				(size_t)boards[cmdCur.board]->CmdLen()+wait);
-			if(bDebug) ESP_LOGI("SendTask", "Send #%d CMD=%x L=%d to Board %d on UART%d \n", port, boards[cmdCur.board]->CmdStart()[0]>>3, boards[cmdCur.board]->CmdLen(), boards[cmdCur.board]->GetBoardId(), this->port);
-		}
-		if (!bRet){
-			xSemaphoreGive(allBoards->seUartFinished);
-		}
-		xTaskNotifyGive(taskRecv);					//	start to receive.
-		if(bDebug) ESP_LOGI("SendTask", "#%d  end\n", port);
-	}
-}
-void UartForBoards::RecvTask(){
-	const ulong READWAIT = 2000;	//[ticks(=ms)]
-	while(1){
-		ulTaskNotifyTake(pdFALSE, portMAX_DELAY);	//	Start to receive
-		for (retCur.board=0; retCur.board < boards.size(); retCur.board++) {
-			int retLen = boards[retCur.board]->RetLenForCommand();
-			if (retLen){
-				//	receive the header byte
-				int readLen = uart_read_bytes(port, (uint8_t*)(boards[retCur.board]->RetStart()), retLen, READWAIT);
-				if (readLen != retLen){
-					//	timeout
-					int i;
-					for(i=0; i<readLen; ++i){
-						if (boards[retCur.board]->RetStart()[i] == boards[retCur.board]->CmdStart()[0]){
-							break;
-						}
-					}
-					ESP_LOGE("UartForBoards::RecvTask", "#%d ReadLen %d != RetLen %d, H%2x C%2x pos%d", port, readLen, retLen,
-						 (int)boards[retCur.board]->RetStart()[0], (int)boards[retCur.board]->CmdStart()[0], i);
-					ets_delay_us(2000);
-					uart_flush_input(port);
-				}else{
-					if (boards[retCur.board]->RetStart()[0] != boards[retCur.board]->CmdStart()[0]){
-						ESP_LOGW("RecvTask", "Recv #%d H:%x L:%d for Cmd H:%x", port, (int)boards[retCur.board]->RetStart()[0], 
-							boards[retCur.board]->RetLen(), (int)boards[retCur.board]->CmdStart()[0]);
-					}
-				}
-				if(bDebug) ESP_LOGI("RecvTask", "Recv #%d H:%x L:%d", port, (int)boards[retCur.board]->RetStart()[0], boards[retCur.board]->RetLen());
-			}
-		}
-		//	check if the buffer is empty
-		size_t remain;
-		uart_get_buffered_data_len(port, &remain);
-		if (remain){
-			uint8_t buf[256];
-			uart_read_bytes(port, buf, remain, 0);
-			char str[1024];
-			char* ptr = str;
-			for(int i=0; i<remain; ++i){
-				slogPrintf(ptr, " %02x", buf[i]);
-				ptr += strlen(ptr);
-			}
-			int i;
-			for(i=0; i<boards.size(); ++i){
-				if (boards[i]->RetLenForCommand() > 0) break;
-			}
-			ESP_LOGE("RecvTask", "Uart #%d %d bytes remains. cmd %x ret %x  remain:%s", port, remain, boards[i]->CmdStart()[0], boards[i]->RetStart()[0], str);
-		}
-		xSemaphoreGive(allBoards->seUartFinished);		//	To finish WriteCmd()
-		//ulTaskNotifyTake(pdFALSE, portMAX_DELAY);	//	Given by ReadRet().
-	}
-}
-#endif
 
 void UartForBoards::EnumerateBoard() {
 	boards.clear();

@@ -23,14 +23,6 @@
 #error
 #endif
 
-RobotState::RobotState(){
-	nTargetMin = 0;
-	mode = CM_DIRECT;
-}
-RobotCommand::RobotCommand(){
-	mode = CM_SKIP;
-}
-
 
 AllBoards allBoards;
 UartForBoards uart1(UART_NUM_1, &allBoards);
@@ -48,18 +40,17 @@ static void execLoop(void* arg){
 	((AllBoards*)arg)->ExecLoop();
 }
 void AllBoards::ExecLoop(){
-	bool& bDebug = UartForBoards::bDebug;
 	while (1){
 		UdpCmdPacket* recv = &udpCom.recvs.Peek();
-		if (bDebug) ESP_LOGI("AllBoards::ExecLoop", "command %d received.", recv->command);
+		ESP_LOGV(Tag(), "ExecLoop(): command %d received.", recv->command);
 		if (CI_BOARD_INFO < recv->command && recv->command < CI_NCOMMAND) {
 			//	send packet to allBoards
-			if (bDebug) ESP_LOGI("AllBoards::ExecLoop", "write cmd %d.", recv->command);
+			ESP_LOGV(Tag(), "ExecLoop(): write cmd %d.", recv->command);
 			WriteCmd(recv->command, *recv);
 			udpCom.PrepareRetPacket(*recv);
 			if (HasRet(recv->command)){
 				ReadRet(recv->command, udpCom.send);
-				if (bDebug) ESP_LOGI("AllBoards::ExecLoop", "read ret %d.", recv->command);
+				ESP_LOGV(Tag(), "ExecLoop() read ret %d.", recv->command);
 			}
 			udpCom.SendReturn(*recv);
 		}
@@ -135,7 +126,7 @@ bool AllBoards::HasRet(unsigned short id){
 }
 
 void AllBoards::WriteCmd(unsigned short commandId, BoardCmdBase& packet) {
-	if (UartForBoards::bDebug) ESP_LOGI("AllBorads::WriteCmd", "cmd=%d\r\n", commandId);
+	ESP_LOGV(Tag(), "WriteCmd() cmd=%d\r\n", commandId);
 	//	Copy UDP command to the command buffers of each borad;
 	boardDirect->WriteCmd(commandId, packet);
 	for (int i = 0; i < NUART; ++i) {
@@ -180,11 +171,7 @@ void AllBoards::ReadRet(unsigned short commandId, BoardRetBase& packet){
 		packet.SetTargetCountReadMax(tcrMax);
 		packet.SetTickMin(tickMin);
 		packet.SetTickMax(tickMax);
-		/*		
-		if (&packet == &state){
-			ESP_LOGI("ReadRet", "Cor:%d--%d, tcw:%d", (int)tcrMin, (int) tcrMax, state.targetCountWrite);
-		}
-		*/
+		ESP_LOGV(Tag(), "ReadRet(): Cor:%d--%d", (int)tcrMin, (int) tcrMax);
 	}else{
 		boardDirect->ReadRet(commandId, packet);
 		for (int i = 0; i < NUART; ++i) {

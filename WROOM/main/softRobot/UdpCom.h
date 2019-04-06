@@ -44,6 +44,7 @@ public:
 };
 class UdpCmdPacket: public UdpPacket, public BoardCmdBase{
 public:
+	const char* Tag = "CmdPkt";
 	ip_addr_t returnIp;	///<	IP address to send return packet, 0.0.0.0 means return to web server (duktape)
 	int CommandLen();	///<	length of packet in bytes
 	short GetControlMode(){
@@ -107,6 +108,7 @@ public:
 };
 class UdpRetPacket:public UdpPacket, public BoardRetBase{
 public:
+	const char* Tag = "RetPkt";
 	//	Set length of the packet based on command.
 	void SetLength();
 	void ClearData();
@@ -171,6 +173,7 @@ public:
 
 class UdpCom {
 public:
+	const char* Tag = "UdpCom";
 	static bool bDebug;
 
 	const int port = 9090;

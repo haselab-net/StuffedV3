@@ -6,8 +6,6 @@
 #include "TinyContainer.h"
 #include "../WroomEnv.h"
 #include "BoardBase.h"
-#include "RobotState.h"
-#include "RobotCommand.h"
 
 class DeviceMap {
 public:
@@ -26,8 +24,7 @@ class UdpRetPacket;
 //
 class AllBoards{
 public:
-//	RobotState state;
-//	RobotCommand command;
+	static const char* Tag(){ return "AllB"; };
 	int nBoard;
 	int nTargetMin;
 	static const int NUART = 2;
