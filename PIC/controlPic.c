@@ -109,22 +109,24 @@ AN      2 3    5     10
 
 
 //  PWM by SPI
-unsigned long spiPwm[2];
+extern unsigned long spiPwmWord1;
+extern unsigned long spiPwmWord2;
+
 inline void setSpiPwm(SDEC ratio){
 	int pwm, pwm0;
 	//	64bit = 0x40bit
 	pwm = ratio * 0x40 >> SDEC_BITS;
 	if (pwm < 2){
-		spiPwm[0] = 0;
-		if (pwm) spiPwm[1] = 1;
-		else spiPwm[1] = 0;
+		spiPwmWord1 = 0;
+		if (pwm) spiPwmWord2 = 1;
+		else spiPwmWord2 = 0;
 	}else{
 		pwm = 0x40 - pwm;
 		if (pwm < 0) pwm = 0;
 		pwm0 = pwm/2;
 		pwm = pwm - pwm0;
-		spiPwm[0] = 0xFFFFFFFF << pwm0;
-		spiPwm[1] = 0xFFFFFFFF << pwm;
+		spiPwmWord1 = 0xFFFFFFFF << pwm0;
+		spiPwmWord2 = 0xFFFFFFFF << pwm;
 	}
 }
 
@@ -274,16 +276,27 @@ void setPwm(int ch, SDEC ratio){
 #error
 #endif
 
+#if 0
+
+unsigned long spiPwmWord1;
+unsigned long spiPwmWord2;
+
 void __attribute__ ((vector(_SPI2_TX_VECTOR), interrupt(IPL6AUTO))) spiEmpty(void)
 {
-	SPI2BUF = spiPwm[0];
-	SPI2BUF = spiPwm[1];
-	SPI2BUF = spiPwm[0];
-	SPI2BUF = spiPwm[1];
+	SPI2BUF = spiPwmWord1;
+	SPI2BUF = spiPwmWord2;
+	SPI2BUF = spiPwmWord1;
+	SPI2BUF = spiPwmWord2;
 	IFS1CLR= 1 << _IFS1_SPI2TXIF_POSITION;
  }
+#endif
+
+
+extern unsigned int addrSPI2BUF;
+
 void controlInitPic(){
     int i;
+    addrSPI2BUF = (unsigned int)&SPI2BUF;
 	//	disable interrupt
 	IEC1bits.SPI2EIE = IEC1bits.SPI2RXIE = IEC1bits.SPI2TXIE = 0;
 	i = SPI2BUF;	//	clear receive buf;
@@ -296,7 +309,7 @@ void controlInitPic(){
     SPI2CON = 0;
     SPI2CON2 = 0;
 	SPI2STAT = 0;
-    SPI2BRG = 0x00000077;
+    SPI2BRG = 0x00000010;
 	SPI2CONbits.MODE32 = 1;
 	SPI2CONbits.ENHBUF = 1;
 	SPI2CONbits.MSTEN = 1;
