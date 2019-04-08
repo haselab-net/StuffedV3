@@ -1,4 +1,7 @@
 #pragma once
+
+#include "TinyContainer.h"
+
 class MonitorCommandBase{
 public:
     MonitorCommandBase();
