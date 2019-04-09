@@ -44,7 +44,7 @@ extern "C" void app_main(){
 #ifdef USE_DUKTAPE
     if(!wsIsJsfileTaskRunning()) {
         wsCreateJsfileTask();
-        EP_LOGI(TAG, "Start running default jsfile task");
+        ESP_LOGI(TAG, "Start running default jsfile task.");
     }
 	ESP_LOGI(TAG, "after running default jsfile task size: %d \n", esp_get_free_heap_size());
 #endif
