@@ -85,6 +85,7 @@ static duk_ret_t commandMessageHandler(duk_context* ctx) {
             // get parameter
             duk_push_object(ctx);
 
+            // put prop pose
             duk_push_array(ctx);
             for(size_t i=0; i<nMotor; i++){
                 duk_push_int(ctx, *(++i16p));
