@@ -11,7 +11,10 @@
 #include "nvs_flash.h"
 #include "rom/uart.h"
 #include "monitor.h"
+#include "ws_task.h"
 #endif
+
+static const char* TAG="main";
 
 extern "C" void softRobot_main();
 #ifdef USE_DUKTAPE
@@ -32,18 +35,26 @@ extern "C" void app_main(){
     printf("silicon revision %d, ", chip_info.revision);
     printf("%dMB %s flash\n", spi_flash_get_chip_size() / (1024 * 1024),
             (chip_info.features & CHIP_FEATURE_EMB_FLASH) ? "embedded" : "external");
-	printf("before ws_main heap size: %d \n", esp_get_free_heap_size());
 	esp_log_level_set("*", ESP_LOG_INFO);
+	ESP_LOGI(TAG, "Initial heap size: %d \n", esp_get_free_heap_size());
 #endif 
 
-softRobot_main();
+    softRobot_main();
+	ESP_LOGI(TAG, "after softRobot_main heap size: %d \n", esp_get_free_heap_size());
+#ifdef USE_DUKTAPE
+    if(!wsIsJsfileTaskRunning()) {
+        wsCreateJsfileTask();
+        EP_LOGI(TAG, "Start running default jsfile task");
+    }
+	ESP_LOGI(TAG, "after running default jsfile task size: %d \n", esp_get_free_heap_size());
+#endif
 
 #ifdef USE_DUKTAPE
 	//duktape_main();
     ws_main();
 
 #ifndef _WIN32
-	printf("after ws_main heap size: %d \n", esp_get_free_heap_size());
+	ESP_LOGI(TAG, "after ws_main heap size: %d \n", esp_get_free_heap_size());
 #endif
 #endif
 

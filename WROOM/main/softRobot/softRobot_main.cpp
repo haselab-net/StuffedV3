@@ -20,9 +20,6 @@
 #include "../wifiMan/wifiMan.h"
 #endif
 
-#ifndef _WIN32
-#include "ws_task.h"
-#endif
 
 extern "C" void softRobot_main()    //  called from app_main in main.cpp 
 {        
@@ -45,10 +42,4 @@ extern "C" void softRobot_main()    //  called from app_main in main.cpp
 #endif
     udpCom.Init();    //  init command processing for udp.
     udpCom.Start();   //  start UDP server.
-#ifdef USE_DUKTAPE
-    if(!wsIsJsfileTaskRunning()) {
-        wsCreateJsfileTask();
-        logPrintf("Start running default jsfile task");
-    }
-#endif
 }
