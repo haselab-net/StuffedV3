@@ -3,6 +3,6 @@
 
 #include <duktape.h>
 
-duk_ret_t ModuleCommand(duk_context *ctx);
+duk_ret_t ModuleSRCommand(duk_context *ctx);
 
 #endif /* MAIN_INCLUDE_MODULE_SRCOMMAND_H_ */

@@ -246,15 +246,27 @@ void UdpCom::OnReceiveUdp(struct udp_pcb * upcb, struct pbuf * top, const ip_add
 	}
 	pbuf_free(top);
 }
-void UdpCom::OnReceiveServer(void* payload, int len) {
+UdpCmdPacket* UdpCom::PrepareCommand(CommandId cid) {
 	if (!recvs.WriteAvail()) {
-		ESP_LOGE(Tag(), "OnReceiveServer(): Udp command receive buffer is full.");
-		return;
+		ESP_LOGE(Tag(), "PrepareCommand(): Udp command receive buffer is full.");
+		return NULL;
 	}
+	UdpCmdPacket* r = &recvs.Poke();
+	r->command = cid;
+	r->length = r->CommandLen();
+	return r;
+}
+void UdpCom::WriteCommand() {
 	UdpCmdPacket* recv = &recvs.Poke();
-	memcpy(recv->bytes + 2, payload, len);
 	recv->count = commandCount;
 	recvs.Write();
+}
+
+void UdpCom::OnReceiveServer(void* payload, int len) {
+	UdpCmdPacket* recv = PrepareCommand();
+	if (!recv) return;
+	memcpy(recv->bytes + 2, payload, len);
+	WriteCommand();
 }
 extern "C" void UdpCom_OnReceiveServer(void* payload, int len){
 	udpCom.OnReceiveServer(payload, len);

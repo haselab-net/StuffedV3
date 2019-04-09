@@ -79,7 +79,8 @@
         "tuple": "cpp",
         "typeinfo": "cpp",
         "duktape_jsfile.h": "c",
-        "udpcom.h": "c"
+        "udpcom.h": "c",
+        "module_srcommand.h": "c"
     },
     "terminal.integrated.shell.windows": "c:\\msys32\\usr\\bin\\bash.exe",
     "terminal.integrated.env.windows": {

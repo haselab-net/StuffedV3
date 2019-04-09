@@ -3,14 +3,10 @@
 #ifndef __cplusplus
 
 void UdpCom_OnReceiveServer(void* payload, int len);
-void UdpCom_Lock();
-void UdpCom_Unlock();
 
 #else
 
 extern "C" void UdpCom_OnReceiveServer(void* payload, int len);
-extern "C" void UdpCom_Lock();
-extern "C" void UdpCom_Unlock();
 
 #include "ArrayRing.h"
 #include "esp_event_loop.h"
@@ -186,6 +182,9 @@ public:
 #endif
 	void Init();
 	void Start();
+	UdpCmdPacket* PrepareCommand(CommandId cid);
+	void WriteCommand();
+
 	void OnReceiveUdp(struct udp_pcb * upcb, struct pbuf * top, const ip_addr_t* addr, u16_t port);
 	void OnReceiveServer(void* payload, int len);
 	///	execute udp command
