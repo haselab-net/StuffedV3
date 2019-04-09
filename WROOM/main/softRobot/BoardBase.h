@@ -2,7 +2,7 @@
 
 #include "CommandWROOM.h"
 #include "UTRef.h"
-#include "TinyContainer.h"
+#include <vector>
 extern "C"{
 #include "../../../PIC/fixed.h"
 #include "../../../PIC/Control.h"
@@ -51,10 +51,10 @@ public:
 	static const char* Tag(){ return "Board"; };
 	const unsigned char * cmdPacketLen;
 	const unsigned char * retPacketLen;
-	tiny::vector<int> motorMap;
-	tiny::vector<int> currentMap;
-	tiny::vector<int> forceMap;
-	tiny::vector<int> touchMap;
+	std::vector<int> motorMap;
+	std::vector<int> currentMap;
+	std::vector<int> forceMap;
+	std::vector<int> touchMap;
 	virtual ~BoardBase(){}
 	virtual const char* GetName() = 0;
 	virtual int GetModelNumber() = 0;
@@ -87,7 +87,7 @@ public:
 	virtual int GetModelNumber() = 0;
 	virtual BoardBase* Create(int id) = 0;
 };
-class BoardFactories :public tiny::vector< UTRef<BoardFactoryBase> > {
+class BoardFactories :public std::vector< UTRef<BoardFactoryBase> > {
 public:
 	static const char* Tag(){ return "BFac"; };
 	BoardFactories();
@@ -95,7 +95,7 @@ public:
 	BoardFactoryBase* Find(int modelNum);
 };
 
-class Boards :public tiny::vector< UTRef<BoardBase> > {	
+class Boards :public std::vector< UTRef<BoardBase> > {	
 	static BoardFactories factories;
 public:
 	static const char* Tag(){ return BoardBase::Tag(); };

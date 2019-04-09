@@ -80,7 +80,7 @@ void AllBoards::Init() {
 	xTaskCreate(execLoop, "ExecLoop", 8 * 1024, this, tskIDLE_PRIORITY, &taskExec);
 }
 void AllBoards::EnumerateBoard() {
-	motorMap.clear();
+	motorMap.clear();	
 	currentMap.clear();
 	forceMap.clear();
 	touchMap.clear();
@@ -100,7 +100,6 @@ void AllBoards::EnumerateBoard() {
 		boardDirect->touchMap.push_back((int)allBoards.touchMap.size());
 		allBoards.touchMap.push_back(DeviceMap(-1, m));
 	}
-
 	for (int i = 0; i < NUART; ++i) {
 		uart[i]->EnumerateBoard();
 	}

@@ -1,4 +1,5 @@
 #include "Board.h"
+#include <string.h>
 
 BoardFactoryBase* BoardFactories::Find(const char* name) {
 	for(iterator it = begin(); it != end(); ++it){
@@ -34,6 +35,7 @@ BoardBase* Boards::Create(int modelNum, int boardId) {
 
 BoardFactories::BoardFactories() {
 #ifndef _WIN32
+	reserve(6);
 	push_back(new BOARD_FACTORY(B1M));
 	push_back(new BOARD_FACTORY(B1F));
 	push_back(new BOARD_FACTORY(B2M));

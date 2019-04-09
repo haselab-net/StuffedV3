@@ -1,14 +1,14 @@
 #pragma once
+#include <vector>
 #include "../../../PIC/env.h"
 #include "driver/touch_pad.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "TinyContainer.h"
 
 class TouchPads
 {
   private:
-    tiny::vector<touch_pad_t> pads;
+    std::vector<touch_pad_t> pads;
     int Add(touch_pad_t pad);
   public:
     void Init();

@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/event_groups.h"
@@ -253,12 +254,13 @@ class MCLogLevel: public MonitorCommandBase{
         int logLevel;
         Tag(const char* t, const char* m):tag(t), msg(m), logLevel(ESP_LOG_INFO){};
     };
-    tiny::vector<Tag> tags;
-	tiny::vector<char> keys;
+    std::vector<Tag> tags;
+	std::vector<char> keys;
 public:
     MCLogLevel(){
         tags.push_back(Tag(AllBoards::Tag(), "AllBoards"));
         tags.push_back(Tag(UartForBoards::Tag(), "UartForBoards"));
+        tags.push_back(Tag(UdpCom::Tag(), "UdpCom"));
         tags.push_back(Tag(BoardBase::Tag(), "Board"));
         tags.push_back(Tag(BoardFactoryBase::Tag(), "BoardFactory"));
         Init();

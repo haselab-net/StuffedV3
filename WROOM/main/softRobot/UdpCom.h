@@ -28,6 +28,7 @@ extern "C" void UdpCom_Unlock();
 */
 class UdpPacket {
 public:
+	static const char* Tag(){ return "UdpCom"; }
 	enum {
 		HEADERLEN = 4,		//	does not include count. 
 		MAXLEN = 512		//	hole packet size include count must equal or smaller than MAXLEN.
@@ -44,7 +45,6 @@ public:
 };
 class UdpCmdPacket: public UdpPacket, public BoardCmdBase{
 public:
-	const char* Tag = "CmdPkt";
 	ip_addr_t returnIp;	///<	IP address to send return packet, 0.0.0.0 means return to web server (duktape)
 	int CommandLen();	///<	length of packet in bytes
 	short GetControlMode(){
@@ -108,7 +108,6 @@ public:
 };
 class UdpRetPacket:public UdpPacket, public BoardRetBase{
 public:
-	const char* Tag = "RetPkt";
 	//	Set length of the packet based on command.
 	void SetLength();
 	void ClearData();
@@ -173,20 +172,14 @@ public:
 
 class UdpCom {
 public:
-	const char* Tag = "UdpCom";
-	static bool bDebug;
-
+	static const char* Tag() { return UdpPacket::Tag(); }
 	const int port = 9090;
 	struct udp_pcb* udp;
 	ip_addr_t ownerIp;
 
 	UdpCmdPackets recvs;
 	unsigned short commandCount;
-	int recvRest;
 	UdpRetPacket send;
-	struct pbuf* sendStart;	//	The first udp buffer to send.
-	struct pbuf* sendLast;	//	The last udp buffer to send.
-	int sendLen;			//	total bytes of send buffers.
 #if 0 
 	void ConnectWifi();
 	void OnWifi(system_event_t* event);

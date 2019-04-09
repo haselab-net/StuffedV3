@@ -8,6 +8,7 @@
 #include "MotorDriver.h"
 #include "../../../PIC/boardType.h"
 #include "../../../PIC/env.h"
+#include <string.h>
 
 static char zero[80];
 

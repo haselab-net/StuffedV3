@@ -1,9 +1,9 @@
 #pragma once
+#include <vector>
 #include "lwip/opt.h"
 #include "lwip/tcpip.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "TinyContainer.h"
 #include "../WroomEnv.h"
 #include "BoardBase.h"
 
@@ -28,10 +28,10 @@ public:
 	int nBoard;
 	int nTargetMin;
 	static const int NUART = 2;
-	tiny::vector<DeviceMap> motorMap;
-	tiny::vector<DeviceMap> currentMap;
-	tiny::vector<DeviceMap> forceMap;
-	tiny::vector<DeviceMap> touchMap;
+	std::vector<DeviceMap> motorMap;
+	std::vector<DeviceMap> currentMap;
+	std::vector<DeviceMap> forceMap;
+	std::vector<DeviceMap> touchMap;
 	UartForBoards* uart[NUART];
 	BoardDirect* boardDirect;
 	xTaskHandle taskExec;
