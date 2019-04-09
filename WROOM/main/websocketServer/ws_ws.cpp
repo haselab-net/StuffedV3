@@ -122,7 +122,7 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
 
     pWebSocketInputStreambuf->discard();
 
-    ESP_LOGD(LOG_TAG, "Received a packet from websocket: ");
+    printf("+ WS packet");
     printPacket((const void*)pBuffer, ssize);
 
     switch (packetId)
@@ -195,7 +195,7 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
  * send command to browser and jsfile task
  */
 void wsOnMessageSr(void* buffer, size_t buffer_size) {
-    ESP_LOGD(LOG_TAG, "Received a packet from softrobot: ");
+    printf("+ SR Packet");
     printPacketCommand(buffer, buffer_size);
     
     // send packet to browser

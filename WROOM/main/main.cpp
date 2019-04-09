@@ -11,6 +11,7 @@
 #include "nvs_flash.h"
 #include "rom/uart.h"
 #include "monitor.h"
+#include "ws_task.h"
 #endif
 
 extern "C" void softRobot_main();
@@ -40,7 +41,13 @@ softRobot_main();
 
 #ifdef USE_DUKTAPE
 	//duktape_main();
+    esp_log_level_set("*", ESP_LOG_DEBUG);
     ws_main();
+
+    if(!wsIsJsfileTaskRunning()) {
+        wsCreateJsfileTask();
+        logPrintf("Start running default jsfile task");
+    }
 
 #ifndef _WIN32
 	printf("after ws_main heap size: %d \n", esp_get_free_heap_size());
