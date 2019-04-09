@@ -67,6 +67,7 @@
       <itemPath>controlPic.c</itemPath>
       <itemPath>commandUart.c</itemPath>
       <itemPath>nvm.c</itemPath>
+      <itemPath>spiPwm.s</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -649,6 +650,8 @@
                   value=""/>
         <property key="warningmessagebreakoptions.warningmessages" value="holdstate"/>
       </Simulator>
+      <item path="spiPwm.s" ex="true" overriding="false">
+      </item>
     </conf>
     <conf name="DIP" type="2">
       <toolsSet>
@@ -1262,7 +1265,7 @@
         </archiverTool>
         <loading>
           <useAlternateLoadableFile>false</useAlternateLoadableFile>
-          <parseOnProdLoad>false</parseOnProdLoad>
+          <parseOnProdLoad>true</parseOnProdLoad>
           <alternateLoadableFile></alternateLoadableFile>
         </loading>
         <subordinates>

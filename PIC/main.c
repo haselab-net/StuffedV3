@@ -41,7 +41,6 @@ void monitor();
                          Main application
  */
 extern int timerRestTime;
-
 int main(void)
 {    
     int i = 0;

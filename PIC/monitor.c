@@ -188,6 +188,10 @@ void disableRx(){
     U1STASET = _U1STA_URXEN_MASK;   //  Enable RX
     U1MODESET = _U1MODE_ON_MASK;	//  Enable UART ON bit
 }
+extern unsigned long spiPwmGpBackup;
+void printGp(){
+    printf("spiPwmGpBackup = %x.\r\n", spiPwmGpBackup);
+}
 struct MonitorFunc monitors[] = {
 	{'a', "Show all A/D value", showAD, true},
 	{'A', "Show A/D value in motor order", showADInMotorOrder, true},
@@ -201,6 +205,7 @@ struct MonitorFunc monitors[] = {
 	{'m', "Select motor", selectMotor, false},
 	{'P', "Pwm up", pwmUp, false},
 	{'p', "Pwm down", pwmDown, false},
+	{'g', "Print GP", printGp, true},
 	{'E', "End monitor", disableRx, false},
 };
 void showHelp(){
