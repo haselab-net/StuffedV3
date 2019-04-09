@@ -44,6 +44,7 @@
 #include "module_softrobot.h"
 #include "module_jsfile.h"
 #include "module_jslib.h"
+#include "module_srcommand.h"
 LOG_TAG("modules");
 
 /**
@@ -112,6 +113,7 @@ functionTableEntry_t functionTable[] = {
 	//{ "ModuleSoftrobot",  ModuleSoftrobot,	1},			// register softrobot module
 	//{ "ModuleJSFile",	  ModuleJSFile,		1},			// register jsfile module
 	{ "ModuleJSLib",	  ModuleJSLib,		1},			// register jslib module
+	{ "ModuleSRCommand",  ModuleSRCommand,	1},			// register srcommand module
 #endif // ESP_PLATFORM
 	// Must be last entry
 	{NULL, NULL, 0 } // *** DO NOT DELETE *** - MUST BE LAST ENTRY.
