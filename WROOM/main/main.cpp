@@ -10,6 +10,7 @@
 #include "esp_log.h"
 #include "nvs_flash.h"
 #include "rom/uart.h"
+#include "monitor.h"
 #endif
 
 extern "C" void softRobot_main();
@@ -35,6 +36,8 @@ extern "C" void app_main(){
 	esp_log_level_set("*", ESP_LOG_INFO);
 #endif 
 
+softRobot_main();
+
 #ifdef USE_DUKTAPE
 	//duktape_main();
     ws_main();
@@ -43,5 +46,7 @@ extern "C" void app_main(){
 	printf("after ws_main heap size: %d \n", esp_get_free_heap_size());
 #endif
 #endif
-	softRobot_main();
+
+    //  monitor start
+    monitor();
 }

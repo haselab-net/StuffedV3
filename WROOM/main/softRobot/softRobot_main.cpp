@@ -51,6 +51,4 @@ extern "C" void softRobot_main()    //  called from app_main in main.cpp
         logPrintf("Start running default jsfile task");
     }
 #endif
-    //  monitor start
-    monitor();
 }
