@@ -75,7 +75,15 @@ static duk_ret_t commandMessageHandler(duk_context* ctx) {
     int16_t* i16p = (int16_t*)p;
     switch (i16p[0])
     {
+        case CI_BOARD_INFO:
+            // function onReceiveCIBoardinfo(data: {systemId: number, nTarget: number, nMotor:number, nCurrent: number, nForces:number, nTouch: number, macAddress: ArrayBuffer});
+            break;
+        case CI_SENSOR:
+            // function onReceiveCISensor(data: {pose: number[], current: number[], force: number[]});
+            break;
         case CI_DIRECT:
+            // function onReceiveCIDirect(data: {pose: number[], velocity: number[]});
+
             // get function
             duk_get_global_string(ctx, "softrobot");
             duk_require_object(ctx, -1);
@@ -101,7 +109,15 @@ static duk_ret_t commandMessageHandler(duk_context* ctx) {
             duk_pop_2(ctx);
 
             break;
-    
+        case CI_INTERPOLATE:
+            // function onReceiveCIInterpolate(data: {pose: number[], targetCountReadMin: number, targetCountReadMax: number, tickMin: number, tickMax: number});
+            break;
+        case CI_SETPARAM:
+            // function onReceiveCISetparam();
+            break;
+        case CI_RESET_SENSOR:
+            // function onReceiveCIResetsensor();
+            break;
         default:
             break;
     }
