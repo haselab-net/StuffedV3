@@ -100,29 +100,38 @@ void commandMessageHandler(void* buffer, size_t buffer_size) {
             // function onReceiveCIDirect(data: {pose: number[], velocity: number[]});
             //  pose[i] = ret.data[i]
             //  vel[i] = ret.data[allBoards.GetNTotalMotor() + i]
+
+            // ...
             // get function
             duk_get_global_string(ctx, "softrobot");
             duk_require_object(ctx, -1);
             duk_get_prop_string(ctx, -1, "message_command");
             duk_get_prop_string(ctx, -1, "onReceiveCIDirect");
+            // ... softrobot message_command onReceiveCIDirect
 
             // get parameter
             duk_push_object(ctx);
+            // ... softrobot message_command onReceiveCIDirect obj
 
             // put prop pose
             duk_push_array(ctx);
             for(size_t i=0; i<nMotor; i++){
                 duk_push_int(ctx, *(++i16p));
-                duk_put_prop_index(ctx, -1, i);
+                duk_put_prop_index(ctx, -2, i);
             }
-            duk_put_prop_string(ctx, -1, "pose");
+            // ... softrobot message_command onReceiveCIDirect obj pose
+            duk_put_prop_string(ctx, -2, "pose");
+            // ... softrobot message_command onReceiveCIDirect obj
 
             // TODO put prop velocity
 
             //  call callback
+            // ... softrobot message_command onReceiveCIDirect obj
             duk_call(ctx, 1);
+            // ... softrobot message_command return_value
 
-            duk_pop_2(ctx);
+            duk_pop_3(ctx);
+            // ...
 
             break;
         case CI_INTERPOLATE:
