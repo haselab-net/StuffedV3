@@ -199,15 +199,11 @@ void wsOnMessageSr(void* buffer, size_t buffer_size) {
     printf("+ SR Packet");
     printPacketCommand(buffer, buffer_size);
     
+    int16_t* ret = (short*)buffer;
+    ret[-1] = PacketId::PI_COMMAND;     //  add packet id at the previous position.
     // send packet to browser
-    void* data_buffer = (void*)malloc(sizeof(int16_t)+buffer_size);
-    *(int16_t*)data_buffer = PacketId::PI_COMMAND;
-    memcpy((int16_t*)data_buffer+1, buffer, buffer_size);
-
-    wsSend(data_buffer, buffer_size+2);
+    wsSend(ret-1, buffer_size+2);
     ESP_LOGD(LOG_TAG, "Packet from softrobot sent to websocket");
-
-    free(data_buffer);
 
     // send packet to jsfile task
     // return_packet_to_jsfile(buffer, buffer_size);

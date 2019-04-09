@@ -7,6 +7,7 @@ extern "C" {
 #include "module_srcommand.h"
 }
 #include "../softRobot/UdpCom.h"
+#include "../softRobot/AllBoards.h"
 
 static const char* Tag = "SRCmd";
 
@@ -80,33 +81,25 @@ static duk_ret_t setMotorDirect(duk_context* ctx) {
 //////////////////////// receive functions /////////////
 ////////////////////////////////////////////////////////
 void commandMessageHandler(void* buffer, size_t buffer_size) {
-    // ... bin info
-    duk_size_t buffer_size;
-    void* p = duk_get_buffer_data(ctx, -2, &buffer_size);
-
-    duk_get_prop_string(ctx, -1, "nTarget");
-    // .. bin info nTarget
-    size_t nTarget = duk_get_int(ctx, -1);
-    duk_pop(ctx);
-    // .. bin info
-
-    // TODO get other elements in info
-    size_t nMotor;
-
-    int16_t* i16p = (int16_t*)p;
-    switch (i16p[0])
+    UdpRetPacket* ret = (UdpRetPacket*) (((short*)buffer) - 1);
+    switch (ret.command)
     {
         case CI_BOARD_INFO:
             // function onReceiveCIBoardinfo(data: {systemId: number, nTarget: number, nMotor:number, nCurrent: number, nForces:number, nTouch: number, macAddress: ArrayBuffer});
-            // TODO
+            //  ret.data[0], ret.data[1], ret.date[2] ... corresponds. TODO: Call js function with them.
             break;
         case CI_SENSOR:
             // TODO
             // function onReceiveCISensor(data: {pose: number[], current: number[], force: number[]});
+            //  pose[i] = ret.data[i];
+            //  current[i] = ret.data[allBoards.GetNTotalMotor() + i]
+            //  force[i] = ret.data[allBoards.GetNTotalMotor() + allBoards.GetNTotalCurrent() + i]
+            //  touch [i] = ret.data[allBoards.GetNTotalMotor() + allBoards.GetNTotalCurrent() + allBoards.GetNTotalForce() + i];
             break;
         case CI_DIRECT:
             // function onReceiveCIDirect(data: {pose: number[], velocity: number[]});
-
+            //  pose[i] = ret.data[i]
+            //  vel[i] = ret.data[allBoards.GetNTotalMotor() + i]
             // get function
             duk_get_global_string(ctx, "softrobot");
             duk_require_object(ctx, -1);
