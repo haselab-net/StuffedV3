@@ -51,7 +51,13 @@ extern "C" void app_main(){
 
 #ifdef USE_DUKTAPE
 	//duktape_main();
+    esp_log_level_set("*", ESP_LOG_DEBUG);
     ws_main();
+
+    if(!wsIsJsfileTaskRunning()) {
+        wsCreateJsfileTask();
+        logPrintf("Start running default jsfile task");
+    }
 
 #ifndef _WIN32
 	ESP_LOGI(TAG, "after ws_main heap size: %d \n", esp_get_free_heap_size());
