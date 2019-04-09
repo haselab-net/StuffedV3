@@ -10,7 +10,17 @@ extern "C" {
 
 static const char* Tag = "SRCmd";
 
-// send functions
+////////////////////////////////////////////////////////
+//////////////////////// send functions ////////////////
+////////////////////////////////////////////////////////
+
+// function requireBoardInfo();
+// TODO
+
+// function requireSensorInfo();
+// TODO
+
+// function setMotorDirect(data: {pose: number[], velocity: number[]});
 static duk_ret_t setMotorDirect(duk_context* ctx) {
     // ... obj
     duk_require_object(ctx, -1);
@@ -57,8 +67,19 @@ static duk_ret_t setMotorDirect(duk_context* ctx) {
     return 0;
 }
 
-// receive functions
-static duk_ret_t commandMessageHandler(duk_context* ctx) {
+// function setMotorInterpolate(data: {pose: number[], period: number[]});
+// TODO
+
+// function setMotorParam(data: {paramType: command.SetParamType, params1: number[], params2: number[]}) // params2 is not used (undefined) in case PT_CURRENT
+// TODO
+
+// function resetSensor(data: {resetSensorFlag: command.ResetSensorFlags});
+// TODO
+
+////////////////////////////////////////////////////////
+//////////////////////// receive functions /////////////
+////////////////////////////////////////////////////////
+void commandMessageHandler(void* buffer, size_t buffer_size) {
     // ... bin info
     duk_size_t buffer_size;
     void* p = duk_get_buffer_data(ctx, -2, &buffer_size);
@@ -77,8 +98,10 @@ static duk_ret_t commandMessageHandler(duk_context* ctx) {
     {
         case CI_BOARD_INFO:
             // function onReceiveCIBoardinfo(data: {systemId: number, nTarget: number, nMotor:number, nCurrent: number, nForces:number, nTouch: number, macAddress: ArrayBuffer});
+            // TODO
             break;
         case CI_SENSOR:
+            // TODO
             // function onReceiveCISensor(data: {pose: number[], current: number[], force: number[]});
             break;
         case CI_DIRECT:
@@ -111,12 +134,15 @@ static duk_ret_t commandMessageHandler(duk_context* ctx) {
             break;
         case CI_INTERPOLATE:
             // function onReceiveCIInterpolate(data: {pose: number[], targetCountReadMin: number, targetCountReadMax: number, tickMin: number, tickMax: number});
+            // TODO 
             break;
         case CI_SETPARAM:
             // function onReceiveCISetparam();
+            // TODO  
             break;
         case CI_RESET_SENSOR:
             // function onReceiveCIResetsensor();
+            // TODO 
             break;
         default:
             break;
@@ -125,8 +151,6 @@ static duk_ret_t commandMessageHandler(duk_context* ctx) {
 
 extern "C" duk_ret_t ModuleSRCommand(duk_context *ctx) {
     ADD_FUNCTION("setMotorDirect", setMotorDirect, 1);      // receive 1 parameter as input
-
-    ADD_FUNCTION("commandMessageHandler", commandMessageHandler, 2);      // receive 2 parameters as input
 
     return 0;
 }

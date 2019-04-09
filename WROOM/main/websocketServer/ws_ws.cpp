@@ -13,6 +13,7 @@ extern "C" {
 #include "module_jslib.h"
 }
 #include "UdpCom.h"
+#include "module_srcommand.h"
 
 #include "ws_command.h"
 #include "ws_task.h"
@@ -209,7 +210,8 @@ void wsOnMessageSr(void* buffer, size_t buffer_size) {
     free(data_buffer);
 
     // send packet to jsfile task
-    return_packet_to_jsfile(buffer, buffer_size);
+    // return_packet_to_jsfile(buffer, buffer_size);
+    commandMessageHandler(buffer, buffer_size);
     ESP_LOGD(LOG_TAG, "Packet from softrobot sent to jsfile");
 }
 
