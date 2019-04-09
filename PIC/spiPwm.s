@@ -1,10 +1,10 @@
 #include <xc.h>
-    .globl    __vector_dispatch_38
+    .globl    __vector_dispatch_38	#SPI2TX empty
     .section    .vector_38,code,keep
     .set nomips16
     .set micromips
     .set noreorder
-    .align    2
+    .align  2
     .ent    __vector_dispatch_38
 __vector_dispatch_38:
     j    _spiEmpty
@@ -18,16 +18,13 @@ __vector_dispatch_38:
     .global addrSPI2BUF
     .global spiPwmWord1
     .global spiPwmWord2
+    .global spiPwmGpBackup
     spiPwmBase:
     addrSPI2BUF:	.space  4
     spiPwmWord1:	.space	4
     spiPwmWord2:	.space	4
     spiPwmGpBackup:	.space  4
-    spiPwmV0Backup:	.space  4
-
-
-#define SPI2BUFADR 0xBF808120
-#define IFS1CLRADR 0xBF80F054
+    spiPwmV0Backup:	.space  4    
     .text
     .set nomips16
     .set micromips
@@ -51,6 +48,9 @@ _spiEmpty:
     sw $v0, 0($gp)
     li $v0, 0x40				# clear IFS
     sw $v0, 0x6F34($gp)				# 0x6F34 = IFS1CLR from $gp=SPI2BUF
+						# SPI2BUF=0xBF808120, IFS1CLRADR=0xBF80F054 
+						# see C:\Program Files (x86)\Microchip\xc32\v2.10\pic32mx\include\procp32mm0064gpm036.h
+
     # restore
     lw $gp, (spiPwmGpBackup-spiPwmBase)($k1)	# load backed up $gp
     lw $v0, (spiPwmV0Backup-spiPwmBase)($k1)	# load backed up $v0
