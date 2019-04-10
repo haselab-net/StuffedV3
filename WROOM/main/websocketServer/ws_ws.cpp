@@ -11,6 +11,7 @@
 #include "esp_log.h"
 extern "C" {
 #include "module_jslib.h"
+#include "duktape_jsfile.h"
 }
 #include "../SoftRobot/UdpCom.h"
 #include "module_srcommand.h"
@@ -123,7 +124,7 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
 
     pWebSocketInputStreambuf->discard();
 
-    printf("+ WS packet");
+    printf("+ WS packet \n");
     printPacket((const void*)pBuffer, ssize);
 
     switch (packetId)
@@ -196,18 +197,19 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
  * send command to browser and jsfile task
  */
 void wsOnMessageSr(UdpRetPacket& ret) {
-    printf("+ SR Packet");
+    printf("+ SR Packet \n");
     printPacketCommand(ret.bytes + 2, ret.length);
     
     ret.count = PacketId::PI_COMMAND;     //  add packet id at the previous position.
     // send packet to browser
     wsSend(ret.bytes, ret.length+2);
-    ESP_LOGD(LOG_TAG, "Packet from softrobot sent to websocket");
+    ESP_LOGD(LOG_TAG, "Packet softrobot -> websocket");
 
     // send packet to jsfile task
     // return_packet_to_jsfile(buffer, buffer_size);
+    if(!esp32_duk_context) return;
     commandMessageHandler(ret);
-    ESP_LOGD(LOG_TAG, "Packet from softrobot sent to jsfile");
+    ESP_LOGD(LOG_TAG, "Packet softrobot -> jsfile");
 }
 
 void printPacketJsfile(const void* pBuffer, size_t len) {

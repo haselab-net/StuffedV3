@@ -4,6 +4,7 @@ extern "C" {
 #include <duktape.h>
 #include "duktape_event.h"
 #include "duktape_utils.h"
+#include "duktape_jsfile.h"
 }
 #include "module_srcommand.h"
 #include "../softRobot/UdpCom.h"
@@ -16,10 +17,14 @@ static const char* Tag = "SRCmd";
 ////////////////////////////////////////////////////////
 
 // function requireBoardInfo();
-// TODO
+static duk_ret_t requireBoardInfo(duk_context* ctx) {
+    return 0;
+}
 
 // function requireSensorInfo();
-// TODO
+static duk_ret_t requireSensorInfo(duk_context* ctx) {
+    return 0;
+}
 
 // function setMotorDirect(data: {pose: number[], velocity: number[]});
 static duk_ret_t setMotorDirect(duk_context* ctx) {
@@ -109,16 +114,20 @@ static duk_ret_t setMotorInterpolate(duk_context* ctx) {
 }
 
 // function setMotorParam(data: {paramType: command.SetParamType, params1: number[], params2: number[]}) // params2 is not used (undefined) in case PT_CURRENT
-// TODO
+static duk_ret_t setMotorParam(duk_context* ctx) {
+    return 0;
+}
 
 // function resetSensor(data: {resetSensorFlag: command.ResetSensorFlags});
-// TODO
+static duk_ret_t resetSensor(duk_context* ctx) {
+    return 0;
+}
 
 ////////////////////////////////////////////////////////
 //////////////////////// receive functions /////////////
 ////////////////////////////////////////////////////////
 void commandMessageHandler(UdpRetPacket& ret) {
-    duk_context* ctx=NULL;  //  TODO: get ctx
+    duk_context* ctx=esp32_duk_context;  //  TODO: get ctx
     switch (ret.command)
     {
         case CI_BOARD_INFO:
@@ -135,6 +144,7 @@ void commandMessageHandler(UdpRetPacket& ret) {
             break;
         case CI_DIRECT:
             //  call onReceiveCIDirect(data: {pose: number[], velocity: number[]});
+            ESP_LOGD(TAG, "CI_DRECT from softrobot");
 
             // get function
             duk_get_global_string(ctx, "softrobot");
@@ -230,8 +240,16 @@ void commandMessageHandler(UdpRetPacket& ret) {
     }
 }
 
+////////////////////////////////////////////////////////
+//////////////////////// register functions ////////////
+////////////////////////////////////////////////////////
 extern "C" duk_ret_t ModuleSRCommand(duk_context *ctx) {
-    ADD_FUNCTION("setMotorDirect", setMotorDirect, 1);      // receive 1 parameter as input
+    ADD_FUNCTION("requireBoardInfo", requireBoardInfo, 1);      // receive 1 parameter as input
+    ADD_FUNCTION("requireSensorInfo", requireSensorInfo, 1);
+    ADD_FUNCTION("setMotorDirect", setMotorDirect, 1);
+    ADD_FUNCTION("setMotorInterpolate", setMotorInterpolate, 1);
+    ADD_FUNCTION("setMotorParam", setMotorParam, 1);
+    ADD_FUNCTION("resetSensor", resetSensor, 1);
 
     return 0;
 }

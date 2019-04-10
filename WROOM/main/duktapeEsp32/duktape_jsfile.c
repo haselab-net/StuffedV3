@@ -16,7 +16,7 @@
 LOG_TAG("duktape_jsfile");
 
 // The Duktape context.
-duk_context *esp32_duk_context;
+duk_context *esp32_duk_context = NULL;
 
 // force to read from posix (espfs can not read the file altered in runtime)
 static void runFileFromPosix(duk_context *ctx, const char *fileName) {

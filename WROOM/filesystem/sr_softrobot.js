@@ -174,8 +174,11 @@ var softrobot;
         device.checkRobotState = checkRobotState;
     })(device = softrobot.device || (softrobot.device = {}));
 })(softrobot || (softrobot = {}));
+(function(softrobot) {
+    softrobot.message_command = require("sr_command");
+})(softrobot || (softrobot = {}));
 (function (softrobot) {
-    var message_command = require("sr_command");
+    var message_command;
     (function (message_command) {
         function onReceiveCIBoardinfo(data) {
             softrobot.device.robotInfo = data;
