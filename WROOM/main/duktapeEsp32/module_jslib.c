@@ -100,7 +100,7 @@ static duk_ret_t send_command(duk_context* ctx) {
 
     void* data = duk_get_buffer_data(ctx, -2, &length);
 
-    UdpCom_OnReceiveServer(data, length);
+    UdpCom_ReceiveCommand(data, length, 1);
 
     duk_pop_2(ctx);
 

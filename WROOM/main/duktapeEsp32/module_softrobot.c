@@ -27,7 +27,7 @@ static duk_ret_t handle_packet(duk_context *ctx){
     }
     // do something with the buffer recieved (buffer, out_size)
     printf("handle_packet: a buffer received.\n");
-    UdpCom_OnReceiveServer(buffer, out_size);
+    UdpCom_ReceiveCommand(buffer, out_size, 0);
 
     // free buffer
     duk_pop(ctx);

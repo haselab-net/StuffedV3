@@ -43,7 +43,7 @@ static duk_ret_t setMotorDirect(duk_context* ctx) {
     size_t n1 = duk_get_length(ctx, -1);
 
     //  Prepare command
-	UdpCmdPacket* cmd = udpCom.PrepareCommand(CI_DIRECT);
+	UdpCmdPacket* cmd = udpCom.PrepareCommand(CI_DIRECT, 1);
     if (!cmd) return DUK_ERR_ERROR;
     if (cmd->length != (2+n0+n1)*2) return DUK_ERR_TYPE_ERROR;
 
@@ -82,7 +82,7 @@ static duk_ret_t setMotorInterpolate(duk_context* ctx) {
     size_t n0 = duk_get_length(ctx, -1);
 
     //  Prepare command
-	UdpCmdPacket* cmd = udpCom.PrepareCommand(CI_INTERPOLATE);
+	UdpCmdPacket* cmd = udpCom.PrepareCommand(CI_INTERPOLATE, 1);
     if (!cmd) return DUK_ERR_ERROR;
     if (cmd->length != (2+n0+2)*2) return DUK_ERR_TYPE_ERROR;
 

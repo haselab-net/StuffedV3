@@ -16,7 +16,6 @@
 #include "module_jsfile.h"
 #include "logging.h"
 #include "modules.h"
-#include "UdpCom.h"
 
 #include "duktape_event.h"
 

@@ -156,7 +156,7 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
         }
 
         case PacketId::PI_COMMAND: {
-            UdpCom_OnReceiveServer((void*)(pBuffer+2), *(int16_t*)(&pBuffer[2]));
+            UdpCom_ReceiveCommand((void*)(pBuffer+2), *(int16_t*)(&pBuffer[2]), 0);
             break;
         }
 
