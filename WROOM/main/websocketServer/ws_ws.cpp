@@ -78,25 +78,6 @@ static void saveToMainJs(const char *content, size_t length){
     ESP_LOGD(LOG_TAG, "File main.js written to /spiffs/main/main.js");
 }
 
-static void combineMainFiles() {
-    std::ifstream m_ifStream;
-    std::ofstream m_ofStream;
-
-    m_ofStream.open(std::string(SPIFFS_MOUNTPOINT) + "/main/runtime.js", std::ofstream::out | std::ofstream::binary | std::ofstream::trunc);
-
-    m_ifStream.open(std::string(SPIFFS_MOUNTPOINT) + "/main/maininit.js", std::ofstream::in | std::ofstream::binary);
-    m_ofStream << m_ifStream.rdbuf() << std::endl;
-    m_ifStream.close();
-    m_ifStream.open(std::string(SPIFFS_MOUNTPOINT) + "/main/main.js", std::ofstream::in | std::ofstream::binary);
-    m_ofStream << m_ifStream.rdbuf() << std::endl;
-    m_ifStream.close();
-    m_ifStream.open(std::string(SPIFFS_MOUNTPOINT) + "/main/mainend.js", std::ofstream::in | std::ofstream::binary);
-    m_ofStream << m_ifStream.rdbuf() << std::endl;
-    m_ifStream.close();
-
-    m_ofStream.close();
-}
-
 static void wsSend(void* data, size_t length) {
     if(!pWebSocket) {
         ESP_LOGD(LOG_TAG, "Unable to send packet, websocket is not connected");

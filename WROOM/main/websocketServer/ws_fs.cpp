@@ -40,3 +40,22 @@ void esp32_spiffs_mount() {
     }
 
 } // esp32_duktape_spiffs_mount
+
+void combineMainFiles() {
+    std::ifstream m_ifStream;
+    std::ofstream m_ofStream;
+
+    m_ofStream.open(std::string(SPIFFS_MOUNTPOINT) + "/main/runtime.js", std::ofstream::out | std::ofstream::binary | std::ofstream::trunc);
+
+    m_ifStream.open(std::string(SPIFFS_MOUNTPOINT) + "/main/maininit.js", std::ofstream::in | std::ofstream::binary);
+    m_ofStream << m_ifStream.rdbuf() << std::endl;
+    m_ifStream.close();
+    m_ifStream.open(std::string(SPIFFS_MOUNTPOINT) + "/main/main.js", std::ofstream::in | std::ofstream::binary);
+    m_ofStream << m_ifStream.rdbuf() << std::endl;
+    m_ifStream.close();
+    m_ifStream.open(std::string(SPIFFS_MOUNTPOINT) + "/main/mainend.js", std::ofstream::in | std::ofstream::binary);
+    m_ofStream << m_ifStream.rdbuf() << std::endl;
+    m_ifStream.close();
+
+    m_ofStream.close();
+}

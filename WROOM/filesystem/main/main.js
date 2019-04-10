@@ -1,6 +1,8 @@
 loops.forever(function () {
-    loops.pause(100)
-    loops.pause(100)
-    loops.pause(100)
-    loops.pause(100)
+    motor.changeLocalStringLength(0, 200)
+    motor.pushLocalMotorPVToRemoteDirect()
+    loops.pause(2000)
+    motor.changeLocalStringLength(0, 100)
+    motor.pushLocalMotorPVToRemoteDirect()
+    loops.pause(2000)
 })

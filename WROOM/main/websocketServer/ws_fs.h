@@ -5,4 +5,6 @@
 
 void esp32_spiffs_mount();
 
+void combineMainFiles();
+
 #endif

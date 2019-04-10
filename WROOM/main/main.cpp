@@ -14,6 +14,7 @@
 #include "ws_task.h"
 #endif
 #include "softRobot/monitor.h"
+#include "ws_fs.h"
 
 static const char* TAG="main";
 
@@ -43,25 +44,18 @@ extern "C" void app_main(){
     softRobot_main();
 	ESP_LOGI(TAG, "after softRobot_main heap size: %d \n", esp_get_free_heap_size());
 
-#if defined USE_DUKTAPE && !defined _WIN32
-	if(!wsIsJsfileTaskRunning()) {
-        wsCreateJsfileTask();
-        ESP_LOGI(TAG, "Start running default jsfile task.");
-    }
-	ESP_LOGI(TAG, "after running default jsfile task size: %d \n", esp_get_free_heap_size());
-#endif
-
 #ifdef USE_DUKTAPE
 	//duktape_main();
     esp_log_level_set("*", ESP_LOG_DEBUG);
 
 #ifndef _WIN32
 	ws_main();
+    ESP_LOGI(TAG, "after ws_main heap size: %d \n", esp_get_free_heap_size());
 	if(!wsIsJsfileTaskRunning()) {
+        combineMainFiles();
         wsCreateJsfileTask();
         logPrintf("Start running default jsfile task");
     }
-	ESP_LOGI(TAG, "after ws_main heap size: %d \n", esp_get_free_heap_size());
 #endif
 #endif
 
