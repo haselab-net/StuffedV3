@@ -4,8 +4,8 @@ extern "C" {
 #include <duktape.h>
 #include "duktape_event.h"
 #include "duktape_utils.h"
-#include "module_srcommand.h"
 }
+#include "module_srcommand.h"
 #include "../softRobot/UdpCom.h"
 #include "../softRobot/AllBoards.h"
 
@@ -100,22 +100,28 @@ void commandMessageHandler(UdpRetPacket& ret) {
             // function onReceiveCIDirect(data: {pose: number[], velocity: number[]});
             //  pose[i] = ret.data[i]
             //  vel[i] = ret.data[allBoards.GetNTotalMotor() + i]
+
+            // ...
             // get function
             duk_get_global_string(ctx, "softrobot");
             duk_require_object(ctx, -1);
             duk_get_prop_string(ctx, -1, "message_command");
             duk_get_prop_string(ctx, -1, "onReceiveCIDirect");
+            // ... softrobot message_command onReceiveCIDirect
 
             // get parameter
             duk_push_object(ctx);
+            // ... softrobot message_command onReceiveCIDirect obj
 
             // put prop pose
             duk_push_array(ctx);
             for(size_t i=0; i<allBoards.GetNTotalMotor(); i++){
                 duk_push_int(ctx, ret.data[i]);
-                duk_put_prop_index(ctx, -1, i);
+                duk_put_prop_index(ctx, -2, i);
             }
-            duk_put_prop_string(ctx, -1, "pose");
+            // ... softrobot message_command onReceiveCIDirect obj pose
+            duk_put_prop_string(ctx, -2, "pose");
+            // ... softrobot message_command onReceiveCIDirect obj
 
             // TODO put prop velocity
             duk_push_array(ctx);
@@ -126,9 +132,12 @@ void commandMessageHandler(UdpRetPacket& ret) {
             duk_put_prop_string(ctx, -1, "velocity");
 
             //  call callback
+            // ... softrobot message_command onReceiveCIDirect obj
             duk_call(ctx, 1);
+            // ... softrobot message_command return_value
 
-            duk_pop_2(ctx);
+            duk_pop_3(ctx);
+            // ...
 
             break;
         case CI_INTERPOLATE:
