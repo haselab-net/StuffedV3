@@ -10,8 +10,6 @@ class SRWebSocketHandler: public WebSocketHandler {
 	void onError(std::string error);
 };
 
-void combineMainFiles();
-
 void wsOnConnected(WebSocket* pWS);
 
 void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket* pWebSocket);

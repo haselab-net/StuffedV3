@@ -1,4 +1,5 @@
-#include <stdio.h>
+#include <iostream>
+#include <map>
 extern "C" {
 
 #include <duktape.h>
@@ -11,6 +12,8 @@ extern "C" {
 #include "../softRobot/AllBoards.h"
 
 static const char* Tag = "SRCmd";
+
+static std::map<std::string, uint32_t> stash_key_map;
 
 ////////////////////////////////////////////////////////
 //////////////////////// send functions ////////////////
@@ -124,12 +127,79 @@ static duk_ret_t resetSensor(duk_context* ctx) {
 }
 
 ////////////////////////////////////////////////////////
+//////////////////////// register callbacks ////////////
+////////////////////////////////////////////////////////
+// function registerCallback(name: string, func: function);
+static duk_ret_t registerCallback(duk_context* ctx) {
+    // ... name func
+    const char* name = duk_get_string(ctx, -2);
+    std::string name_str(name);
+
+    if(stash_key_map.find(name_str)!=stash_key_map.end()) esp32_duktape_stash_delete(ctx, stash_key_map[name_str]);             // delete last registered callback
+
+    if(!duk_is_function(ctx, -1)) {
+        printf("register_packet_callback: not a function\n");
+        duk_pop_2(ctx);
+        return 0;
+    }
+
+    uint32_t stash_key_callback = esp32_duktape_stash_array(ctx, 1);
+
+    if(stash_key_callback==0) printf("register_packet_callback: register callback failed.\n");
+    else {
+        stash_key_map[name_str] = stash_key_callback;
+        printf("register_packet_callback: register callback success with stash key - %d\n", stash_key_callback);
+    }
+
+    duk_pop(ctx);
+
+    return 0;
+}
+
+////////////////////////////////////////////////////////
+//////////////////////// call callbacks ////////////////
+////////////////////////////////////////////////////////
+// function onReceiveCIBoardinfo(data: {systemId: number, nTarget: number, nMotor:number, nCurrent: number, nForces:number, nTouch: number, macAddress: ArrayBuffer});
+static int dataProvider_onReceiveCIBoardinfo(duk_context* ctx, void* context) {
+    UdpRetPacket* ret = (UdpRetPacket*)context;
+
+    // get parameter
+    duk_push_object(ctx);
+    // ... obj
+
+    // put prop pose
+    duk_push_array(ctx);
+    for(size_t i=0; i<allBoards.GetNTotalMotor(); i++){
+        duk_push_int(ctx, ret->GetMotorPos(i));
+        duk_put_prop_index(ctx, -2, i);
+    }
+    // ... obj pose
+    duk_put_prop_string(ctx, -2, "pose");
+
+    // put prop velocity
+    duk_push_array(ctx);
+    for(size_t i=0; i<allBoards.GetNTotalMotor(); i++){
+        duk_push_int(ctx, ret->GetMotorVel(i));
+        duk_put_prop_index(ctx, -2, i);
+    }
+    duk_put_prop_string(ctx, -2, "velocity");
+
+    return 1;
+}
+// function onReceiveCISensor(data: {pose: number[], current: number[], force: number[]});
+// function onReceiveCIDirect(data: {pose: number[], velocity: number[]});
+// function onReceiveCIInterpolate(data: {pose: number[], targetCountReadMin: number, targetCountReadMax: number, tickMin: number, tickMax: number});
+// function onReceiveCISetparam();
+// function onReceiveCIResetsensor();
+
+////////////////////////////////////////////////////////
 //////////////////////// receive functions /////////////
 ////////////////////////////////////////////////////////
 void commandMessageHandler(UdpRetPacket& ret) {
 	xSemaphoreTake(esp32_duk_context_mutex, portMAX_DELAY);	//	lock esp32_duk_context
     //  do not return from this function until unlock (call Give).
-    (void) duk_push_thread(esp32_duk_context);
+
+	(void) duk_push_thread(esp32_duk_context);
     duk_context* ctx= duk_get_context(esp32_duk_context, -1);
     switch (ret.command)
     {
@@ -146,102 +216,56 @@ void commandMessageHandler(UdpRetPacket& ret) {
             //  touch [i] = ret.data[allBoards.GetNTotalMotor() + allBoards.GetNTotalCurrent() + allBoards.GetNTotalForce() + i];
             break;
         case CI_DIRECT: {
-            //  call onReceiveCIDirect(data: {pose: number[], velocity: number[]});
-            ESP_LOGD(Tag, "CI_DRECT from softrobot");
-            ESP_LOGD(Tag, "top: %i", duk_get_top(ctx));
-
-            // get function
-            bool flag = duk_get_global_string(ctx, "callbacks");
-            ESP_LOGD(Tag, "get callbacks object success ? %i", flag);
-            ESP_LOGD(Tag, "top: %i", duk_get_top(ctx));
-            flag = duk_get_prop_string(ctx, -1, "onReceiveCIDirect");
-            ESP_LOGD(Tag, "get onReceiveCIDirect function success ? %i", flag);
-            // ... callbacks onReceiveCIDirect
-            ESP_LOGD(Tag, "top: %i", duk_get_top(ctx));
-
-            // get parameter
-            ESP_LOGD(Tag, "push object: %i", duk_push_object(ctx));
-            ESP_LOGD(Tag, "top: %i", duk_get_top(ctx));
-            // ... callbacks onReceiveCIDirect obj
-
-            // put prop pose
-            ESP_LOGD(Tag, "push array: %i", duk_push_array(ctx));
-            ESP_LOGD(Tag, "top: %i", duk_get_top(ctx));
-            for(size_t i=0; i<allBoards.GetNTotalMotor(); i++){
-                duk_push_int(ctx, ret.GetMotorPos(i));
-                duk_put_prop_index(ctx, -2, i);
-            }
-            // ... callbacks onReceiveCIDirect obj pose
-            duk_put_prop_string(ctx, -2, "pose");
-            // ... callbacks onReceiveCIDirect obj
-
-            ESP_LOGD(Tag, "push pose");
-            ESP_LOGD(Tag, "top: %i", duk_get_top(ctx));
-
-            // put prop velocity
-            duk_push_array(ctx);
-            for(size_t i=0; i<allBoards.GetNTotalMotor(); i++){
-                duk_push_int(ctx, ret.GetMotorVel(i));
-                duk_put_prop_index(ctx, -1, i);
-            }
-            duk_put_prop_string(ctx, -1, "velocity");
-
-            ESP_LOGD(Tag, "push velocity");
-            ESP_LOGD(Tag, "top: %i", duk_get_top(ctx));
-
-            //  call callback
-            // ... callbacks onReceiveCIDirect obj
-            duk_pcall(ctx, 1);
-            // ... callbacks return_value
-
-            duk_pop_2(ctx);
-            // ...
-
-            ESP_LOGD(Tag, "top: %i", duk_get_top(ctx));
-
+            event_newCallbackRequestedEvent(
+                ESP32_DUKTAPE_CALLBACK_STATIC_TYPE_FUNCTION,
+                stash_key_map["onReceiveCIDirect"], // Stash key for stashed callback array
+                dataProvider_onReceiveCIBoardinfo, // Data provider parameter
+                (void*)&ret // Context parameter
+            );
+            
             break;
         }
         case CI_INTERPOLATE:
-            // function onReceiveCIInterpolate(data: {pose: number[], targetCountReadMin: number, targetCountReadMax: number, tickMin: number, tickMax: number});
-            // get function
-            duk_get_global_string(ctx, "callbacks");
-            duk_require_object(ctx, -1);
-            duk_get_prop_string(ctx, -1, "onReceiveCIInterpolate");
-            // ... callbacks onReceiveCIInterpolate
+            // // function onReceiveCIInterpolate(data: {pose: number[], targetCountReadMin: number, targetCountReadMax: number, tickMin: number, tickMax: number});
+            // // get function
+            // duk_get_global_string(ctx, "callbacks");
+            // duk_require_object(ctx, -1);
+            // duk_get_prop_string(ctx, -1, "onReceiveCIInterpolate");
+            // // ... callbacks onReceiveCIInterpolate
 
-            // get parameter
-            duk_push_object(ctx);
-            // ... callbacks onReceiveCIInterpolate obj
+            // // get parameter
+            // duk_push_object(ctx);
+            // // ... callbacks onReceiveCIInterpolate obj
 
-            // put prop pose
-            duk_push_array(ctx);
-            for(size_t i=0; i<allBoards.GetNTotalMotor(); i++){
-                duk_push_int(ctx, ret.GetMotorPos(i));
-                duk_put_prop_index(ctx, -2, i);
-            }
-            // ... callbacks onReceiveCIDirect obj pose
-            duk_put_prop_string(ctx, -2, "pose");
-            // ... callbacks onReceiveCIDirect obj
+            // // put prop pose
+            // duk_push_array(ctx);
+            // for(size_t i=0; i<allBoards.GetNTotalMotor(); i++){
+            //     duk_push_int(ctx, ret.GetMotorPos(i));
+            //     duk_put_prop_index(ctx, -2, i);
+            // }
+            // // ... callbacks onReceiveCIDirect obj pose
+            // duk_put_prop_string(ctx, -2, "pose");
+            // // ... callbacks onReceiveCIDirect obj
 
-            duk_push_int(ctx, ret.GetTargetCountReadMin());
-            duk_put_prop_string(ctx, -1, "targetCountReadMin");
+            // duk_push_int(ctx, ret.GetTargetCountReadMin());
+            // duk_put_prop_string(ctx, -1, "targetCountReadMin");
 
-            duk_push_int(ctx, ret.GetTargetCountReadMax());
-            duk_put_prop_string(ctx, -1, "targetCountReadMax");
+            // duk_push_int(ctx, ret.GetTargetCountReadMax());
+            // duk_put_prop_string(ctx, -1, "targetCountReadMax");
 
-            duk_push_int(ctx, ret.GetTickMin());
-            duk_put_prop_string(ctx, -1, "tickMin");
+            // duk_push_int(ctx, ret.GetTickMin());
+            // duk_put_prop_string(ctx, -1, "tickMin");
 
-            duk_push_int(ctx, ret.GetTickMax());
-            duk_put_prop_string(ctx, -1, "tickMax");
+            // duk_push_int(ctx, ret.GetTickMax());
+            // duk_put_prop_string(ctx, -1, "tickMax");
 
-            //  call callback
-            // ... callbacks onReceiveCIDirect ????? TODO: I' not sure number or args on stack.
-            duk_call(ctx, 1);
-            // ... callbacks return_value
+            // //  call callback
+            // // ... callbacks onReceiveCIDirect ????? TODO: I' not sure number or args on stack.
+            // duk_call(ctx, 1);
+            // // ... callbacks return_value
 
-            duk_pop_3(ctx);
-            // ...
+            // duk_pop_3(ctx);
+            // // ...
             break;
         case CI_SETPARAM:
             // function onReceiveCISetparam();
@@ -255,39 +279,6 @@ void commandMessageHandler(UdpRetPacket& ret) {
             break;
     }
 	xSemaphoreGive(esp32_duk_context_mutex);	//	unlock esp32_duk_context
-}
-
-////////////////////////////////////////////////////////
-//////////////////////// register callbacks ////////////
-////////////////////////////////////////////////////////
-// function registerCallback(name: string, func: function);
-static duk_ret_t registerCallback(duk_context* ctx) {
-    // ... name func
-
-    bool ret = duk_get_global_string(ctx, "callbacks"); // we store all callback functions in global.callbacks 
-    if (!ret) { // if no such object, create new
-        duk_pop(ctx);
-        duk_push_object(ctx);
-    }
-    // ... name func callbacks
-    
-    const char* name = duk_get_string(ctx, -3);
-
-    printf("register callback %s", name);
-
-    duk_dup(ctx, -2);
-    // ... name func callbacks func
-
-    duk_put_prop_string(ctx, -2, name);
-    // ... name func callbacks
-
-    duk_put_global_string(ctx, "callbacks");
-    // ... name func
-
-    duk_pop_2(ctx);
-    // ...
-
-    return 0;
 }
 
 ////////////////////////////////////////////////////////
