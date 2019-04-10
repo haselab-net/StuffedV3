@@ -142,13 +142,13 @@ void commandMessageHandler(UdpRetPacket& ret) {
             //  force[i] = ret.data[allBoards.GetNTotalMotor() + allBoards.GetNTotalCurrent() + i]
             //  touch [i] = ret.data[allBoards.GetNTotalMotor() + allBoards.GetNTotalCurrent() + allBoards.GetNTotalForce() + i];
             break;
-        case CI_DIRECT:
+        case CI_DIRECT: {
             //  call onReceiveCIDirect(data: {pose: number[], velocity: number[]});
             ESP_LOGD(Tag, "CI_DRECT from softrobot");
 
             // get function
-            duk_get_global_string(ctx, "softrobot");
-            duk_require_object(ctx, -1);
+            bool flag = duk_get_global_string(ctx, "softrobot");
+            ESP_LOGD(Tag, "get softrobot object success ? %i", flag);
             duk_get_prop_string(ctx, -1, "message_command");
             duk_get_prop_string(ctx, -1, "onReceiveCIDirect");
             // ... softrobot message_command onReceiveCIDirect
@@ -184,6 +184,7 @@ void commandMessageHandler(UdpRetPacket& ret) {
             // ...
 
             break;
+        }
         case CI_INTERPOLATE:
             // function onReceiveCIInterpolate(data: {pose: number[], targetCountReadMin: number, targetCountReadMax: number, tickMin: number, tickMax: number});
             // get function
