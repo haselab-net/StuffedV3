@@ -156,7 +156,7 @@ void UdpCmdPackets::Write() {
 
 static void onReceiveUdp(void *arg, struct udp_pcb *pcb, struct pbuf *p, const ip_addr_t *addr, u16_t port)
 {
-	((UdpCom*)arg)->OnReceiveUdp(pcb, p, addr, port);
+	((UdpCom*)arg)->ReceiveCommandFromUdp(pcb, p, addr, port);
 }
 void UdpCom::Init() {
 	udp = NULL;
@@ -170,7 +170,7 @@ void UdpCom::Start(){
 	udp_recv(udp, onReceiveUdp, this);
 }
 
-void UdpCom::OnReceiveUdp(struct udp_pcb * upcb, struct pbuf * top, const ip_addr_t* addr, u16_t port) {
+void UdpCom::ReceiveCommandFromUdp(struct udp_pcb * upcb, struct pbuf * top, const ip_addr_t* addr, u16_t port) {
 	if (!recvs.WriteAvail()) {
 		ESP_LOGE(Tag(), "Udp command receive buffer is full.");
 		pbuf_free(top);
@@ -246,7 +246,7 @@ void UdpCom::OnReceiveUdp(struct udp_pcb * upcb, struct pbuf * top, const ip_add
 	}
 	pbuf_free(top);
 }
-UdpCmdPacket* UdpCom::PrepareCommand(CommandId cid) {
+UdpCmdPacket* UdpCom::PrepareCommand(CommandId cid, short from) {
 	if (!recvs.WriteAvail()) {
 		ESP_LOGE(Tag(), "PrepareCommand(): Udp command receive buffer is full.");
 		return NULL;
@@ -254,23 +254,24 @@ UdpCmdPacket* UdpCom::PrepareCommand(CommandId cid) {
 	UdpCmdPacket* r = &recvs.Poke();
 	r->command = cid;
 	r->length = r->CommandLen();
+	r->count = from;
+	memset(&r->returnIp, 0, sizeof(r->returnIp));
 	return r;
 }
 void UdpCom::WriteCommand() {
-	UdpCmdPacket* recv = &recvs.Poke();
-	recv->count = commandCount;
 	recvs.Write();
 }
 
-void UdpCom::OnReceiveServer(void* payload, int len) {
-	UdpCmdPacket* recv = PrepareCommand((CommandId)((short*)payload)[1]);	//	[0] is length, [1] is command id
+void UdpCom::ReceiveCommand(void* payload, int len, short from) {
+	UdpCmdPacket* recv = PrepareCommand((CommandId)((short*)payload)[1], from);	//	[0] is length, [1] is command id
 	if (!recv) return;
 	memcpy(recv->bytes + 2, payload, len);
 	WriteCommand();
 }
-extern "C" void UdpCom_OnReceiveServer(void* payload, int len){
-	udpCom.OnReceiveServer(payload, len);
+extern "C" void UdpCom_ReceiveCommand(void* payload, int len, short from) {
+	udpCom.ReceiveCommand(payload, len, from);
 }
+
 
 void UdpCom::SendText(char* text, short errorlevel) {
 	send.command = CIU_TEXT;
@@ -304,7 +305,7 @@ void UdpCom::SendText(char* text, short errorlevel) {
 }
 void UdpCom::PrepareRetPacket(UdpCmdPacket& recv) {
 	send.command = recv.command;
-	send.count = commandCount;
+	send.count = recv.count;
 	send.ClearData();
 }
 void UdpCom::SendReturn(UdpCmdPacket& recv) {

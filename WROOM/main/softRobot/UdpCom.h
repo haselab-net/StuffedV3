@@ -1,12 +1,8 @@
 ﻿#pragma once
-
 #ifndef __cplusplus
-
-void UdpCom_OnReceiveServer(void* payload, int len);
-
+void UdpCom_ReceiveCommand(void* payload, int len, short from);
 #else
-
-extern "C" void UdpCom_OnReceiveServer(void* payload, int len);
+extern "C" void UdpCom_ReceiveCommand(void* payload, int len, short from);
 
 #include "ArrayRing.h"
 #include "esp_event_loop.h"
@@ -171,13 +167,7 @@ public:
 #endif
 	void Init();
 	void Start();
-	UdpCmdPacket* PrepareCommand(CommandId cid);
-	void WriteCommand();
 
-	void OnReceiveUdp(struct udp_pcb * upcb, struct pbuf * top, const ip_addr_t* addr, u16_t port);
-	void OnReceiveServer(void* payload, int len);
-	///	execute udp command
-	void ExecUdpCommand(UdpCmdPacket& recv);
 	///	send return packet correspond to UdpCmdPacket recv.
 	void SendReturn(UdpCmdPacket& recv);
 	///	send return packet to web server (duktape)
@@ -186,7 +176,23 @@ public:
 	void SendReturnUdp(UdpCmdPacket& recv);
 	///	prepare return packet for command cmd
 	void PrepareRetPacket(UdpCmdPacket& recv);
-	void SendText(char* text, short errorlevel=0);
+
+	///	prepare command to receive "from" is passed to UdpRetPacket::count, which can be used to identify caller.
+	UdpCmdPacket* PrepareCommand(CommandId cid, short from);
+	///	Put the command to execute on the queue.
+	void WriteCommand();
+	///	Receive command packet from UDP and put it on the queue.
+	void ReceiveCommandFromUdp(struct udp_pcb * upcb, struct pbuf * top, const ip_addr_t* addr, u16_t port);
+
+	///	Receive command and put it on the queue. "from" is passed to UdpRetPacket::count of the return packet, which can be used to distigush caller.
+	void ReceiveCommand(void* payload, int len, short from);
+
+	///	Send a sendText packet to udp, web socket or duktape
+	void SendText(char* text, short errorlevel = 0);
+
+	///	Execute commands, which do not require communication with motor driver boards.
+	void ExecUdpCommand(UdpCmdPacket& recv);
 };
 extern UdpCom udpCom;
+
 #endif
