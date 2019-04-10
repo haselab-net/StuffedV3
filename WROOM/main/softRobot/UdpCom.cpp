@@ -73,7 +73,7 @@ void UdpRetPacket::SetLength() {
 		length = (NHEADER + allBoards.GetNTotalMotor() * 2) * 2; break;
 	case CI_CURRENT:			//	pos vel current
 		length = (NHEADER + allBoards.GetNTotalMotor() * 2 + allBoards.GetNTotalCurrent()) * 2; break;
-	case CI_INTERPOLATE:	//	pos targetCountRead tickMin tickMax remain vacancy
+	case CI_INTERPOLATE:	//	pos targetCountReadMin targetCountReadMax tickMin tickMax
 	case CI_FORCE_CONTROL: 
 		length = (NHEADER + allBoards.GetNTotalMotor() + 4) * 2; break;
 	case CI_SETPARAM:

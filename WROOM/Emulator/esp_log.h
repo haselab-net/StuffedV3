@@ -16,6 +16,8 @@ extern "C" {
 	void ESP_LOGW(const char* tag, const char* fmt, ...);
 	void ESP_LOGE(const char* tag, const char* fmt, ...);
 #define ESP_ERROR_CHECK(x)
+	inline int esp_get_free_heap_size() { return 0; }
+	inline void esp_log_level_set(const char*, int l) { return;  }
 #ifdef __cplusplus
 }
 #endif

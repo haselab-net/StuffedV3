@@ -51,46 +51,35 @@ public:
 		ESP_LOGE("UdpComPacket", "Control mode is not included in a packet of command id %d", command);
 		return -1;
 	}
-	short GetMotorPos(int i) {
-		return data[i];
-	}
-	short GetMotorVel(int i) {
-		return data[allBoards.GetNTotalMotor() + i];
-	}
-	unsigned short GetPeriod() {
-		return data[allBoards.GetNTotalMotor()];
-	}
-	unsigned short GetTargetCountWrite() {
-		return data[allBoards.GetNTotalMotor()+1];
-	}
+	short GetMotorPos(int i) { return data[i]; }
+	void SetMotorPos(short p, int i) { data[i] = p; }
+	short GetMotorVel(int i) { return data[allBoards.GetNTotalMotor() + i]; }
+	void SetMotorVel(short v, int i) { data[allBoards.GetNTotalMotor() + i] = v; }
+	unsigned short GetPeriod() { return data[allBoards.GetNTotalMotor()]; }
+	void SetPeriod(unsigned short p) { data[allBoards.GetNTotalMotor()] = p; }
+	unsigned short GetTargetCountWrite() { return data[allBoards.GetNTotalMotor() + 1]; }
+	void SetTargetCountWrite(unsigned short c) { data[allBoards.GetNTotalMotor() + 1] = c; }
 	short GetForceControlJacob(int j, int i) {	//	j: row, i: col,
-		//	The matrix is 2 row x  3 col or 2*nBoard row x 3 col.
+	//	The matrix is 2 row x  3 col or 2*nBoard row x 3 col.
 	//	int b = j / 2;
 	//	int r = j % 2;
 	//	return data[allBoards.GetNTotalMotor() + 2 + b*6 + r*3 + i];
 		return data[allBoards.GetNTotalMotor() + 2 + j*3 + i];
 	}
-	short GetParamType(){
-		return data[0];
-	}
-	short GetControlK(int i) {
-		return data[1 + i];
-	}
-	short GetControlB(int i) {
-		return data[1 + allBoards.GetNTotalMotor() + i];
-	}
-	short GetControlA(int i) {
-		return data[1 + i];
-	}
-	short GetTorqueMin(int i) {
-		return data[1 + i];
-	}
-	short GetTorqueMax(int i) {
-		return data[1 + allBoards.GetNTotalMotor() + i];
-	}
-	short GetBoardId() {
-		return data[1];
-	}
+	short GetParamType() { return data[0]; }
+	void SetParamType(short t) { data[0] = t; }
+	SDEC GetControlK(int i) { return data[1 + i]; }
+	void SetControlK(SDEC k, int i) { data[1 + i] = k; }
+	SDEC GetControlB(int i) { return data[1 + allBoards.GetNTotalMotor() + i]; }
+	void SetControlB(SDEC k, int i) { data[1 + allBoards.GetNTotalMotor() + i] = k; }
+	SDEC GetControlA(int i) { return data[1 + i]; }
+	void SetControlA(SDEC k, int i) { data[1 + i] = k; }
+	SDEC GetTorqueMin(int i) { return data[1 + i]; }
+	void SetTorqueMin(SDEC t, int i) { data[1 + i] = t; }
+	SDEC GetTorqueMax(int i) { return data[1 + allBoards.GetNTotalMotor() + i]; }
+	void SetTorqueMax(SDEC t, int i) { data[1 + allBoards.GetNTotalMotor() + i] = t; }
+	short GetBoardId() { return data[1]; }
+	void SetBoardId(short id) { data[1] = id; }
 	short GetResetSensorFlags() {
 		if (command == CI_ALL){
 			//TBW hase
@@ -99,6 +88,15 @@ public:
 			return data[0];
 		}else{
 			return RSF_NONE;
+		}
+	}
+	void SetResetSensorFlags(short f) {
+		if (command == CI_ALL) {
+			//TBW hase
+			data[0] = f;
+		}
+		else if (command == CI_RESET_SENSOR) {
+			data[0] = f;
 		}
 	}
 };
@@ -111,35 +109,26 @@ public:
 	virtual void SetAll(ControlMode controlMode, unsigned char targetCountReadMin, unsigned char targetCountReadMax,
 		unsigned short tickMin, unsigned short tickMax, 
 		SDEC* pos, SDEC* vel, SDEC* current, SDEC* force, SDEC* touch);
-	void SetMotorPos(short p, int i) {
-		data[i] = p;
-	}
-	void SetMotorVel(short v, int i) {
-		data[allBoards.GetNTotalMotor() + i] = v;
-	}
+	short GetMotorPos(int i) { return data[i]; }
+	void SetMotorPos(short p, int i) { data[i] = p; }
+	short GetMotorVel(int i) { return data[allBoards.GetNTotalMotor() + i]; }
+	void SetMotorVel(short v, int i) { data[allBoards.GetNTotalMotor() + i] = v; }
 	//	for interpolate and force control
-	void SetTargetCountReadMin(unsigned char c) {
-		data[allBoards.GetNTotalMotor()] = c;
-	}
-	void SetTargetCountReadMax(unsigned char c) {
-		data[allBoards.GetNTotalMotor()+1] = c;
-	}
-	void SetTickMin(unsigned short t) {
-		data[allBoards.GetNTotalMotor()+2] = t;
-	}
-	void SetTickMax(unsigned short t) {
-		data[allBoards.GetNTotalMotor()+3] = t;
-	}
+	unsigned char GetTargetCountReadMin() { return (unsigned char)data[allBoards.GetNTotalMotor()]; }
+	void SetTargetCountReadMin(unsigned char c) { data[allBoards.GetNTotalMotor()] = c; }
+	unsigned char GetTargetCountReadMax() { return (unsigned char)data[allBoards.GetNTotalMotor() + 1]; }
+	void SetTargetCountReadMax(unsigned char c) { data[allBoards.GetNTotalMotor() + 1] = c; }
+	short GetTickMin() { return data[allBoards.GetNTotalMotor() + 2]; }
+	void SetTickMin(unsigned short t) { data[allBoards.GetNTotalMotor() + 2] = t; }
+	short GetTickMax() { return data[allBoards.GetNTotalMotor() + 3]; }
+	void SetTickMax(unsigned short t) { data[allBoards.GetNTotalMotor() + 3] = t; }
 	//	sense
-	void SetCurrent(short c, int i) {
-		data[allBoards.GetNTotalMotor() + i] = c;
-	}
-	void SetForce(short f, int i) {
-		data[allBoards.GetNTotalMotor() + allBoards.GetNTotalCurrent() + i] = f;
-	}
-	void SetTouch(short t, int i) {
-		data[allBoards.GetNTotalMotor() + allBoards.GetNTotalCurrent() + allBoards.GetNTotalForce() + i] = t;
-	}
+	short GetCurrent(int i) { return data[allBoards.GetNTotalMotor() + i]; }
+	void SetCurrent(short c, int i) { data[allBoards.GetNTotalMotor() + i] = c; }
+	short GetForce(int i) { return data[allBoards.GetNTotalMotor() + allBoards.GetNTotalCurrent() + i]; }
+	void SetForce(short f, int i) { data[allBoards.GetNTotalMotor() + allBoards.GetNTotalCurrent() + i] = f; }
+	short GetTouch(int i) { return data[allBoards.GetNTotalMotor() + allBoards.GetNTotalCurrent() + allBoards.GetNTotalForce() + i]; }
+	void SetTouch(short t, int i) { data[allBoards.GetNTotalMotor() + allBoards.GetNTotalCurrent() + allBoards.GetNTotalForce() + i] = t; }
 	void SetBoardInfo(int systemId, int nTarget, int nMotor, int nCurrent, int nForce, int nTouch) {
 		data[0] = systemId;
 		data[1] = nTarget;

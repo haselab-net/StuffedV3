@@ -266,9 +266,9 @@ public:
         Init();
     }
     void Init(){
-        for(int i=0; i<tags.size(); ++i){
+        for(int i=0; i<(int)tags.size(); ++i){
             char key = toLower(tags[i].tag[0]);
-            for(int k=0; k<keys.size(); ++k){
+            for(int k=0; k<(int)keys.size(); ++k){
                 if (key == keys[k]){
                     if (toUpper(key) != key){
                         key = toUpper(key);
@@ -293,23 +293,23 @@ public:
     void Func(){
         const char levels [] = "NEWIDV";
 		conPrintf("Log level tags:\n");
-		for (int i = 0; i<tags.size(); ++i) {
+		for (int i = 0; i<(int)tags.size(); ++i) {
 			conPrintf(" %c %s\t= %c (%s)\n", (int)keys[i], tags[i].tag, (int)levels[tags[i].logLevel], tags[i].msg);
 		}
 		while(1){
             int ch = getchWait();
             int i;
-            for(i=0; i<tags.size(); ++i){
+            for(i=0; i<(int)tags.size(); ++i){
                 if (keys[i] == ch){
 					conPrintf("%c %s (%s) = ? choose from %s\n", (int)keys[i], tags[i].tag, tags[i].msg, levels);
                     ch = getchWait();
                     for(int l=0; l < sizeof(levels)/sizeof(levels[0]) - 1; ++l){
                         if (toUpper(ch) == levels[l]){
                             tags[i].logLevel = l;
-                            if (l > CONFIG_LOG_DEFAULT_LEVEL){
+#ifndef _WIN32
+							if (l > CONFIG_LOG_DEFAULT_LEVEL){
                                 conPrintf("Log level %d must be lower than CONFIG_LOG_DEFAULT_LEVEL %d.\n", l, CONFIG_LOG_DEFAULT_LEVEL);
                             }
-#ifndef _WIN32
                             esp_log_level_set(tags[i].tag, (esp_log_level_t)tags[i].logLevel);
 #endif
 							conPrintf("%c %s\t= %c (%s)\n", (int)keys[i], tags[i].tag, (int)levels[tags[i].logLevel], tags[i].msg);

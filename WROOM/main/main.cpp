@@ -3,6 +3,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/event_groups.h"
+#include "esp_log.h"
 #ifndef _WIN32
 #include "esp_system.h"
 #include "esp_spi_flash.h"
@@ -10,14 +11,14 @@
 #include "esp_log.h"
 #include "nvs_flash.h"
 #include "rom/uart.h"
-#include "monitor.h"
 #include "ws_task.h"
 #endif
+#include "softRobot/monitor.h"
 
 static const char* TAG="main";
 
 extern "C" void softRobot_main();
-#ifdef USE_DUKTAPE
+#if defined USE_DUKTAPE && !defined _WIN32
 extern "C" void duktape_main();
 extern "C" void ws_main();
 #endif
@@ -41,8 +42,9 @@ extern "C" void app_main(){
 
     softRobot_main();
 	ESP_LOGI(TAG, "after softRobot_main heap size: %d \n", esp_get_free_heap_size());
-#ifdef USE_DUKTAPE
-    if(!wsIsJsfileTaskRunning()) {
+
+#if defined USE_DUKTAPE && !defined _WIN32
+	if(!wsIsJsfileTaskRunning()) {
         wsCreateJsfileTask();
         ESP_LOGI(TAG, "Start running default jsfile task.");
     }
@@ -52,14 +54,13 @@ extern "C" void app_main(){
 #ifdef USE_DUKTAPE
 	//duktape_main();
     esp_log_level_set("*", ESP_LOG_DEBUG);
-    ws_main();
 
-    if(!wsIsJsfileTaskRunning()) {
+#ifndef _WIN32
+	ws_main();
+	if(!wsIsJsfileTaskRunning()) {
         wsCreateJsfileTask();
         logPrintf("Start running default jsfile task");
     }
-
-#ifndef _WIN32
 	ESP_LOGI(TAG, "after ws_main heap size: %d \n", esp_get_free_heap_size());
 #endif
 #endif

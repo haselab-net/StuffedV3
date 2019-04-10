@@ -47,16 +47,16 @@ static duk_ret_t setMotorDirect(duk_context* ctx) {
     if (!cmd) return DUK_ERR_ERROR;
     if (cmd->length != (2+n0+n1)*2) return DUK_ERR_TYPE_ERROR;
 
-    // iterate pose
+    // set motor positions
     for(int i=0; i<n0; i++){
         duk_get_prop_index(ctx, -2, i);
-        cmd->data[i] = duk_get_int(ctx, -1);
+        cmd->SetMotorPos(duk_get_int(ctx, -1), i);
         duk_pop(ctx);
     }
-    // iterate velocity
+    // set motor velocities
     for(int i=0; i<n1; i++){
         duk_get_prop_index(ctx, -1, i);
-        cmd->data[n0+i] = duk_get_int(ctx, -1);
+        cmd->SetMotorVel(duk_get_int(ctx, -1), i);
         duk_pop(ctx);
     }
     //  send the packet
@@ -69,7 +69,44 @@ static duk_ret_t setMotorDirect(duk_context* ctx) {
 }
 
 // function setMotorInterpolate(data: {pose: number[], period: number[]});
-// TODO
+static duk_ret_t setMotorInterpolate(duk_context* ctx) {
+    // ... obj
+    duk_require_object(ctx, -1);
+
+    duk_get_prop_string(ctx, -1, "pose");
+    // ... obj pose
+    if (!duk_is_array(ctx, -1)) {
+        duk_pop_2(ctx);
+        return DUK_ERR_TYPE_ERROR;
+    }
+    size_t n0 = duk_get_length(ctx, -1);
+
+    //  Prepare command
+	UdpCmdPacket* cmd = udpCom.PrepareCommand(CI_INTERPOLATE);
+    if (!cmd) return DUK_ERR_ERROR;
+    if (cmd->length != (2+n0+2)*2) return DUK_ERR_TYPE_ERROR;
+
+    // set motor positions
+    for(int i=0; i<n0; i++){
+        duk_get_prop_index(ctx, -2, i);
+        cmd->SetMotorPos(duk_get_int(ctx, -1), i);
+        duk_pop(ctx);
+    }
+    //  set period
+    duk_get_prop_string(ctx, -2, "period");
+    cmd->SetPeriod(duk_get_int(ctx, -1));
+
+    duk_get_prop_string(ctx, -2, "targetCountWrite");
+    cmd->SetPeriod(duk_get_int(ctx, -1));
+
+    //  send the packet
+	udpCom.WriteCommand();
+
+    // ... obj pose velocity
+    duk_pop_3(ctx);
+    // ...
+    return 0;
+}
 
 // function setMotorParam(data: {paramType: command.SetParamType, params1: number[], params2: number[]}) // params2 is not used (undefined) in case PT_CURRENT
 // TODO
@@ -97,11 +134,8 @@ void commandMessageHandler(UdpRetPacket& ret) {
             //  touch [i] = ret.data[allBoards.GetNTotalMotor() + allBoards.GetNTotalCurrent() + allBoards.GetNTotalForce() + i];
             break;
         case CI_DIRECT:
-            // function onReceiveCIDirect(data: {pose: number[], velocity: number[]});
-            //  pose[i] = ret.data[i]
-            //  vel[i] = ret.data[allBoards.GetNTotalMotor() + i]
+            //  call onReceiveCIDirect(data: {pose: number[], velocity: number[]});
 
-            // ...
             // get function
             duk_get_global_string(ctx, "softrobot");
             duk_require_object(ctx, -1);
@@ -116,7 +150,7 @@ void commandMessageHandler(UdpRetPacket& ret) {
             // put prop pose
             duk_push_array(ctx);
             for(size_t i=0; i<allBoards.GetNTotalMotor(); i++){
-                duk_push_int(ctx, ret.data[i]);
+                duk_push_int(ctx, ret.GetMotorPos(i));
                 duk_put_prop_index(ctx, -2, i);
             }
             // ... softrobot message_command onReceiveCIDirect obj pose
@@ -126,7 +160,7 @@ void commandMessageHandler(UdpRetPacket& ret) {
             // TODO put prop velocity
             duk_push_array(ctx);
             for(size_t i=0; i<allBoards.GetNTotalMotor(); i++){
-                duk_push_int(ctx, ret.data[allBoards.GetNTotalMotor() + i]);
+                duk_push_int(ctx, ret.GetMotorVel(i));
                 duk_put_prop_index(ctx, -1, i);
             }
             duk_put_prop_string(ctx, -1, "velocity");
@@ -142,7 +176,46 @@ void commandMessageHandler(UdpRetPacket& ret) {
             break;
         case CI_INTERPOLATE:
             // function onReceiveCIInterpolate(data: {pose: number[], targetCountReadMin: number, targetCountReadMax: number, tickMin: number, tickMax: number});
-            // TODO 
+            // get function
+            duk_get_global_string(ctx, "softrobot");
+            duk_require_object(ctx, -1);
+            duk_get_prop_string(ctx, -1, "message_command");
+            duk_get_prop_string(ctx, -1, "onReceiveCIInterpolate");
+            // ... softrobot message_command onReceiveCIInterpolate
+
+            // get parameter
+            duk_push_object(ctx);
+            // ... softrobot message_command onReceiveCIInterpolate obj
+
+            // put prop pose
+            duk_push_array(ctx);
+            for(size_t i=0; i<allBoards.GetNTotalMotor(); i++){
+                duk_push_int(ctx, ret.GetMotorPos(i));
+                duk_put_prop_index(ctx, -2, i);
+            }
+            // ... softrobot message_command onReceiveCIDirect obj pose
+            duk_put_prop_string(ctx, -2, "pose");
+            // ... softrobot message_command onReceiveCIDirect obj
+
+            duk_push_int(ctx, ret.GetTargetCountReadMin());
+            duk_put_prop_string(ctx, -1, "targetCountReadMin");
+
+            duk_push_int(ctx, ret.GetTargetCountReadMax());
+            duk_put_prop_string(ctx, -1, "targetCountReadMax");
+
+            duk_push_int(ctx, ret.GetTickMin());
+            duk_put_prop_string(ctx, -1, "tickMin");
+
+            duk_push_int(ctx, ret.GetTickMax());
+            duk_put_prop_string(ctx, -1, "tickMax");
+
+            //  call callback
+            // ... softrobot message_command onReceiveCIDirect ????? TODO: I' not sure number or args on stack.
+            duk_call(ctx, 1);
+            // ... softrobot message_command return_value
+
+            duk_pop_3(ctx);
+            // ...
             break;
         case CI_SETPARAM:
             // function onReceiveCISetparam();
