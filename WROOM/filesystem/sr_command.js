@@ -9,10 +9,10 @@ var internalSRCommand = {};
 moduleSRCommand(internalSRCommand);
 
 var _ret = {
-    requireBoardInfo: function (data) {
+    requireBoardInfo: function () {
 
     },
-    requireSensorInfo: function (data) {
+    requireSensorInfo: function () {
 
     },
     setMotorDirect: function (data) {
@@ -27,6 +27,10 @@ var _ret = {
     },
     resetSensor: function (data) {
 
+    },
+    registerCallback: function (name, func) {
+        console.log("register function: "+name);
+        internalSRCommand.registerCallback(name, func);
     }
 }
 

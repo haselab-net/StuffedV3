@@ -174,9 +174,12 @@ var softrobot;
         device.checkRobotState = checkRobotState;
     })(device = softrobot.device || (softrobot.device = {}));
 })(softrobot || (softrobot = {}));
+
+// sr_command
 (function(softrobot) {
     softrobot.message_command = require("sr_command");
 })(softrobot || (softrobot = {}));
+
 (function (softrobot) {
     var message_command;
     (function (message_command) {
@@ -337,6 +340,19 @@ var softrobot;
         message_command.updateRemoteDirect = updateRemoteDirect;
     })(message_command = softrobot.message_command || (softrobot.message_command = {}));
 })(softrobot || (softrobot = {}));
+
+// register callbacks
+(function(softrobot) {
+    (function (message_command) {
+        message_command.registerCallback("onReceiveCIBoardinfo", message_command.onReceiveCIBoardinfo);
+        message_command.registerCallback("onReceiveCISensor", message_command.onReceiveCISensor);
+        message_command.registerCallback("onReceiveCIDirect", message_command.onReceiveCIDirect);
+        message_command.registerCallback("onReceiveCIInterpolate", message_command.onReceiveCIInterpolate);
+        message_command.registerCallback("onReceiveCISetparam", message_command.onReceiveCISetparam);
+        message_command.registerCallback("onReceiveCIResetsensor", message_command.onReceiveCIResetsensor);
+    })(message_command = softrobot.message_command || (softrobot.message_command = {}));
+})(softrobot || (softrobot = {}));
+
 (function (softrobot) {
     var movement;
     (function (movement) {
