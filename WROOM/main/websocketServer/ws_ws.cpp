@@ -200,16 +200,19 @@ void wsOnMessageSr(UdpRetPacket& ret) {
     printf("+ SR Packet \n");
     printPacketCommand(ret.bytes + 2, ret.length);
     
-    ret.count = PacketId::PI_COMMAND;     //  add packet id at the previous position.
-    // send packet to browser
-    wsSend(ret.bytes, ret.length+2);
-    ESP_LOGD(LOG_TAG, "Packet softrobot -> websocket");
-
-    // send packet to jsfile task
-    // return_packet_to_jsfile(buffer, buffer_size);
-    if(!esp32_duk_context) return;
-    commandMessageHandler(ret);
-    ESP_LOGD(LOG_TAG, "Packet softrobot -> jsfile");
+    if (ret.count == 0) {
+        // send packet to browser
+        wsSend(ret.bytes+2, ret.length);
+        ESP_LOGD(LOG_TAG, "Packet softrobot -> websocket");
+    } else if (ret.count == 1) {
+        // send packet to jsfile task
+        // return_packet_to_jsfile(buffer, buffer_size);
+        if(!esp32_duk_context) return;
+        commandMessageHandler(ret);
+        ESP_LOGD(LOG_TAG, "Packet softrobot -> jsfile");
+    } else {
+        ESP_LOGD(LOG_TAG, "Cannot find destination: %i", ret.count);
+    }
 }
 
 void printPacketJsfile(const void* pBuffer, size_t len) {
