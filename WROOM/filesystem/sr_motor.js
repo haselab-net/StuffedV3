@@ -1,5 +1,3 @@
-var softrobot = require("sr_softrobot");
-
 var motor;
 (function (motor_1) {
     function changeRemoteMotorParameter(motor, parameterType, value) {
@@ -28,11 +26,14 @@ var motor;
     }
     motor_1.changeLocalStringVelocity = changeLocalStringVelocity;
     function pushLocalMotorPVToRemoteDirect() {
-        softrobot.message_command.updateMotorPVDirect();
+        softrobot.message_command.updateRemoteDirect();
     }
     motor_1.pushLocalMotorPVToRemoteDirect = pushLocalMotorPVToRemoteDirect;
     function pushLocalMotorPVToRemoteInterpolate(period) {
-        softrobot.message_command.updateMotorPVInterpolate(period);
+        softrobot.movement.sendKeyframeQueue.enqueue({
+            pose: softrobot.device.robotState.getPropArray("pose", softrobot.device.robotState.motor),
+            period: period
+        });
     }
     motor_1.pushLocalMotorPVToRemoteInterpolate = pushLocalMotorPVToRemoteInterpolate;
 })(motor || (motor = {}));
