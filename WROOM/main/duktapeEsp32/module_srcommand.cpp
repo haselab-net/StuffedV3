@@ -144,7 +144,7 @@ void commandMessageHandler(UdpRetPacket& ret) {
             break;
         case CI_DIRECT:
             //  call onReceiveCIDirect(data: {pose: number[], velocity: number[]});
-            ESP_LOGD(TAG, "CI_DRECT from softrobot");
+            ESP_LOGD(Tag, "CI_DRECT from softrobot");
 
             // get function
             duk_get_global_string(ctx, "softrobot");
