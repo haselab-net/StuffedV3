@@ -1,5 +1,5 @@
 #include <iostream>
-#include <map>
+#include <cstring>
 extern "C" {
 
 #include <duktape.h>
@@ -12,8 +12,6 @@ extern "C" {
 #include "../softRobot/AllBoards.h"
 
 static const char* Tag = "SRCmd";
-
-static std::map<std::string, uint32_t> stash_key_map;
 
 ////////////////////////////////////////////////////////
 //////////////////////// send functions ////////////////
@@ -132,153 +130,212 @@ static duk_ret_t resetSensor(duk_context* ctx) {
 // function registerCallback(name: string, func: function);
 static duk_ret_t registerCallback(duk_context* ctx) {
     // ... name func
-    const char* name = duk_get_string(ctx, -2);
-    std::string name_str(name);
 
-    if(stash_key_map.find(name_str)!=stash_key_map.end()) esp32_duktape_stash_delete(ctx, stash_key_map[name_str]);             // delete last registered callback
-
-    if(!duk_is_function(ctx, -1)) {
-        printf("register_packet_callback: not a function\n");
-        duk_pop_2(ctx);
-        return 0;
+    bool ret = duk_get_global_string(ctx, "callbacks"); // we store all callback functions in global.callbacks 
+    if (!ret) { // if no such object, create new
+        duk_pop(ctx);
+        duk_push_object(ctx);
     }
+    // ... name func callbacks
+    
+    const char* name = duk_get_string(ctx, -3);
 
-    uint32_t stash_key_callback = esp32_duktape_stash_array(ctx, 1);
+    printf("register callback %s", name);
 
-    if(stash_key_callback==0) printf("register_packet_callback: register callback failed.\n");
-    else {
-        stash_key_map[name_str] = stash_key_callback;
-        printf("register_packet_callback: register callback success with stash key - %d\n", stash_key_callback);
-    }
+    duk_dup(ctx, -2);
+    // ... name func callbacks func
 
-    duk_pop(ctx);
+    duk_put_prop_string(ctx, -2, name);
+    // ... name func callbacks
+
+    duk_put_global_string(ctx, "callbacks");
+    // ... name func
+
+    duk_pop_2(ctx);
+    // ...
 
     return 0;
 }
 
 ////////////////////////////////////////////////////////
-//////////////////////// call callbacks ////////////////
+//////////////////////// receive functions /////////////
 ////////////////////////////////////////////////////////
-// function onReceiveCIBoardinfo(data: {systemId: number, nTarget: number, nMotor:number, nCurrent: number, nForces:number, nTouch: number, macAddress: ArrayBuffer});
-static int dataProvider_onReceiveCIBoardinfo(duk_context* ctx, void* context) {
-    UdpRetPacket* ret = (UdpRetPacket*)context;
+static bool pushFunction(duk_context* ctx, const char* name) {
+    bool ret = duk_get_global_string(ctx, "callbacks"); // we store all callback functions in global.callbacks 
+    if (!ret) { return false;}
+    
+    ret = duk_get_prop_string(ctx, -1, name);
+    if (!ret) { return false;}
 
+    return true;
+}
+static void putPropPos(duk_context* ctx, UdpRetPacket& ret) {
+    duk_push_array(ctx);
+    for(size_t i=0; i<allBoards.GetNTotalMotor(); i++){
+        duk_push_int(ctx, ret.GetMotorPos(i));
+        duk_put_prop_index(ctx, -2, i);
+    }
+    duk_put_prop_string(ctx, -2, "pose");
+}
+static void putPropVel(duk_context* ctx, UdpRetPacket& ret) {
+    duk_push_array(ctx);
+    for(size_t i=0; i<allBoards.GetNTotalMotor(); i++){
+        duk_push_int(ctx, ret.GetMotorVel(i));
+        duk_put_prop_index(ctx, -2, i);
+    }
+    duk_put_prop_string(ctx, -2, "velocity");
+}
+static void putPropCur(duk_context* ctx, UdpRetPacket& ret) {
+    duk_push_array(ctx);
+    for(size_t i=0; i<allBoards.GetNTotalCurrent(); i++){
+        duk_push_int(ctx, ret.GetCurrent(i));
+        duk_put_prop_index(ctx, -2, i);
+    }
+    duk_put_prop_string(ctx, -2, "current");
+} 
+static void putPropFor(duk_context* ctx, UdpRetPacket& ret) {
+    duk_push_array(ctx);
+    for(size_t i=0; i<allBoards.GetNTotalForce(); i++){
+        duk_push_int(ctx, ret.GetForce(i));
+        duk_put_prop_index(ctx, -2, i);
+    }
+    duk_put_prop_string(ctx, -2, "force");
+} 
+// function onReceiveCIBoardinfo(data: {systemId: number, nTarget: number, nMotor:number, nCurrent: number, nForces:number, nTouch: number, macAddress: ArrayBuffer});
+static size_t pushDataCIBoardinfo(duk_context* ctx, UdpRetPacket& ret) {
+    duk_push_object(ctx);
+
+    duk_push_number(ctx, ret.data[0]);
+    duk_put_prop_string(ctx, -1, "systemId");
+
+    duk_push_number(ctx, ret.data[1]);
+    duk_put_prop_string(ctx, -1, "nTarget");
+
+    duk_push_number(ctx, ret.data[2]);
+    duk_put_prop_string(ctx, -1, "nMotor");
+
+    duk_push_number(ctx, ret.data[3]);
+    duk_put_prop_string(ctx, -1, "nCurrent");
+
+    duk_push_number(ctx, ret.data[4]);
+    duk_put_prop_string(ctx, -1, "nForces");
+
+    duk_push_number(ctx, ret.data[5]);
+    duk_put_prop_string(ctx, -1, "nTouch");
+
+    void* p = duk_push_fixed_buffer(ctx, 6);
+    std::memcpy(p, (void *)&ret.data[6], 6);
+    duk_push_buffer_object(ctx, -1, 0, 6, DUK_BUFOBJ_ARRAYBUFFER);
+    duk_put_prop_string(ctx, -1, "macAddress");
+    duk_pop(ctx);
+
+    return 1;
+}
+// function onReceiveCISensor(data: {pose: number[], current: number[], force: number[]});
+static size_t pushDataCISensor(duk_context* ctx, UdpRetPacket& ret) {
+    // get parameter
+    duk_push_object(ctx);
+    // ... obj
+
+    putPropPos(ctx, ret);
+    putPropCur(ctx, ret);
+    putPropFor(ctx, ret);
+
+    return 1;
+}
+// function onReceiveCIDirect(data: {pose: number[], velocity: number[]});
+static size_t pushDataCIDirect(duk_context* ctx, UdpRetPacket& ret) {
     // get parameter
     duk_push_object(ctx);
     // ... obj
 
     // put prop pose
-    duk_push_array(ctx);
-    for(size_t i=0; i<allBoards.GetNTotalMotor(); i++){
-        duk_push_int(ctx, ret->GetMotorPos(i));
-        duk_put_prop_index(ctx, -2, i);
-    }
-    // ... obj pose
-    duk_put_prop_string(ctx, -2, "pose");
+    putPropPos(ctx, ret);
 
     // put prop velocity
-    duk_push_array(ctx);
-    for(size_t i=0; i<allBoards.GetNTotalMotor(); i++){
-        duk_push_int(ctx, ret->GetMotorVel(i));
-        duk_put_prop_index(ctx, -2, i);
-    }
-    duk_put_prop_string(ctx, -2, "velocity");
+    putPropVel(ctx, ret);
 
     return 1;
 }
-// function onReceiveCISensor(data: {pose: number[], current: number[], force: number[]});
-// function onReceiveCIDirect(data: {pose: number[], velocity: number[]});
 // function onReceiveCIInterpolate(data: {pose: number[], targetCountReadMin: number, targetCountReadMax: number, tickMin: number, tickMax: number});
+static size_t pushDataCIInterpolate(duk_context* ctx, UdpRetPacket& ret) {
+    // get parameter
+    duk_push_object(ctx);
+    // ... obj
+
+    putPropPos(ctx, ret);
+
+    duk_push_int(ctx, ret.GetTargetCountReadMin());
+    duk_put_prop_string(ctx, -1, "targetCountReadMin");
+    duk_push_int(ctx, ret.GetTargetCountReadMax());
+    duk_put_prop_string(ctx, -1, "targetCountReadMax");
+    duk_push_int(ctx, ret.GetTickMin());
+    duk_put_prop_string(ctx, -1, "tickMin");
+    duk_push_int(ctx, ret.GetTickMax());
+    duk_put_prop_string(ctx, -1, "tickMax");
+
+    return 1;
+}
 // function onReceiveCISetparam();
 // function onReceiveCIResetsensor();
 
-////////////////////////////////////////////////////////
-//////////////////////// receive functions /////////////
-////////////////////////////////////////////////////////
 void commandMessageHandler(UdpRetPacket& ret) {
-	xSemaphoreTake(esp32_duk_context_mutex, portMAX_DELAY);	//	lock esp32_duk_context
+	lock_heap();
     //  do not return from this function until unlock (call Give).
 
-	(void) duk_push_thread(esp32_duk_context);
-    duk_context* ctx= duk_get_context(esp32_duk_context, -1);
+    duk_context* ctx= esp32_duk_context;
+    duk_idx_t top = duk_get_top(ctx);
     switch (ret.command)
     {
-        case CI_BOARD_INFO:
-            // function onReceiveCIBoardinfo(data: {systemId: number, nTarget: number, nMotor:number, nCurrent: number, nForces:number, nTouch: number, macAddress: ArrayBuffer});
-            //  ret.data[0], ret.data[1], ret.date[2] ... corresponds. TODO: Call js function with them.
+        case CI_BOARD_INFO: {
+            bool flag = pushFunction(ctx, "onReceiveCIBoardinfo");
+            if(!flag) break;
+            size_t argN = pushDataCIBoardinfo(ctx, ret);
+            duk_pcall(ctx, argN);
             break;
-        case CI_SENSOR:
-            // TODO
-            // function onReceiveCISensor(data: {pose: number[], current: number[], force: number[]});
-            //  pose[i] = ret.data[i];
-            //  current[i] = ret.data[allBoards.GetNTotalMotor() + i]
-            //  force[i] = ret.data[allBoards.GetNTotalMotor() + allBoards.GetNTotalCurrent() + i]
-            //  touch [i] = ret.data[allBoards.GetNTotalMotor() + allBoards.GetNTotalCurrent() + allBoards.GetNTotalForce() + i];
+        }
+        case CI_SENSOR:{
+            bool flag = pushFunction(ctx, "onReceiveCISensor");
+            if(!flag) break;
+            size_t argN = pushDataCISensor(ctx, ret);
+            duk_pcall(ctx, argN);
             break;
+        }
         case CI_DIRECT: {
-            event_newCallbackRequestedEvent(
-                ESP32_DUKTAPE_CALLBACK_STATIC_TYPE_FUNCTION,
-                stash_key_map["onReceiveCIDirect"], // Stash key for stashed callback array
-                dataProvider_onReceiveCIBoardinfo, // Data provider parameter
-                (void*)&ret // Context parameter
-            );
+            bool flag = pushFunction(ctx, "onReceiveCIDirect");
+            if(!flag) break;
+            size_t argN = pushDataCIDirect(ctx, ret);
+            duk_pcall(ctx, argN);
             
             break;
         }
-        case CI_INTERPOLATE:
-            // // function onReceiveCIInterpolate(data: {pose: number[], targetCountReadMin: number, targetCountReadMax: number, tickMin: number, tickMax: number});
-            // // get function
-            // duk_get_global_string(ctx, "callbacks");
-            // duk_require_object(ctx, -1);
-            // duk_get_prop_string(ctx, -1, "onReceiveCIInterpolate");
-            // // ... callbacks onReceiveCIInterpolate
-
-            // // get parameter
-            // duk_push_object(ctx);
-            // // ... callbacks onReceiveCIInterpolate obj
-
-            // // put prop pose
-            // duk_push_array(ctx);
-            // for(size_t i=0; i<allBoards.GetNTotalMotor(); i++){
-            //     duk_push_int(ctx, ret.GetMotorPos(i));
-            //     duk_put_prop_index(ctx, -2, i);
-            // }
-            // // ... callbacks onReceiveCIDirect obj pose
-            // duk_put_prop_string(ctx, -2, "pose");
-            // // ... callbacks onReceiveCIDirect obj
-
-            // duk_push_int(ctx, ret.GetTargetCountReadMin());
-            // duk_put_prop_string(ctx, -1, "targetCountReadMin");
-
-            // duk_push_int(ctx, ret.GetTargetCountReadMax());
-            // duk_put_prop_string(ctx, -1, "targetCountReadMax");
-
-            // duk_push_int(ctx, ret.GetTickMin());
-            // duk_put_prop_string(ctx, -1, "tickMin");
-
-            // duk_push_int(ctx, ret.GetTickMax());
-            // duk_put_prop_string(ctx, -1, "tickMax");
-
-            // //  call callback
-            // // ... callbacks onReceiveCIDirect ????? TODO: I' not sure number or args on stack.
-            // duk_call(ctx, 1);
-            // // ... callbacks return_value
-
-            // duk_pop_3(ctx);
-            // // ...
+        case CI_INTERPOLATE: {
+            bool flag = pushFunction(ctx, "onReceiveCIInterpolate");
+            if(!flag) break;
+            size_t argN = pushDataCIInterpolate(ctx, ret);
+            duk_pcall(ctx, argN);
+            
             break;
-        case CI_SETPARAM:
-            // function onReceiveCISetparam();
-            // TODO  
+        }
+        case CI_SETPARAM: {
+            bool flag = pushFunction(ctx, "onReceiveCISetparam");
+            duk_pcall(ctx, 0);
+            
             break;
-        case CI_RESET_SENSOR:
-            // function onReceiveCIResetsensor();
-            // TODO 
+        }
+        case CI_RESET_SENSOR: {
+            bool flag = pushFunction(ctx, "onReceiveCIResetsensor");
+            duk_pcall(ctx, 0);
+            
             break;
+        }
         default:
             break;
     }
-	xSemaphoreGive(esp32_duk_context_mutex);	//	unlock esp32_duk_context
+
+    duk_pop_n(ctx, duk_get_top(ctx)-top);
+
+	unlock_heap();
 }
 
 ////////////////////////////////////////////////////////

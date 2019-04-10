@@ -17,6 +17,8 @@ LOG_TAG("duktape_jsfile");
 
 // The Duktape context.
 duk_context *esp32_duk_context = NULL;
+// mutex for heap
+static xSemaphoreHandle heap_mutex;
 
 // force to read from posix (espfs can not read the file altered in runtime)
 static void runFileFromPosix(duk_context *ctx, const char *fileName) {
@@ -183,6 +185,14 @@ void handle_event() {
     vTaskDelay(1);
 }
 
+void lock_heap() {
+	xSemaphoreTake(heap_mutex, portMAX_DELAY);
+}
+
+void unlock_heap() {
+	xSemaphoreGive(heap_mutex);
+}
+
 void duktape_start() {
     esp32_duktape_initEvents();
 
@@ -191,6 +201,7 @@ void duktape_start() {
     createJSFileHeap();
 
     //duk_idx_t lastStackTop = duk_get_top(esp32_duk_context); // Get the last top value of the stack from which we will use to check for leaks.
+	heap_mutex = xSemaphoreCreateMutex();
 
     runJsFile();
 }
@@ -198,6 +209,11 @@ void duktape_start() {
 void duktape_end(){
     esp32_duktape_endEvents();
 
+	lock_heap();
+
     duk_destroy_heap( esp32_duk_context );
     esp32_duk_context = NULL;
+
+	unlock_heap();
+	vSemaphoreDelete(heap_mutex);
 }

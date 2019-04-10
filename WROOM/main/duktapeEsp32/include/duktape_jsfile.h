@@ -10,8 +10,10 @@ extern SemaphoreHandle_t esp32_duk_context_mutex;
 
 void handle_event();
 
-void duktape_start();
+void lock_heap();
+void unlock_heap();
 
+void duktape_start();
 void duktape_end();
 
 #endif
