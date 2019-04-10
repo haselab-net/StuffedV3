@@ -263,7 +263,7 @@ void UdpCom::WriteCommand() {
 }
 
 void UdpCom::OnReceiveServer(void* payload, int len) {
-	UdpCmdPacket* recv = PrepareCommand();
+	UdpCmdPacket* recv = PrepareCommand((CommandId)((short*)payload)[1]);	//	[0] is length, [1] is command id
 	if (!recv) return;
 	memcpy(recv->bytes + 2, payload, len);
 	WriteCommand();
@@ -287,7 +287,7 @@ void UdpCom::SendText(char* text, short errorlevel) {
     memcpy (pb->payload, send.bytes, send.length+2);
 #ifndef _WIN32
 	//	send to server
-	wsOnMessageSr(send.bytes+2, send.length);
+	wsOnMessageSr(send);
 #endif
 	//	send to UDP
 #ifdef _WIN32
@@ -323,7 +323,7 @@ void UdpCom::SendReturn(UdpCmdPacket& recv) {
 }
 void UdpCom::SendReturnServer() {
 #ifndef _WIN32
-	wsOnMessageSr(send.bytes+2, send.length);
+	wsOnMessageSr(send);
 #endif
 }
 void UdpCom::SendReturnUdp(UdpCmdPacket& recv) {

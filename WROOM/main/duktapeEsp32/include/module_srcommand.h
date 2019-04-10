@@ -3,7 +3,10 @@
 
 #include <duktape.h>
 
-void commandMessageHandler(void* buffer, size_t buffer_size);
+#ifdef __cplusplus
+class UdpRetPacket;
+void commandMessageHandler(UdpRetPacket& ret);
+#endif
 
 duk_ret_t ModuleSRCommand(duk_context *ctx);
 

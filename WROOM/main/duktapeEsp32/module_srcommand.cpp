@@ -80,8 +80,8 @@ static duk_ret_t setMotorDirect(duk_context* ctx) {
 ////////////////////////////////////////////////////////
 //////////////////////// receive functions /////////////
 ////////////////////////////////////////////////////////
-void commandMessageHandler(void* buffer, size_t buffer_size) {
-    UdpRetPacket* ret = (UdpRetPacket*) (((short*)buffer) - 1);
+void commandMessageHandler(UdpRetPacket& ret) {
+    duk_context* ctx=NULL;  //  TODO: get ctx
     switch (ret.command)
     {
         case CI_BOARD_INFO:
@@ -111,13 +111,19 @@ void commandMessageHandler(void* buffer, size_t buffer_size) {
 
             // put prop pose
             duk_push_array(ctx);
-            for(size_t i=0; i<nMotor; i++){
-                duk_push_int(ctx, *(++i16p));
+            for(size_t i=0; i<allBoards.GetNTotalMotor(); i++){
+                duk_push_int(ctx, ret.data[i]);
                 duk_put_prop_index(ctx, -1, i);
             }
             duk_put_prop_string(ctx, -1, "pose");
 
             // TODO put prop velocity
+            duk_push_array(ctx);
+            for(size_t i=0; i<allBoards.GetNTotalMotor(); i++){
+                duk_push_int(ctx, ret.data[allBoards.GetNTotalMotor() + i]);
+                duk_put_prop_index(ctx, -1, i);
+            }
+            duk_put_prop_string(ctx, -1, "velocity");
 
             //  call callback
             duk_call(ctx, 1);

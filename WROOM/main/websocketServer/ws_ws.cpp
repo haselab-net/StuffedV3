@@ -12,7 +12,7 @@
 extern "C" {
 #include "module_jslib.h"
 }
-#include "UdpCom.h"
+#include "../SoftRobot/UdpCom.h"
 #include "module_srcommand.h"
 
 #include "ws_command.h"
@@ -195,19 +195,18 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
  * Handle message from softrobot
  * send command to browser and jsfile task
  */
-void wsOnMessageSr(void* buffer, size_t buffer_size) {
+void wsOnMessageSr(UdpRetPacket& ret) {
     printf("+ SR Packet");
-    printPacketCommand(buffer, buffer_size);
+    printPacketCommand(ret.bytes + 2, ret.length);
     
-    int16_t* ret = (short*)buffer;
-    ret[-1] = PacketId::PI_COMMAND;     //  add packet id at the previous position.
+    ret.count = PacketId::PI_COMMAND;     //  add packet id at the previous position.
     // send packet to browser
-    wsSend(ret-1, buffer_size+2);
+    wsSend(ret.bytes, ret.length+2);
     ESP_LOGD(LOG_TAG, "Packet from softrobot sent to websocket");
 
     // send packet to jsfile task
     // return_packet_to_jsfile(buffer, buffer_size);
-    commandMessageHandler(buffer, buffer_size);
+    commandMessageHandler(ret);
     ESP_LOGD(LOG_TAG, "Packet from softrobot sent to jsfile");
 }
 

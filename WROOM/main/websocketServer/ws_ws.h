@@ -12,7 +12,10 @@ class SRWebSocketHandler: public WebSocketHandler {
 void wsOnConnected(WebSocket* pWS);
 
 void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket* pWebSocket);
-void wsOnMessageSr(void* buffer, size_t buffer_size);
+#ifdef __cplusplus
+class UdpRetPacket;
+void wsOnMessageSr(UdpRetPacket& ret);
+#endif
 
 void printPacketJsfile(const void* pBuffer, size_t len);
 void printPacketCommand(const void* pBuffer, size_t len);
