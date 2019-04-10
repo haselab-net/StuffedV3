@@ -41,8 +41,6 @@
 #include "module_spi.h"
 #include "module_ssl.h"
 #include "module_wifi.h"
-#include "module_softrobot.h"
-#include "module_jsfile.h"
 #include "module_jslib.h"
 #include "module_srcommand.h"
 LOG_TAG("modules");
@@ -110,8 +108,6 @@ functionTableEntry_t functionTable[] = {
 	{ "ModuleSerialVFS",  ModuleSerialVFS,  1},
 	{ "ModuleSPI",        ModuleSPI,        1},
 	{ "ModuleSSL",        ModuleSSL,        1},
-	//{ "ModuleSoftrobot",  ModuleSoftrobot,	1},			// register softrobot module
-	//{ "ModuleJSFile",	  ModuleJSFile,		1},			// register jsfile module
 	{ "ModuleJSLib",	  ModuleJSLib,		1},			// register jslib module
 	{ "ModuleSRCommand",  ModuleSRCommand,	1},			// register srcommand module
 #endif // ESP_PLATFORM
