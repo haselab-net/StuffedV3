@@ -127,6 +127,8 @@ static duk_ret_t resetSensor(duk_context* ctx) {
 //////////////////////// receive functions /////////////
 ////////////////////////////////////////////////////////
 void commandMessageHandler(UdpRetPacket& ret) {
+	xSemaphoreTake(esp32_duk_context_mutex, portMAX_DELAY);	//	lock esp32_duk_context
+    //  do not return from this function until unlock (call Give).
     (void) duk_push_thread(esp32_duk_context);
     duk_context* ctx= duk_get_context(esp32_duk_context, -1);
     switch (ret.command)
@@ -252,6 +254,7 @@ void commandMessageHandler(UdpRetPacket& ret) {
         default:
             break;
     }
+	xSemaphoreGive(esp32_duk_context_mutex);	//	unlock esp32_duk_context
 }
 
 ////////////////////////////////////////////////////////

@@ -34,6 +34,8 @@ LOG_TAG("duktape_task");
 
 // The Duktape context.
 duk_context *esp32_duk_context;
+//	Mutex for context
+xSemaphoreHandle esp32_duk_context_mutex;
 
 /*
  * Log a logo to the console.
@@ -72,6 +74,9 @@ void duktape_init_environment() {
 	// about to create a new one.
 	if (esp32_duk_context != NULL) {
 		duk_destroy_heap(esp32_duk_context);
+	}else{
+		esp32_duk_context_mutex = xSemaphoreCreateMutex();	//	create mutex
+		xSemaphoreTake(esp32_duk_context_mutex, portMAX_DELAY);			//	and take it.
 	}
 
 	LOGD("About to create heap");
@@ -302,11 +307,12 @@ void duktape_task(void* ignore) {
 			esp32_duktape_dump_value_stack(esp32_duk_context);
 			lastStackTop = duk_get_top(esp32_duk_context);
 		} // End of check for value stack leakage.
-
+		xSemaphoreGive(esp32_duk_context_mutex);	//	unlock esp32_duk_context
 #if defined(ESP_PLATFORM)
 		//taskYIELD();
-		vTaskDelay(1);
+		vTaskDelay(1);		//	during this period, we can use the context
 #endif /* ESP_PLATFORM */
+		xSemaphoreTake(esp32_duk_context_mutex, portMAX_DELAY);	//	lock esp32_duk_context (wait until finish to use the cotext)
 
 	} // End while loop.
 
