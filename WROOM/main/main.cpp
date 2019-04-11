@@ -47,7 +47,6 @@ extern "C" void app_main(){
 
 #ifdef USE_DUKTAPE
 	//duktape_main();
-    esp_log_level_set("*", ESP_LOG_DEBUG);
 
 #ifndef _WIN32
 	ws_main();

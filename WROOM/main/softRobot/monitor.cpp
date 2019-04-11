@@ -282,6 +282,9 @@ public:
         tags.push_back(Tag(UdpCom::Tag(), "UdpCom"));
         tags.push_back(Tag(BoardBase::Tag(), "Board"));
         tags.push_back(Tag(BoardFactoryBase::Tag(), "BoardFactory"));
+        tags.push_back(Tag("ws_ws", "Web socket"));
+        tags.push_back(Tag("SRCmd", "module srCommand"));
+        tags.push_back(Tag("duktape_jsfile", "duktape_jsfile.c"));
         Init();
     }
     void Init(){
