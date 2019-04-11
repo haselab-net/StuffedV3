@@ -90,7 +90,7 @@ class MCTaskList: public MonitorCommandBase{
     void Func(){
         char buf[1024*2];
         vTaskList(buf);
-        conPrintf("%s\n", buf);
+        conPrintf("Task\t\tState\tPrio\tStack\tNum\n%s\n", buf);
     }
 } mcTaskList;
  
@@ -202,6 +202,15 @@ class MCShowHeap: public MonitorCommandBase{
     const char* Desc(){ return "h Show heap memory"; }
     void Func(){
 		conPrintf("Heap free size: %d bytes", esp_get_free_heap_size());
+        conPrintf(" a:dump all  c:check\n");
+        switch(getchWait()){
+            case 'a':
+                heap_caps_dump_all();
+                break;
+            case 'c':
+                heap_caps_check_integrity_all(true);
+                break;
+        }
 	}
 } mcShowHeap;
 #endif
