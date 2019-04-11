@@ -16,14 +16,163 @@ static const char* Tag = "SRCmd";
 ////////////////////////////////////////////////////////
 //////////////////////// send functions ////////////////
 ////////////////////////////////////////////////////////
+static int getPropPos(duk_context* ctx, UdpCmdPacket* cmd) {        // return prop length, or error with -1
+    duk_get_prop_string(ctx, -1, "pose");
+    // ... obj pose
+    if (!duk_is_array(ctx, -1)) {
+        duk_pop(ctx);
+        return -1;
+    }
+    size_t n = duk_get_length(ctx, -1);
+
+    // set motor positions
+    for(int i=0; i<n; i++){
+        duk_get_prop_index(ctx, -1, i);
+        cmd->SetMotorPos(duk_get_int(ctx, -1), i);
+        duk_pop(ctx);
+    }
+
+    duk_pop(ctx);
+
+    return n;
+}
+static int getPropVel(duk_context* ctx, UdpCmdPacket* cmd) {        // return prop length, or error with -1
+    duk_get_prop_string(ctx, -1, "velocity");
+    // ... obj velocity
+    if (!duk_is_array(ctx, -1)) {
+        duk_pop(ctx);
+        return -1;
+    }
+    size_t n = duk_get_length(ctx, -1);
+
+    // set motor positions
+    for(int i=0; i<n; i++){
+        duk_get_prop_index(ctx, -1, i);
+        cmd->SetMotorVel(duk_get_int(ctx, -1), i);
+        duk_pop(ctx);
+    }
+
+    duk_pop(ctx);
+
+    return n;
+}
+static int getPropTorMin(duk_context* ctx, UdpCmdPacket* cmd) {        // return prop length, or error with -1
+    duk_get_prop_string(ctx, -1, "params1");
+    if (!duk_is_array(ctx, -1)) {
+        duk_pop(ctx);
+        return -1;
+    }
+    size_t n = duk_get_length(ctx, -1);
+
+    // set motor positions
+    for(int i=0; i<n; i++){
+        duk_get_prop_index(ctx, -1, i);
+        cmd->SetTorqueMin(duk_get_int(ctx, -1), i);
+        duk_pop(ctx);
+    }
+
+    duk_pop(ctx);
+
+    return n;
+}
+static int getPropTorMax(duk_context* ctx, UdpCmdPacket* cmd) {        // return prop length, or error with -1
+    duk_get_prop_string(ctx, -1, "params2");
+    if (!duk_is_array(ctx, -1)) {
+        duk_pop(ctx);
+        return -1;
+    }
+    size_t n = duk_get_length(ctx, -1);
+
+    // set motor positions
+    for(int i=0; i<n; i++){
+        duk_get_prop_index(ctx, -1, i);
+        cmd->SetTorqueMax(duk_get_int(ctx, -1), i);
+        duk_pop(ctx);
+    }
+
+    duk_pop(ctx);
+
+    return n;
+}
+static int getPropConK(duk_context* ctx, UdpCmdPacket* cmd) {        // return prop length, or error with -1
+    duk_get_prop_string(ctx, -1, "params1");
+    if (!duk_is_array(ctx, -1)) {
+        duk_pop(ctx);
+        return -1;
+    }
+    size_t n = duk_get_length(ctx, -1);
+
+    // set motor positions
+    for(int i=0; i<n; i++){
+        duk_get_prop_index(ctx, -1, i);
+        cmd->SetControlK(duk_get_int(ctx, -1), i);
+        duk_pop(ctx);
+    }
+
+    duk_pop(ctx);
+
+    return n;
+}
+static int getPropConB(duk_context* ctx, UdpCmdPacket* cmd) {        // return prop length, or error with -1
+    duk_get_prop_string(ctx, -1, "params2");
+    if (!duk_is_array(ctx, -1)) {
+        duk_pop(ctx);
+        return -1;
+    }
+    size_t n = duk_get_length(ctx, -1);
+
+    // set motor positions
+    for(int i=0; i<n; i++){
+        duk_get_prop_index(ctx, -1, i);
+        cmd->SetControlB(duk_get_int(ctx, -1), i);
+        duk_pop(ctx);
+    }
+
+    duk_pop(ctx);
+
+    return n;
+}
+static int getPropConA(duk_context* ctx, UdpCmdPacket* cmd) {        // return prop length, or error with -1
+    duk_get_prop_string(ctx, -1, "params1");
+    if (!duk_is_array(ctx, -1)) {
+        duk_pop(ctx);
+        return -1;
+    }
+    size_t n = duk_get_length(ctx, -1);
+
+    // set motor positions
+    for(int i=0; i<n; i++){
+        duk_get_prop_index(ctx, -1, i);
+        cmd->SetControlA(duk_get_int(ctx, -1), i);
+        duk_pop(ctx);
+    }
+
+    duk_pop(ctx);
+
+    return n;
+}
 
 // function requireBoardInfo();
 static duk_ret_t requireBoardInfo(duk_context* ctx) {
+    //  Prepare command
+	UdpCmdPacket* cmd = udpCom.PrepareCommand(CI_BOARD_INFO, 1);
+    if (!cmd) return DUK_RET_ERROR;
+
+    //  send the packet
+	udpCom.WriteCommand();
+
     return 0;
 }
 
 // function requireSensorInfo();
 static duk_ret_t requireSensorInfo(duk_context* ctx) {
+    //  Prepare command
+	UdpCmdPacket* cmd = udpCom.PrepareCommand(CI_SENSOR, 1);
+    if (!cmd) return DUK_RET_ERROR;
+
+    //  send the packet
+	udpCom.WriteCommand();
+
     return 0;
 }
 
@@ -32,45 +181,23 @@ static duk_ret_t setMotorDirect(duk_context* ctx) {
     // ... obj
     duk_require_object(ctx, -1);
 
-    duk_get_prop_string(ctx, -1, "pose");
-    // ... obj pose
-    if (!duk_is_array(ctx, -1)) {
-        duk_pop_2(ctx);
-        return DUK_ERR_TYPE_ERROR;
-    }
-    size_t n0 = duk_get_length(ctx, -1);
-
-    duk_get_prop_string(ctx, -2, "velocity");
-    // ... obj pose velocity
-    if (!duk_is_array(ctx, -1)) {
-        duk_pop_3(ctx);
-        return DUK_ERR_TYPE_ERROR;
-    }
-    size_t n1 = duk_get_length(ctx, -1);
-
     //  Prepare command
 	UdpCmdPacket* cmd = udpCom.PrepareCommand(CI_DIRECT, 1);
-    if (!cmd) return DUK_ERR_ERROR;
-    if (cmd->length != (2+n0+n1)*2) return DUK_ERR_TYPE_ERROR;
+    if (!cmd) return DUK_RET_ERROR;
 
-    // set motor positions
-    for(int i=0; i<n0; i++){
-        duk_get_prop_index(ctx, -2, i);
-        cmd->SetMotorPos(duk_get_int(ctx, -1), i);
-        duk_pop(ctx);
-    }
-    // set motor velocities
-    for(int i=0; i<n1; i++){
-        duk_get_prop_index(ctx, -1, i);
-        cmd->SetMotorVel(duk_get_int(ctx, -1), i);
-        duk_pop(ctx);
-    }
+    int n0 = getPropPos(ctx, cmd);
+    int n1 = getPropVel(ctx, cmd);
+    if (n0<0 || n1<0) return DUK_RET_TYPE_ERROR;
+
+    if (cmd->length != (2+n0+n1)*2) return DUK_RET_TYPE_ERROR;
+
     //  send the packet
 	udpCom.WriteCommand();
 
-    // ... obj pose velocity
-    duk_pop_3(ctx);
+    // ... obj
+    duk_pop(ctx);
     // ...
+
     return 0;
 }
 
@@ -79,48 +206,108 @@ static duk_ret_t setMotorInterpolate(duk_context* ctx) {
     // ... obj
     duk_require_object(ctx, -1);
 
-    duk_get_prop_string(ctx, -1, "pose");
-    // ... obj pose
-    if (!duk_is_array(ctx, -1)) {
-        duk_pop_2(ctx);
-        return DUK_ERR_TYPE_ERROR;
-    }
-    size_t n0 = duk_get_length(ctx, -1);
-
     //  Prepare command
 	UdpCmdPacket* cmd = udpCom.PrepareCommand(CI_INTERPOLATE, 1);
-    if (!cmd) return DUK_ERR_ERROR;
-    if (cmd->length != (2+n0+2)*2) return DUK_ERR_TYPE_ERROR;
+    if (!cmd) return DUK_RET_ERROR;
 
-    // set motor positions
-    for(int i=0; i<n0; i++){
-        duk_get_prop_index(ctx, -2, i);
-        cmd->SetMotorPos(duk_get_int(ctx, -1), i);
-        duk_pop(ctx);
-    }
+    int n0 = getPropPos(ctx, cmd);
+    if(n0<0) return DUK_RET_TYPE_ERROR;
+
+    if (cmd->length != (2+n0+2)*2) return DUK_RET_TYPE_ERROR;
+
     //  set period
-    duk_get_prop_string(ctx, -2, "period");
+    bool flag = duk_get_prop_string(ctx, -2, "period");
+    if(!flag) return DUK_RET_REFERENCE_ERROR;
     cmd->SetPeriod(duk_get_int(ctx, -1));
+    duk_pop(ctx);
 
-    duk_get_prop_string(ctx, -2, "targetCountWrite");
-    cmd->SetPeriod(duk_get_int(ctx, -1));
+    // set targetCountWrite
+    flag = duk_get_prop_string(ctx, -2, "targetCountWrite");
+    if(!flag) return DUK_RET_REFERENCE_ERROR;
+    cmd->SetTargetCountWrite(duk_get_int(ctx, -1));
+    duk_pop(ctx);
 
     //  send the packet
 	udpCom.WriteCommand();
 
-    // ... obj pose velocity
-    duk_pop_3(ctx);
+    // ... obj
+    duk_pop(ctx);
     // ...
     return 0;
 }
 
 // function setMotorParam(data: {paramType: command.SetParamType, params1: number[], params2: number[]}) // params2 is not used (undefined) in case PT_CURRENT
 static duk_ret_t setMotorParam(duk_context* ctx) {
+    // ... obj
+    duk_require_object(ctx, -1);
+
+    //  Prepare command
+	UdpCmdPacket* cmd = udpCom.PrepareCommand(CI_SETPARAM, 1);
+    if (!cmd) return DUK_RET_ERROR;
+
+    bool flag = duk_get_prop_string(ctx, -1, "paramType");
+    if(!flag) return DUK_RET_REFERENCE_ERROR;
+
+    int type = duk_get_int(ctx, -1);
+    duk_pop(ctx);
+    switch (type)
+    {
+        case PT_PD: {
+            int n0 = getPropConK(ctx, cmd);
+            if(n0<0) return DUK_RET_TYPE_ERROR;
+            int n1 = getPropConB(ctx, cmd);
+            if(n1<0) return DUK_RET_TYPE_ERROR;
+
+            if(cmd->length!=(2+1+n0+n1)*2) return DUK_RET_TYPE_ERROR;
+            break;
+        }
+        case PT_CURRENT: {
+            int n0 = getPropConA(ctx, cmd);
+            if(n0<0) return DUK_RET_TYPE_ERROR;
+
+            if(cmd->length!=(2+1+n0)*2) return DUK_RET_TYPE_ERROR;
+            break;
+        }
+        case PT_TORQUE_LIMIT: {
+            int n0 = getPropTorMin(ctx, cmd);
+            if(n0<0) return DUK_RET_TYPE_ERROR;
+            int n1 = getPropTorMax(ctx, cmd);
+            if(n1<0) return DUK_RET_TYPE_ERROR;
+
+            if(cmd->length!=(2+1+n0+n1)*2) return DUK_RET_TYPE_ERROR;
+            break;
+        }
+    
+        default:
+            return DUK_RET_TYPE_ERROR;
+    }
+    //  send the packet
+	udpCom.WriteCommand();
+
+    duk_pop(ctx);
+
     return 0;
 }
 
 // function resetSensor(data: {resetSensorFlag: command.ResetSensorFlags});
 static duk_ret_t resetSensor(duk_context* ctx) {
+    // ... obj
+    duk_require_object(ctx, -1);
+
+    //  Prepare command
+	UdpCmdPacket* cmd = udpCom.PrepareCommand(CI_RESET_SENSOR, 1);
+    if (!cmd) return DUK_RET_ERROR;
+
+    bool flag = duk_get_prop_string(ctx, -1, "resetSensorFlag");
+    if(!flag) return DUK_RET_REFERENCE_ERROR;
+    cmd->SetResetSensorFlags(duk_get_int(ctx, -1));
+    duk_pop(ctx);
+
+    //  send the packet
+	udpCom.WriteCommand();
+
+    duk_pop(ctx);
+
     return 0;
 }
 
@@ -319,12 +506,14 @@ void commandMessageHandler(UdpRetPacket& ret) {
         }
         case CI_SETPARAM: {
             bool flag = pushFunction(ctx, "onReceiveCISetparam");
+            if(!flag) break;
             duk_pcall(ctx, 0);
             
             break;
         }
         case CI_RESET_SENSOR: {
             bool flag = pushFunction(ctx, "onReceiveCIResetsensor");
+            if(!flag) break;
             duk_pcall(ctx, 0);
             
             break;
