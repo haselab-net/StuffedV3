@@ -7,6 +7,7 @@
 #include "esp_system.h"
 #include "esp_spi_flash.h"
 #include "esp_task_wdt.h"
+#include "esp_heap_trace.h"
 #include "nvs_flash.h"
 #include "rom/uart.h"
 #endif
@@ -202,13 +203,24 @@ class MCShowHeap: public MonitorCommandBase{
     const char* Desc(){ return "h Show heap memory"; }
     void Func(){
 		conPrintf("Heap free size: %d bytes", esp_get_free_heap_size());
-        conPrintf(" a:dump all  c:check\n");
+        conPrintf(" a:dump all  c:check  m:max free block\n");
         switch(getchWait()){
             case 'a':
                 heap_caps_dump_all();
                 break;
             case 'c':
                 heap_caps_check_integrity_all(true);
+                conPrintf("Heap structure is checked.\n");
+                break;
+            case 'm':{
+                size_t fs = heap_caps_get_largest_free_block(MALLOC_CAP_8BIT);
+                conPrintf("Maximum free heap block size with MALLOC_CAP_8BIT is %d = 0x%x.\n", fs, fs);
+                fs = heap_caps_get_largest_free_block(MALLOC_CAP_32BIT);
+                conPrintf("Maximum free heap block size with MALLOC_CAP_32BIT is %d = 0x%x.\n", fs, fs);
+                break;
+            }
+            case 't':
+                heap_trace_dump();
                 break;
         }
 	}

@@ -8,6 +8,7 @@
 #include "esp_system.h"
 #include "esp_spi_flash.h"
 #include "esp_task_wdt.h"
+#include "esp_heap_trace.h"
 #include "esp_log.h"
 #include "nvs_flash.h"
 #include "rom/uart.h"
@@ -23,6 +24,9 @@ extern "C" void softRobot_main();
 extern "C" void duktape_main();
 extern "C" void ws_main();
 #endif
+
+#define NUM_RECORDS 100
+static heap_trace_record_t trace_record[NUM_RECORDS]; // This buffer must be in internal RAM
 
 extern "C" void app_main(){
 #ifndef _WIN32
@@ -40,8 +44,8 @@ extern "C" void app_main(){
         esp_log_level_set("*", ESP_LOG_INFO);
         ESP_LOGI(TAG, "Initial heap size: %d \n", esp_get_free_heap_size());
     }
+    ESP_ERROR_CHECK( heap_trace_init_standalone(trace_record, NUM_RECORDS) );
 #endif 
-
     softRobot_main();
 	ESP_LOGI(TAG, "after softRobot_main heap size: %d \n", esp_get_free_heap_size());
 
@@ -49,8 +53,8 @@ extern "C" void app_main(){
 	//duktape_main();
 
 #ifndef _WIN32
-	ws_main();
     ESP_LOGI(TAG, "after ws_main heap size: %d \n", esp_get_free_heap_size());
+	ws_main();
 	if(!wsIsJsfileTaskRunning()) {
         combineMainFiles();
         wsCreateJsfileTask();
@@ -58,6 +62,8 @@ extern "C" void app_main(){
     }
 #endif
 #endif
+    vTaskDelay(5000);
+    heap_trace_start(HEAP_TRACE_LEAKS);
 
     //  monitor start
     monitor();

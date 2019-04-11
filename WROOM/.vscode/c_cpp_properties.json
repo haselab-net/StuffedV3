@@ -35,6 +35,10 @@
                     "C:/msys32/opt/xtensa-esp32-elf/lib/gcc/xtensa-esp32-elf/5.2.0/include-fixed",
                     "C:/msys32/opt/xtensa-esp32-elf/xtensa-esp32-elf/include",
                     "C:/msys32/opt/xtensa-esp32-elf/xtensa-esp32-elf/sysroot/usr/include",
+                    "C:/msys32/home/espressif/esp/esp-idf/components/esp32/include",
+                    "C:/msys32/home/espressif/esp/esp-idf/components/spi_flash/include",
+                    "C:/msys32/home/espressif/esp/esp-idf/components/heap/include",
+                    "C:/msys32/home/espressif/esp/esp-idf/components/nvs_flash/include",
                     "${workspaceRoot}/components"
                 ],
                 "limitSymbolsToIncludedHeaders": true,
