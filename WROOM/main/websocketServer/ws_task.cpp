@@ -8,6 +8,7 @@ extern "C" {
     #include "duktape_jsfile.h"
 }
 #include "UdpCom.h"
+#include "duktape_jsfile.h"
 
 static TaskHandle_t xHandle = NULL;
 
@@ -34,7 +35,7 @@ void wsCreateJsfileTask() {
         "duktape_task",
         16*1024,
         NULL,
-        tskIDLE_PRIORITY+1,
+        tskIDLE_PRIORITY,
         &xHandle
     );
 
@@ -46,6 +47,8 @@ void wsCreateJsfileTask() {
 void wsDeleteJsfileTask() {
     if(xHandle==NULL) return;
     ESP_LOGD(LOG_TAG, "Delete old jsfile task");
+
+    lock_heap();    // it will be unlocked inside duktape_end()
 
     vTaskDelete(xHandle);
     xHandle = NULL;

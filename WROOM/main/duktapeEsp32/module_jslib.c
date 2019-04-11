@@ -114,7 +114,7 @@ static duk_ret_t jslib_handle_event(duk_context* ctx) {
     handle_event();
 
     unlock_heap();
-
+    
     lock_heap();
 
     return 0;

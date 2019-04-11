@@ -25,7 +25,7 @@ static char LOG_TAG[] = "ws_ws";
 static WebSocket* pWebSocket = NULL;
 static SRWebSocketHandler webSocketHandler = SRWebSocketHandler();
 
-static bool development_mode = false;
+static bool offline_mode = true;   // offline: 1, synchronization || development: 0
 
 void SRWebSocketHandler::onClose() {
     ESP_LOGD(LOG_TAG, "on close");
@@ -119,7 +119,7 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
             delete[] pBuffer;       // delete buffer to provide more space for jsfile task
             pBuffer = NULL;
 
-            if(development_mode) {  // do not run file in development mode
+            if(!offline_mode) {  // do not run file in development mode
                 break;
             }
             else {                  // run file
@@ -147,13 +147,14 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
             uint16_t id = pBufferI16[1];
             switch (id)
             {
-                case PacketSettingsId::DEVELOPMENT_MODE:
-                    development_mode = pBufferI16[2];
-                    if(development_mode) {
+                case PacketSettingsId::OFFLINE_MODE:
+                    offline_mode = pBufferI16[2];
+                    if(!offline_mode) {
                         ESP_LOGD(LOG_TAG, "switch to development mode, stop running jsfile task");
                         wsDeleteJsfileTask();
+                        printf("delete success");
                     }else if(!wsIsJsfileTaskRunning()){
-                        ESP_LOGD(LOG_TAG, "switch to jsfile mode, start running jsfile task");
+                        ESP_LOGD(LOG_TAG, "switch to offline mode, start running jsfile task");
                         wsDeleteJsfileTask();
                         wsCreateJsfileTask();
                     }
@@ -188,9 +189,11 @@ void wsOnMessageSr(UdpRetPacket& ret) {
     } else if (ret.count == 1) {
         // send packet to jsfile task
         // return_packet_to_jsfile(buffer, buffer_size);
+        lock_heap();
         if(!esp32_duk_context) return;
         commandMessageHandler(ret);
         ESP_LOGD(LOG_TAG, "Packet softrobot -> jsfile");
+        unlock_heap();
     } else {
         ESP_LOGD(LOG_TAG, "Cannot find destination: %i", ret.count);
     }
@@ -233,7 +236,7 @@ void printPacketSettings(const void* pBuffer, size_t len) {
     printf("   |- Value: ");
     switch (id)
     {
-        case PacketSettingsId::DEVELOPMENT_MODE:
+        case PacketSettingsId::OFFLINE_MODE:
             printf("%i ", pBufferI16[1]);
             break;
     
