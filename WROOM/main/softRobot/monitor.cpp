@@ -202,6 +202,15 @@ class MCShowHeap: public MonitorCommandBase{
     const char* Desc(){ return "h Show heap memory"; }
     void Func(){
 		conPrintf("Heap free size: %d bytes", esp_get_free_heap_size());
+        conPrintf(" a:dump all  c:check\n");
+        switch(getchWait()){
+            case 'a':
+                heap_caps_dump_all();
+                break;
+            case 'c':
+                heap_caps_check_integrity_all(true);
+                break;
+        }
 	}
 } mcShowHeap;
 #endif
