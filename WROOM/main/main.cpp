@@ -49,21 +49,17 @@ extern "C" void app_main(){
     softRobot_main();
 	ESP_LOGI(TAG, "after softRobot_main heap size: %d \n", esp_get_free_heap_size());
 
-#ifdef USE_DUKTAPE
-	//duktape_main();
-
-#ifndef _WIN32
-    ESP_LOGI(TAG, "after ws_main heap size: %d \n", esp_get_free_heap_size());
+#if defined USE_DUKTAPE && ! defined _WIN32
 	ws_main();
+    ESP_LOGI(TAG, "after ws_main heap size: %d \n", esp_get_free_heap_size());
 	if(!wsIsJsfileTaskRunning()) {
         combineMainFiles();
         wsCreateJsfileTask();
         logPrintf("Start running default jsfile task");
     }
 #endif
-#endif
     Monitor::theMonitor.Init();
-    vTaskDelay(5000);
+    vTaskDelay(500);   //  5 sec
     heap_trace_start(HEAP_TRACE_LEAKS);
 
     Monitor::theMonitor.Run();  //  monitor start. never return;

@@ -12,6 +12,7 @@
 #include "duktape_utils.h"
 #include "logging.h"
 #include "modules.h"
+#include "duk_alloc_hybrid.h"
 
 LOG_TAG("duktape_jsfile");
 
@@ -54,6 +55,7 @@ static void runJsFile(){
     runFileFromPosix(esp32_duk_context, "/spiffs/main/runtime.js");		// file in espfs would be rewrite from user
 }
 
+void* duk_alloc_hybrid_udata;
 /**
  * create environment for running js file
  */
@@ -64,7 +66,10 @@ static void createJSFileHeap() {
 	}
 
     LOGD("About to create heap");
-    esp32_duk_context = duk_create_heap_default();
+//	Hase test 
+//    esp32_duk_context = duk_create_heap_default();
+	duk_alloc_hybrid_udata = duk_alloc_hybrid_init();
+	esp32_duk_context = duk_create_heap(duk_alloc_hybrid, duk_realloc_hybrid, duk_free_hybrid, duk_alloc_hybrid_udata, NULL);
 
     if (!esp32_duk_context) { exit(1); }
     dukf_log_heap("Heap after duk create heap");

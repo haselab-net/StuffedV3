@@ -201,11 +201,15 @@ class MCShowTouch: public MonitorCommandBase{
 } mcShowTouch;
 
 #ifndef _WIN32
+extern "C" void* duk_alloc_hybrid_udata;
+extern "C"{
+#include "../duktapeEsp32/duk_alloc_hybrid.h"
+}
 class MCShowHeap: public MonitorCommandBase{
     const char* Desc(){ return "h Show heap memory"; }
     void Func(){
 		conPrintf("Heap free size: %d bytes", esp_get_free_heap_size());
-        conPrintf(" a:dump all  c:check  m:max free block\n");
+        conPrintf(" a:dump all  c:check  m:max free block  t:trace heap  h:hybrid heap\n");
         switch(getchWait()){
             case 'a':
                 heap_caps_dump_all();
@@ -224,6 +228,10 @@ class MCShowHeap: public MonitorCommandBase{
             case 't':
                 heap_trace_dump();
                 break;
+            case 'h':
+                duk_alloc_hybrid_dump(duk_alloc_hybrid_udata);
+                break;
+
         }
 	}
 } mcShowHeap;
