@@ -62,9 +62,9 @@ extern "C" void app_main(){
     }
 #endif
 #endif
+    Monitor::theMonitor.Init();
     vTaskDelay(5000);
     heap_trace_start(HEAP_TRACE_LEAKS);
 
-    //  monitor start
-    monitor();
+    Monitor::theMonitor.Run();  //  monitor start. never return;
 }

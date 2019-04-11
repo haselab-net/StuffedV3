@@ -63,8 +63,10 @@ void Monitor::ShowList(){
         conPrintf(" %s\n", mc->Desc());
     }
 }
-void Monitor::Run(){
+void Monitor::Init(){
     uart_driver_install(UART_NUM_0, 1024, 1024, 10, NULL, 0);
+}
+void Monitor::Run(){
     conPrintf("Monitor start.\n");
     ShowList();
     while(1){
@@ -359,7 +361,3 @@ public:
         }
     }
 } mcLogLevel;
-
-void monitor(){
-    Monitor::theMonitor.Run();    
-}
