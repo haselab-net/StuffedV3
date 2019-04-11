@@ -7,6 +7,7 @@
 #include "esp_system.h"
 #include "esp_spi_flash.h"
 #include "esp_task_wdt.h"
+#include "esp_heap_trace.h"
 #include "nvs_flash.h"
 #include "rom/uart.h"
 #endif
@@ -62,8 +63,10 @@ void Monitor::ShowList(){
         conPrintf(" %s\n", mc->Desc());
     }
 }
-void Monitor::Run(){
+void Monitor::Init(){
     uart_driver_install(UART_NUM_0, 1024, 1024, 10, NULL, 0);
+}
+void Monitor::Run(){
     conPrintf("Monitor start.\n");
     ShowList();
     while(1){
@@ -198,18 +201,37 @@ class MCShowTouch: public MonitorCommandBase{
 } mcShowTouch;
 
 #ifndef _WIN32
+extern "C" void* duk_alloc_hybrid_udata;
+extern "C"{
+#include "../duktapeEsp32/duk_alloc_hybrid.h"
+}
 class MCShowHeap: public MonitorCommandBase{
     const char* Desc(){ return "h Show heap memory"; }
     void Func(){
 		conPrintf("Heap free size: %d bytes", esp_get_free_heap_size());
-        conPrintf(" a:dump all  c:check\n");
+        conPrintf(" a:dump all  c:check  m:max free block  t:trace heap  h:hybrid heap\n");
         switch(getchWait()){
             case 'a':
                 heap_caps_dump_all();
                 break;
             case 'c':
                 heap_caps_check_integrity_all(true);
+                conPrintf("Heap structure is checked.\n");
                 break;
+            case 'm':{
+                size_t fs = heap_caps_get_largest_free_block(MALLOC_CAP_8BIT);
+                conPrintf("Maximum free heap block size with MALLOC_CAP_8BIT is %d = 0x%x.\n", fs, fs);
+                fs = heap_caps_get_largest_free_block(MALLOC_CAP_32BIT);
+                conPrintf("Maximum free heap block size with MALLOC_CAP_32BIT is %d = 0x%x.\n", fs, fs);
+                break;
+            }
+            case 't':
+                heap_trace_dump();
+                break;
+            case 'h':
+                duk_alloc_hybrid_dump(duk_alloc_hybrid_udata);
+                break;
+
         }
 	}
 } mcShowHeap;
@@ -282,6 +304,9 @@ public:
         tags.push_back(Tag(UdpCom::Tag(), "UdpCom"));
         tags.push_back(Tag(BoardBase::Tag(), "Board"));
         tags.push_back(Tag(BoardFactoryBase::Tag(), "BoardFactory"));
+        tags.push_back(Tag("ws_ws", "Web socket"));
+        tags.push_back(Tag("SRCmd", "module srCommand"));
+        tags.push_back(Tag("duktape_jsfile", "duktape_jsfile.c"));
         Init();
     }
     void Init(){
@@ -344,7 +369,3 @@ public:
         }
     }
 } mcLogLevel;
-
-void monitor(){
-    Monitor::theMonitor.Run();    
-}

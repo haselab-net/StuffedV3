@@ -13,9 +13,12 @@ class Monitor{
 public:
     static Monitor theMonitor;
     std::vector<MonitorCommandBase*> commands;
+    //  call before Init();
     void AddCommand(MonitorCommandBase*);
-    void Run();
     void ShowList();
+
+    //  call from main
+    void Init();
+    void Run();
 };
 
-void monitor();

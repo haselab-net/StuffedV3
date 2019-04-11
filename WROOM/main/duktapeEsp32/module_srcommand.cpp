@@ -6,12 +6,13 @@ extern "C" {
 #include "duktape_event.h"
 #include "duktape_utils.h"
 #include "duktape_jsfile.h"
+#include "logging.h"
 }
 #include "module_srcommand.h"
 #include "../softRobot/UdpCom.h"
 #include "../softRobot/AllBoards.h"
 
-static const char* Tag = "SRCmd";
+LOG_TAG("SRCmd");
 
 ////////////////////////////////////////////////////////
 //////////////////////// send functions ////////////////
@@ -327,7 +328,7 @@ static duk_ret_t registerCallback(duk_context* ctx) {
     
     const char* name = duk_get_string(ctx, -3);
 
-    printf("register callback %s", name);
+    LOGI("register callback %s", name);
 
     duk_dup(ctx, -2);
     // ... name func callbacks func
