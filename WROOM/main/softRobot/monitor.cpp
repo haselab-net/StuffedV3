@@ -84,6 +84,15 @@ void Monitor::Run(){
 MonitorCommandBase::MonitorCommandBase(){
     Monitor::theMonitor.AddCommand(this);
 }
+
+class MCTaskList: public MonitorCommandBase{
+    const char* Desc(){ return "t Show task list"; }
+    void Func(){
+        char buf[1024*2];
+        vTaskList(buf);
+        conPrintf("%s\n", buf);
+    }
+} mcTaskList;
  
 class MCEraseNvs: public MonitorCommandBase{
     const char* Desc(){ return "E Erase NVS flash"; }
@@ -104,6 +113,7 @@ class MCEraseNvs: public MonitorCommandBase{
         }
     }
 } mcEraseNvs;
+
 
 class MCPwmTest: public MonitorCommandBase{
     const char* Desc(){ return "m Motor PWM Test"; }
