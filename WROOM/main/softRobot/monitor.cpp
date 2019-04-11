@@ -90,7 +90,7 @@ class MCTaskList: public MonitorCommandBase{
     void Func(){
         char buf[1024*2];
         vTaskList(buf);
-        conPrintf("%s\n", buf);
+        conPrintf("Task\t\tState\tPrio\tStack\tNum\n%s\n", buf);
     }
 } mcTaskList;
  
