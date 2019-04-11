@@ -6,7 +6,6 @@
 #include <freertos/semphr.h>
 
 extern duk_context* esp32_duk_context;
-extern SemaphoreHandle_t esp32_duk_context_mutex;
 
 void handle_event();
 

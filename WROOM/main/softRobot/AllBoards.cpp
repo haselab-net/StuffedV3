@@ -77,7 +77,7 @@ void AllBoards::Init() {
 	uart[1]->Init(uconf, U2TXPIN, U2RXPIN);
 	logPrintf(". done.\n");
 	EnumerateBoard();
-	xTaskCreate(execLoop, "ExecLoop", 8 * 1024, this, tskIDLE_PRIORITY, &taskExec);
+	xTaskCreate(execLoop, "ExecLoop", 8 * 1024, this, tskIDLE_PRIORITY+2, &taskExec);
 }
 void AllBoards::EnumerateBoard() {
 	motorMap.clear();	
