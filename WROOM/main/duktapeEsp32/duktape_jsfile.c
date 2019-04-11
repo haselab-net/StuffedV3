@@ -198,19 +198,20 @@ void duktape_start() {
 
     dukf_init_nvs_values(); // Initialize any defaults for NVS data
 
+	heap_mutex = xSemaphoreCreateMutex();
+	lock_heap();
+
     createJSFileHeap();
 
     //duk_idx_t lastStackTop = duk_get_top(esp32_duk_context); // Get the last top value of the stack from which we will use to check for leaks.
-	heap_mutex = xSemaphoreCreateMutex();
 
-	lock_heap();
     runJsFile();
+
+	unlock_heap();
 }
 
 void duktape_end(){
     esp32_duktape_endEvents();
-
-	lock_heap();
 
     duk_destroy_heap( esp32_duk_context );
     esp32_duk_context = NULL;

@@ -468,7 +468,6 @@ static size_t pushDataCIInterpolate(duk_context* ctx, UdpRetPacket& ret) {
 // function onReceiveCIResetsensor();
 
 void commandMessageHandler(UdpRetPacket& ret) {
-	lock_heap();
     //  do not return from this function until unlock (call Give).
 
     duk_context* ctx= esp32_duk_context;
@@ -524,8 +523,6 @@ void commandMessageHandler(UdpRetPacket& ret) {
     }
 
     duk_pop_n(ctx, duk_get_top(ctx)-top);
-
-	unlock_heap();
 }
 
 ////////////////////////////////////////////////////////
