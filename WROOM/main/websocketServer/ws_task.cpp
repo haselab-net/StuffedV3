@@ -48,12 +48,14 @@ void wsDeleteJsfileTask() {
     if(xHandle==NULL) return;
     ESP_LOGD(LOG_TAG, "Delete old jsfile task");
 
-    lock_heap();    // it will be unlocked inside duktape_end()
+    lock_heap();
 
     vTaskDelete(xHandle);
     xHandle = NULL;
 
     duktape_end();
+
+    unlock_heap();
 }
 
 bool wsIsJsfileTaskRunning() {

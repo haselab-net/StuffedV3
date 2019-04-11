@@ -18,7 +18,7 @@ LOG_TAG("duktape_jsfile");
 // The Duktape context.
 duk_context *esp32_duk_context = NULL;
 // mutex for heap
-static xSemaphoreHandle heap_mutex;
+static xSemaphoreHandle heap_mutex = NULL;
 
 // force to read from posix (espfs can not read the file altered in runtime)
 static void runFileFromPosix(duk_context *ctx, const char *fileName) {
@@ -198,7 +198,7 @@ void duktape_start() {
 
     dukf_init_nvs_values(); // Initialize any defaults for NVS data
 
-	heap_mutex = xSemaphoreCreateMutex();
+	if(!heap_mutex) heap_mutex = xSemaphoreCreateMutex();
 	lock_heap();
 
     createJSFileHeap();
@@ -215,7 +215,4 @@ void duktape_end(){
 
     duk_destroy_heap( esp32_duk_context );
     esp32_duk_context = NULL;
-
-	unlock_heap();
-	vSemaphoreDelete(heap_mutex);
 }
