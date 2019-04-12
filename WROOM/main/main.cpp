@@ -55,7 +55,7 @@ extern "C" void app_main(){
 	if(!wsIsJsfileTaskRunning()) {
         combineMainFiles();
         wsCreateJsfileTask();
-        logPrintf("Start running default jsfile task");
+        ESP_LOGI(TAG ,"Start running default jsfile task");
     }
 #endif
 #endif
