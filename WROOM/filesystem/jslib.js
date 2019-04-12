@@ -34,7 +34,8 @@ var _core = {
 
     printHeap: function(str) {
         internalJSLib.print_heap(str);
-    }
+    },
+    
     print: function(str) {
         internalJSLib.print(str);
     }
