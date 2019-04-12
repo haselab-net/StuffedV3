@@ -193,6 +193,8 @@ void wsOnMessageSr(UdpRetPacket& ret) {
         if(!esp32_duk_context) return;
         
         lock_heap();
+        if(!wsIsJsfileTaskRunning()) return;
+        if(!esp32_duk_context) return;
         commandMessageHandler(ret);
         ESP_LOGD(LOG_TAG, "Packet softrobot -> jsfile");
         unlock_heap();
