@@ -53,11 +53,7 @@ void wsDeleteJsfileTask() {
     if(xHandle==NULL) return;
     ESP_LOGD(LOG_TAG, "Delete old jsfile task");
 
-<<<<<<< .mine
-    lock_heap();
-=======
     dukf_log_heap("Heap before delete task");
->>>>>>> .theirs
 
     lock_heap();
 
@@ -67,17 +63,10 @@ void wsDeleteJsfileTask() {
     dukf_log_heap("Heap after delete task");
 
     duktape_end();
-<<<<<<< .mine
-
-    unlock_heap();
-
-
-=======
 
     unlock_heap();
 
     dukf_log_heap("Heap after delete heap");
->>>>>>> .theirs
 }
 
 bool wsIsJsfileTaskRunning() {

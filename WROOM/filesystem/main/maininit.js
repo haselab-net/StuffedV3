@@ -1,5 +1,6 @@
-var loops = require("sr_loops");
 var jslib = require("jslib");
+jslib.print("MaiInit\n");
+var loops = require("sr_loops");
 var softrobot = require("sr_softrobot");
 var motor = require("sr_motor");
 

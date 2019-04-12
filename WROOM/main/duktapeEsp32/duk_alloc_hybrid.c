@@ -165,7 +165,7 @@ void *duk_alloc_hybrid(void *udata, duk_size_t size) {
 		return NULL;
 	}
 	if (size > st->pool_max_size) {
-#if defined(DUK_ALLOC_HYBRID_DEBUG) || 1
+#if defined(DUK_ALLOC_HYBRID_DEBUG) || 0
 		printf("alloc fallback: %ld\n", (long) size);
 #endif
 		return malloc(size);
@@ -185,14 +185,14 @@ void *duk_alloc_hybrid(void *udata, duk_size_t size) {
 			hdr->free = hdr->free->next;
 			return new_ptr;
 		} else {
-#if defined(DUK_ALLOC_HYBRID_DEBUG) || 1
+#if defined(DUK_ALLOC_HYBRID_DEBUG) || 0
 			printf("alloc out of pool entries: %ld -> pool size %ld\n", (long) size, (long) hdr->size);
 #endif
 			break;
 		}
 	}
 
-#if defined(DUK_ALLOC_HYBRID_DEBUG) || 1
+#if defined(DUK_ALLOC_HYBRID_DEBUG) || 0
 	printf("alloc fallback (out of pool): %ld\n", (long) size);
 #endif
 	return malloc(size);
