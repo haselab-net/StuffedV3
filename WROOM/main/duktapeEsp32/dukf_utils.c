@@ -45,7 +45,7 @@ void dukf_log_heap(const char *localTag) {
 	if (localTag == NULL) {
 		localTag = "<no tag>";
 	}
-	LOGD("%s: heapSize=%d", localTag, dukf_get_free_heap_size());
+	printf("%s: heapSize=%d", localTag, dukf_get_free_heap_size());
 } // dukf_log_heap
 
 

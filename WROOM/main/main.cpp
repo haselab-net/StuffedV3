@@ -50,6 +50,7 @@ extern "C" void app_main(){
 	ESP_LOGI(TAG, "after softRobot_main heap size: %d \n", esp_get_free_heap_size());
 
 #if defined USE_DUKTAPE && ! defined _WIN32
+    esp_log_level_set("ws_task", ESP_LOG_DEBUG);
 	ws_main();
     ESP_LOGI(TAG, "after ws_main heap size: %d \n", esp_get_free_heap_size());
 	if(!wsIsJsfileTaskRunning()) {

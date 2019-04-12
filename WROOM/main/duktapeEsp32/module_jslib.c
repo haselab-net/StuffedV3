@@ -39,6 +39,15 @@ static duk_ret_t printHeap(duk_context* ctx){
     return 0;
 }
 
+static duk_ret_t print(duk_context* ctx){
+    const char* str = duk_get_string(ctx, -1);
+    printf("%s", str);
+    duk_pop(ctx);
+
+    return 0;
+}
+
+
 /*
 * register a callback with one parameter: arraybuffer
 * the callback would be called when hardware want to send a packet
@@ -126,6 +135,7 @@ duk_ret_t ModuleJSLib(duk_context *ctx){
     ADD_FUNCTION("send_command",        send_command,       1);
     ADD_FUNCTION("handle_event",        jslib_handle_event, 0);
     ADD_FUNCTION("print_heap",          printHeap,          1);
+    ADD_FUNCTION("print",               print,          1);
 
     return 0;
 }
