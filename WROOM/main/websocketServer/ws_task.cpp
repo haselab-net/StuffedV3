@@ -6,6 +6,7 @@
 #include "esp_log.h"
 extern "C" {
     #include "duktape_jsfile.h"
+    #include "dukf_utils.h"
 }
 #include "UdpCom.h"
 #include "duktape_jsfile.h"
@@ -16,6 +17,8 @@ static char LOG_TAG[] = "ws_task";
 
 static void duktapeTask(void* pvParameters) {
     ESP_LOGD(LOG_TAG, "Start running JSFile");
+
+    dukf_log_heap("Heap after create task");
 
     duktape_start();
 
@@ -29,6 +32,8 @@ static void duktapeTask(void* pvParameters) {
 
 void wsCreateJsfileTask() {
     ESP_LOGD(LOG_TAG, "Create new jsfile task");
+
+    dukf_log_heap("Heap before create task");
 
     BaseType_t xReturned = xTaskCreate(
         duktapeTask,
@@ -48,14 +53,31 @@ void wsDeleteJsfileTask() {
     if(xHandle==NULL) return;
     ESP_LOGD(LOG_TAG, "Delete old jsfile task");
 
+<<<<<<< .mine
+    lock_heap();
+=======
+    dukf_log_heap("Heap before delete task");
+>>>>>>> .theirs
+
     lock_heap();
 
     vTaskDelete(xHandle);
     xHandle = NULL;
 
+    dukf_log_heap("Heap after delete task");
+
     duktape_end();
+<<<<<<< .mine
 
     unlock_heap();
+
+
+=======
+
+    unlock_heap();
+
+    dukf_log_heap("Heap after delete heap");
+>>>>>>> .theirs
 }
 
 bool wsIsJsfileTaskRunning() {

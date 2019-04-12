@@ -155,7 +155,6 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
                         printf("delete success");
                     }else if(!wsIsJsfileTaskRunning()){
                         ESP_LOGD(LOG_TAG, "switch to offline mode, start running jsfile task");
-                        wsDeleteJsfileTask();
                         wsCreateJsfileTask();
                     }
                     break;
