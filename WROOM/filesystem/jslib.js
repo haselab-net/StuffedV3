@@ -9,9 +9,6 @@ if (moduleJSLib === null) {
 	return;
 }
 
-moduleJSLib.print("jslib.js is executed\n");
-
-
 var internalJSLib = {};
 moduleJSLib(internalJSLib);
 
