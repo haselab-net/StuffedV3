@@ -55,6 +55,7 @@ static void runFileFromPosix(duk_context *ctx, const char *fileName) {
 static void runJsFile(){
 	// run main.js
     runFileFromPosix(esp32_duk_context, "/spiffs/main/runtime.js");		// file in espfs would be rewrite from user
+	ESP_LOGD(tag, "runtime.js finished.");
 }
 
 void* duk_alloc_hybrid_udata;
@@ -210,9 +211,7 @@ void duktape_start() {
 
     createJSFileHeap();
 
-    //duk_idx_t lastStackTop = duk_get_top(esp32_duk_context); // Get the last top value of the stack from which we will use to check for leaks.
-
-    // runJsFile();
+    runJsFile();
 
 	unlock_heap();
 }

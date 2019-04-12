@@ -1,5 +1,5 @@
 var jslib = require("jslib");
-jslib.print("MaiInit\n");
+jslib.print("maininit.js is executed\n");
 var loops = require("sr_loops");
 var softrobot = require("sr_softrobot");
 var motor = require("sr_motor");

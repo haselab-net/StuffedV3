@@ -9,6 +9,9 @@ if (moduleJSLib === null) {
 	return;
 }
 
+moduleJSLib.print("jslib.js is executed\n");
+
+
 var internalJSLib = {};
 moduleJSLib(internalJSLib);
 
@@ -31,6 +34,9 @@ var _core = {
 
     printHeap: function(str) {
         internalJSLib.print_heap(str);
+    }
+    print: function(str) {
+        internalJSLib.print(str);
     }
 }
 
