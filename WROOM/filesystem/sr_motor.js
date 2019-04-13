@@ -32,10 +32,12 @@ var motor;
     }
     motor_1.pushLocalMotorPVToRemoteDirect = pushLocalMotorPVToRemoteDirect;
     function pushLocalMotorPVToRemoteInterpolate(period) {
-        softrobot.movement.sendKeyframeQueue.enqueue({
+        while (softrobot.movement.sendKeyframeQueue.enqueue({
             pose: softrobot.device.robotState.getPropArray("pose", softrobot.device.robotState.motor),
             period: period
-        });
+        }) < 0) {
+            loops.pause(5000);
+        }
     }
     motor_1.pushLocalMotorPVToRemoteInterpolate = pushLocalMotorPVToRemoteInterpolate;
 })(motor || (motor = {}));

@@ -126,9 +126,9 @@ var softrobot;
                     return null;
                 }
                 var res = new Array();
-                array.forEach(function (element) {
-                    res.push(element[name]);
-                });
+                for (var i = 0; i < array.length; i++) {
+                    res.push(array[i][name]);
+                }
                 return res;
             };
             RobotState.prototype.setPropArray = function (name, pArray, oArray) {
@@ -186,22 +186,21 @@ var softrobot;
         function onReceiveCIBoardinfo(data) {
             softrobot.device.robotInfo = data;
             softrobot.device.checkRobotState();
-            message_command.onRcvCIBoardInfoMessage.forEach(function (element) {
-                element();
-            });
+            for (var i = void 0; i < message_command.onRcvCIBoardInfoMessage.length; i++) {
+                message_command.onRcvCIBoardInfoMessage[i]();
+            }
         }
         message_command.onReceiveCIBoardinfo = onReceiveCIBoardinfo;
         function onReceiveCISensor(data) {
             softrobot.device.robotState.setPropArray("pose", data.pose, softrobot.device.robotState.motor);
             softrobot.device.robotState.current = data.current;
             softrobot.device.robotState.force = data.force;
-            message_command.onRcvCISensorMessage.forEach(function (element) {
-                element();
-            });
+            for (var i = void 0; i < message_command.onRcvCISensorMessage.length; i++) {
+                message_command.onRcvCISensorMessage[i]();
+            }
         }
         message_command.onReceiveCISensor = onReceiveCISensor;
         function onReceiveCIDirect(data) {
-            console.log("on receive ci direct called");
             softrobot.device.robotState.setPropArray("pose", data.pose, softrobot.device.robotState.motor);
             softrobot.device.robotState.setPropArray("velocity", data.velocity, softrobot.device.robotState.motor);
         }
@@ -216,9 +215,9 @@ var softrobot;
             softrobot.device.robotState.nInterpolateVacancy = softrobot.device.robotState.nInterpolateTotal - softrobot.device.robotState.nInterpolateRemain;
             if (softrobot.device.robotState.interpolateTargetCountOfWrite < softrobot.device.robotState.interpolateTargetCountOfReadMax)
                 softrobot.device.robotState.interpolateTargetCountOfWrite = softrobot.device.robotState.interpolateTargetCountOfReadMax;
-            message_command.onRcvCIInterpolateMessage.forEach(function (element) {
-                element();
-            });
+            for (var i = void 0; i < message_command.onRcvCIInterpolateMessage.length; i++) {
+                message_command.onRcvCIInterpolateMessage[i]();
+            }
         }
         message_command.onReceiveCIInterpolate = onReceiveCIInterpolate;
         function onReceiveCISetparam() {
@@ -226,9 +225,9 @@ var softrobot;
         }
         message_command.onReceiveCISetparam = onReceiveCISetparam;
         function onReceiveCIResetsensor() {
-            message_command.onRcvCIResetSensorMessage.forEach(function (element) {
-                element();
-            });
+            for (var i = void 0; i < message_command.onRcvCIResetSensorMessage.length; i++) {
+                message_command.onRcvCIResetSensorMessage[i]();
+            }
         }
         message_command.onReceiveCIResetsensor = onReceiveCIResetsensor;
         message_command.onRcvCIBoardInfoMessage = [];
@@ -332,6 +331,7 @@ var softrobot;
         }
         message_command.updateLocalMotorState = updateLocalMotorState;
         function updateRemoteDirect() {
+            softrobot.movement.sendKeyframeQueue.clear();
             message_command.setMotorDirect({
                 pose: softrobot.device.robotState.getPropArray("pose", softrobot.device.robotState.motor),
                 velocity: softrobot.device.robotState.getPropArray("velocity", softrobot.device.robotState.motor)
@@ -368,7 +368,7 @@ var softrobot;
                 receiver.push(this.onInterpolateMessage.bind(this));
                 if (stuckChecker) {
                     this.lastTimeWriteCount = softrobot.device.robotState.interpolateTargetCountOfWrite;
-                    setInterval(this.check, 2000);
+                    setInterval(this.check, SendKeyframeQueue.STUCK_CHECKER_INTERVAL);
                 }
             }
             SendKeyframeQueue.prototype.check = function () {
@@ -380,6 +380,8 @@ var softrobot;
                 }
             };
             SendKeyframeQueue.prototype.enqueue = function (keyframe) {
+                if (this.queue.length == SendKeyframeQueue.MAX_SIZE)
+                    return -1;
                 var len = this.queue.push(keyframe);
                 this.queryVacancy();
                 return len;
@@ -414,11 +416,11 @@ var softrobot;
                 };
                 this.sender(queryObj);
                 this.blockQuery = true;
-                setTimeout(function () { _this.blockQuery = false; }, 1000);
+                setTimeout(function () { _this.blockQuery = false; }, SendKeyframeQueue.BLOCK_QUERY_TIME);
             };
             SendKeyframeQueue.prototype.onInterpolateMessage = function () {
                 this.remoteVacancy = softrobot.device.robotState.nInterpolateVacancy;
-                if (this.remoteVacancy > 2 && this.queue.length > 0) {
+                if (this.remoteVacancy >= softrobot.device.robotState.nInterpolateTotal - SendKeyframeQueue.REMOTE_MAX_SIZE && this.queue.length > 0) {
                     var keyframe = this.dequeue();
                     this.send(keyframe);
                 }
@@ -430,6 +432,10 @@ var softrobot;
                 var _this = this;
                 setTimeout(function () { _this.queryVacancy(); }, 50);
             };
+            SendKeyframeQueue.MAX_SIZE = 20;
+            SendKeyframeQueue.REMOTE_MAX_SIZE = 6;
+            SendKeyframeQueue.STUCK_CHECKER_INTERVAL = 2000;
+            SendKeyframeQueue.BLOCK_QUERY_TIME = 1000;
             return SendKeyframeQueue;
         }());
         movement.SendKeyframeQueue = SendKeyframeQueue;
