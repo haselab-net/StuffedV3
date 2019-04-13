@@ -27,7 +27,9 @@ esp_err_t SRWifiEventHandler::staGotIp(system_event_sta_got_ip_t info) {
 esp_err_t SRWifiEventHandler::staDisconnected(system_event_sta_disconnected_t info) {
     switch (info.reason)
     {
-        case WIFI_REASON_NO_AP_FOUND || WIFI_REASON_AUTH_FAIL:
+        case WIFI_REASON_NO_AP_FOUND:
+            LOGD("Unable to find AP %s, work as AP now", info.ssid);
+        case WIFI_REASON_AUTH_FAIL:
             LOGD("Unable to connect to AP %s, work as AP now", info.ssid);
             becomeAccessPoint();
             break;
