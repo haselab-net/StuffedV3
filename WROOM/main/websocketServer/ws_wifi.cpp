@@ -33,7 +33,8 @@ esp_err_t SRWifiEventHandler::staDisconnected(system_event_sta_disconnected_t in
             break;
     
         default:
-            LOGD("Unhandled sta disconnected event");
+            LOGD("Unknown sta disconnected event: %i, work as AP now", info.reason);
+            becomeAccessPoint();
             break;
     }
     return ESP_OK;
