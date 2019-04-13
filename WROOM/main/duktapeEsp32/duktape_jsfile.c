@@ -65,7 +65,7 @@ void* duk_alloc_hybrid_udata;
 static void createJSFileHeap() {
     LOGD("About to create heap");
 	//	Heap selection
-#if 1
+#if 0
 	heap_context = duk_create_heap_default();
 #else
 	duk_alloc_hybrid_udata = duk_alloc_hybrid_init();
