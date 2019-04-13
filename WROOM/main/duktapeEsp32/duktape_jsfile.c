@@ -205,6 +205,9 @@ void duktape_start() {
 	lock_heap();
 
     if(!heap_context) createJSFileHeap();					// only create once
+	else {
+		dukf_runFile(heap_context, "/main/reinit.js");
+	}
 
 	// create new context on the same heap
 	(void*)duk_push_thread(heap_context);
