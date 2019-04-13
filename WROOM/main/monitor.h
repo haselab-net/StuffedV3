@@ -4,6 +4,7 @@
 
 class MonitorCommandBase{
 public:
+    static const char* Tag();
     MonitorCommandBase();
     virtual void Func()=0;
     virtual const char* Desc()=0;

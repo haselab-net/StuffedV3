@@ -64,10 +64,13 @@ void* duk_alloc_hybrid_udata;
  */
 static void createJSFileHeap() {
     LOGD("About to create heap");
-	//	Hase test 
-	//    esp32_duk_context = duk_create_heap_default();
+	//	Heap selection
+#if 1
+	heap_context = duk_create_heap_default();
+#else
 	duk_alloc_hybrid_udata = duk_alloc_hybrid_init();
 	heap_context = duk_create_heap(duk_alloc_hybrid, duk_realloc_hybrid, duk_free_hybrid, duk_alloc_hybrid_udata, NULL);
+#endif
 
     if (!heap_context) { exit(1); }
     dukf_log_heap("Heap after duk create heap");

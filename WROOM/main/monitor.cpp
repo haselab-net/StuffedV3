@@ -1,5 +1,8 @@
 #include <stdio.h>
 #include <string.h>
+#include <sstream>
+#include <fstream>
+
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/event_groups.h"
@@ -21,8 +24,23 @@
 #include "MotorDriver.h"
 #include "monitor.h"
 #include "UartForBoards.h"
+extern "C" {
+#include "module_jslib.h"
+#include "duktape_jsfile.h"
+}
+#include "../SoftRobot/UdpCom.h"
+#include "module_srcommand.h"
+
+#include "ws_command.h"
+#include "ws_task.h"
+#include "ws_fs.h"
+
 
 Monitor Monitor::theMonitor;
+
+const char* MonitorCommandBase::Tag(){
+    return "Mon"; 
+}
 
 #ifndef _WIN32
 int getchNoWait(){
@@ -274,6 +292,32 @@ class MCTargetUnderflow: public MonitorCommandBase{
         }
     }
 } mcShowTargetUnderflow;
+class MCJSRestart: public MonitorCommandBase{
+    const char* Desc(){ return "j Restart java script"; }
+    void Func(){
+        wsDeleteJsfileTask();
+/*        combineMainFiles();
+        std::ifstream m_ifstream("/spiffs/main/runtime.js");
+        std::string str((std::istreambuf_iterator<char>(m_ifstream)),
+        std::istreambuf_iterator<char>());
+        ESP_LOGI(Tag(), "Start runtime file: %s", str.c_str());
+        m_ifstream.close();
+*/
+        ESP_LOGI(Tag(), "before wsCreateJsfileTask heap size: %d", esp_get_free_heap_size());
+
+        heap_trace_start(HEAP_TRACE_LEAKS);
+
+        wsCreateJsfileTask();
+        ESP_LOGI(Tag(), "Create JS Task and wait 10 sec.");
+        vTaskDelay(1000);
+        ESP_LOGI(Tag(), "Delete JS Task.");
+        wsDeleteJsfileTask();
+        ESP_LOGI(Tag(), "Deleted. dump heap:");
+        heap_trace_dump();
+
+        wsCreateJsfileTask();
+    }
+} mcJSRestart;
 
 inline char toLower(char c){
     if ('A' <= c && c <= 'Z'){
@@ -305,6 +349,7 @@ public:
         tags.push_back(Tag(BoardBase::Tag(), "Board"));
         tags.push_back(Tag(BoardFactoryBase::Tag(), "BoardFactory"));
         tags.push_back(Tag("ws_ws", "Web socket"));
+        tags.push_back(Tag("ws_task", "Web socket task"));
         tags.push_back(Tag("SRCmd", "module srCommand"));
         tags.push_back(Tag("duktape_jsfile", "duktape_jsfile.c"));
         tags.push_back(Tag("log", "duktape console log"));

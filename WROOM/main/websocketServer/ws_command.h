@@ -17,7 +17,7 @@ enum PacketSettingsId {
     OFFLINE_MODE = 1
 };
 
-std::string getPacketIdStr(int id){
+inline std::string getPacketIdStr(int id){
     switch (id)
     {
         case PacketId::PI_NONE:
@@ -31,7 +31,7 @@ std::string getPacketIdStr(int id){
     }
 }
 
-std::string getPacketSettingsIdStr(int id){
+inline std::string getPacketSettingsIdStr(int id){
     switch (id)
     {
         case PacketSettingsId::OFFLINE_MODE:

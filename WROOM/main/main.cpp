@@ -24,7 +24,7 @@ extern "C" void duktape_main();
 extern "C" void ws_main();
 #endif
 
-//  #define HEAPTRACE
+#define HEAPTRACE
 #ifdef HEAPTRACE
 #include "esp_heap_trace.h"
 #define NUM_RECORDS 100
@@ -73,8 +73,6 @@ extern "C" void app_main(){
 #endif
     Monitor::theMonitor.Init();
 #ifdef HEAPTRACE
-    vTaskDelay(500);   //  5 sec
-    heap_trace_start(HEAP_TRACE_LEAKS);
 #endif
     Monitor::theMonitor.Run();  //  monitor start. never return;
 }
