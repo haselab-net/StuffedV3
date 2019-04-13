@@ -56,7 +56,7 @@ extern "C" void app_main(){
     esp_log_level_set("module_os", ESP_LOG_DEBUG);
     esp_log_level_set("dukf_utils", ESP_LOG_DEBUG);
     esp_log_level_set("espfs", ESP_LOG_DEBUG);
-    // esp_log_level_set("*", ESP_LOG_DEBUG);
+    esp_log_level_set("*", ESP_LOG_DEBUG);
 	ws_main();
     ESP_LOGI(TAG, "after ws_main heap size: %d \n", esp_get_free_heap_size());
 	if(!wsIsJsfileTaskRunning()) {

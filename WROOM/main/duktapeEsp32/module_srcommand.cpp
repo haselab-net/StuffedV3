@@ -179,6 +179,8 @@ static duk_ret_t requireSensorInfo(duk_context* ctx) {
 
 // function setMotorDirect(data: {pose: number[], velocity: number[]});
 static duk_ret_t setMotorDirect(duk_context* ctx) {
+    duk_idx_t top = duk_get_top(ctx);
+
     // ... obj
     duk_require_object(ctx, -1);
 
@@ -198,6 +200,8 @@ static duk_ret_t setMotorDirect(duk_context* ctx) {
     // ... obj
     duk_pop(ctx);
     // ...
+
+    printf("top leak: %d", duk_get_top(ctx)-top);
 
     return 0;
 }

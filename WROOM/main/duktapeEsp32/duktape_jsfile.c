@@ -17,7 +17,7 @@
 LOG_TAG("duktape_jsfile");
 
 // The heap context
-duk_context *heap_context = NULL;
+static duk_context *heap_context = NULL;
 // The Duktape context.
 duk_context *esp32_duk_context = NULL;
 // mutex for heap
@@ -63,31 +63,26 @@ void* duk_alloc_hybrid_udata;
  * create environment for running js file
  */
 static void createJSFileHeap() {
-    // initialize heap
-    if (esp32_duk_context != NULL) {
-		duk_destroy_heap(esp32_duk_context);
-	}
-
     LOGD("About to create heap");
-//	Hase test 
-//    esp32_duk_context = duk_create_heap_default();
+	//	Hase test 
+	//    esp32_duk_context = duk_create_heap_default();
 	duk_alloc_hybrid_udata = duk_alloc_hybrid_init();
-	esp32_duk_context = duk_create_heap(duk_alloc_hybrid, duk_realloc_hybrid, duk_free_hybrid, duk_alloc_hybrid_udata, NULL);
+	heap_context = duk_create_heap(duk_alloc_hybrid, duk_realloc_hybrid, duk_free_hybrid, duk_alloc_hybrid_udata, NULL);
 
-    if (!esp32_duk_context) { exit(1); }
+    if (!heap_context) { exit(1); }
     dukf_log_heap("Heap after duk create heap");
     
-	duk_eval_string_noresult(esp32_duk_context, "new Function('return this')().Duktape = Object.create(Duktape);");
+	duk_eval_string_noresult(heap_context, "new Function('return this')().Duktape = Object.create(Duktape);");
 
-	duk_module_duktape_init(esp32_duk_context); // Initialize the duktape module functions.
+	duk_module_duktape_init(heap_context); // Initialize the duktape module functions.
 	dukf_log_heap("Heap after duk_module_duktape_init");
 
-	esp32_duktape_stash_init(esp32_duk_context); // Initialize the stash environment.
+	esp32_duktape_stash_init(heap_context); // Initialize the stash environment.
 
-	registerModules(esp32_duk_context); // Register the built-in modules
+	registerModules(heap_context); // Register the built-in modules
 	dukf_log_heap("Heap after duk register modules");
 
-    dukf_runFile(esp32_duk_context, "/main/init.js");
+    dukf_runFile(heap_context, "/main/init.js");
     dukf_log_heap("Heap after init.js");
 
     #if defined(ESP_PLATFORM)
@@ -206,10 +201,14 @@ void duktape_start() {
 
     dukf_init_nvs_values(); // Initialize any defaults for NVS data
 
-	if(!heap_mutex) heap_mutex = xSemaphoreCreateMutex();
+	if(!heap_mutex) heap_mutex = xSemaphoreCreateMutex();	// only create once
 	lock_heap();
 
-    createJSFileHeap();
+    if(!heap_context) createJSFileHeap();					// only create once
+
+	// create new context on the same heap
+	(void*)duk_push_thread(heap_context);
+	esp32_duk_context = duk_get_context(heap_context, -1);
 
     //duk_idx_t lastStackTop = duk_get_top(esp32_duk_context); // Get the last top value of the stack from which we will use to check for leaks.
 
@@ -221,6 +220,9 @@ void duktape_start() {
 void duktape_end(){
     esp32_duktape_endEvents();
 
-    duk_destroy_heap( esp32_duk_context );
-    esp32_duk_context = NULL;
+	esp32_duk_context = NULL;
+	dukf_log_heap("Heap after set esp32_duk_context NULL");
+
+    // duk_destroy_heap( heap_context );
+	// heap_context = NULL;
 }
