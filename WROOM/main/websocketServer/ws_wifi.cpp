@@ -4,7 +4,7 @@
 
 LOG_TAG("ws_wifi");
 
-static WiFi wifi = WiFi();
+WiFi wifi = WiFi();
 static SRWifiEventHandler* wifiEventHandler;
 NVS wifiNvs = NVS("wifinvs");
 

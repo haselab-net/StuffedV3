@@ -16,4 +16,6 @@ class SRWifiEventHandler: public WiFiEventHandler {
 
 extern NVS wifiNvs;
 
+extern WiFi wifi;
+
 #endif

@@ -69,10 +69,13 @@ static void httpWifiSetHandler(HttpRequest* pRequest, HttpResponse* pResponse) {
     wifiNvs.set("netmask", up.getString("netmask"));
 
     pResponse->setStatus(200, "OK");
-    pResponse->sendData("Got data - rebooting in 5s");
+    std::string return_message = "Got data - try to connect to AP: " + up.getString("ssid") + ", with password: " + up.getString("password");
+    pResponse->sendData(return_message);
     pResponse->close();
 
-    esp_restart();
+    wifi.connectAP(up.getString("ssid"), up.getString("password"), false);
+
+    //esp_restart();
 
     // char timer_name[] = "rebootin5s";
     // FreeRTOSTimer timer(timer_name, (TickType_t)5000/10, false, NULL, restartin5s);
