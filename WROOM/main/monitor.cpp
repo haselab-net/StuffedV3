@@ -307,6 +307,8 @@ public:
         tags.push_back(Tag("ws_ws", "Web socket"));
         tags.push_back(Tag("SRCmd", "module srCommand"));
         tags.push_back(Tag("duktape_jsfile", "duktape_jsfile.c"));
+        tags.push_back(Tag("log", "duktape console log"));
+        tags.push_back(Tag("modules", "duktape modules"));
         Init();
     }
     void Init(){

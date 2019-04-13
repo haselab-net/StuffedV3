@@ -15,7 +15,6 @@
 #include "AllBoards.h"
 #include "TouchSensing.h"
 #include "MotorDriver.h"
-#include "monitor.h"
 #ifndef USE_DUKTAPE
 #include "../wifiMan/wifiMan.h"
 #endif

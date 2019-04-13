@@ -8,13 +8,12 @@
 #include "esp_system.h"
 #include "esp_spi_flash.h"
 #include "esp_task_wdt.h"
-#include "esp_heap_trace.h"
 #include "esp_log.h"
 #include "nvs_flash.h"
 #include "rom/uart.h"
 #include "ws_task.h"
 #endif
-#include "softRobot/monitor.h"
+#include "monitor.h"
 #include "ws_fs.h"
 
 static const char* TAG="main";
@@ -25,8 +24,12 @@ extern "C" void duktape_main();
 extern "C" void ws_main();
 #endif
 
+//  #define HEAPTRACE
+#ifdef HEAPTRACE
+#include "esp_heap_trace.h"
 #define NUM_RECORDS 100
 static heap_trace_record_t trace_record[NUM_RECORDS]; // This buffer must be in internal RAM
+#endif
 
 extern "C" void app_main(){
 #ifndef _WIN32
@@ -44,7 +47,9 @@ extern "C" void app_main(){
         esp_log_level_set("*", ESP_LOG_INFO);
         ESP_LOGI(TAG, "Initial heap size: %d \n", esp_get_free_heap_size());
     }
+    #ifdef HEAPTRACE
     ESP_ERROR_CHECK( heap_trace_init_standalone(trace_record, NUM_RECORDS) );
+    #endif
 #endif 
     softRobot_main();
 	ESP_LOGI(TAG, "after softRobot_main heap size: %d \n", esp_get_free_heap_size());
@@ -56,6 +61,7 @@ extern "C" void app_main(){
     esp_log_level_set("module_os", ESP_LOG_DEBUG);
     esp_log_level_set("dukf_utils", ESP_LOG_DEBUG);
     esp_log_level_set("espfs", ESP_LOG_DEBUG);
+    esp_log_level_set("log", ESP_LOG_DEBUG);
     // esp_log_level_set("*", ESP_LOG_DEBUG);
 	ws_main();
     ESP_LOGI(TAG, "after ws_main heap size: %d \n", esp_get_free_heap_size());
@@ -67,7 +73,8 @@ extern "C" void app_main(){
 #endif
     Monitor::theMonitor.Init();
     vTaskDelay(500);   //  5 sec
+#ifdef HEAPTRACE
     heap_trace_start(HEAP_TRACE_LEAKS);
-
+#endif
     Monitor::theMonitor.Run();  //  monitor start. never return;
 }
