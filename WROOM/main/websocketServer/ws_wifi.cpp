@@ -55,9 +55,6 @@ void initWifi() {
     wifiEventHandler = new SRWifiEventHandler();
     wifi.setWifiEventHandler(wifiEventHandler);
     
-    //if(ssid.size()==0||password.size()==0) becomeAccessPoint();    // become AP
-    //else wifi.connectAP(ssid, password, false);           // become STA
-
-    // test
-    becomeAccessPoint();
+    if(ssid.size()==0||password.size()==0) becomeAccessPoint();    // become AP
+    else wifi.connectAP(ssid, password, false);           // become STA
 }
