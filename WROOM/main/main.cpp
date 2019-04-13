@@ -24,10 +24,9 @@ extern "C" void duktape_main();
 extern "C" void ws_main();
 #endif
 
-#define HEAPTRACE
-#ifdef HEAPTRACE
+#if CONFIG_HEAP_TRACING
 #include "esp_heap_trace.h"
-#define NUM_RECORDS 100
+#define NUM_RECORDS 40
 static heap_trace_record_t trace_record[NUM_RECORDS]; // This buffer must be in internal RAM
 #endif
 
@@ -47,7 +46,7 @@ extern "C" void app_main(){
         esp_log_level_set("*", ESP_LOG_INFO);
         ESP_LOGI(TAG, "Initial heap size: %d \n", esp_get_free_heap_size());
     }
-    #ifdef HEAPTRACE
+    #if CONFIG_HEAP_TRACING
     ESP_ERROR_CHECK( heap_trace_init_standalone(trace_record, NUM_RECORDS) );
     #endif
 #endif 
@@ -72,7 +71,5 @@ extern "C" void app_main(){
     }
 #endif
     Monitor::theMonitor.Init();
-#ifdef HEAPTRACE
-#endif
     Monitor::theMonitor.Run();  //  monitor start. never return;
 }

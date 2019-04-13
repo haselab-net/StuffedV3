@@ -58,7 +58,7 @@ static void runJsFile(){
 	ESP_LOGD(tag, "runtime.js finished.");
 }
 
-void* duk_alloc_hybrid_udata;
+void* duk_alloc_hybrid_udata = NULL;
 /**
  * create environment for running js file
  */
@@ -68,7 +68,9 @@ static void createJSFileHeap() {
 #if 0
 	heap_context = duk_create_heap_default();
 #else
-	duk_alloc_hybrid_udata = duk_alloc_hybrid_init();
+	if (!duk_alloc_hybrid_udata){
+		duk_alloc_hybrid_udata = duk_alloc_hybrid_init();
+	}
 	heap_context = duk_create_heap(duk_alloc_hybrid, duk_realloc_hybrid, duk_free_hybrid, duk_alloc_hybrid_udata, NULL);
 #endif
 
@@ -229,6 +231,6 @@ void duktape_end(){
 	esp32_duk_context = NULL;
 	dukf_log_heap("Heap after set esp32_duk_context NULL");
 
-    // duk_destroy_heap( heap_context );
-	// heap_context = NULL;
+    duk_destroy_heap( heap_context );
+	heap_context = NULL;
 }
