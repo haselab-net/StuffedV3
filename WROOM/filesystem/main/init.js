@@ -1,4 +1,5 @@
 /* globals Duktape, log, DUKF, require */
+// init only once when first initialize heap
 
 StringUtils = {
 	endsWith: function(subjectString, searchString, position) {

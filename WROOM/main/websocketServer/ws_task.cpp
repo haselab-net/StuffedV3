@@ -50,7 +50,7 @@ void wsCreateJsfileTask() {
 }
 
 void wsDeleteJsfileTask() {
-    if(xHandle==NULL) return;
+    if(!xHandle) return;
     ESP_LOGD(LOG_TAG, "Delete old jsfile task");
 
     dukf_log_heap("Heap before delete task");

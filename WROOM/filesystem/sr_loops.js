@@ -14,6 +14,12 @@ var loops = {
 
     forever: function (func) {
         loops._foreverFunc = func;
+        loops.doForever = function () {
+            while(1) {
+                loops._foreverFunc();
+                loops.pause(1000);
+            }
+        }
     },
 
     _foreverFunc: function() {
@@ -22,10 +28,7 @@ var loops = {
     },
 
     doForever: function () {
-        while(1) {
-            loops._foreverFunc();
-            jslib.handleEvent();
-        }
+        
     }
 }
 

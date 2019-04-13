@@ -192,10 +192,14 @@ void wsOnMessageSr(UdpRetPacket& ret) {
         if(!esp32_duk_context) return;
         
         lock_heap();
-        if(!wsIsJsfileTaskRunning()) return;
-        if(!esp32_duk_context) return;
+        if(!wsIsJsfileTaskRunning() || !esp32_duk_context) {
+            unlock_heap();
+            return;
+        }
+
         commandMessageHandler(ret);
         ESP_LOGD(LOG_TAG, "Packet softrobot -> jsfile");
+        
         unlock_heap();
     } else {
         ESP_LOGV(LOG_TAG, "Cannot find destination: %i", ret.count);
