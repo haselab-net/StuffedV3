@@ -57,7 +57,7 @@ extern "C" void app_main(){
 #if defined USE_DUKTAPE && ! defined _WIN32
     esp_log_level_set("ws_task", ESP_LOG_DEBUG);
     esp_log_level_set("duktape_jsfile", ESP_LOG_DEBUG);
-    esp_log_level_set("modules", ESP_LOG_DEBUG);
+    //esp_log_level_set("modules", ESP_LOG_DEBUG);
     esp_log_level_set("module_os", ESP_LOG_DEBUG);
     esp_log_level_set("dukf_utils", ESP_LOG_DEBUG);
     esp_log_level_set("espfs", ESP_LOG_DEBUG);
@@ -72,8 +72,8 @@ extern "C" void app_main(){
     }
 #endif
     Monitor::theMonitor.Init();
-    vTaskDelay(500);   //  5 sec
 #ifdef HEAPTRACE
+    vTaskDelay(500);   //  5 sec
     heap_trace_start(HEAP_TRACE_LEAKS);
 #endif
     Monitor::theMonitor.Run();  //  monitor start. never return;
