@@ -110,6 +110,11 @@ private:
 			fileName = fileName.substr(0, fileName.length() - 1);
 		}
 
+		//	In case a server address without path is requested, append /index.html
+		if (request.getPath().length() == 1 && request.getPath().back() == '/'){
+			fileName.append("/index.html");
+		}
+
 		HttpResponse response(&request);
 		// Test if the path is a directory.
 		if (FileSystem::isDirectory(fileName)) {

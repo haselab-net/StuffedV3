@@ -84,9 +84,11 @@ static void httpWifiSetHandler(HttpRequest* pRequest, HttpResponse* pResponse) {
 
 void createHttpServer() {
     pHttpServer = new HttpServer();
+    pHttpServer->setRootPath(std::string(SPIFFS_MOUNTPOINT) + "/web");
+    pHttpServer->setDirectoryListing(true);
     pHttpServer->addPathHandler(
         HttpRequest::HTTP_METHOD_GET,
-        "/",
+        "/ws",
         wsHandshakeHandler
     );
     pHttpServer->addPathHandler(
@@ -99,7 +101,6 @@ void createHttpServer() {
         "/ssidSelected",
         httpWifiSetHandler
     );
-    pHttpServer->start(8002);       // listen http handshake at port 8000
+    pHttpServer->start(80);       // listen http handshake at port 8000
 }
-
 

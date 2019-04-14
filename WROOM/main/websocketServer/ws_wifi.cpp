@@ -1,6 +1,8 @@
 #include "ws_wifi.h"
-
 #include "logging.h"
+#include "esp_system.h"
+#include "esp_wifi.h"
+#include <string.h>
 
 LOG_TAG("ws_wifi");
 
@@ -9,7 +11,14 @@ static SRWifiEventHandler* wifiEventHandler;
 NVS wifiNvs = NVS("wifinvs");
 
 static void becomeAccessPoint() {
-    wifi.startAP("esp32-duktape-gzl", "");
+    uint8_t mac[6];
+	esp_read_mac(mac, ESP_MAC_WIFI_STA);	// 6 bytes
+    char buf[33];
+    strcpy(buf, "Nuibot ");
+    for(int i=0; i<6; ++i){
+        sprintf(buf+strlen(buf), "%02X", mac[i]);
+    }
+    wifi.startAP(buf, "");
 }
 
 esp_err_t SRWifiEventHandler::apStart() {
