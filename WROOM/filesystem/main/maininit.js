@@ -7,6 +7,8 @@ var motor = require("sr_motor");
 jslib.printHeap("heap size after require: ");
 softrobot.message_command.requireBoardInfo();
 
+jslib.handleEvent();    // before start main, unlock incase ws want to stop duktape
+
 // softrobot.senArrayBuffer = jslib.sendCommand;
 // jslib.registerCallback(function(buffer, buffersize){
 //     var packet = softrobot.packet_command.Packet.fromBinary(buffer);
