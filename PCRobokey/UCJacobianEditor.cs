@@ -415,6 +415,9 @@ namespace Robokey
                 if (ad < -180) ad += 360;
                 if (ad > 180) ad -= 360;
                 float[] s = { PosForce.Norm(pf.force[0]), (PosForce.Norm(pf.force[0]) + PosForce.Norm(pf.force[1])) / 2, PosForce.Norm(pf.force[1]) };
+                for (int i = 0; i < 3; ++i) {
+                    if (s[i] == 0) s[i] = 0.01f;
+                }
                 float r1 = 0.2f;
                 float r2 = 0.8f;
                 e.Graphics.FillPie(brs[selectedPlane], Center(s[0]), a0, ad * r1);
