@@ -186,7 +186,7 @@ var softrobot;
         function onReceiveCIBoardinfo(data) {
             softrobot.device.robotInfo = data;
             softrobot.device.checkRobotState();
-            for (var i = void 0; i < message_command.onRcvCIBoardInfoMessage.length; i++) {
+            for (var i = 0; i < message_command.onRcvCIBoardInfoMessage.length; i++) {
                 message_command.onRcvCIBoardInfoMessage[i]();
             }
         }
@@ -195,7 +195,7 @@ var softrobot;
             softrobot.device.robotState.setPropArray("pose", data.pose, softrobot.device.robotState.motor);
             softrobot.device.robotState.current = data.current;
             softrobot.device.robotState.force = data.force;
-            for (var i = void 0; i < message_command.onRcvCISensorMessage.length; i++) {
+            for (var i = 0; i < message_command.onRcvCISensorMessage.length; i++) {
                 message_command.onRcvCISensorMessage[i]();
             }
         }
@@ -215,7 +215,7 @@ var softrobot;
             softrobot.device.robotState.nInterpolateVacancy = softrobot.device.robotState.nInterpolateTotal - softrobot.device.robotState.nInterpolateRemain;
             if (softrobot.device.robotState.interpolateTargetCountOfWrite < softrobot.device.robotState.interpolateTargetCountOfReadMax)
                 softrobot.device.robotState.interpolateTargetCountOfWrite = softrobot.device.robotState.interpolateTargetCountOfReadMax;
-            for (var i = void 0; i < message_command.onRcvCIInterpolateMessage.length; i++) {
+            for (var i = 0; i < message_command.onRcvCIInterpolateMessage.length; i++) {
                 message_command.onRcvCIInterpolateMessage[i]();
             }
         }
@@ -225,7 +225,7 @@ var softrobot;
         }
         message_command.onReceiveCISetparam = onReceiveCISetparam;
         function onReceiveCIResetsensor() {
-            for (var i = void 0; i < message_command.onRcvCIResetSensorMessage.length; i++) {
+            for (var i = 0; i < message_command.onRcvCIResetSensorMessage.length; i++) {
                 message_command.onRcvCIResetSensorMessage[i]();
             }
         }

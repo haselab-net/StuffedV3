@@ -7,6 +7,7 @@
 #include <string>
 #include <sstream>
 #include <fstream>
+#include <cstring>
 
 #include "esp_log.h"
 extern "C" {
@@ -183,7 +184,11 @@ void wsOnMessageSr(UdpRetPacket& ret) {
     
     if (ret.count == 0) {
         // send packet to browser
-        wsSend(ret.bytes+2, ret.length);
+        char* buf = (char*)malloc(ret.length+2);
+        std::memcpy(buf+2, ret.bytes+2, ret.length);
+        *(short*)buf = 2;
+        wsSend(buf, ret.length+2);
+        free(buf);
         ESP_LOGV(LOG_TAG, "Packet softrobot -> websocket");
     } else if (ret.count == 1) {
         // send packet to jsfile task
