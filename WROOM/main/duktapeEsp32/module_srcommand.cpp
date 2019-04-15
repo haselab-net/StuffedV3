@@ -217,13 +217,13 @@ static duk_ret_t setMotorInterpolate(duk_context* ctx) {
     if (cmd->length != (2+n0+2)*2) return DUK_RET_TYPE_ERROR;
 
     //  set period
-    bool flag = duk_get_prop_string(ctx, -2, "period");
+    bool flag = duk_get_prop_string(ctx, -1, "period");
     if(!flag) return DUK_RET_REFERENCE_ERROR;
     cmd->SetPeriod(duk_get_int(ctx, -1));
     duk_pop(ctx);
 
     // set targetCountWrite
-    flag = duk_get_prop_string(ctx, -2, "targetCountWrite");
+    flag = duk_get_prop_string(ctx, -1, "targetCountWrite");
     if(!flag) return DUK_RET_REFERENCE_ERROR;
     cmd->SetTargetCountWrite(duk_get_int(ctx, -1));
     duk_pop(ctx);
@@ -394,27 +394,27 @@ static size_t pushDataCIBoardinfo(duk_context* ctx, UdpRetPacket& ret) {
     duk_push_object(ctx);
 
     duk_push_number(ctx, ret.data[0]);
-    duk_put_prop_string(ctx, -1, "systemId");
+    duk_put_prop_string(ctx, -2, "systemId");
 
     duk_push_number(ctx, ret.data[1]);
-    duk_put_prop_string(ctx, -1, "nTarget");
+    duk_put_prop_string(ctx, -2, "nTarget");
 
     duk_push_number(ctx, ret.data[2]);
-    duk_put_prop_string(ctx, -1, "nMotor");
+    duk_put_prop_string(ctx, -2, "nMotor");
 
     duk_push_number(ctx, ret.data[3]);
-    duk_put_prop_string(ctx, -1, "nCurrent");
+    duk_put_prop_string(ctx, -2, "nCurrent");
 
     duk_push_number(ctx, ret.data[4]);
-    duk_put_prop_string(ctx, -1, "nForces");
+    duk_put_prop_string(ctx, -2, "nForces");
 
     duk_push_number(ctx, ret.data[5]);
-    duk_put_prop_string(ctx, -1, "nTouch");
+    duk_put_prop_string(ctx, -2, "nTouch");
 
     void* p = duk_push_fixed_buffer(ctx, 6);
     std::memcpy(p, (void *)&ret.data[6], 6);
     duk_push_buffer_object(ctx, -1, 0, 6, DUK_BUFOBJ_ARRAYBUFFER);
-    duk_put_prop_string(ctx, -1, "macAddress");
+    duk_put_prop_string(ctx, -2, "macAddress");
     duk_pop(ctx);
 
     return 1;
@@ -454,13 +454,13 @@ static size_t pushDataCIInterpolate(duk_context* ctx, UdpRetPacket& ret) {
     putPropPos(ctx, ret);
 
     duk_push_int(ctx, ret.GetTargetCountReadMin());
-    duk_put_prop_string(ctx, -1, "targetCountReadMin");
+    duk_put_prop_string(ctx, -2, "targetCountReadMin");
     duk_push_int(ctx, ret.GetTargetCountReadMax());
-    duk_put_prop_string(ctx, -1, "targetCountReadMax");
+    duk_put_prop_string(ctx, -2, "targetCountReadMax");
     duk_push_int(ctx, ret.GetTickMin());
-    duk_put_prop_string(ctx, -1, "tickMin");
+    duk_put_prop_string(ctx, -2, "tickMin");
     duk_push_int(ctx, ret.GetTickMax());
-    duk_put_prop_string(ctx, -1, "tickMax");
+    duk_put_prop_string(ctx, -2, "tickMax");
 
     return 1;
 }

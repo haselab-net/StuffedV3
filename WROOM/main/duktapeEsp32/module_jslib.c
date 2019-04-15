@@ -122,6 +122,8 @@ static duk_ret_t send_command(duk_context* ctx) {
 static duk_ret_t jslib_handle_event(duk_context* ctx) {
     handle_event();
 
+    printf("handle_event -> unlock heap \n");
+
     unlock_heap();
     
     lock_heap();

@@ -10,23 +10,24 @@ moduleSRCommand(internalSRCommand);
 
 var _ret = {
     requireBoardInfo: function () {
-
+        internalSRCommand.requireBoardInfo(data);
     },
     requireSensorInfo: function () {
-
+        internalSRCommand.requireSensorInfo(data);
     },
     setMotorDirect: function (data) {
-        console.log("set motor direct called");
+        console.log("Set motor direct");
         internalSRCommand.setMotorDirect(data);
     },
     setMotorInterpolate: function (data) {
-
+        console.log("Set motor interpolate");
+        internalSRCommand.setMotorInterpolate(data);
     },
     setMotorParam: function (data) {
-
+        internalSRCommand.setMotorParam(data);
     },
     resetSensor: function (data) {
-
+        internalSRCommand.resetSensor(data);
     },
     registerCallback: function (name, func) {
         console.log("register function: "+name);
