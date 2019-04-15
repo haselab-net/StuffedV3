@@ -23,7 +23,7 @@ extern "C" void ws_main() {
 	// Boot the WiFi environment
 	nvs_flash_init();
 	tcpip_adapter_init();
-    initWifi();
+    SRWiFi::wifi.init();
 
     // Mount the SPIFFS file system.
     #if defined(ESP_PLATFORM)

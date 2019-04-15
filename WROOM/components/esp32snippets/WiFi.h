@@ -47,7 +47,6 @@ private:
 
 class WiFiAPRecord {
 public:
-	friend class WiFi;
 
 	/**
 	 * @brief Get the auth mode.
@@ -75,7 +74,6 @@ public:
 
 	std::string toString();
 
-private:
 	uint8_t        m_bssid[6];
 	int8_t         m_rssi;
 	std::string    m_ssid;
@@ -156,7 +154,6 @@ public:
 	void                      setIPInfo(const char* ip, const char* gw, const char* netmask);
 	void                      setIPInfo(uint32_t ip, uint32_t gw, uint32_t netmask);
 	void                      setWifiEventHandler(WiFiEventHandler* wifiEventHandler);
-
 };
 
 #endif /* MAIN_WIFI_H_ */

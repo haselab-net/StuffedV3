@@ -5,6 +5,7 @@
  */
 
 #include "ws_http.h"
+#include "ws_form.h"
 
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
@@ -62,24 +63,25 @@ static void httpWifiSetHandler(HttpRequest* pRequest, HttpResponse* pResponse) {
     printf("body: %s", body.c_str());
     printf("ssif: %s", up.getString("ssid").c_str());
 
-    wifiNvs.set("ssid", up.getString("ssid"));
-    wifiNvs.set("password", up.getString("password"));
-    wifiNvs.set("ip", up.getString("ip"));
-    wifiNvs.set("gw", up.getString("gw"));
-    wifiNvs.set("netmask", up.getString("netmask"));
+    SRWiFi::wifiNvs.set("ssid", up.getString("ssid"));
+    SRWiFi::wifiNvs.set("password", up.getString("password"));
+    SRWiFi::wifiNvs.set("ip", up.getString("ip"));
+    SRWiFi::wifiNvs.set("gw", up.getString("gw"));
+    SRWiFi::wifiNvs.set("netmask", up.getString("netmask"));
 
     pResponse->setStatus(200, "OK");
     std::string return_message = "Got data - try to connect to AP: " + up.getString("ssid") + ", with password: " + up.getString("password");
     pResponse->sendData(return_message);
     pResponse->close();
 
-    wifi.connectAP(up.getString("ssid"), up.getString("password"), false);
+    SRWiFi::wifi.connectAP(up.getString("ssid"), up.getString("password"), false);
+}
 
-    //esp_restart();
+static void formHandler(HttpRequest* pRequest, HttpResponse* pResponse) {
+    // Serve up the content from the file on the file system ... if found ...
+    std::string fileName = pHttpServer->getRootPath() + pRequest->getPath(); // Build the absolute file name to read.
 
-    // char timer_name[] = "rebootin5s";
-    // FreeRTOSTimer timer(timer_name, (TickType_t)5000/10, false, NULL, restartin5s);
-    // timer.start();
+ //   pResponse->sendFile(fileName, pHttpServer->getFileBufferSize());
 }
 
 void createHttpServer() {
@@ -90,6 +92,16 @@ void createHttpServer() {
         HttpRequest::HTTP_METHOD_GET,
         "/ws",
         wsHandshakeHandler
+    );
+    pHttpServer->addPathHandler(
+        HttpRequest::HTTP_METHOD_GET,
+        "/",
+        formHandler
+    );
+    pHttpServer->addPathHandler(
+        HttpRequest::HTTP_METHOD_POST,
+        "/",
+        formHandler
     );
     pHttpServer->addPathHandler(
         HttpRequest::HTTP_METHOD_GET,

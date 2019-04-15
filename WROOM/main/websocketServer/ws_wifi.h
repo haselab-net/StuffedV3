@@ -5,17 +5,32 @@
 #include "WiFi.h"
 #include "CPPNVS.h"
 
-void initWifi();
-
+class SRWiFi;
 class SRWifiEventHandler: public WiFiEventHandler {
-    esp_err_t apStart();
-    esp_err_t staConnected(system_event_sta_connected_t info);
-    esp_err_t staGotIp(system_event_sta_got_ip_t info);
-    esp_err_t staDisconnected(system_event_sta_disconnected_t info);
+protected:
+    SRWiFi* wifi;
+	virtual esp_err_t staScanDone(system_event_sta_scan_done_t info);
+	virtual esp_err_t apStaConnected(system_event_ap_staconnected_t info);
+    virtual esp_err_t staConnected(system_event_sta_connected_t info);
+    virtual esp_err_t staGotIp(system_event_sta_got_ip_t info);
+    virtual esp_err_t staDisconnected(system_event_sta_disconnected_t info);
+public:
+    SRWifiEventHandler(SRWiFi* w);
+    virtual ~SRWifiEventHandler(){}
 };
 
-extern NVS wifiNvs;
+class SRWiFi: public WiFi{
+protected:
+    SRWifiEventHandler eventHandler;
+public:
+    static SRWiFi wifi;
+    static NVS wifiNvs;
 
-extern WiFi wifi;
+    SRWiFi():eventHandler(this){}
+    void init();
+	void					  startScan();	//	Start scan. Wifi mode must be station or apSta. 
+	std::vector<WiFiAPRecord> stopScan();	//	Stop scan and return ap list.
 
+    void startAccessPoint();
+};
 #endif
