@@ -10,10 +10,10 @@ moduleSRCommand(internalSRCommand);
 
 var _ret = {
     requireBoardInfo: function () {
-        internalSRCommand.requireBoardInfo(data);
+        internalSRCommand.requireBoardInfo();
     },
     requireSensorInfo: function () {
-        internalSRCommand.requireSensorInfo(data);
+        internalSRCommand.requireSensorInfo();
     },
     setMotorDirect: function (data) {
         console.log("Set motor direct");

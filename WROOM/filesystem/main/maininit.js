@@ -5,6 +5,7 @@ var softrobot = require("sr_softrobot");
 var motor = require("sr_motor");
 
 jslib.printHeap("heap size after require: ");
+softrobot.message_command.requireBoardInfo();
 
 // softrobot.senArrayBuffer = jslib.sendCommand;
 // jslib.registerCallback(function(buffer, buffersize){

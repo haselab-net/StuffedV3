@@ -414,7 +414,7 @@ static size_t pushDataCIBoardinfo(duk_context* ctx, UdpRetPacket& ret) {
     void* p = duk_push_fixed_buffer(ctx, 6);
     std::memcpy(p, (void *)&ret.data[6], 6);
     duk_push_buffer_object(ctx, -1, 0, 6, DUK_BUFOBJ_ARRAYBUFFER);
-    duk_put_prop_string(ctx, -2, "macAddress");
+    duk_put_prop_string(ctx, -3, "macAddress");
     duk_pop(ctx);
 
     return 1;
