@@ -266,7 +266,7 @@ static duk_ret_t setMotorParam(duk_context* ctx) {
             int n0 = getPropConA(ctx, cmd);
             if(n0<0) return DUK_RET_TYPE_ERROR;
 
-            if(cmd->length!=(2+1+n0)*2) return DUK_RET_TYPE_ERROR;
+            if(cmd->length!=(2+1+n0+n0)*2) return DUK_RET_TYPE_ERROR;
             break;
         }
         case PT_TORQUE_LIMIT: {
