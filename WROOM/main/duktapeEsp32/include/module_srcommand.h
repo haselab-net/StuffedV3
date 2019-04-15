@@ -10,7 +10,7 @@ duk_ret_t ModuleSRCommand(duk_context *ctx);
 
 #ifdef __cplusplus
 }
-#include "../softRobot/UdpCom.h"
+#include "../../softRobot/UdpCom.h"
 void commandMessageHandler(UdpRetPacket& ret);
 #endif
 

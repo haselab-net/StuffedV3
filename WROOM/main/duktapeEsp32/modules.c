@@ -524,7 +524,7 @@ static void ModuleESP32(duk_context *ctx) {
  */
 void registerModules(duk_context *ctx) {
 	LOGD(">> registerModules");
-#if defined(ESP_PLATFORM)
+#if 0	// && defined(ESP_PLATFORM)	This causes memory leak. Should be in main.cpp	
 	int flashSize = 1024*1024;
 	espFsInit((void *)0x300000, flashSize);
 #endif // ESP_PLATFORM

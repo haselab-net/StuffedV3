@@ -18,22 +18,21 @@
 #include "driver/uart.h"
 
 #include "../WroomEnv.h"
-#include "UdpCom.h"
-#include "AllBoards.h"
-#include "TouchSensing.h"
-#include "MotorDriver.h"
+#include "SoftRobot/UdpCom.h"
+#include "SoftRobot/AllBoards.h"
+#include "SoftRobot/TouchSensing.h"
+#include "SoftRobot/MotorDriver.h"
 #include "monitor.h"
-#include "UartForBoards.h"
+#include "SoftRobot/UartForBoards.h"
 extern "C" {
-#include "module_jslib.h"
-#include "duktape_jsfile.h"
+#include "duktapeEsp32/include/module_jslib.h"
+#include "duktapeEsp32/include/duktape_jsfile.h"
 }
-#include "../SoftRobot/UdpCom.h"
-#include "module_srcommand.h"
+#include "duktapeEsp32/include/module_srcommand.h"
 
-#include "ws_command.h"
-#include "ws_task.h"
-#include "ws_fs.h"
+#include "websocketServer/ws_command.h"
+#include "websocketServer/ws_task.h"
+#include "websocketServer/ws_fs.h"
 
 
 Monitor Monitor::theMonitor;
@@ -293,19 +292,25 @@ class MCTargetUnderflow: public MonitorCommandBase{
     }
 } mcShowTargetUnderflow;
 class MCJSRestart: public MonitorCommandBase{
+public:
+    MCJSRestart() { bFirst = true; } 
     const char* Desc(){ return "j Restart java script"; }
+    bool bFirst;
     void Func(){
         wsDeleteJsfileTask();
         heap_trace_dump();
-        heap_trace_start(HEAP_TRACE_LEAKS);
+        if (bFirst){
+            heap_trace_start(HEAP_TRACE_LEAKS);
+            bFirst = false;
+        }
 
-        combineMainFiles();
+/*        combineMainFiles();
         std::ifstream m_ifstream("/spiffs/main/runtime.js");
         std::string str((std::istreambuf_iterator<char>(m_ifstream)),
         std::istreambuf_iterator<char>());
         ESP_LOGI(Tag(), "Start runtime file: %s", str.c_str());
         m_ifstream.close();
-        ESP_LOGI(Tag(), "before wsCreateJsfileTask heap size: %d", esp_get_free_heap_size());
+  */      ESP_LOGI(Tag(), "before wsCreateJsfileTask heap size: %d", esp_get_free_heap_size());
         wsCreateJsfileTask();
 #if 0
         ESP_LOGI(Tag(), "Create JS Task and wait 10 sec.");

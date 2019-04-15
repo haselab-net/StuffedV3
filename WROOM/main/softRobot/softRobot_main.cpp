@@ -24,9 +24,6 @@ extern "C" void softRobot_main()    //  called from app_main in main.cpp
     //----------------------------------
     logPrintf("!!! Stuffed Robot Start !!!\n");   
 	//nvs_flash_erase();
-#ifndef _WIN32
-	esp_log_level_set("phy_init", ESP_LOG_INFO);
-#endif
     motorDriver.Init();
 #if 1   //  touchPads can not work with JTAG debugger
     touchPads.Init();
@@ -35,9 +32,10 @@ extern "C" void softRobot_main()    //  called from app_main in main.cpp
     logPrintf("Init allBoards finished. ");
     logPrintf("%d motors, %d current sensors, %d force sensors found.\n", allBoards.GetNTotalMotor(), allBoards.GetNTotalCurrent(), allBoards.GetNTotalForce());
 
-#ifndef USE_DUKTAPE
-    wifiMan();    //  Start wifi manager. 
-#endif
+#ifdef USE_DUKTAPE
     udpCom.Init();    //  init command processing for udp.
-    udpCom.Start();   //  start UDP server.
+#else
+    wifiMan();        //  Start wifi manager. 
+    udpCom.Init();    //  init command processing for udp.
+#endif
 }

@@ -231,4 +231,5 @@ void duktape_end(){
 
     duk_destroy_heap( heap_context );
 	heap_context = NULL;
+	esp32_duktape_endEvents();
 }

@@ -8,7 +8,7 @@ extern "C" {
     #include "duktape_jsfile.h"
     #include "dukf_utils.h"
 }
-#include "UdpCom.h"
+#include "../softRobot/UdpCom.h"
 #include "duktape_jsfile.h"
 
 static TaskHandle_t xHandle = NULL;

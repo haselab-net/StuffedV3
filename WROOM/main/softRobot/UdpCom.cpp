@@ -6,6 +6,7 @@
 
 #include "lwip/opt.h"
 #include "lwip/tcpip.h"
+#include "lwip/mem.h"
 #include "lwip/udp.h"
 #include "lwip/ip_addr.h"
 #ifndef _WIN32
