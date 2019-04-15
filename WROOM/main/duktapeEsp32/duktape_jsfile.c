@@ -202,7 +202,7 @@ void unlock_heap() {
 }
 
 void duktape_start() {
-    esp32_duktape_initEvents();
+    if(!heap_context) esp32_duktape_initEvents();			// only create once
 
     dukf_init_nvs_values(); // Initialize any defaults for NVS data
 
@@ -226,11 +226,9 @@ void duktape_start() {
 }
 
 void duktape_end(){
-    esp32_duktape_endEvents();
-
 	esp32_duk_context = NULL;
 	dukf_log_heap("Heap after set esp32_duk_context NULL");
 
-    duk_destroy_heap( heap_context );
-	heap_context = NULL;
+    // duk_destroy_heap( heap_context );
+	// heap_context = NULL;
 }
