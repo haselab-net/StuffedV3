@@ -24,7 +24,7 @@
 
 LOG_TAG("ws_http");
 
-static HttpServer* pHttpServer;
+HttpServer* pHttpServer;
 
 // static void restartin5s(FreeRTOSTimer* pTimer) {
 //     LOGD("restart in 5s");

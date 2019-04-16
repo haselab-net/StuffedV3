@@ -1,19 +1,30 @@
 #pragma once
 #include "HttpServer.h"
 #include "HttpResponse.h"
+#include <vector>
+#include <regex>
 
 class SRFormBase{
 public:
-	std::regex path;
-	const char* type;
+	std::regex path;	//	if request path and method match, this form is used.
+	const char* method;
+	virtual void handler(HttpRequest& request, HttpResponse& response)=0;
 };
 
 class SRRequestHandler {
 	SRRequestHandler();
-	static void handlerStatic(HttpRequest* pRequest, HttpResponse* pResponse);
 public:
 	static SRRequestHandler theRequestHandler;
 	std::vector<SRFormBase*> forms;
-	void handler(HttpRequest* pRequest, HttpResponse* pResponse);
 	void Register(HttpServer* s);
+};
+
+class SRFormReplace: public SRFormBase{
+public:
+	struct Replace{
+		std::string from;
+		std::string to;
+	};
+	std::vector<Replace> replaces;
+	virtual void handler(HttpRequest& request, HttpResponse& response);
 };

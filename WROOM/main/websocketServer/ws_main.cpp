@@ -11,9 +11,9 @@
 #include "logging.h"
 #include "WiFiEventHandler.h"
 
-#include "ws_server.h"
 #include "ws_wifi.h"
 #include "ws_fs.h"
+#include "ws_http.h"
 
 LOG_TAG("ws_main");
 
@@ -31,5 +31,5 @@ extern "C" void ws_main() {
     #endif /* ESP_PLATFORM */
 
     // start server
-    createServer();
+    createHttpServer();
 }

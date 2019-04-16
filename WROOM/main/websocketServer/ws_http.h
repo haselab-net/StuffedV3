@@ -4,5 +4,6 @@
 #include "HttpServer.h"
 
 void createHttpServer();
+extern HttpServer* pHttpServer;
 
 #endif

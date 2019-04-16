@@ -76,6 +76,7 @@ void SRWiFi::init() {
 
     setWifiEventHandler(&eventHandler);
     
+#if 0
     if (ssid.size()==0||password.size()==0){
         startAccessPoint();     // start AP
     }
@@ -83,6 +84,9 @@ void SRWiFi::init() {
         startAccessPoint();     // start AP and 
         connectAP(ssid, password, false, WIFI_MODE_APSTA);     // move to APSTA
     } 
+#else
+        connectAP("hasefone", "hasevr@gmail.com", false, WIFI_MODE_APSTA);     // move to APSTA
+#endif
 }
 
 
