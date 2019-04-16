@@ -12,7 +12,7 @@
 #include "duktape_utils.h"
 #include "duktape_event.h"
 #include "duktape_jsfile.h"
-#include "UdpCom.h"
+#include "../softRobot/UdpCom.h"
 
 static uint32_t stash_key_callback = 0;    // stash key for packet callback function
 static size_t return_packet_buffer_size;   // the size of buffer we want to send

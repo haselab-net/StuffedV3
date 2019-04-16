@@ -104,6 +104,8 @@ extern "C" void app_main(){
 	//  Start file system (espFs)
     int flashSize = 1024*1024;
 	espFsInit((void *)0x300000, flashSize);
+
+    esp_log_level_set("*", ESP_LOG_DEBUG);
 	
     //  Start web server with web socket
     ws_main();

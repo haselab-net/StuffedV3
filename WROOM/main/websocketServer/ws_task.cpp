@@ -26,7 +26,7 @@ static void duktapeTask(void* pvParameters) {
 
     while(1) {
         vTaskDelay(pdMS_TO_TICKS(1000));
-        printf("wait 1s\n");
+        ESP_LOGD(LOG_TAG,"wait 1s");
     }
 }
 

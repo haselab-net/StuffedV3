@@ -9,6 +9,7 @@
 #include <fstream>
 #include <cstring>
 
+#include "esp_heap_trace.h"
 #include "esp_log.h"
 extern "C" {
 #include "module_jslib.h"
@@ -153,8 +154,11 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
                     if(!offline_mode) {
                         ESP_LOGD(LOG_TAG, "switch to development mode, stop running jsfile task");
                         wsDeleteJsfileTask();
+                        heap_trace_dump();
+                        heap_trace_start(HEAP_TRACE_LEAKS);                        
                         printf("delete success");
                     }else if(!wsIsJsfileTaskRunning()){
+                        ESP_LOGI(LOG_TAG, "before wsCreateJsfileTask heap size: %d", esp_get_free_heap_size());
                         ESP_LOGD(LOG_TAG, "switch to offline mode, start running jsfile task");
                         wsCreateJsfileTask();
                     }
