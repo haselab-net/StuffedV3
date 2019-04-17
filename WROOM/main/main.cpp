@@ -97,7 +97,7 @@ extern "C" void app_main(){
     setLogLevel();
 
     //  Start soft robot controller
-//    softRobot_main();
+    softRobot_main();
     ESP_LOGI(TAG, "after softRobot_main heap size: %d \n", esp_get_free_heap_size());
 
 	//  Start file system (espFs)
@@ -110,15 +110,15 @@ extern "C" void app_main(){
     esp_log_level_set("intr_alloc", ESP_LOG_INFO);
     
     //  start soft robot's udp command server.
-//    udpCom.Start();   //  start UDP server.
+    udpCom.Start();   //  start UDP server.
 
     //  start DukTape, javascript engine and run /main/main*.js
-/*	if(!wsIsJsfileTaskRunning()) {
+	if(!wsIsJsfileTaskRunning()) {
         combineMainFiles();
         wsCreateJsfileTask();
         ESP_LOGI(TAG ,"Start running default jsfile task");
     }
-*/
+
     //  start monitor
     Monitor::theMonitor.Init();
     Monitor::theMonitor.Run();  //  monitor start. never return;
