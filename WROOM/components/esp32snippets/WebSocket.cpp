@@ -412,7 +412,7 @@ WebSocketInputStreambuf::WebSocketInputStreambuf(
 	m_bufferSize = bufferSize; // The size of the buffer used to hold data
 	m_sizeRead   = 0;          // The size of data read from the socket
 	m_buffer = new char[bufferSize]; // Create the buffer used to hold the data read from the socket.
-
+	//ESP_LOGI(LOG_TAG, "WebSocketInputStreambuf: new");
 	setg(m_buffer, m_buffer, m_buffer); // Set the initial get buffer pointers to no data.
 } // WebSocketInputStreambuf
 
@@ -422,6 +422,7 @@ WebSocketInputStreambuf::WebSocketInputStreambuf(
  */
 WebSocketInputStreambuf::~WebSocketInputStreambuf() {
 	delete[] m_buffer;
+	//ESP_LOGI(LOG_TAG, "WebSocketInputStreambuf: delete");
 	discard();
 } // ~WebSocketInputRecordStreambuf
 

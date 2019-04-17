@@ -102,6 +102,7 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
     std::streamsize ssize = pWebSocketInputStreambuf->sgetn(pBuffer, bufferSize);
     if(ssize>=bufferSize) {
         ESP_LOGV(LOG_TAG ,"File main.js to large!!!!!!!!!");
+        delete [] pBuffer;
         return;
     }
 

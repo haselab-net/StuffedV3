@@ -42,9 +42,9 @@ SRFormHandler::SRFormHandler(){
 }
 
 //-------------------------------------------------------------------
-//	SRFormReplace
+//	SRReplace
 //
-void SRFormReplace::handler(HttpRequest& request, HttpResponse& response){
+void SRReplace::handle(HttpRequest& request, HttpResponse& response, std::vector<Replace>& replaces){
     // Serve up the content from the file on the file system ... if found ...
     std::string fileName = pHttpServer->getRootPath() + request.getPath(); // Build the absolute file name to read.
     // If the file name ends with a '/' then remove it ... we are normalizing to NO trailing slashes.
@@ -109,7 +109,7 @@ void SRFormReplace::handler(HttpRequest& request, HttpResponse& response){
 					}
 					ESP_LOGE(tag, "Repeat count must be set.");
 					foundNum:
-					//ESP_LOGD(tag, "SRFormReplace: Repeat %d.", nRepeat);
+					//ESP_LOGD(tag, "SRReplace: Repeat %d.", nRepeat);
 					//	Shift buffer and read from file;
 					dataLen -= pos+1;
 					memmove(pData, pData + pos+1, dataLen);
@@ -152,7 +152,7 @@ void SRFormReplace::handler(HttpRequest& request, HttpResponse& response){
 						inParen--;
 						if (inParen < 0){
 							inParen = 0;
-							ESP_LOGE(tag, "SRFormReplace: parentheses error in %s.", key);
+							ESP_LOGE(tag, "SRReplace: parentheses error in %s.", key);
 						}
 						pos ++;						//skip and stop;
 					}else if (nRepeat > 0 && pData[pos] == '*'){	//	add repeatCount to key
@@ -164,12 +164,12 @@ void SRFormReplace::handler(HttpRequest& request, HttpResponse& response){
 					for(Replace& r: replaces){
 						if (r.from.compare(key) == 0){
 							response.sendData((uint8_t*) r.to.c_str(), r.to.length());
-							//ESP_LOGD(tag, "SRFormReplace: key='%s' is replaced to %s.", r.from.c_str(), r.to.c_str());	
+							//ESP_LOGD(tag, "SRReplace: key='%s' is replaced to %s.", r.from.c_str(), r.to.c_str());	
 							goto foundKey;
 						}
 					}
 					//	not found
-					ESP_LOGE(tag, "SRFormReplace: Undefined key='%s' is used in %s.", key, fileName.c_str());	
+					ESP_LOGE(tag, "SRReplace: Undefined key='%s' is used in %s.", key, fileName.c_str());	
 				foundKey:
 					keyLen = -1;
 					sentPos = pos;
@@ -185,7 +185,7 @@ void SRFormReplace::handler(HttpRequest& request, HttpResponse& response){
 			ESP_LOGE(tag, "Corresponding '$]' is needed.");
 		}
 		if (keyLen == -1){
-			response.sendData(pData + sentPos, dataLen);
+			response.sendData(pData + sentPos, dataLen-sentPos);
 		}
 	}
 	delete[] pData;

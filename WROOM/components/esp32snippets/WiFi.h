@@ -107,7 +107,7 @@ public:
  * @endcode
  */
 class WiFi {
-private:
+protected:
 	static esp_err_t    eventHandler(void* ctx, system_event_t* event);
 	void                init();
 	uint32_t            ip;

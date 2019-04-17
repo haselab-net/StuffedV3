@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Nuibot WiFi Setting</title>
+<style>button.AP{width:25%;height:3em;}</style>
+</head>
+<body>
+<div style="zoom: 150%;">
+<h1>Nuibot WiFi Setting</h1>
+<form action="/password.html" method="post">
+<h2>WiFi Stations</h2>
+$nAP[
+<button class="AP" type="submit" name="selected" value="$ssid*">$ssid*<br/>$auth* $rssi*</button>
+$]
+<h3>Direct Input</h3>
+<input type="text" name="ssid">
+<input type="submit" name="typed">
+</form>
+</div>
+<!-- End -->
+</body>
+</html>

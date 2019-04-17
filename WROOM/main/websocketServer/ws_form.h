@@ -20,13 +20,12 @@ public:
 	static void addForm(SRFormBase* form);
 };
 
-class SRFormReplace: public SRFormBase{
+class SRReplace{
 public:
 	struct Replace{
 		std::string from;
 		std::string to;
 		Replace(std::string f, std::string t): from(f), to(t){}
 	};
-	std::vector<Replace> replaces;
-	virtual void handler(HttpRequest& request, HttpResponse& response);
+	void handle(HttpRequest& request, HttpResponse& response, std::vector<Replace>& replaces);
 };
