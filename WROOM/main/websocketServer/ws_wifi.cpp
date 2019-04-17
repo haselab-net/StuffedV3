@@ -22,7 +22,7 @@ esp_err_t SRWifiEventHandler::staConnected(system_event_sta_connected_t info) {
     return ESP_OK;
 }
 esp_err_t SRWifiEventHandler::staGotIp(system_event_sta_got_ip_t info) {
-    LOGD("GOT IP: %s", ip4addr_ntoa(&info.ip_info.ip));
+    LOGI("GOT IP: %s", ip4addr_ntoa(&info.ip_info.ip));
     return ESP_OK;
 }
 esp_err_t SRWifiEventHandler::staDisconnected(system_event_sta_disconnected_t info) {
@@ -74,9 +74,7 @@ void SRWiFi::init() {
     wifiNvs.get("netmask",  &netmask);
     wifiNvs.commit();
 
-    setWifiEventHandler(&eventHandler);
-    
-#if 0
+    setWifiEventHandler(&eventHandler);    
     if (ssid.size()==0||password.size()==0){
         startAccessPoint();     // start AP
     }
@@ -84,9 +82,6 @@ void SRWiFi::init() {
         startAccessPoint();     // start AP and 
         connectAP(ssid, password, false, WIFI_MODE_APSTA);     // move to APSTA
     } 
-#else
-        connectAP("hasefone", "hasevr@gmail.com", false, WIFI_MODE_APSTA);     // move to APSTA
-#endif
 }
 
 

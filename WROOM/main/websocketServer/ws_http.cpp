@@ -77,12 +77,7 @@ static void httpWifiSetHandler(HttpRequest* pRequest, HttpResponse* pResponse) {
     SRWiFi::wifi.connectAP(up.getString("ssid"), up.getString("password"), false);
 }
 
-static void formHandler(HttpRequest* pRequest, HttpResponse* pResponse) {
-    // Serve up the content from the file on the file system ... if found ...
-    std::string fileName = pHttpServer->getRootPath() + pRequest->getPath(); // Build the absolute file name to read.
-
- //   pResponse->sendFile(fileName, pHttpServer->getFileBufferSize());
-}
+extern void addWifiForm();
 
 void createHttpServer() {
     pHttpServer = new HttpServer();
@@ -93,16 +88,9 @@ void createHttpServer() {
         "/ws",
         wsHandshakeHandler
     );
-    pHttpServer->addPathHandler(
-        HttpRequest::HTTP_METHOD_GET,
-        "/",
-        formHandler
-    );
-    pHttpServer->addPathHandler(
-        HttpRequest::HTTP_METHOD_POST,
-        "/",
-        formHandler
-    );
+    addWifiForm();
+    SRFormHandler::registerToServer(pHttpServer);
+
     pHttpServer->addPathHandler(
         HttpRequest::HTTP_METHOD_GET,
         "/wifi.html",

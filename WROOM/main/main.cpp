@@ -38,7 +38,6 @@ static heap_trace_record_t trace_record[NUM_RECORDS]; // This buffer must be in 
 void setLogLevel(){
 #ifndef _WIN32
     //  Set log level
-    esp_log_level_set("*", ESP_LOG_INFO);
     esp_log_level_set("clk", ESP_LOG_INFO);
     esp_log_level_set("CPPNVS", ESP_LOG_INFO);
     esp_log_level_set("cpu_start", ESP_LOG_INFO);
@@ -65,18 +64,19 @@ void setLogLevel(){
     esp_log_level_set("ws_main", ESP_LOG_INFO);
     esp_log_level_set("ws_wifi", ESP_LOG_INFO);
     esp_log_level_set("ws_task", ESP_LOG_INFO);
+    esp_log_level_set("ws_form", ESP_LOG_DEBUG);
     //  duktape
     esp_log_level_set("duk_utils", ESP_LOG_INFO);
     esp_log_level_set("modules", ESP_LOG_INFO);
     esp_log_level_set("module_os", ESP_LOG_INFO);
-    esp_log_level_set("log", ESP_LOG_DEBUG);
+//    esp_log_level_set("log", ESP_LOG_DEBUG);
 #endif
 }
 
 extern "C" void app_main(){
     #ifndef _WIN32
-	esp_log_level_set("*", ESP_LOG_INFO);
     {
+    	esp_log_level_set("*", ESP_LOG_INFO);
         esp_chip_info_t chip_info;
         esp_chip_info(&chip_info);
         printf("This is ESP32 chip with %d CPU cores, WiFi%s%s, ",
@@ -86,7 +86,6 @@ extern "C" void app_main(){
         printf("silicon revision %d, ", chip_info.revision);
         printf("%dMB %s flash\n", spi_flash_get_chip_size() / (1024 * 1024),
                 (chip_info.features & CHIP_FEATURE_EMB_FLASH) ? "embedded" : "external");
-        esp_log_level_set("*", ESP_LOG_INFO);
         ESP_LOGI(TAG, "Initial heap size: %d \n", esp_get_free_heap_size());
     }
     #if CONFIG_HEAP_TRACING
@@ -98,29 +97,28 @@ extern "C" void app_main(){
     setLogLevel();
 
     //  Start soft robot controller
-    softRobot_main();
-	ESP_LOGI(TAG, "after softRobot_main heap size: %d \n", esp_get_free_heap_size());
+//    softRobot_main();
+    ESP_LOGI(TAG, "after softRobot_main heap size: %d \n", esp_get_free_heap_size());
 
 	//  Start file system (espFs)
     int flashSize = 1024*1024;
 	espFsInit((void *)0x300000, flashSize);
-
-    esp_log_level_set("*", ESP_LOG_DEBUG);
 	
     //  Start web server with web socket
     ws_main();
     ESP_LOGI(TAG, "after ws_main heap size: %d \n", esp_get_free_heap_size());
+    esp_log_level_set("intr_alloc", ESP_LOG_INFO);
     
     //  start soft robot's udp command server.
-    udpCom.Start();   //  start UDP server.
+//    udpCom.Start();   //  start UDP server.
 
     //  start DukTape, javascript engine and run /main/main*.js
-	if(!wsIsJsfileTaskRunning()) {
+/*	if(!wsIsJsfileTaskRunning()) {
         combineMainFiles();
         wsCreateJsfileTask();
         ESP_LOGI(TAG ,"Start running default jsfile task");
     }
-
+*/
     //  start monitor
     Monitor::theMonitor.Init();
     Monitor::theMonitor.Run();  //  monitor start. never return;
