@@ -220,6 +220,9 @@ void duktape_start() {
 
     //duk_idx_t lastStackTop = duk_get_top(esp32_duk_context); // Get the last top value of the stack from which we will use to check for leaks.
 
+	unlock_heap();
+	lock_heap();
+
 	runJsFile();
 
 	unlock_heap();
@@ -229,7 +232,7 @@ void duktape_end(){
 	esp32_duk_context = NULL;
 	dukf_log_heap("Heap after set esp32_duk_context NULL");
 
-	duk_destroy_heap( heap_context );
-	heap_context = NULL;
+	//duk_destroy_heap( heap_context );
+	//heap_context = NULL;
 	esp32_duktape_endEvents();
 }
