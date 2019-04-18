@@ -70,18 +70,18 @@ void NVS::erase(std::string key) {
  * @param [in] key The key to read from the namespace.
  * @param [out] result The string read from the %NVS storage.
  */
-int NVS::get(std::string key, std::string* result, bool isBlob) {
+int NVS::get(std::string key, std::string& result, bool isBlob) {
 	size_t length;
 	if (isBlob) {
 		esp_err_t rc = ::nvs_get_blob(m_handle, key.c_str(), NULL, &length);
 		if (rc != ESP_OK) {
-			ESP_LOGI(LOG_TAG, "Error getting key: %i", rc);
+//			ESP_LOGI(LOG_TAG, "Error getting key: %i", rc);
 			return rc;
 		}
 	} else {
 		esp_err_t rc = ::nvs_get_str(m_handle, key.c_str(), NULL, &length);
 		if (rc != ESP_OK) {
-			ESP_LOGI(LOG_TAG, "Error getting key: %i", rc);
+//			ESP_LOGI(LOG_TAG, "Error getting key: %i", rc);
 			return rc;
 		}
 	}
@@ -91,11 +91,15 @@ int NVS::get(std::string key, std::string* result, bool isBlob) {
 	} else {
 		::nvs_get_str(m_handle, key.c_str(), data, &length);
 	}
-	*result = std::string(data);
+	result = std::string(data);
 	free(data);
 	return ESP_OK;
 } // get
 
+
+int NVS::get(std::string key, int32_t& value) {
+	return ::nvs_get_i32(m_handle, key.c_str(), &value);
+} // get - uint32_t
 
 int NVS::get(std::string key, uint32_t& value) {
 	return ::nvs_get_u32(m_handle, key.c_str(), &value);
@@ -134,6 +138,12 @@ void NVS::set(std::string key, std::string data, bool isBlob) {
 void NVS::set(std::string key, uint32_t value) {
 	ESP_LOGD(LOG_TAG, ">> set: key: %s, u32: value=%d", key.c_str(), value);
 	::nvs_set_u32(m_handle, key.c_str(), value);
+	ESP_LOGD(LOG_TAG, "<< set");
+} // set - uint32_t
+
+void NVS::set(std::string key, int32_t value) {
+	ESP_LOGD(LOG_TAG, ">> set: key: %s, u32: value=%d", key.c_str(), value);
+	::nvs_set_i32(m_handle, key.c_str(), value);
 	ESP_LOGD(LOG_TAG, "<< set");
 } // set - uint32_t
 

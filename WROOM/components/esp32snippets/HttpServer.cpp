@@ -73,6 +73,10 @@ private:
 	void processRequest(HttpRequest& request) {
 		ESP_LOGD("HttpServerTask", ">> processRequest: Method: %s, Path: %s",
 			request.getMethod().c_str(), request.getPath().c_str());
+		std::map<std::string, std::string> hs = request.getHeaders();
+		for(std::pair<std::string, std::string> p : hs){
+			ESP_LOGI("HttpServerTask", "HEADER:%s:%s", p.first.c_str(), p.second.c_str());
+		}
 
 		// Loop over all the path handlers we have looking for the first one that matches.  Note that none of them
 		// need to match.  If we find one that does, then invoke the handler and that is the end of processing.

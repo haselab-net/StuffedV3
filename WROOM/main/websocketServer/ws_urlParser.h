@@ -13,6 +13,7 @@ class urlParser {
         urlParser(std::string url);
 
         std::string getString(std::string key);
+        std::string getDecodedString(std::string key);
 };
 
 #endif

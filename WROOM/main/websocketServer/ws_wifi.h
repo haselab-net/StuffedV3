@@ -23,6 +23,7 @@ class SRWiFi: public WiFi{
 protected:
     SRWifiEventHandler srWifiEventHandler;
 public:
+    std::vector<WiFiAPRecord> scannedAPs;
     enum Status{
         WIFI_STA_DISCONNECTED,
         WIFI_STA_CONNECTING,
@@ -35,7 +36,7 @@ public:
     SRWiFi();
     void init();        //  Init wifi and start WIFI_MODE_APSTA
 	void startScan();	//	Start scan. Wifi mode must be station or apSta. 
-	std::vector<WiFiAPRecord> stopScan();	//	Stop scan and return ap list.
+	void stopScan();	//	Stop scan and return ap list.
     void connectAP(std::string ssid, std::string pass);
 };
 #endif

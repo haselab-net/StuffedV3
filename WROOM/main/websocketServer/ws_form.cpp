@@ -56,7 +56,7 @@ void SRReplace::handle(HttpRequest& request, HttpResponse& response, std::vector
         fileName.append("/index.html");
     }
 
-	ESP_LOGI(tag, "hanlder(): Opening file: %s", fileName.c_str());
+	ESP_LOGD(tag, "hanlder(): Opening file: %s", fileName.c_str());
 	std::ifstream ifStream;
 	ifStream.open(fileName, std::ifstream::in | std::ifstream::binary);      // Attempt to open the file for reading.
 
