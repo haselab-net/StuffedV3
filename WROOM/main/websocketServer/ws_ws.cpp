@@ -282,3 +282,8 @@ void printPacket(const void* pBuffer, size_t len) {
         }
     }
 }
+
+void printDTPacket(const void* pBuffer, size_t len) {
+    ESP_LOGD(LOG_TAG, "+ DT packet");
+    printPacketCommand(pBuffer, len);
+}

@@ -19,5 +19,6 @@ void wsOnMessageSr(UdpRetPacket& ret);
 void printPacketJsfile(const void* pBuffer, size_t len);
 void printPacketCommand(const void* pBuffer, size_t len);
 void printPacket(const void* pBuffer, size_t len);
+void printDTPacket(const void* pBuffer, size_t len);
 
 #endif
