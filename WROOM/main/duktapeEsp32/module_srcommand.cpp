@@ -9,8 +9,11 @@ extern "C" {
 #include "logging.h"
 }
 #include "module_srcommand.h"
+#include "../websocketServer/ws_ws.h"
 #include "../softRobot/UdpCom.h"
 #include "../softRobot/AllBoards.h"
+
+#define PRINT_DUKTAPE_PACKET 1
 
 LOG_TAG("SRCmd");
 
@@ -159,6 +162,11 @@ static duk_ret_t requireBoardInfo(duk_context* ctx) {
 	UdpCmdPacket* cmd = udpCom.PrepareCommand(CI_BOARD_INFO, 1);
     if (!cmd) return DUK_RET_ERROR;
 
+    #ifdef PRINT_DUKTAPE_PACKET
+    // print packet
+    printDTPacket(cmd->bytes+2, cmd->length-2);
+    #endif
+    
     //  send the packet
 	udpCom.WriteCommand();
 
@@ -171,6 +179,11 @@ static duk_ret_t requireSensorInfo(duk_context* ctx) {
 	UdpCmdPacket* cmd = udpCom.PrepareCommand(CI_SENSOR, 1);
     if (!cmd) return DUK_RET_ERROR;
 
+    #ifdef PRINT_DUKTAPE_PACKET
+    // print packet
+    printDTPacket(cmd->bytes+2, cmd->length-2);
+    #endif
+    
     //  send the packet
 	udpCom.WriteCommand();
 
@@ -191,6 +204,11 @@ static duk_ret_t setMotorDirect(duk_context* ctx) {
     if (n0<0 || n1<0) return DUK_RET_TYPE_ERROR;
 
     if (cmd->length != (2+n0+n1)*2) return DUK_RET_TYPE_ERROR;
+
+    #ifdef PRINT_DUKTAPE_PACKET
+    // print packet
+    printDTPacket(cmd->bytes+2, cmd->length-2);
+    #endif
 
     //  send the packet
 	udpCom.WriteCommand();
@@ -227,6 +245,11 @@ static duk_ret_t setMotorInterpolate(duk_context* ctx) {
     if(!flag) return DUK_RET_REFERENCE_ERROR;
     cmd->SetTargetCountWrite(duk_get_int(ctx, -1));
     duk_pop(ctx);
+
+    #ifdef PRINT_DUKTAPE_PACKET
+    // print packet
+    printDTPacket(cmd->bytes+2, cmd->length-2);
+    #endif
 
     //  send the packet
 	udpCom.WriteCommand();
@@ -282,6 +305,12 @@ static duk_ret_t setMotorParam(duk_context* ctx) {
         default:
             return DUK_RET_TYPE_ERROR;
     }
+
+    #ifdef PRINT_DUKTAPE_PACKET
+    // print packet
+    printDTPacket(cmd->bytes+2, cmd->length-2);
+    #endif
+
     //  send the packet
 	udpCom.WriteCommand();
 
@@ -304,6 +333,11 @@ static duk_ret_t resetSensor(duk_context* ctx) {
     cmd->SetResetSensorFlags(duk_get_int(ctx, -1));
     duk_pop(ctx);
 
+    #ifdef PRINT_DUKTAPE_PACKET
+    // print packet
+    printDTPacket(cmd->bytes+2, cmd->length-2);
+    #endif
+    
     //  send the packet
 	udpCom.WriteCommand();
 
