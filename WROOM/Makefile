@@ -3,7 +3,7 @@
 # project subdirectory.
 #
 
-PROJECT_NAME := stuffedRobot
+PROJECT_NAME := Nuibot
 
 include $(IDF_PATH)/make/project.mk
 
@@ -16,7 +16,7 @@ ship: images ship_build all
 	echo "| Building ship |"
 	echo "+---------------+"	
 	mkdir -p build/ship
-	cp build/esp32-duktape.bin build/ship
+	cp build/Nuibot.bin build/ship
 	cp build/partitions_singleapp.bin build/ship
 	cp build/bootloader/bootloader.bin build/ship
 	cp build/spiffs.img build/ship
@@ -110,7 +110,7 @@ duktape_configure:
 #
 flashdata: images
 	echo "Flashing both ESPFS and SPIFFS to ESP32"
-	$(ESPTOOLPY_WRITE_FLASH) --compress 0x300000 build/espfs.img 0x180000 build/spiffs.img
+	$(ESPTOOLPY_WRITE_FLASH) --compress 0x300000 build/espfs.img 0x210000 build/spiffs.img
 #
 #  Build all, flash app & flash both ESPFS and SPIFFS to ESP32
 #

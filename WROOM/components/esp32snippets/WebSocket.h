@@ -25,7 +25,7 @@ public:
 		size_t   dataLength,
 		uint8_t* pMask = nullptr,
 		size_t   bufferSize = 2048);
-	~WebSocketInputStreambuf();
+	virtual ~WebSocketInputStreambuf();
 	int_type underflow();
 	void discard();
 	size_t getRecordSize();

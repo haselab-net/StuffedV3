@@ -6,25 +6,26 @@
 
 class SRFormBase{
 public:
-	std::regex path;	//	if request path and method match, this form is used.
+	const char* path;	//	if request path and method match, this form is used.
 	const char* method;
 	virtual void handler(HttpRequest& request, HttpResponse& response)=0;
 };
 
-class SRRequestHandler {
-	SRRequestHandler();
+class SRFormHandler {
+	SRFormHandler();
 public:
-	static SRRequestHandler theRequestHandler;
-	std::vector<SRFormBase*> forms;
-	void Register(HttpServer* s);
+	static std::vector<SRFormBase*> forms;
+	static SRFormHandler theFormHandler;
+	static void registerToServer(HttpServer* s);
+	static void addForm(SRFormBase* form);
 };
 
-class SRFormReplace: public SRFormBase{
+class SRReplace{
 public:
 	struct Replace{
 		std::string from;
 		std::string to;
+		Replace(std::string f, std::string t): from(f), to(t){}
 	};
-	std::vector<Replace> replaces;
-	virtual void handler(HttpRequest& request, HttpResponse& response);
+	void handle(HttpRequest& request, HttpResponse& response, std::vector<Replace>& replaces);
 };

@@ -15,6 +15,7 @@ extern "C"{
 #include "driver/adc.h"
 #endif 
 
+#include <string.h>
 #include "MotorDriver.h"
 extern "C" {
 #include "../../../PIC/control.h"
@@ -105,18 +106,16 @@ void MotorDriver::Init(){
         adcChsRev[adcChs[i]] = i;
     }
 #ifndef _WIN32
-	i2s_config_t i2s_config = {
-        mode : (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_RX | I2S_MODE_ADC_BUILT_IN),
-        sample_rate : ADC_DMA_LEN * 3000 * 4,   //  3kHz * 4
-        bits_per_sample : i2s_bits_per_sample_t(16),
-        channel_format : I2S_CHANNEL_FMT_ONLY_LEFT,
-        communication_format : I2S_COMM_FORMAT_I2S_LSB,
-        intr_alloc_flags : ESP_INTR_FLAG_LEVEL1,
-        dma_buf_count : 2,
-        dma_buf_len : ADC_DMA_LEN,
-        use_apll : false,
-        fixed_mclk : 0,
-    };
+	i2s_config_t i2s_config;
+    memset(&i2s_config, 0, sizeof(i2s_config));
+    i2s_config.mode = (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_RX | I2S_MODE_ADC_BUILT_IN);
+    i2s_config.sample_rate = ADC_DMA_LEN * 3000 * 4;   //  3kHz * 4
+    i2s_config.bits_per_sample = i2s_bits_per_sample_t(16);
+    i2s_config.channel_format = I2S_CHANNEL_FMT_ONLY_LEFT;
+    i2s_config.communication_format = I2S_COMM_FORMAT_I2S_LSB;
+    i2s_config.intr_alloc_flags = ESP_INTR_FLAG_LEVEL1;
+    i2s_config.dma_buf_count = 2;
+    i2s_config.dma_buf_len = ADC_DMA_LEN;
     vTaskDelay(50);    //  Wait for wake up of ADC.
     adc_set_i2s_data_source(ADC_I2S_DATA_SRC_ADC);
     adc_i2s_mode_init(ADC_UNIT_1, ADC_CHANNEL_0);

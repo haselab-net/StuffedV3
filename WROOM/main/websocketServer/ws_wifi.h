@@ -21,16 +21,21 @@ public:
 
 class SRWiFi: public WiFi{
 protected:
-    SRWifiEventHandler eventHandler;
+    SRWifiEventHandler srWifiEventHandler;
 public:
+    enum Status{
+        WIFI_STA_DISCONNECTED,
+        WIFI_STA_CONNECTING,
+        WIFI_STA_CONNECTED,
+        WIFI_STA_GOT_IP,
+    } state;
+    tcpip_adapter_ip_info_t ipInfo;
     static SRWiFi wifi;
     static NVS wifiNvs;
-
-    SRWiFi():eventHandler(this){}
-    void init();
-	void					  startScan();	//	Start scan. Wifi mode must be station or apSta. 
+    SRWiFi();
+    void init();        //  Init wifi and start WIFI_MODE_APSTA
+	void startScan();	//	Start scan. Wifi mode must be station or apSta. 
 	std::vector<WiFiAPRecord> stopScan();	//	Stop scan and return ap list.
-
-    void startAccessPoint();
+    void connectAP(std::string ssid, std::string pass);
 };
 #endif

@@ -194,6 +194,7 @@ static duk_ret_t js_esp32_setLogLevel(duk_context *ctx) {
 		pLevels++;
 	}
 	if (pLevels->levelString != NULL) {
+		printf("log level change %s:%d\n", tagToChange, pLevels->level);
 		esp_log_level_set(tagToChange, pLevels->level);
 	}
 	return 0;
