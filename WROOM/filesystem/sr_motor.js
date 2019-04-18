@@ -34,7 +34,7 @@ var motor;
     function pushLocalMotorPVToRemoteInterpolate(period) {
         while (softrobot.movement.sendKeyframeQueue.enqueue({
             pose: softrobot.device.robotState.getPropArray("pose", softrobot.device.robotState.motor),
-            period: period
+            period: period * 3
         }) < 0) {
             loops.pause(5000);
         }

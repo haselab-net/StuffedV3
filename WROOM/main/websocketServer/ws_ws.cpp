@@ -122,6 +122,14 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
             delete[] pBuffer;       // delete buffer to provide more space for jsfile task
             pBuffer = NULL;
 
+            // return packet to pxt
+            short* retBuffer = (short*)malloc(2 * sizeof(short));        // return packet for download success
+            *retBuffer = PacketId::PI_JSFILE;
+            *(retBuffer+1) = 1;
+            wsSend((void*)retBuffer, 4);
+            delete[] retBuffer;
+            retBuffer = NULL;
+
             if(!offline_mode) {  // do not run file in development mode
                 break;
             }
