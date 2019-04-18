@@ -112,7 +112,7 @@ var softrobot;
                     this.touch[index] = 0;
                 }
                 this.nInterpolateTotal = 12;
-                this.interpolateTargetCountOfWrite = 1;
+                this.interpolateTargetCountOfWrite = -1;
                 this.interpolateTargetCountOfReadMin = 0;
                 this.interpolateTargetCountOfReadMax = 0;
                 this.interpolateTickMin = 0;
@@ -207,14 +207,16 @@ var softrobot;
         message_command.onReceiveCIDirect = onReceiveCIDirect;
         function onReceiveCIInterpolate(data) {
             softrobot.device.robotState.setPropArray("pose", data.pose, softrobot.device.robotState.motor);
-            softrobot.device.robotState.interpolateTargetCountOfReadMin = data.targetCountReadMin;
-            softrobot.device.robotState.interpolateTargetCountOfReadMax = data.targetCountReadMax;
-            softrobot.device.robotState.interpolateTickMin = data.tickMin;
-            softrobot.device.robotState.interpolateTickMax = data.tickMax;
-            softrobot.device.robotState.nInterpolateRemain = softrobot.device.robotState.interpolateTargetCountOfReadMax - softrobot.device.robotState.interpolateTargetCountOfReadMin + 1;
-            softrobot.device.robotState.nInterpolateVacancy = softrobot.device.robotState.nInterpolateTotal - softrobot.device.robotState.nInterpolateRemain;
-            if (softrobot.device.robotState.interpolateTargetCountOfWrite < softrobot.device.robotState.interpolateTargetCountOfReadMax)
-                softrobot.device.robotState.interpolateTargetCountOfWrite = softrobot.device.robotState.interpolateTargetCountOfReadMax;
+            var rmin = softrobot.device.robotState.interpolateTargetCountOfReadMin = data.targetCountReadMin;
+            var rmax = softrobot.device.robotState.interpolateTargetCountOfReadMax = data.targetCountReadMax;
+            var tmin = softrobot.device.robotState.interpolateTickMin = data.tickMin;
+            var tmax = softrobot.device.robotState.interpolateTickMax = data.tickMax;
+            if (softrobot.device.robotState.interpolateTargetCountOfWrite < 0)
+                softrobot.device.robotState.interpolateTargetCountOfWrite = rmax;
+            var wc = softrobot.device.robotState.interpolateTargetCountOfWrite;
+            softrobot.device.robotState.nInterpolateRemain = wc >= rmax ? wc - rmax : wc - rmax + 256;
+            var readDiff = rmax >= rmin ? rmax - rmin : rmax - rmin + 256;
+            softrobot.device.robotState.nInterpolateVacancy = softrobot.device.robotState.nInterpolateTotal - softrobot.device.robotState.nInterpolateRemain - (readDiff + 1);
             for (var i = 0; i < message_command.onRcvCIInterpolateMessage.length; i++) {
                 message_command.onRcvCIInterpolateMessage[i]();
             }
@@ -396,13 +398,13 @@ var softrobot;
                 this.queue = [];
             };
             SendKeyframeQueue.prototype.send = function (keyframe) {
+                softrobot.device.robotState.interpolateTargetCountOfWrite += 1;
                 var dataObj = {
                     pose: keyframe.pose,
                     period: keyframe.period,
-                    targetCountWrite: softrobot.device.robotState.interpolateTargetCountOfWrite
+                    targetCountWrite: softrobot.device.robotState.interpolateTargetCountOfWrite % 256
                 };
                 this.sender(dataObj);
-                softrobot.device.robotState.interpolateTargetCountOfWrite++;
                 return true;
             };
             SendKeyframeQueue.prototype.queryVacancy = function () {
