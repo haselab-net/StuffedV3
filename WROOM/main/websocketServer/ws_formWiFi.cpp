@@ -20,6 +20,84 @@ inline std::string str(ip4_addr_t ip){
     return std::string(buf);
 }
 
+class SRFormDelete:public SRFormBase, public SRReplace{
+public:
+    SRFormDelete(){
+        method = NULL;
+        path = "/delete.html";
+    }
+	virtual void handler(HttpRequest& request, HttpResponse& response){
+        std::string body = request.getBody();
+        ESP_LOGD(tag, "body:%s", body.c_str());
+
+        urlParser up(body);
+        std::string ssid = up.getDecodedString("selected");
+        if (up.getDecodedString("all").length()){
+            SRWiFi::wifiNvs.erase("lastAP");
+            for(int i=0; i<SRWiFi::N_AP_RECORD_MAX; ++i){
+                char ssidKey[] = "ssid0"; ssidKey[4] = '0'+i;
+                SRWiFi::wifiNvs.erase(ssidKey);
+                char passKey[] = "pass0"; passKey[4] = '0'+i;
+                SRWiFi::wifiNvs.erase(passKey);
+                SRWiFi::wifiNvs.commit();
+            }
+        }else if (ssid.length()){
+            int lastAP = 0;
+            SRWiFi::wifiNvs.get("lastAP", lastAP);
+            for(int i=0; i<SRWiFi::N_AP_RECORD_MAX; ++i){
+                char ssidKey[] = "ssid0"; ssidKey[4] = '0'+i;
+                std::string rec;
+                SRWiFi::wifiNvs.get(ssidKey, rec);
+                if (rec == ssid){
+                    SRWiFi::wifiNvs.erase(ssidKey);
+                    char passKey[] = "pass0"; passKey[4] = '0'+i;
+                    SRWiFi::wifiNvs.erase(passKey);
+                    SRWiFi::wifiNvs.commit();
+                    if (lastAP == i){
+                        int i = lastAP-1;
+                        while(i!=lastAP){
+                            if (i < 0) i = SRWiFi::N_AP_RECORD_MAX-1;
+                            ssidKey[4] = '0' + i;
+                            SRWiFi::wifiNvs.get(ssidKey, rec);
+                            if (rec.length()) {
+                                lastAP = i;
+                                SRWiFi::wifiNvs.get("lastAP", lastAP);
+                                break;
+                            }
+                            i--;
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+        
+        std::vector<SRReplace::Replace> replaces;
+        int nRec = 0;
+        int lastAP = 0;
+        if (SRWiFi::wifiNvs.get("lastAP", lastAP) == ESP_OK){
+            ESP_LOGI(tag, "lastAP %d", lastAP);
+            if (lastAP < 0) lastAP = 0;
+            if (lastAP >= SRWiFi::N_AP_RECORD_MAX) lastAP = SRWiFi::N_AP_RECORD_MAX-1;
+            int i=lastAP;
+            std::string ssid;
+            do{
+                char ssidKey[] = "ssid0"; ssidKey[4] = '0'+i;
+                if (SRWiFi::wifiNvs.get(ssidKey, ssid) == ESP_OK){
+                    ssidKey[4] = '0' + nRec;
+                    replaces.push_back(Replace(ssidKey, ssid));
+                    nRec ++;
+                }
+                i--;
+                if (i<0) i = SRWiFi::N_AP_RECORD_MAX-1;
+            }while(i!=lastAP);
+        }
+        replaces.push_back(Replace("nRec", str(nRec)));
+        handle(request, response, replaces);
+    }
+} srFormDelete;
+
+
 class SRFormMain:public SRFormBase, public SRReplace{
 public:
     SRFormMain(const char* p){
@@ -118,6 +196,7 @@ public:
 } srFormConnect;
 
 void addWifiForm(){
+    SRFormHandler::addForm(&srFormDelete);
     SRFormHandler::addForm(&srFormRoot);
     SRFormHandler::addForm(&srFormIndex);
     SRFormHandler::addForm(&srFormPassword);

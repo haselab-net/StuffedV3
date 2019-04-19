@@ -22,14 +22,12 @@
 extern "C" void softRobot_main()    //  called from app_main in main.cpp 
 {        
     //----------------------------------
-    logPrintf("!!! Stuffed Robot Start !!!\n");   
-	//nvs_flash_erase();
+    logPrintf("Soft Robot Starts...");   
     motorDriver.Init();
 #if 1   //  touchPads can not work with JTAG debugger
     touchPads.Init();
 #endif
     allBoards.Init();
-    logPrintf("Init allBoards finished. ");
     logPrintf("%d motors, %d current sensors, %d force sensors found.\n", allBoards.GetNTotalMotor(), allBoards.GetNTotalCurrent(), allBoards.GetNTotalForce());
 
 #ifdef USE_DUKTAPE

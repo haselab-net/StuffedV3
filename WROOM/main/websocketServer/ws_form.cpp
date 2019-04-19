@@ -55,14 +55,38 @@ void SRReplace::handle(HttpRequest& request, HttpResponse& response, std::vector
     if (request.getPath().length() == 1 && request.getPath().back() == '/'){
         fileName.append("/index.html");
     }
-
-	ESP_LOGD(tag, "hanlder(): Opening file: %s", fileName.c_str());
+	//	accept laguage check
+	std::string lang = request.getHeader("accept-language");
+	int spos = fileName.rfind("/");
+	int ppos = fileName.rfind(".");
+	if (ppos == std::string::npos || (spos != std::string::npos && ppos < spos)){
+		ppos = fileName.length();
+	}
+	std::string fileNameLang;
+	int start = 0;
+	for(int i=0; i<lang.length(); ++i){
+		if (lang[i] == ';'){
+			for(;i<lang.length() && lang[i] != ','; ++i);
+			++i;
+			start = i;
+		}
+		if (lang[i] == ','){
+			fileNameLang = fileName;
+			fileNameLang.insert(ppos, ".");
+			fileNameLang.insert(ppos+1, lang, start, i);
+			ESP_LOGD(tag, "Try to open file name with language %s", fileNameLang.c_str());
+			if (access(fileNameLang.c_str(), F_OK) == 0) goto langFound;
+		}
+	}
+	fileNameLang = fileName;
+langFound:
+	ESP_LOGD(tag, "hanlder(): Opening file: %s", fileNameLang.c_str());
 	std::ifstream ifStream;
-	ifStream.open(fileName, std::ifstream::in | std::ifstream::binary);      // Attempt to open the file for reading.
+	ifStream.open(fileNameLang, std::ifstream::in | std::ifstream::binary);      // Attempt to open the file for reading.
 
 	// If we failed to open the requested file, then it probably didn't exist so return a not found.
 	if (!ifStream.is_open()) {
-		ESP_LOGE(tag, "Unable to open file %s for reading", fileName.c_str());
+		ESP_LOGE(tag, "Unable to open file %s for reading", fileNameLang.c_str());
 		response.setStatus(HttpResponse::HTTP_STATUS_NOT_FOUND, "Not Found");
 		response.addHeader(HttpRequest::HTTP_HEADER_CONTENT_TYPE, "text/plain");
 		response.sendData("Not Found");
@@ -124,7 +148,8 @@ void SRReplace::handle(HttpRequest& request, HttpResponse& response, std::vector
 						for(;pos < dataLen-1; ++pos){
 							if (pData[pos] == '$' && pData[pos+1] == ']'){
 								nRepeat = -1;
-								pos ++;
+								pos +=2;
+								sentPos = pos;
 								break;
 							}
 						}
@@ -169,7 +194,7 @@ void SRReplace::handle(HttpRequest& request, HttpResponse& response, std::vector
 						}
 					}
 					//	not found
-					ESP_LOGE(tag, "SRReplace: Undefined key='%s' is used in %s.", key, fileName.c_str());	
+					ESP_LOGE(tag, "SRReplace: Undefined key='%s' is used in %s.", key, fileNameLang.c_str());	
 				foundKey:
 					keyLen = -1;
 					sentPos = pos;

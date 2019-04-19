@@ -62,7 +62,6 @@ void AllBoards::ExecLoop(){
 }
 void AllBoards::Init() {
 	assert(NUART == 2);	//NUART must be much to followings.
-	logPrintf("Start allBoards");
 	uart_config_t uconf;
 	uconf.baud_rate = 2000000;
 	uconf.data_bits = UART_DATA_8_BITS;
@@ -73,11 +72,9 @@ void AllBoards::Init() {
     uconf.use_ref_tick = false;
 	
 	uart[0]->Init(uconf, U1TXPIN, U1RXPIN); // pin must be changed. IO6-11 are reserved. (RX=32 Yellow, TX=33 Green)
-	logPrintf(".");
 	uart[1]->Init(uconf, U2TXPIN, U2RXPIN);
-	logPrintf(". done.\n");
 	EnumerateBoard();
-	xTaskCreate(execLoop, "SR_Exec", 8 * 1024, this, tskIDLE_PRIORITY+2, &taskExec);
+	xTaskCreate(execLoop, "SR_Exec", 1024*6, this, tskIDLE_PRIORITY+2, &taskExec);
 }
 void AllBoards::EnumerateBoard() {
 	motorMap.clear();	
