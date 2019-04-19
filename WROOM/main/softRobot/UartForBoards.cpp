@@ -125,7 +125,7 @@ void UartForBoards::EnumerateBoard() {
 						b->touchMap.push_back(allBoards->touchMap.size());
 						allBoards->touchMap.push_back(DeviceMap(i, m));
 					}
-					logPrintf("%dT%dM%dC%dF%d", ret.boardInfo.modelNumber, ret.boardInfo.nTarget,
+					sprintf(msg + strlen(msg), "%dT%dM%dC%dF%d", ret.boardInfo.modelNumber, ret.boardInfo.nTarget,
 						ret.boardInfo.nMotor, ret.boardInfo.nCurrent, ret.boardInfo.nForce);
 					break;
 				}
@@ -140,11 +140,11 @@ void UartForBoards::EnumerateBoard() {
 		sprintf(msg, "Board %d CLEN:", boards[i]->GetBoardId());
 		for (int c = 0; c < CI_NCOMMAND; ++c) {
 			cmd.cmdLen.len[c] = boards[i]->cmdPacketLen[c];
-			logPrintf(" %d", (int) boards[i]->cmdPacketLen[c]);
+			sprintf(msg + strlen(msg), " %d", (int) boards[i]->cmdPacketLen[c]);
 		}
-		sprintf(msg, " RLEN:");
+		sprintf(msg + strlen(msg), " RLEN:");
 		for (int c = 0; c < CI_NCOMMAND; ++c) {
-			logPrintf(" %d", (int) boards[i]->retPacketLen[c]);
+			sprintf(msg + strlen(msg), " %d", (int) boards[i]->retPacketLen[c]);
 		}
 		ESP_LOGD(Tag(), "%s", msg);
 		cmd.commandId = CI_SET_CMDLEN;

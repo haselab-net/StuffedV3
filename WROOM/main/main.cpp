@@ -37,38 +37,49 @@ static heap_trace_record_t trace_record[NUM_RECORDS]; // This buffer must be in 
 
 void setLogLevel(){
 #ifndef _WIN32
-    //  Set log level
-    esp_log_level_set("clk", ESP_LOG_INFO);
-    esp_log_level_set("CPPNVS", ESP_LOG_INFO);
-    esp_log_level_set("cpu_start", ESP_LOG_INFO);
-    esp_log_level_set("esp_dbg_stubs", ESP_LOG_INFO);
-    esp_log_level_set("espfs", ESP_LOG_INFO);
-    esp_log_level_set("event", ESP_LOG_INFO);
-    esp_log_level_set("heap_init", ESP_LOG_INFO);
-    esp_log_level_set("HttpServer", ESP_LOG_INFO);
-    esp_log_level_set("HttpServerTask", ESP_LOG_INFO);
-    esp_log_level_set("main", ESP_LOG_INFO);
-    esp_log_level_set("nvs", ESP_LOG_INFO);
-    esp_log_level_set("phy", ESP_LOG_INFO);
-    esp_log_level_set("phy_init", ESP_LOG_INFO);
-    esp_log_level_set("pthread", ESP_LOG_INFO);
-    esp_log_level_set("RTC_MODULE", ESP_LOG_INFO);
-    esp_log_level_set("Socket", ESP_LOG_INFO);
-    esp_log_level_set("system_api", ESP_LOG_INFO);
-    esp_log_level_set("Task", ESP_LOG_INFO);
-    esp_log_level_set("tcpip_adapter", ESP_LOG_INFO);
-//    esp_log_level_set("Uart", ESP_LOG_DEBUG);
-    esp_log_level_set("WiFi", ESP_LOG_INFO);
-    esp_log_level_set("WiFiEventHandler", ESP_LOG_INFO);
-    esp_log_level_set("ws_fs", ESP_LOG_INFO);
-    esp_log_level_set("ws_main", ESP_LOG_INFO);
-    esp_log_level_set("ws_wifi", ESP_LOG_INFO);
-    esp_log_level_set("ws_task", ESP_LOG_INFO);
+    //  Set log level. default log level is info.
+    //  components set to info
+    //esp_log_level_set("clk", ESP_LOG_INFO);
+    //esp_log_level_set("CPPNVS", ESP_LOG_INFO);
+    //esp_log_level_set("cpu_start", ESP_LOG_INFO);
+    //esp_log_level_set("esp_dbg_stubs", ESP_LOG_INFO);
+    //esp_log_level_set("espfs", ESP_LOG_INFO);
+    //esp_log_level_set("event", ESP_LOG_INFO);
+    //esp_log_level_set("heap_init", ESP_LOG_INFO);
+    //esp_log_level_set("HttpServer", ESP_LOG_INFO);
+    //esp_log_level_set("HttpServerTask", ESP_LOG_INFO);
+    //esp_log_level_set("nvs", ESP_LOG_INFO);
+    //esp_log_level_set("phy", ESP_LOG_INFO);
+    //esp_log_level_set("phy_init", ESP_LOG_INFO);
+    //esp_log_level_set("pthread", ESP_LOG_INFO);
+    //esp_log_level_set("RTC_MODULE", ESP_LOG_INFO);
+    //esp_log_level_set("Socket", ESP_LOG_INFO);
+    //esp_log_level_set("Task", ESP_LOG_INFO);
+    //esp_log_level_set("tcpip_adapter", ESP_LOG_INFO);
+
+    // components set to warn
+    esp_log_level_set("system_api", ESP_LOG_WARN);
+    esp_log_level_set("wifi", ESP_LOG_WARN);
+    esp_log_level_set("gpio", ESP_LOG_WARN);
+    esp_log_level_set("I2S", ESP_LOG_WARN);
+
+    //  SoftRobot  
+    //esp_log_level_set("main", ESP_LOG_INFO);
+    //esp_log_level_set("Uart", ESP_LOG_DEBUG);
+
+    //  Web Server
+    //esp_log_level_set("WiFi", ESP_LOG_INFO);
+    //esp_log_level_set("WiFiEventHandler", ESP_LOG_INFO);
+    //esp_log_level_set("ws_fs", ESP_LOG_INFO);
+    esp_log_level_set("ws_wifi", ESP_LOG_DEBUG);
+    //esp_log_level_set("ws_task", ESP_LOG_INFO);
+    esp_log_level_set("ws_main", ESP_LOG_DEBUG);
     //esp_log_level_set("ws_form", ESP_LOG_DEBUG);
+
     //  duktape
-    esp_log_level_set("duk_utils", ESP_LOG_INFO);
-    esp_log_level_set("modules", ESP_LOG_INFO);
-    esp_log_level_set("module_os", ESP_LOG_INFO);
+    //esp_log_level_set("duk_utils", ESP_LOG_INFO);
+    //esp_log_level_set("modules", ESP_LOG_INFO);
+    //esp_log_level_set("module_os", ESP_LOG_INFO);
     //esp_log_level_set("log", ESP_LOG_DEBUG);
 #endif
 }
@@ -108,11 +119,7 @@ extern "C" void app_main(){
     ESP_LOGI(TAG, "after espFsInit heap size: %d", esp_get_free_heap_size());
 	
     //  Start web server with web socket
-    esp_log_level_set("wifi", ESP_LOG_WARN);
-    esp_log_level_set("system_api", ESP_LOG_WARN);
     ws_main();
-    esp_log_level_set("wifi", ESP_LOG_INFO);
-    esp_log_level_set("system_api", ESP_LOG_INFO);
 
     ESP_LOGI(TAG, "after ws_main heap size: %d", esp_get_free_heap_size());
     

@@ -63,6 +63,9 @@ esp_err_t SRWifiEventHandler::staGotIp(system_event_sta_got_ip_t info) {
     SRWiFi::wifiNvs.set(ssidKey, std::string((char*)wc.sta.ssid));
     SRWiFi::wifiNvs.set(passKey, std::string((char*)wc.sta.password));
     SRWiFi::wifiNvs.commit();
+    
+    SRWiFi::wifi.scannedAPs.clear();
+    SRWiFi::wifi.scannedAPs.shrink_to_fit();
     return ESP_OK;
 }
 esp_err_t SRWifiEventHandler::staDisconnected(system_event_sta_disconnected_t info) {
@@ -125,6 +128,7 @@ SRWiFi::SRWiFi():srWifiEventHandler(this){
 void SRWiFi::init() {
     //  set SREventHandler
     setWifiEventHandler(&srWifiEventHandler);
+    LOGD("Free heap after setEventHandler: %d", esp_get_free_heap_size());
 
     //  make ssid
     uint8_t mac[6];
@@ -136,7 +140,9 @@ void SRWiFi::init() {
     }
     startAP(ssid, "");
     esp_wifi_set_mode(WIFI_MODE_APSTA);
+    LOGD("Free heap after startAP: %d", esp_get_free_heap_size());
     startScan();
+    LOGD("Free heap after scan: %d", esp_get_free_heap_size());
 }
 void SRWiFi::connectAP(std::string ssid, std::string pass){
     state = WIFI_STA_CONNECTING;
