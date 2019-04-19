@@ -11,6 +11,7 @@
 
 #include "esp_heap_trace.h"
 #include "esp_log.h"
+#include "assert.h"
 extern "C" {
 #include "module_jslib.h"
 #include "duktape_jsfile.h"
@@ -237,6 +238,7 @@ void printPacketCommand(const void* pBuffer, size_t len) {
     ESP_LOGD(LOG_TAG, "|- PacketId: PI_COMMAND");
 
     uint16_t length = pBufferI16[0];
+    assert(length == len);
     ESP_LOGD(LOG_TAG, "|- Content:");
     ESP_LOGD(LOG_TAG, "   |- Length: %i", length);
     ESP_LOGD(LOG_TAG, "   |- CommandId: %i", pBufferI16[1]);

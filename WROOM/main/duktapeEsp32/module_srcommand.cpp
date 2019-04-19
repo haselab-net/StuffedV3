@@ -164,7 +164,7 @@ static duk_ret_t requireBoardInfo(duk_context* ctx) {
 
     #ifdef PRINT_DUKTAPE_PACKET
     // print packet
-    printDTPacket(cmd->bytes+2, cmd->length-2);
+    printDTPacket(cmd->bytes+2, cmd->length);
     #endif
     
     //  send the packet
@@ -181,7 +181,7 @@ static duk_ret_t requireSensorInfo(duk_context* ctx) {
 
     #ifdef PRINT_DUKTAPE_PACKET
     // print packet
-    printDTPacket(cmd->bytes+2, cmd->length-2);
+    printDTPacket(cmd->bytes+2, cmd->length);
     #endif
     
     //  send the packet
@@ -207,7 +207,7 @@ static duk_ret_t setMotorDirect(duk_context* ctx) {
 
     #ifdef PRINT_DUKTAPE_PACKET
     // print packet
-    printDTPacket(cmd->bytes+2, cmd->length-2);
+    printDTPacket(cmd->bytes+2, cmd->length);
     #endif
 
     //  send the packet
@@ -248,7 +248,7 @@ static duk_ret_t setMotorInterpolate(duk_context* ctx) {
 
     #ifdef PRINT_DUKTAPE_PACKET
     // print packet
-    printDTPacket(cmd->bytes+2, cmd->length-2);
+    printDTPacket(cmd->bytes+2, cmd->length);
     #endif
 
     //  send the packet
@@ -308,7 +308,7 @@ static duk_ret_t setMotorParam(duk_context* ctx) {
 
     #ifdef PRINT_DUKTAPE_PACKET
     // print packet
-    printDTPacket(cmd->bytes+2, cmd->length-2);
+    printDTPacket(cmd->bytes+2, cmd->length);
     #endif
 
     //  send the packet
@@ -335,7 +335,7 @@ static duk_ret_t resetSensor(duk_context* ctx) {
 
     #ifdef PRINT_DUKTAPE_PACKET
     // print packet
-    printDTPacket(cmd->bytes+2, cmd->length-2);
+    printDTPacket(cmd->bytes+2, cmd->length);
     #endif
     
     //  send the packet
