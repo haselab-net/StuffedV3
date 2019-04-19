@@ -19,17 +19,21 @@ LOG_TAG("ws_main");
 
 extern "C" void ws_main() {
     LOGD("Free heap at start: %d", esp_get_free_heap_size());
-
 	// Boot the WiFi environment
 	nvs_flash_init();
 	tcpip_adapter_init();
+    LOGD("Free heap after tcp_ip: %d", esp_get_free_heap_size());
     SRWiFi::wifi.init();
+    LOGD("Free heap after wifi: %d", esp_get_free_heap_size());
 
     // Mount the SPIFFS file system.
     #if defined(ESP_PLATFORM)
 	    esp32_spiffs_mount();
     #endif /* ESP_PLATFORM */
 
+    LOGD("Free heap after spiffs mount: %d", esp_get_free_heap_size());
+
     // start server
     createHttpServer();
+    LOGD("Free heap after create server: %d", esp_get_free_heap_size());
 }

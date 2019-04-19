@@ -87,7 +87,7 @@ static void init() {
 	//xTaskCreatePinnedToCore(&telnetTask, "telnetTask", 8048, NULL, 5, NULL, 0);
 	//startMongooseServer();
 	//xTaskCreatePinnedToCore(&socket_server, "socket_server", 8048, NULL, 5, NULL, 0);
-	xTaskCreatePinnedToCore(&duktape_task, "duktape_task", 16*1024, NULL, 5, NULL, tskNO_AFFINITY);
+	xTaskCreatePinnedToCore(&duktape_task, "duktape_task", 1024, NULL, 5, NULL, tskNO_AFFINITY);
 } // init
 
 

@@ -28,23 +28,34 @@ esp_err_t SRWifiEventHandler::staGotIp(system_event_sta_got_ip_t info) {
     
     wifi_config_t wc;
 	esp_wifi_get_config(WIFI_IF_STA, &wc);
-#define N_AP_INFO_MAX   10  //  Must less than 10
-    int pos = 0;
-    SRWiFi::wifiNvs.get("lastAP", pos);
-    pos ++;
-    if (pos < 0) pos = 0;
-    if (pos >= N_AP_INFO_MAX) pos = 0;
-
-    for(int i=0; i<N_AP_INFO_MAX; ++i){
+    int pos = -1;
+    for(int i=0; i<SRWiFi::N_AP_RECORD_MAX; ++i){
         char ssidKey[] = "ssid0";
         ssidKey[4] = '0' + i; 
         std::string ssid;
         SRWiFi::wifiNvs.get(ssidKey, ssid);
-        if (ssid.length() == 0){
+        if (ssid.compare((char*)wc.sta.ssid) == 0){
             pos = i;
             break;
         }
-    }    
+    }
+    if (pos == -1){
+        SRWiFi::wifiNvs.get("lastAP", pos);
+        pos ++;
+        if (pos < 0) pos = 0;
+        if (pos >= SRWiFi::N_AP_RECORD_MAX) pos = 0;
+
+        for(int i=0; i<SRWiFi::N_AP_RECORD_MAX; ++i){
+            char ssidKey[] = "ssid0";
+            ssidKey[4] = '0' + i; 
+            std::string ssid;
+            SRWiFi::wifiNvs.get(ssidKey, ssid);
+            if (ssid.length() == 0){
+                pos = i;
+                break;
+            }
+        }    
+    }
     char ssidKey[] = "ssid0"; ssidKey[4] = '0' + pos;
     char passKey[] = "pass0"; passKey[4] = '0' + pos;
     ESP_LOGI(tag, "WriteNVS %s=%s", ssidKey, wc.sta.ssid);
@@ -52,6 +63,9 @@ esp_err_t SRWifiEventHandler::staGotIp(system_event_sta_got_ip_t info) {
     SRWiFi::wifiNvs.set(ssidKey, std::string((char*)wc.sta.ssid));
     SRWiFi::wifiNvs.set(passKey, std::string((char*)wc.sta.password));
     SRWiFi::wifiNvs.commit();
+    
+    SRWiFi::wifi.scannedAPs.clear();
+    SRWiFi::wifi.scannedAPs.shrink_to_fit();
     return ESP_OK;
 }
 esp_err_t SRWifiEventHandler::staDisconnected(system_event_sta_disconnected_t info) {
@@ -78,7 +92,7 @@ esp_err_t SRWifiEventHandler::staScanDone(system_event_sta_scan_done_t info){
     int lastAP;
     if (SRWiFi::wifiNvs.get("lastAP", lastAP) == ESP_OK){
         if (lastAP < 0) lastAP = 0;
-        if (lastAP >= N_AP_INFO_MAX) lastAP = N_AP_INFO_MAX-1;
+        if (lastAP >= SRWiFi::N_AP_RECORD_MAX) lastAP = SRWiFi::N_AP_RECORD_MAX-1;
         int i=lastAP;
         std::string ssid, pass;
         do{
@@ -99,7 +113,7 @@ esp_err_t SRWifiEventHandler::staScanDone(system_event_sta_scan_done_t info){
             }
             ESP_LOGI(tag, "staScannDone %d", i);
             i--;
-            if (i<0) i = N_AP_INFO_MAX-1;
+            if (i<0) i = SRWiFi::N_AP_RECORD_MAX-1;
         }while(i!=lastAP);
     }
     return ESP_OK;
@@ -114,6 +128,7 @@ SRWiFi::SRWiFi():srWifiEventHandler(this){
 void SRWiFi::init() {
     //  set SREventHandler
     setWifiEventHandler(&srWifiEventHandler);
+    LOGD("Free heap after setEventHandler: %d", esp_get_free_heap_size());
 
     //  make ssid
     uint8_t mac[6];
@@ -125,7 +140,9 @@ void SRWiFi::init() {
     }
     startAP(ssid, "");
     esp_wifi_set_mode(WIFI_MODE_APSTA);
+    LOGD("Free heap after startAP: %d", esp_get_free_heap_size());
     startScan();
+    LOGD("Free heap after scan: %d", esp_get_free_heap_size());
 }
 void SRWiFi::connectAP(std::string ssid, std::string pass){
     state = WIFI_STA_CONNECTING;

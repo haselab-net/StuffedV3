@@ -14,15 +14,13 @@ extern "C"{
 }
 
 class MotorDriver{
-#ifndef _WIN32
-	esp_adc_cal_characteristics_t adc_chars;
-#endif
 	xTaskHandle task;
     xQueueHandle queue;
     static void AdcReadTaskStatic(void*);
     void AdcReadTask();
-    const int DEFAULT_VREF = 1100;        //Use adc2_vref_to_gpio() to obtain a better estimate
-    enum {ADC_DMA_LEN = 8};
+    enum {
+        ADC_DMA_LEN = 8
+    };
     public:
     bool bControl;
 #ifdef BOARD3_SEPARATE
@@ -40,19 +38,18 @@ class MotorDriver{
 #endif
     private:
 #ifdef BOARD3_SEPARATE
-    const int pwmPins[NMOTOR_DIRECT*2] = {4, 27, 21, 22, 0, 19};    //M0, M1, M2
+    const uint8_t pwmPins[NMOTOR_DIRECT*2] = {4, 27, 21, 22, 0, 19};    //M0, M1, M2
 #else
-    const int pwmPins[0] = {};
+    const uint8_t pwmPins[0] = {};
 #endif
-    const int adcChs[ADC_DMA_LEN] = {0, 3, 5, 4, 6, 7, 1, 2};   //M0, M1, M2, dummy
-    int adcChsRev[8];   //  must be larger than ch numbers
+    const uint8_t adcChs[ADC_DMA_LEN] = {0, 3, 5, 4, 6, 7, 1, 2};   //M0, M1, M2, dummy
+    uint8_t adcChsRev[8];   //  must be larger than ch numbers
 
 
 public:
-    int adcRaws[NMOTOR_DIRECT*2];
+    int16_t adcRaws[NMOTOR_DIRECT*2];
     void Init();
-    void Pwm(int ch, float duty);
-    uint32_t GetAdcVoltage(int ch);
+    void Pwm(int ch, SDEC duty);
     int GetAdcRaw(int ch);
 };
 extern MotorDriver motorDriver;

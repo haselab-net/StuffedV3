@@ -8,9 +8,9 @@ extern "C"{
 #include "soc/syscon_struct.h"
 }
 #include "soc/syscon_reg.h"
-#include "soc/mcpwm_struct.h"
-#include "soc/mcpwm_reg.h"
-#include "driver/mcpwm.h"
+#include <soc/mcpwm_struct.h>
+#include <soc/mcpwm_reg.h>
+#include <driver/mcpwm.h>
 #include "driver/i2s.h"
 #include "driver/adc.h"
 #endif 
@@ -44,7 +44,7 @@ void MotorDriver::AdcReadTask(){
     int count=0;
 	while(1) {
         count ++;
-		system_event_t evt;
+        system_event_t evt;
         if (xQueueReceive(queue, &evt, portMAX_DELAY) == pdPASS) {
             if (evt.event_id==2) {
                 size_t readBytes;
@@ -144,52 +144,32 @@ void MotorDriver::Init(){
     for(int i=0; i<8; ++i){
         patTab.pat[i] = patterns[(i-i%4) + (3-i%4)];
     }
-    logPrintf("%08x ", patTab.tab[0]);
-    logPrintf("%08x ", patTab.tab[1]);
+    //logPrintf("%08x ", patTab.tab[0]);
+    //logPrintf("%08x ", patTab.tab[1]);
     SYSCON.saradc_sar1_patt_tab[0] = patTab.tab[0];
     SYSCON.saradc_sar1_patt_tab[1] = patTab.tab[1];
     SYSCON.saradc_ctrl2.sar1_inv = 1;
 #endif
-	xTaskCreate(AdcReadTaskStatic, "ADC", 1024*10, this, configMAX_PRIORITIES-1, &task);
+	xTaskCreate(AdcReadTaskStatic, "ADC", 1024, this, configMAX_PRIORITIES-1, &task);
 
     for(int ch=0; ch<NMOTOR_DIRECT; ++ch){
-        torqueLimit.max[ch] = (SDEC)(0.8*SDEC_ONE);
-        torqueLimit.min[ch] = (SDEC)(-0.8*SDEC_ONE);
-        Pwm(ch, 0.0f);
+        torqueLimit.max[ch] = (SDEC)(1.0*SDEC_ONE);
+        torqueLimit.min[ch] = (SDEC)(-1.0*SDEC_ONE);
+        Pwm(ch, 0);
     }
-#if 0   //  Code for debugging: To see ADC values.
-# define READADC
-# ifdef READADC
-    adc1_config_width(ADC_WIDTH_BIT_11);
-    for(int i=0; i<ADC_DMA_LEN; ++i){
-        adc1_config_channel_atten((adc1_channel_t)adcChs[i], ADC_ATTEN_DB_11);
-    }
-# endif
-    while(1){
-        for(int i=0; i<ADC_DMA_LEN; ++i){
-# ifdef READADC
-            int ad = adc1_get_raw((adc1_channel_t)adcChs[i]);
-            logPrintf("%5d\t", ad);
-# else
-            logPrintf("%5d\t", adcRaws[i]);
-# endif
-        }
-        logPrintf("\r\n");
-        vTaskDelay(500);
-    }
-#endif
 }
 
-void MotorDriver::Pwm(int ch, float duty){
+void MotorDriver::Pwm(int ch, SDEC duty){  //   SDEC -1 to 1 (-1024 - 1024)
 #ifndef _WIN32
+    uint32_t set_duty = (MCPWM0.timer[(mcpwm_timer_t)ch].period.period) * duty / SDEC_ONE;
 	if (duty > 0){
         mcpwm_set_signal_low(MCPWM_UNIT_0, (mcpwm_timer_t)ch, MCPWM_OPR_B);
-        mcpwm_set_duty(MCPWM_UNIT_0, (mcpwm_timer_t)ch, MCPWM_OPR_A, duty * 100);
+        mcpwm_set_duty_in_us(MCPWM_UNIT_0, (mcpwm_timer_t)ch, MCPWM_OPR_A, set_duty);
         mcpwm_set_duty_type(MCPWM_UNIT_0, (mcpwm_timer_t)ch, MCPWM_OPR_A, MCPWM_DUTY_MODE_0); //call this each time, if operator was previously in low/high state
     }else{
         duty *= -1;
         mcpwm_set_signal_low(MCPWM_UNIT_0, (mcpwm_timer_t)ch, MCPWM_OPR_A);
-        mcpwm_set_duty(MCPWM_UNIT_0, (mcpwm_timer_t)ch, MCPWM_OPR_B, duty * 100);
+        mcpwm_set_duty_in_us(MCPWM_UNIT_0, (mcpwm_timer_t)ch, MCPWM_OPR_B, set_duty);
         mcpwm_set_duty_type(MCPWM_UNIT_0, (mcpwm_timer_t)ch, MCPWM_OPR_B, MCPWM_DUTY_MODE_0); //call this each time, if operator was previously in low/high state
     }
 #else
@@ -202,14 +182,6 @@ void MotorDriver::Pwm(int ch, float duty){
 }
 int MotorDriver::GetAdcRaw(int ch){
     return adcRaws[ch];
-}
-uint32_t MotorDriver::GetAdcVoltage(int ch){
-#ifndef _WIN32
-	uint32_t voltage = esp_adc_cal_raw_to_voltage(adcRaws[ch], &adc_chars);
-    return voltage;
-#else
-	return 0;
-#endif
 }
 
 #define ADC_CENTER  ((0x700+0x35C0)/2)
@@ -229,6 +201,6 @@ extern "C"{
         }
     }
     void setPwm(int ch, SDEC ratio){
-        motorDriver.Pwm(ch, (float)ratio / SDEC_ONE);
+        motorDriver.Pwm(ch, ratio);
     }	
 }

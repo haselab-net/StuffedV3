@@ -146,7 +146,7 @@ void *duk_alloc_hybrid_init(void) {
 		}
 	}
 
-	dump_pool_state(st);
+	//dump_pool_state(st);
 
 	/* Use 'st' as udata. */
 	return (void *) st;

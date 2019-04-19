@@ -33,6 +33,7 @@ public:
     tcpip_adapter_ip_info_t ipInfo;
     static SRWiFi wifi;
     static NVS wifiNvs;
+    enum {N_AP_RECORD_MAX = 10};
     SRWiFi();
     void init();        //  Init wifi and start WIFI_MODE_APSTA
 	void startScan();	//	Start scan. Wifi mode must be station or apSta. 
