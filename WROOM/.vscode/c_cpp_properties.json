@@ -27,7 +27,7 @@
                 "C:/msys32/opt/xtensa-esp32-elf/xtensa-esp32-elf/include/c++/5.2.0",
                 "C:/msys32/opt/xtensa-esp32-elf/xtensa-esp32-elf/include/c++/5.2.0/xtensa-esp32-elf",
                 "C:/msys32/usr/include",
-                "${workspaceRoot}/build/include",
+                "${workspaceRoot}/build/include"
             ],
             "intelliSenseMode": "clang-x64",
             "defines": [
