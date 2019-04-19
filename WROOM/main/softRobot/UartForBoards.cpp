@@ -133,6 +133,7 @@ void UartForBoards::EnumerateBoard() {
 		}
 		ESP_LOGD(Tag(), "%s", msg);
 	}
+	boards.shrink_to_fit();
 	cmdCur.board = boards.size();
 	retCur.board = 0;
 	//	set command length for all boards

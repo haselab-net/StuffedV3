@@ -100,6 +100,10 @@ void AllBoards::EnumerateBoard() {
 	for (int i = 0; i < NUART; ++i) {
 		uart[i]->EnumerateBoard();
 	}
+	motorMap.shrink_to_fit();	
+	currentMap.shrink_to_fit();
+	forceMap.shrink_to_fit();
+	touchMap.shrink_to_fit();
 	nTargetMin = boardDirect->GetNTarget();
 	nBoard = 1;
 	for (int i = 0; i < NUART; ++i) {

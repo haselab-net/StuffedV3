@@ -23,7 +23,7 @@
 #include "UartForBoards.h"
 #include "CommandWROOM.h"
 #ifndef _WIN32
-#include "ws_ws.h"
+#include "../websocketServer/ws_ws.h"
 #endif
 
 UdpCom udpCom;

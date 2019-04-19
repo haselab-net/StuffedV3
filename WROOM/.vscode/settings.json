@@ -1,5 +1,5 @@
 {
-    "C_Cpp.intelliSenseEngineFallback": "Enabled",
+    "C_Cpp.intelliSenseEngineFallback": "Disabled",
     "files.associations": {
         "stdio.h": "c",
         "freertos.h": "c",
@@ -95,8 +95,10 @@
         "-l"
     ],
     "C_Cpp.dimInactiveRegions": false,
-    "search.exclude":{
+    "files.exclude":{
         "**/Emulator": true,
         "**/build": true,
+    },
+    "search.exclude":{
     },
 }
