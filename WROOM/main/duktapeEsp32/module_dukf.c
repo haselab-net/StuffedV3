@@ -65,7 +65,7 @@ static duk_ret_t js_dukf_loadFile(duk_context *ctx) {
 	} else {
 		duk_push_lstring(ctx, data, fileSize);
 	}
-	//dukf_log_heap("js_dukf_loadFile");
+	LOGD("After js_dukf_loadFile(%s): free heap %d bytes", fileName, esp_get_free_heap_size());
 	return 1;
 } // js_dukf_loadFile
 

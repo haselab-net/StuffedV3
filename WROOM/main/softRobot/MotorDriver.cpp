@@ -150,7 +150,7 @@ void MotorDriver::Init(){
     SYSCON.saradc_sar1_patt_tab[1] = patTab.tab[1];
     SYSCON.saradc_ctrl2.sar1_inv = 1;
 #endif
-	xTaskCreate(AdcReadTaskStatic, "ADC", 1024, this, configMAX_PRIORITIES-1, &task);
+	xTaskCreate(AdcReadTaskStatic, "ADC", 1024+512, this, configMAX_PRIORITIES-1, &task);
 
     for(int ch=0; ch<NMOTOR_DIRECT; ++ch){
         torqueLimit.max[ch] = (SDEC)(1.0*SDEC_ONE);

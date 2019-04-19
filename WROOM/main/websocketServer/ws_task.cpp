@@ -5,8 +5,8 @@
 
 #include "esp_log.h"
 extern "C" {
-    #include "duktape_jsfile.h"
-    #include "dukf_utils.h"
+#include "../duktapeEsp32/include/duktape_jsfile.h"
+#include "../duktapeEsp32/include/dukf_utils.h"
 }
 #include "../softRobot/UdpCom.h"
 #include "duktape_jsfile.h"

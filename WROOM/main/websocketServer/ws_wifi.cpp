@@ -22,7 +22,7 @@ esp_err_t SRWifiEventHandler::staConnected(system_event_sta_connected_t info) {
     return ESP_OK;
 }
 esp_err_t SRWifiEventHandler::staGotIp(system_event_sta_got_ip_t info) {
-    LOGI("GOT IP: %s", ip4addr_ntoa(&info.ip_info.ip));
+    LOGI("WiFi got IP as a station: %s", ip4addr_ntoa(&info.ip_info.ip));
     wifi->state = SRWiFi::WIFI_STA_GOT_IP;
     memcpy(&wifi->ipInfo, &info.ip_info, sizeof(wifi->ipInfo));
     
@@ -58,7 +58,7 @@ esp_err_t SRWifiEventHandler::staGotIp(system_event_sta_got_ip_t info) {
     }
     char ssidKey[] = "ssid0"; ssidKey[4] = '0' + pos;
     char passKey[] = "pass0"; passKey[4] = '0' + pos;
-    ESP_LOGI(tag, "WriteNVS %s=%s", ssidKey, wc.sta.ssid);
+    //ESP_LOGI(tag, "WriteNVS %s=%s", ssidKey, wc.sta.ssid);
     SRWiFi::wifiNvs.set("lastAP", pos);
     SRWiFi::wifiNvs.set(ssidKey, std::string((char*)wc.sta.ssid));
     SRWiFi::wifiNvs.set(passKey, std::string((char*)wc.sta.password));
@@ -99,19 +99,16 @@ esp_err_t SRWifiEventHandler::staScanDone(system_event_sta_scan_done_t info){
             char ssidKey[] = "ssid0"; ssidKey[4] = '0'+i;
             if (SRWiFi::wifiNvs.get(ssidKey, ssid) == ESP_OK){
                 for(WiFiAPRecord& ap : wifi->scannedAPs){
-                    ESP_LOGI(tag, "SRWifiEventHandler::staScanDone found=%s try=%s", ap.m_ssid.c_str(), ssid.c_str());
+                    //ESP_LOGI(tag, "SRWifiEventHandler::staScanDone found=%s try=%s", ap.m_ssid.c_str(), ssid.c_str());
                     if (ap.m_ssid == ssid){
                         char passKey[] = "pass0"; passKey[4] = '0'+i;
                         SRWiFi::wifiNvs.get(passKey, pass);
-                        ESP_LOGI(tag, "SRWifiEventHandler::staScanDone connect ssid=%s pass=%s", ssid.c_str(), pass.c_str());
+                        //ESP_LOGI(tag, "SRWifiEventHandler::staScanDone connect ssid=%s pass=%s", ssid.c_str(), pass.c_str());
                         wifi->connectAP(ssid, pass);
                         break;
                     }
                 }
-            }else{
-                ESP_LOGI(tag, "Failed to get %s", ssidKey);
             }
-            ESP_LOGI(tag, "staScannDone %d", i);
             i--;
             if (i<0) i = SRWiFi::N_AP_RECORD_MAX-1;
         }while(i!=lastAP);

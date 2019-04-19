@@ -291,10 +291,11 @@ class MCTargetUnderflow: public MonitorCommandBase{
         }
     }
 } mcShowTargetUnderflow;
+
 class MCJSRestart: public MonitorCommandBase{
 public:
     MCJSRestart() { bFirst = true; } 
-    const char* Desc(){ return "j Restart java script"; }
+    const char* Desc(){ return "J Restart java script"; }
     bool bFirst;
     void Func(){
         wsDeleteJsfileTask();
@@ -324,6 +325,21 @@ public:
 #endif
     }
 } mcJSRestart;
+
+class MCJSStack: public MonitorCommandBase{
+public:
+    const char* Desc(){ return "j dump java script stack"; }
+    void Func(){
+        lock_heap();
+        duk_context* ctx = esp32_duk_context;
+        duk_push_global_object(ctx);
+        duk_push_context_dump(ctx);
+        printf("%s\n", duk_to_string(ctx, -1));
+        duk_pop(ctx);
+        duk_pop(ctx);
+        unlock_heap();
+    }
+} mcJSStack;
 
 inline char toLower(char c){
     if ('A' <= c && c <= 'Z'){
