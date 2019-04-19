@@ -422,6 +422,10 @@ var softrobot;
             };
             SendKeyframeQueue.prototype.onInterpolateMessage = function () {
                 this.remoteVacancy = softrobot.device.robotState.nInterpolateVacancy;
+                console.log("interpolateTargetCountOfWrite: ", softrobot.robotState.interpolateTargetCountOfWrite)
+                console.log("interpolateTargetCountOfReadMin: ", softrobot.robotState.interpolateTargetCountOfReadMin)
+                console.log("interpolateTargetCountOfReadMax: ", softrobot.robotState.interpolateTargetCountOfReadMax)
+                console.log("vacancy: ", this.remoteVacancy);
                 if (this.remoteVacancy >= softrobot.device.robotState.nInterpolateTotal - SendKeyframeQueue.REMOTE_MAX_SIZE && this.queue.length > 0) {
                     var keyframe = this.dequeue();
                     this.send(keyframe);
