@@ -14,6 +14,28 @@
 #include <stdint.h>
 #include "duk_alloc_hybrid.h"
 
+#if 1
+#define duk_alloc_hybrid_ duk_alloc_hybrid
+#define duk_realloc_hybrid_ duk_realloc_hybrid
+
+#else
+#include "../../components/duktape/lowmemSupport.h"
+void *duk_alloc_hybrid_(void *udata, duk_size_t size);
+void *duk_alloc_hybrid(void *udata, duk_size_t size) {
+	printf("duk_alloc_hybrid:");
+	void* rv = duk_alloc_hybrid_(udata, size);
+	heap_ptr_enc16(udata, rv);
+	return rv;
+}
+void *duk_realloc_hybrid_(void *udata, void* ptr,  duk_size_t size);
+void *duk_realloc_hybrid(void *udata, void* ptr,  duk_size_t size) {
+	printf("duk_realloc_hybrid:");
+	void* rv = duk_realloc_hybrid_(udata, ptr, size);
+	heap_ptr_enc16(udata, rv);
+	return rv;
+}
+#endif
+
 /* Define to enable some debug printfs. */
 /*#define DUK_ALLOC_HYBRID_DEBUG*/
 
@@ -152,7 +174,7 @@ void *duk_alloc_hybrid_init(void) {
 	return (void *) st;
 }
 
-void *duk_alloc_hybrid(void *udata, duk_size_t size) {
+void *duk_alloc_hybrid_(void *udata, duk_size_t size) {
 	pool_state *st = (pool_state *) udata;
 	int i;
 	void *new_ptr;
@@ -198,7 +220,7 @@ void *duk_alloc_hybrid(void *udata, duk_size_t size) {
 	return malloc(size);
 }
 
-void *duk_realloc_hybrid(void *udata, void *ptr, duk_size_t size) {
+void *duk_realloc_hybrid_(void *udata, void *ptr, duk_size_t size) {
 	pool_state *st = (pool_state *) udata;
 	void *new_ptr;
 	int i;

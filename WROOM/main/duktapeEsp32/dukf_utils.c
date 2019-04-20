@@ -27,6 +27,7 @@
 #include "duktape_utils.h"
 #include "esp32_specific.h"
 #include "logging.h"
+#include "../../components/duktape/lowmemSupport.h"
 
 #define MAX_RUN_AT_START (5)
 
@@ -116,14 +117,8 @@ void dukf_addRunAtStart(const char *fileName) {
 } // dukf_addRunAtStart
 
 uint32_t dukf_get_free_heap_size() {
-#if defined(ESP_PLATFORM)
 	return esp_get_free_heap_size();
-#else // ESP_PLATFORM
-	return 999999;
-#endif // ESP_PLATFORM
 }
-
-#if defined(ESP_PLATFORM)
 
 /*
  * Initialize the default NVS values that are used by ESP32-Duktape.  These
@@ -171,51 +166,20 @@ const char *dukf_loadFileFromESPFS(const char *path, size_t *fileSize) {
 		return NULL;
 	}
 
-  char *fileData;
-  espFsAccess(fh, (void **)&fileData, fileSize);
-  espFsClose(fh);
-  // Note ... because data is mapped in memory from flash ... it will be good
-  // past the file close.
-  LOGD("<< duk_loadFile: Read file %s for size %d", path, *fileSize);
-  return fileData;
+	char *fileData;
+	espFsAccess(fh, (void **)&fileData, fileSize);
+	espFsClose(fh);
+	// Note ... because data is mapped in memory from flash ... it will be good
+	// past the file close.
+	LOGD("<< duk_loadFile: Read file %s for size %d", path, *fileSize);
+	for(int i=0; i<NLOADEDSTR; ++i){
+		if (loadedStr[i] == NULL){
+			loadedStr[i] = fileData;
+			break;
+		}
+	}
+	return fileData;
 } // dukf_loadFile
-
-#else // ESP_PLATFORM
-/**
- * Load the named file and return the data and the size of it.
- * We load the file from the DUKF file system.
- */
-#define DUKF_BASE_DIR "/home/kolban/esp32/esptest/apps/workspace/duktape/filesystem"
-const char *dukf_loadFileFromESPFS(const char *path, size_t *fileSize) {
-
-	char fileName[256];
-	sprintf(fileName, "%s/%s", DUKF_BASE_DIR, path);
-	int fd = open(fileName, O_RDONLY);
-	if (fd < 0) {
-		LOGE("open: %s - %d %s", path, errno, strerror(errno));
-		return NULL;
-	}
-	struct stat statBuf;
-	int rc = fstat(fd, &statBuf);
-	if (rc < 0) {
-		LOGE("open: %d %s", errno, strerror(errno));
-		close(fd);
-		return NULL;
-	}
-
-	char *data = mmap(NULL, statBuf.st_size, PROT_READ, MAP_SHARED, fd, 0);
-	if (data == MAP_FAILED) {
-		LOGE("mmap: %d %s", errno, strerror(errno));
-		close(fd);
-		return NULL;
-	}
-	close(fd);
-  LOGD("duk_loadFile: Read file %s for size %d", path, (int)statBuf.st_size);
-  *fileSize = statBuf.st_size;
-	return data;
-} // dukf_loadFile
-
-#endif // ESP_PLATFORM
 
 
 /*

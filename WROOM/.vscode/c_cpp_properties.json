@@ -3,6 +3,7 @@
         {
             "name": "ESP32-Win",
             "includePath": [
+                ".",
                 "${workspaceRoot}/main",
                 "${workspaceRoot}/components/esp32snippets",
                 "${workspaceRoot}/../PIC",
