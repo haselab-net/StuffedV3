@@ -32,6 +32,11 @@ const duk_uint8_t* extstr_intern_check(void* udata, void* str, duk_size_t blen){
 		//fwrite(loadedStr[i], blen > 30 ? 30 : blen, 1, stdout);
 		//printf("\n");
 		if (loadedStr[i] == str){
+			int len = strlen(loadedStr[i]);
+			if (blen != len){
+				printf("ERROR in lowmemSupport.c: loadStr's len %d != blen %d\n", len, blen);
+				return NULL;
+			}
 #ifdef LMS_SHOWALLOC
 			printf(" hit.\n");
 #endif

@@ -44,7 +44,7 @@ void setLogLevel(){
     esp_log_level_set("CPPNVS", ESP_LOG_INFO);
     esp_log_level_set("cpu_start", ESP_LOG_INFO);
     esp_log_level_set("esp_dbg_stubs", ESP_LOG_INFO);
-    esp_log_level_set("espfs", ESP_LOG_INFO);
+    //esp_log_level_set("espfs", ESP_LOG_INFO);
     esp_log_level_set("event", ESP_LOG_INFO);
     esp_log_level_set("heap_init", ESP_LOG_INFO);
     esp_log_level_set("HttpServer", ESP_LOG_INFO);
@@ -71,7 +71,7 @@ void setLogLevel(){
     //  Web Server
     esp_log_level_set("WiFi", ESP_LOG_INFO);
     esp_log_level_set("WiFiEventHandler", ESP_LOG_INFO);
-    esp_log_level_set("ws_fs", ESP_LOG_INFO);
+    //esp_log_level_set("ws_fs", ESP_LOG_INFO);
     esp_log_level_set("ws_wifi", ESP_LOG_INFO);
     esp_log_level_set("ws_task", ESP_LOG_INFO);
     //esp_log_level_set("ws_main", ESP_LOG_INFO);

@@ -304,25 +304,8 @@ public:
             heap_trace_start(HEAP_TRACE_LEAKS);
             bFirst = false;
         }
-
-/*        combineMainFiles();
-        std::ifstream m_ifstream("/spiffs/main/runtime.js");
-        std::string str((std::istreambuf_iterator<char>(m_ifstream)),
-        std::istreambuf_iterator<char>());
-        ESP_LOGI(Tag(), "Start runtime file: %s", str.c_str());
-        m_ifstream.close();
-  */      ESP_LOGI(Tag(), "before wsCreateJsfileTask heap size: %d", esp_get_free_heap_size());
+        ESP_LOGI(Tag(), "before wsCreateJsfileTask heap size: %d", esp_get_free_heap_size());
         wsCreateJsfileTask();
-#if 0
-        ESP_LOGI(Tag(), "Create JS Task and wait 10 sec.");
-        //vTaskDelay(1000);
-        ESP_LOGI(Tag(), "Delete JS Task.");
-        wsDeleteJsfileTask();
-        //ESP_LOGI(Tag(), "Deleted. dump heap:");
-        //heap_trace_dump();
-
-        wsCreateJsfileTask();
-#endif
     }
 } mcJSRestart;
 
