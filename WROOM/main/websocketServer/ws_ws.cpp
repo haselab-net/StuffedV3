@@ -246,7 +246,7 @@ void printPacketCommand(const void* pBuffer, size_t len) {
     for(size_t i = 2; i < len/2; i++){
         sprintf(buf+strlen(buf), "%i, ", pBufferI16[i]);
     }
-    ESP_LOGD(LOG_TAG, "   |- Command:%s", buf);
+    ESP_LOGD(LOG_TAG, "   |- Command: %s", buf);
 }
 
 void printPacketSettings(const void* pBuffer, size_t len) {

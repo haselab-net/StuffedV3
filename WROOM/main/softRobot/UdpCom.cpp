@@ -150,9 +150,11 @@ UdpCmdPacket& UdpCmdPackets::Poke() {
 	return base::Poke();
 }
 void UdpCmdPackets::Write() {
+	printf("before take semaphore \n");
 	xSemaphoreTake(smFree, portMAX_DELAY);
 	base::Write();
 	xSemaphoreGive(smAvail);
+	printf("after give semaphore \n");
 }
 
 static void onReceiveUdp(void *arg, struct udp_pcb *pcb, struct pbuf *p, const ip_addr_t *addr, u16_t port)
@@ -310,6 +312,7 @@ void UdpCom::PrepareRetPacket(UdpCmdPacket& recv) {
 	send.ClearData();
 }
 void UdpCom::SendReturn(UdpCmdPacket& recv) {
+	printf("send return packet");
 #ifdef _WIN32
 	if (recv.returnIp.addr == 0) {
 #elif defined WROOM

@@ -251,12 +251,19 @@ static duk_ret_t setMotorInterpolate(duk_context* ctx) {
     printDTPacket(cmd->bytes+2, cmd->length);
     #endif
 
+    printf("before write command \n");
+
     //  send the packet
 	udpCom.WriteCommand();
+
+    printf("after write command \n");
 
     // ... obj
     duk_pop(ctx);
     // ...
+
+    printf("after duk pop \n");
+
     return 0;
 }
 
