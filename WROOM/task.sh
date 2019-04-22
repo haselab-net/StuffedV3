@@ -1,7 +1,7 @@
 #!/bin/sh
 case "$1" in
     "app-run") 
-    make app -j8&&make app-flash -j8&&make monitor -j8
+    make -j9 app-flash&&make -j9 monitor
     ;;
     "monitor") 
 	make monitor -j8
