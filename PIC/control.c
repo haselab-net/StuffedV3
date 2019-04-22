@@ -235,6 +235,10 @@ void targetsInit(){
 		}
 	}
 }
+
+//----------------------------------------------------------------------------------
+//	Time critical code (for motor control).
+//	Do not use printf from here.
 void targetsTickProceed(){
 	targets.tick ++;
 	if (targets.tick >= targets.buf[(targets.read+1)%NTARGET].period){
@@ -246,10 +250,12 @@ void targetsTickProceed(){
 			}else{
 				targets.read = 0;
 			}
-			LOGI("TickProceed: Read=%d tcr=%d\r\n", targets.read, targets.targetCountRead);
+			//	Never use LOG here. This code is called from interrupt and can not use printf here.
+			//LOGI("TickProceed: Read=%d tcr=%d\r\n", targets.read, targets.targetCountRead);
 		}else{
 			targets.tick = targets.buf[(targets.read+1)%NTARGET].period;
-			LOGW("TickProceed: Underflow. Failed to increment read=%d tcr=%d\r\n", targets.read, targets.targetCountRead);
+			//	Never use LOG here. This code is called from interrupt and can not use printf here.
+			//LOGW("TickProceed: Underflow. Failed to increment read=%d tcr=%d\r\n", targets.read, targets.targetCountRead);
 			underflowCount ++;
 		}
 	}
