@@ -120,6 +120,8 @@ extern "C" void app_main(){
 	espFsInit((void *)0x300000, flashSize);
     ESP_LOGI(TAG, "after espFsInit heap size: %d", esp_get_free_heap_size());
 	
+    esp_log_level_set("*", ESP_LOG_DEBUG);
+
     //  Start web server with web socket
     ws_main();
 
