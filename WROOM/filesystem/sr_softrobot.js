@@ -212,7 +212,7 @@ var softrobot;
             var tmin = softrobot.device.robotState.interpolateTickMin = data.tickMin;
             var tmax = softrobot.device.robotState.interpolateTickMax = data.tickMax;
             if (softrobot.device.robotState.interpolateTargetCountOfWrite < 0)
-                softrobot.device.robotState.interpolateTargetCountOfWrite = rmax;
+                softrobot.device.robotState.interpolateTargetCountOfWrite = (rmax + 1) % 256;
             var wc = softrobot.device.robotState.interpolateTargetCountOfWrite;
             softrobot.device.robotState.nInterpolateRemain = wc >= rmax ? wc - rmax : wc - rmax + 256;
             var readDiff = rmax >= rmin ? rmax - rmin : rmax - rmin + 256;
@@ -399,10 +399,11 @@ var softrobot;
             };
             SendKeyframeQueue.prototype.send = function (keyframe) {
                 softrobot.device.robotState.interpolateTargetCountOfWrite += 1;
+                softrobot.device.robotState.interpolateTargetCountOfWrite %= 256;
                 var dataObj = {
                     pose: keyframe.pose,
                     period: keyframe.period,
-                    targetCountWrite: softrobot.device.robotState.interpolateTargetCountOfWrite % 256
+                    targetCountWrite: softrobot.device.robotState.interpolateTargetCountOfWrite
                 };
                 this.sender(dataObj);
                 return true;
