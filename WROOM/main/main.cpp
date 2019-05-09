@@ -60,6 +60,7 @@ void setLogLevel(){
     esp_log_level_set("RTC_MODULE", ESP_LOG_INFO);
     esp_log_level_set("Task", ESP_LOG_INFO);
     esp_log_level_set("tcpip_adapter", ESP_LOG_INFO);
+    esp_log_level_set("MotorDriver", ESP_LOG_INFO);
 
     // components set to warn
     esp_log_level_set("phy", ESP_LOG_WARN);
@@ -76,7 +77,7 @@ void setLogLevel(){
     esp_log_level_set("WiFi", ESP_LOG_INFO);
     esp_log_level_set("WiFiEventHandler", ESP_LOG_INFO);
     esp_log_level_set("ws_fs", ESP_LOG_INFO);
-    esp_log_level_set("ws_wifi", ESP_LOG_INFO);
+    aesp_log_level_set("ws_wifi", ESP_LOG_INFO);
     esp_log_level_set("ws_task", ESP_LOG_INFO);
     esp_log_level_set("ws_main", ESP_LOG_INFO);
     esp_log_level_set("ws_form", ESP_LOG_INFO);

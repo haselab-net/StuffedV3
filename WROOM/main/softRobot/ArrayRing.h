@@ -23,9 +23,7 @@ public:
 		return buf[write];
 	}
 	void Write() {
-		printf("before write \n");
 		write = (write+1) % N;
-		printf("after write \n");
 	}
 	int WriteAvail() {
 		int rv = read - write;

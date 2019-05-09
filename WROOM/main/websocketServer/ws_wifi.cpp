@@ -58,7 +58,7 @@ esp_err_t SRWifiEventHandler::staGotIp(system_event_sta_got_ip_t info) {
     }
     char ssidKey[] = "ssid0"; ssidKey[4] = '0' + pos;
     char passKey[] = "pass0"; passKey[4] = '0' + pos;
-    //ESP_LOGI(tag, "WriteNVS %s=%s", ssidKey, wc.sta.ssid);
+    //LOGI("WriteNVS %s=%s", ssidKey, wc.sta.ssid);
     SRWiFi::wifiNvs.set("lastAP", pos);
     SRWiFi::wifiNvs.set(ssidKey, std::string((char*)wc.sta.ssid));
     SRWiFi::wifiNvs.set(passKey, std::string((char*)wc.sta.password));
@@ -99,11 +99,11 @@ esp_err_t SRWifiEventHandler::staScanDone(system_event_sta_scan_done_t info){
             char ssidKey[] = "ssid0"; ssidKey[4] = '0'+i;
             if (SRWiFi::wifiNvs.get(ssidKey, ssid) == ESP_OK){
                 for(WiFiAPRecord& ap : wifi->scannedAPs){
-                    //ESP_LOGI(tag, "SRWifiEventHandler::staScanDone found=%s try=%s", ap.m_ssid.c_str(), ssid.c_str());
+                    //LOGI("SRWifiEventHandler::staScanDone found=%s try=%s", ap.m_ssid.c_str(), ssid.c_str());
                     if (ap.m_ssid == ssid){
                         char passKey[] = "pass0"; passKey[4] = '0'+i;
                         SRWiFi::wifiNvs.get(passKey, pass);
-                        //ESP_LOGI(tag, "SRWifiEventHandler::staScanDone connect ssid=%s pass=%s", ssid.c_str(), pass.c_str());
+                        //LOGI("SRWifiEventHandler::staScanDone connect ssid=%s pass=%s", ssid.c_str(), pass.c_str());
                         wifi->connectAP(ssid, pass);
                         break;
                     }
@@ -141,6 +141,77 @@ void SRWiFi::init() {
     startScan();
     LOGD("Free heap after scan: %d", esp_get_free_heap_size());
 }
+void SRWiFi::startAP(const std::string& ssid, const std::string& password, wifi_auth_mode_t auth) {
+	startAP(ssid, password, auth, 0, false, 4);
+} // startAP
+void SRWiFi::initInternal(){
+	if (m_eventLoopStarted) {
+		esp_event_loop_set_cb(WiFi::eventHandler, this);   // Returns the old handler.
+	} else {
+		esp_err_t errRc = ::esp_event_loop_init(WiFi::eventHandler, this);  // Initialze the event handler.
+		if (errRc != ESP_OK) {
+			LOGE("esp_event_loop_init: rc=%d %s", errRc, GeneralUtils::errorToString(errRc));
+			abort();
+		}
+		m_eventLoopStarted = true;
+	}
+	if (!m_initCalled) {
+		//::nvs_flash_init();
+
+		wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+		esp_err_t errRc = ::esp_wifi_init(&cfg);
+		if (errRc != ESP_OK) {
+			LOGE("esp_wifi_init: rc=%d %s", errRc, GeneralUtils::errorToString(errRc));
+			abort();
+		}
+
+		errRc = ::esp_wifi_set_storage(WIFI_STORAGE_RAM);
+		if (errRc != ESP_OK) {
+			LOGE("esp_wifi_set_storage: rc=%d %s", errRc, GeneralUtils::errorToString(errRc));
+			abort();
+		}
+	}
+	m_initCalled = true;
+}
+void SRWiFi::startAP(const std::string& ssid, const std::string& password, wifi_auth_mode_t auth, uint8_t channel, bool ssid_hidden, uint8_t max_connection) {
+	initInternal();
+    LOGD(">> startAP: ssid: %s", ssid.c_str());
+	esp_err_t errRc = ::esp_wifi_set_mode(WIFI_MODE_APSTA);
+	if (errRc != ESP_OK) {
+		LOGE("esp_wifi_set_mode: rc=%d %s", errRc, GeneralUtils::errorToString(errRc));
+		abort();
+	}
+	// Build the apConfig structure.
+	wifi_config_t apConfig;
+	::memset(&apConfig, 0, sizeof(apConfig));
+	::memcpy(apConfig.ap.ssid, ssid.data(), ssid.size());
+	apConfig.ap.ssid_len = ssid.size();
+	::memcpy(apConfig.ap.password, password.data(), password.size());
+	apConfig.ap.channel         = channel;
+	apConfig.ap.authmode        = auth;
+	apConfig.ap.ssid_hidden     = (uint8_t) ssid_hidden;
+	apConfig.ap.max_connection  = max_connection;
+	apConfig.ap.beacon_interval = 100;
+	errRc = ::esp_wifi_set_config(WIFI_IF_AP, &apConfig);
+	if (errRc != ESP_OK) {
+		LOGE("esp_wifi_set_config: rc=%d %s", errRc, GeneralUtils::errorToString(errRc));
+		abort();
+	}
+
+	errRc = ::esp_wifi_start();
+	if (errRc != ESP_OK) {
+		LOGE("esp_wifi_start: rc=%d %s", errRc, GeneralUtils::errorToString(errRc));
+		abort();
+	}
+
+	errRc = tcpip_adapter_dhcps_start(TCPIP_ADAPTER_IF_AP);
+	if (errRc != ESP_OK) {
+		LOGE("tcpip_adapter_dhcps_start: rc=%d %s", errRc, GeneralUtils::errorToString(errRc));
+	}
+
+	LOGD("<< startAP");
+}
+
 void SRWiFi::connectAP(std::string ssid, std::string pass){
     state = WIFI_STA_CONNECTING;
 	m_apConnectionStatus = UINT8_MAX;
@@ -151,12 +222,12 @@ void SRWiFi::connectAP(std::string ssid, std::string pass){
     sta_config.sta.bssid_set = 0;
     esp_err_t errRc = ::esp_wifi_set_config(WIFI_IF_STA, &sta_config);
     if (errRc != ESP_OK) {
-        ESP_LOGE(tag, "esp_wifi_set_config: rc=%d %s", errRc, GeneralUtils::errorToString(errRc));
+        LOGE("esp_wifi_set_config: rc=%d %s", errRc, GeneralUtils::errorToString(errRc));
         abort();
     }
     errRc = ::esp_wifi_connect();
     if (errRc != ESP_OK) {
-        ESP_LOGE(tag, "esp_wifi_connect: rc=%d %s", errRc, GeneralUtils::errorToString(errRc));
+        LOGE("esp_wifi_connect: rc=%d %s", errRc, GeneralUtils::errorToString(errRc));
         abort();
     }
 }
@@ -171,19 +242,19 @@ void SRWiFi::stopScan(){
     uint16_t apCount;  // Number of access points available.
 	esp_err_t rc = ::esp_wifi_scan_get_ap_num(&apCount);
 	if (rc != ESP_OK) {
-		ESP_LOGE(tag, "esp_wifi_scan_get_ap_num: %d", rc);
+		LOGE("esp_wifi_scan_get_ap_num: %d", rc);
 		return;
 	} else {
-		ESP_LOGD(tag, "Count of found access points: %d", apCount);
+		LOGD("Count of found access points: %d", apCount);
 	}
 	wifi_ap_record_t* list = (wifi_ap_record_t*) malloc(sizeof(wifi_ap_record_t) * apCount);
 	if (list == nullptr) {
-		ESP_LOGE(tag, "Failed to allocate memory");
+		LOGE("Failed to allocate memory");
 		return;
 	}
 	esp_err_t errRc = ::esp_wifi_scan_get_ap_records(&apCount, list);
 	if (errRc != ESP_OK) {
-		ESP_LOGE(tag, "esp_wifi_scan_get_ap_records: rc=%d %s", errRc, GeneralUtils::errorToString(errRc));
+		LOGE("esp_wifi_scan_get_ap_records: rc=%d %s", errRc, GeneralUtils::errorToString(errRc));
 		abort();
 	}
     scannedAPs.clear();
