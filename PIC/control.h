@@ -103,6 +103,7 @@ int targetsCountMax();
 void controlInit();
 void controlSetMode(enum ControlMode m);
 void controlLoop();
+void updateMotorState();
 
 extern SDEC forceOffset[NFORCE];
 

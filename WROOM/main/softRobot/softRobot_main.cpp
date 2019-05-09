@@ -23,10 +23,11 @@ extern "C" void softRobot_main()    //  called from app_main in main.cpp
 {        
     //----------------------------------
     logPrintf("Soft Robot Starts. Search sub boards.\n");
-    motorDriver.Init();
 #if 1   //  touchPads can not work with JTAG debugger
     touchPads.Init();
 #endif
+
+    motorDriver.Init();
     allBoards.Init();
     logPrintf("%d motors, %d current sensors, %d force sensors found.\n", allBoards.GetNTotalMotor(), allBoards.GetNTotalCurrent(), allBoards.GetNTotalForce());
 

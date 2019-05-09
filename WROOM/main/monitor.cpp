@@ -197,14 +197,54 @@ class MCShowADC: public MonitorCommandBase{
                 conPrintf("\t%4.2f", LDEC2DBL(motorState.pos[i]));
             }
             conPrintf("\n");
-            vTaskDelay(100);
+            vTaskDelay(10);
             if (getchNoWait() >= 0) break;
         }
     }
 } mcShowADC;
 
+class MCMotorAngleTest: public MonitorCommandBase{
+    const char* Desc(){ return "M Motor angle test"; }
+    void Func(){
+        int dir = 1;
+        motorDriver.bControl = false;
+        for(int i=0; i<MotorDriver::NMOTOR_DIRECT; ++i){
+            motorDriver.Pwm(i, 0);
+        }
+
+        conPrintf("Hit Enter key\n\n\n\n");
+        if (getchWait() == '\r'){
+            for(int d = 0; d<2; ++d){
+                for(int i=0; i<MotorDriver::NMOTOR_DIRECT; ++i){
+                    motorDriver.Pwm(i, dir * (SDEC)(SDEC_ONE * 0.8) );
+                }
+                for(int t=0; t<150; ++t){
+                    for(int i=0; i<MotorDriver::NMOTOR_DIRECT*2; ++i){
+                        int raw = motorDriver.GetAdcRaw(i);
+                        conPrintf("%5d\t", raw);
+                    }
+                    for(int i=0; i<MotorDriver::NMOTOR_DIRECT; ++i){
+                        conPrintf("\t%4.2f", LDEC2DBL(motorState.pos[i]));
+                    }
+                    conPrintf("\n");
+                    vTaskDelay(2);
+                    if (getchNoWait() >= 0) break;
+                }
+                dir *= -1;
+            }
+            for(int i=0; i<MotorDriver::NMOTOR_DIRECT; ++i){
+                motorDriver.Pwm(i, 0);
+            }
+            conPrintf("\n\n\n\nHit any key\n");
+            getchWait();
+            motorDriver.bControl = true;
+        }
+    }
+} mcMotorAngleTest;
+
+
 class MCShowTouch: public MonitorCommandBase{
-    const char* Desc(){ return "t Show Touch sensors"; }
+    const char* Desc(){ return "T Show Touch sensors"; }
     void Func(){
         while(1){
             for(int i=0; i<touchPads.NPad(); ++i){

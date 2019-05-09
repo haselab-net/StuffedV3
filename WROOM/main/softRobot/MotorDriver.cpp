@@ -70,6 +70,8 @@ void MotorDriver::AdcReadTask(){
                     gpio_set_level(GPIO_LED, 1);
                     controlLoop();
                     gpio_set_level(GPIO_LED, 0);
+                }else{
+                    updateMotorState();                    
                 }
             }
         }
@@ -126,11 +128,15 @@ void MotorDriver::Init(){
     i2s_config.intr_alloc_flags = ESP_INTR_FLAG_LEVEL1;
     i2s_config.dma_buf_count = 2;
     i2s_config.dma_buf_len = ADC_DMA_LEN;
-    vTaskDelay(50);    //  Wait for wake up of ADC.
     adc_set_i2s_data_source(ADC_I2S_DATA_SRC_ADC);
+    vTaskDelay(1 + 50 / portTICK_PERIOD_MS);
     adc_i2s_mode_init(ADC_UNIT_1, ADC_CHANNEL_0);
     //  Install and start I2S driver
     i2s_driver_install(ADCI2SNUM, &i2s_config, 1, &queue);
+    //  Start ADC task
+	xTaskCreate(AdcReadTaskStatic, "ADC", 512+256, this, configMAX_PRIORITIES-1, &task);
+    vTaskDelay(1 + 50 / portTICK_PERIOD_MS);    //  Wait for wake up of ADC task.
+    //  Start ADC
     i2s_set_adc_mode(ADC_UNIT_1, ADC1_CHANNEL_0);
     i2s_adc_enable(ADCI2SNUM);
 
@@ -160,7 +166,6 @@ void MotorDriver::Init(){
     SYSCON.saradc_sar1_patt_tab[1] = patTab.tab[1];
     SYSCON.saradc_ctrl2.sar1_inv = 1;
 #endif
-	xTaskCreate(AdcReadTaskStatic, "ADC", 512+256, this, configMAX_PRIORITIES-1, &task);
 
     for(int ch=0; ch<NMOTOR_DIRECT; ++ch){
         torqueLimit.max[ch] = (SDEC)(1.0*SDEC_ONE);
