@@ -39,7 +39,7 @@ void esp32_spiffs_mount() {
     if (ret != ESP_OK) {
         LOGE("Failed to get SPIFFS partition information");
     } else {
-        LOGI("Partition size: total: %d, used: %d", total, used);
+        LOGD("Partition size: total: %d, used: %d", total, used);
     }
 
 } // esp32_duktape_spiffs_mount
