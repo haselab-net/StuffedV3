@@ -84,8 +84,8 @@ void Monitor::Init(){
     uart_driver_install(UART_NUM_0, 1024, 1024, 10, NULL, 0);
 }
 void Monitor::Run(){
-    conPrintf("Monitor start.\n");
-    ShowList();
+    conPrintf("Monitor starts. Hit [Enter] for help.\n");
+    //ShowList();
     while(1){
         uint8_t ch = getchWait();
         int i=0;

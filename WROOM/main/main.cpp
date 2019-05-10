@@ -69,15 +69,17 @@ void setLogLevel(){
     esp_log_level_set("gpio", ESP_LOG_WARN);
     esp_log_level_set("I2S", ESP_LOG_WARN);
 
-    //  SoftRobot  
+    //  application
     esp_log_level_set("main", ESP_LOG_INFO);
+    //  SoftRobot  
+    esp_log_level_set("sr_main", ESP_LOG_INFO);
     esp_log_level_set("Uart", ESP_LOG_INFO);
 
     //  Web Server
     esp_log_level_set("WiFi", ESP_LOG_INFO);
     esp_log_level_set("WiFiEventHandler", ESP_LOG_INFO);
     esp_log_level_set("ws_fs", ESP_LOG_INFO);
-    aesp_log_level_set("ws_wifi", ESP_LOG_INFO);
+    esp_log_level_set("ws_wifi", ESP_LOG_INFO);
     esp_log_level_set("ws_task", ESP_LOG_INFO);
     esp_log_level_set("ws_main", ESP_LOG_INFO);
     esp_log_level_set("ws_form", ESP_LOG_INFO);
@@ -97,7 +99,7 @@ extern "C" void app_main(){
     	esp_log_level_set("*", ESP_LOG_INFO);
         esp_chip_info_t chip_info;
         esp_chip_info(&chip_info);
-        printf("\n\nThis is ESP32 chip with %d CPU cores, WiFi%s%s, ",
+        printf("\n\n\n\n\n\nThis is ESP32 chip with %d CPU cores, WiFi%s%s, ",
             chip_info.cores,
             (chip_info.features & CHIP_FEATURE_BT) ? "/BT" : "",
             (chip_info.features & CHIP_FEATURE_BLE) ? "/BLE" : "");

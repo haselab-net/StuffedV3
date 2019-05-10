@@ -28,10 +28,6 @@ AllBoards allBoards;
 UartForBoards uart1(UART_NUM_1, &allBoards);
 UartForBoards uart2(UART_NUM_2, &allBoards);
 AllBoards::AllBoards(){
-	nBoard = 0;
-	uart[0] = &uart1;
-	uart[1] = &uart2;
-	boardDirect = new BoardDirect();
 }
 AllBoards::~AllBoards(){
 	delete boardDirect;
@@ -62,6 +58,11 @@ void AllBoards::ExecLoop(){
 }
 void AllBoards::Init() {
 	assert(NUART == 2);	//NUART must be much to followings.
+	nBoard = 0;
+	uart[0] = &uart1;
+	uart[1] = &uart2;
+	boardDirect = new BoardDirect();
+
 	uart_config_t uconf;
 	uconf.baud_rate = 2000000;
 	uconf.data_bits = UART_DATA_8_BITS;
