@@ -178,7 +178,7 @@ class MCPwmTest: public MonitorCommandBase{
                 break;
             }
             for(int i=0; i<MotorDriver::NMOTOR_DIRECT; ++i){
-                motorDriver.Pwm(i, duty[i]);
+                motorDriver.Pwm(i, (SDEC)(duty[i] * SDEC_ONE));
             }
         }
         motorDriver.bControl = true;
