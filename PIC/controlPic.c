@@ -84,7 +84,7 @@ AN      2 3    5     10
 	msin[2] = FilterForAngle(msin[2], ADC1BUF9 - msinOffset[2]);
 	mcos[3] = FilterForAngle(mcos[3], ADC1BUF10 - mcosOffset[3]);
 	msin[3] = FilterForAngle(msin[3], ADC1BUF11 - msinOffset[3]);
-#elif defined BOARD3_SEPARATE
+#elif defined BOARD3_SEPARATE || defined BOARD4
 /*  BUF 0 1 2 3  4 5 6 7  8   9 10 11
     AN  0 1 2 3  4 5 7 8 10  11 12 13 
     MT      2 3    5     10             */
@@ -225,7 +225,7 @@ void setPwm(int ch, SDEC ratio){
 		setSpiPwm(ratio);
     }
 }
-#elif defined BOARD3_SEPARATE
+#elif defined BOARD3_SEPARATE || defined BOARD4
 void setPwm(int ch, SDEC ratio){
     if (ch == 0){   //  M0=LCP4  U2B1/2=OCM1B/A
 		if (ratio < 0){

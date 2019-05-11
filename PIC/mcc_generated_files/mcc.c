@@ -52,7 +52,7 @@
 #pragma config JTAGEN = OFF    // JTAG Enable bit->JTAG is disabled
 #if defined BOARD1_MOTORDRIVER
 #pragma config ICS = PGx1    // ICE/ICD Communication Channel Selection bits->Communicate on PGEC1/PGED1
-#elif defined BOARD2_COMBINATION || defined BOARD3_SEPARATE
+#elif defined BOARD2_COMBINATION || defined BOARD3_SEPARATE || defined BOARD4
 #pragma config ICS = PGx3    // ICE/ICD Communication Channel Selection bits->Communicate on PGEC3/PGED3
 #else
 #error

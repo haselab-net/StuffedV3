@@ -63,7 +63,7 @@ void UART2_Initialize(void)
 #if defined BOARD1_MOTORDRIVER
     // BaudRate = 3000000; Frequency = 24000000 Hz; BRG 1; 
     U2BRG = 0x1;
-#elif defined BOARD2_COMBINATION || defined BOARD3_SEPARATE
+#elif defined BOARD2_COMBINATION || defined BOARD3_SEPARATE || defined BOARD4
     // BaudRate = 2000000; Frequency = 24000000 Hz; BRG 2; 
     U2BRG = 0x2;
 #else
@@ -73,7 +73,7 @@ void UART2_Initialize(void)
     //Make sure to set LAT bit corresponding to TxPin as high before UART initialization
 #if defined BOARD1_MOTORDRIVER
     U2STASET = _U2STA_UTXEN_MASK;
-#elif defined BOARD2_COMBINATION || defined BOARD3_SEPARATE
+#elif defined BOARD2_COMBINATION || defined BOARD3_SEPARATE || defined BOARD4
 	//U2STASET = _U2STA_UTXEN_MASK;	//	Do not on TX until called by master.
 #else
 #error
@@ -134,12 +134,13 @@ UART2_STATUS UART2_StatusGet (void)
 static char mon_buffer[512];
 static int wp=0;
 static int rp=0;
-void monOut(){
+bool monOut(){
     if (rp != wp && !UMSTAbits.UTXBF){
 		UMTXREG = mon_buffer[rp];
-		if (rp < sizeof(mon_buffer)) rp++;
+		if (rp < sizeof(mon_buffer)-1) rp++;
 		else rp = 0;
 	}
+    return rp != wp;    //  if remain return true
 }
 int monWaiting(){
     int rv = rp - wp;
@@ -149,7 +150,7 @@ int monWaiting(){
 }
 void _mon_putc(char c) {
 	mon_buffer[wp] = c;
-	if (wp < sizeof(mon_buffer)) wp++;
+	if (wp < sizeof(mon_buffer)-1) wp++;
 	else wp = 0;
 	monOut();
 }
