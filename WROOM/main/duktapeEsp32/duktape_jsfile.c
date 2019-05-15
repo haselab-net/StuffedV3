@@ -189,8 +189,6 @@ void handle_event() {
         processEvent(&esp32_duktape_event);
         esp32_duktape_freeEvent(esp32_duk_context, &esp32_duktape_event);
     }
-
-    vTaskDelay(1);
 }
 
 void lock_heap() {
