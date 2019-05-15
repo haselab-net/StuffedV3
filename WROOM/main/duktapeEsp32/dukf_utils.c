@@ -168,7 +168,6 @@ const char *dukf_loadFileFromESPFS(const char *path, size_t *fileSize) {
 
 	char *fileData;
 	espFsAccess(fh, (void **)&fileData, fileSize);
-	if (fileData[(*fileSize)-1] == '\0') (*fileSize)--;
 	espFsClose(fh);
 	// Note ... because data is mapped in memory from flash ... it will be good
 	// past the file close.

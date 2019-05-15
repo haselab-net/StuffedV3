@@ -488,4 +488,4 @@ var softrobot;
     })(util = softrobot.util || (softrobot.util = {}));
 })(softrobot || (softrobot = {}));
 
-module.exports = softrobot; 
+module.exports = softrobot;

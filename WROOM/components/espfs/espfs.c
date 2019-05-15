@@ -137,7 +137,7 @@ EspFsFile *espFsOpen(const char *fileName) {
 			return fileData;
 		}
 		//We don't need this file. Skip name and file
-		flashAddress += header->nameLen+header->fileLenComp;
+		flashAddress += header->nameLen+header->fileLenComp + 1;	//	+1 is for appeded '\0'.
 		if ((int)flashAddress&3) {
 			flashAddress += 4-((int)flashAddress & 3); //align to next 32bit val
 		}
@@ -206,7 +206,7 @@ void espFsDumpFiles() {
 		totalSize += header->fileLenComp;
 
 		//We don't need this file. Skip name and file
-		flashAddress += header->nameLen+header->fileLenComp;
+		flashAddress += header->nameLen+header->fileLenComp + 1;	//	+1 is for appeded '\0'.
 		if ((int)flashAddress&3) {
 			flashAddress += 4-((int)flashAddress & 3); //align to next 32bit val
 		}

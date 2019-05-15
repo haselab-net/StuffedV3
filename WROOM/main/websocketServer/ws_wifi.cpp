@@ -132,7 +132,7 @@ void SRWiFi::init() {
 	esp_read_mac(mac, ESP_MAC_WIFI_STA);	// 6 bytes
     char ssid[33];
     strcpy(ssid, "Nuibot ");
-    for(int i=0; i<6; ++i){
+    for(int i=3; i<6; ++i){ //  0-2 is the same 30AEA4
         sprintf(ssid+strlen(ssid), "%02X", mac[i]);
     }
     startAP(ssid, "");
