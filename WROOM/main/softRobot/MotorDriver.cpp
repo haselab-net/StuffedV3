@@ -135,7 +135,7 @@ void MotorDriver::Init(){
     i2s_set_adc_mode(ADC_UNIT_1, ADC1_CHANNEL_0);
     i2s_adc_enable(ADCI2SNUM);
 
-#ifdef BOARD3_SEPARATE
+#if defined BOARD3_SEPARATE || defined BOARD4
     SYSCON.saradc_ctrl.sar1_patt_len = NMOTOR_DIRECT*2-1;   // table length - 1
 #else
     SYSCON.saradc_ctrl.sar1_patt_len = 0;

@@ -4,7 +4,7 @@
 #include "driver/uart.h"
 
 //	PIN definition
-#if defined BOARD3_SEPARATE
+#if defined BOARD3_SEPARATE || defined BOARD4
 #define U1TXPIN	16
 #define U1RXPIN	17
 #define U2TXPIN	5

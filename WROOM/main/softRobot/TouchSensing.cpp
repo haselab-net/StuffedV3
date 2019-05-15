@@ -19,7 +19,7 @@ void TouchPads::Init()
 #ifndef _WIN32
 	touch_pad_init();
     touch_pad_set_voltage(TOUCH_HVOLT_2V7, TOUCH_LVOLT_0V5, TOUCH_HVOLT_ATTEN_1V);
-#ifdef BOARD3_SEPARATE 
+#if defined BOARD3_SEPARATE || defined BOARD4
     memset(&pads, 0, sizeof(pads));
     pads.reserve(6);
     Add(TOUCH_PAD_NUM2);
