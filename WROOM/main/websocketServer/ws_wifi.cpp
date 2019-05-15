@@ -198,15 +198,15 @@ void SRWiFi::startAP(const std::string& ssid, const std::string& password, wifi_
 		abort();
 	}
 
+	errRc = tcpip_adapter_dhcps_start(TCPIP_ADAPTER_IF_AP);
+	if (errRc != ESP_OK) {
+		LOGE("tcpip_adapter_dhcps_start: rc=%d %s", errRc, GeneralUtils::errorToString(errRc));
+	}
+
 	errRc = ::esp_wifi_start();
 	if (errRc != ESP_OK) {
 		LOGE("esp_wifi_start: rc=%d %s", errRc, GeneralUtils::errorToString(errRc));
 		abort();
-	}
-
-	errRc = tcpip_adapter_dhcps_start(TCPIP_ADAPTER_IF_AP);
-	if (errRc != ESP_OK) {
-		LOGE("tcpip_adapter_dhcps_start: rc=%d %s", errRc, GeneralUtils::errorToString(errRc));
 	}
 
 	LOGD("<< startAP");
