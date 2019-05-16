@@ -28,7 +28,7 @@ static char LOG_TAG[] = "ws_ws";
 static WebSocket* pWebSocket = NULL;
 static SRWebSocketHandler webSocketHandler = SRWebSocketHandler();
 
-bool offline_mode = true;   // offline: 1, synchronization || development: 0
+bool offline_mode = false;   // offline: 1, synchronization || development: 0
 
 void SRWebSocketHandler::onClose() {
     ESP_LOGV(LOG_TAG, "on close");
@@ -159,8 +159,10 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
             uint16_t id = pBufferI16[1];
             switch (id)
             {
-                case PacketSettingsId::OFFLINE_MODE:
-                    offline_mode = pBufferI16[2];
+                case PacketSettingsId::OFFLINE_MODE: {
+                    bool new_offline_mode = pBufferI16[2];
+                    if (new_offline_mode == offline_mode) break;
+                    else offline_mode = new_offline_mode;
                     if(!offline_mode) {
                         ESP_LOGD(LOG_TAG, "switch to development mode, stop running jsfile task");
                         wsDeleteJsfileTask();
@@ -173,7 +175,7 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
                         wsCreateJsfileTask();
                     }
                     break;
-            
+                }
                 default:
                     ESP_LOGV(LOG_TAG, "Unknown packet settings id (%i)", pBufferI16[1]);
                     break;

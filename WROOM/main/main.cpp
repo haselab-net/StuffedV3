@@ -77,14 +77,14 @@ void setLogLevel(){
     esp_log_level_set("Uart", ESP_LOG_INFO);
 
     //  Web Server
-    esp_log_level_set("WiFi", ESP_LOG_INFO);
-    esp_log_level_set("WiFiEventHandler", ESP_LOG_INFO);
-    esp_log_level_set("ws_fs", ESP_LOG_INFO);
-    esp_log_level_set("ws_wifi", ESP_LOG_INFO);
-    esp_log_level_set("ws_task", ESP_LOG_INFO);
-    esp_log_level_set("ws_main", ESP_LOG_INFO);
-    esp_log_level_set("ws_form", ESP_LOG_INFO);
-    esp_log_level_set("ws_ws", ESP_LOG_INFO);
+    esp_log_level_set("WiFi", ESP_LOG_DEBUG);
+    esp_log_level_set("WiFiEventHandler", ESP_LOG_DEBUG);
+    esp_log_level_set("ws_fs", ESP_LOG_DEBUG);
+    esp_log_level_set("ws_wifi", ESP_LOG_DEBUG);
+    esp_log_level_set("ws_task", ESP_LOG_DEBUG);
+    esp_log_level_set("ws_main", ESP_LOG_DEBUG);
+    esp_log_level_set("ws_form", ESP_LOG_DEBUG);
+    esp_log_level_set("ws_ws", ESP_LOG_DEBUG);
 
     //  duktape
     //esp_log_level_set("duk_utils", ESP_LOG_INFO);
@@ -135,16 +135,15 @@ extern "C" void app_main(){
     
     //  start soft robot's udp command server.
     udpCom.Start();   //  start UDP server.
-#if 0
+
     //  start DukTape, javascript engine and run /main/main*.js
 	if(offline_mode && !wsIsJsfileTaskRunning()) {
         combineMainFiles();
         wsCreateJsfileTask();
         ESP_LOGI(TAG ,"Start running default jsfile task");
+    } else {
+        ESP_LOGI(TAG, "JS is NOT started.");
     }
-#else
-    ESP_LOGI(TAG, "JS is NOT started.");
-#endif
     //  start monitor
     Monitor::theMonitor.Init();
     Monitor::theMonitor.Run();  //  monitor start. never return;
