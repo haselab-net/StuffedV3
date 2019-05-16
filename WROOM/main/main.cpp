@@ -19,6 +19,7 @@ extern "C" {
 #endif
 #include "monitor.h"
 #include "ws_fs.h"
+#include "ws_ws.h"
 #include "softRobot/UdpCom.h"
 
 static const char* TAG="main";
@@ -131,7 +132,7 @@ extern "C" void app_main(){
     udpCom.Start();   //  start UDP server.
 
     //  start DukTape, javascript engine and run /main/main*.js
-	if(!wsIsJsfileTaskRunning()) {
+	if(offline_mode && !wsIsJsfileTaskRunning()) {
         combineMainFiles();
         wsCreateJsfileTask();
         ESP_LOGI(TAG ,"Start running default jsfile task");

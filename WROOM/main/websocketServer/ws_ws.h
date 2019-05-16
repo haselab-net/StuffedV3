@@ -4,6 +4,8 @@
 #include "WebSocket.h"
 #include "../softRobot/UdpCom.h"
 
+extern bool offline_mode;
+
 class SRWebSocketHandler: public WebSocketHandler {
     void onClose();
     void onMessage(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket* pWebSocket);

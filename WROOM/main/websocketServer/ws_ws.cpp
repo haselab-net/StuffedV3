@@ -28,7 +28,7 @@ static char LOG_TAG[] = "ws_ws";
 static WebSocket* pWebSocket = NULL;
 static SRWebSocketHandler webSocketHandler = SRWebSocketHandler();
 
-static bool offline_mode = true;   // offline: 1, synchronization || development: 0
+bool offline_mode = true;   // offline: 1, synchronization || development: 0
 
 void SRWebSocketHandler::onClose() {
     ESP_LOGV(LOG_TAG, "on close");
