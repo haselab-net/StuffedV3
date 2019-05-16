@@ -50,32 +50,39 @@ void setLogLevel(){
     esp_log_level_set("heap_init", ESP_LOG_INFO);
     esp_log_level_set("HttpServer", ESP_LOG_INFO);
     esp_log_level_set("HttpServerTask", ESP_LOG_INFO);
+    esp_log_level_set("HttpRequest", ESP_LOG_INFO);
+    esp_log_level_set("HttpParser", ESP_LOG_INFO);
+    esp_log_level_set("HttpResponse", ESP_LOG_INFO);
+    esp_log_level_set("PathHandler", ESP_LOG_INFO);
+    esp_log_level_set("Socket", ESP_LOG_INFO);
     esp_log_level_set("nvs", ESP_LOG_INFO);
-    esp_log_level_set("phy", ESP_LOG_INFO);
     esp_log_level_set("phy_init", ESP_LOG_INFO);
     esp_log_level_set("pthread", ESP_LOG_INFO);
     esp_log_level_set("RTC_MODULE", ESP_LOG_INFO);
-    esp_log_level_set("Socket", ESP_LOG_INFO);
     esp_log_level_set("Task", ESP_LOG_INFO);
     esp_log_level_set("tcpip_adapter", ESP_LOG_INFO);
+    esp_log_level_set("MotorDriver", ESP_LOG_INFO);
 
     // components set to warn
+    esp_log_level_set("phy", ESP_LOG_WARN);
     esp_log_level_set("system_api", ESP_LOG_WARN);
     esp_log_level_set("wifi", ESP_LOG_WARN);
     esp_log_level_set("gpio", ESP_LOG_WARN);
     esp_log_level_set("I2S", ESP_LOG_WARN);
 
-    //  SoftRobot  
+    //  application
     esp_log_level_set("main", ESP_LOG_INFO);
+    //  SoftRobot  
+    esp_log_level_set("sr_main", ESP_LOG_INFO);
     esp_log_level_set("Uart", ESP_LOG_INFO);
 
     //  Web Server
     esp_log_level_set("WiFi", ESP_LOG_INFO);
     esp_log_level_set("WiFiEventHandler", ESP_LOG_INFO);
-    //esp_log_level_set("ws_fs", ESP_LOG_INFO);
+    esp_log_level_set("ws_fs", ESP_LOG_INFO);
     esp_log_level_set("ws_wifi", ESP_LOG_INFO);
     esp_log_level_set("ws_task", ESP_LOG_INFO);
-    //esp_log_level_set("ws_main", ESP_LOG_INFO);
+    esp_log_level_set("ws_main", ESP_LOG_INFO);
     esp_log_level_set("ws_form", ESP_LOG_INFO);
     esp_log_level_set("ws_ws", ESP_LOG_INFO);
 
@@ -93,7 +100,7 @@ extern "C" void app_main(){
     	esp_log_level_set("*", ESP_LOG_INFO);
         esp_chip_info_t chip_info;
         esp_chip_info(&chip_info);
-        printf("\n\nThis is ESP32 chip with %d CPU cores, WiFi%s%s, ",
+        printf("\n\n\n\n\n\nThis is ESP32 chip with %d CPU cores, WiFi%s%s, ",
             chip_info.cores,
             (chip_info.features & CHIP_FEATURE_BT) ? "/BT" : "",
             (chip_info.features & CHIP_FEATURE_BLE) ? "/BLE" : "");
@@ -114,30 +121,30 @@ extern "C" void app_main(){
     //heap_trace_start(HEAP_TRACE_LEAKS);
     softRobot_main();
     //heap_trace_dump();
-    ESP_LOGI(TAG, "after softRobot_main heap size: %d", esp_get_free_heap_size());
+    //ESP_LOGI(TAG, "after softRobot_main heap size: %d", esp_get_free_heap_size());
 
 	//  Start file system (espFs)
     int flashSize = 1024*1024;
 	espFsInit((void *)0x300000, flashSize);
-    ESP_LOGI(TAG, "after espFsInit heap size: %d", esp_get_free_heap_size());
+    //ESP_LOGI(TAG, "after espFsInit heap size: %d", esp_get_free_heap_size());
 	
-    esp_log_level_set("*", ESP_LOG_DEBUG);
-
     //  Start web server with web socket
     ws_main();
 
-    ESP_LOGI(TAG, "after ws_main heap size: %d", esp_get_free_heap_size());
+    //ESP_LOGI(TAG, "after ws_main heap size: %d", esp_get_free_heap_size());
     
     //  start soft robot's udp command server.
     udpCom.Start();   //  start UDP server.
-
+#if 0
     //  start DukTape, javascript engine and run /main/main*.js
 	if(offline_mode && !wsIsJsfileTaskRunning()) {
         combineMainFiles();
         wsCreateJsfileTask();
         ESP_LOGI(TAG ,"Start running default jsfile task");
     }
-
+#else
+    ESP_LOGI(TAG, "JS is NOT started.");
+#endif
     //  start monitor
     Monitor::theMonitor.Init();
     Monitor::theMonitor.Run();  //  monitor start. never return;

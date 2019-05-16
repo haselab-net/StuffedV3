@@ -168,17 +168,18 @@ const char *dukf_loadFileFromESPFS(const char *path, size_t *fileSize) {
 
 	char *fileData;
 	espFsAccess(fh, (void **)&fileData, fileSize);
-	if (fileData[(*fileSize)-1] == '\0') (*fileSize)--;
 	espFsClose(fh);
 	// Note ... because data is mapped in memory from flash ... it will be good
 	// past the file close.
 	LOGD("<< duk_loadFile: Read file %s for size %d", path, *fileSize);
+#if 0
 	for(int i=0; i<NLOADEDSTR; ++i){
 		if (loadedStr[i] == NULL){
 			loadedStr[i] = fileData;
 			break;
 		}
 	}
+#endif
 	return fileData;
 } // dukf_loadFile
 

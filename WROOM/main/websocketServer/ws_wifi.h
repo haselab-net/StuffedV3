@@ -22,6 +22,7 @@ public:
 class SRWiFi: public WiFi{
 protected:
     SRWifiEventHandler srWifiEventHandler;
+    void initInternal();
 public:
     std::vector<WiFiAPRecord> scannedAPs;
     enum Status{
@@ -36,6 +37,8 @@ public:
     enum {N_AP_RECORD_MAX = 10};
     SRWiFi();
     void init();        //  Init wifi and start WIFI_MODE_APSTA
+	void startAP(const std::string& ssid, const std::string& passwd, wifi_auth_mode_t auth = WIFI_AUTH_OPEN);
+	void startAP(const std::string& ssid, const std::string& passwd, wifi_auth_mode_t auth, uint8_t channel, bool ssid_hidden, uint8_t max_connection);
 	void startScan();	//	Start scan. Wifi mode must be station or apSta. 
 	void stopScan();	//	Stop scan and return ap list.
     void connectAP(std::string ssid, std::string pass);

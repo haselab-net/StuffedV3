@@ -264,7 +264,7 @@ namespace Robokey
             udK.Maximum = udB.Maximum = 32000;
             udA.Minimum = -1024 * 8;
             udA.Maximum = 1024 * 8;
-            K = 1024*4;
+            K = 1024 * 3;
             B = 1024 * 2;
             A = 1024/2;
             udK.Top = 0;

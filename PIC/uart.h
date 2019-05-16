@@ -26,7 +26,7 @@
 #define UARTC_Initialize	UART1_Initialize
 
 
-#elif defined BOARD2_COMBINATION || defined BOARD3_SEPARATE
+#elif defined BOARD2_COMBINATION || defined BOARD3_SEPARATE || defined BOARD4
 
 #define UMSTA	U1STA
 #define UMSTAbits	U1STAbits

@@ -21,26 +21,8 @@
 #include "duktape_utils.h"
 #include "logging.h"
 #include "modules.h"
-#include "module_adc.h"
-#include "module_aes.h"
-#include "module_bluetooth.h"
 #include "module_dukf.h"
-#include "module_gpio.h"
 #include "module_fs.h"
-#include "module_i2c.h"
-#include "module_ledc.h"
-#include "module_linenoise.h"
-#include "module_netvfs.h"
-#include "module_nvs.h"
-#include "module_os.h"
-#include "module_partitions.h"
-#include "module_rmt.h"
-#include "module_rtos.h"
-#include "module_serial.h"
-#include "module_serialvfs.h"
-#include "module_spi.h"
-#include "module_ssl.h"
-#include "module_wifi.h"
 #include "module_jslib.h"
 #include "module_srcommand.h"
 LOG_TAG("modules");
@@ -88,29 +70,9 @@ typedef struct {
  * { NULL, NULL, 0 }
  */
 functionTableEntry_t functionTable[] = {
-#if defined(ESP_PLATFORM)
-	{ "ModuleADC",        ModuleADC,        1},
-	{ "ModuleAES",        ModuleAES,        1},
-#if defined(CONFIG_BT_ENABLED)
-	{ "ModuleBluetooth",  ModuleBluetooth,  1},
-#endif
 	{ "ModuleFS",         ModuleFS,         1},
-	{ "ModuleGPIO",       ModuleGPIO,       1},
-	{ "ModuleI2C",        ModuleI2C,        1},
-	{ "ModuleLEDC",       ModuleLEDC,       1},
-	{ "ModuleLinenoise",  ModuleLinenoise,  1},
-	{ "ModuleNetVFS",     ModuleNetVFS,     1},
-	{ "ModuleNVS",        ModuleNVS,        1},
-	{ "ModulePartitions", ModulePartitions, 1},
-	{ "ModuleRMT",        ModuleRMT,        1},
-	{ "ModuleRTOS",       ModuleRTOS,       1},
-	{ "ModuleSerial",     ModuleSerial,     1},
-	{ "ModuleSerialVFS",  ModuleSerialVFS,  1},
-	{ "ModuleSPI",        ModuleSPI,        1},
-	{ "ModuleSSL",        ModuleSSL,        1},
 	{ "ModuleJSLib",	  ModuleJSLib,		1},			// register jslib module
 	{ "ModuleSRCommand",  ModuleSRCommand,	1},			// register srcommand module
-#endif // ESP_PLATFORM
 	// Must be last entry
 	{NULL, NULL, 0 } // *** DO NOT DELETE *** - MUST BE LAST ENTRY.
 };
@@ -425,6 +387,16 @@ static void ModuleConsole(duk_context *ctx) {
 } // ModuleConsole
 
 #if defined(ESP_PLATFORM)
+/* include: require need to edit js code and use memory of the source code size.
+    include just execute the specified js file and do not use memory for source code.	*/
+static duk_ret_t js_include(duk_context* ctx){
+    const char* fn = duk_get_string(ctx, -1);
+    //  load and exec
+	dukf_runFile(ctx, fn);
+    duk_pop(ctx);
+	return 0;
+}
+
 /**
  * Register the ESP32 module with its functions.
  */
@@ -510,6 +482,15 @@ static void ModuleESP32(duk_context *ctx) {
 	// [0] - Global object
 	// [1] - New object
 
+	duk_push_c_function(ctx, js_include, 1);
+	// [0] - Global object
+	// [1] - New object
+	// [2] - c-function - js_include
+
+	duk_put_prop_string(ctx, -2, "include"); // Add include to new ESP32
+	// [0] - Global object
+	// [1] - New object
+
 	duk_put_prop_string(ctx, -2, "ESP32"); // Add ESP32 to global
 	// [0] - Global object
 
@@ -525,30 +506,15 @@ static void ModuleESP32(duk_context *ctx) {
  */
 void registerModules(duk_context *ctx) {
 	LOGD(">> registerModules");
-#if 0	// && defined(ESP_PLATFORM)	This causes memory leak. Should be in main.cpp	
-	int flashSize = 1024*1024;
-	espFsInit((void *)0x300000, flashSize);
-#endif // ESP_PLATFORM
-
 	duk_idx_t top = duk_get_top(ctx);
 	ModuleConsole(ctx);
 	assert(top == duk_get_top(ctx));
-
-	ModuleOS(ctx);
-	assert(top == duk_get_top(ctx));
-
 	ModuleDUKF(ctx);
 	assert(top == duk_get_top(ctx));
 
 #if defined(ESP_PLATFORM)
 	ModuleESP32(ctx);
 	assert(top == duk_get_top(ctx));
-
-	// ModuleWIFI(ctx); // Load the WiFi module
-	// assert(top == duk_get_top(ctx));
-
-	//ModuleTIMERS(ctx);
-	//assert(top == duk_get_top(ctx));
 #endif /* ESP_PLATFORM */
 	LOGD("<< registerModules");
 } // End of registerModules

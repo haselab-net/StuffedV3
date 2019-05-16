@@ -23,7 +23,7 @@ class MotorDriver{
     };
     public:
     bool bControl;
-#ifdef BOARD3_SEPARATE
+#if defined BOARD3_SEPARATE || defined BOARD4
     enum {
         NTARGET_DIRECT = 12,
         NMOTOR_DIRECT = BoardInfo::NMOTOR,
@@ -37,7 +37,7 @@ class MotorDriver{
     };
 #endif
     private:
-#ifdef BOARD3_SEPARATE
+#if defined BOARD3_SEPARATE || defined BOARD4
     const uint8_t pwmPins[NMOTOR_DIRECT*2] = {4, 27, 21, 22, 0, 19};    //M0, M1, M2
 #else
     const uint8_t pwmPins[0] = {};

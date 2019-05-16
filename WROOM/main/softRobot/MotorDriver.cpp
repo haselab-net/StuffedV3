@@ -1,7 +1,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/event_groups.h"
 #include "esp_event_loop.h"
-#include "esp_log.h"
+#include <logging.h>
 #ifndef _WIN32
 #include "esp_adc_cal.h"
 extern "C"{
@@ -17,6 +17,7 @@ extern "C"{
 
 #include <string.h>
 #include "MotorDriver.h"
+#include "TouchSensing.h"
 extern "C" {
 #include "../../../PIC/control.h"
 }
@@ -26,13 +27,13 @@ extern "C" {
 float pwm[NMOTOR];
 float theta[NMOTOR];
 #endif
+LOG_TAG("MotorDriver");
 
 MotorDriver motorDriver;
 
 
 void MotorDriver::AdcReadTaskStatic(void* arg){
-    MotorDriver* md = (MotorDriver*)arg;
-    md->AdcReadTask();
+    motorDriver.AdcReadTask();
 }
 
 #define ADCI2SNUM   I2S_NUM_0
@@ -42,7 +43,7 @@ void MotorDriver::AdcReadTask(){
 #ifndef _WIN32
     gpio_reset_pin(GPIO_LED);
     gpio_set_direction(GPIO_LED, GPIO_MODE_OUTPUT);
-    int count=0;
+    static int count=0;
 	while(1) {
         static uint16_t buf[ADC_DMA_LEN];
         static system_event_t evt;
@@ -50,7 +51,7 @@ void MotorDriver::AdcReadTask(){
         if (xQueueReceive(queue, &evt, portMAX_DELAY) == pdPASS) {
             if (evt.event_id==2) {
                 //  read ADC
-                static size_t readBytes;
+                static size_t readBytes = bufLen;
                 i2s_read(ADCI2SNUM, buf, bufLen, &readBytes, portMAX_DELAY);
                 for (int i=0; i<readBytes/2; ++i){
                     int ch = buf[i] >> 11;                    
@@ -59,17 +60,14 @@ void MotorDriver::AdcReadTask(){
 #define FILTER_TIME 16
                     adcRaws[pos] = adcRaws[pos]*(FILTER_TIME-1)/FILTER_TIME + value; 
                 }
-                //  update target state for targetsAddOrUpdated()
-                if (!bForTargetsAddUpdated){
-                    readForTargetsAdd = targets.read;
-                    availForTargetsAdd = targetsReadAvail();
-                    tcrForTargetsAdd = targets.targetCountRead;
-                    bForTargetsAddUpdated = true;
-                }
-                if (bControl && count % 4 == 0){
-                    gpio_set_level(GPIO_LED, 1);
-                    controlLoop();
-                    gpio_set_level(GPIO_LED, 0);
+                if (count % 4 == 0){    //  ADC read at 12kHz. control at 3kHz
+                    if (bControl){
+                        gpio_set_level(GPIO_LED, 1);
+                        controlLoop();
+                        gpio_set_level(GPIO_LED, 0);
+                    }else{
+                        updateMotorState();                    
+                    }
                 }
             }
         }
@@ -126,15 +124,18 @@ void MotorDriver::Init(){
     i2s_config.intr_alloc_flags = ESP_INTR_FLAG_LEVEL1;
     i2s_config.dma_buf_count = 2;
     i2s_config.dma_buf_len = ADC_DMA_LEN;
-    vTaskDelay(50);    //  Wait for wake up of ADC.
-    adc_set_i2s_data_source(ADC_I2S_DATA_SRC_ADC);
-    adc_i2s_mode_init(ADC_UNIT_1, ADC_CHANNEL_0);
     //  Install and start I2S driver
     i2s_driver_install(ADCI2SNUM, &i2s_config, 1, &queue);
+    //  Start ADC task
+    LOGD("nPads %d", touchPads.NPad());
+	xTaskCreate(AdcReadTaskStatic, "ADC", 512+256, this, configMAX_PRIORITIES-1, &task);
+    vTaskDelay(1 + 50 / portTICK_PERIOD_MS);    //  Without this delay, memory will .
+    LOGD("nPads %d", touchPads.NPad());
+    //  Start ADC
     i2s_set_adc_mode(ADC_UNIT_1, ADC1_CHANNEL_0);
     i2s_adc_enable(ADCI2SNUM);
 
-#ifdef BOARD3_SEPARATE
+#if defined BOARD3_SEPARATE || defined BOARD4
     SYSCON.saradc_ctrl.sar1_patt_len = NMOTOR_DIRECT*2-1;   // table length - 1
 #else
     SYSCON.saradc_ctrl.sar1_patt_len = 0;
@@ -160,13 +161,13 @@ void MotorDriver::Init(){
     SYSCON.saradc_sar1_patt_tab[1] = patTab.tab[1];
     SYSCON.saradc_ctrl2.sar1_inv = 1;
 #endif
-	xTaskCreate(AdcReadTaskStatic, "ADC", 512+256, this, configMAX_PRIORITIES-1, &task);
 
     for(int ch=0; ch<NMOTOR_DIRECT; ++ch){
         torqueLimit.max[ch] = (SDEC)(1.0*SDEC_ONE);
         torqueLimit.min[ch] = (SDEC)(-1.0*SDEC_ONE);
         Pwm(ch, 0);
     }
+    LOGD("nPads %d", touchPads.NPad());
 }
 
 void MotorDriver::Pwm(int ch, SDEC duty){  //   SDEC -1 to 1 (-1024 - 1024)

@@ -39,12 +39,13 @@ void esp32_spiffs_mount() {
     if (ret != ESP_OK) {
         LOGE("Failed to get SPIFFS partition information");
     } else {
-        LOGI("Partition size: total: %d, used: %d", total, used);
+        LOGD("Partition size: total: %d, used: %d", total, used);
     }
 
 } // esp32_duktape_spiffs_mount
 
 void combineMainFiles() {
+#if 0   //  uploaded file can not be access from espFs. stream must be used.
     std::ofstream m_ofStream;
     m_ofStream.open(std::string(SPIFFS_MOUNTPOINT) + "/main/runtime.js", std::ofstream::out | std::ofstream::binary | std::ofstream::trunc);
     
@@ -64,7 +65,7 @@ void combineMainFiles() {
         }
     }
     m_ofStream.close();
-#if 0
+#else
     std::ifstream m_ifStream;
     std::ofstream m_ofStream;
 

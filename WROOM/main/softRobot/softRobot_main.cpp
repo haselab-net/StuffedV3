@@ -1,14 +1,15 @@
 #include <stdio.h>
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "freertos/event_groups.h"
+#include <string.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+#include <freertos/event_groups.h>
 #ifndef _WIN32
-#include "esp_system.h"
-#include "esp_spi_flash.h"
-#include "esp_task_wdt.h"
-#include "esp_log.h"
-#include "nvs_flash.h"
-#include "rom/uart.h"
+#include <logging.h>
+#include <esp_system.h>
+#include <esp_spi_flash.h>
+#include <esp_task_wdt.h>
+#include <nvs_flash.h>
+#include <rom/uart.h>
 #endif
 
 #include "UdpCom.h"
@@ -18,18 +19,21 @@
 #ifndef USE_DUKTAPE
 #include "../wifiMan/wifiMan.h"
 #endif
+LOG_TAG("sr_main");
 
 extern "C" void softRobot_main()    //  called from app_main in main.cpp 
 {        
     //----------------------------------
-    logPrintf("Soft Robot Starts. Search sub boards.\n");
+    LOGI("Soft Robot Starts. Search sub boards.");
     motorDriver.Init();
+    LOGD("nPads %d", touchPads.NPad());
 #if 1   //  touchPads can not work with JTAG debugger
     touchPads.Init();
+    LOGD("nPads %d", touchPads.NPad());
 #endif
     allBoards.Init();
-    logPrintf("%d motors, %d current sensors, %d force sensors found.\n", allBoards.GetNTotalMotor(), allBoards.GetNTotalCurrent(), allBoards.GetNTotalForce());
-
+    LOGI("%d motors, %d current sensors, %d force sensors and %d touch pads found.", 
+        allBoards.GetNTotalMotor(), allBoards.GetNTotalCurrent(), allBoards.GetNTotalForce(), allBoards.GetNTotalTouch());
 #ifdef USE_DUKTAPE
     udpCom.Init();    //  init command processing for udp.
 #else

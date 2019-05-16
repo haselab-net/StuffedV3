@@ -81,11 +81,14 @@ void showADInMotorOrder(){
 	printf(" %d %d ", ADC1BUF0, ADC1BUF1);
 	printf(" %d %d ", ADC1BUF4, ADC1BUF9);
 	printf(" %d %d\r\n", ADC1BUF10, ADC1BUF11);
-#elif defined BOARD3_SEPARATE
-	printf(" %d %d ", ADC1BUF0, ADC1BUF1);
-	printf(" %d %d ", ADC1BUF7, ADC1BUF8);
-	printf(" %d %d ", ADC1BUF4, ADC1BUF11);
-	printf(" %d %d\r\n", ADC1BUF12, ADC1BUF13);
+#elif defined BOARD3_SEPARATE || defined BOARD4
+	//  motor angle
+    printf(" Angle: %d %d ", ADC1BUF0, ADC1BUF1);
+	printf(" %d %d ", ADC1BUF6, ADC1BUF7);
+	printf(" %d %d ", ADC1BUF4, ADC1BUF9);
+	printf(" %d %d ", ADC1BUF11, ADC1BUF10);
+    //  current
+	printf(" Current: %d %d %d %d\r\n", ADC1BUF5, ADC1BUF8, ADC1BUF2, ADC1BUF3);    
 #else
 #error
 #endif
@@ -212,6 +215,7 @@ void showHelp(){
 	int i;
 	for(i=0; i<sizeof(monitors)/sizeof(monitors[0]); ++i){
 		printf("%c: %s %c\r\n", monitors[i].ch, monitors[i].desc, monitors[i].callAgain ? 'R':' ');
+        while(!U1STAbits.TRMT) monOut();
 	}
 }
 

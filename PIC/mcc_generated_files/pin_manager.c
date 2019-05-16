@@ -65,7 +65,7 @@ void PIN_MANAGER_Initialize(void)
 #if defined BOARD1_MOTORDRIVER
     LATB = 0x4010;
     LATC = 0x0004;
-#elif defined BOARD2_COMBINATION || defined BOARD3_SEPARATE
+#elif defined BOARD2_COMBINATION || defined BOARD3_SEPARATE || defined BOARD4
     LATB = 0x4800;
     LATC = 0x0000;
 #endif
@@ -76,7 +76,7 @@ void PIN_MANAGER_Initialize(void)
     TRISA = 0x000B;
     TRISB = 0xF00F;
     TRISC = 0x0003;		//	
-#elif defined BOARD2_COMBINATION || defined BOARD3_SEPARATE
+#elif defined BOARD2_COMBINATION || defined BOARD3_SEPARATE || defined BOARD4
     TRISA = 0x0007;		// RA 012=i, 34=o	9o
     TRISB = 0xBC6F;		// RB U2TX set to input 15i 14o 13i 12i  11i 10i 9o 8o 7o6i5i4o 3210i 
     TRISC = 0x010B;		// RC 9o8i           3i2o10i
@@ -93,7 +93,7 @@ void PIN_MANAGER_Initialize(void)
     CNPUA = 0x0000;
 #if defined BOARD1_MOTORDRIVER
     CNPUB = 0x4000;	//	RB14
-#elif defined BOARD2_COMBINATION || defined BOARD3_SEPARATE
+#elif defined BOARD2_COMBINATION || defined BOARD3_SEPARATE || defined BOARD4
     CNPUB = 0x0800;	//	RB11
 #else
 #error
@@ -112,7 +112,7 @@ void PIN_MANAGER_Initialize(void)
 #if defined BOARD1_MOTORDRIVER
     ANSELA = 0x0007;
     ANSELB = 0x300C;
-#elif defined BOARD2_COMBINATION || defined BOARD3_SEPARATE
+#elif defined BOARD2_COMBINATION || defined BOARD3_SEPARATE || defined BOARD4
     ANSELA = 0x000B;
 #ifdef USE_MONITOR_RX
     ANSELB = 0x300F; //U1RX=AN10=RB15, U1TX=RB14, AN8=RB13, AN7=RB12, RB3210=AN11 AN4 AN3 AN2
@@ -134,7 +134,7 @@ void PIN_MANAGER_Initialize(void)
     RPOR1bits.RP6R = 0x0006;   //RA4->SCCP2:OCM2;
     RPOR1bits.RP8R = 0x0003;   //RB9->SPI2:SDO2;
     RPOR4bits.RP20R = 0x0007;  //RA9->SCCP3:OCM3;
-#elif defined BOARD2_COMBINATION || defined BOARD3_SEPARATE
+#elif defined BOARD2_COMBINATION || defined BOARD3_SEPARATE || defined BOARD4
     RPINR9bits.U2RXR = 0x0011;  //RB10->UART2:U2RX;
     RPOR4bits.RP18R = 0x0001;   //RB11->UART2:U2TX;
     RPOR1bits.RP5R = 0x0007;    //RB4->SCCP3:OCM3;
@@ -148,7 +148,7 @@ void PIN_MANAGER_Initialize(void)
 
 #if defined BOARD1_MOTORDRIVER
     RPCONbits.IOLOCK = 1; // lock   PPS
-#elif defined BOARD2_COMBINATION || defined BOARD3_SEPARATE
+#elif defined BOARD2_COMBINATION || defined BOARD3_SEPARATE || defined BOARD4
 	//	BOARD2 and BOARD3 need to change PPS to change PWM out pin.
 #else
 #error

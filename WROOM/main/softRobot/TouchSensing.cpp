@@ -1,5 +1,6 @@
 #include "TouchSensing.h"
 #include "esp_log.h"
+#include <string.h>
 #include "../../../PIC/boardType.h"
 
 #define TOUCHPAD_FILTER_TOUCH_PERIOD (10)
@@ -18,7 +19,9 @@ void TouchPads::Init()
 #ifndef _WIN32
 	touch_pad_init();
     touch_pad_set_voltage(TOUCH_HVOLT_2V7, TOUCH_LVOLT_0V5, TOUCH_HVOLT_ATTEN_1V);
-#ifdef BOARD3_SEPARATE 
+#if defined BOARD3_SEPARATE || defined BOARD4
+    memset(&pads, 0, sizeof(pads));
+    pads.reserve(6);
     Add(TOUCH_PAD_NUM2);
     Add(TOUCH_PAD_NUM3);
     Add(TOUCH_PAD_NUM4);
@@ -43,6 +46,8 @@ uint16_t TouchPads::Filtered(int i)
 {
     uint16_t value=0;
 #ifndef _WIN32
+    assert(i<pads.size());
+    assert(pads[i] < TOUCH_PAD_MAX);
 	esp_err_t e = touch_pad_read_filtered(pads[i], &value);
     if (e == ESP_OK) return value;
     if (e == ESP_ERR_INVALID_STATE){

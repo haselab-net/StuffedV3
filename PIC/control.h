@@ -103,6 +103,7 @@ int targetsCountMax();
 void controlInit();
 void controlSetMode(enum ControlMode m);
 void controlLoop();
+void updateMotorState();
 
 extern SDEC forceOffset[NFORCE];
 
@@ -121,10 +122,6 @@ inline SDEC getForce(int ch){
 extern int coretimerRemainTime;
 extern uint32_t coretimerCompare;
 extern uint32_t controlCount;
-#endif
-#ifdef WROOM
-extern volatile unsigned char availForTargetsAdd, tcrForTargetsAdd, readForTargetsAdd;
-extern volatile bool bForTargetsAddUpdated;
 #endif
 
 #endif

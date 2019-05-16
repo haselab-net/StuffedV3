@@ -20,6 +20,23 @@ SDEC currentSense[NMOTOR];
 uint32_t controlCount;
 int underflowCount;
 
+#ifdef WROOM
+#define DISABLE_INTERRUPT	xSemaphoreTake(mutexForControl, portMAX_DELAY);
+#define ENABLE_INTERRUPT	xSemaphoreGive(mutexForControl);
+#endif
+#ifdef PIC
+#define DISABLE_INTERRUPT 	asm volatile("di"); // Disable all interrupts  
+#define ENABLE_INTERRUPT	asm volatile("ei"); // Enable all interrupt	
+#endif
+
+
+#ifdef WROOM	//	Mutex for control
+#include "freertos/FreeRTOS.h"
+#include <freertos/task.h>
+#include <freertos/semphr.h>
+static xSemaphoreHandle mutexForControl;
+#endif
+
 //----------------------------------------------------------------------------
 //	Control
 //
@@ -146,30 +163,17 @@ void targetsWrite(){
 void targetsAddOrUpdate(SDEC* pos, short period, unsigned char tcw){
 	targetsForceControlAddOrUpdate(pos, NULL, period, tcw);
 }
-
-#ifdef WROOM
-volatile unsigned char availForTargetsAdd, tcrForTargetsAdd, readForTargetsAdd;
-volatile bool bForTargetsAddUpdated = true;
-#endif
 //	Update or add interpolate target with force control
 void targetsForceControlAddOrUpdate(SDEC* pos, SDEC JK[NFORCE][NMOTOR] ,short period, unsigned char tcw){
 	char delta;					//	tcr - tcw	
 	unsigned char avail, tcr, read;
 	if (period == 0) return;	//	for vacancy check
 	//	check targets delta
-#ifdef WROOM
-	while(!bForTargetsAddUpdated);
-	read = readForTargetsAdd;
-	avail = availForTargetsAdd;
-	tcr = tcrForTargetsAdd;
-	bForTargetsAddUpdated = false;
-#elif defined PIC
-	asm volatile("di");
+	DISABLE_INTERRUPT
 	read = targets.read;
 	avail = targetsReadAvail();
 	tcr = targets.targetCountRead;
-	asm volatile("ei");
-#endif
+	ENABLE_INTERRUPT
 	delta = tcw - tcr;
 	LOGI("targetsAdd m0:%d pr:%d c:%d | tcr=%d read=%d delta=%d\r\n", (int)pos[0], (int)period, (int)tcw, 
 		(int)tcr, (int)read, (int)delta);
@@ -235,6 +239,10 @@ void targetsInit(){
 		}
 	}
 }
+
+//----------------------------------------------------------------------------------
+//	Time critical code (for motor control).
+//	Do not use printf from here.
 void targetsTickProceed(){
 	targets.tick ++;
 	if (targets.tick >= targets.buf[(targets.read+1)%NTARGET].period){
@@ -246,10 +254,12 @@ void targetsTickProceed(){
 			}else{
 				targets.read = 0;
 			}
-			LOGI("TickProceed: Read=%d tcr=%d\r\n", targets.read, targets.targetCountRead);
+			//	Never use LOG here. This code is called from interrupt and can not use printf here.
+			//LOGI("TickProceed: Read=%d tcr=%d\r\n", targets.read, targets.targetCountRead);
 		}else{
 			targets.tick = targets.buf[(targets.read+1)%NTARGET].period;
-			LOGW("TickProceed: Underflow. Failed to increment read=%d tcr=%d\r\n", targets.read, targets.targetCountRead);
+			//	Never use LOG here. This code is called from interrupt and can not use printf here.
+			//LOGW("TickProceed: Underflow. Failed to increment read=%d tcr=%d\r\n", targets.read, targets.targetCountRead);
 			underflowCount ++;
 		}
 	}
@@ -304,11 +314,18 @@ void controlLoop(){
 	controlCount ++;
 	controlMode = nextControlMode;
 	
+	#ifdef WROOM
+	xSemaphoreTake(mutexForControl, portMAX_DELAY);
+	#endif
     if (controlMode == CM_INTERPOLATE){
         targetsProceed();
     }else if (controlMode == CM_FORCE_CONTROL){
         targetsForceControlProceed();
 	}
+	#ifdef WROOM
+	xSemaphoreGive(mutexForControl);
+	#endif
+
     updateMotorState();
 	if (controlMode == CM_CURRENT){
         currentControl();
@@ -330,6 +347,9 @@ void controlInit(){
 	}
 #ifdef PIC
 	controlInitPic();
+#endif
+#ifdef WROOM
+	mutexForControl = xSemaphoreCreateMutex();
 #endif
 }
 void controlSetMode(enum ControlMode m){

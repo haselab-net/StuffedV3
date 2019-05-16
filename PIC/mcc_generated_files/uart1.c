@@ -64,7 +64,7 @@ void UART1_Initialize(void)
 #if defined BOARD1_MOTORDRIVER
     // BaudRate = 2000000; Frequency = 24000000 Hz; BRG 2; 
     U1BRG = 0x2;
-#elif defined BOARD2_COMBINATION || defined BOARD3_SEPARATE
+#elif defined BOARD2_COMBINATION || defined BOARD3_SEPARATE || defined BOARD4
     // BaudRate = 3000000; Frequency = 24000000 Hz; BRG 1; 
     U1BRG = 0x1;
 #if defined USE_MONITOR_RX && defined BOARD3_SEPARATE
@@ -82,7 +82,7 @@ void UART1_Initialize(void)
     //Make sure to set LAT bit corresponding to TxPin as high before UART initialization
 #if defined BOARD1_MOTORDRIVER
 	//U1STASET = _U1STA_UTXEN_MASK;	//	Do not on TX until called by master.
-#elif defined BOARD2_COMBINATION || defined BOARD3_SEPARATE
+#elif defined BOARD2_COMBINATION || defined BOARD3_SEPARATE || defined BOARD4
 	U1STASET = _U1STA_UTXEN_MASK;    //	Enable TX.
 #else
 #error

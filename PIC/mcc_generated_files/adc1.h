@@ -79,17 +79,17 @@ typedef enum
 {
     channel_AN0 =  0x0,
     channel_AN1 =  0x1,
-#if defined BOARD2_COMBINATION || defined BOARD3_SEPARATE 
+#if defined BOARD2_COMBINATION || defined BOARD3_SEPARATE || defined BOARD4 
     channel_AN2 =  0x2,
     channel_AN3 =  0x3,
 #endif
     channel_AN4 =  0x4,
-#if defined BOARD2_COMBINATION || defined BOARD3_SEPARATE 
+#if defined BOARD2_COMBINATION || defined BOARD3_SEPARATE || defined BOARD4
     channel_AN5 =  0x5,
 #endif
     channel_AN7 =  0x7,
     channel_AN8 =  0x8,
-#if defined BOARD2_COMBINATION || defined BOARD3_SEPARATE 
+#if defined BOARD2_COMBINATION || defined BOARD3_SEPARATE || defined BOARD4
     channel_AN10 =  0xA,
 #endif
     channel_AN11 =  0xB,
@@ -101,7 +101,7 @@ typedef enum
 /*
 #if defined BOARD1_MOTORDRIVER
     ADC1_MAX_CHANNEL_COUNT = 11
-#elif defined BOARD2_COMBINATION || defined BOARD3_SEPARATE
+#elif defined BOARD2_COMBINATION || defined BOARD3_SEPARATE || defined BOARD4
     ADC1_MAX_CHANNEL_COUNT = 15
 #else
 #error
