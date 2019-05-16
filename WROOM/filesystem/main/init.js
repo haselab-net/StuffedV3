@@ -94,3 +94,5 @@ function setInterval(callback, interval) {
 function setTimeout(callback, interval) {
 	return _timers.setTimer(callback, interval, false);
 }
+
+ESP32.include("main/test.js");

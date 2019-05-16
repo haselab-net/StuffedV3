@@ -8,7 +8,7 @@
 #define _MODULE_DUKF
 #include <duktape.h>
 
-void dukf_runFile(duk_context *ctx, char *fileName);
+void dukf_runFile(duk_context *ctx, const char *fileName);
 void ModuleDUKF(duk_context *ctx);
 
 #endif /* _MODULE_DUKF */

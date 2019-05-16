@@ -1,3 +1,5 @@
+ESP32.include("sr_loops.js");
+
 var loops = require("sr_loops");
 var jslib = require("jslib");
 var motor = require("sr_motor")

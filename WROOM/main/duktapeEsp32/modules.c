@@ -387,6 +387,16 @@ static void ModuleConsole(duk_context *ctx) {
 } // ModuleConsole
 
 #if defined(ESP_PLATFORM)
+/* include: require need to edit js code and use memory of the source code size.
+    include just execute the specified js file and do not use memory for source code.	*/
+static duk_ret_t js_include(duk_context* ctx){
+    const char* fn = duk_get_string(ctx, -1);
+    //  load and exec
+	dukf_runFile(ctx, fn);
+    duk_pop(ctx);
+	return 0;
+}
+
 /**
  * Register the ESP32 module with its functions.
  */
@@ -469,6 +479,15 @@ static void ModuleESP32(duk_context *ctx) {
 	// [2] - c-function - js_esp32_setLogLevel
 
 	duk_put_prop_string(ctx, -2, "setLogLevel"); // Add setLogLevel to new ESP32
+	// [0] - Global object
+	// [1] - New object
+
+	duk_push_c_function(ctx, js_include, 1);
+	// [0] - Global object
+	// [1] - New object
+	// [2] - c-function - js_include
+
+	duk_put_prop_string(ctx, -2, "include"); // Add include to new ESP32
 	// [0] - Global object
 	// [1] - New object
 

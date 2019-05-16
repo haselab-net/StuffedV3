@@ -1,8 +1,12 @@
-var jslib = require("jslib");
-jslib.print("maininit.js is executed\n");
-var loops = require("sr_loops");
-var softrobot = require("sr_softrobot");
-var motor = require("sr_motor");
+//var jslib = require("jslib");
+//jslib.print("maininit.js is executed\n");
+//var loops = require("sr_loops");
+//var softrobot = require("sr_softrobot");
+//var motor = require("sr_motor");
+ESP32.include("jslib.js");
+ESP32.include("sr_loops.js");
+ESP32.include("sr_softrobot.js");
+ESP32.include("sr_motor.js");
 
 jslib.printHeap("heap size after require: ");
 softrobot.message_command.requireBoardInfo();
