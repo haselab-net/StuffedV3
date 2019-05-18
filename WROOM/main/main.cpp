@@ -19,6 +19,7 @@ extern "C" {
 #endif
 #include "monitor.h"
 #include "ws_fs.h"
+#include "ws_ws.h"
 #include "softRobot/UdpCom.h"
 
 static const char* TAG="main";
@@ -76,14 +77,14 @@ void setLogLevel(){
     esp_log_level_set("Uart", ESP_LOG_INFO);
 
     //  Web Server
-    esp_log_level_set("WiFi", ESP_LOG_INFO);
-    esp_log_level_set("WiFiEventHandler", ESP_LOG_INFO);
-    esp_log_level_set("ws_fs", ESP_LOG_INFO);
-    esp_log_level_set("ws_wifi", ESP_LOG_INFO);
-    esp_log_level_set("ws_task", ESP_LOG_INFO);
-    esp_log_level_set("ws_main", ESP_LOG_INFO);
-    esp_log_level_set("ws_form", ESP_LOG_INFO);
-    esp_log_level_set("ws_ws", ESP_LOG_INFO);
+    esp_log_level_set("WiFi", ESP_LOG_DEBUG);
+    esp_log_level_set("WiFiEventHandler", ESP_LOG_DEBUG);
+    esp_log_level_set("ws_fs", ESP_LOG_DEBUG);
+    esp_log_level_set("ws_wifi", ESP_LOG_DEBUG);
+    esp_log_level_set("ws_task", ESP_LOG_DEBUG);
+    esp_log_level_set("ws_main", ESP_LOG_DEBUG);
+    esp_log_level_set("ws_form", ESP_LOG_DEBUG);
+    esp_log_level_set("ws_ws", ESP_LOG_DEBUG);
 
     //  duktape
     esp_log_level_set("duktape_jsfile", ESP_LOG_INFO);
@@ -139,15 +140,13 @@ extern "C" void app_main(){
     udpCom.Start();   //  start UDP server.
 
     //  start DukTape, javascript engine and run /main/main*.js
-#if 0
-	if(!wsIsJsfileTaskRunning()) {
+	if(offline_mode && !wsIsJsfileTaskRunning()) {
         combineMainFiles();
         wsCreateJsfileTask();
         ESP_LOGI(TAG ,"Start running default jsfile task");
+    } else {
+        ESP_LOGI(TAG, "JS is NOT started.");
     }
-#else
-    ESP_LOGI(TAG, "JS is NOT started.");
-#endif
     //  start monitor
     Monitor::theMonitor.Init();
     Monitor::theMonitor.Run();  //  monitor start. never return;
