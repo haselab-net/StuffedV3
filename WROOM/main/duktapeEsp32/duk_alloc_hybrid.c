@@ -49,9 +49,9 @@ static pool_size_spec pool_sizes[] = {
 	{32, 128 },
 	{48, 256 },
 	{64, 128 },
-	{128, 32 },
+/*	{128, 32 },
 	{192, 16 },
-	{256, 16 },
+	{256, 16 },*/
 };
 
 #define  NUM_POOLS  (sizeof(pool_sizes) / sizeof(pool_size_spec))

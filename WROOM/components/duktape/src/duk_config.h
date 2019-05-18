@@ -2896,7 +2896,11 @@ typedef struct duk_hthread duk_context;
 #define DUK_USE_DEBUGGER_THROW_NOTIFY
 #undef DUK_USE_DEBUGGER_TRANSPORT_TORTURE
 #define DUK_USE_DEBUG_LEVEL 0
-#undef DUK_USE_DEBUG_WRITE
+#define DUK_USE_DEBUG_WRITE(level,file,line,func,msg) do { \
+        printf("DKD%ld %s:%ld (%s): %s\n", \
+                (long) (level), (file), (long) (line), (func), (msg));  \
+    } while (0)
+//#undef DUK_USE_DEBUG_WRITE
 #define DUK_USE_DOUBLE_LINKED_HEAP
 #define DUK_USE_DUKTAPE_BUILTIN
 #define DUK_USE_ES6_OBJECT_PROTO_PROPERTY

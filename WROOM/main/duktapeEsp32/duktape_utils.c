@@ -40,7 +40,7 @@ void esp32_duktape_addGlobalFunction(
  * Log a message to the duktape console.
  */
 void esp32_duktape_console(const char *message) {
-	LOGD_TAG("log", "Console: %s", message);
+	LOGI_TAG("log", "Console: %s", message);
 } // esp32_duktape_console
 
 

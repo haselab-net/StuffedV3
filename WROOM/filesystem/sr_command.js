@@ -2,7 +2,7 @@ var moduleSRCommand = ESP32.getNativeFunction("ModuleSRCommand");
 if (moduleSRCommand === null) {
 	log("Unable to find ModuleSRCommand");
 	module.exports = null;
-	return;
+	exit;
 }
 
 var internalSRCommand = {};

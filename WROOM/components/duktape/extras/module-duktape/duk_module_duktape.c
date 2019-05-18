@@ -319,7 +319,7 @@ static duk_ret_t duk__require(duk_context *ctx) {
 	 *  loaded, circular references for C modules should also work
 	 *  (although expected to be quite rare).
 	 */
-
+#if 0	//	original code use a lot of memory
 	duk_push_string(ctx, "(function(require,exports,module){");
 
 	/* Duktape.modSearch(resolved_id, fresh_require, exports, module). */
@@ -418,6 +418,125 @@ static duk_ret_t duk__require(duk_context *ctx) {
 		 */
 		goto delete_rethrow;
 	}
+#else	//	for low memory
+	/* Call Duktape.modSearch(resolved_id, fresh_require, exports, module). */
+	duk_get_prop_string(ctx, DUK__IDX_DUKTAPE, "modSearch");  /* Duktape.modSearch */
+	duk_dup(ctx, DUK__IDX_RESOLVED_ID);
+	duk_dup(ctx, DUK__IDX_FRESH_REQUIRE);
+	duk_dup(ctx, DUK__IDX_EXPORTS);
+	duk_dup(ctx, DUK__IDX_MODULE);  /* [ ... Duktape.modSearch resolved_id last_comp fresh_require exports module ] */
+	pcall_rc = duk_pcall(ctx, 4 /*nargs*/);  /* -> [ ... source ] */
+	DUK__ASSERT_TOP(ctx, DUK__IDX_MODULE + 3);
+	if (pcall_rc != DUK_EXEC_SUCCESS) {
+		/* Delete entry in Duktape.modLoaded[] and rethrow. */
+		goto delete_rethrow;
+	}
+
+	/* If user callback did not return source code, module loading
+	 * is finished (user callback initialized exports table directly).
+	 */
+	if (!duk_is_string(ctx, -1)) {
+		/* User callback did not return source code, so module loading
+		 * is finished: just update modLoaded with final module.exports
+		 * and we're done.
+		 */
+		goto return_exports;
+	}
+	if (!duk_get_prop_string(ctx, DUK__IDX_MODULE, "filename")) {
+		/* module.filename for .fileName, default to resolved ID if
+		 * not present.
+		 */
+		duk_pop(ctx);
+		duk_dup(ctx, DUK__IDX_RESOLVED_ID);
+	}	
+	//	[source_code, filename]
+
+	//	Set a new global object and add properties (exports, module)
+	duk_push_object(ctx);					//	new global		[... new]
+	duk_push_global_object(ctx);			//	push original	[... new, org]
+	duk_set_prototype(ctx, -2);				//	use original as the prototype of new global. [... new]
+
+	duk_push_string(ctx, "require");		//	[... new, "require"]
+	duk_dup(ctx, DUK__IDX_FRESH_REQUIRE);  	//	[... new, "require", fresh_require]
+	duk_def_prop(ctx, -3, DUK_DEFPROP_HAVE_VALUE);
+											//	[... new]
+	duk_push_string(ctx, "exports");		//	[... new, "exports"]
+	duk_get_prop_string(ctx, DUK__IDX_MODULE, "exports");  /* relookup exports from module.exports in case it was changed by modSearch */
+											//	[... new, "exports", expports]
+	duk_def_prop(ctx, -3, DUK_DEFPROP_HAVE_VALUE | DUK_DEFPROP_SET_WRITABLE | DUK_DEFPROP_SET_ENUMERABLE | DUK_DEFPROP_SET_CONFIGURABLE);
+											//	[... new]
+	duk_push_string(ctx, "module");			//	[... new, "module"]
+	duk_dup(ctx, DUK__IDX_MODULE);  		//	[... new, "module", module]
+	duk_def_prop(ctx, -3, DUK_DEFPROP_HAVE_VALUE | DUK_DEFPROP_SET_WRITABLE | DUK_DEFPROP_SET_ENUMERABLE | DUK_DEFPROP_SET_CONFIGURABLE);
+											//	[... new]
+	duk_set_global_object(ctx);				//	new global is set. [source_code, filename]
+
+#if 0	//	dump stack [source_code, filename, new]
+	duk_push_global_object(ctx);			//	push new
+	duk_push_context_dump(ctx);
+	printf("Before pop new %s\n", duk_to_string(ctx, -1));
+	duk_pop(ctx);
+	duk_pop(ctx);
+#endif
+	pcall_rc = duk_pcompile(ctx, 0);	//[source_code, filename] -> [func]
+	if (pcall_rc != DUK_EXEC_SUCCESS) {
+		goto delete_rethrow;
+	}
+
+	/* Module has now evaluated to a wrapped module function.  Force its
+	 * .name to match module.name (defaults to last component of resolved
+	 * ID) so that it is shown in stack traces too.  Note that we must not
+	 * introduce an actual name binding into the function scope (which is
+	 * usually the case with a named function) because it would affect the
+	 * scope seen by the module and shadow accesses to globals of the same name.
+	 * This is now done by compiling the function as anonymous and then forcing
+	 * its .name without setting a "has name binding" flag.
+	 */
+
+	duk_push_string(ctx, "name");
+	if (!duk_get_prop_string(ctx, DUK__IDX_MODULE, "name")) {
+		/* module.name for .name, default to last component if
+		 * not present.
+		 */
+		duk_pop(ctx);
+		duk_dup(ctx, DUK__IDX_LASTCOMP);
+	}
+	duk_def_prop(ctx, -3, DUK_DEFPROP_HAVE_VALUE | DUK_DEFPROP_FORCE);
+
+	/*
+	 *  Call the wrapped module function.
+	 *
+	 *  Use a protected call so that we can update Duktape.modLoaded[resolved_id]
+	 *  even if the module throws an error.
+	 */
+
+	/* [ requested_id require require.id resolved_id last_comp Duktape Duktape.modLoaded undefined fresh_require exports module mod_func ] */
+	DUK__ASSERT_TOP(ctx, DUK__IDX_MODULE + 2);
+
+	duk_dup(ctx, DUK__IDX_EXPORTS);  		//	[func, exports]
+	pcall_rc = duk_pcall_method(ctx, 0 /*nargs*/);	//	call exports.func()
+#if 0
+	duk_push_global_object(ctx);			//	push new
+	duk_push_context_dump(ctx);
+	printf("After pcall rc=%d,  %s\n", pcall_rc, duk_to_string(ctx, -1));
+	duk_pop(ctx);
+	duk_pop(ctx);
+#endif
+
+	//	restore global variables
+	duk_push_global_object(ctx);			//	[new]
+	duk_get_prototype(ctx, -1);				//	[new, org]
+	duk_set_global_object(ctx);				//	[new]
+	duk_pop(ctx);							//	[]
+
+	if (pcall_rc != DUK_EXEC_SUCCESS) {
+		/* Module loading failed.  Node.js will forget the module
+		 * registration so that another require() will try to load
+		 * the module again.  Mimic that behavior.
+		 */
+		goto delete_rethrow;
+	}
+#endif
 
 	/* [ requested_id require require.id resolved_id last_comp Duktape Duktape.modLoaded undefined fresh_require exports module result(ignored) ] */
 	DUK__ASSERT_TOP(ctx, DUK__IDX_MODULE + 2);
@@ -426,6 +545,11 @@ static duk_ret_t duk__require(duk_context *ctx) {
 
  return_exports:
 	duk_get_prop_string(ctx, DUK__IDX_MODULE, "exports");
+#if 0
+	duk_push_context_dump(ctx);
+	printf("return_exports,  %s\n", duk_to_string(ctx, -1));
+	duk_pop(ctx);
+#endif
 	duk_compact(ctx, -1);  /* compact the exports table */
 	return 1;  /* return module.exports */
 

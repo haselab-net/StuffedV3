@@ -44,7 +44,7 @@ void setLogLevel(){
     esp_log_level_set("CPPNVS", ESP_LOG_INFO);
     esp_log_level_set("cpu_start", ESP_LOG_INFO);
     esp_log_level_set("esp_dbg_stubs", ESP_LOG_INFO);
-    //esp_log_level_set("espfs", ESP_LOG_INFO);
+    esp_log_level_set("espfs", ESP_LOG_INFO);
     esp_log_level_set("event", ESP_LOG_INFO);
     esp_log_level_set("heap_init", ESP_LOG_INFO);
     esp_log_level_set("HttpServer", ESP_LOG_INFO);
@@ -86,10 +86,13 @@ void setLogLevel(){
     esp_log_level_set("ws_ws", ESP_LOG_INFO);
 
     //  duktape
-    //esp_log_level_set("duk_utils", ESP_LOG_INFO);
-    //esp_log_level_set("modules", ESP_LOG_INFO);
-    //esp_log_level_set("module_os", ESP_LOG_INFO);
-    //esp_log_level_set("log", ESP_LOG_INFO);
+    esp_log_level_set("duktape_jsfile", ESP_LOG_INFO);
+    esp_log_level_set("duk_utils", ESP_LOG_INFO);
+    esp_log_level_set("dukf_utils", ESP_LOG_INFO);
+    esp_log_level_set("module_dukf", ESP_LOG_INFO);
+    esp_log_level_set("modules", ESP_LOG_INFO);
+    esp_log_level_set("module_os", ESP_LOG_INFO);
+    esp_log_level_set("log", ESP_LOG_INFO);
 #endif
 }
 

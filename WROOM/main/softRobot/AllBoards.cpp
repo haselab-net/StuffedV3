@@ -75,7 +75,7 @@ void AllBoards::Init() {
 	uart[0]->Init(uconf, U1TXPIN, U1RXPIN); // pin must be changed. IO6-11 are reserved. (RX=32 Yellow, TX=33 Green)
 	uart[1]->Init(uconf, U2TXPIN, U2RXPIN);
 	EnumerateBoard();
-	xTaskCreate(execLoop, "SR_Exec", 1024*6, this, tskIDLE_PRIORITY+2, &taskExec);
+	xTaskCreate(execLoop, "SR_Exec", 1024*4, this, tskIDLE_PRIORITY+2, &taskExec);
 }
 void AllBoards::EnumerateBoard() {
 	motorMap.clear();	

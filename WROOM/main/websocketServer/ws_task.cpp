@@ -38,7 +38,7 @@ void wsCreateJsfileTask() {
     BaseType_t xReturned = xTaskCreate(
         duktapeTask,
         "js_task",
-        1024*12,
+        1024*10,
         NULL,
         tskIDLE_PRIORITY + 1,
         &xHandle

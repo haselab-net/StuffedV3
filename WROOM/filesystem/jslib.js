@@ -6,7 +6,7 @@ var moduleJSLib = ESP32.getNativeFunction("ModuleJSLib");
 if (moduleJSLib === null) {
 	log("Unable to find ModuleJSLib");
 	module.exports = null;
-	return;
+	exit;
 }
 
 var internalJSLib = {};

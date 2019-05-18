@@ -391,10 +391,49 @@ static void ModuleConsole(duk_context *ctx) {
     include just execute the specified js file and do not use memory for source code.	*/
 static duk_ret_t js_include(duk_context* ctx){
     const char* fn = duk_get_string(ctx, -1);
+		duk_pop(ctx);	//	pop argment(filename)
     //  load and exec
-	dukf_runFile(ctx, fn);
-    duk_pop(ctx);
-	return 0;
+		duk_push_global_object(ctx);	//	save original global
+		duk_push_object(ctx);					//	new global	[org, new]
+		duk_push_global_object(ctx);	//	for prototype	[org, new, org]
+		duk_set_prototype(ctx, -2);		//	use original as the prototype of new global. [org, new]
+		duk_set_global_object(ctx);		//	new global is set.	[org]
+		duk_push_global_object(ctx);	//	for prototype	[org, new]
+		//	set property for module
+		duk_push_string(ctx, "module");		//	[org, new, "module"]
+		duk_push_object(ctx);					//	module	[org, new, "module", mod]
+		duk_push_string(ctx, "exports");		//	[org, new, "module", mod, "exports"]
+		duk_push_object(ctx);					//	module	[org, new, "module", mod, "exports", exp]
+		duk_def_prop(ctx, -3, DUK_DEFPROP_HAVE_VALUE | DUK_DEFPROP_SET_WRITABLE | DUK_DEFPROP_SET_ENUMERABLE | DUK_DEFPROP_SET_CONFIGURABLE);
+																	//	[org, new, "module", mod]
+		duk_def_prop(ctx, -3, DUK_DEFPROP_HAVE_VALUE | DUK_DEFPROP_SET_WRITABLE | DUK_DEFPROP_SET_ENUMERABLE | DUK_DEFPROP_SET_CONFIGURABLE);
+																	//	[org, new]
+		//	set property for exports
+		duk_push_string(ctx, "exports");		//	[org, new, "exports"]
+		duk_dup(ctx, -3);							//	[org, new, "exports", org]
+		duk_def_prop(ctx, -3, DUK_DEFPROP_HAVE_VALUE | DUK_DEFPROP_SET_WRITABLE | DUK_DEFPROP_SET_ENUMERABLE | DUK_DEFPROP_SET_CONFIGURABLE);
+																	//	[org, new]
+		//	run script
+		dukf_runFile(ctx, fn);
+		
+		//	restore global object	
+		duk_swap_top(ctx, -2);					//	[new, org]
+		duk_set_global_object(ctx);			//	[new]
+
+		duk_push_string(ctx, "module");	//	[new, "module"]
+		duk_get_prop(ctx, -2);					//	[new, mod]
+		duk_push_string(ctx, "exports");//	[new, mod, "exports"]
+		duk_get_prop(ctx, -2);					//	[new, mod, mod.expotrs]
+
+		duk_swap_top(ctx, -3);					//	[mod.expotrs, new, mod]
+		duk_pop(ctx);
+		duk_pop(ctx);										//	[mod.expotrs]
+/*
+		duk_push_context_dump(ctx);
+		printf("Final:%s\n", duk_to_string(ctx, -1));
+		duk_pop(ctx);	
+*/
+		return 1;
 }
 
 /**
