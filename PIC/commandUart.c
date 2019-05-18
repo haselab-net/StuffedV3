@@ -34,7 +34,7 @@ void __attribute__ ((vector(_TIMER_1_VECTOR), interrupt(IPL3AUTO))) TMR1_ISR()
 {
 	if (bRunReturnCommand){	//	call from recv
 		bRunReturnCommand = false;
-		LOGI("RC%d len%d ", retPacket.commandId, retLen);
+		PIC_LOGI("RC%d len%d ", retPacket.commandId, retLen);
         returnCommand[retPacket.commandId]();
 		timeRetCmd = TMR1;
 		IFS0bits.T1IF = false;
@@ -123,7 +123,7 @@ bool uartExecCommand(){
 	if (bRunExecCommand){
 		bRunExecCommand = false;
         execCommand[command.commandId]();
-		LOGI("H%x Ex%d\r\n", (int)command.header, (int)command.commandId);
+		PIC_LOGI("H%x Ex%d\r\n", (int)command.header, (int)command.commandId);
 		return true;
 	}else{
 		return false;

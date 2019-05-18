@@ -38,9 +38,10 @@ static heap_trace_record_t trace_record[NUM_RECORDS]; // This buffer must be in 
 
 void setLogLevel(){
 #ifndef _WIN32
-    //  Set log level.
-    esp_log_level_set("*", ESP_LOG_DEBUG);
-    //  components set to info
+    //  Set all log level to DEBUG
+	esp_log_level_set("*", ESP_LOG_DEBUG);
+
+	//  Components set to info
     esp_log_level_set("clk", ESP_LOG_INFO);
     esp_log_level_set("CPPNVS", ESP_LOG_INFO);
     esp_log_level_set("cpu_start", ESP_LOG_INFO);
@@ -58,35 +59,36 @@ void setLogLevel(){
     esp_log_level_set("nvs", ESP_LOG_INFO);
     esp_log_level_set("phy_init", ESP_LOG_INFO);
     esp_log_level_set("pthread", ESP_LOG_INFO);
+    esp_log_level_set("efuse", ESP_LOG_INFO);
     esp_log_level_set("RTC_MODULE", ESP_LOG_INFO);
     esp_log_level_set("Task", ESP_LOG_INFO);
     esp_log_level_set("tcpip_adapter", ESP_LOG_INFO);
     esp_log_level_set("MotorDriver", ESP_LOG_INFO);
 
-    // components set to warn
+    // Components set to warn
     esp_log_level_set("phy", ESP_LOG_WARN);
     esp_log_level_set("system_api", ESP_LOG_WARN);
     esp_log_level_set("wifi", ESP_LOG_WARN);
     esp_log_level_set("gpio", ESP_LOG_WARN);
     esp_log_level_set("I2S", ESP_LOG_WARN);
 
-    //  application
+    //  Application
     esp_log_level_set("main", ESP_LOG_INFO);
     //  SoftRobot  
     esp_log_level_set("sr_main", ESP_LOG_INFO);
     esp_log_level_set("Uart", ESP_LOG_INFO);
 
     //  Web Server
-    esp_log_level_set("WiFi", ESP_LOG_DEBUG);
-    esp_log_level_set("WiFiEventHandler", ESP_LOG_DEBUG);
-    esp_log_level_set("ws_fs", ESP_LOG_DEBUG);
-    esp_log_level_set("ws_wifi", ESP_LOG_DEBUG);
-    esp_log_level_set("ws_task", ESP_LOG_DEBUG);
-    esp_log_level_set("ws_main", ESP_LOG_DEBUG);
-    esp_log_level_set("ws_form", ESP_LOG_DEBUG);
-    esp_log_level_set("ws_ws", ESP_LOG_DEBUG);
+    esp_log_level_set("WiFi", ESP_LOG_INFO);
+    esp_log_level_set("WiFiEventHandler", ESP_LOG_INFO);
+    esp_log_level_set("ws_fs", ESP_LOG_INFO);
+    esp_log_level_set("ws_wifi", ESP_LOG_INFO);
+    esp_log_level_set("ws_task", ESP_LOG_INFO);
+    esp_log_level_set("ws_main", ESP_LOG_INFO);
+    esp_log_level_set("ws_form", ESP_LOG_INFO);
+    esp_log_level_set("ws_ws", ESP_LOG_INFO);
 
-    //  duktape
+    //  Duktape
     esp_log_level_set("duktape_jsfile", ESP_LOG_INFO);
     esp_log_level_set("duk_utils", ESP_LOG_INFO);
     esp_log_level_set("dukf_utils", ESP_LOG_INFO);

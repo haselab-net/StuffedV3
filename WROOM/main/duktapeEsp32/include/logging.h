@@ -1,6 +1,10 @@
 #if !defined(_LOGGING_H)
 #define _LOGGING_H
 
+#ifdef __cplusplus
+extern "C"{
+#endif
+
 #define LOG_TAG(_TAG) static char tag[] = _TAG
 
 #if defined(ESP_PLATFORM)
@@ -35,4 +39,10 @@ extern void dukf_log(char *tag, char type, char *fmt, ...);
 #define LOGW_TAG(_TAG, ...) dukf_log(_TAG, 'W', __VA_ARGS__)
 
 #endif /* ESP_PLATFORM */
+
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif /* _LOGGING_H */

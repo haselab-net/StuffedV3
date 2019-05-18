@@ -2,6 +2,9 @@
 #include "esp_log.h"
 #include <string.h>
 #include "../../../PIC/boardType.h"
+#include "../duktapeEsp32/include/logging.h"
+
+LOG_TAG("Touch");
 
 #define TOUCHPAD_FILTER_TOUCH_PERIOD (10)
 #define TOUCH_THRESH_NO_USE   (0)
@@ -20,6 +23,9 @@ void TouchPads::Init()
 	touch_pad_init();
     touch_pad_set_voltage(TOUCH_HVOLT_2V7, TOUCH_LVOLT_0V5, TOUCH_HVOLT_ATTEN_1V);
 #if defined BOARD3_SEPARATE || defined BOARD4
+    if (pads.size()){
+        LOGE("pads.size() != 0 0x%x-0x%x", (int)&*pads.begin(), (int)&*pads.end());
+    }
     memset(&pads, 0, sizeof(pads));
     pads.reserve(6);
     Add(TOUCH_PAD_NUM2);

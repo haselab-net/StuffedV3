@@ -175,11 +175,11 @@ void targetsForceControlAddOrUpdate(SDEC* pos, SDEC JK[NFORCE][NMOTOR] ,short pe
 	tcr = targets.targetCountRead;
 	ENABLE_INTERRUPT
 	delta = tcw - tcr;
-	LOGI("targetsAdd m0:%d pr:%d c:%d | tcr=%d read=%d delta=%d\r\n", (int)pos[0], (int)period, (int)tcw, 
+	PIC_LOGI("targetsAdd m0:%d pr:%d c:%d | tcr=%d read=%d delta=%d\r\n", (int)pos[0], (int)period, (int)tcw, 
 		(int)tcr, (int)read, (int)delta);
 	if (delta > avail){
 		//	target count jumped. may be communication error.
-		LOGE("CJ\r\n");
+		PIC_LOGE("CJ\r\n");
 		targets.targetCountRead = tcw - (avail-1);
 	}
 	
@@ -199,18 +199,18 @@ void targetsForceControlAddOrUpdate(SDEC* pos, SDEC JK[NFORCE][NMOTOR] ,short pe
 				}
 			}
 		}
-		LOGI("Write@%d ra:%d p:%d c:%d", w, avail, period, (int)tcw);
+		PIC_LOGI("Write@%d ra:%d p:%d c:%d", w, avail, period, (int)tcw);
 		if (w == targets.write){
-			LOGI(" Add.\r\n");
+			PIC_LOGI(" Add.\r\n");
 			assert(delta == avail);
 			if (targetsWriteAvail()){
 				targetsWrite();
 			}else{
-				LOGE("Error: overflow of targets targetCountRead shifted\r\n");
+				PIC_LOGE("Error: overflow of targets targetCountRead shifted\r\n");
 				targets.targetCountRead = tcr + 1;
 			}
 		}else{
-			LOGI(" Update.\r\n");		
+			PIC_LOGI(" Update.\r\n");		
 		}
 	}
 }
@@ -255,11 +255,11 @@ void targetsTickProceed(){
 				targets.read = 0;
 			}
 			//	Never use LOG here. This code is called from interrupt and can not use printf here.
-			//LOGI("TickProceed: Read=%d tcr=%d\r\n", targets.read, targets.targetCountRead);
+			//PIC_LOGI("TickProceed: Read=%d tcr=%d\r\n", targets.read, targets.targetCountRead);
 		}else{
 			targets.tick = targets.buf[(targets.read+1)%NTARGET].period;
 			//	Never use LOG here. This code is called from interrupt and can not use printf here.
-			//LOGW("TickProceed: Underflow. Failed to increment read=%d tcr=%d\r\n", targets.read, targets.targetCountRead);
+			//PIC_LOGW("TickProceed: Underflow. Failed to increment read=%d tcr=%d\r\n", targets.read, targets.targetCountRead);
 			underflowCount ++;
 		}
 	}

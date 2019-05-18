@@ -50,11 +50,9 @@ enum logLevelList{
 	LOG_LEVEL_WARN,
 	LOG_LEVEL_ERROR,	
 };
-#ifndef LOGE
-#define LOGE	logPrintfE
-#define LOGW	logPrintfW
-#define LOGI	logPrintfI
-#endif
+#define PIC_LOGE	logPrintfE
+#define PIC_LOGW	logPrintfW
+#define PIC_LOGI	logPrintfI
 
 void logPrintfE(const char* fmt,  ...);
 void logPrintfW(const char* fmt,  ...);

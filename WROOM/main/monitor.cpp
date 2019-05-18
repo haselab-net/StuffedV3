@@ -34,6 +34,9 @@ extern "C" {
 #include "websocketServer/ws_task.h"
 #include "websocketServer/ws_fs.h"
 
+#include "../duktapeEsp32/include/logging.h"
+LOG_TAG("Monitor");
+
 
 Monitor Monitor::theMonitor;
 
@@ -378,30 +381,23 @@ inline char toUpper(char c){
 }
 
 class MCLogLevel: public MonitorCommandBase{
+public:
     struct Tag{
         const char* tag;
         const char* msg;
         int logLevel;
-        Tag(const char* t, const char* m):tag(t), msg(m), logLevel(ESP_LOG_INFO){};
+        Tag(const char* t, const char* m, int l=ESP_LOG_INFO):tag(t), msg(m), logLevel(l){};
     };
     std::vector<Tag> tags;
+protected:
 	std::vector<char> keys;
+    bool bInit;
 public:
-    MCLogLevel(){
-        tags.push_back(Tag(AllBoards::Tag(), "AllBoards"));
-        tags.push_back(Tag(UartForBoards::Tag(), "UartForBoards"));
-        tags.push_back(Tag(UdpCom::Tag(), "UdpCom"));
-        tags.push_back(Tag(BoardBase::Tag(), "Board"));
-        tags.push_back(Tag(BoardFactoryBase::Tag(), "BoardFactory"));
-        tags.push_back(Tag("ws_ws", "Web socket"));
-        tags.push_back(Tag("ws_task", "Web socket task"));
-        tags.push_back(Tag("SRCmd", "module srCommand"));
-        tags.push_back(Tag("duktape_jsfile", "duktape_jsfile.c"));
-        tags.push_back(Tag("log", "duktape console log"));
-        tags.push_back(Tag("modules", "duktape modules"));
-        Init();
+    MCLogLevel(): bInit(false) {
     }
     void Init(){
+        LOGI("MCLogLevel::Init() tags:%d", tags.size());
+        bInit = true;
         for(int i=0; i<(int)tags.size(); ++i){
             char key = toLower(tags[i].tag[0]);
             for(int k=0; k<(int)keys.size(); ++k){
@@ -427,6 +423,9 @@ public:
     }
     const char* Desc(){ return "l change log level"; }
     void Func(){
+        if (!bInit){
+            Init();
+        }
         const char levels [] = "NEWIDV";
 		conPrintf("Log level tags:\n");
 		for (int i = 0; i<(int)tags.size(); ++i) {
@@ -461,3 +460,29 @@ public:
         }
     }
 } mcLogLevel;
+static void logLevelSet(const char* tag, const char* msg, int level){
+    for(MCLogLevel::Tag& t : mcLogLevel.tags){
+        if (strcmp(t.tag, tag) == 0){
+            if (level != 10000){
+                t.logLevel = level;
+                esp_log_level_set(tag, (esp_log_level_t)level);
+            }
+            if (msg != NULL){
+                t.msg = msg;
+            }
+            return;
+        }
+    }
+    if (level == 10000){
+        level = ESP_LOG_INFO;
+    } else {
+        esp_log_level_set(tag, (esp_log_level_t)level);
+    }
+    mcLogLevel.tags.push_back(MCLogLevel::Tag(tag, msg, level));
+}
+extern "C" void log_level_set(const char* t, int level){
+    logLevelSet(t, NULL, level);
+}
+extern "C" void log_tag_desc(const char* t, const char* desc){
+    logLevelSet(t, desc, 10000);
+}

@@ -80,7 +80,7 @@ inline unsigned char targetsWriteAvail(){
 	if (len < 0) len += NTARGET;
 #if 0
 	if (len > NTARGET){
-		LOGE("targetsWriteAvail() w:%d r:%d len:%d", targets.write, targets.read, len);
+		PIC_LOGE("targetsWriteAvail() w:%d r:%d len:%d", targets.write, targets.read, len);
 		assert(len <= NTARGET);
 	}
 #endif
@@ -91,7 +91,7 @@ inline unsigned char targetsReadAvail(){
 	if (len <= 0) len += NTARGET;
 #if 0
 	if (len > NTARGET){
-		LOGE("targetsReadAvail w:%d r:%d len:%d", targets.write, targets.read, len);
+		PIC_LOGE("targetsReadAvail w:%d r:%d len:%d", targets.write, targets.read, len);
 		assert(len <= NTARGET);
 	}
 #endif
