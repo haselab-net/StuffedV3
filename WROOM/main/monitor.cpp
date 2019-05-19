@@ -12,7 +12,7 @@
 #include "esp_task_wdt.h"
 #include "esp_heap_trace.h"
 #include "nvs_flash.h"
-#include "rom/uart.h"
+#include "esp32/rom/uart.h"
 #endif
 #include "esp_log.h"
 #include "driver/uart.h"
@@ -72,6 +72,30 @@ int getchWait() {
 	}
 }
 #endif
+
+static void getLine(char* buf, int len){
+    int cur = 0;
+    while(1){
+        fflush(stdout);
+        int ch = getchWait();
+        switch (ch){
+        case '\b':
+            if (cur > 0) cur--;
+            conPrintf("\b \b");
+            break;
+        case '\r':
+            buf[cur] = '\0';
+            conPrintf("\n");
+            return;
+            break;
+        default:
+            buf[cur] = ch;
+            if (cur < len) cur ++;
+            conPrintf("%c", (char)ch);
+            break;
+        }
+    }
+}
 
 void Monitor::AddCommand(MonitorCommandBase* c){
     commands.push_back(c);
@@ -382,107 +406,36 @@ inline char toUpper(char c){
 
 class MCLogLevel: public MonitorCommandBase{
 public:
-    struct Tag{
-        const char* tag;
-        const char* msg;
-        int logLevel;
-        Tag(const char* t, const char* m, int l=ESP_LOG_INFO):tag(t), msg(m), logLevel(l){};
-    };
-    std::vector<Tag> tags;
-protected:
-	std::vector<char> keys;
-    bool bInit;
-public:
-    MCLogLevel(): bInit(false) {
-    }
-    void Init(){
-        LOGI("MCLogLevel::Init() tags:%d", tags.size());
-        bInit = true;
-        for(int i=0; i<(int)tags.size(); ++i){
-            char key = toLower(tags[i].tag[0]);
-            for(int k=0; k<(int)keys.size(); ++k){
-                if (key == keys[k]){
-                    if (toUpper(key) != key){
-                        key = toUpper(key);
-                        k = 0;
-                        continue;
-                    }else if (key < '~'){
-                        key ++;
-                        k = 0;
-                        continue;
-                    }else{
-                        key = '!';
-                        k = 0;
-                        continue;
-                    }
-                }
-            }
-            keys.push_back(key);
-        }
-        assert(tags.size() == keys.size());
-    }
-    const char* Desc(){ return "l change log level"; }
+    const char* Desc(){ return "l log level set"; }
     void Func(){
-        if (!bInit){
-            Init();
-        }
         const char levels [] = "NEWIDV";
-		conPrintf("Log level tags:\n");
-		for (int i = 0; i<(int)tags.size(); ++i) {
-			conPrintf(" %c %s\t= %c (%s)\n", (int)keys[i], tags[i].tag, (int)levels[tags[i].logLevel], tags[i].msg);
-		}
+		conPrintf("Type 'tag level[ENTER]' loglevel='NEWIDV'\n");
 		while(1){
-            int ch = getchWait();
-            int i;
-            for(i=0; i<(int)tags.size(); ++i){
-                if (keys[i] == ch){
-					conPrintf("%c %s (%s) = ? choose from %s\n", (int)keys[i], tags[i].tag, tags[i].msg, levels);
-                    ch = getchWait();
-                    for(int l=0; l < sizeof(levels)/sizeof(levels[0]) - 1; ++l){
-                        if (toUpper(ch) == levels[l]){
-                            tags[i].logLevel = l;
-#ifndef _WIN32
-							if (l > CONFIG_LOG_DEFAULT_LEVEL){
-                                conPrintf("Log level %d must be lower than CONFIG_LOG_DEFAULT_LEVEL %d.\n", l, CONFIG_LOG_DEFAULT_LEVEL);
-                            }
-                            esp_log_level_set(tags[i].tag, (esp_log_level_t)tags[i].logLevel);
-#endif
-							conPrintf("%c %s\t= %c (%s)\n", (int)keys[i], tags[i].tag, (int)levels[tags[i].logLevel], tags[i].msg);
-						}
+            char buf[40];
+            getLine(buf, sizeof(buf));
+            char* tag = buf;
+            while(*tag==' ') tag++;
+            char* level = tag;
+            while(*level != '\0' && *level != ' ') level++;
+            if (*level){
+                *level = '\0';
+                level++;
+            }
+            while(*level == ' ') level++;
+            for(int l=0; l<sizeof(levels); ++l){
+                if (toUpper(level[0]) == levels[l]){
+                    if (strlen(tag)){
+                        esp_log_level_set(tag, (esp_log_level_t)l);
+                        conPrintf("esp_log_level_set(%s, %d)", tag, l);
+                        goto next;
                     }
-                    break;
                 }
             }
-			if (i == tags.size()) {
-				conPrintf("Back to 'main menu' from 'log level'\n");
-				break;
-			}
+            if (strlen(buf) == 0){
+                break;
+            }
+            next:;
         }
+		conPrintf("Back to 'main menu' from 'log level set'\n");
     }
 } mcLogLevel;
-static void logLevelSet(const char* tag, const char* msg, int level){
-    for(MCLogLevel::Tag& t : mcLogLevel.tags){
-        if (strcmp(t.tag, tag) == 0){
-            if (level != 10000){
-                t.logLevel = level;
-                esp_log_level_set(tag, (esp_log_level_t)level);
-            }
-            if (msg != NULL){
-                t.msg = msg;
-            }
-            return;
-        }
-    }
-    if (level == 10000){
-        level = ESP_LOG_INFO;
-    } else {
-        esp_log_level_set(tag, (esp_log_level_t)level);
-    }
-    mcLogLevel.tags.push_back(MCLogLevel::Tag(tag, msg, level));
-}
-extern "C" void log_level_set(const char* t, int level){
-    logLevelSet(t, NULL, level);
-}
-extern "C" void log_tag_desc(const char* t, const char* desc){
-    logLevelSet(t, desc, 10000);
-}

@@ -11,7 +11,7 @@
 #include "esp_task_wdt.h"
 #include "esp_log.h"
 #include "nvs_flash.h"
-#include "rom/uart.h"
+#include "esp32/rom/uart.h"
 #include "ws_task.h"
 extern "C" { 
 #include "espfs.h"
@@ -48,22 +48,15 @@ void setLogLevel(){
     esp_log_level_set("esp_dbg_stubs", ESP_LOG_INFO);
     esp_log_level_set("espfs", ESP_LOG_INFO);
     esp_log_level_set("event", ESP_LOG_INFO);
+    esp_log_level_set("system_event", ESP_LOG_INFO);
     esp_log_level_set("heap_init", ESP_LOG_INFO);
-    esp_log_level_set("HttpServer", ESP_LOG_INFO);
-    esp_log_level_set("HttpServerTask", ESP_LOG_INFO);
-    esp_log_level_set("HttpRequest", ESP_LOG_INFO);
-    esp_log_level_set("HttpParser", ESP_LOG_INFO);
-    esp_log_level_set("HttpResponse", ESP_LOG_INFO);
-    esp_log_level_set("PathHandler", ESP_LOG_INFO);
-    esp_log_level_set("Socket", ESP_LOG_INFO);
     esp_log_level_set("nvs", ESP_LOG_INFO);
     esp_log_level_set("phy_init", ESP_LOG_INFO);
     esp_log_level_set("pthread", ESP_LOG_INFO);
     esp_log_level_set("efuse", ESP_LOG_INFO);
-    esp_log_level_set("RTC_MODULE", ESP_LOG_INFO);
     esp_log_level_set("Task", ESP_LOG_INFO);
     esp_log_level_set("tcpip_adapter", ESP_LOG_INFO);
-    esp_log_level_set("MotorDriver", ESP_LOG_INFO);
+    esp_log_level_set("RTC_MODULE", ESP_LOG_INFO);
 
     // Components set to warn
     esp_log_level_set("phy", ESP_LOG_WARN);
@@ -77,8 +70,16 @@ void setLogLevel(){
     //  SoftRobot  
     esp_log_level_set("sr_main", ESP_LOG_INFO);
     esp_log_level_set("Uart", ESP_LOG_INFO);
+    esp_log_level_set("MotorDriver", ESP_LOG_INFO);
 
     //  Web Server
+    esp_log_level_set("Socket", ESP_LOG_INFO);
+    esp_log_level_set("HttpServer", ESP_LOG_INFO);
+    esp_log_level_set("HttpServerTask", ESP_LOG_INFO);
+    esp_log_level_set("HttpRequest", ESP_LOG_INFO);
+    esp_log_level_set("HttpParser", ESP_LOG_INFO);
+    esp_log_level_set("HttpResponse", ESP_LOG_INFO);
+    esp_log_level_set("PathHandler", ESP_LOG_INFO);
     esp_log_level_set("WiFi", ESP_LOG_INFO);
     esp_log_level_set("WiFiEventHandler", ESP_LOG_INFO);
     esp_log_level_set("ws_fs", ESP_LOG_INFO);
@@ -125,6 +126,7 @@ extern "C" void app_main(){
     //  Start soft robot controller
     //heap_trace_start(HEAP_TRACE_LEAKS);
     softRobot_main();
+    setLogLevel();  //  call again because ADC I2S break grobal variable.
     //heap_trace_dump();
     //ESP_LOGI(TAG, "after softRobot_main heap size: %d", esp_get_free_heap_size());
 

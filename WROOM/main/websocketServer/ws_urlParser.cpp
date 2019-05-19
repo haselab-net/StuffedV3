@@ -2,6 +2,7 @@
 #include <ctype.h>
 #include <string.h>
 #include <memory.h>
+#include <malloc.h>
 
 char *url_encode(const char *str);
 char *url_decode(const char *str);
