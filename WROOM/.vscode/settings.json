@@ -87,7 +87,8 @@
         "mcpwm_struct.h": "c",
         "heap_private.h": "c",
         "soc_memory_layout.h": "c",
-        "logging.h": "c"
+        "logging.h": "c",
+        "gpio_struct.h": "c"
     },
     "terminal.integrated.shell.windows": "c:\\msys32\\usr\\bin\\bash.exe",
     "terminal.integrated.env.windows": {
