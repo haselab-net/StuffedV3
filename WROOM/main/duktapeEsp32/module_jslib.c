@@ -120,12 +120,13 @@ static duk_ret_t send_command(duk_context* ctx) {
  * Handle events in the event queue
  */
 static duk_ret_t jslib_handle_event(duk_context* ctx) {
-    handle_event();
-
+    if (handle_event()){
+        duk_push_true(ctx);
+    }else{
+        duk_push_false(ctx);
+    }
     unlock_heap();
-    
     lock_heap();
-
     return 0;
 }
 

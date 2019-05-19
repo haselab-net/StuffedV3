@@ -21,8 +21,9 @@ extern "C" {
 #include "ws_fs.h"
 #include "ws_ws.h"
 #include "softRobot/UdpCom.h"
+#include "duktapeEsp32/include/logging.h"
 
-static const char* TAG="main";
+LOG_TAG("main");
 
 extern "C" void softRobot_main();
 #if defined USE_DUKTAPE && !defined _WIN32
@@ -46,7 +47,7 @@ void setLogLevel(){
     esp_log_level_set("CPPNVS", ESP_LOG_INFO);
     esp_log_level_set("cpu_start", ESP_LOG_INFO);
     esp_log_level_set("esp_dbg_stubs", ESP_LOG_INFO);
-    esp_log_level_set("espfs", ESP_LOG_INFO);
+    esp_log_level_set("espfs", ESP_LOG_VERBOSE);
     esp_log_level_set("event", ESP_LOG_INFO);
     esp_log_level_set("system_event", ESP_LOG_INFO);
     esp_log_level_set("heap_init", ESP_LOG_INFO);
@@ -113,7 +114,7 @@ extern "C" void app_main(){
         printf("silicon revision %d, ", chip_info.revision);
         printf("%dMB %s flash\n", spi_flash_get_chip_size() / (1024 * 1024),
                 (chip_info.features & CHIP_FEATURE_EMB_FLASH) ? "embedded" : "external");
-        ESP_LOGI(TAG, "Initial heap size: %d", esp_get_free_heap_size());
+        LOGI("Initial heap size: %d", esp_get_free_heap_size());
     }
     #if CONFIG_HEAP_TRACING
     ESP_ERROR_CHECK( heap_trace_init_standalone(trace_record, NUM_RECORDS) );
@@ -128,17 +129,25 @@ extern "C" void app_main(){
     softRobot_main();
     setLogLevel();  //  call again because ADC I2S break grobal variable.
     //heap_trace_dump();
-    //ESP_LOGI(TAG, "after softRobot_main heap size: %d", esp_get_free_heap_size());
+    //LOGI("after softRobot_main heap size: %d", esp_get_free_heap_size());
 
 	//  Start file system (espFs)
     int flashSize = 1024*1024;
 	espFsInit((void *)0x300000, flashSize);
-    //ESP_LOGI(TAG, "after espFsInit heap size: %d", esp_get_free_heap_size());
+#if 0
+    espFsAddFile("newfile.txt", "ABCDEFG", 7);
+    EspFsFile* fh = espFsOpen("newfile.txt");
+    const char* buf=NULL;
+    size_t len=0;
+    espFsAccess(fh, (void **)&buf, &len);
+    LOGI("file, len=%d, buf=%s", len, buf);
+#endif
+    //LOGI("after espFsInit heap size: %d", esp_get_free_heap_size());
 	
     //  Start web server with web socket
     ws_main();
 
-    //ESP_LOGI(TAG, "after ws_main heap size: %d", esp_get_free_heap_size());
+    //LOGI("after ws_main heap size: %d", esp_get_free_heap_size());
     
     //  start soft robot's udp command server.
     udpCom.Start();   //  start UDP server.
@@ -147,9 +156,9 @@ extern "C" void app_main(){
 	if(offline_mode && !wsIsJsfileTaskRunning()) {
         combineMainFiles();
         wsCreateJsfileTask();
-        ESP_LOGI(TAG ,"Start running default jsfile task");
+        LOGI("Start running default jsfile task");
     } else {
-        ESP_LOGI(TAG, "JS is NOT started.");
+        LOGI("JS is NOT started.");
     }
     //  start monitor
     Monitor::theMonitor.Init();

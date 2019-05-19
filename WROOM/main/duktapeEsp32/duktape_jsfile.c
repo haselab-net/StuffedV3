@@ -180,7 +180,7 @@ static void processEvent(esp32_duktape_event_t *pEvent) {
 	LOGV("<< processEvent");
 } // processEvent
 
-void handle_event() {
+bool handle_event() {
     esp32_duktape_event_t esp32_duktape_event;
 
     // Process any events.  A return code other than 0 indicates we have an event.
@@ -188,7 +188,9 @@ void handle_event() {
     if (rc != 0) {
         processEvent(&esp32_duktape_event);
         esp32_duktape_freeEvent(esp32_duk_context, &esp32_duktape_event);
+		return true;
     }
+	return false;
 }
 
 void lock_heap() {

@@ -7,7 +7,7 @@
 
 extern duk_context* esp32_duk_context;
 
-void handle_event();
+bool handle_event();
 
 void lock_heap();
 void unlock_heap();

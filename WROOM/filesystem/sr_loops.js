@@ -9,7 +9,7 @@ var loops = {
         var start_time = Date.now();
         while(Date.now()-start_time<ms) {
             // handle event
-            jslib.handleEvent();
+            var busy = jslib.handleEvent();
 
             // End of check timers.
             if (_timers.timerEntries.length > 0 && new Date().getTime() >= _timers.timerEntries[0].fire ) {
@@ -22,8 +22,12 @@ var loops = {
                     _timers.timerEntries.splice(0, 1);
                 }
                 timerCallback();
-            } else {
-                //  TODO: Must call vTaskDelay() here to give processor time to lower priority tasks.
+                busy = true;
+            }
+            if (!busy){
+                if (_timers.timerEntries.length > 0 && new Date().getTime() < _timers.timerEntries[0].fire - 10) {
+                    jslib.blockPause(10);
+                }
             }
         }
     },

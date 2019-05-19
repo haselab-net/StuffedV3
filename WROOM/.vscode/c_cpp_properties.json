@@ -22,8 +22,6 @@
                 "C:/msys32/home/espressif/esp/esp-idf/components/freertos/include",
                 "C:/msys32/home/espressif/esp/esp-idf/components/heap/include",
                 "C:/msys32/home/espressif/esp/esp-idf/components/tcpip_adapter/include",
-                "C:/msys32/home/espressif/esp/esp-idf/components/lwip/include/lwip",
-                "C:/msys32/home/espressif/esp/esp-idf/components/lwip/include/lwip/port",
                 "C:/msys32/home/espressif/esp/esp-idf/components/log/include",
                 "C:/msys32/home/espressif/esp/esp-idf/components/esp_adc_cal/include",
                 "C:/msys32/home/espressif/esp/esp-idf/components/mbedtls/port/include/mbedtls",
@@ -31,7 +29,7 @@
                 "C:/msys32/opt/xtensa-esp32-elf/xtensa-esp32-elf/include/c++/5.2.0/xtensa-esp32-elf",
                 "C:/msys32/usr/include"
             ],
-            "intelliSenseMode": "clang-x64",
+            "intelliSenseMode": "gcc-x64",
             "defines": [
                 "__xtensa__"
             ],
@@ -51,7 +49,8 @@
                 "databaseFilename": "${workspaceRoot}/.vscode/browse.vc.db"
             },
             "cStandard": "c11",
-            "cppStandard": "c++17"
+            "cppStandard": "c++17",
+            "compilerPath": "C:\\msys32\\opt\\xtensa-esp32-elf\\bin\\xtensa-esp32-elf-gcc.exe"
         }
     ],
     "version": 4

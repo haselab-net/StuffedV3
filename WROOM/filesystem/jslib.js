@@ -26,7 +26,7 @@ var _core = {
     },
 
     handleEvent: function() {
-        internalJSLib.handle_event();
+        return internalJSLib.handle_event();
     },
 
     printHeap: function(str) {

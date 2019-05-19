@@ -20,5 +20,6 @@ int espFsRead(EspFsFile *fh, char *buff, int len);
 void espFsClose(EspFsFile *fh);
 int espFsAccess(EspFsFile *fh, void **buf, size_t *len);
 void espFsDumpFiles();
+bool espFsAddFile(const char* fname, const char* data, int len);
 
 #endif
