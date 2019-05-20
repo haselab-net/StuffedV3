@@ -98,6 +98,7 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
     int16_t packetId = pWebSocketInputStreambuf->sgetc();
     ESP_LOGV(LOG_TAG, "type: %i", packetId);
 
+
     size_t bufferSize = 4096;
     char* pBuffer = new char[bufferSize];
     std::streamsize ssize = pWebSocketInputStreambuf->sgetn(pBuffer, bufferSize);
