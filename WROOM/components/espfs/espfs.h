@@ -5,11 +5,6 @@
 // to be able to use Heatshrink-compressed espfs images.
 //#define ESPFS_HEATSHRINK
 
-#ifdef __cpulsplus
-#include <iostream>
-std::ostream espFsAddFileByStream(const char* fname, int len);
-extern "C" {
-#endif
 
 typedef enum {
 	ESPFS_INIT_RESULT_OK,
@@ -29,8 +24,5 @@ void espFsDumpFiles();
 size_t espFsAddCleanArea(const char* fname, int len);
 bool espFsAddFile(const char* fname, const char* data, int len);
 
-#ifdef __cpulsplus
-}
-#endif
 
 #endif

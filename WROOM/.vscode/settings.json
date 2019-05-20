@@ -96,6 +96,7 @@
         "MSYSTEM": "MINGW32",
         "CHERE_INVOKING": "1"
     },
+    "terminal.integrated.scrollback":10000,
     "terminal.integrated.shellArgs.windows": [
         "-l"
     ],

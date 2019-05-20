@@ -10,6 +10,8 @@
 #include <sys/stat.h>
 #include "GeneralUtils.h"
 #include "JSON.h"
+#include "../espfs/espfs.h"
+#include "../espfs/espfsStream.h"
 static const char* LOG_TAG = "WebSocketFileTransfer";
 
 #include "WebSocketFileTransfer.h"
@@ -43,7 +45,8 @@ namespace {
  */
 class FileTransferWebSocketHandler : public WebSocketHandler {
 public:
-	FileTransferWebSocketHandler(std::string rootPath) {
+	FileTransferWebSocketHandler(std::string rootPath, bool bEspFsIn) {
+		bEspFs = bEspFsIn;
 		m_fileName     = "";
 		m_fileLength   = 0;
 		m_sizeReceived = 0;
@@ -97,10 +100,20 @@ public:
 			}
 			// We are NOT creating a directory but are instead creating a file.
 			else {
-				m_ofStream.open(fileName, std::ofstream::out | std::ofstream::binary | std::ofstream::trunc);
-				if (!m_ofStream.is_open()) {
-					ESP_LOGE("FileTransferWebSocketHandler", "Failed to open file %s for writing", m_fileName.c_str());
-					return;
+				if (bEspFs && m_fileLength){
+					m_ostream = espFsAddFileByStream(m_fileName.c_str(), m_fileLength);
+				}else{
+					if(bEspFs){
+						ESP_LOGE("FileTransferWebSocketHandler", "Need exact file length to write espFs: %s", fileName.c_str());
+						bEspFs = false;
+					}
+					std::ofstream* fs = new std::ofstream();
+					fs->open(fileName, std::ofstream::out | std::ofstream::binary | std::ofstream::trunc);
+					if (!fs->is_open()) {
+						ESP_LOGE("FileTransferWebSocketHandler", "Failed to open file %s for writing", m_fileName.c_str());
+						return;
+					}
+					m_ostream = fs;
 				}
 			}
 			m_active = true;
@@ -108,7 +121,7 @@ public:
 		} // !active --- Not active
 		else {
 			// We are about to receive a chunk of file
-			m_ofStream << pWebSocketInputStreambuf;
+			(*m_ostream) << pWebSocketInputStreambuf;
 			/*
 			std::stringstream bufferStream;
 			bufferStream << pWebSocketInputRecordStreambuf;
@@ -131,28 +144,34 @@ public:
 			ESP_LOGD("FileTransferWebSocketHandler",
 				"ERROR: Transfer finished but we received total of %d bytes and expected %d bytes!", m_sizeReceived, m_fileLength);
 		}
-		if (m_ofStream.is_open()) {
-			m_ofStream.close();   // Close the file now that we have finished writing to it.
+		if (m_ostream) {
+			if (bEspFs){	//	espFs
+				m_ostream->flush();
+			}else{
+				((std::ofstream*)m_ostream)->close();   // Close the file now that we have finished writing to it.
+			}
+			delete m_ostream;
 		}
 		delete this;   // Delete ourselves.
 	} // onClose
 
 private:
-	std::string   m_fileName;	  // The name of the file we are receiving.
-	uint32_t      m_fileLength;	// We may optionally receive a file length.
-	uint32_t      m_sizeReceived;  // The size of the data actually received so far.
-	bool          m_active;		// Are we actively processing a file.
-	std::ofstream m_ofStream;	  // The file stream we are writing to when active.
-	std::string   m_rootPath;	  // The root path for file names.
+	bool bEspFs;					//	flag whether try to write espfs or normal FILE.
+	std::string   m_fileName;	  	// The name of the file we are receiving.
+	uint32_t      m_fileLength;		// We may optionally receive a file length.
+	uint32_t      m_sizeReceived;  	// The size of the data actually received so far.
+	bool          m_active;			// Are we actively processing a file.
+	std::ostream* m_ostream;		// The file stream to write received file when active.
+	std::string   m_rootPath;	  	// The root path for file names.
 
 }; // FileTransferWebSocketHandler
 
 } // End un-named namespace
 
 
-void WebSocketFileTransfer::start(WebSocket* pWebSocket) {
+void WebSocketFileTransfer::start(WebSocket* pWebSocket, bool bEspFs) {
 	ESP_LOGD(LOG_TAG, ">> start");
-	pWebSocket->setHandler(new FileTransferWebSocketHandler(m_rootPath));
+	pWebSocket->setHandler(new FileTransferWebSocketHandler(m_rootPath, bEspFs));
 } // start
 
 
