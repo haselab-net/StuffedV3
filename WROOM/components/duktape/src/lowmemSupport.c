@@ -66,7 +66,7 @@ const duk_uint8_t* extstr_intern_check(void* udata, void* str, duk_size_t blen){
 #else
 
 //#define LMS_SHOWALLOC	
-//#define LMS_SHOWLARGE
+#define LMS_SHOWLARGE
 const duk_uint8_t* extstr_intern_check(void* udata, void* str, duk_size_t blen){
 	if (blen < 80) return NULL;
 #ifdef LMS_SHOWALLOC
