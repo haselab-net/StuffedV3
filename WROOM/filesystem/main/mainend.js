@@ -1,2 +1,0 @@
-// start loop
-loops.doForever();

@@ -154,7 +154,7 @@ extern "C" void app_main(){
 
     //  start DukTape, javascript engine and run /main/main*.js
 	if(offline_mode && !wsIsJsfileTaskRunning()) {
-        combineMainFiles();
+        //combineMainFiles();
         wsCreateJsfileTask();
         LOGI("Start running default jsfile task");
     } else {
