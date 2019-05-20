@@ -12,7 +12,7 @@
 #include "esp_task_wdt.h"
 #include "esp_heap_trace.h"
 #include "nvs_flash.h"
-#include "esp32/rom/uart.h"
+#include "rom/uart.h"
 #endif
 #include "esp_log.h"
 #include "driver/uart.h"

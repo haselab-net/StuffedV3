@@ -11,7 +11,7 @@
 #include "esp_task_wdt.h"
 #include "esp_log.h"
 #include "nvs_flash.h"
-#include "esp32/rom/uart.h"
+#include "rom/uart.h"
 #include "ws_task.h"
 extern "C" { 
 #include "espfs.h"

@@ -9,7 +9,7 @@
 #include <esp_spi_flash.h>
 #include <esp_task_wdt.h>
 #include <nvs_flash.h>
-#include <esp32/rom/uart.h>
+#include <rom/uart.h>
 #endif
 
 #include "UdpCom.h"
