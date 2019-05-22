@@ -119,7 +119,6 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
             wsDeleteJsfileTask();
             
             saveToMainJs(pBuffer+2, ssize-2);
-            //combineMainFiles();
 
             delete[] pBuffer;       // delete buffer to provide more space for jsfile task
             pBuffer = NULL;

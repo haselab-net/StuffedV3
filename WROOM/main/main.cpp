@@ -125,11 +125,7 @@ extern "C" void app_main(){
     setLogLevel();
 
     //  Start soft robot controller
-    //heap_trace_start(HEAP_TRACE_LEAKS);
     softRobot_main();
-    setLogLevel();  //  call again because ADC I2S break grobal variable.
-    //heap_trace_dump();
-    //LOGI("after softRobot_main heap size: %d", esp_get_free_heap_size());
 
 	//  Start file system (espFs)
     int flashSize = 1024*1024;
@@ -154,7 +150,6 @@ extern "C" void app_main(){
 
     //  start DukTape, javascript engine and run /main/main*.js
 	if(offline_mode && !wsIsJsfileTaskRunning()) {
-        //combineMainFiles();
         wsCreateJsfileTask();
         LOGI("Start running default jsfile task");
     } else {

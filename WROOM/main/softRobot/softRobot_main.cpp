@@ -23,17 +23,17 @@ LOG_TAG("sr_main");
 
 extern "C" void softRobot_main()    //  called from app_main in main.cpp 
 {        
-    //----------------------------------
+    //  Search sub boards.
     LOGI("Soft Robot Starts. Search sub boards.");
+    allBoards.Init();
+    LOGI("%d motors, %d current sensors, %d force sensors and %d touch pads found.", 
+        allBoards.GetNTotalMotor(), allBoards.GetNTotalCurrent(), allBoards.GetNTotalForce(), allBoards.GetNTotalTouch());
+    //  Init MCPWM and ADC
     motorDriver.Init();
-    LOGD("nPads %d", touchPads.NPad());
 #if 1   //  touchPads can not work with JTAG debugger
     touchPads.Init();
     LOGD("nPads %d", touchPads.NPad());
 #endif
-    allBoards.Init();
-    LOGI("%d motors, %d current sensors, %d force sensors and %d touch pads found.", 
-        allBoards.GetNTotalMotor(), allBoards.GetNTotalCurrent(), allBoards.GetNTotalForce(), allBoards.GetNTotalTouch());
 #ifdef USE_DUKTAPE
     udpCom.Init();    //  init command processing for udp.
 #else
