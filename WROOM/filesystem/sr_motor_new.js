@@ -1,5 +1,3 @@
-var softrobot = require("sr_softrobot");
-
 var motor;
 (function (motor_1) {
     function changeRemoteMotorParameter(motor, parameterType, value) {
@@ -60,5 +58,3 @@ var motor;
     }
     motor_1.pushLocalMotorPVToRemoteInterpolate = pushLocalMotorPVToRemoteInterpolate;
 })(motor || (motor = {}));
-
-module.exports = motor;
