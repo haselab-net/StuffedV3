@@ -1,6 +1,7 @@
 var loops = require("sr_loops");
 var jslib = require("jslib");
-var motor = require("sr_motor")
+ESP32.include("sr_softrobot.js");
+ESP32.include("sr_motor.js");
 
 jslib.printHeap("heap size after require: ");
 

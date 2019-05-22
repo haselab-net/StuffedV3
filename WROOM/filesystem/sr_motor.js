@@ -1,4 +1,4 @@
-var softrobot = require("sr_softrobot");
+// var softrobot = require("sr_softrobot");
 
 var motor;
 (function (motor_1) {
@@ -61,4 +61,4 @@ var motor;
     motor_1.pushLocalMotorPVToRemoteInterpolate = pushLocalMotorPVToRemoteInterpolate;
 })(motor || (motor = {}));
 
-module.exports = motor;
+// module.exports = motor;
