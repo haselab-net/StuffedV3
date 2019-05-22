@@ -72,7 +72,11 @@ var motor;
         var lines = movementStr.split("\n");
         var line_1 = splitToInt(lines[0], " ");
         var line_2 = splitToInt(lines[1], " ");
-        var keyframes = lines.slice(2, 2 + line_1[0]).map(partialKeyframeDecoder);
+        var keyframes_lines = lines.slice(2, 2 + line_1[0]);
+        var keyframes = [];
+        for (var i = 0; i < keyframes_lines.length; i++) {
+            keyframes.push(partialKeyframeDecoder(keyframes_lines[i]));
+        }
         return {
             motorIds: line_2.slice(1),
             keyframes: keyframes
@@ -82,8 +86,10 @@ var motor;
     function playMovement(movement) {
         for (var _i = 0, _a = movement.keyframes; _i < _a.length; _i++) {
             var keyframe = _a[_i];
-            keyframe.pose.map(function (value, index) { return changeLocalStringLength(movement.motorIds[index], value); });
-            pushLocalMotorPVToRemoteInterpolate(keyframe.time);
+            for (var i = 0; i < keyframe.pose.length; i++) {
+                changeLocalStringLength(movement.motorIds[i], keyframe.pose[i]);
+            }
+            pushLocalMotorPVToRemoteInterpolate(keyframe.period);
         }
     }
     motor_1.playMovement = playMovement;
