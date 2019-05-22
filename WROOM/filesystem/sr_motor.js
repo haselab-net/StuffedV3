@@ -45,6 +45,40 @@ var motor;
         softrobot.movement.sendKeyframeQueue.clear();
     }
     motor_1.stopInterpolate = stopInterpolate;
+    function movementDecoder(movementStr) {
+        function splitToInt(str, seperator) {
+            var nums_str = str.split(seperator);
+            var nums = [];
+            for (var i = 0; i < nums_str.length; i++) {
+                nums.push(parseInt(nums_str[i]));
+            }
+            return nums;
+        }
+        function partialKeyframeDecoder(str) {
+            var nums = splitToInt(str, " ");
+            return {
+                period: nums[0],
+                pose: nums.slice(1)
+            };
+        }
+        if (movementStr === "")
+            return {
+                motorIds: [0],
+                keyframes: [{
+                        period: 1000,
+                        pose: [0]
+                    }]
+            };
+        var lines = movementStr.split("\n");
+        var line_1 = splitToInt(lines[0], " ");
+        var line_2 = splitToInt(lines[1], " ");
+        var keyframes = lines.slice(2, 2 + line_1[0]).map(partialKeyframeDecoder);
+        return {
+            motorIds: line_2.slice(1),
+            keyframes: keyframes
+        };
+    }
+    motor_1.movementDecoder = movementDecoder;
     function playMovement(movement) {
         for (var _i = 0, _a = movement.keyframes; _i < _a.length; _i++) {
             var keyframe = _a[_i];
