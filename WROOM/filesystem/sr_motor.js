@@ -50,7 +50,7 @@ var motor;
             var nums_str = str.split(seperator);
             var nums = [];
             for (var i = 0; i < nums_str.length; i++) {
-                nums.push(parseInt(nums_str[i]));
+                nums.push(Number(nums_str[i]));
             }
             return nums;
         }
