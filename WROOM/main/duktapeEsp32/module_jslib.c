@@ -127,7 +127,8 @@ static duk_ret_t jslib_handle_event(duk_context* ctx) {
     }
     unlock_heap();
     lock_heap();
-    return 0;
+
+    return 1;
 }
 
 duk_ret_t ModuleJSLib(duk_context *ctx){
