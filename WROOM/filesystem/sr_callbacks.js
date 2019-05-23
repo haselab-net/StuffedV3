@@ -1,4 +1,4 @@
-var softrobot = require("sr_softrobot");
+// var softrobot = require("sr_softrobot");
 
 var callbacks;
 (function (callbacks) {
@@ -49,4 +49,4 @@ var callbacks;
     callbacks.onEndTouch = onEndTouch;
 })(callbacks || (callbacks = {}));
 
-module.exports = callbacks;
+// module.exports = callbacks;
