@@ -232,7 +232,9 @@ void duktape_end(){
 	esp32_duk_context = NULL;
 	dukf_log_heap("Heap after set esp32_duk_context NULL");
 
-	//duk_destroy_heap( heap_context );
-	//heap_context = NULL;
+	// delete heap
+	duk_destroy_heap( heap_context );
+	heap_context = NULL;
+	
 	esp32_duktape_endEvents();
 }

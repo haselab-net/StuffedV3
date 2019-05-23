@@ -368,18 +368,12 @@ static duk_ret_t registerCallback(duk_context* ctx) {
     duk_put_prop_string(ctx, -2, name);
     // ... name func callbacks
 
-    LOGI("test: after register callback %s", name);
-
     duk_put_global_string(ctx, "callbacks");
     // ... name func
 
-    LOGI("test: after put global string %s", name);
-
     duk_pop_2(ctx);
     // ...
-
-    LOGI("test: after pop 2 %s", name);
-
+    
     return 0;
 }
 
