@@ -96,14 +96,14 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
     ESP_LOGD(LOG_TAG, "before wsOnMessageWs heap size: %d", esp_get_free_heap_size());
 
     int16_t packetId = pWebSocketInputStreambuf->sgetc();
-    ESP_LOGV(LOG_TAG, "type: %i", packetId);
+    ESP_LOGD(LOG_TAG, "packet type: %i", packetId);
 
 
     size_t bufferSize = 4096;
     char* pBuffer = new char[bufferSize];
     std::streamsize ssize = pWebSocketInputStreambuf->sgetn(pBuffer, bufferSize);
     if(ssize>=bufferSize) {
-        ESP_LOGV(LOG_TAG ,"File main.js to large!!!!!!!!!");
+        ESP_LOGD(LOG_TAG ,"File main.js to large!!!!!!!!!");
         delete [] pBuffer;
         return;
     }

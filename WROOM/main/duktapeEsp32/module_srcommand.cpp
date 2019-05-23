@@ -373,7 +373,7 @@ static duk_ret_t registerCallback(duk_context* ctx) {
 
     duk_pop_2(ctx);
     // ...
-
+    
     return 0;
 }
 
@@ -421,6 +421,14 @@ static void putPropFor(duk_context* ctx, UdpRetPacket& ret) {
     }
     duk_put_prop_string(ctx, -2, "force");
 } 
+static void putPropTou(duk_context* ctx, UdpRetPacket& ret) {
+    duk_push_array(ctx);
+    for(size_t i=0; i<allBoards.GetNTotalTouch(); i++){
+        duk_push_int(ctx, ret.GetTouch(i));
+        duk_put_prop_index(ctx, -2, i);
+    }
+    duk_put_prop_string(ctx, -2, "touch");
+} 
 // function onReceiveCIBoardinfo(data: {systemId: number, nTarget: number, nMotor:number, nCurrent: number, nForces:number, nTouch: number, macAddress: ArrayBuffer});
 static size_t pushDataCIBoardinfo(duk_context* ctx, UdpRetPacket& ret) {
     duk_push_object(ctx);
@@ -460,6 +468,7 @@ static size_t pushDataCISensor(duk_context* ctx, UdpRetPacket& ret) {
     putPropPos(ctx, ret);
     putPropCur(ctx, ret);
     putPropFor(ctx, ret);
+    putPropTou(ctx, ret);
 
     return 1;
 }

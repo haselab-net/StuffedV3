@@ -48,7 +48,10 @@ var loops = {
     },
 
     doForever: function () {
-        
+        while(1) {
+            loops._foreverFunc();
+            loops.pause(1000);
+        }
     }
 }
 

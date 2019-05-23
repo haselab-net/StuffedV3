@@ -190,12 +190,6 @@ var softrobot;
         device.checkRobotState = checkRobotState;
     })(device = softrobot.device || (softrobot.device = {}));
 })(softrobot || (softrobot = {}));
-
-// sr_command
-(function(softrobot) {
-    softrobot.message_command = require("sr_command");
-})(softrobot || (softrobot = {}));
-
 (function (softrobot) {
     var message_command;
     (function (message_command) {
@@ -204,7 +198,7 @@ var softrobot;
             callbacks.touchThresholdArray = [];
             callbacks.callTouchCallback = undefined;
             callbacks.touchQueryer = undefined;
-            callbacks.touchQueryerInterval = 1000;
+            callbacks.touchQueryerInterval = 500;
             callbacks.onRcvTouchMessage = function (oldValue, newValue) {
                 if (!callbacks.callTouchCallback)
                     return;
@@ -226,6 +220,11 @@ var softrobot;
             };
         })(callbacks = message_command.callbacks || (message_command.callbacks = {}));
     })(message_command = softrobot.message_command || (softrobot.message_command = {}));
+})(softrobot || (softrobot = {}));
+
+// sr_command
+(function(softrobot) {
+    softrobot.message_command = require("sr_command");
 })(softrobot || (softrobot = {}));
 
 (function (softrobot) {
@@ -264,7 +263,7 @@ var softrobot;
                 var readDiff = rmax >= rmin ? rmax - rmin : rmax - rmin + 256;
                 softrobot.device.robotState.nInterpolateVacancy = softrobot.device.robotState.nInterpolateTotal - softrobot.device.robotState.nInterpolateRemain - readDiff;
             }
-            // softrobot.device.robotState.setPropArray("pose", data.pose, softrobot.device.robotState.motor);
+            softrobot.device.robotState.setPropArray("pose", data.pose, softrobot.device.robotState.motor);
             softrobot.device.robotState.interpolateTargetCountOfReadMin = data.targetCountReadMin;
             softrobot.device.robotState.interpolateTargetCountOfReadMax = data.targetCountReadMax;
             softrobot.device.robotState.interpolateTickMin = data.tickMin;
@@ -443,7 +442,6 @@ var softrobot;
                 if (this.queue.length == SendKeyframeQueue.MAX_SIZE)
                     return -1;
                 var len = this.queue.push(keyframe);
-                console.log("enqueue, new len: " + len.toString());
                 this.queryVacancy();
                 return len;
             };
@@ -502,7 +500,7 @@ var softrobot;
                 var _this = this;
                 setTimeout(function () { _this.queryVacancy(); }, 50);
             };
-            SendKeyframeQueue.MAX_SIZE = 5;
+            SendKeyframeQueue.MAX_SIZE = 20;
             SendKeyframeQueue.REMOTE_MAX_SIZE = 6;
             SendKeyframeQueue.STUCK_CHECKER_INTERVAL = 2000;
             SendKeyframeQueue.BLOCK_QUERY_TIME = 1000;
@@ -576,4 +574,4 @@ var softrobot;
     })(util = softrobot.util || (softrobot.util = {}));
 })(softrobot || (softrobot = {}));
 
-// module.exports = softrobot;
+module.exports = softrobot;
