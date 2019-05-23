@@ -238,7 +238,10 @@ void SRWiFi::startScan(){
     memset(&scan_config, 0, sizeof(scan_config));
     scan_config.show_hidden = true;
     scan_config.scan_type = WIFI_SCAN_TYPE_ACTIVE;
-    ESP_ERROR_CHECK(esp_wifi_scan_start(&scan_config, false));   //  start non blocking ap scan.
+    esp_err_t rv = esp_wifi_scan_start(&scan_config, false);   //  start non blocking ap scan.
+    if (rv != ESP_OK){
+        LOGE("esp_wifi_scan_start() failed. returns %x.", rv);
+    }
 }
 void SRWiFi::stopScan(){
     uint16_t apCount;  // Number of access points available.

@@ -373,6 +373,7 @@ public:
         }
         ESP_LOGI(Tag(), "before wsCreateJsfileTask heap size: %d", esp_get_free_heap_size());
         wsCreateJsfileTask();
+        ESP_LOGI(Tag(), "After wsCreateJsfileTask heap size: %d", esp_get_free_heap_size());
     }
 } mcJSRestart;
 
