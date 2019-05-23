@@ -28,7 +28,7 @@ static char LOG_TAG[] = "ws_ws";
 static WebSocket* pWebSocket = NULL;
 static SRWebSocketHandler webSocketHandler = SRWebSocketHandler();
 
-bool offline_mode = false;   // offline: 1, synchronization || development: 0
+bool offline_mode = true;   // offline: 1, synchronization || development: 0
 
 void SRWebSocketHandler::onClose() {
     ESP_LOGV(LOG_TAG, "on close");
@@ -116,6 +116,7 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
     switch (packetId)
     {
         case PacketId::PI_JSFILE: {
+            // stop current running js task
             wsDeleteJsfileTask();
             
             saveToMainJs(pBuffer+2, ssize-2);
@@ -132,15 +133,16 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
             delete[] retBuffer;
             retBuffer = NULL;
 
+            // run file or not
             if(!offline_mode) {  // do not run file in development mode
                 break;
             }
             else {                  // run file
-                std::ifstream m_ifstream("/spiffs/main/runtime.js");
-                std::string str((std::istreambuf_iterator<char>(m_ifstream)),
-                    std::istreambuf_iterator<char>());
-                ESP_LOGD(LOG_TAG, "Start runtime file: %s", str.c_str());
-                m_ifstream.close();
+                // std::ifstream m_ifstream("/spiffs/main/runtime.js");
+                // std::string str((std::istreambuf_iterator<char>(m_ifstream)),
+                //     std::istreambuf_iterator<char>());
+                // ESP_LOGD(LOG_TAG, "Start runtime file: %s", str.c_str());
+                // m_ifstream.close();
 
                 ESP_LOGD(LOG_TAG, "before wsCreateJsfileTask heap size: %d", esp_get_free_heap_size());
 
