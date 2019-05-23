@@ -23,6 +23,10 @@ extern "C" {
 #include "softRobot/UdpCom.h"
 #include "duktapeEsp32/include/logging.h"
 
+#include <iostream>
+#include <string>
+#include "espfsStream.h"
+
 LOG_TAG("main");
 
 extern "C" void softRobot_main();
@@ -134,9 +138,16 @@ extern "C" void app_main(){
 	//  Start file system (espFs)
     int flashSize = 1024*1024;
 	espFsInit((void *)0x300000, flashSize);
-#if 0
-    espFsAddFile("newfile.txt", "ABCDEFG", 7);
-    EspFsFile* fh = espFsOpen("newfile.txt");
+#if 1
+    std::ostream* m_ostream;
+    std::string content = "hello world";
+    m_ostream = espFsAddFileByStream("/main/main.js", 11);
+    m_ostream->write(content.c_str(), 11);
+    m_ostream->flush();
+    LOGI("finish writing file");
+
+    // espFsAddFile("newfile.txt", "ABCDEFG", 7);
+    EspFsFile* fh = espFsOpen("/main/main.js");
     const char* buf=NULL;
     size_t len=0;
     espFsAccess(fh, (void **)&buf, &len);
