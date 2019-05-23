@@ -13,9 +13,7 @@
 #include "nvs_flash.h"
 #include "rom/uart.h"
 #include "ws_task.h"
-extern "C" { 
 #include "espfs.h"
-}
 #endif
 #include "monitor.h"
 #include "ws_fs.h"
@@ -130,14 +128,6 @@ extern "C" void app_main(){
 	//  Start file system (espFs)
     int flashSize = 1024*1024;
 	espFsInit((void *)0x300000, flashSize);
-#if 0
-    espFsAddFile("newfile.txt", "ABCDEFG", 7);
-    EspFsFile* fh = espFsOpen("newfile.txt");
-    const char* buf=NULL;
-    size_t len=0;
-    espFsAccess(fh, (void **)&buf, &len);
-    LOGI("file, len=%d, buf=%s", len, buf);
-#endif
     //LOGI("after espFsInit heap size: %d", esp_get_free_heap_size());
 	
     //  Start web server with web socket

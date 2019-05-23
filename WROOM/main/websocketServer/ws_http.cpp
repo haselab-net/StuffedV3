@@ -17,6 +17,8 @@
 #include "CPPNVS.h"
 #include "FreeRTOSTimer.h"
 
+#include "WebSocketFileTransfer.h"
+
 #include "ws_ws.h"
 #include "ws_fs.h"
 #include "ws_wifi.h"
@@ -37,17 +39,29 @@ static void wsHandshakeHandler(HttpRequest* pRequest, HttpResponse* pResponse) {
     }
 }
 
+WebSocketFileTransfer webSocketJsfileTransfer("/main");
+static void wsJsfileHandshakeHandler(HttpRequest* pRequest, HttpResponse* pResponse) {
+    if(pRequest->isWebsocket()) {
+        webSocketJsfileTransfer.start(pRequest->getWebSocket(), true);
+    }
+}
+
 extern void addWifiForm();
 void createHttpServer() {
     pHttpServer = new HttpServer();
     pHttpServer->setRootPath(std::string(SPIFFS_MOUNTPOINT) + "/web");
     pHttpServer->setDirectoryListing(true);
-    pHttpServer->addPathHandler(
+    pHttpServer->addPathHandler(            // handler for ws commands from pxt
         HttpRequest::HTTP_METHOD_GET,
         "/ws",
         wsHandshakeHandler
     );
+    pHttpServer->addPathHandler(            // handler for jsfile from pxt
+        HttpRequest::HTTP_METHOD_GET,
+        "/ws_jsfile",
+        wsJsfileHandshakeHandler
+    );
     addWifiForm();
     SRFormHandler::registerToServer(pHttpServer);
-    pHttpServer->start(80);       // listen http handshake at port 8000
+    pHttpServer->start(80);       // listen http handshake at port 80
 }

@@ -10,9 +10,7 @@
 #include <sys/stat.h>
 #include "GeneralUtils.h"
 #include "JSON.h"
-extern "C" {
-	#include "../espfs/espfs.h"
-}
+#include "../espfs/espfs.h"
 #include "../espfs/espfsStream.h"
 static const char* LOG_TAG = "WebSocketFileTransfer";
 
@@ -154,6 +152,13 @@ public:
 			}
 			delete m_ostream;
 		}
+
+		EspFsFile* fh = espFsOpen("/main/main.js");
+		const char* buf=NULL;
+    	size_t len=0;
+		espFsAccess(fh, (void **)&buf, &len);
+    	ESP_LOGD("FileTransferWebSocketHandler", "received file: len=%d, buf=%s", len, buf);
+
 		delete this;   // Delete ourselves.
 	} // onClose
 
