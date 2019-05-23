@@ -8,8 +8,11 @@
 #include <esp_err.h>
 #include <iostream>
 
-#include "espfsformat.h"
-#include "espfs.h"
+extern "C" {
+    #include "espfsformat.h"
+    #include "espfs.h"
+}
+
 #include "espfsStream.h"
 #include "sdkconfig.h"
 
