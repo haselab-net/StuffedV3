@@ -444,23 +444,32 @@ public:
 
 class MCEspFs: public MonitorCommandBase{
 public:
-    const char* Desc(){ return "e test Esp fs"; }
+    const char* Desc(){ return "e test Espfs"; }
     void Func(){
-        std::ostream* m_ostream;
-        std::string content = "hello world";
-        m_ostream = espFsAddFileByStream("/main/main.js", 11);
-        m_ostream->write(content.c_str(), 11);
-        m_ostream->flush();
-        delete m_ostream;
-        LOGI("finish writing file");
-
-        // espFsAddFile("newfile.txt", "ABCDEFG", 7);
-        EspFsFile* fh = espFsOpen("/main/main.js");
-        if (fh){
-            const char* buf=NULL;
-            size_t len=0;
-            espFsAccess(fh, (void **)&buf, &len);
-            LOGI("file, len=%d, at 0x%x buf=%s", len, (int)buf, buf);
+        conPrintf("Espfs test w:write, r:read\n");
+        switch (getchWait()){
+            case 'w':
+            case 'W':{
+                std::ostream* m_ostream;
+                std::string content = "hello world";
+                m_ostream = espFsAddFileByStream("/main/main.js", 11);
+                m_ostream->write(content.c_str(), 11);
+                m_ostream->flush();
+                delete m_ostream;
+                LOGI("finish writing file");
+            }
+            break;
+            case 'r':
+            case 'R':{
+                EspFsFile* fh = espFsOpen("/main/main.js");
+                if (fh){
+                    const char* buf=NULL;
+                    size_t len=0;
+                    espFsAccess(fh, (void **)&buf, &len);
+                    LOGI("file, len=%d, at 0x%x buf=%s", len, (int)buf, buf);
+                }
+                break;
+            }
         }
     }
 } mcEspFs;

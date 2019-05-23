@@ -37,6 +37,7 @@ static char tag[] = "espfs";
 static spi_flash_mmap_handle_t handle;
 static void *espFlashPtr = NULL;
 static size_t flashOffset;
+static size_t flashSize;
 
 struct EspFsFile {
 	EspFsHeader *header;
@@ -60,6 +61,7 @@ EspFsInitResult espFsInit(void *flashAddress, size_t size) {
 		ESP_LOGD(tag, "rc from spi_flash_mmap: %d", rc);
 	}
 	flashOffset = (size_t)flashAddress;
+	flashSize = size;
 
 	// check if there is valid header at address
 	EspFsHeader *testHeader = (EspFsHeader *)espFlashPtr;
@@ -88,8 +90,16 @@ int espFsFlags(EspFsFile *fh) {
 EspFsFile *espFsOpen(const char *fileName) {
 	ESP_LOGD(tag, ">> espFsOpen: %s", fileName);
 	if (espFlashPtr == NULL) {
-		ESP_LOGD(tag, "Call espFsInit first!");
-		return NULL;
+		if (flashOffset == 0){
+			ESP_LOGD(tag, "Call espFsInit first!");
+			return NULL;
+		}else{
+			spi_flash_munmap(handle);
+			esp_err_t rc = spi_flash_mmap(flashOffset, flashSize, SPI_FLASH_MMAP_DATA, (const void **)&espFlashPtr, &handle);
+			if (rc != ESP_OK) {
+				ESP_LOGD(tag, "rc from spi_flash_mmap: %d", rc);
+			}
+		}
 	}
 	char *flashAddress = espFlashPtr;
 	char *hpos;
@@ -231,6 +241,7 @@ size_t espFsAddCleanArea(const char* fname, int len){
 			newHeader.flags = FLAG_LASTFILE;
 			newHeader.magic = ESPFS_MAGIC;
 			spi_flash_write(flashAddress - flashBase, &newHeader, sizeof(newHeader));
+			espFlashPtr = NULL;	//	must flash unmap and map again.
 			return rv;
 		}
 		//Grab the name of the file.
