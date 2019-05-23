@@ -158,6 +158,10 @@ size_t espFsAddCleanArea(const char* fname, int len){
 		ESP_LOGD(tag, "Call espFsInit first!");
 		return 0;
 	}
+	//Strip initial slashes
+	while(fname[0] == '/') {
+		fname++;
+	}
 	char *flashAddress = espFlashPtr;
 	EspFsHeader *header;
 	//Go find that file!
@@ -173,6 +177,7 @@ size_t espFsAddCleanArea(const char* fname, int len){
 				ESP_LOGD(tag, "Find the end.");
 			}else{
 				//	check if the next file is the last file or not.
+				ESP_LOGD(tag, "Find the same name %s at 0x%x.", flashAddress+sizeof(EspFsHeader), (int)flashAddress);
 				char* faNext = flashAddress;
 				faNext += sizeof(EspFsHeader) + header->nameLen + header->fileLenComp + 1;	//	+1 is for appeded '\0'.
 				if ((int)faNext&3) {
@@ -183,9 +188,9 @@ size_t espFsAddCleanArea(const char* fname, int len){
 					ESP_LOGE(tag, "Magic mismatch. EspFS image broken at file '%s'.", faNext+sizeof(EspFsHeader));
 				}
 				if (hNext->flags & FLAG_LASTFILE){
-					ESP_LOGD(tag, "Find a file with the same name '%s' at the end.", fname);
+					ESP_LOGD(tag, "Find a file with the same name '%s' at 0x%x as the last file.", fname, (int)flashAddress);
 				}else{
-					ESP_LOGE(tag, "Find a file with the same name '%s' before '%s'.", fname, faNext+sizeof(EspFsHeader));
+					ESP_LOGE(tag, "Find a file with the same name '%s' at 0x%x before '%s'.", fname, (int)flashAddress, faNext+sizeof(EspFsHeader));
 				}
 			}
 			//	Write the new file
@@ -202,6 +207,7 @@ size_t espFsAddCleanArea(const char* fname, int len){
 			eraseLen = (eraseLen + 0xFFF) & 0xFFFFF000;
 			spi_flash_erase_range(flashErase - flashBase, eraseLen);
 			spi_flash_write(flashErase - flashBase, keep, keepLen);			//	restore before new file
+			free(keep);
 			EspFsHeader newHeader;
 			memset(&newHeader, 0, sizeof(newHeader)); 
 			newHeader.fileLenDecomp = len;

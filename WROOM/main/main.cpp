@@ -13,9 +13,7 @@
 #include "nvs_flash.h"
 #include "rom/uart.h"
 #include "ws_task.h"
-extern "C" { 
 #include "espfs.h"
-}
 #endif
 #include "monitor.h"
 #include "ws_fs.h"
@@ -25,7 +23,6 @@ extern "C" {
 
 #include <iostream>
 #include <string>
-#include "espfsStream.h"
 
 LOG_TAG("main");
 
@@ -78,30 +75,30 @@ void setLogLevel(){
     esp_log_level_set("MotorDriver", ESP_LOG_INFO);
 
     //  Web Server
-    esp_log_level_set("Socket", ESP_LOG_DEBUG);
-    esp_log_level_set("HttpServer", ESP_LOG_DEBUG);
-    esp_log_level_set("HttpServerTask", ESP_LOG_DEBUG);
-    esp_log_level_set("HttpRequest", ESP_LOG_DEBUG);
-    esp_log_level_set("HttpParser", ESP_LOG_DEBUG);
-    esp_log_level_set("HttpResponse", ESP_LOG_DEBUG);
-    esp_log_level_set("PathHandler", ESP_LOG_DEBUG);
-    esp_log_level_set("WiFi", ESP_LOG_DEBUG);
-    esp_log_level_set("WiFiEventHandler", ESP_LOG_DEBUG);
-    esp_log_level_set("ws_fs", ESP_LOG_DEBUG);
-    esp_log_level_set("ws_wifi", ESP_LOG_DEBUG);
-    esp_log_level_set("ws_task", ESP_LOG_DEBUG);
-    esp_log_level_set("ws_main", ESP_LOG_DEBUG);
-    esp_log_level_set("ws_form", ESP_LOG_DEBUG);
-    esp_log_level_set("ws_ws", ESP_LOG_DEBUG);
+    esp_log_level_set("Socket", ESP_LOG_INFO);
+    esp_log_level_set("HttpServer", ESP_LOG_INFO);
+    esp_log_level_set("HttpServerTask", ESP_LOG_INFO);
+    esp_log_level_set("HttpRequest", ESP_LOG_INFO);
+    esp_log_level_set("HttpParser", ESP_LOG_INFO);
+    esp_log_level_set("HttpResponse", ESP_LOG_INFO);
+    esp_log_level_set("PathHandler", ESP_LOG_INFO);
+    esp_log_level_set("WiFi", ESP_LOG_INFO);
+    esp_log_level_set("WiFiEventHandler", ESP_LOG_INFO);
+    esp_log_level_set("ws_fs", ESP_LOG_INFO);
+    esp_log_level_set("ws_wifi", ESP_LOG_INFO);
+    esp_log_level_set("ws_task", ESP_LOG_INFO);
+    esp_log_level_set("ws_main", ESP_LOG_INFO);
+    esp_log_level_set("ws_form", ESP_LOG_INFO);
+    esp_log_level_set("ws_ws", ESP_LOG_INFO);
 
     //  Duktape
-    esp_log_level_set("duktape_jsfile", ESP_LOG_DEBUG);
-    esp_log_level_set("duk_utils", ESP_LOG_DEBUG);
-    esp_log_level_set("dukf_utils", ESP_LOG_DEBUG);
-    esp_log_level_set("module_dukf", ESP_LOG_DEBUG);
-    esp_log_level_set("modules", ESP_LOG_DEBUG);
-    esp_log_level_set("module_os", ESP_LOG_DEBUG);
-    esp_log_level_set("log", ESP_LOG_DEBUG);
+    esp_log_level_set("duktape_jsfile", ESP_LOG_INFO);
+    esp_log_level_set("duk_utils", ESP_LOG_INFO);
+    esp_log_level_set("dukf_utils", ESP_LOG_INFO);
+    esp_log_level_set("module_dukf", ESP_LOG_INFO);
+    esp_log_level_set("modules", ESP_LOG_INFO);
+    esp_log_level_set("module_os", ESP_LOG_INFO);
+    esp_log_level_set("log", ESP_LOG_INFO);
 #endif
 }
 
@@ -138,21 +135,6 @@ extern "C" void app_main(){
 	//  Start file system (espFs)
     int flashSize = 1024*1024;
 	espFsInit((void *)0x300000, flashSize);
-#if 1
-    std::ostream* m_ostream;
-    std::string content = "hello world";
-    m_ostream = espFsAddFileByStream("/main/main.js", 11);
-    m_ostream->write(content.c_str(), 11);
-    m_ostream->flush();
-    LOGI("finish writing file");
-
-    // espFsAddFile("newfile.txt", "ABCDEFG", 7);
-    EspFsFile* fh = espFsOpen("/main/main.js");
-    const char* buf=NULL;
-    size_t len=0;
-    espFsAccess(fh, (void **)&buf, &len);
-    LOGI("file, len=%d, buf=%s", len, buf);
-#endif
     //LOGI("after espFsInit heap size: %d", esp_get_free_heap_size());
 	
     //  Start web server with web socket

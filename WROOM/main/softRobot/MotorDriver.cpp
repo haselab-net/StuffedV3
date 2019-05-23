@@ -130,17 +130,8 @@ void MotorDriver::Init(){
 	xTaskCreate(AdcReadTaskStatic, "ADC", 512+256, this, configMAX_PRIORITIES-1, &task);
     vTaskDelay(1 + 50 / portTICK_PERIOD_MS);    //  Without this delay, memory will .
     //  Start ADC
-    ESP_LOG_BUFFER_HEXDUMP("ADC",  (char*)&touchPads-32, 64, ESP_LOG_WARN);
-    LOGW("nPads 0x%x", touchPads.NPad());
     ESP_ERROR_CHECK(i2s_set_adc_mode(ADC_UNIT_1, ADC1_CHANNEL_0));
-    LOGW("nPads 0x%x", touchPads.NPad());
-    LOGW("nPads adr 0x%x", (int)&touchPads);
-    ESP_LOG_BUFFER_HEXDUMP("ADC",  (char*)&touchPads-32, 64, ESP_LOG_WARN);
-    LOGW("nPads 0x%x", touchPads.NPad());
-    vTaskDelay(10);
     ESP_ERROR_CHECK(i2s_adc_enable(ADCI2SNUM));
-    LOGW("nPads 0x%x", touchPads.NPad());
-    ESP_LOG_BUFFER_HEXDUMP("ADC",  (char*)&touchPads-32, 64, ESP_LOG_WARN);
 
 #if defined BOARD3_SEPARATE || defined BOARD4
     SYSCON.saradc_ctrl.sar1_patt_len = NMOTOR_DIRECT*2-1;   // table length - 1

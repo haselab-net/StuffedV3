@@ -5,6 +5,9 @@
 // to be able to use Heatshrink-compressed espfs images.
 //#define ESPFS_HEATSHRINK
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef enum {
 	ESPFS_INIT_RESULT_OK,
@@ -23,6 +26,11 @@ int espFsAccess(EspFsFile *fh, void **buf, size_t *len);
 void espFsDumpFiles();
 size_t espFsAddCleanArea(const char* fname, int len);
 bool espFsAddFile(const char* fname, const char* data, int len);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 
 #endif

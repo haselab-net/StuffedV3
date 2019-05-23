@@ -10,9 +10,7 @@
 #include <sys/stat.h>
 #include "GeneralUtils.h"
 #include "JSON.h"
-extern "C" {
-	#include "../espfs/espfs.h"
-}
+#include "../espfs/espfs.h"
 #include "../espfs/espfsStream.h"
 static const char* LOG_TAG = "WebSocketFileTransfer";
 
