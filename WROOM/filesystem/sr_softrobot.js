@@ -241,7 +241,7 @@ var softrobot;
         message_command.onReceiveCIBoardinfo = onReceiveCIBoardinfo;
         function onReceiveCISensor(data) {
             message_command.callbacks.onRcvTouchMessage(softrobot.device.robotState.touch, data.touch);
-            softrobot.device.robotState.setPropArray("pose", data.pose, softrobot.device.robotState.motor);
+            // softrobot.device.robotState.setPropArray("pose", data.pose, softrobot.device.robotState.motor);
             softrobot.device.robotState.current = data.current;
             softrobot.device.robotState.force = data.force;
             softrobot.device.robotState.touch = data.touch;
