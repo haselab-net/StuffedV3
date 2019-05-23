@@ -10,7 +10,9 @@
 #include <sys/stat.h>
 #include "GeneralUtils.h"
 #include "JSON.h"
-#include "../espfs/espfs.h"
+extern "C" {
+	#include "../espfs/espfs.h"
+}
 #include "../espfs/espfsStream.h"
 static const char* LOG_TAG = "WebSocketFileTransfer";
 
@@ -57,7 +59,7 @@ public:
 	/**
 	 * @brief Handler for the message received over the web socket.
 	 */
-	virtual void onMessage(WebSocketInputStreambuf* pWebSocketInputStreambuf) {
+	virtual void onMessage(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket* pWebSocket) {
 		ESP_LOGD("FileTransferWebSocketHandler", ">> onMessage");
 		// Test to see if we are currently active.  If not, this is the start of a transfer.
 		if (!m_active) {
@@ -101,7 +103,7 @@ public:
 			// We are NOT creating a directory but are instead creating a file.
 			else {
 				if (bEspFs && m_fileLength){
-					m_ostream = espFsAddFileByStream(m_fileName.c_str(), m_fileLength);
+					m_ostream = espFsAddFileByStream(fileName.c_str(), m_fileLength);
 				}else{
 					if(bEspFs){
 						ESP_LOGE("FileTransferWebSocketHandler", "Need exact file length to write espFs: %s", fileName.c_str());
@@ -140,10 +142,10 @@ public:
 	 */
 	virtual void onClose() {
 		ESP_LOGD("FileTransferWebSocketHandler", ">> onClose: fileName: %s, sizeReceived: %d", m_fileName.c_str(), m_sizeReceived);
-		if (m_fileLength > 0 && m_sizeReceived != m_fileLength) {
-			ESP_LOGD("FileTransferWebSocketHandler",
-				"ERROR: Transfer finished but we received total of %d bytes and expected %d bytes!", m_sizeReceived, m_fileLength);
-		}
+		// if (m_fileLength > 0 && m_sizeReceived != m_fileLength) {
+		// 	ESP_LOGD("FileTransferWebSocketHandler",
+		// 		"ERROR: Transfer finished but we received total of %d bytes and expected %d bytes!", m_sizeReceived, m_fileLength);
+		// }
 		if (m_ostream) {
 			if (bEspFs){	//	espFs
 				m_ostream->flush();

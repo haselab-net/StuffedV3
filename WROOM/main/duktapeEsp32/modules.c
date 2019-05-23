@@ -18,6 +18,7 @@
 #include <unistd.h>
 
 #include "duk_trans_socket.h" // The debug functions from Duktape.
+#include "dukf_utils.h"
 #include "duktape_utils.h"
 #include "logging.h"
 #include "modules.h"
@@ -398,6 +399,14 @@ static duk_ret_t js_include(duk_context* ctx){
 		return 0;
 }
 
+static duk_ret_t js_include_spiffs(duk_context* ctx) {
+		const char* fn = duk_get_string(ctx, -1);
+		duk_pop(ctx);	//	pop argment(filename)
+		//	run script
+		dukf_runFileFromPosix(ctx, fn);
+		return 0;
+}
+
 /**
  * Register the ESP32 module with its functions.
  */
@@ -489,6 +498,15 @@ static void ModuleESP32(duk_context *ctx) {
 	// [2] - c-function - js_include
 
 	duk_put_prop_string(ctx, -2, "include"); // Add include to new ESP32
+	// [0] - Global object
+	// [1] - New object
+
+	duk_push_c_function(ctx, js_include_spiffs, 1);
+	// [0] - Global object
+	// [1] - New object
+	// [2] - c-function - js_include_spiffs
+
+	duk_put_prop_string(ctx, -2, "include_spiffs"); // Add include to new ESP32
 	// [0] - Global object
 	// [1] - New object
 

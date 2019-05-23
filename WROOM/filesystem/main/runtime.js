@@ -6,6 +6,6 @@ ESP32.include("sr_callbacks.js");
 
 jslib.printHeap("heap size after require: ");
 
-ESP32.include("main/main.js");
+ESP32.include_spiffs("/spiffs/main/main.js");
 
 loops.doForever();

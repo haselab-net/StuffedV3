@@ -101,6 +101,35 @@ void dukf_runFile(duk_context *ctx, const char *fileName) {
 	LOGD("<< dukf_runFile: %s", fileName);
 } // dukf_runFile
 
+// force to read from posix (espfs can not read the file altered in runtime)
+void dukf_runFileFromPosix(duk_context *ctx, const char *fileName) {
+	LOGD(">> dukf_runFile: %s", fileName);
+	size_t fileSize;
+
+	char *fileData = dukf_loadFileFromPosix(fileName, &fileSize);
+	if (fileData == NULL) {
+		LOGE("<< dukf_runFile: Failed to load file");
+		return;
+	}
+	// At this point we have the file in memory and we know its size.  Now we push it onto
+	// the stack and run the script.
+	duk_push_string(ctx, fileName);
+	duk_compile_lstring_filename(ctx, 0, fileData, fileSize);
+
+	free(fileData);
+	fileData = NULL;
+
+	int rc = duk_pcall(
+		ctx,
+		0 // Number of arguments
+	);
+	if (rc != 0) {
+		esp32_duktape_log_error(ctx);
+	}
+	duk_pop(ctx);
+	LOGD("<< dukf_runFile: %s", fileName);
+}
+
 
 /**
  * Record the name of a file we wish to run at the start.

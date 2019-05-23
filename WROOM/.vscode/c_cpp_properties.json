@@ -5,6 +5,7 @@
             "includePath": [
                 ".",
                 "${workspaceRoot}/main",
+                "${workspaceRoot}/components",
                 "${workspaceRoot}/components/esp32snippets",
                 "${workspaceRoot}/../PIC",
                 "${workspaceRoot}/../PCRobokey",
@@ -27,7 +28,8 @@
                 "C:/msys32/home/espressif/esp/esp-idf/components/mbedtls/port/include/mbedtls",
                 "C:/msys32/opt/xtensa-esp32-elf/xtensa-esp32-elf/include/c++/5.2.0",
                 "C:/msys32/opt/xtensa-esp32-elf/xtensa-esp32-elf/include/c++/5.2.0/xtensa-esp32-elf",
-                "C:/msys32/usr/include"
+                "C:/msys32/usr/include",
+                "${workspaceFolder}/main/duktapeEsp32/include"
             ],
             "intelliSenseMode": "gcc-x64",
             "defines": [
@@ -50,7 +52,7 @@
             },
             "cStandard": "c11",
             "cppStandard": "c++17",
-            "compilerPath": "C:\\msys32\\opt\\xtensa-esp32-elf\\bin\\xtensa-esp32-elf-gcc.exe"
+            "compilerPath": "C:\\\\\\\\msys32\\\\\\\\opt\\\\\\\\xtensa-esp32-elf\\\\\\\\bin\\\\\\\\xtensa-esp32-elf-gcc.exe"
         }
     ],
     "version": 4
