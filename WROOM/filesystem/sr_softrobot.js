@@ -204,7 +204,7 @@ var softrobot;
             callbacks.touchThresholdArray = [];
             callbacks.callTouchCallback = undefined;
             callbacks.touchQueryer = undefined;
-            callbacks.touchQueryerInterval = 1000;
+            callbacks.touchQueryerInterval = 500;
             callbacks.onRcvTouchMessage = function (oldValue, newValue) {
                 if (!callbacks.callTouchCallback)
                     return;
@@ -240,6 +240,7 @@ var softrobot;
         }
         message_command.onReceiveCIBoardinfo = onReceiveCIBoardinfo;
         function onReceiveCISensor(data) {
+            console.log("sensor callback, touch 0: " + data.touch[0].toString());
             message_command.callbacks.onRcvTouchMessage(softrobot.device.robotState.touch, data.touch);
             // softrobot.device.robotState.setPropArray("pose", data.pose, softrobot.device.robotState.motor);
             softrobot.device.robotState.current = data.current;

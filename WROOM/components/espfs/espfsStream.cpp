@@ -47,7 +47,7 @@ class espFsStreambuf: public std::streambuf{
         if (traits_type::eq_int_type(p_iChar, traits_type::eof())){
             //  put overflowed character in the buffer.
             buf[0] = traits_type::to_char_type(p_iChar);
-            setp(buf+1, buf+ sizeof(buf)+1);
+            setp(buf+1, buf+ sizeof(buf)-1);
             return 1; 
         }else{
             setp(buf, buf+ sizeof(buf));
