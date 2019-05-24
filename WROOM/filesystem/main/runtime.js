@@ -6,6 +6,8 @@ ESP32.include("sr_callbacks.js");
 
 jslib.printHeap("heap size after require: ");
 
+softrobot.message_command.requireBoardInfo();
+
 ESP32.include("/main/main.js");
 
 loops.doForever();

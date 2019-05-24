@@ -1,5 +1,8 @@
 #include <iostream>
 #include <cstring>
+#include <unordered_map>
+#include <string>
+
 extern "C" {
 
 #include <duktape.h>
@@ -16,6 +19,8 @@ extern "C" {
 #define PRINT_DUKTAPE_PACKET 1
 
 LOG_TAG("SRCmd");
+
+static std::unordered_map<std::string, uint32_t> callback_stash_keys;
 
 ////////////////////////////////////////////////////////
 //////////////////////// send functions ////////////////
@@ -351,31 +356,24 @@ static duk_ret_t resetSensor(duk_context* ctx) {
 static duk_ret_t registerCallback(duk_context* ctx) {
     // ... name func
 
-    bool ret = duk_get_global_string(ctx, "callbacks"); // we store all callback functions in global.callbacks 
-    if (!ret) { // if no such object, create new
-        duk_pop(ctx);
-        duk_push_object(ctx);
-    }
-    // ... name func callbacks
-    
-    const char* name = duk_get_string(ctx, -3);
+    const char* name = duk_get_string(ctx, -2);
+    std::string name_str(name);
+    callback_stash_keys[name_str] = esp32_duktape_stash_array(ctx, 1);
+    // ... name
+
+    duk_pop(ctx);
 
     LOGI("register callback %s", name);
-
-    duk_dup(ctx, -2);
-    // ... name func callbacks func
-
-    duk_put_prop_string(ctx, -2, name);
-    // ... name func callbacks
-
-    duk_put_global_string(ctx, "callbacks");
-    // ... name func
-
-    duk_pop_2(ctx);
-    // ...
     
     return 0;
 }
+
+// void commandMessageEventHandler() {
+//     event_newCallbackRequestedEvent(
+//         ESP32_DUKTAPE_CALLBACK_TYPE_FUNCTION,
+
+//     )
+// }
 
 ////////////////////////////////////////////////////////
 //////////////////////// receive functions /////////////
@@ -430,7 +428,12 @@ static void putPropTou(duk_context* ctx, UdpRetPacket& ret) {
     duk_put_prop_string(ctx, -2, "touch");
 } 
 // function onReceiveCIBoardinfo(data: {systemId: number, nTarget: number, nMotor:number, nCurrent: number, nForces:number, nTouch: number, macAddress: ArrayBuffer});
-static size_t pushDataCIBoardinfo(duk_context* ctx, UdpRetPacket& ret) {
+int pushDataCIBoardinfo(duk_context* ctx, void* data) {
+    UdpRetPacket ret;
+    unsigned short* data_short = (unsigned short*)data;
+    size_t len = data_short[1];
+    memcpy(ret.data, data, 2 + len);
+
     duk_push_object(ctx);
 
     duk_push_number(ctx, ret.data[0]);
@@ -456,6 +459,8 @@ static size_t pushDataCIBoardinfo(duk_context* ctx, UdpRetPacket& ret) {
     duk_push_buffer_object(ctx, -1, 0, 6, DUK_BUFOBJ_ARRAYBUFFER);
     duk_put_prop_string(ctx, -3, "macAddress");
     duk_pop(ctx);
+
+    free(data);
 
     return 1;
 }
@@ -516,49 +521,63 @@ void commandMessageHandler(UdpRetPacket& ret) {
     switch (ret.command)
     {
         case CI_BOARD_INFO: {
-            bool flag = pushFunction(ctx, "onReceiveCIBoardinfo");
-            if(!flag) break;
-            size_t argN = pushDataCIBoardinfo(ctx, ret);
-            duk_pcall(ctx, argN);
+            // bool flag = pushFunction(ctx, "onReceiveCIBoardinfo");
+            // if(!flag) break;
+            std::unordered_map<std::string, uint32_t>::const_iterator iter = callback_stash_keys.find("onReceiveCIBoardinfo");
+            if (iter == callback_stash_keys.end()) {
+                LOGE("Callback function onReceiveCIBoardinfo is not registered");
+                break;
+            }
+
+            void* data = (void*)malloc(2 + ret.length);
+            memcpy(data, ret.data, 2 + ret.length);
+
+            event_newCallbackRequestedEvent(
+                ESP32_DUKTAPE_CALLBACK_TYPE_FUNCTION,
+                iter->second,
+                pushDataCIBoardinfo,
+                data
+            );
+
             break;
         }
-        case CI_SENSOR:{
-            bool flag = pushFunction(ctx, "onReceiveCISensor");
-            if(!flag) break;
-            size_t argN = pushDataCISensor(ctx, ret);
-            duk_pcall(ctx, argN);
-            break;
-        }
-        case CI_DIRECT: {
-            bool flag = pushFunction(ctx, "onReceiveCIDirect");
-            if(!flag) break;
-            size_t argN = pushDataCIDirect(ctx, ret);
-            duk_pcall(ctx, argN);
+        // case CI_SENSOR:{
+        //     bool flag = pushFunction(ctx, "onReceiveCISensor");
+        //     if(!flag) break;
+        //     size_t argN = pushDataCISensor(ctx, ret);
+        //     duk_pcall(ctx, argN);
+        //     break;
+        // }
+        // case CI_DIRECT: {
+        //     bool flag = pushFunction(ctx, "onReceiveCIDirect");
+        //     if(!flag) break;
+        //     size_t argN = pushDataCIDirect(ctx, ret);
+        //     duk_pcall(ctx, argN);
             
-            break;
-        }
-        case CI_INTERPOLATE: {
-            bool flag = pushFunction(ctx, "onReceiveCIInterpolate");
-            if(!flag) break;
-            size_t argN = pushDataCIInterpolate(ctx, ret);
-            duk_pcall(ctx, argN);
+        //     break;
+        // }
+        // case CI_INTERPOLATE: {
+        //     bool flag = pushFunction(ctx, "onReceiveCIInterpolate");
+        //     if(!flag) break;
+        //     size_t argN = pushDataCIInterpolate(ctx, ret);
+        //     duk_pcall(ctx, argN);
             
-            break;
-        }
-        case CI_SETPARAM: {
-            bool flag = pushFunction(ctx, "onReceiveCISetparam");
-            if(!flag) break;
-            duk_pcall(ctx, 0);
+        //     break;
+        // }
+        // case CI_SETPARAM: {
+        //     bool flag = pushFunction(ctx, "onReceiveCISetparam");
+        //     if(!flag) break;
+        //     duk_pcall(ctx, 0);
             
-            break;
-        }
-        case CI_RESET_SENSOR: {
-            bool flag = pushFunction(ctx, "onReceiveCIResetsensor");
-            if(!flag) break;
-            duk_pcall(ctx, 0);
+        //     break;
+        // }
+        // case CI_RESET_SENSOR: {
+        //     bool flag = pushFunction(ctx, "onReceiveCIResetsensor");
+        //     if(!flag) break;
+        //     duk_pcall(ctx, 0);
             
-            break;
-        }
+        //     break;
+        // }
         default:
             break;
     }

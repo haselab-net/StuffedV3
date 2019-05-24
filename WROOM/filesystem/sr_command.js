@@ -30,7 +30,6 @@ var _ret = {
         internalSRCommand.resetSensor(data);
     },
     registerCallback: function (name, func) {
-        console.log("register function: "+name);
         internalSRCommand.registerCallback(name, func);
     }
 }
