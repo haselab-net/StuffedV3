@@ -28,7 +28,7 @@ static char LOG_TAG[] = "ws_ws";
 static WebSocket* pWebSocket = NULL;
 static SRWebSocketHandler webSocketHandler = SRWebSocketHandler();
 
-bool offline_mode = true;   // offline: 1, synchronization || development: 0
+bool offline_mode = false;   // offline: 1, synchronization || development: 0
 
 void SRWebSocketHandler::onClose() {
     ESP_LOGV(LOG_TAG, "on close");
@@ -103,7 +103,7 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
     char* pBuffer = new char[bufferSize];
     std::streamsize ssize = pWebSocketInputStreambuf->sgetn(pBuffer, bufferSize);
     if(ssize>=bufferSize) {
-        ESP_LOGD(LOG_TAG ,"File main.js to large!!!!!!!!!");
+        ESP_LOGI(LOG_TAG ,"WS command to long (longer than 4096)!!!!!!!!!");
         delete [] pBuffer;
         return;
     }
@@ -118,11 +118,6 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
         case PacketId::PI_JSFILE: {
             // stop current running js task
             wsDeleteJsfileTask();
-            
-            saveToMainJs(pBuffer+2, ssize-2);
-
-            delete[] pBuffer;       // delete buffer to provide more space for jsfile task
-            pBuffer = NULL;
 
             // return packet to pxt
             short* retBuffer = (short*)malloc(2 * sizeof(short));        // return packet for download success
@@ -131,22 +126,6 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
             wsSend((void*)retBuffer, 4);
             delete[] retBuffer;
             retBuffer = NULL;
-
-            // run file or not
-            if(!offline_mode) {  // do not run file in development mode
-                break;
-            }
-            else {                  // run file
-                // std::ifstream m_ifstream("/spiffs/main/runtime.js");
-                // std::string str((std::istreambuf_iterator<char>(m_ifstream)),
-                //     std::istreambuf_iterator<char>());
-                // ESP_LOGD(LOG_TAG, "Start runtime file: %s", str.c_str());
-                // m_ifstream.close();
-
-                ESP_LOGD(LOG_TAG, "before wsCreateJsfileTask heap size: %d", esp_get_free_heap_size());
-
-                wsCreateJsfileTask();
-            }
             
             break;
         }
@@ -231,10 +210,12 @@ void wsOnMessageSr(UdpRetPacket& ret) {
 
 void printPacketJsfile(const void* pBuffer, size_t len) {
     ESP_LOGD(LOG_TAG, "|- PacketId: PI_JSFILE");
-    char buf[1024];
-    memcpy(buf, pBuffer, len);
-    buf[len] = '\0';
-    ESP_LOGD(LOG_TAG, "|- Content: %s", buf);
+
+    /* deprecated: no content any more, use /ws_jsfile url to transfer file instead */
+    // char buf[1024];
+    // memcpy(buf, pBuffer, len);
+    // buf[len] = '\0';
+    // ESP_LOGD(LOG_TAG, "|- Content: %s", buf);
 }
 
 void printPacketCommand(const void* pBuffer, size_t len) {

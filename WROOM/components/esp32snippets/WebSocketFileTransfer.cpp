@@ -153,6 +153,7 @@ public:
 			delete m_ostream;
 		}
 
+		// print received file
 		EspFsFile* fh = espFsOpen("/main/main.js");
 		const char* buf=NULL;
     	size_t len=0;
