@@ -45,13 +45,16 @@ class espFsStreambuf: public std::streambuf{
 		spi_flash_write(flashAddress, pbase(), writeLen);	//	write whole buffer into flash.
         flashAddress += pptr()-pbase();
         if (traits_type::eq_int_type(p_iChar, traits_type::eof())){
-            //  put overflowed character in the buffer.
-            buf[0] = traits_type::to_char_type(p_iChar);
-            setp(buf+1, buf+ sizeof(buf)-1);
-            return 1; 
+            printf("overflow 1 with character: %c \n", (char)p_iChar);
+            
+            return traits_type::eof(); 
         }else{
-            setp(buf, buf+ sizeof(buf));
-            return 0;
+            //  put overflowed character in the buffer.
+            printf("overflow 2 with character: %c \n", (char)p_iChar);
+            buf[0] = traits_type::to_char_type(p_iChar);
+            setp(buf, buf + sizeof(buf));
+            pbump(1);
+            return p_iChar;
         }
     }
     virtual int sync(){
