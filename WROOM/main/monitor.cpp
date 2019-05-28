@@ -452,9 +452,15 @@ public:
             case 'w':
             case 'W':{
                 std::ostream* m_ostream;
-                std::string content = "hello world";
-                m_ostream = espFsAddFileByStream("/main/main.js", 11);
-                m_ostream->write(content.c_str(), 11);
+                const std::string content = "hello world !!. 0ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                "1ABCDEFGHIJKLMNOPQRSTUVWXYZ" "2ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                "3ABCDEFGHIJKLMNOPQRSTUVWXYZ" "4ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                "5ABCDEFGHIJKLMNOPQRSTUVWXYZ" "6ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                "7ABCDEFGHIJKLMNOPQRSTUVWXYZ" "8ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                "9ABCDEFGHIJKLMNOPQRSTUVWXYZ" "AABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                "BABCDEFGHIJKLMNOPQRSTUVWXYZ" "CABCDEFGHIJKLMNOPQRSTUVWXYZ";
+                m_ostream = espFsAddFileByStream("/main/main.js", content.length());
+                m_ostream->write(content.c_str(), content.length());
                 m_ostream->flush();
                 delete m_ostream;
                 LOGI("finish writing file");

@@ -58,7 +58,7 @@ EspFsInitResult espFsInit(void *flashAddress, size_t size) {
 	}
 	esp_err_t rc = spi_flash_mmap((uint32_t) flashAddress, size, SPI_FLASH_MMAP_DATA, (const void **)&espFlashPtr, &handle);
 	if (rc != ESP_OK) {
-		ESP_LOGD(tag, "rc from spi_flash_mmap: %d", rc);
+		ESP_LOGE(tag, "rc from spi_flash_mmap: %d", rc);
 	}
 	flashOffset = (size_t)flashAddress;
 	flashSize = size;
@@ -77,7 +77,7 @@ EspFsInitResult espFsInit(void *flashAddress, size_t size) {
 // Returns flags of opened file.
 int espFsFlags(EspFsFile *fh) {
 	if (fh == NULL) {
-		ESP_LOGD(tag, "File handle not ready");
+		ESP_LOGE(tag, "File handle not ready");
 		return -1;
 	}
 
@@ -86,21 +86,27 @@ int espFsFlags(EspFsFile *fh) {
 	return (int)flags;
 }
 
-//Open a file and return a pointer to the file desc struct.
-EspFsFile *espFsOpen(const char *fileName) {
-	ESP_LOGD(tag, ">> espFsOpen: %s", fileName);
+static bool remap(){
 	if (espFlashPtr == NULL) {
 		if (flashOffset == 0){
-			ESP_LOGD(tag, "Call espFsInit first!");
-			return NULL;
+			ESP_LOGE(tag, "Call espFsInit first!");
+			return false;
 		}else{
 			spi_flash_munmap(handle);
 			esp_err_t rc = spi_flash_mmap(flashOffset, flashSize, SPI_FLASH_MMAP_DATA, (const void **)&espFlashPtr, &handle);
 			if (rc != ESP_OK) {
-				ESP_LOGD(tag, "rc from spi_flash_mmap: %d", rc);
+				ESP_LOGE(tag, "rc from spi_flash_mmap: %d", rc);
+				return false;
 			}
 		}
 	}
+	return true;
+}
+
+//Open a file and return a pointer to the file desc struct.
+EspFsFile *espFsOpen(const char *fileName) {
+	ESP_LOGD(tag, ">> espFsOpen: %s", fileName);
+	if (!remap()) return NULL;
 	char *flashAddress = espFlashPtr;
 	char *hpos;
 	char *namebuf;
@@ -142,7 +148,7 @@ EspFsFile *espFsOpen(const char *fileName) {
 			if (header->compression == COMPRESS_NONE) {
 				fileData->decompData = NULL;
 			} else {
-				ESP_LOGD(tag, "Invalid compression: %d", header->compression);
+				ESP_LOGE(tag, "Invalid compression: %d", header->compression);
 				return NULL;
 			}
 			return fileData;
@@ -164,10 +170,7 @@ void espFsClose(EspFsFile *fh) {
 
 //	Add clean file and return the start address for data.
 size_t espFsAddCleanArea(const char* fname, int len){
-	if (espFlashPtr == NULL) {
-		ESP_LOGD(tag, "Call espFsInit first!");
-		return 0;
-	}
+	if (!remap()) return 0;
 	//Strip initial slashes
 	while(fname[0] == '/') {
 		fname++;
@@ -183,8 +186,10 @@ size_t espFsAddCleanArea(const char* fname, int len){
 			return 0;
 		}
 		if ((header->flags & FLAG_LASTFILE) || strcmp(flashAddress+sizeof(EspFsHeader), fname) == 0){
+			bool bWriteHere = false;
 			if (header->flags & FLAG_LASTFILE){
 				ESP_LOGD(tag, "Find the end.");
+				bWriteHere = true;
 			}else{
 				//	check if the next file is the last file or not.
 				ESP_LOGD(tag, "Find the same name %s at 0x%x.", flashAddress+sizeof(EspFsHeader), (int)flashAddress);
@@ -199,50 +204,58 @@ size_t espFsAddCleanArea(const char* fname, int len){
 				}
 				if (hNext->flags & FLAG_LASTFILE){
 					ESP_LOGD(tag, "Find a file with the same name '%s' at 0x%x as the last file.", fname, (int)flashAddress);
+					bWriteHere = true;
 				}else{
-					ESP_LOGE(tag, "Find a file with the same name '%s' at 0x%x before '%s'.", fname, (int)flashAddress, faNext+sizeof(EspFsHeader));
+					ESP_LOGD(tag, "Find a file with the same name '%s' at 0x%x before '%s'. Rename it and skip.", fname, (int)flashAddress, faNext+sizeof(EspFsHeader));
+					//	rename the filename of this file into "".
+					const char* flashBase = (const char*)espFlashPtr - flashOffset;
+					char* name = flashAddress + sizeof(EspFsFile);
+					spi_flash_write(name-flashBase, "", 1);
+					bWriteHere = false;
 				}
 			}
-			//	Write the new file
-			const char* flashBase = (const char*)espFlashPtr - flashOffset;
-			const char* flashErase = (const char*)((unsigned)flashAddress & 0xFFFFF000);	//	4kB = 0x1000byte align
-			size_t keepLen = flashAddress - flashErase;
-			//ESP_LOGD(tag, "base=0x%x, erase=0x%x, eraseInPh=0x%x,  keep=%d", (int)flashBase, (int)flashErase, flashErase-flashBase, keepLen);
-			char* keep = (char*)malloc(keepLen);
-			memcpy(keep, flashErase, keepLen);					//	keep contents of erasing area
-			size_t nameLen = strlen(fname)+1;
-			if (nameLen&3) nameLen+=4-(nameLen&3); 				//Round to next 32bit boundary
+			if (bWriteHere){
+				//	Write the new file
+				const char* flashBase = (const char*)espFlashPtr - flashOffset;
+				const char* flashErase = (const char*)((unsigned)flashAddress & 0xFFFFF000);	//	4kB = 0x1000byte align
+				size_t keepLen = flashAddress - flashErase;
+				//ESP_LOGD(tag, "base=0x%x, erase=0x%x, eraseInPh=0x%x,  keep=%d", (int)flashBase, (int)flashErase, flashErase-flashBase, keepLen);
+				char* keep = (char*)malloc(keepLen);
+				memcpy(keep, flashErase, keepLen);					//	keep contents of erasing area
+				size_t nameLen = strlen(fname)+1;
+				if (nameLen&3) nameLen+=4-(nameLen&3); 				//Round to next 32bit boundary
 
-			size_t eraseLen = keepLen + sizeof(EspFsHeader) + nameLen + len + sizeof(EspFsHeader);
-			eraseLen = (eraseLen + 0xFFF) & 0xFFFFF000;
-			spi_flash_erase_range(flashErase - flashBase, eraseLen);
-			spi_flash_write(flashErase - flashBase, keep, keepLen);			//	restore before new file
-			free(keep);
-			EspFsHeader newHeader;
-			memset(&newHeader, 0, sizeof(newHeader)); 
-			newHeader.fileLenDecomp = len;
-			newHeader.fileLenComp = len;
-			newHeader.nameLen = nameLen;
-			newHeader.magic = ESPFS_MAGIC;
-			spi_flash_write(flashAddress - flashBase, &newHeader, sizeof(newHeader));	//	write header
-			flashAddress += sizeof(newHeader);
-			spi_flash_write(flashAddress - flashBase, fname, newHeader.nameLen);	//	write header
-			flashAddress += newHeader.nameLen;
-//			spi_flash_write(flashAddress - flashBase, data, len);
-			size_t rv = flashAddress - flashBase;
-			flashAddress += len;
-			spi_flash_write(flashAddress - flashBase, "\0", 1);
-			flashAddress += 1;
-			if ((int)flashAddress&3) {
-				flashAddress += 4-((int)flashAddress & 3); //align to next 32bit val
+				size_t eraseLen = keepLen + sizeof(EspFsHeader) + nameLen + len + sizeof(EspFsHeader);
+				eraseLen = (eraseLen + 0xFFF) & 0xFFFFF000;
+				spi_flash_erase_range(flashErase - flashBase, eraseLen);
+				spi_flash_write(flashErase - flashBase, keep, keepLen);			//	restore before new file
+				free(keep);
+				EspFsHeader newHeader;
+				memset(&newHeader, 0, sizeof(newHeader)); 
+				newHeader.fileLenDecomp = len;
+				newHeader.fileLenComp = len;
+				newHeader.nameLen = nameLen;
+				newHeader.magic = ESPFS_MAGIC;
+				spi_flash_write(flashAddress - flashBase, &newHeader, sizeof(newHeader));	//	write header
+				flashAddress += sizeof(newHeader);
+				spi_flash_write(flashAddress - flashBase, fname, newHeader.nameLen);	//	write header
+				flashAddress += newHeader.nameLen;
+	//			spi_flash_write(flashAddress - flashBase, data, len);
+				size_t rv = flashAddress - flashBase;
+				flashAddress += len;
+				spi_flash_write(flashAddress - flashBase, "\0", 1);
+				flashAddress += 1;
+				if ((int)flashAddress&3) {
+					flashAddress += 4-((int)flashAddress & 3); //align to next 32bit val
+				}
+				//	write terminator
+				memset(&newHeader, 0, sizeof(newHeader)); 
+				newHeader.flags = FLAG_LASTFILE;
+				newHeader.magic = ESPFS_MAGIC;
+				spi_flash_write(flashAddress - flashBase, &newHeader, sizeof(newHeader));
+				espFlashPtr = NULL;	//	must flash unmap and map again.
+				return rv;
 			}
-			//	write terminator
-			memset(&newHeader, 0, sizeof(newHeader)); 
-			newHeader.flags = FLAG_LASTFILE;
-			newHeader.magic = ESPFS_MAGIC;
-			spi_flash_write(flashAddress - flashBase, &newHeader, sizeof(newHeader));
-			espFlashPtr = NULL;	//	must flash unmap and map again.
-			return rv;
 		}
 		//Grab the name of the file.
 		flashAddress += sizeof(EspFsHeader);
@@ -262,91 +275,6 @@ bool espFsAddFile(const char* fname, const char* data, int len){
 	}
 	return false;
 }
-#if 0
-bool espFsAddFile(const char* fname, const char* data, int len){
-	if (espFlashPtr == NULL) {
-		ESP_LOGD(tag, "Call espFsInit first!");
-		return false;
-	}
-	char *flashAddress = espFlashPtr;
-	EspFsHeader *header;
-	//Go find that file!
-	while(1) {
-		//Grab the next file header.
-		header = (EspFsHeader *)flashAddress;
-		if (header->magic != ESPFS_MAGIC) {
-			ESP_LOGE(tag, "Magic mismatch. EspFS image broken at file '%s'.", flashAddress+sizeof(EspFsHeader));
-			return false;
-		}
-		if ((header->flags & FLAG_LASTFILE) || strcmp(flashAddress+sizeof(EspFsHeader), fname) == 0){
-			if (header->flags & FLAG_LASTFILE){
-				ESP_LOGD(tag, "Find the end.");
-			}else{
-				//	check if the next file is the last file or not.
-				char* faNext = flashAddress;
-				faNext += sizeof(EspFsHeader) + header->nameLen + header->fileLenComp + 1;	//	+1 is for appeded '\0'.
-				if ((int)faNext&3) {
-					faNext += 4-((int)faNext & 3); //align to next 32bit val
-				}
-				EspFsHeader* hNext = (EspFsHeader*)faNext; 
-				if (hNext->magic != ESPFS_MAGIC) {
-					ESP_LOGE(tag, "Magic mismatch. EspFS image broken at file '%s'.", faNext+sizeof(EspFsHeader));
-				}
-				if (hNext->flags & FLAG_LASTFILE){
-					ESP_LOGD(tag, "Find a file with the same name '%s' at the end.", fname);
-				}else{
-					ESP_LOGE(tag, "Find a file with the same name '%s' before '%s'.", fname, faNext+sizeof(EspFsHeader));
-				}
-			}
-			//	Write the new file
-			const char* flashBase = (const char*)espFlashPtr - flashOffset;
-			const char* flashErase = (const char*)((unsigned)flashAddress & 0xFFFFF000);	//	4kB = 0x1000byte align
-			size_t keepLen = flashAddress - flashErase;
-			//ESP_LOGD(tag, "base=0x%x, erase=0x%x, eraseInPh=0x%x,  keep=%d", (int)flashBase, (int)flashErase, flashErase-flashBase, keepLen);
-			char* keep = (char*)malloc(keepLen);
-			memcpy(keep, flashErase, keepLen);					//	keep contents of erasing area
-			size_t nameLen = strlen(fname)+1;
-			if (nameLen&3) nameLen+=4-(nameLen&3); 				//Round to next 32bit boundary
-
-			size_t eraseLen = keepLen + sizeof(EspFsHeader) + nameLen + len + sizeof(EspFsHeader);
-			eraseLen = (eraseLen + 0xFFF) & 0xFFFFF000;
-			spi_flash_erase_range(flashErase - flashBase, eraseLen);
-			spi_flash_write(flashErase - flashBase, keep, keepLen);			//	restore before new file
-			EspFsHeader newHeader;
-			memset(&newHeader, 0, sizeof(newHeader)); 
-			newHeader.fileLenDecomp = len;
-			newHeader.fileLenComp = len;
-			newHeader.nameLen = nameLen;
-			newHeader.magic = ESPFS_MAGIC;
-			spi_flash_write(flashAddress - flashBase, &newHeader, sizeof(newHeader));	//	write header
-			flashAddress += sizeof(newHeader);
-			spi_flash_write(flashAddress - flashBase, fname, newHeader.nameLen);	//	write header
-			flashAddress += newHeader.nameLen;
-			spi_flash_write(flashAddress - flashBase, data, len);
-			flashAddress += len;
-			spi_flash_write(flashAddress - flashBase, "\0", 1);
-			flashAddress += 1;
-			if ((int)flashAddress&3) {
-				flashAddress += 4-((int)flashAddress & 3); //align to next 32bit val
-			}
-			//	write terminator
-			memset(&newHeader, 0, sizeof(newHeader)); 
-			newHeader.flags = FLAG_LASTFILE;
-			newHeader.magic = ESPFS_MAGIC;
-			spi_flash_write(flashAddress - flashBase, &newHeader, sizeof(newHeader));
-			return true;
-		}
-		//Grab the name of the file.
-		flashAddress += sizeof(EspFsHeader);
-		//We don't need this file. Skip name and file
-		flashAddress += header->nameLen+header->fileLenComp + 1;	//	+1 is for appeded '\0'.
-		if ((int)flashAddress&3) {
-			flashAddress += 4-((int)flashAddress & 3); //align to next 32bit val
-		}
-	} // While files to process
-	return false;
-}
-#endif
 
 //Read len bytes from the given file into buff. Returns the actual amount of bytes read.
 int espFsRead(EspFsFile *fh, char *buff, int len) {

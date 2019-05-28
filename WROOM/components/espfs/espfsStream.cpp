@@ -26,6 +26,7 @@ class espFsStreambuf: public std::streambuf{
     public:
     espFsStreambuf() = delete;
     espFsStreambuf(size_t fa, int l):flashAddress(fa), len(l){
+        ESP_LOGD(tag, "stream buf with length %d bytes constructed.", len);
         setp(buf, buf+ sizeof(buf));
     }
     virtual ~espFsStreambuf(){
@@ -37,25 +38,21 @@ class espFsStreambuf: public std::streambuf{
     virtual int overflow( int p_iChar = EOF ){
         size_t writeLen = pptr()-pbase();
         if (writeLen > len){
-            ESP_LOGE(tag, "Try to write a data longer than the file length.");
+            ESP_LOGE(tag, "Try to write a data (len:%d) longer than the file length remain %d.", writeLen, len);
             writeLen = len;
             return traits_type::eof();
         }
         len -= writeLen;
 		spi_flash_write(flashAddress, pbase(), writeLen);	//	write whole buffer into flash.
-        flashAddress += pptr()-pbase();
-        if (traits_type::eq_int_type(p_iChar, traits_type::eof())){
-            printf("overflow 1 with character: %c \n", (char)p_iChar);
-            
-            return traits_type::eof(); 
-        }else{
+        flashAddress += writeLen;
+        setp(buf, buf + sizeof(buf));
+        if (!traits_type::eq_int_type(p_iChar, traits_type::eof())){
             //  put overflowed character in the buffer.
-            printf("overflow 2 with character: %c \n", (char)p_iChar);
             buf[0] = traits_type::to_char_type(p_iChar);
-            setp(buf, buf + sizeof(buf));
             pbump(1);
-            return p_iChar;
         }
+        ESP_LOGD(tag, "Write %d, remain %d, char %d", writeLen, len, p_iChar);
+        return writeLen; 
     }
     virtual int sync(){
         overflow();
