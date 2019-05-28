@@ -38,10 +38,10 @@ void MotorDriver::AdcReadTaskStatic(void* arg){
 
 #define ADCI2SNUM   I2S_NUM_0
 void MotorDriver::AdcReadTask(){
-#if defined BOARD4  // for BOARD4
-    const gpio_num_t GPIO_LED = GPIO_NUM_0;
+#if defined BOARD4  
+    const gpio_num_t GPIO_LED = GPIO_NUM_0; // for BOARD4
 #else
-    const gpio_num_t GPIO_LED = GPIO_NUM_26;
+    const gpio_num_t GPIO_LED = GPIO_NUM_26;  // for all BOARD
 #endif
     const size_t bufLen = ADC_DMA_LEN * 2;
 #ifndef _WIN32
