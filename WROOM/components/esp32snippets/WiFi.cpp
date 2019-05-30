@@ -536,7 +536,7 @@ std::vector<WiFiAPRecord> WiFi::scan() {
 	uint16_t apCount;  // Number of access points available.
 	rc = ::esp_wifi_scan_get_ap_num(&apCount);
 	if (rc != ESP_OK) {
-		ESP_LOGE(LOG_TAG, "esp_wifi_scan_get_ap_num: %d", rc);
+		ESP_LOGE(LOG_TAG, "esp_wifi_scan_get_ap_num fails: %d", rc);
 		return apRecords;
 	} else {
 		ESP_LOGD(LOG_TAG, "Count of found access points: %d", apCount);
@@ -566,6 +566,11 @@ std::vector<WiFiAPRecord> WiFi::scan() {
 	std::sort(apRecords.begin(),
 		apRecords.end(),
 		[](const WiFiAPRecord& lhs, const WiFiAPRecord& rhs){ return lhs.m_rssi > rhs.m_rssi; });
+	std::string ssids="";
+	for(WiFiAPRecord& ap: apRecords){
+		ssids += ap.m_ssid + " ";
+	}
+	ESP_LOGD(LOG_TAG, "AP found: %s", ssids.c_str());
 	return apRecords;
 } // scan
 

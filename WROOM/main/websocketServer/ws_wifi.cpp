@@ -104,7 +104,7 @@ esp_err_t SRWifiEventHandler::staScanDone(system_event_sta_scan_done_t info){
                         char passKey[] = "pass0"; passKey[4] = '0'+i;
                         SRWiFi::wifiNvs->get(passKey, pass);
                         //LOGI("SRWifiEventHandler::staScanDone connect ssid=%s pass=%s", ssid.c_str(), pass.c_str());
-                        wifi->connectAP(ssid, pass);
+                        wifi->connect(ssid, pass);
                         break;
                     }
                 }
@@ -128,24 +128,12 @@ void SRWiFi::init() {
     //  set SREventHandler
     setWifiEventHandler(&srWifiEventHandler);
     LOGD("Free heap after setEventHandler: %d", esp_get_free_heap_size());
-
-    //  make ssid
-    uint8_t mac[6];
-	esp_read_mac(mac, ESP_MAC_WIFI_STA);	// 6 bytes
-    char ssid[33];
-    strcpy(ssid, "Nuibot ");
-    for(int i=3; i<6; ++i){ //  0-2 is the same 30AEA4
-        sprintf(ssid+strlen(ssid), "%02X", mac[i]);
-    }
-    startAP(ssid, "");
-    esp_wifi_set_mode(WIFI_MODE_APSTA);
+    startAP();
     LOGD("Free heap after startAP: %d", esp_get_free_heap_size());
     startScan();
     LOGD("Free heap after scan: %d", esp_get_free_heap_size());
 }
-void SRWiFi::startAP(const std::string& ssid, const std::string& password, wifi_auth_mode_t auth) {
-	startAP(ssid, password, auth, 0, false, 4);
-} // startAP
+
 void SRWiFi::initInternal(){
 	if (m_eventLoopStarted) {
 		esp_event_loop_set_cb(WiFi::eventHandler, this);   // Returns the old handler.
@@ -175,8 +163,32 @@ void SRWiFi::initInternal(){
 	}
 	m_initCalled = true;
 }
+
+bool SRWiFi::isAP(){
+    wifi_mode_t mode;
+    esp_wifi_get_mode(&mode);
+    if (mode == WIFI_MODE_AP || mode == WIFI_MODE_APSTA){
+        return true;
+    }
+    return false;
+}
+void SRWiFi::startAP(){
+    //  make ssid
+    uint8_t mac[6];
+	esp_read_mac(mac, ESP_MAC_WIFI_STA);	// 6 bytes
+    char ssid[33];
+    strcpy(ssid, "Nuibot ");
+    for(int i=3; i<6; ++i){ //  0-2 is the same 30AEA4
+        sprintf(ssid+strlen(ssid), "%02X", mac[i]);
+    }
+    startAP(ssid, "");
+}
+void SRWiFi::startAP(const std::string& ssid, const std::string& password, wifi_auth_mode_t auth) {
+	startAP(ssid, password, auth, 0, false, 4);
+} // startAP
 void SRWiFi::startAP(const std::string& ssid, const std::string& password, wifi_auth_mode_t auth, uint8_t channel, bool ssid_hidden, uint8_t max_connection) {
 	initInternal();
+    esp_wifi_set_mode(WIFI_MODE_APSTA);
     LOGD(">> startAP: ssid: %s", ssid.c_str());
 	esp_err_t errRc = ::esp_wifi_set_mode(WIFI_MODE_APSTA);
 	if (errRc != ESP_OK) {
@@ -199,7 +211,6 @@ void SRWiFi::startAP(const std::string& ssid, const std::string& password, wifi_
 		LOGE("esp_wifi_set_config: rc=%d %s", errRc, GeneralUtils::errorToString(errRc));
 		abort();
 	}
-
 	errRc = tcpip_adapter_dhcps_start(TCPIP_ADAPTER_IF_AP);
 	if (errRc != ESP_OK) {
 		LOGE("tcpip_adapter_dhcps_start: rc=%d %s", errRc, GeneralUtils::errorToString(errRc));
@@ -213,8 +224,14 @@ void SRWiFi::startAP(const std::string& ssid, const std::string& password, wifi_
 
 	LOGD("<< startAP");
 }
-
-void SRWiFi::connectAP(std::string ssid, std::string pass){
+void SRWiFi::stopAP(){
+	esp_err_t errRc = tcpip_adapter_dhcps_stop(TCPIP_ADAPTER_IF_AP);
+	if (errRc != ESP_OK) {
+		LOGE("tcpip_adapter_dhcps_stop: rc=%d %s", errRc, GeneralUtils::errorToString(errRc));
+	}
+    esp_wifi_set_mode(WIFI_MODE_STA);
+}
+void SRWiFi::connect(std::string ssid, std::string pass){
     state = WIFI_STA_CONNECTING;
 	m_apConnectionStatus = UINT8_MAX;
     wifi_config_t sta_config;
@@ -233,6 +250,16 @@ void SRWiFi::connectAP(std::string ssid, std::string pass){
         abort();
     }
 }
+void SRWiFi::disconnect(){
+    esp_err_t errRc = esp_wifi_disconnect();
+    state = WIFI_STA_DISCONNECTED;
+    if (errRc != ESP_OK) {
+        LOGE("esp_wifi_disconnect: rc=%d %s", errRc, GeneralUtils::errorToString(errRc));
+        abort();
+    }
+}
+
+
 void SRWiFi::startScan(){
 	wifi_scan_config_t scan_config;
     memset(&scan_config, 0, sizeof(scan_config));
@@ -276,4 +303,10 @@ void SRWiFi::stopScan(){
 	std::sort(scannedAPs.begin(),
 		scannedAPs.end(),
 		[](const WiFiAPRecord& lhs, const WiFiAPRecord& rhs){ return lhs.m_rssi > rhs.m_rssi; });
+}
+
+std::string SRWiFi::getStaPassword() {
+    wifi_config_t conf;
+    esp_wifi_get_config(WIFI_IF_STA, &conf);
+    return std::string((char*) conf.ap.password);
 }

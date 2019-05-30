@@ -9,12 +9,26 @@ label{font-size:150%; vertical-align: middle;}</style>
 </head>
 <body>
 <div style="zoom: 150%;">
-<h1>Nuibot WiFi Setting</h1>
-<form action="/index.html" method="post">
-Connecting to "$ssid"<br>
-state="$state"<br>
+<h1>Nuibot WiFi Status</h1>
+$ip?[
+Please connect to WiFi AP of <em>$ssid</em> and open the
+<a href="http://nuibot.haselab.net?ip=$ip">MakeCode Editor for Nuibot</a>.
+<br />
+<br />
+$]
+AP to connect: <em>$ssid</em><br>
+status="$state"<br>
 ip:$ip<br>
 mask:$mask<br>
-gw:$gw
+gw:$gw<br>
+<br>
+<a href="/delete.html">See registered access points</a><br>
+<form action="/delete.html" method="post">
+<button class="AP" type="submit" name="selected" value="$ssid">Disconnect and unregister <em>$ssid</em></button>
+</form>
+<form action="/connect.html" method="post">
+<input type="hidden", name="ssid" value="$ssid" />
+<button class="AP" type="submit" name="apSwitch" value="switch">$apStart?[Stop$]     $apStop?[Start$] access point for setting</button>
+</form>
 </body>
 </html>

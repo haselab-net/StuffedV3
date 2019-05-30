@@ -9,11 +9,17 @@
 <div style="zoom: 150%;">
 <h1>Nuibot WiFi Setting</h1>
 <form action="/password.html" method="post">
-<h2>WiFi Stations</h2>
+<h2>WiFi access points</h2>
 $nAP[
 <button class="AP" type="submit" name="selected" value="$ssid*">$ssid*<br/>$auth* $rssi*</button>
 $]
+</form>
+<br/>
+<form action="/index.html" method="post">
+<button class="AP" type="submit" name="button" value="reflesh">Update access point list</button>
+</form>
 <h3>Direct Input</h3>
+<form action="/password.html" method="post">
 <input type="text" name="ssid">
 <input type="submit" name="typed">
 </form>

@@ -45,6 +45,10 @@ SRFormHandler::SRFormHandler(){
 //	SRReplace
 //
 void SRReplace::handle(HttpRequest& request, HttpResponse& response, std::vector<Replace>& replaces){
+	std::vector<Replace> filenameReplaces;
+	handle(request, response, replaces, filenameReplaces);
+}
+void SRReplace::handle(HttpRequest& request, HttpResponse& response, std::vector<Replace>& replaces, std::vector<Replace>& filenameReplaces){
     // Serve up the content from the file on the file system ... if found ...
     std::string fileName = pHttpServer->getRootPath() + request.getPath(); // Build the absolute file name to read.
     // If the file name ends with a '/' then remove it ... we are normalizing to NO trailing slashes.
@@ -55,6 +59,12 @@ void SRReplace::handle(HttpRequest& request, HttpResponse& response, std::vector
     if (request.getPath().length() == 1 && request.getPath().back() == '/'){
         fileName.append("/index.html");
     }
+	for(Replace& fr: filenameReplaces){
+		for(std::string::size_type pos = fileName.find(fr.from, 0); pos != std::string::npos; pos = fileName.find(fr.from, pos)){
+			fileName.replace(pos, fr.from.length(), fr.to);
+			pos += fr.to.length();
+		}
+	}
 	//	accept laguage check
 	std::string lang = request.getHeader("accept-language");
 	int spos = fileName.rfind("/");
@@ -121,22 +131,38 @@ langFound:
 					keyLen++;
 				}else if (keyLen == 0 && pData[pos] == '$'){	//	$$ = $
 					response.sendData((uint8_t*) "$", 1);
-				}else if (pData[pos] == '['){	//	repeat start
+				}else if (pData[pos] == '[' || pData[pos] == '?'){	//	repeat or if start
+					bool bIf = false;
+					if (pData[pos] == '?') bIf = true;
 					key[keyLen] = 0;
 					repeatCount = 0;
 					for(Replace& r : replaces){
 						if (r.from.compare(key) == 0){
 							//ESP_LOGD(tag, "Repeat: %s -> %s", r.from.c_str(), r.to.c_str());
+							nRepeat = -1;
 							nRepeat = atoi(r.to.c_str());
+							if (bIf){
+								if (nRepeat > 0) nRepeat = 1;
+								if (nRepeat < 0){
+									if (r.to.length()) nRepeat = 1;
+									else nRepeat = 0;
+								}
+							}
 							if (nRepeat >= 0) goto foundNum;
 						}
+					}
+					if (bIf){
+						nRepeat = 0;
+						goto foundNum;
 					}
 					ESP_LOGE(tag, "Repeat count must be set.");
 					foundNum:
 					//ESP_LOGD(tag, "SRReplace: Repeat %d.", nRepeat);
 					//	Shift buffer and read from file;
-					dataLen -= pos+1;
-					memmove(pData, pData + pos+1, dataLen);
+					dataLen -= pos + (bIf ? 2 : 1);
+					if (dataLen > 0){
+						memmove(pData, pData + pos+(bIf ? 2 : 1), dataLen);
+					}
 					pos = 0;
 					sentPos = 0;
 					if (!ifStream.eof()){

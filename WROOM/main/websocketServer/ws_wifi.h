@@ -37,10 +37,20 @@ public:
     enum {N_AP_RECORD_MAX = 10};
     SRWiFi();
     void init();        //  Init wifi and start WIFI_MODE_APSTA
+    bool isAP();        //  is access point ?
 	void startAP(const std::string& ssid, const std::string& passwd, wifi_auth_mode_t auth = WIFI_AUTH_OPEN);
 	void startAP(const std::string& ssid, const std::string& passwd, wifi_auth_mode_t auth, uint8_t channel, bool ssid_hidden, uint8_t max_connection);
+    void startAP();
+    void stopAP();
+
+    void connectAP(std::string ssid, std::string pass){
+        connect(ssid, pass);
+    }
+    void connect(std::string ssid, std::string pass); //  connect to AP as an station (client).
+    void disconnect();  //  disconnect from AP.
+
 	void startScan();	//	Start scan. Wifi mode must be station or apSta. 
 	void stopScan();	//	Stop scan and return ap list.
-    void connectAP(std::string ssid, std::string pass);
+    std::string getStaPassword();
 };
 #endif
