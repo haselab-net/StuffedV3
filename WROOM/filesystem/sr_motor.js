@@ -74,8 +74,24 @@ var motor;
         var line_2 = splitToInt(lines[1], " ");
         var keyframes_lines = lines.slice(2, 2 + line_1[0]);
         var keyframes = [];
+        var time = 0;
         for (var i = 0; i < keyframes_lines.length; i++) {
             keyframes.push(partialKeyframeDecoder(keyframes_lines[i]));
+            time += keyframes[keyframes.length - 1].period;
+        }
+        function interpolate(x1, y1, x2, y2, x) {
+            return (y2 - y1) / (x2 - x1) * (x - x1) + y1;
+        }
+        var keyframe_first = keyframes[0], keyframe_last = keyframes[keyframes.length - 1];
+        if (time < line_1[2]) {
+            var lastPose = [];
+            for (var i = 0; i < line_1[1]; i++) {
+                lastPose.push(interpolate(time - line_1[2], keyframe_last.pose[i], keyframe_first.period, keyframe_first.pose[i], 0));
+            }
+            keyframes.push({
+                period: line_1[2] - time,
+                pose: lastPose
+            });
         }
         return {
             motorIds: line_2.slice(1),
