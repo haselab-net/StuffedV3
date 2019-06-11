@@ -194,6 +194,13 @@ var softrobot;
 // sr_command
 (function(softrobot) {
     softrobot.message_command = require("sr_command");
+    var tmp = softrobot.message_command.setMotorDirect;
+    softrobot.message_command.setMotorDirect = function (data) {
+        softrobot.movement.sendKeyframeQueue.clear();
+        softrobot.device.robotState.interpolateTargetCountOfWrite = -1;
+        softrobot.device.robotState.nInterpolateVacancy = softrobot.device.robotState.nInterpolateTotal;
+        softrobot.device.robotState.nInterpolateRemain = 0;
+    }
 })(softrobot || (softrobot = {}));
 
 (function (softrobot) {
