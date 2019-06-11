@@ -6,8 +6,7 @@ var motor;
         var instruction = {
             motorId: motor
         };
-        var array = Object.keys(softrobot.device.robotState.motor[0]);
-        instruction[array[parameterType]] = value;
+        instruction[parameterType] = value;
         softrobot.message_command.updateRemoteMotorState(instruction);
     }
     motor_1.changeRemoteMotorParameter = changeRemoteMotorParameter;
