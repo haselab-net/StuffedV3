@@ -10,7 +10,8 @@ enum PacketId {
     PI_NONE = 0,
     PI_JSFILE = 1,
     PI_COMMAND = 2,
-    PI_SETTINGS = 3
+    PI_SETTINGS = 3,
+    PI_PINGPONG = 4
 };
 
 enum PacketSettingsId {

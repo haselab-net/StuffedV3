@@ -163,6 +163,14 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
             }
             break;
         }
+
+        case PacketId::PI_PINGPONG: {
+            short* retBuffer = (short*)malloc(1 * sizeof(short));
+            *retBuffer = PacketId::PI_PINGPONG;
+            wsSend((void*)retBuffer, 2);
+            delete[] retBuffer;
+            retBuffer = NULL;
+        }
     
         default:
             break;
@@ -252,6 +260,10 @@ void printPacketSettings(const void* pBuffer, size_t len) {
     ESP_LOGD(LOG_TAG, "   |- Value: %s", buf);
 }
 
+void printPacketPingPong() {
+    ESP_LOGD(LOG_TAG, "|- PacketId: PI_PINGPONG");
+}
+
 void printPacket(const void* pBuffer, size_t len) {
     const int16_t* pBufferI16 = (const int16_t*)pBuffer;
     switch (*pBufferI16)
@@ -268,6 +280,11 @@ void printPacket(const void* pBuffer, size_t len) {
 
         case PacketId::PI_SETTINGS: {
             printPacketSettings((char*)pBuffer+2, len-2);
+            break;
+        }
+
+        case PacketId::PI_PINGPONG: {
+            printPacketPingPong();
             break;
         }
     
