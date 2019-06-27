@@ -44,7 +44,7 @@ var loops = {
 
     _foreverFunc: function() {
         console.log("default forever");
-        jslib.blockPause(1000);
+        jslib.blockPause(10000);
     },
 
     doForever: function () {

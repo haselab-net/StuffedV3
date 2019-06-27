@@ -69,7 +69,7 @@ public:
 	int  bind(uint16_t port, uint32_t address);
 	int  close();
 	int  connect(struct in_addr address, uint16_t port);
-	int  connect(char* address, uint16_t port);
+	int  connect(const char* address, uint16_t port);
 	int  createSocket(bool isDatagram = false);
 	void setReuseAddress(bool value);
 	int  setSocketOption(int option, void* value, size_t len);

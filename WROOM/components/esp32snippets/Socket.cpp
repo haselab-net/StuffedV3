@@ -189,7 +189,7 @@ int Socket::connect(struct in_addr address, uint16_t port) {
  * @param [in] port The port number of the partner.
  * @return Success or failure of the connection.
  */
-int Socket::connect(char* strAddress, uint16_t port) {
+int Socket::connect(const char* strAddress, uint16_t port) {
 	struct in_addr address;
 	inet_pton(AF_INET, strAddress, &address);
 	return connect(address, port);

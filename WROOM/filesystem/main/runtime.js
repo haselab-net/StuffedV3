@@ -1,5 +1,7 @@
 var loops = require("sr_loops");
 var jslib = require("jslib");
+var ifttt = require("ifttt");
+var console = require("console");
 ESP32.include("sr_softrobot.js");
 ESP32.include("sr_motor.js");
 ESP32.include("sr_callbacks.js");

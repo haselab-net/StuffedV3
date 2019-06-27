@@ -144,13 +144,13 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
                     bool new_offline_mode = pBufferI16[2];
                     if (new_offline_mode == offline_mode) break;
                     else offline_mode = new_offline_mode;
-                    if(!offline_mode) {
+                    if(!offline_mode) { // exit offline mode
                         ESP_LOGD(LOG_TAG, "switch to development mode, stop running jsfile task");
                         wsDeleteJsfileTask();
                         heap_trace_dump();
                         heap_trace_start(HEAP_TRACE_LEAKS);                        
                         printf("delete success");
-                    }else if(!wsIsJsfileTaskRunning()){
+                    }else if(!wsIsJsfileTaskRunning()){ // switch to offline mode
                         ESP_LOGI(LOG_TAG, "before wsCreateJsfileTask heap size: %d", esp_get_free_heap_size());
                         ESP_LOGD(LOG_TAG, "switch to offline mode, start running jsfile task");
                         wsCreateJsfileTask();

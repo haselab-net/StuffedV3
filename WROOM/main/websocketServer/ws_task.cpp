@@ -11,6 +11,8 @@ extern "C" {
 #include "../softRobot/UdpCom.h"
 #include "duktape_jsfile.h"
 
+#include "../duktapeEsp32/include/module_ifttt.h"
+
 static TaskHandle_t xHandle = NULL;
 
 static char LOG_TAG[] = "ws_task";
@@ -54,6 +56,10 @@ void wsDeleteJsfileTask() {
     ESP_LOGD(LOG_TAG, "Delete old jsfile task");
 
     dukf_log_heap("Heap before delete task");
+
+    if (isTCPWaiting) {     // close waiting event task if it's running
+        stopWaitingEventTask();
+    }
 
     lock_heap();
 

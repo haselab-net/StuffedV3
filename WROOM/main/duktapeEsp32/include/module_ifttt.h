@@ -14,4 +14,8 @@ duk_ret_t ModuleIFTTT(duk_context *ctx);
 }
 #endif
 
+extern bool isTCPWaiting;
+
+void stopWaitingEventTask();
+
 #endif /* MAIN_INCLUDE_MODULE_IFTTT_H_ */
