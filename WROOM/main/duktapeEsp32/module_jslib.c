@@ -7,6 +7,7 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <stdio.h>
+#include <esp_log.h>
 
 #include "dukf_utils.h"
 #include "duktape_utils.h"
@@ -21,7 +22,6 @@ static duk_ret_t block_pause(duk_context* ctx){
     duk_int_t t = duk_get_int(ctx, -1);
 
     if(t<=0) return 0;
-
     vTaskDelay(pdMS_TO_TICKS(t));
 
     return 0;
@@ -41,7 +41,7 @@ static duk_ret_t printHeap(duk_context* ctx){
 
 static duk_ret_t print(duk_context* ctx){
     const char* str = duk_get_string(ctx, -1);
-    printf("%s", str);
+    ESP_LOGI("PRINT", "%s", str);
     duk_pop(ctx);
 
     return 0;
@@ -132,12 +132,12 @@ static duk_ret_t jslib_handle_event(duk_context* ctx) {
 }
 
 duk_ret_t ModuleJSLib(duk_context *ctx){
-    ADD_FUNCTION("block_pause",         block_pause,        0);
+    ADD_FUNCTION("block_pause",         block_pause,        1);
     ADD_FUNCTION("register_callback",   register_callback,  1);
     ADD_FUNCTION("send_command",        send_command,       1);
     ADD_FUNCTION("handle_event",        jslib_handle_event, 0);
     ADD_FUNCTION("print_heap",          printHeap,          1);
-    ADD_FUNCTION("print",               print,          1);
+    ADD_FUNCTION("print",               print,              1);
 
     return 0;
 }
