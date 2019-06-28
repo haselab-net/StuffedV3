@@ -8,7 +8,7 @@ extern "C"{
 #include <duktape.h>
 #include "duktape_utils.h"
 
-duk_ret_t ModuleIFTTT(duk_context *ctx);
+duk_ret_t ModuleIoT(duk_context *ctx);
 
 #ifdef __cplusplus
 }

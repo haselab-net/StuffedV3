@@ -75,7 +75,7 @@ functionTableEntry_t functionTable[] = {
 	{ "ModuleFS",         ModuleFS,         1},
 	{ "ModuleJSLib",	  ModuleJSLib,		1},			// register jslib module
 	{ "ModuleSRCommand",  ModuleSRCommand,	1},			// register srcommand module
-	{ "ModuleIFTTT",	  ModuleIFTTT,		1},			// register IFTTT module
+	{ "ModuleIoT",	      ModuleIoT,		1},			// register IoT module
 	// Must be last entry
 	{NULL, NULL, 0 } // *** DO NOT DELETE *** - MUST BE LAST ENTRY.
 };

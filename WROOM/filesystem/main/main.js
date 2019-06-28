@@ -3,12 +3,12 @@
 //     jslib.blockPause(1000);
 // }
 
-ifttt.registerEvent("hello", function (value1, value2, value3) {
+iot.registerMQTTEvent("hello", function (value1, value2, value3) {
     console.log("Hello called")
     console.log(value1)
     console.log(value2)
     console.log(value3)
 })
-ifttt.startWaitingEvent("192.168.2.51", 5000)
+iot.startWaitingMQTTEvent("192.168.2.51", 5000)
 
 jslib.print("Initial default main.js is called.");
