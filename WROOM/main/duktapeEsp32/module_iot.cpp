@@ -198,6 +198,14 @@ int pushValues(duk_context* ctx, void* data) {
     return 3;
 }
 void mqtt_data_event_handler (char* data) {
+    cJSON *obj = cJSON_Parse((char*) data);
+    const char* event = cJSON_GetStringValue(cJSON_GetObjectItem(obj, "event"));
+    const char* value1 = cJSON_GetStringValue(cJSON_GetObjectItem(obj, "value1"));
+    const char* value2 = cJSON_GetStringValue(cJSON_GetObjectItem(obj, "value2"));
+    const char* value3 = cJSON_GetStringValue(cJSON_GetObjectItem(obj, "value3"));
+
+    ESP_LOGI(LOG_TAG, "Receive MQTT event=%s with value1=%s value2=%s value3=%s", event, value1, value2, value3);
+
     // find function
     std::unordered_map<std::string, uint32_t>::iterator func = event_stash_keys.find(event);
     if (func == event_stash_keys.end()) {
