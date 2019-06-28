@@ -3,3 +3,14 @@ WROOM/.vscode
 WROOM/build
 WROOM/sdkconfig
 WROOM/sdkconfig.old
+PIC/GPATH
+PIC/GRTAGS
+PIC/GTAGS
+PIC/.vscode
+WROOM/GPATH
+WROOM/GRTAGS
+WROOM/GTAGS
+PCRobokey/bin
+PCRobokey/obj
+PCRobokey/.vs
+

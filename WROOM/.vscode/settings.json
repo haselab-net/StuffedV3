@@ -90,7 +90,10 @@
         "logging.h": "c",
         "gpio_struct.h": "c",
         "espfs.h": "c",
-        "regex": "cpp"
+        "regex": "cpp",
+        "string": "cpp",
+        "chrono": "cpp",
+        "ratio": "cpp"
     },
     "terminal.integrated.shell.windows": "c:\\msys32\\usr\\bin\\bash.exe",
     "terminal.integrated.env.windows": {

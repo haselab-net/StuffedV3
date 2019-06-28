@@ -128,6 +128,7 @@ void RESTClient::prepForCall() {
 		::curl_easy_setopt(m_curlHandle, CURLOPT_VERBOSE, 0L);
 	}
 
+	::curl_easy_setopt(m_curlHandle, CURLOPT_FAILONERROR, true);
 	::curl_easy_setopt(m_curlHandle, CURLOPT_ERRORBUFFER, m_errbuf);
 	::curl_easy_setopt(m_curlHandle, CURLOPT_SSL_VERIFYPEER, 0L);
 	::curl_easy_setopt(m_curlHandle, CURLOPT_CAINFO, nullptr);
