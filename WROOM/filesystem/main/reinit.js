@@ -4,3 +4,5 @@
 loops.doForever = function () {};
 
 softrobot.movement.sendKeyframeQueue.clear();
+
+iot.stopWaitingMQTTEvent();

@@ -14,6 +14,8 @@
 #include "modules.h"
 #include "duk_alloc_hybrid.h"
 
+#include "module_iot.h"
+
 LOG_TAG("duktape_jsfile");
 
 // The heap context
@@ -231,6 +233,8 @@ void duktape_start() {
 }
 
 void duktape_end(){
+	iotBeforeStopJSTask();
+
 	esp32_duk_context = NULL;
 	dukf_log_heap("Heap after set esp32_duk_context NULL");
 

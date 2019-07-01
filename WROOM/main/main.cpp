@@ -90,6 +90,7 @@ void setLogLevel(){
 
     //  Duktape
     esp_log_level_set("duktape_jsfile", ESP_LOG_INFO);
+    esp_log_level_set("duktape_event", ESP_LOG_INFO);
     esp_log_level_set("duk_utils", ESP_LOG_INFO);
     esp_log_level_set("dukf_utils", ESP_LOG_INFO);
     esp_log_level_set("module_dukf", ESP_LOG_INFO);

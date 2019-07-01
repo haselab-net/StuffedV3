@@ -26,7 +26,7 @@
 #include "module_fs.h"
 #include "module_jslib.h"
 #include "module_srcommand.h"
-#include "module_ifttt.h"
+#include "module_iot.h"
 LOG_TAG("modules");
 
 /**

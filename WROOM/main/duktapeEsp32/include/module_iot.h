@@ -8,14 +8,14 @@ extern "C"{
 #include <duktape.h>
 #include "duktape_utils.h"
 
+#include "mqtt_client.h"
+
 duk_ret_t ModuleIoT(duk_context *ctx);
+
+void iotBeforeStopJSTask();
 
 #ifdef __cplusplus
 }
 #endif
-
-extern bool isTCPWaiting;
-
-void stopWaitingEventTask();
 
 #endif /* MAIN_INCLUDE_MODULE_IFTTT_H_ */
