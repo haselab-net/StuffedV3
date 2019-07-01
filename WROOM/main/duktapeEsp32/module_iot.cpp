@@ -98,10 +98,8 @@ static duk_ret_t triggerIFTTTEvent(duk_context* ctx) {
 
     char* json_str = cJSON_Print(json);
 
-    printf("before get");
-
     std::string url = "http://maker.ifttt.com/trigger/" + std::string(event) + "/with/key/" + std::string(key);
-    printf("url: %s", url.c_str());
+    ESP_LOGI(LOG_TAG, "IFTTT url: %s", url.c_str());
 
     esp_http_client_config_t config = { };
     config.url = url.c_str();
@@ -111,8 +109,6 @@ static duk_ret_t triggerIFTTTEvent(duk_context* ctx) {
     esp_http_client_set_post_field(client, json_str, strlen(json_str));
 
     esp_err_t err = esp_http_client_perform(client);
-
-    printf("after get");
 
     if (err == ESP_OK) {
         ESP_LOGI(LOG_TAG, "Status = %d, content_length = %d",

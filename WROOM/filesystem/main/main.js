@@ -13,7 +13,7 @@ iot.registerMQTTEvent("event", function (value1, value2, value3) {
     value3
     );
 })
-iot.startWaitingMQTTEvent("192.168.2.51", 5000)
+iot.startWaitingMQTTEvent("131.112.182.91", 5000)
 
 // loops.pause(30000)
 // loops.forever(function () {
