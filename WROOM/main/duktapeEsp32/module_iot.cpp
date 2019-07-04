@@ -29,7 +29,7 @@ esp_mqtt_client_handle_t mqtt_client = NULL;
 ////////// Send Event ///////////////////
 /////////////////////////////////////////
 
-static esp_err_t _ifttt_https_event_handle(esp_http_client_event_t *evt) {
+static esp_err_t _http_event_handle(esp_http_client_event_t *evt) {
     switch(evt->event_id) {
         case HTTP_EVENT_ERROR:
             ESP_LOGI(LOG_TAG, "HTTP_EVENT_ERROR");
@@ -61,52 +61,15 @@ static esp_err_t _ifttt_https_event_handle(esp_http_client_event_t *evt) {
     return ESP_OK;
 }
 
-// function triggerEvent(key: string, event: string, value1?: string, value2?: string, value3?: string)
-// trigger remote event through IFTTT
-static duk_ret_t triggerIFTTTEvent(duk_context* ctx) {
-    int id = -5;
-
-    const char* key;
-    key = duk_get_string(ctx, id);
-    id++;
-
-    const char* event;
-    event = duk_get_string(ctx, id);
-    id++;
-
-    const char* value1;
-    if (duk_is_string(ctx, id)) value1 = duk_get_string(ctx, id);
-    else value1 = "";
-    id++;
-
-    const char* value2;
-    if (duk_is_string(ctx, id)) value2 = duk_get_string(ctx, id);
-    else value2 = "";
-    id++;
-
-    const char* value3;
-    if (duk_is_string(ctx, id)) value3 = duk_get_string(ctx, id);
-    else value3 = "";
-    id++;
-
-    cJSON* json;
-	json = cJSON_CreateObject();
-
-	cJSON_AddStringToObject(json, "value1", value1);
-	cJSON_AddStringToObject(json, "value2", value2);
-	cJSON_AddStringToObject(json, "value3", value3);
-
-    char* json_str = cJSON_Print(json);
-
-    std::string url = "http://maker.ifttt.com/trigger/" + std::string(event) + "/with/key/" + std::string(key);
-    ESP_LOGI(LOG_TAG, "IFTTT url: %s", url.c_str());
+// function httpGet(url: string)
+static duk_ret_t httpGet(duk_context* ctx) {
+    const char* url = duk_get_string(ctx, -1);
 
     esp_http_client_config_t config = { };
-    config.url = url.c_str();
-    config.event_handler = _ifttt_https_event_handle;
+    config.url = url;
+    config.event_handler = _http_event_handle;
     esp_http_client_handle_t client = esp_http_client_init(&config);
-    esp_http_client_set_method(client, HTTP_METHOD_POST);
-    esp_http_client_set_post_field(client, json_str, strlen(json_str));
+    esp_http_client_set_method(client, HTTP_METHOD_GET);
 
     esp_err_t err = esp_http_client_perform(client);
 
@@ -118,6 +81,36 @@ static duk_ret_t triggerIFTTTEvent(duk_context* ctx) {
         ESP_LOGE(LOG_TAG, "Error perform http request %s", esp_err_to_name(err));
     }
     esp_http_client_cleanup(client);
+
+    duk_pop(ctx);
+
+    return 0;
+}
+
+// function httpPost(url: string, data: string)
+static duk_ret_t httpPost(duk_context* ctx) {
+    const char* url = duk_get_string(ctx, -2);
+    const char* data = duk_get_string(ctx, -1);
+
+    esp_http_client_config_t config = { };
+    config.url = url;
+    config.event_handler = _http_event_handle;
+    esp_http_client_handle_t client = esp_http_client_init(&config);
+    esp_http_client_set_method(client, HTTP_METHOD_POST);
+    esp_http_client_set_post_field(client, data, strlen(data));
+
+    esp_err_t err = esp_http_client_perform(client);
+
+    if (err == ESP_OK) {
+        ESP_LOGI(LOG_TAG, "Status = %d, content_length = %d",
+        esp_http_client_get_status_code(client),
+        esp_http_client_get_content_length(client));
+    } else {
+        ESP_LOGE(LOG_TAG, "Error perform http request %s", esp_err_to_name(err));
+    }
+    esp_http_client_cleanup(client);
+
+    duk_pop_2(ctx);
 
     return 0;
 }
@@ -295,7 +288,8 @@ extern "C" duk_ret_t ModuleIoT(duk_context *ctx) {
     }
     mqtt_key[7] = '\0';
 
-    ADD_FUNCTION("triggerIFTTTEvent", triggerIFTTTEvent, 5);
+    ADD_FUNCTION("httpGet", httpGet, 1);
+    ADD_FUNCTION("httpPost", httpPost, 2);
     ADD_FUNCTION("registerMQTTCallback", registerMQTTCallback, 1);
     ADD_FUNCTION("startWaitingMQTTEvent", startWaitingMQTTEvent, 2);
     ADD_FUNCTION("stopWaitingMQTTEvent", stopWaitingMQTTEvent, 0);

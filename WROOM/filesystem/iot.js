@@ -12,9 +12,18 @@ moduleIoT(internalIoT);
 var iot = {
     mqttCallbacks: {},
 
-    // IFTTT
+    // Webhook
     triggerIFTTTEvent: function (key, event, value1, value2, value3) {
-        internalIoT.triggerIFTTTEvent(key, event, value1, value2, value3);
+        const url = "http://maker.ifttt.com/trigger/" + event + "/with/key/" + key;
+        const data = JSON.stringify({
+            value1: value1,
+            value2: value2,
+            value3: value3
+        });
+        internalIoT.httpPost(url, data);
+    },
+    triggerWebhook: function (url, params) {
+        internalIoT.httpGet(url + "?" + params);
     },
 
     // MQTT
