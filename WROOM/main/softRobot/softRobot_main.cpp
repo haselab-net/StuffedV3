@@ -16,6 +16,7 @@
 #include "AllBoards.h"
 #include "TouchSensing.h"
 #include "MotorDriver.h"
+#include "Movement.h"
 #ifndef USE_DUKTAPE
 #include "../wifiMan/wifiMan.h"
 #endif
@@ -34,6 +35,9 @@ extern "C" void softRobot_main()    //  called from app_main in main.cpp
     touchPads.Init();
     LOGD("nPads %d", touchPads.NPad());
 #endif
+
+    initMovementDS();
+
 #ifdef USE_DUKTAPE
     udpCom.Init();    //  init command processing for udp.
 #else

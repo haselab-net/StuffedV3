@@ -172,6 +172,8 @@ public:
 	void SendReturn(UdpCmdPacket& recv);
 	///	send return packet to web server (duktape)
 	void SendReturnServer();
+	///	send return packet to movement manager
+	void SendReturnMovement(UdpRetPacket& ret);
 	///	send return packet to udp
 	void SendReturnUdp(UdpCmdPacket& recv);
 	///	prepare return packet for command cmd

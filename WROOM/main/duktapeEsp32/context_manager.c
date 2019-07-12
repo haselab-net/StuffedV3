@@ -1,4 +1,5 @@
 #include <duktape.h>
+/*
 
 #include "driver/include/driver/timer.h"
 
@@ -120,3 +121,5 @@ void multiContextTest() {
 
     duk_destroy_heap(ctx1);
 }
+
+*/

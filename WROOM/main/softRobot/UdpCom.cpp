@@ -317,7 +317,8 @@ void UdpCom::SendReturn(UdpCmdPacket& recv) {
 #else
 #error
 #endif
-		SendReturnServer();
+		if (recv.count == 0) SendReturnServer();
+		else if (recv.count == 1) SendReturnMovement(send);
 	}
 	else {
 		SendReturnUdp(recv);
@@ -327,6 +328,11 @@ void UdpCom::SendReturnServer() {
 #ifndef _WIN32
 	wsOnMessageSr(send);
 #endif
+}
+
+#include "Movement.h"
+void UdpCom::SendReturnMovement(UdpRetPacket& ret) {
+	movementOnGetPICInfo(ret);
 }
 void UdpCom::SendReturnUdp(UdpCmdPacket& recv) {
 	if (!udp) return;
