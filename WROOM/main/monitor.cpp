@@ -480,3 +480,20 @@ public:
         }
     }
 } mcEspFs;
+
+
+#include "duktapeEsp32/include/context_manager.h"
+class MCTest: public MonitorCommandBase{
+public:
+    const char* Desc(){ return "p test Espfs"; }
+    void Func(){
+        conPrintf("MCTest\n");
+        switch (getchWait()){
+            case 'q': {
+                multiContextTest();
+                break;
+            }
+        }
+    }
+} mcTest;
+
