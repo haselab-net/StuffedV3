@@ -25,12 +25,12 @@ struct MovementKeyframe {
 	uint16_t refId;             // 0 if no ref (movement id should start from 1)
 	uint8_t refMotorId;
 	short timeOffset;
-};
+}__attribute__((packed));
 
 struct MovementKeyframeAddState {
     uint16_t id;
     uint8_t success;
-};
+}__attribute__((packed));
 
 struct InterpolateState {
 	vector<uint16_t> id;

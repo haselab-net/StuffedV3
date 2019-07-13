@@ -482,6 +482,7 @@ public:
 } mcEspFs;
 
 #include "../PIC/control.h"
+#include "./softRobot/Movement.h"
 
 class MCTest: public MonitorCommandBase{
 public:
@@ -494,7 +495,50 @@ public:
                 break;
             }
             case '1': {
-                
+                size_t len = 4 + 1 + sizeof(MovementKeyframe);
+                unsigned char motorId[3] = {0, 1, 2};
+                short pose[3] = {1000, 0, 0};
+
+                void* payload = (void*)malloc(len);
+                *((unsigned short*)payload) = len;
+                *((unsigned short*)payload+1) = CI_MOVEMENT;
+                *((unsigned char*)payload+4) = CI_M_ADD_KEYFRAME;
+                MovementKeyframe* keyframe = (MovementKeyframe*)((unsigned char*)payload+5);
+                keyframe->id = 0x0100;
+                keyframe->motorCount = 3;
+                memcpy(keyframe->motorId, motorId, 3);
+                keyframe->period = 6000;
+                memcpy(keyframe->pose, pose, 6);
+                keyframe->refId = 0x0000;
+                keyframe->refMotorId = 0;
+                keyframe->timeOffset = 0;
+
+                UdpCom_ReceiveCommand(payload, len, 0);
+
+                break;
+            }
+            case '2': {
+                size_t len = 4 + 1 + sizeof(MovementKeyframe);
+                unsigned char motorId[3] = {0, 1, 2};
+                short pose[3] = {-1000, 0, 0};
+
+                void* payload = (void*)malloc(len);
+                *((unsigned short*)payload) = len;
+                *((unsigned short*)payload+1) = CI_MOVEMENT;
+                *((unsigned char*)payload+4) = CI_M_ADD_KEYFRAME;
+                MovementKeyframe* keyframe = (MovementKeyframe*)((unsigned char*)payload+5);
+                keyframe->id = 0x0100;
+                keyframe->motorCount = 3;
+                memcpy(keyframe->motorId, motorId, 3);
+                keyframe->period = 6000;
+                memcpy(keyframe->pose, pose, 6);
+                keyframe->refId = 0x0000;
+                keyframe->refMotorId = 0;
+                keyframe->timeOffset = 0;
+
+                UdpCom_ReceiveCommand(payload, len, 0);
+
+                break;
             }
         }
     }

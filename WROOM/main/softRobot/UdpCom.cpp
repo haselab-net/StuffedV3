@@ -57,6 +57,15 @@ int UdpCmdPacket::CommandLen() {
 		return NHEADER * 2;
 	case CIU_GET_SUBBOARD_INFO:	//	index
 		return (NHEADER + 1) * 2;
+	case CIU_MOVEMENT:		// index
+		switch (command)
+		{
+		case MCI_ADD_KEYFRAME:
+			return NHEADER*2 + 1 + sizeof(MovementKeyframe);
+		
+		default:
+			break;
+		}
 	}
 	return 0;
 }
@@ -88,6 +97,15 @@ void UdpRetPacket::SetLength() {
 		length = (NHEADER + 16) * 2; break;
 	case CIU_GET_SUBBOARD_INFO:	//	uart id model nTarget nMotor nCurrent nForce
 		length = (NHEADER + 7) * 2 ; break;
+	case CIU_MOVEMENT:
+		switch (command)
+		{
+		case MCI_ADD_KEYFRAME:
+			length = NHEADER*2 + 1 + sizeof(MovementKeyframeAddState); break;
+		
+		default:
+			break;
+		}
 	default:				//	error
 		ESP_LOGE(Tag(), "Undefined command %d set lentgh to 0", command);
 		length = 0;
@@ -435,6 +453,17 @@ void UdpCom::ExecUdpCommand(UdpCmdPacket& recv) {
 		}
 		SendReturn(recv);
 	}	break;
+	case CIU_MOVEMENT: {
+		switch (*(uint8_t*)recv.data)
+		{
+		case CIU_MOVEMENT:
+			addKeyframe((MovementKeyframe*)((uint8_t*)recv.data+1));
+			break;
+		
+		default:
+			break;
+		}
+	} break;
 	default:
 		ESP_LOGE(Tag(), "Invalid command %d count %d received from %s at %x.\n", 
 			(int)recv.command, (int)recv.count, ipaddr_ntoa(&recv.returnIp), (unsigned)&recv);

@@ -16,8 +16,9 @@ enum CommandId {
 	CIU_SET_IPADDRESS,		//12 Set ip address to return the packet
     CIU_GET_IPADDRESS,      //13 Get ip address to return the packet
     CIU_GET_SUBBOARD_INFO,  //14 Get sub board info
+	CIU_MOVEMENT,			//15 movement command
 
-	CIU_NCOMMAND,           //14 number of commands
+	CIU_NCOMMAND,           //15 number of commands
 	CIU_NONE = -1           //  no command is in receiving state.
 };
 enum SetParamType{
@@ -31,3 +32,7 @@ enum ResetSensorFlags {
 	RSF_MOTOR=1,
 	RSF_FORCE=2,
 };
+enum MovementCommandId {
+	MCI_NONE = 0,
+	MCI_ADD_KEYFRAME = 1
+}
