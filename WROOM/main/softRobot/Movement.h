@@ -7,12 +7,18 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <freertos/semphr.h>
+#include <freertos/queue.h>
+#include <driver/periph_ctrl.h>
+#include <driver/timer.h>
 
 #include "AllBoards.h"
 
 using namespace std;
 
 ///////////////////////////////////////// data structure for WROOM interface ///////////////////////////// 
+
+#define MOTOR_KEYFRAME_BUFFER_SIZE 10        // size of buffer for every motor
+#define MS_PER_MOVEMENT_TICK 50				// 20 ms = 1 movement tick
 
 class MovementKeyframe {
 public:
@@ -38,14 +44,20 @@ struct InterpolateState {
 };
 
 /////////////////////////////////////////// api for accessing PIC ///////////////////////////////////////////////
-static void movementQueryInterpolateState();
+#define PIC_INTERPOLATE_BUFFER_VACANCY_MIN 1		// the minimum empty interpolate buffer count
+void movementQueryInterpolateState();
 void movementOnGetPICInfo(UdpRetPacket& pkt);
 
 /////////////////////////////////////////// debug ///////////////////////////////////////////////////////
 void printMotorKeyframes(uint8_t motorId);
+void printInterpolateParams();
 
 /////////////////////////////////////////// interface to hardware ///////////////////////////////////////
-void movementTick();
+#define MOVEMENT_MANAGER_TIMER_DIVIDER 16
+#define MOVEMENT_MANAGER_TIMER_GROUP TIMER_GROUP_0
+#define MOVEMENT_MANAGER_TIMER_IDX TIMER_0
+#define MOVEMENT_MANAGER_TIMER_SCALE (TIMER_BASE_CLK / MOVEMENT_MANAGER_TIMER_DIVIDER / 1000)  // convert counter value to ms
+
 void initMovementDS();
 
 /////////////////////////////////////////// api for WROOM ///////////////////////////////////////////////

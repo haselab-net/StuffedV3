@@ -58,7 +58,7 @@ int UdpCmdPacket::CommandLen() {
 	case CIU_GET_SUBBOARD_INFO:	//	index
 		return (NHEADER + 1) * 2;
 	case CIU_MOVEMENT:		// index
-		switch (command)
+		switch (*(uint8_t*)data)
 		{
 		case CI_M_ADD_KEYFRAME:
 			return NHEADER*2 + 1 + (2 + 1 + allBoards.GetNTotalMotor() + 2 + allBoards.GetNTotalMotor() * 2 + 2 + 1 + 2);
@@ -98,7 +98,7 @@ void UdpRetPacket::SetLength() {
 	case CIU_GET_SUBBOARD_INFO:	//	uart id model nTarget nMotor nCurrent nForce
 		length = (NHEADER + 7) * 2 ; break;
 	case CIU_MOVEMENT:
-		switch (command)
+		switch (*(uint8_t*)data)
 		{
 		case CI_M_ADD_KEYFRAME:
 			length = NHEADER*2 + 1 + (2 + 1); break;
@@ -454,7 +454,10 @@ void UdpCom::ExecUdpCommand(UdpCmdPacket& recv) {
 		SendReturn(recv);
 	}	break;
 	case CIU_MOVEMENT: {
-		switch (*(uint8_t*)recv.data)
+		printf("=============== ExecUdpCommand ================ \n");
+		uint8_t movement_command_id = *(uint8_t*)recv.data;
+		printf("command id: %i \n", movement_command_id);
+		switch (movement_command_id)
 		{
 		case CI_M_ADD_KEYFRAME: {
 			MovementKeyframe keyframe;
