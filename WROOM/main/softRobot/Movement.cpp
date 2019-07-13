@@ -2,6 +2,8 @@
 #include "UdpCom.h"
 #include "../../../PIC/control.h"
 
+static char* LOG_TAG = "Movement";
+
 typedef struct MotorKeyframeNode MotorKeyframeNode;
 typedef struct MotorHead MotorHead;
 typedef struct PausedMovementHead PausedMovementHead;
@@ -82,8 +84,13 @@ static void initPausedMovements() {
 /////////////////////////////////////////// api for accessing PIC ///////////////////////////////////////////////
 static xSemaphoreHandle picQuerySemaphore;
 
-static uint8_t targetCountReadMin, targetCountReadMax, targetWrite;
+static uint8_t targetCountReadMin = 0xfe, targetCountReadMax = 0xfe, targetWrite = 0xff;
 static uint16_t tickMin, tickMax;
+
+// return the count of remaining empty buffer
+static uint8_t getInterpolateBufferVacancy() {
+	return allBoards.GetNTarget() - (targetWrite - targetCountReadMin + 1);
+}
 
 void movementQueryInterpolateState() {
 	// xSemaphoreTake(picQuerySemaphore, portMAX_DELAY);
@@ -557,8 +564,6 @@ static xSemaphoreHandle tickSemaphore;		// semaphore for lock movement linked li
 static xSemaphoreHandle intervalSemaphore;	// semaphore to allow movement manager send interpolate buffer in specified interval
 static xTaskHandle movementManagerTask;
 
-uint16_t targetCountWrite = 0xffff;
-
 static void movementTick() {
 	xSemaphoreTake(tickSemaphore, portMAX_DELAY);
 
@@ -574,7 +579,7 @@ static void movementTick() {
 	cmd.command = CI_INTERPOLATE; 
 	cmd.length = cmd.CommandLen();
 	cmd.SetPeriod(MS_PER_MOVEMENT_TICK * 3);
-	cmd.SetTargetCountWrite(++targetCountWrite);
+	cmd.SetTargetCountWrite(++targetWrite);
 
 	for (int i = 0; i < allBoards.GetNTotalMotor(); i++) {
 		// change pose
@@ -597,10 +602,19 @@ static void movementTick() {
 	xSemaphoreGive(tickSemaphore);
 }
 
+static bool skippedOneLoop = false;		// forbid continuous skip (because the targetWrite will not be updated)
 static void movementManager(void* arg) {
 	while(1) {
 		xSemaphoreTake(intervalSemaphore, portMAX_DELAY);
 
+		// avoid overflow of interpolate buffer in PIC
+		if (getInterpolateBufferVacancy() <= PIC_INTERPOLATE_BUFFER_VACANCY_MIN && !skippedOneLoop) {
+			ESP_LOGD(LOG_TAG, "interpolate buffer vacany: %i, skip one loop", getInterpolateBufferVacancy());
+			skippedOneLoop = true;
+			continue;
+		} else if (skippedOneLoop) skippedOneLoop = false;
+
+		// do tick
 		movementTick();
 	}
 }

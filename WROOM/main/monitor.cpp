@@ -511,7 +511,7 @@ public:
         conPrintf("MCtest\n");
         switch (getchWait()){
             case 'p': {
-                printf("target pose: %ld, %ld, %ld \n", motorTarget.pos[0], motorTarget.pos[1], motorTarget.pos[2]);
+                printf("target pose: %ld, %ld, %ld \n", motorTarget.pos[0] >> 6, motorTarget.pos[1] >> 6, motorTarget.pos[2] >> 6);
                 break;
             }
             case 'm': {
