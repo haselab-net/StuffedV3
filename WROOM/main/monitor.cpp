@@ -503,6 +503,7 @@ static void print_timer_counter(uint64_t counter_value)
     printf("Counter: 0x%08x%08x\n", (uint32_t) (counter_value >> 32), (uint32_t) (counter_value));
     printf("Time   : %.8f ms\n", (double) counter_value / MOVEMENT_MANAGER_TIMER_SCALE);
 }
+static short currentPos = 0;
 class MCTest: public MonitorCommandBase{
 public:
     const char* Desc(){ return "p test movement"; }
@@ -521,10 +522,11 @@ public:
                 printInterpolateParams();
                 break;
             }
-            case '1': {
+            case '+': {
                 size_t len = 4 + 1 + sizeof(MonitorMovementKeyframe);
                 unsigned char motorId[3] = {0, 1, 2};
-                short pose[3] = {1000, 0, 0};
+                currentPos += 2000;
+                short pose[3] = {currentPos, 0, 0};
 
                 void* payload = (void*)malloc(len);
                 *((unsigned short*)payload) = len;
@@ -534,7 +536,7 @@ public:
                 keyframe->id = 0x0100;
                 keyframe->motorCount = 3;
                 memcpy(keyframe->motorId, motorId, 3);
-                keyframe->period = 100;
+                keyframe->period = 2000 / MS_PER_MOVEMENT_TICK;
                 memcpy(keyframe->pose, pose, 6);
                 keyframe->refId = 0x0000;
                 keyframe->refMotorId = 0;
@@ -544,10 +546,11 @@ public:
 
                 break;
             }
-            case '2': {
+            case '-': {
                 size_t len = 4 + 1 + sizeof(MonitorMovementKeyframe);
                 unsigned char motorId[3] = {0, 1, 2};
-                short pose[3] = {-1000, 0, 0};
+                currentPos -= 2000;
+                short pose[3] = {currentPos, 0, 0};
 
                 void* payload = (void*)malloc(len);
                 *((unsigned short*)payload) = len;
@@ -557,7 +560,7 @@ public:
                 keyframe->id = 0x0100;
                 keyframe->motorCount = 3;
                 memcpy(keyframe->motorId, motorId, 3);
-                keyframe->period = 100;
+                keyframe->period = 2000 / MS_PER_MOVEMENT_TICK;
                 memcpy(keyframe->pose, pose, 6);
                 keyframe->refId = 0x0000;
                 keyframe->refMotorId = 0;
