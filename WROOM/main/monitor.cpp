@@ -509,6 +509,10 @@ public:
                 printf("target pose: %ld, %ld, %ld \n", motorTarget.pos[0], motorTarget.pos[1], motorTarget.pos[2]);
                 break;
             }
+            case 'm': {
+                printMotorKeyframes(0);
+                break;
+            }
             case '1': {
                 size_t len = 4 + 1 + sizeof(MonitorMovementKeyframe);
                 unsigned char motorId[3] = {0, 1, 2};

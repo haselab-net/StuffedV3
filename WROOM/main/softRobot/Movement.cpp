@@ -205,8 +205,6 @@ static void getInterpolateParams(uint8_t motorId) {
 	head.slopeDecimal = dif_sum & 0xffff;
 	head.slopeError = 0x8000;
 	head.nextTime = min_time;
-
-	if (minTime(minNextTime, head.nextTime, movementTime) == head.nextTime) minNextTime = head.nextTime;	// update min next time
 }
 
 static MotorKeyframeNode* lastSmallerNode(MotorKeyframeNode* smallerNode, MotorKeyframeNode* node) {
@@ -537,6 +535,7 @@ void printNode(MotorKeyframeNode* node, bool isHead) {
 void printMotorKeyframes(uint8_t motorId) {
 	MotorHead &head = motorHeads[motorId];
 
+	printf("tick: %d ", 0x0000ffff & controlCount);
 	printf("currentTime: %d, nextTime: %d \r\n", movementTime, head.nextTime);
 
 	MotorKeyframeNode* node = head.head;
@@ -610,11 +609,15 @@ void sendAndDeletePICKeyframe() {
 
 	movementTime = time;
 
+	printf("send PIC and delete: ");
+
 	for (int i=0; i<allBoards.GetNTotalMotor(); i++) {
 		// set motor pose
 		uint16_t offset = motorHeads[i].slopeInteger * period + (uint16_t)(((uint32_t)motorHeads[i].slopeDecimal * period) >> 16);
 		short targetPose = motorHeads[i].currentPose + (motorHeads[i].minus ? -offset : offset);
 		cmd.SetMotorPos(targetPose, i);
+
+		printf(" %i,", targetPose);
 
 		motorHeads[i].currentPose = targetPose;
 
@@ -623,6 +626,7 @@ void sendAndDeletePICKeyframe() {
 			finishKeyframe(i);
 		}
 	}
+	printf("\n");
 
 	UdpCom_ReceiveCommand((void*)(cmd.bytes+2), cmd.CommandLen(), 1);
 }
@@ -640,17 +644,22 @@ void sendPICKeyframe(uint16_t targetTime) {
 
 	movementTime = targetTime;
 
+	printf("send PIC: ");
+
 	for (int i=0; i<allBoards.GetNTotalMotor(); i++) {
 		// set motor pose
 		uint16_t offset = motorHeads[i].slopeInteger * period + (uint16_t)(((uint32_t)motorHeads[i].slopeDecimal * period) >> 16);
 		short targetPose = motorHeads[i].currentPose + (motorHeads[i].minus ? -offset : offset);
 		cmd.SetMotorPos(targetPose, i);
 
+		printf(" %i,", targetPose);
+
 		// get pose at targetTime
 		offset = motorHeads[i].slopeInteger * target_period + (uint16_t)(((uint32_t)motorHeads[i].slopeDecimal * target_period) >> 16);
 		targetPose = motorHeads[i].currentPose + (motorHeads[i].minus ? -offset : offset);
 		motorHeads[i].currentPose = targetPose;
 	}
+	printf("\n");
 
 	UdpCom_ReceiveCommand((void*)(cmd.bytes+2), cmd.CommandLen(), 1);
 }
@@ -669,15 +678,31 @@ void dropNextKeyframe() {
 	}
 }
 
+static void updateMinNextTime() {
+	minNextTime = movementTime-1;
+	for (int i=0; i<allBoards.GetNTotalMotor(); i++) {
+		if (minTime(minNextTime, motorHeads[i].nextTime, movementTime) == motorHeads[i].nextTime) minNextTime = motorHeads[i].nextTime;	// update min next time
+	}
+}
+
 #define MONITOR_PIC_MAX_LOOP_INTERVAL 1000
 TaskHandle_t monitorPICTask;
 void monitorPICForever(void* arg) {
 	printf(" ================ Start PIC forever =================== \n");
 	static uint16_t lastMinNextTime = minNextTime;
 	static uint16_t formalKeyframeTime = 0;
+
+	// add first keyframe (0)
+	uint16_t tick = 0x0000ffff & controlCount;
+	sendPICKeyframe(tick + MONITOR_PIC_MAX_LOOP_INTERVAL);
+	movementTime = tick + MONITOR_PIC_MAX_LOOP_INTERVAL;
+
 	while(1) {
+		bool changePartialInterpolateKeyframe = false;
+
 		// the last buffer in PIC need to be changed (a new keyframe is inserted)
 		if (lastMinNextTime != minNextTime) {
+			printf("==== overwrite last buffer \n");
 			UdpCmdPacket cmd;
 
 			cmd.command = CI_INTERPOLATE;
@@ -693,11 +718,14 @@ void monitorPICForever(void* arg) {
 			}
 
 			UdpCom_ReceiveCommand((void*)(cmd.bytes+2), cmd.CommandLen(), 1);
+
+			lastMinNextTime = minNextTime;
+			changePartialInterpolateKeyframe = true;
 		}
 
 		movementQueryInterpolateState();
 
-		uint16_t tick = 0x0000ffff & controlCount;
+		tick = 0x0000ffff & controlCount;
 
 		// lose synchronization on target count
 		uint8_t n_targets_occupied = targetWrite-targetCountReadMin+1;
@@ -716,7 +744,8 @@ void monitorPICForever(void* arg) {
 		uint8_t vacancy = allBoards.GetNTarget() - n_targets_occupied;
 		while (minTime(minNextTime, targetTime, movementTime) == minNextTime) {
 			formalKeyframeTime = minNextTime;
-			printf("%i, %i, %i \n", minNextTime, targetTime, movementTime);
+			printf("tick: %i\n", controlCount);
+			printf("time: %i, %i, %i \n", minNextTime, targetTime, movementTime);
 			if (vacancy > 0) {
 				printf("==== sendAndDeletePICKeyframe \n");
 				sendAndDeletePICKeyframe();
@@ -725,17 +754,23 @@ void monitorPICForever(void* arg) {
 				printf("==== dropNextKeyframe \n");
 				dropNextKeyframe();
 			}
+			updateMinNextTime();
+			changePartialInterpolateKeyframe = true;
 		}
 
 		// just send last keyframe that is partially interpolated
-		printf("==== sendPICKeyframe \n");
-		sendPICKeyframe(targetTime);
+		if (changePartialInterpolateKeyframe) {
+			printf("==== sendPICKeyframe \n");
+			sendPICKeyframe(targetTime);
+		}
+
+		movementTime = targetTime;
 
 		xSemaphoreGive(tickSemaphore);
-
+		
 		lastMinNextTime = minNextTime;
 
-		vTaskDelay(MONITOR_PIC_MAX_LOOP_INTERVAL / 2 / portTICK_PERIOD_MS);
+		vTaskDelay(MONITOR_PIC_MAX_LOOP_INTERVAL / 4 / portTICK_PERIOD_MS);
 	}
 }
 
