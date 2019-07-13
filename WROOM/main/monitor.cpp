@@ -26,7 +26,7 @@
 #include "SoftRobot/UartForBoards.h"
 extern "C" {
 #include "duktapeEsp32/include/module_jslib.h"
-#include "duktapeEsp32/include/duktape_jsfile.h"
+#include "duktapeEsp32/include/duktape_task.h"
 }
 #include "duktapeEsp32/include/module_srcommand.h"
 
@@ -384,12 +384,14 @@ public:
     const char* Desc(){ return "j dump java script stack"; }
     void Func(){
         lock_heap();
-        duk_context* ctx = esp32_duk_context;
-        duk_push_global_object(ctx);
-        duk_push_context_dump(ctx);
-        printf("%s\n", duk_to_string(ctx, -1));
-        duk_pop(ctx);
-        duk_pop(ctx);
+        for(int i=0; i<NJSTHREADS; ++i){
+            duk_context* ctx = jsThreads[i].ctx;
+            duk_push_global_object(ctx);
+            duk_push_context_dump(ctx);
+            printf("%d: %s\n", i, duk_to_string(ctx, -1));
+            duk_pop(ctx);
+            duk_pop(ctx);
+        }
         unlock_heap();
     }
 } mcJSStack;

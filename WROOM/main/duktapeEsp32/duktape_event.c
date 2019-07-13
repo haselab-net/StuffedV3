@@ -76,15 +76,9 @@ void esp32_duktape_endEvents() {
  *
  * We return 0 to indicate that no event was caught.
  */
-int esp32_duktape_waitForEvent(esp32_duktape_event_t* pEvent) {
-	// Ask FreeRTOS to see if we have a new event.
-#if defined(ESP_PLATFORM)
-	BaseType_t rc = xQueueReceive(esp32_duktape_event_queue, pEvent, 0);
-#else /* ESP_PLATFORM */
-	int rc = 0;
-#endif /* ESP_PLATFORM */
-	return (int)rc;
-} // esp32_duktape_waitForEvent
+void esp32_duktape_waitForEvent(esp32_duktape_event_t* pEvent) {
+	xQueueReceive(esp32_duktape_event_queue, pEvent, portMAX_DELAY);
+}
 
 
 /**

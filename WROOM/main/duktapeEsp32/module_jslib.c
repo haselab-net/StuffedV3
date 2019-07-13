@@ -12,7 +12,7 @@
 #include "dukf_utils.h"
 #include "duktape_utils.h"
 #include "duktape_event.h"
-#include "duktape_jsfile.h"
+#include "duktape_task.h"
 #include "../softRobot/UdpCom.h"
 
 static uint32_t stash_key_callback = 0;    // stash key for packet callback function
@@ -116,26 +116,10 @@ static duk_ret_t send_command(duk_context* ctx) {
     return 0;
 }
 
-/**
- * Handle events in the event queue
- */
-static duk_ret_t jslib_handle_event(duk_context* ctx) {
-    if (handle_event()){
-        duk_push_true(ctx);
-    }else{
-        duk_push_false(ctx);
-    }
-    unlock_heap();
-    lock_heap();
-
-    return 1;
-}
-
 duk_ret_t ModuleJSLib(duk_context *ctx){
     ADD_FUNCTION("block_pause",         block_pause,        1);
     ADD_FUNCTION("register_callback",   register_callback,  1);
     ADD_FUNCTION("send_command",        send_command,       1);
-    ADD_FUNCTION("handle_event",        jslib_handle_event, 0);
     ADD_FUNCTION("print_heap",          printHeap,          1);
     ADD_FUNCTION("print",               print,              1);
 

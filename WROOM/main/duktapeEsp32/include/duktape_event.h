@@ -73,7 +73,7 @@ void  event_newISREvent(int isrType, void* data);
 void  esp32_duktape_freeEvent(duk_context* ctx, esp32_duktape_event_t* pEvent);
 void  esp32_duktape_initEvents();
 void  esp32_duktape_endEvents();
-int   esp32_duktape_waitForEvent();
+void  esp32_duktape_waitForEvent();	//	blocking waitForEvent	
 char* event_eventTypeToString(int eventType);
 void  event_newCallbackRequestedEvent(
 	uint32_t callbackType,

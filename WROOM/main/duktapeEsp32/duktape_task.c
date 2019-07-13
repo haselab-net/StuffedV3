@@ -1,4 +1,4 @@
-#include "duktape_jsfile.h"
+#include "duktape_task.h"
 
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
@@ -16,27 +16,20 @@
 
 #include "module_iot.h"
 
-LOG_TAG("duktape_jsfile");
+LOG_TAG("duktape_task");
 
 // The heap context
-static duk_context *heap_context = NULL;
-// The Duktape context.
-duk_context *esp32_duk_context = NULL;
+duk_context *heap_context = NULL;
+//	Threads
+JSThread jsThreads[NJSTHREADS];
 // mutex for heap
 static xSemaphoreHandle heap_mutex = NULL;
-
-// deprecated
-static void runJsFile(){
-	// run main.js
-    dukf_runFileFromPosix(esp32_duk_context, "/spiffs/main/runtime.js");		// file in espfs could not be rewrite from user
-	ESP_LOGD(tag, "runtime.js finished.");
-}
 
 void* duk_alloc_hybrid_udata = NULL;
 /**
  * create environment for running js file
  */
-static void createJSFileHeap() {
+static void createDuktapeHeap() {
     LOGD("About to create heap");
 	//	Heap selection
 #if 0
@@ -69,7 +62,7 @@ static void createJSFileHeap() {
     #endif /* ESP_PLATFORM */
 }
 
-static void processEvent(esp32_duktape_event_t *pEvent) {
+static void processEvent(duk_context* ctx, esp32_duktape_event_t *pEvent) {
 	duk_int_t callRc;
 	LOGV(">> processEvent: eventType=%s", event_eventTypeToString(pEvent->type));
 
@@ -77,28 +70,27 @@ static void processEvent(esp32_duktape_event_t *pEvent) {
 		// Handle a new command line submitted to us.
 		case ESP32_DUKTAPE_EVENT_COMMAND_LINE: {
 			LOGD("We are about to eval: %.*s", pEvent->commandLine.commandLineLength, pEvent->commandLine.commandLine);
-			callRc = duk_peval_lstring(esp32_duk_context,	pEvent->commandLine.commandLine, pEvent->commandLine.commandLineLength);
+			callRc = duk_peval_lstring(ctx,	pEvent->commandLine.commandLine, pEvent->commandLine.commandLineLength);
 			// [0] - result
-
-    // If an error was detected, perform error logging.
+		    
+			// If an error was detected, perform error logging.
 			if (callRc != 0) {
-				esp32_duktape_log_error(esp32_duk_context);
+				esp32_duktape_log_error(ctx);
 			}
 
 			// If we executed from a keyboard, send keyboard user response.
 			if (pEvent->commandLine.fromKeyboard) {
-				esp32_duktape_console(duk_safe_to_string(esp32_duk_context, -1));
+				esp32_duktape_console(duk_safe_to_string(ctx, -1));
 				esp32_duktape_console("\n");
 				esp32_duktape_console("esp32_duktape> "); // Put out a prompt.
 			}
 
-			duk_pop(esp32_duk_context); // Discard the result from the stack.
+			duk_pop(ctx); // Discard the result from the stack.
 			// <Empty Stack>
 			break;
 		}
 
 		case ESP32_DUKTAPE_EVENT_CALLBACK_REQUESTED: {
-
 			// The event contains 4 properties:
 			// * callbackType - int
 			// * stashKey     - int - A key to an array stash that contains a function and parameters.
@@ -113,34 +105,34 @@ static void processEvent(esp32_duktape_event_t *pEvent) {
 					pEvent->callbackRequested.callbackType == ESP32_DUKTAPE_CALLBACK_TYPE_ISR_FUNCTION ||
 					pEvent->callbackRequested.callbackType == ESP32_DUKTAPE_CALLBACK_STATIC_TYPE_FUNCTION) {
 
-				int topStart = duk_get_top(esp32_duk_context);
+				int topStart = duk_get_top(ctx);
 
 				// In this case, the stashKey points to a stashed array which starts with a callback function and parameters.
-				esp32_duktape_unstash_array(esp32_duk_context, pEvent->callbackRequested.stashKey);
+				esp32_duktape_unstash_array(ctx, pEvent->callbackRequested.stashKey);
 				// [0] - function
 				// [1] - param 1
 				// [.] - param
 				// [n] - param last
 
-				int numberParams = duk_get_top(esp32_duk_context) - topStart -1;
+				int numberParams = duk_get_top(ctx) - topStart -1;
 
 				LOGD("ESP32_DUKTAPE_EVENT_CALLBACK_REQUESTED: #params: %d", numberParams);
 
-				if (!duk_is_function(esp32_duk_context, topStart)) {
+				if (!duk_is_function(ctx, topStart)) {
 					LOGE("ESP32_DUKTAPE_EVENT_CALLBACK_REQUESTED: Not a function!");
-					duk_pop_n(esp32_duk_context, duk_get_top(esp32_duk_context) - topStart);
+					duk_pop_n(ctx, duk_get_top(ctx) - topStart);
 					return;
 				}
 
 				if (pEvent->callbackRequested.dataProvider != NULL) {
-					int numberAdditionalStackItems = pEvent->callbackRequested.dataProvider(esp32_duk_context, pEvent->callbackRequested.context);
+					int numberAdditionalStackItems = pEvent->callbackRequested.dataProvider(ctx, pEvent->callbackRequested.context);
 					numberParams += numberAdditionalStackItems;
 				}
 
-				duk_pcall(esp32_duk_context, numberParams);
+				duk_pcall(ctx, numberParams);
 				// [0] - Ret val
 
-				duk_pop(esp32_duk_context);
+				duk_pop(ctx);
 				// <empty stack>
 			}
 
@@ -154,64 +146,68 @@ static void processEvent(esp32_duktape_event_t *pEvent) {
 	LOGV("<< processEvent");
 } // processEvent
 
-bool handle_event() {
-    esp32_duktape_event_t esp32_duktape_event;
-
-    // Process any events.  A return code other than 0 indicates we have an event.
-    int rc = esp32_duktape_waitForEvent(&esp32_duktape_event);
-    if (rc != 0) {
-        processEvent(&esp32_duktape_event);
-        esp32_duktape_freeEvent(esp32_duk_context, &esp32_duktape_event);
-		return true;
-    }
-	return false;
-}
-
 void lock_heap() {
 	xSemaphoreTake(heap_mutex, portMAX_DELAY);
 }
-
 void unlock_heap() {
 	xSemaphoreGive(heap_mutex);
 }
 
+static void dukEventHandleTask(void* arg){
+	JSThread* th = (JSThread*)arg;
+	while(1){
+		esp32_duktape_event_t esp32_duktape_event;
+		esp32_duktape_waitForEvent(&esp32_duktape_event);
+		if (th->ctx){
+			lock_heap();
+			processEvent(th->ctx, &esp32_duktape_event);
+			esp32_duktape_freeEvent(th->ctx, &esp32_duktape_event);
+			unlock_heap();
+		}else{
+			vTaskDelete(th->task);
+			th->task = NULL;
+			return;
+		}
+	}
+}
 void duktape_start() {
-    esp32_duktape_initEvents();
-
+	//	Initialize heap and threads
     dukf_init_nvs_values(); // Initialize any defaults for NVS data
-
+    esp32_duktape_initEvents();
 	if(!heap_mutex) heap_mutex = xSemaphoreCreateMutex();	// only create once
 	lock_heap();
-
-    if(!heap_context) createJSFileHeap();					// only create once
+    if(!heap_context) createDuktapeHeap();					// only create once
 	else {
 		dukf_runFile(heap_context, "/main/reinit.js");
 	}
-
-	// create new context on the same heap
-	(void*)duk_push_thread(heap_context);
-	esp32_duk_context = duk_get_context(heap_context, -1);
-
-    //duk_idx_t lastStackTop = duk_get_top(esp32_duk_context); // Get the last top value of the stack from which we will use to check for leaks.
-
+	jsThreads[0].ctx = heap_context;
+	for(int i=1; i<NJSTHREADS; ++i){
+		// create new context on the same heap
+		duk_push_thread(heap_context);
+		jsThreads[i].ctx = duk_get_context(heap_context, -1);
+	}
 	unlock_heap();
-	lock_heap();
-
-	// runJsFile(); // run js file from spiffs
-	dukf_runFile(esp32_duk_context, "/main/runtime.js");
-
-	unlock_heap();
+	const char* taskNames[NJSTHREADS] = {"js0", "js1", "js2", "js3"};
+	
+	//	create tasks for threads
+	for(int i=0; i<NJSTHREADS; ++i){
+		xTaskCreate(dukEventHandleTask, taskNames[i], 1024*10, &jsThreads[i], tskIDLE_PRIORITY + 1, &jsThreads[i].task);
+	}
+	char* cmd = "ESP32.include('/main/runtime.js');";
+	event_newCommandLineEvent(cmd, strlen(cmd), 0);
 }
 
 void duktape_end(){
 	iotBeforeStopJSTask();
-
-	esp32_duk_context = NULL;
-	dukf_log_heap("Heap after set esp32_duk_context NULL");
+	for(int i=0; i<NJSTHREADS; ++i){
+		jsThreads[i].ctx = NULL;
+	}
 
 	// delete heap
+	lock_heap();
 	duk_destroy_heap( heap_context );
 	heap_context = NULL;
+	unlock_heap();
 	
 	esp32_duktape_endEvents();
 }

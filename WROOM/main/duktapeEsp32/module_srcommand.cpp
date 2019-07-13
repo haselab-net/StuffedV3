@@ -8,7 +8,7 @@ extern "C" {
 #include <duktape.h>
 #include "duktape_event.h"
 #include "duktape_utils.h"
-#include "duktape_jsfile.h"
+#include "duktape_task.h"
 #include "logging.h"
 }
 #include "module_srcommand.h"
@@ -542,10 +542,11 @@ int pushDataCIResetsensor(duk_context* ctx, void* data) {
 }
 
 void commandMessageHandler(UdpRetPacket& ret) {
+    //hase: now ctx is not needed here. It is assigned at dukEventHandleTask() in duktape_task.c
     //  do not return from this function until unlock (call Give).
-
-    duk_context* ctx= esp32_duk_context;
-    duk_idx_t top = duk_get_top(ctx);
+    //  duk_context* ctx= esp32_duk_context;
+    //  duk_idx_t top = duk_get_top(ctx);
+    
     switch (ret.command)
     {
         case CI_BOARD_INFO: {
@@ -659,8 +660,9 @@ void commandMessageHandler(UdpRetPacket& ret) {
         default:
             break;
     }
-
-    duk_pop_n(ctx, duk_get_top(ctx)-top);
+    
+    //  ctx is assigned dukEventHandleTask() in duktape_task.c
+    //  duk_pop_n(ctx, duk_get_top(ctx)-top);
 }
 
 ////////////////////////////////////////////////////////

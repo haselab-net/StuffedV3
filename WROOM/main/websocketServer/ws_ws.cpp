@@ -14,7 +14,7 @@
 #include "assert.h"
 extern "C" {
 #include "module_jslib.h"
-#include "duktape_jsfile.h"
+#include "duktape_task.h"
 }
 #include "../SoftRobot/UdpCom.h"
 #include "module_srcommand.h"
@@ -65,21 +65,6 @@ static void saveToMainJsStream(const WebSocketInputStreambuf *content) {
     m_ofStream.close();
 }
 */
-
-static void saveToMainJs(const char *content, size_t length){
-    std::ofstream m_ofStream;
-
-    m_ofStream.open(std::string(SPIFFS_MOUNTPOINT) + "/main/main.js", std::ofstream::out | std::ofstream::binary | std::ofstream::trunc);
-    if (!m_ofStream.is_open()) {
-        ESP_LOGV(LOG_TAG, "Failed to open file /spiffs/main/main.js for writing");
-        return;
-    }
-
-    m_ofStream.write(content, length);
-    m_ofStream.close();
-
-    ESP_LOGV(LOG_TAG, "File main.js written to /spiffs/main/main.js");
-}
 
 static void wsSend(void* data, size_t length) {
     if(!pWebSocket) {
@@ -199,10 +184,10 @@ void wsOnMessageSr(UdpRetPacket& ret) {
         // send packet to jsfile task
         // return_packet_to_jsfile(buffer, buffer_size);
         if(!wsIsJsfileTaskRunning()) return;
-        if(!esp32_duk_context) return;
+        if(!heap_context) return;
         
         lock_heap();
-        if(!wsIsJsfileTaskRunning() || !esp32_duk_context) {
+        if(!wsIsJsfileTaskRunning()) {
             unlock_heap();
             return;
         }

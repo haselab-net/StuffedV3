@@ -1,5 +1,16 @@
 #include <duktape.h>
 /*
+    Requirements:
+
+    Duktape only can suspend and resume the native thread. So, pcall() can not return before
+    the finish of the js fucntion. 
+    Therefore, multi-threading is needed for blocking of more than two threads.
+    - While blocking, the native thread calling the JS function is blocked.
+    - For each event, we need a native thread.
+    - When a callback function for an event is finished, the thread can handle the next event. 
+*/
+
+/*
 
 #include "driver/include/driver/timer.h"
 
