@@ -118,10 +118,10 @@ inline SDEC getForce(int ch){
 	return 0;
 }
 
-#ifdef PIC
+// #ifdef PIC
 extern int coretimerRemainTime;
 extern uint32_t coretimerCompare;
 extern uint32_t controlCount;
-#endif
+// #endif
 
 #endif

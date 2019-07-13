@@ -1,4 +1,5 @@
 #include "Movement.h"
+#include "../../PIC/control.h"
 
 typedef struct MotorKeyframeNode MotorKeyframeNode;
 typedef struct MotorHead MotorHead;
@@ -84,7 +85,7 @@ static void initPausedMovements() {
 static xSemaphoreHandle picQuerySemaphore;
 
 static uint8_t targetCountReadMin, targetCountReadMax, targetWrite;
-static uint16_t tickMin, tickMax;
+// static uint16_t tickMin, tickMax;
 
 void movementQueryInterpolateState() {
 	xSemaphoreTake(picQuerySemaphore, portMAX_DELAY);
@@ -100,13 +101,13 @@ void movementQueryInterpolateState() {
 }
 
 static void movementUpdateInterpolateState(UdpRetPacket& pkt) {
-	for(int i=0; i<allBoards.GetNTotalMotor(); i++) {
-		motorHeads[i].currentPose = pkt.GetMotorPos(i);
-	}
+	// for(int i=0; i<allBoards.GetNTotalMotor(); i++) {
+	// 	motorHeads[i].currentPose = pkt.GetMotorPos(i);
+	// }
 	targetCountReadMin = pkt.GetTargetCountReadMin();
 	targetCountReadMax = pkt.GetTargetCountReadMax();
-	tickMin = pkt.GetTickMin();
-	tickMax = pkt.GetTickMax();
+	// tickMin = pkt.GetTickMin();
+	// tickMax = pkt.GetTickMax();
 }
 void movementOnGetPICInfo(UdpRetPacket& pkt) {
 	switch (pkt.command)
@@ -691,6 +692,8 @@ void monitorPICForever(void* arg) {
 
 		movementQueryInterpolateState();
 
+		uint16_t tick = 0x0000ffff & controlCount;
+
 		// lose synchronization on target count
 		uint8_t n_targets_occupied = targetWrite-targetCountReadMin+1;
 		if (n_targets_occupied > allBoards.GetNTarget()) {
@@ -698,7 +701,9 @@ void monitorPICForever(void* arg) {
 			n_targets_occupied = targetCountReadMax + 1 - targetCountReadMin;
 		}
 
-		uint16_t targetTime = tickMax + MONITOR_PIC_MAX_LOOP_INTERVAL;
+		uint16_t targetTime = tick + MONITOR_PIC_MAX_LOOP_INTERVAL;
+
+		xSemaphoreTake(tickSemaphore, portMAX_DELAY);
 
 		// send and delete next keyframes that have been fully interpolated
 		uint8_t vacancy = allBoards.GetNTarget() - n_targets_occupied;
@@ -714,6 +719,8 @@ void monitorPICForever(void* arg) {
 
 		// just send last keyframe that is partially interpolated
 		sendPICKeyframe(targetTime);
+
+		xSemaphoreGive(tickSemaphore);
 
 		lastMinNextTime = minNextTime;
 
