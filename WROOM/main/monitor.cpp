@@ -481,6 +481,7 @@ public:
     }
 } mcEspFs;
 
+#include "../PIC/control.h"
 
 class MCTest: public MonitorCommandBase{
 public:
@@ -488,8 +489,12 @@ public:
     void Func(){
         conPrintf("MCtest\n");
         switch (getchWait()){
-            case 'q': {
+            case 'p': {
+                printf("target pose: %i, %i, %i", motorTarget.pos[0], motorTarget.pos[1], motorTarget.pos[2]);
                 break;
+            }
+            case '1': {
+                
             }
         }
     }

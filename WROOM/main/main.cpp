@@ -19,6 +19,7 @@
 #include "ws_fs.h"
 #include "ws_ws.h"
 #include "softRobot/UdpCom.h"
+#include "softRobot/Movement.h"
 #include "duktapeEsp32/include/logging.h"
 
 LOG_TAG("main");
@@ -138,6 +139,9 @@ extern "C" void app_main(){
     
     //  start soft robot's udp command server.
     udpCom.Start();   //  start UDP server.
+
+    // init movement manager
+    initMovementDS();
 
     //  start DukTape, javascript engine and run /main/main*.js
 	if(offline_mode && !wsIsJsfileTaskRunning()) {

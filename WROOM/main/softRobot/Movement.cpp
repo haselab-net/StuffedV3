@@ -88,16 +88,20 @@ static uint8_t targetCountReadMin, targetCountReadMax, targetWrite;
 // static uint16_t tickMin, tickMax;
 
 void movementQueryInterpolateState() {
-	xSemaphoreTake(picQuerySemaphore, portMAX_DELAY);
+	// xSemaphoreTake(picQuerySemaphore, portMAX_DELAY);
 
-	UdpCmdPacket cmd;
-	cmd.command = CI_INTERPOLATE;
-	cmd.length = cmd.CommandLen();
-	cmd.SetPeriod(0);
-	UdpCom_ReceiveCommand((void*)(cmd.bytes+2), cmd.CommandLen(), 1);
+	// UdpCmdPacket cmd;
+	// cmd.command = CI_INTERPOLATE;
+	// cmd.length = cmd.CommandLen();
+	// cmd.SetPeriod(0);
+	// UdpCom_ReceiveCommand((void*)(cmd.bytes+2), cmd.CommandLen(), 1);
 
-	xSemaphoreTake(picQuerySemaphore, portMAX_DELAY);
-	xSemaphoreGive(picQuerySemaphore);
+	// xSemaphoreTake(picQuerySemaphore, portMAX_DELAY);
+	// xSemaphoreGive(picQuerySemaphore);
+
+	// REVIEW unstable simple version
+	targetCountReadMin = targets.read;
+	targetCountReadMax = targets.write;
 }
 
 static void movementUpdateInterpolateState(UdpRetPacket& pkt) {
@@ -668,6 +672,7 @@ void dropNextKeyframe() {
 #define MONITOR_PIC_MAX_LOOP_INTERVAL 200
 TaskHandle_t monitorPICTask;
 void monitorPICForever(void* arg) {
+	printf(" ================ Start PIC forever =================== \n");
 	static uint16_t lastMinNextTime = minNextTime;
 	static uint16_t formalKeyframeTime = 0;
 	while(1) {
