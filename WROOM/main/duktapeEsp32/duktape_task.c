@@ -187,7 +187,7 @@ void duktape_start() {
 		jsThreads[i].ctx = duk_get_context(heap_context, -1);
 	}
 	unlock_heap();
-	const char* taskNames[NJSTHREADS] = {"js0", "js1", "js2", "js3"};
+	const char* taskNames[NJSTHREADS] = {"js0", "js1"};
 	
 	//	create tasks for threads
 	for(int i=0; i<NJSTHREADS; ++i){

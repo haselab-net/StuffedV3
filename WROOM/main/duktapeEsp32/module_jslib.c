@@ -22,8 +22,19 @@ static duk_ret_t block_pause(duk_context* ctx){
     duk_int_t t = duk_get_int(ctx, -1);
 
     if(t<=0) return 0;
+    JSThread* th=NULL; 
+    for(int i=0; i<NJSTHREADS; ++i){
+        if (jsThreads[i].ctx == ctx){
+            th = &jsThreads[i];
+            break;
+        }
+    }
+    assert(th != NULL);
+    duk_suspend(th->ctx, &th->state);
+    unlock_heap();
     vTaskDelay(pdMS_TO_TICKS(t));
-
+    lock_heap();
+    duk_resume(th->ctx, &th->state);
     return 0;
 }
 
