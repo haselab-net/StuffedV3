@@ -669,8 +669,7 @@ void dropNextKeyframe() {
 	}
 }
 
-#define INTERPOLATE_BUFFER_TIMING_ADVANCE_MS 200
-#define MONITOR_PIC_MAX_LOOP_INTERVAL 200
+#define MONITOR_PIC_MAX_LOOP_INTERVAL 1000
 TaskHandle_t monitorPICTask;
 void monitorPICForever(void* arg) {
 	printf(" ================ Start PIC forever =================== \n");
@@ -709,34 +708,41 @@ void monitorPICForever(void* arg) {
 
 		uint16_t targetTime = tick + MONITOR_PIC_MAX_LOOP_INTERVAL;
 
+		printf("==== loop \n");
+
 		xSemaphoreTake(tickSemaphore, portMAX_DELAY);
 
 		// send and delete next keyframes that have been fully interpolated
 		uint8_t vacancy = allBoards.GetNTarget() - n_targets_occupied;
-		while (minNextTime <= targetTime) {
+		while (minTime(minNextTime, targetTime, movementTime) == minNextTime) {
 			formalKeyframeTime = minNextTime;
+			printf("%i, %i, %i \n", minNextTime, targetTime, movementTime);
 			if (vacancy > 0) {
+				printf("==== sendAndDeletePICKeyframe \n");
 				sendAndDeletePICKeyframe();
 				vacancy--;
 			} else {
+				printf("==== dropNextKeyframe \n");
 				dropNextKeyframe();
 			}
 		}
 
 		// just send last keyframe that is partially interpolated
+		printf("==== sendPICKeyframe \n");
 		sendPICKeyframe(targetTime);
 
 		xSemaphoreGive(tickSemaphore);
 
 		lastMinNextTime = minNextTime;
 
-		vTaskDelay(INTERPOLATE_BUFFER_TIMING_ADVANCE_MS / 2 / portTICK_PERIOD_MS);
+		vTaskDelay(MONITOR_PIC_MAX_LOOP_INTERVAL / 2 / portTICK_PERIOD_MS);
 	}
 }
 
 // init data structure for movement interpolation
 void initMovementDS() {
 	initMotorHeads();
+		minNextTime = movementTime - 1;
 	initPausedMovements();
 
 	picQuerySemaphore = xSemaphoreCreateMutex();
