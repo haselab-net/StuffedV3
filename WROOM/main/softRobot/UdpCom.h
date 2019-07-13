@@ -10,6 +10,7 @@ extern "C" void UdpCom_ReceiveCommand(void* payload, int len, short from);
 #include "../WroomEnv.h"
 #include "BoardBase.h"
 #include "AllBoards.h"
+#include "Movement.h"
 
 /**	Udp packet from PC
 	Each command has sequential counter to detect packet drop.
@@ -94,6 +95,24 @@ public:
 		else if (command == CI_RESET_SENSOR) {
 			data[0] = f;
 		}
+	}
+	void GetKeyframe(MovementKeyframe& keyframe) {
+		char* p = (char*)data; p += 1;
+		
+		keyframe.id = *(uint16_t*)p; p += 2;
+		keyframe.motorCount = *(uint8_t*)p; p += 1;
+		keyframe.motorId.clear(); keyframe.motorId.reserve(keyframe.motorCount);
+		for(int i=0; i<keyframe.motorCount; i++){
+			keyframe.motorId.push_back(*(uint8_t*)p); p += 1;
+		}
+		keyframe.period = *(uint16_t*)p; p += 2;
+		keyframe.pose.clear(); keyframe.pose.reserve(keyframe.motorCount);
+		for(int i=0; i<keyframe.motorCount; i++){
+			keyframe.pose.push_back(*(uint16_t*)p); p += 2;
+		}
+		keyframe.refId = *(uint16_t*)p; p += 2;
+		keyframe.refMotorId = *(uint8_t*)p; p += 1;
+		keyframe.timeOffset = *(short*)p; p += 2;
 	}
 };
 class UdpRetPacket:public UdpPacket, public BoardRetBase{

@@ -60,8 +60,8 @@ int UdpCmdPacket::CommandLen() {
 	case CIU_MOVEMENT:		// index
 		switch (command)
 		{
-		case MCI_ADD_KEYFRAME:
-			return NHEADER*2 + 1 + sizeof(MovementKeyframe);
+		case CI_M_ADD_KEYFRAME:
+			return NHEADER*2 + 1 + (2 + 1 + allBoards.GetNTotalMotor() + 2 + allBoards.GetNTotalMotor() * 2 + 2 + 1 + 2);
 		
 		default:
 			break;
@@ -100,8 +100,8 @@ void UdpRetPacket::SetLength() {
 	case CIU_MOVEMENT:
 		switch (command)
 		{
-		case MCI_ADD_KEYFRAME:
-			length = NHEADER*2 + 1 + sizeof(MovementKeyframeAddState); break;
+		case CI_M_ADD_KEYFRAME:
+			length = NHEADER*2 + 1 + (2 + 1); break;
 		
 		default:
 			break;
@@ -456,8 +456,22 @@ void UdpCom::ExecUdpCommand(UdpCmdPacket& recv) {
 	case CIU_MOVEMENT: {
 		switch (*(uint8_t*)recv.data)
 		{
-		case CIU_MOVEMENT:
-			addKeyframe((MovementKeyframe*)((uint8_t*)recv.data+1));
+		case CI_M_ADD_KEYFRAME: {
+			MovementKeyframe keyframe;
+			recv.GetKeyframe(keyframe);
+
+			struct MovementKeyframeAddState* retP = (struct MovementKeyframeAddState*)((uint8_t*)send.data+1);
+			*(uint8_t*)send.data = CI_M_ADD_KEYFRAME;
+			retP->id = keyframe.id;
+			retP->success = false;
+
+			if (canAddKeyframe(keyframe)) {
+				addKeyframe(keyframe);
+				retP->success = true;
+			}
+
+			SendReturn(recv);
+		}
 			break;
 		
 		default:

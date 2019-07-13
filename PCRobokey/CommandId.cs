@@ -32,7 +32,14 @@ enum ResetSensorFlags {
 	RSF_MOTOR=1,
 	RSF_FORCE=2,
 };
-enum MovementCommandId {
-	MCI_NONE = 0,
-	MCI_ADD_KEYFRAME = 1
-}
+enum CommandIdMovement {
+	CI_M_NONE,
+	CI_M_ADD_KEYFRAME,
+	CI_M_PAUSE_MOV,
+	CI_M_RESUME_MOV,
+	CI_M_PAUSE_INTERPOLATE,
+	CI_M_RESUME_INTERPOLATE,
+	CI_M_CLEAR_PAUSED,
+	CI_M_CLEAR_ALL,
+	CI_M_QUERY
+};

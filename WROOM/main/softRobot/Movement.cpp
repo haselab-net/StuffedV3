@@ -1,5 +1,6 @@
 #include "Movement.h"
-#include "../../PIC/control.h"
+#include "UdpCom.h"
+#include "../../../PIC/control.h"
 
 typedef struct MotorKeyframeNode MotorKeyframeNode;
 typedef struct MotorHead MotorHead;
@@ -747,39 +748,39 @@ void initMovementDS() {
 
 /////////////////////////////////////////// api for WROOM ///////////////////////////////////////////////
 
-bool canAddKeyframe(struct MovementKeyframe* keyframe) {
-	vector<uint8_t> &motorId = keyframe->motorId;
+bool canAddKeyframe(MovementKeyframe& keyframe) {
+	vector<uint8_t> &motorId = keyframe.motorId;
 
 	// check motor
-	for (int i=0; i<keyframe->motorCount; i++) {
+	for (int i=0; i<keyframe.motorCount; i++) {
 		if (motorId[i] >= allBoards.GetNTotalMotor()) return false;	// wrong motor id
 		else if (motorHeads[motorId[i]].nOccupied == MOTOR_KEYFRAME_BUFFER_SIZE) return false;	// keyframe list is full
 	}
 	
 	// check ref
-	if (keyframe->refId && !getNode(keyframe->refMotorId, keyframe->id)) return false;	// can not find reference node
+	if (keyframe.refId && !getNode(keyframe.refMotorId, keyframe.id)) return false;	// can not find reference node
 
 	return true;
 }
 
-void addKeyframe(struct MovementKeyframe* keyframe) {
+void addKeyframe(MovementKeyframe& keyframe) {
 	#ifdef WROOM
 	    xSemaphoreTake(tickSemaphore, portMAX_DELAY);
     #endif
 
-	for (int i=0; i<keyframe->motorCount; i++) {
+	for (int i=0; i<keyframe.motorCount; i++) {
 		// init node
 		struct MotorKeyframeNode* node = (struct MotorKeyframeNode*)malloc(sizeof(struct MotorKeyframeNode));
-		node->id = keyframe->id;
-		node->pose = keyframe->pose[i];
-		node->end = keyframe->period;
+		node->id = keyframe.id;
+		node->pose = keyframe.pose[i];
+		node->end = keyframe.period;
 		node->next = NULL;
 
 		// add node
-		if (!keyframe->refId) addNodeDefault(keyframe->motorId[i], node, true);
+		if (!keyframe.refId) addNodeDefault(keyframe.motorId[i], node, true);
 		else {
-			MotorKeyframeNode* refNode = getNode(keyframe->motorId[i], keyframe->id);
-			addNodeAtTime(keyframe->motorId[i], node, true, refNode->start + keyframe->timeOffset);
+			MotorKeyframeNode* refNode = getNode(keyframe.motorId[i], keyframe.id);
+			addNodeAtTime(keyframe.motorId[i], node, true, refNode->start + keyframe.timeOffset);
 		}
 	}
 

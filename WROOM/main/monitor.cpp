@@ -481,8 +481,23 @@ public:
     }
 } mcEspFs;
 
-#include "../PIC/control.h"
+#include "../../PIC/control.h"
 #include "./softRobot/Movement.h"
+#include "./softRobot/CommandWROOM.h"
+
+struct MonitorMovementKeyframe {
+	uint16_t id;				// 8-bit movement id + 8-bit keyframe id
+	uint8_t motorCount;			// count of motors used in the movement
+	uint8_t motorId[3];	// the motorIds used
+	uint16_t period;			// note that the sum of period in list could not larger than UINT16_MAX (or the sorting might fail)
+	short pose[3];			// the poses correspond with motorIds
+
+	uint16_t refId;             // 0 if no ref (movement id should start from 1)
+	uint8_t refMotorId;
+	short timeOffset;
+};
+
+#define struct MonitorMovementKeyframe MonitorMovementKeyframe;
 
 class MCTest: public MonitorCommandBase{
 public:
@@ -491,19 +506,19 @@ public:
         conPrintf("MCtest\n");
         switch (getchWait()){
             case 'p': {
-                printf("target pose: %i, %i, %i", motorTarget.pos[0], motorTarget.pos[1], motorTarget.pos[2]);
+                printf("target pose: %ld, %ld, %ld", motorTarget.pos[0], motorTarget.pos[1], motorTarget.pos[2]);
                 break;
             }
             case '1': {
-                size_t len = 4 + 1 + sizeof(MovementKeyframe);
+                size_t len = 4 + 1 + sizeof(MonitorMovementKeyframe);
                 unsigned char motorId[3] = {0, 1, 2};
                 short pose[3] = {1000, 0, 0};
 
                 void* payload = (void*)malloc(len);
                 *((unsigned short*)payload) = len;
-                *((unsigned short*)payload+1) = CI_MOVEMENT;
+                *((unsigned short*)payload+1) = CIU_MOVEMENT;
                 *((unsigned char*)payload+4) = CI_M_ADD_KEYFRAME;
-                MovementKeyframe* keyframe = (MovementKeyframe*)((unsigned char*)payload+5);
+                MonitorMovementKeyframe* keyframe = (MonitorMovementKeyframe*)((unsigned char*)payload+5);
                 keyframe->id = 0x0100;
                 keyframe->motorCount = 3;
                 memcpy(keyframe->motorId, motorId, 3);
@@ -518,15 +533,15 @@ public:
                 break;
             }
             case '2': {
-                size_t len = 4 + 1 + sizeof(MovementKeyframe);
+                size_t len = 4 + 1 + sizeof(MonitorMovementKeyframe);
                 unsigned char motorId[3] = {0, 1, 2};
                 short pose[3] = {-1000, 0, 0};
 
                 void* payload = (void*)malloc(len);
                 *((unsigned short*)payload) = len;
-                *((unsigned short*)payload+1) = CI_MOVEMENT;
+                *((unsigned short*)payload+1) = CIU_MOVEMENT;
                 *((unsigned char*)payload+4) = CI_M_ADD_KEYFRAME;
-                MovementKeyframe* keyframe = (MovementKeyframe*)((unsigned char*)payload+5);
+                MonitorMovementKeyframe* keyframe = (MonitorMovementKeyframe*)((unsigned char*)payload+5);
                 keyframe->id = 0x0100;
                 keyframe->motorCount = 3;
                 memcpy(keyframe->motorId, motorId, 3);

@@ -9,13 +9,13 @@
 #include <freertos/semphr.h>
 
 #include "AllBoards.h"
-#include "UdpCom.h"
 
 using namespace std;
 
 ///////////////////////////////////////// data structure for WROOM interface ///////////////////////////// 
 
-struct MovementKeyframe {
+class MovementKeyframe {
+public:
 	uint16_t id;				// 8-bit movement id + 8-bit keyframe id
 	uint8_t motorCount;			// count of motors used in the movement
 	vector<uint8_t> motorId;	// the motorIds used
@@ -25,7 +25,7 @@ struct MovementKeyframe {
 	uint16_t refId;             // 0 if no ref (movement id should start from 1)
 	uint8_t refMotorId;
 	short timeOffset;
-}__attribute__((packed));
+};
 
 struct MovementKeyframeAddState {
     uint16_t id;
@@ -50,8 +50,8 @@ void initMovementDS();
 
 /////////////////////////////////////////// api for WROOM ///////////////////////////////////////////////
 
-bool canAddKeyframe(struct MovementKeyframe* keyframe);
-void addKeyframe(struct MovementKeyframe* keyframe);
+bool canAddKeyframe(MovementKeyframe& keyframe);
+void addKeyframe(MovementKeyframe& keyframe);
 
 void pauseInterpolate();
 void resumeInterpolate();
