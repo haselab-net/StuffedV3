@@ -576,6 +576,10 @@ public:
                 print_timer_counter(value);
                 break;
             }
+            case 'q': {
+                movementQueryInterpolateState();
+                break;
+            }
         }
     }
 } mcTest;

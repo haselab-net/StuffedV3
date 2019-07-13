@@ -15,6 +15,8 @@ typedef struct InterpolateState InterpolateState;
 static uint16_t movementTime = 0;                // current time in movement tick
 static bool tickPaused = false;
 
+static xSemaphoreHandle tickSemaphore;		// semaphore for lock movement linked list
+
 struct MotorKeyframeNode {
 	uint16_t id;              // id of the keyframe (movement id + index)
 	uint16_t start;           // start time
@@ -87,32 +89,36 @@ static xSemaphoreHandle picQuerySemaphore;
 static uint8_t targetCountReadMin = 0xfe, targetCountReadMax = 0xfe, targetWrite = 0xff;
 static uint16_t tickMin, tickMax;
 
+static bool calibrateCurrentPose = false;		// set current pose once with return packet of CI_INTERPOLATE
+
 // return the count of remaining empty buffer
-static uint8_t getInterpolateBufferVacancy() {
-	return allBoards.GetNTarget() - (targetWrite - targetCountReadMin + 1);
+static short getInterpolateBufferVacancy() {
+	return (short)allBoards.GetNTarget() - (uint8_t)(targetWrite - targetCountReadMin + 1);
 }
 
 void movementQueryInterpolateState() {
-	// xSemaphoreTake(picQuerySemaphore, portMAX_DELAY);
+	xSemaphoreTake(picQuerySemaphore, portMAX_DELAY);
 
-	// UdpCmdPacket cmd;
-	// cmd.command = CI_INTERPOLATE;
-	// cmd.length = cmd.CommandLen();
-	// cmd.SetPeriod(0);
-	// UdpCom_ReceiveCommand((void*)(cmd.bytes+2), cmd.CommandLen(), 1);
+	UdpCmdPacket cmd;
+	cmd.command = CI_INTERPOLATE;
+	cmd.length = cmd.CommandLen();
+	cmd.SetPeriod(0);
+	UdpCom_ReceiveCommand((void*)(cmd.bytes+2), cmd.CommandLen(), 1);
 
-	// xSemaphoreTake(picQuerySemaphore, portMAX_DELAY);
-	// xSemaphoreGive(picQuerySemaphore);
-
-	// REVIEW unstable simple version
-	targetCountReadMin = targets.read;
-	targetCountReadMax = targets.write;
+	xSemaphoreTake(picQuerySemaphore, portMAX_DELAY);
+	xSemaphoreGive(picQuerySemaphore);
 }
 
 static void movementUpdateInterpolateState(UdpRetPacket& pkt) {
-	// for(int i=0; i<allBoards.GetNTotalMotor(); i++) {
-	// 	motorHeads[i].currentPose = pkt.GetMotorPos(i);
-	// }
+	if (calibrateCurrentPose) {
+		xSemaphoreTake(tickSemaphore, portMAX_DELAY);
+		for(int i=0; i<allBoards.GetNTotalMotor(); i++) {
+			motorHeads[i].currentPose = pkt.GetMotorPos(i);
+		}
+		xSemaphoreGive(tickSemaphore);
+		calibrateCurrentPose = false;
+	}
+
 	targetCountReadMin = pkt.GetTargetCountReadMin();
 	targetCountReadMax = pkt.GetTargetCountReadMax();
 	tickMin = pkt.GetTickMin();
@@ -560,7 +566,7 @@ void printInterpolateParams() {
 }
 
 /////////////////////////////////////////// interface to hardware ///////////////////////////////////////
-static xSemaphoreHandle tickSemaphore;		// semaphore for lock movement linked list
+
 static xSemaphoreHandle intervalSemaphore;	// semaphore to allow movement manager send interpolate buffer in specified interval
 static xTaskHandle movementManagerTask;
 
@@ -607,9 +613,25 @@ static void movementManager(void* arg) {
 	while(1) {
 		xSemaphoreTake(intervalSemaphore, portMAX_DELAY);
 
+		short nVacancy = getInterpolateBufferVacancy();
+
+		// the interpolate buffer have been changed by except this task		// TODO more precise way
+		if (nVacancy < 0 || nVacancy > allBoards.GetNTarget()-2) {
+			ESP_LOGD(LOG_TAG, "interpolate buffer vacany: %i, recalibrate pose", nVacancy);
+
+			// get new current pose
+			calibrateCurrentPose = true;
+			movementQueryInterpolateState();
+
+			// recalculate interpolate params according to new current pose
+			xSemaphoreTake(tickSemaphore, portMAX_DELAY);
+			for (int i=0; i<allBoards.GetNTotalMotor(); i++) getInterpolateParams(i);
+			xSemaphoreGive(tickSemaphore);
+		}
+
 		// avoid overflow of interpolate buffer in PIC
-		if (getInterpolateBufferVacancy() <= PIC_INTERPOLATE_BUFFER_VACANCY_MIN && !skippedOneLoop) {
-			ESP_LOGD(LOG_TAG, "interpolate buffer vacany: %i, skip one loop", getInterpolateBufferVacancy());
+		if (nVacancy <= PIC_INTERPOLATE_BUFFER_VACANCY_MIN && !skippedOneLoop) {
+			ESP_LOGD(LOG_TAG, "interpolate buffer vacany: %i, skip one loop", nVacancy);
 			skippedOneLoop = true;
 			continue;
 		} else if (skippedOneLoop) skippedOneLoop = false;
@@ -660,10 +682,10 @@ static void initMovementManager() {
 
 // init data structure for movement interpolation
 void initMovementDS() {
+	initPICPacketHandler();
+
 	initMotorHeads();
 	initPausedMovements();
-
-	initPICPacketHandler();
 
 	initMovementManager();
 }
