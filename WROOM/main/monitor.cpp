@@ -498,7 +498,11 @@ struct MonitorMovementKeyframe {
 };
 
 #define struct MonitorMovementKeyframe MonitorMovementKeyframe;
-
+static void print_timer_counter(uint64_t counter_value)
+{
+    printf("Counter: 0x%08x%08x\n", (uint32_t) (counter_value >> 32), (uint32_t) (counter_value));
+    printf("Time   : %.8f ms\n", (double) counter_value / MOVEMENT_MANAGER_TIMER_SCALE);
+}
 class MCTest: public MonitorCommandBase{
 public:
     const char* Desc(){ return "p test movement"; }
@@ -511,6 +515,10 @@ public:
             }
             case 'm': {
                 printMotorKeyframes(0);
+                break;
+            }
+            case 'i': {
+                printInterpolateParams();
                 break;
             }
             case '1': {
@@ -526,7 +534,7 @@ public:
                 keyframe->id = 0x0100;
                 keyframe->motorCount = 3;
                 memcpy(keyframe->motorId, motorId, 3);
-                keyframe->period = 6000;
+                keyframe->period = 100;
                 memcpy(keyframe->pose, pose, 6);
                 keyframe->refId = 0x0000;
                 keyframe->refMotorId = 0;
@@ -549,7 +557,7 @@ public:
                 keyframe->id = 0x0100;
                 keyframe->motorCount = 3;
                 memcpy(keyframe->motorId, motorId, 3);
-                keyframe->period = 6000;
+                keyframe->period = 100;
                 memcpy(keyframe->pose, pose, 6);
                 keyframe->refId = 0x0000;
                 keyframe->refMotorId = 0;
@@ -557,6 +565,12 @@ public:
 
                 UdpCom_ReceiveCommand(payload, len, 0);
 
+                break;
+            }
+            case 't': {
+                uint64_t value;
+                timer_get_counter_value(TIMER_GROUP_0, TIMER_0, &value);
+                print_timer_counter(value);
                 break;
             }
         }

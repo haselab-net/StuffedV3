@@ -10,9 +10,7 @@ typedef struct InterpolateState InterpolateState;
 
 ////////////////////////////////////////// data structure for interpolate ///////////////////////////////////////////
 
-#define MOTOR_KEYFRAME_BUFFER_SIZE 10        // size of buffer for every motor
-
-static uint16_t movementTime = 0;                // current time in tick (1ms = 3tick)
+static uint16_t movementTime = 0;                // current time in movement tick
 static bool tickPaused = false;
 
 struct MotorKeyframeNode {
@@ -23,7 +21,6 @@ struct MotorKeyframeNode {
 	MotorKeyframeNode* next; // next node
 };
 
-uint16_t minNextTime;
 struct MotorHead {
 	uint8_t nOccupied;        // count of occupied buffer, includes paused keyframes
 
@@ -60,8 +57,8 @@ static void initMotorHead(uint8_t motorId) {
 	head.nextTime = movementTime - 1;
 	head.minus = 0;
 	head.slopeInteger = 0;
-	head.slopeDecimal = 0x8000;
-	head.slopeError = 0;
+	head.slopeDecimal = 0;
+	head.slopeError = 0x8000;
 
 	head.head = NULL;
 	head.read = NULL;
@@ -86,7 +83,7 @@ static void initPausedMovements() {
 static xSemaphoreHandle picQuerySemaphore;
 
 static uint8_t targetCountReadMin, targetCountReadMax, targetWrite;
-// static uint16_t tickMin, tickMax;
+static uint16_t tickMin, tickMax;
 
 void movementQueryInterpolateState() {
 	// xSemaphoreTake(picQuerySemaphore, portMAX_DELAY);
@@ -111,8 +108,8 @@ static void movementUpdateInterpolateState(UdpRetPacket& pkt) {
 	// }
 	targetCountReadMin = pkt.GetTargetCountReadMin();
 	targetCountReadMax = pkt.GetTargetCountReadMax();
-	// tickMin = pkt.GetTickMin();
-	// tickMax = pkt.GetTickMax();
+	tickMin = pkt.GetTickMin();
+	tickMax = pkt.GetTickMax();
 }
 void movementOnGetPICInfo(UdpRetPacket& pkt) {
 	switch (pkt.command)
@@ -126,6 +123,9 @@ void movementOnGetPICInfo(UdpRetPacket& pkt) {
 	}
 
 	xSemaphoreGive(picQuerySemaphore);
+}
+void initPICPacketHandler() {
+	picQuerySemaphore = xSemaphoreCreateMutex();
 }
 
 /////////////////////////////////////////// basic api ////////////////////////////////////////////////
@@ -535,7 +535,6 @@ void printNode(MotorKeyframeNode* node, bool isHead) {
 void printMotorKeyframes(uint8_t motorId) {
 	MotorHead &head = motorHeads[motorId];
 
-	printf("tick: %d ", 0x0000ffff & controlCount);
 	printf("currentTime: %d, nextTime: %d \r\n", movementTime, head.nextTime);
 
 	MotorKeyframeNode* node = head.head;
@@ -547,25 +546,35 @@ void printMotorKeyframes(uint8_t motorId) {
 	printf("NULL \r\n");
 }
 
+void printInterpolateParams() {
+	for (int i=0; i<allBoards.GetNTotalMotor(); i++) {
+		printf("motor %i: slopeInteger: %i, slopeDecimal: %i\n", i, motorHeads[i].slopeInteger, motorHeads[i].slopeDecimal);
+	}
+}
+
 /////////////////////////////////////////// interface to hardware ///////////////////////////////////////
-static xSemaphoreHandle tickSemaphore;
+static xSemaphoreHandle tickSemaphore;		// semaphore for lock movement linked list
+static xSemaphoreHandle intervalSemaphore;	// semaphore to allow movement manager send interpolate buffer in specified interval
+static xTaskHandle movementManagerTask;
 
-unsigned short myTestFlag3 = 0;
+uint16_t targetCountWrite = 0xffff;
 
-void movementTick() {
-    #ifdef WROOM
-	    xSemaphoreTake(tickSemaphore, portMAX_DELAY);
-    #endif
+static void movementTick() {
+	xSemaphoreTake(tickSemaphore, portMAX_DELAY);
 
 	if (tickPaused) {
-        #ifdef WROOM
-            xSemaphoreGive(tickSemaphore);
-        #endif
+		xSemaphoreGive(tickSemaphore);
         return;
     }
 
 	movementTime++;
-	myTestFlag3++;
+
+	// prepare command
+	UdpCmdPacket cmd;
+	cmd.command = CI_INTERPOLATE; 
+	cmd.length = cmd.CommandLen();
+	cmd.SetPeriod(MS_PER_MOVEMENT_TICK * 3);
+	cmd.SetTargetCountWrite(++targetCountWrite);
 
 	for (int i = 0; i < allBoards.GetNTotalMotor(); i++) {
 		// change pose
@@ -577,214 +586,72 @@ void movementTick() {
 		head.currentPose += head.minus ? -differece : differece;
 
 		// update motor
-		motorTarget.pos[i] = head.currentPose;
-		motorTarget.vel[i] = head.minus ? (-1)*(long)(head.slopeInteger) : (long)(head.slopeInteger);
-		// #ifdef _WIN32
-		// 	filePrintf("%d,%d,", motorTarget.pos[i], 0);
-		// #endif
+		cmd.SetMotorPos(head.currentPose, i);
 
 		// change interpolating keyframes
 		if (movementTime == motorHeads[i].nextTime && motorHeads[i].head) finishKeyframe(i);
 	}
-	// #ifdef _WIN32
-	// 	filePrintf("\n");
-	// #endif
 
-    #ifdef WROOM
-	    xSemaphoreGive(tickSemaphore);
-    #endif
+	UdpCom_ReceiveCommand(cmd.bytes+2, cmd.length, 1);
+
+	xSemaphoreGive(tickSemaphore);
 }
 
-void sendAndDeletePICKeyframe() {
-	uint16_t time = minNextTime;
-
-	UdpCmdPacket cmd;
-
-	cmd.command = CI_INTERPOLATE;
-	cmd.length = cmd.CommandLen();
-
-	uint16_t period = minNextTime - movementTime;
-	cmd.SetPeriod(period);
-	cmd.SetTargetCountWrite(++targetWrite);
-
-	movementTime = time;
-
-	printf("send PIC and delete: ");
-
-	for (int i=0; i<allBoards.GetNTotalMotor(); i++) {
-		// set motor pose
-		uint16_t offset = motorHeads[i].slopeInteger * period + (uint16_t)(((uint32_t)motorHeads[i].slopeDecimal * period) >> 16);
-		short targetPose = motorHeads[i].currentPose + (motorHeads[i].minus ? -offset : offset);
-		cmd.SetMotorPos(targetPose, i);
-
-		printf(" %i,", targetPose);
-
-		motorHeads[i].currentPose = targetPose;
-
-		// delete keyframe
-		if (time == motorHeads[i].nextTime) {
-			finishKeyframe(i);
-		}
-	}
-	printf("\n");
-
-	UdpCom_ReceiveCommand((void*)(cmd.bytes+2), cmd.CommandLen(), 1);
-}
-
-void sendPICKeyframe(uint16_t targetTime) {
-	UdpCmdPacket cmd;
-
-	cmd.command = CI_INTERPOLATE;
-	cmd.length = cmd.CommandLen();
-
-	uint16_t period = minNextTime - movementTime;
-	uint16_t target_period = targetTime - movementTime;
-	cmd.SetPeriod(period);
-	cmd.SetTargetCountWrite(++targetWrite);
-
-	movementTime = targetTime;
-
-	printf("send PIC: ");
-
-	for (int i=0; i<allBoards.GetNTotalMotor(); i++) {
-		// set motor pose
-		uint16_t offset = motorHeads[i].slopeInteger * period + (uint16_t)(((uint32_t)motorHeads[i].slopeDecimal * period) >> 16);
-		short targetPose = motorHeads[i].currentPose + (motorHeads[i].minus ? -offset : offset);
-		cmd.SetMotorPos(targetPose, i);
-
-		printf(" %i,", targetPose);
-
-		// get pose at targetTime
-		offset = motorHeads[i].slopeInteger * target_period + (uint16_t)(((uint32_t)motorHeads[i].slopeDecimal * target_period) >> 16);
-		targetPose = motorHeads[i].currentPose + (motorHeads[i].minus ? -offset : offset);
-		motorHeads[i].currentPose = targetPose;
-	}
-	printf("\n");
-
-	UdpCom_ReceiveCommand((void*)(cmd.bytes+2), cmd.CommandLen(), 1);
-}
-
-void dropNextKeyframe() {
-	uint16_t time = minNextTime;
-	uint16_t period = minNextTime - movementTime;
-	movementTime = time;
-	for (int i=0; i<allBoards.GetNTotalMotor(); i++) {
-		uint16_t offset = motorHeads[i].slopeInteger * period + (uint16_t)(((uint32_t)motorHeads[i].slopeDecimal * period) >> 16);
-		short targetPose = motorHeads[i].currentPose + (motorHeads[i].minus ? -offset : offset);
-		motorHeads[i].currentPose = targetPose;
-		if (time == motorHeads[i].nextTime) {
-			finishKeyframe(i);
-		}
-	}
-}
-
-static void updateMinNextTime() {
-	minNextTime = movementTime-1;
-	for (int i=0; i<allBoards.GetNTotalMotor(); i++) {
-		if (minTime(minNextTime, motorHeads[i].nextTime, movementTime) == motorHeads[i].nextTime) minNextTime = motorHeads[i].nextTime;	// update min next time
-	}
-}
-
-#define MONITOR_PIC_MAX_LOOP_INTERVAL 1000
-TaskHandle_t monitorPICTask;
-void monitorPICForever(void* arg) {
-	printf(" ================ Start PIC forever =================== \n");
-	static uint16_t lastMinNextTime = minNextTime;
-	static uint16_t formalKeyframeTime = 0;
-
-	// add first keyframe (0)
-	uint16_t tick = 0x0000ffff & controlCount;
-	sendPICKeyframe(tick + MONITOR_PIC_MAX_LOOP_INTERVAL);
-	movementTime = tick + MONITOR_PIC_MAX_LOOP_INTERVAL;
-
+static void movementManager(void* arg) {
 	while(1) {
-		bool changePartialInterpolateKeyframe = false;
+		xSemaphoreTake(intervalSemaphore, portMAX_DELAY);
 
-		// the last buffer in PIC need to be changed (a new keyframe is inserted)
-		if (lastMinNextTime != minNextTime) {
-			printf("==== overwrite last buffer \n");
-			UdpCmdPacket cmd;
-
-			cmd.command = CI_INTERPOLATE;
-			cmd.length = cmd.CommandLen();
-
-			uint16_t period = movementTime - formalKeyframeTime;
-			cmd.SetPeriod(period);
-			cmd.SetTargetCountWrite(targetWrite);
-
-			for (int i=0; i<allBoards.GetNTotalMotor(); i++) {
-				// set motor pose
-				cmd.SetMotorPos(motorHeads[i].currentPose, i);
-			}
-
-			UdpCom_ReceiveCommand((void*)(cmd.bytes+2), cmd.CommandLen(), 1);
-
-			lastMinNextTime = minNextTime;
-			changePartialInterpolateKeyframe = true;
-		}
-
-		movementQueryInterpolateState();
-
-		tick = 0x0000ffff & controlCount;
-
-		// lose synchronization on target count
-		uint8_t n_targets_occupied = targetWrite-targetCountReadMin+1;
-		if (n_targets_occupied > allBoards.GetNTarget()) {
-			targetWrite = targetCountReadMax + 1;
-			n_targets_occupied = targetCountReadMax + 1 - targetCountReadMin;
-		}
-
-		uint16_t targetTime = tick + MONITOR_PIC_MAX_LOOP_INTERVAL;
-
-		printf("==== loop \n");
-
-		xSemaphoreTake(tickSemaphore, portMAX_DELAY);
-
-		// send and delete next keyframes that have been fully interpolated
-		uint8_t vacancy = allBoards.GetNTarget() - n_targets_occupied;
-		while (minTime(minNextTime, targetTime, movementTime) == minNextTime) {
-			formalKeyframeTime = minNextTime;
-			printf("tick: %i\n", controlCount);
-			printf("time: %i, %i, %i \n", minNextTime, targetTime, movementTime);
-			if (vacancy > 0) {
-				printf("==== sendAndDeletePICKeyframe \n");
-				sendAndDeletePICKeyframe();
-				vacancy--;
-			} else {
-				printf("==== dropNextKeyframe \n");
-				dropNextKeyframe();
-			}
-			updateMinNextTime();
-			changePartialInterpolateKeyframe = true;
-		}
-
-		// just send last keyframe that is partially interpolated
-		if (changePartialInterpolateKeyframe) {
-			printf("==== sendPICKeyframe \n");
-			sendPICKeyframe(targetTime);
-		}
-
-		movementTime = targetTime;
-
-		xSemaphoreGive(tickSemaphore);
-		
-		lastMinNextTime = minNextTime;
-
-		vTaskDelay(MONITOR_PIC_MAX_LOOP_INTERVAL / 4 / portTICK_PERIOD_MS);
+		movementTick();
 	}
+}
+
+static void IRAM_ATTR onTimerTriggered(void* arg) {
+	TIMERG0.int_clr_timers.t0 = 1;
+	TIMERG0.hw_timer[MOVEMENT_MANAGER_TIMER_IDX].config.alarm_en = TIMER_ALARM_EN;
+	
+	xSemaphoreGive(intervalSemaphore);
+}
+
+static void initTimer() {
+	/* Select and initialize basic parameters of the timer */
+    timer_config_t config;
+    config.divider = MOVEMENT_MANAGER_TIMER_DIVIDER;
+    config.counter_dir = TIMER_COUNT_UP;
+    config.counter_en = TIMER_PAUSE;
+    config.alarm_en = TIMER_ALARM_EN;
+    config.intr_type = TIMER_INTR_LEVEL;
+    config.auto_reload = TIMER_AUTORELOAD_EN;
+    timer_init(MOVEMENT_MANAGER_TIMER_GROUP, MOVEMENT_MANAGER_TIMER_IDX, &config);
+
+	/* Timer's counter will initially start from value below.
+       Also, if auto_reload is set, this value will be automatically reload on alarm */
+    timer_set_counter_value(MOVEMENT_MANAGER_TIMER_GROUP, MOVEMENT_MANAGER_TIMER_IDX, 0x00000000ULL);
+
+	/* Configure the alarm value and the interrupt on alarm. */
+    timer_set_alarm_value(MOVEMENT_MANAGER_TIMER_GROUP, MOVEMENT_MANAGER_TIMER_IDX, MS_PER_MOVEMENT_TICK * MOVEMENT_MANAGER_TIMER_SCALE);
+    timer_enable_intr(MOVEMENT_MANAGER_TIMER_GROUP, MOVEMENT_MANAGER_TIMER_IDX);
+    timer_isr_register(MOVEMENT_MANAGER_TIMER_GROUP, MOVEMENT_MANAGER_TIMER_IDX, onTimerTriggered, NULL, ESP_INTR_FLAG_IRAM, NULL);
+
+    timer_start(MOVEMENT_MANAGER_TIMER_GROUP, MOVEMENT_MANAGER_TIMER_IDX);
+}
+
+static void initMovementManager() {
+	tickSemaphore = xSemaphoreCreateMutex();
+	vSemaphoreCreateBinary(intervalSemaphore);
+
+	xTaskCreate(movementManager, "movement_manager", 1024*3, NULL, tskIDLE_PRIORITY+2, &movementManagerTask);
+
+	initTimer();
 }
 
 // init data structure for movement interpolation
 void initMovementDS() {
 	initMotorHeads();
-		minNextTime = movementTime - 1;
 	initPausedMovements();
 
-	picQuerySemaphore = xSemaphoreCreateMutex();
-    tickSemaphore = xSemaphoreCreateMutex();
-	targetWrite = 0xff;
+	initPICPacketHandler();
 
-	xTaskCreate(monitorPICForever, "movement_manager", 1024*3, NULL, tskIDLE_PRIORITY+2, &monitorPICTask);
+	initMovementManager();
 }
 
 /////////////////////////////////////////// api for WROOM ///////////////////////////////////////////////
