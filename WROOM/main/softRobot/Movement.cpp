@@ -103,7 +103,7 @@ void movementQueryInterpolateState() {
 	cmd.command = CI_INTERPOLATE;
 	cmd.length = cmd.CommandLen();
 	cmd.SetPeriod(0);
-	UdpCom_ReceiveCommand((void*)(cmd.bytes+2), cmd.CommandLen(), 1);
+	UdpCom_ReceiveCommand((void*)(cmd.bytes+2), cmd.CommandLen(), CS_MOVEMENT_MANAGER);
 
 	xSemaphoreTake(picQuerySemaphore, portMAX_DELAY);
 	xSemaphoreGive(picQuerySemaphore);
@@ -157,6 +157,7 @@ static MotorKeyframeNode* getNode(uint8_t motorId, uint16_t id) {
 	while (res)
 	{
 		if (res->id == id) return res;
+		res = res->next;
 	}
 	return res;
 }
@@ -559,6 +560,13 @@ void printMotorKeyframes(uint8_t motorId) {
 	printf("NULL \r\n");
 }
 
+void printAllMotorKeyframes() {
+	for (int i=0; i<allBoards.GetNTotalMotor(); i++) {
+		printf("=== motor %i === \n", i);
+		printMotorKeyframes(i);
+	}
+}
+
 void printInterpolateParams() {
 	for (int i=0; i<allBoards.GetNTotalMotor(); i++) {
 		printf("motor %i: slopeInteger: %i, slopeDecimal: %i\n", i, motorHeads[i].slopeInteger, motorHeads[i].slopeDecimal);
@@ -603,7 +611,7 @@ static void movementTick() {
 		if (movementTime == motorHeads[i].nextTime && motorHeads[i].head) finishKeyframe(i);
 	}
 
-	UdpCom_ReceiveCommand(cmd.bytes+2, cmd.length, 1);
+	UdpCom_ReceiveCommand(cmd.bytes+2, cmd.length, CS_MOVEMENT_MANAGER);
 
 	xSemaphoreGive(tickSemaphore);
 }
@@ -708,9 +716,7 @@ bool canAddKeyframe(MovementKeyframe& keyframe) {
 }
 
 void addKeyframe(MovementKeyframe& keyframe) {
-	#ifdef WROOM
-	    xSemaphoreTake(tickSemaphore, portMAX_DELAY);
-    #endif
+	xSemaphoreTake(tickSemaphore, portMAX_DELAY);
 
 	for (int i=0; i<keyframe.motorCount; i++) {
 		// init node
@@ -728,11 +734,9 @@ void addKeyframe(MovementKeyframe& keyframe) {
 		}
 	}
 
-	#ifdef WROOM
-	    xSemaphoreGive(tickSemaphore);
-    #endif
+	xSemaphoreGive(tickSemaphore);
 
-	printMotorKeyframes(0);	// REVIEW 
+	printAllMotorKeyframes();
 }
 
 // pause one movement

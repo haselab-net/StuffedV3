@@ -43,3 +43,10 @@ enum CommandIdMovement {
 	CI_M_CLEAR_ALL,
 	CI_M_QUERY
 };
+
+// define the source of command packet, for return packet to know where to return
+enum CommandSource {
+	CS_WEBSOCKET = 0,
+	CS_DUKTAPE = 1,
+	CS_MOVEMENT_MANAGER = 2
+};

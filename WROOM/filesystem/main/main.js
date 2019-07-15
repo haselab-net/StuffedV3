@@ -1,5 +1,33 @@
-loops.pause(10000);
-iot.triggerIFTTTEvent("Mf0JcCX_5FLZiz6Svtpjn", "esp_event", "", "", "")
+// loops.pause(10000);
+// iot.triggerIFTTTEvent("Mf0JcCX_5FLZiz6Svtpjn", "esp_event", "", "", "")
+
+for (var i=0; i<3; i++) {
+    console.log("loop: " + i);
+    softrobot.message_command.movementAddKeyframe({
+        movementId: 1,
+        keyframeId: 0,
+        motorCount: 1,
+        motorId: [0],
+        period: 2000,
+        pose: [2000],
+        refMovementId: 0,
+        refKeyframeId: 0,
+        refMotorId: 0,
+        timeOffset: 0
+    });
+    softrobot.message_command.movementAddKeyframe({
+        movementId: 1,
+        keyframeId: 0,
+        motorCount: 1,
+        motorId: [0],
+        period: 2000,
+        pose: [-2000],
+        refMovementId: 0,
+        refKeyframeId: 0,
+        refMotorId: 0,
+        timeOffset: 0
+    })
+}
 
 // iot.registerMQTTEvent("event", function (value1, value2, value3) {
 //     console.log("event");

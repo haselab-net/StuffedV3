@@ -23,6 +23,42 @@ LOG_TAG("SRCmd");
 static std::unordered_map<std::string, uint32_t> callback_stash_keys;
 
 ////////////////////////////////////////////////////////
+//////////////////////// tool functions ////////////////
+////////////////////////////////////////////////////////
+
+static void* shiftPointer(void* p, int8_t offsetBytes) {
+    return (void*)((char*)p + offsetBytes);
+}
+static void setPayload(void* &payload, void* source, size_t byteSize) {
+    memcpy(payload, source, byteSize);
+    payload = shiftPointer(payload, byteSize);
+}
+
+template <class T>
+static void setPayloadNum(duk_context* ctx, void* &payload, const char* prop) {
+    duk_get_prop_string(ctx, -1, prop);
+    T num = (T)duk_get_int(ctx, -1);
+    setPayload(payload, &num, sizeof(T));
+    duk_pop(ctx);
+}
+
+template <class T>
+static void setPayloadNumArray(duk_context* ctx, void* &payload, const char* prop) {
+    duk_get_prop_string(ctx, -1, prop);
+    assert(duk_is_array(ctx, -1));
+    size_t n = duk_get_length(ctx, -1);
+
+    for(int i=0; i<n; i++){
+        duk_get_prop_index(ctx, -1, i);
+        T num = (T)duk_get_int(ctx, -1);
+        setPayload(payload, &num, sizeof(T));
+        duk_pop(ctx);
+    }
+
+    duk_pop(ctx);
+}
+
+////////////////////////////////////////////////////////
 //////////////////////// send functions ////////////////
 ////////////////////////////////////////////////////////
 static int getPropPos(duk_context* ctx, UdpCmdPacket* cmd) {        // return prop length, or error with -1
@@ -349,6 +385,66 @@ static duk_ret_t resetSensor(duk_context* ctx) {
     return 0;
 }
 
+/* function resetSensor(data: {
+    movementId: number,
+    keyframeId: number,
+    motorCount: number,
+    motorId: number[],
+    period: number,
+    pose: number[],
+    refId: number,
+    refMotorId: number,
+    timeOffset: number
+}); */
+static duk_ret_t movementAddKeyframe(duk_context* ctx) {
+    // ... obj
+    duk_require_object(ctx, -1);
+
+    //  Prepare command
+	UdpCmdPacket* cmd = udpCom.PrepareMovementCommand(CIU_MOVEMENT, CI_M_ADD_KEYFRAME, CS_DUKTAPE);
+    if (!cmd) return DUK_RET_ERROR;
+
+    // fill payload data
+    void* payload = shiftPointer(cmd->data, 1);
+    setPayloadNum<uint8_t>(ctx, payload, "movementId");
+    setPayloadNum<uint8_t>(ctx, payload, "keyframeId");
+    setPayloadNum<uint8_t>(ctx, payload, "motorCount");
+    setPayloadNumArray<uint8_t>(ctx, payload, "motorId");
+    setPayloadNum<uint16_t>(ctx, payload, "period");
+    setPayloadNumArray<short>(ctx, payload, "pose");
+    setPayloadNum<uint8_t>(ctx, payload, "refMovementId");
+    setPayloadNum<uint8_t>(ctx, payload, "refKeyframeId");
+    setPayloadNum<uint8_t>(ctx, payload, "refMotorId");
+    setPayloadNum<short>(ctx, payload, "timeOffset");
+
+    printf("movement commandId: %i \n", *(uint8_t*)shiftPointer(cmd->data, 0));
+    printf("movementId: %i \n", *(uint8_t*)shiftPointer(cmd->data, 1));
+    printf("keyframeId: %i \n", *(uint8_t*)shiftPointer(cmd->data, 2));
+    printf("motorCount: %i \n", *(uint8_t*)shiftPointer(cmd->data, 3));
+    printf("motorId: %i \n", *(uint8_t*)shiftPointer(cmd->data, 4));
+    printf("period: %i \n", *(uint16_t*)shiftPointer(cmd->data, 5));
+    printf("pose: %i \n", *(short*)shiftPointer(cmd->data, 7));
+    printf("refMovementId: %i \n", *(uint8_t*)shiftPointer(cmd->data, 9));
+    printf("refKeyframeId: %i \n", *(uint8_t*)shiftPointer(cmd->data, 10));
+    printf("refMotorId: %i \n", *(uint8_t*)shiftPointer(cmd->data, 11));
+    printf("timeOffset: %i \n", *(short*)shiftPointer(cmd->data, 12));
+
+    #ifdef PRINT_DUKTAPE_PACKET
+    // print packet
+    printDTPacket(cmd->bytes+2, cmd->length);
+    #endif
+
+    //  send the packet
+	udpCom.WriteCommand();
+    printf("after write command \n");
+
+    // ... obj
+    duk_pop(ctx);
+    // ...
+
+    return 0;
+}
+
 ////////////////////////////////////////////////////////
 //////////////////////// register callbacks ////////////
 ////////////////////////////////////////////////////////
@@ -656,6 +752,11 @@ void commandMessageHandler(UdpRetPacket& ret) {
             
             break;
         }
+        case CIU_MOVEMENT: {
+            // TODO 
+            printf("=========== duktape CIU_MOVEMENT received =========== \n");
+            break;
+        }
         default:
             break;
     }
@@ -673,6 +774,7 @@ extern "C" duk_ret_t ModuleSRCommand(duk_context *ctx) {
     ADD_FUNCTION("setMotorInterpolate", setMotorInterpolate, 1);
     ADD_FUNCTION("setMotorParam", setMotorParam, 1);
     ADD_FUNCTION("resetSensor", resetSensor, 1);
+    ADD_FUNCTION("movementAddKeyframe", movementAddKeyframe, 1);
 
     ADD_FUNCTION("registerCallback", registerCallback, 2);
 

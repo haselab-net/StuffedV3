@@ -25,7 +25,7 @@ public:
 	uint16_t id;				// 8-bit movement id + 8-bit keyframe id
 	uint8_t motorCount;			// count of motors used in the movement
 	vector<uint8_t> motorId;	// the motorIds used
-	uint16_t period;			// note that the sum of period in list could not larger than UINT16_MAX (or the sorting might fail)
+	uint16_t period;			// note that 1. the sum of period in list could not larger than UINT16_MAX (or the sorting might fail); 2. time in movement tick, not ms
 	vector<short> pose;			// the poses correspond with motorIds
 
 	uint16_t refId;             // 0 if no ref (movement id should start from 1)
@@ -51,6 +51,7 @@ void movementOnGetPICInfo(UdpRetPacket& pkt);
 /////////////////////////////////////////// debug ///////////////////////////////////////////////////////
 void printMotorKeyframes(uint8_t motorId);
 void printInterpolateParams();
+void printAllMotorKeyframes();
 
 /////////////////////////////////////////// interface to hardware ///////////////////////////////////////
 #define MOVEMENT_MANAGER_TIMER_DIVIDER 16

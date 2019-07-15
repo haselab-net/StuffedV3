@@ -277,6 +277,19 @@ UdpCmdPacket* UdpCom::PrepareCommand(CommandId cid, short from) {
 	memset(&r->returnIp, 0, sizeof(r->returnIp));
 	return r;
 }
+UdpCmdPacket* UdpCom::PrepareMovementCommand(CommandId cid, CommandIdMovement mid, short from) {
+	if (!recvs.WriteAvail()) {
+		ESP_LOGE(Tag(), "PrepareCommand(): Udp command receive buffer is full.");
+		return NULL;
+	}
+	UdpCmdPacket* r = &recvs.Poke();
+	r->command = cid;
+	*(uint8_t*)r->data = mid;
+	r->length = r->CommandLen();
+	r->count = from;
+	memset(&r->returnIp, 0, sizeof(r->returnIp));
+	return r;
+}
 void UdpCom::WriteCommand() {
 	recvs.Write();
 }
@@ -335,8 +348,8 @@ void UdpCom::SendReturn(UdpCmdPacket& recv) {
 #else
 #error
 #endif
-		if (recv.count == 0) SendReturnServer();
-		else if (recv.count == 1) SendReturnMovement(send);
+		if (recv.count == CS_WEBSOCKET || recv.count == CS_DUKTAPE) SendReturnServer();
+		else if (recv.count == CS_MOVEMENT_MANAGER) SendReturnMovement(send);
 	}
 	else {
 		SendReturnUdp(recv);
@@ -382,6 +395,7 @@ void UdpCom::SendReturnUdp(UdpCmdPacket& recv) {
 	//	ESP_LOGI(Tag(), "Ret%d C%d L%d to %s\n", send.command, send.count, send.length, ipaddr_ntoa(&returnIp));
 }
 void UdpCom::ExecUdpCommand(UdpCmdPacket& recv) {
+	printf("=============== ExecUdpCommand: %i ================ \n", recv.command);
 	switch (recv.command)
 	{
 	case CI_BOARD_INFO: 
@@ -454,7 +468,7 @@ void UdpCom::ExecUdpCommand(UdpCmdPacket& recv) {
 		SendReturn(recv);
 	}	break;
 	case CIU_MOVEMENT: {
-		printf("=============== ExecUdpCommand ================ \n");
+		printf("=============== CIU_MOVEMENT ================ \n");
 		uint8_t movement_command_id = *(uint8_t*)recv.data;
 		printf("command id: %i \n", movement_command_id);
 		switch (movement_command_id)
