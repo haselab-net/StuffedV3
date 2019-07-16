@@ -4,6 +4,7 @@
 for (var i=0; i<3; i++) {
     console.log("loop: " + i);
     softrobot.message_command.movementAddKeyframe({
+        movementCommandId: 1,
         movementId: 1,
         keyframeId: 0,
         motorCount: 1,
@@ -16,6 +17,39 @@ for (var i=0; i<3; i++) {
         timeOffset: 0
     });
     softrobot.message_command.movementAddKeyframe({
+        movementCommandId: 1,
+        movementId: 1,
+        keyframeId: 0,
+        motorCount: 1,
+        motorId: [0],
+        period: 2000,
+        pose: [-2000],
+        refMovementId: 0,
+        refKeyframeId: 0,
+        refMotorId: 0,
+        timeOffset: 0
+    })
+}
+
+loops.pause(10000);
+
+for (var i=0; i<3; i++) {
+    console.log("loop: " + i);
+    softrobot.message_command.movementAddKeyframe({
+        movementCommandId: 1,
+        movementId: 1,
+        keyframeId: 0,
+        motorCount: 1,
+        motorId: [0],
+        period: 2000,
+        pose: [2000],
+        refMovementId: 0,
+        refKeyframeId: 0,
+        refMotorId: 0,
+        timeOffset: 0
+    });
+    softrobot.message_command.movementAddKeyframe({
+        movementCommandId: 1,
         movementId: 1,
         keyframeId: 0,
         motorCount: 1,

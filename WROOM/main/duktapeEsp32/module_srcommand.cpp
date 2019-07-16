@@ -15,6 +15,7 @@ extern "C" {
 #include "../websocketServer/ws_ws.h"
 #include "../softRobot/UdpCom.h"
 #include "../softRobot/AllBoards.h"
+#include "../softRobot/Utils.h"
 
 #define PRINT_DUKTAPE_PACKET 1
 
@@ -22,28 +23,30 @@ LOG_TAG("SRCmd");
 
 static std::unordered_map<std::string, uint32_t> callback_stash_keys;
 
+static struct MyBoardInfo {
+    uint8_t nTarget;
+    uint8_t nMotor;
+    uint8_t nCurrent;
+    uint8_t nForces;
+    uint8_t nTouch;
+} boardInfo = {0, 0, 0, 0, 0};
+
 ////////////////////////////////////////////////////////
 //////////////////////// tool functions ////////////////
 ////////////////////////////////////////////////////////
 
-static void* shiftPointer(void* p, int8_t offsetBytes) {
-    return (void*)((char*)p + offsetBytes);
-}
-static void setPayload(void* &payload, void* source, size_t byteSize) {
-    memcpy(payload, source, byteSize);
-    payload = shiftPointer(payload, byteSize);
-}
-
+// push prop (number) of object (index: -1) to payload, increment payload pointer
 template <class T>
-static void setPayloadNum(duk_context* ctx, void* &payload, const char* prop) {
+static void pushCtx2PayloadNum(duk_context* ctx, void* &payload, const char* prop) {
     duk_get_prop_string(ctx, -1, prop);
     T num = (T)duk_get_int(ctx, -1);
-    setPayload(payload, &num, sizeof(T));
+    pushPayload(payload, &num, sizeof(T));
     duk_pop(ctx);
 }
 
+// push prop (number array) of object (index: -1) to payload, increment payload pointer
 template <class T>
-static void setPayloadNumArray(duk_context* ctx, void* &payload, const char* prop) {
+static void pushCtx2PayloadNumArray(duk_context* ctx, void* &payload, const char* prop) {
     duk_get_prop_string(ctx, -1, prop);
     assert(duk_is_array(ctx, -1));
     size_t n = duk_get_length(ctx, -1);
@@ -51,12 +54,38 @@ static void setPayloadNumArray(duk_context* ctx, void* &payload, const char* pro
     for(int i=0; i<n; i++){
         duk_get_prop_index(ctx, -1, i);
         T num = (T)duk_get_int(ctx, -1);
-        setPayload(payload, &num, sizeof(T));
+        pushPayload(payload, &num, sizeof(T));
         duk_pop(ctx);
     }
 
     duk_pop(ctx);
 }
+
+// pop payload (number) and put it as prop to object (index: -1), increment payload pointer
+template <class T>
+static void popPayload2CtxNum(duk_context* ctx, const void* &payload, const char* prop) {
+    T num;
+    popPayloadNum(payload, num);
+    duk_push_number(ctx, (duk_double_t)num);
+    duk_put_prop_string(ctx, -2, prop);
+}
+
+// pop payload (number array) and put it as prop to object (index: -1), increment payload pointer
+template <class T>
+static void popPayload2CtxNumArray(duk_context* ctx, const void* &payload, const char* prop, size_t len) {
+    duk_push_array(ctx);
+
+    for (int i=0; i<len; i++) {
+        T num;
+        popPayloadNum(payload, num);
+        duk_push_number(ctx, (duk_double_t)num);
+        duk_put_prop_index(ctx, -2, i);
+    }
+
+    duk_put_prop_string(ctx, -2, prop);
+}
+
+
 
 ////////////////////////////////////////////////////////
 //////////////////////// send functions ////////////////
@@ -385,7 +414,8 @@ static duk_ret_t resetSensor(duk_context* ctx) {
     return 0;
 }
 
-/* function resetSensor(data: {
+
+/* function movementAddKeyframe(data: {
     movementId: number,
     keyframeId: number,
     motorCount: number,
@@ -396,26 +426,19 @@ static duk_ret_t resetSensor(duk_context* ctx) {
     refMotorId: number,
     timeOffset: number
 }); */
-static duk_ret_t movementAddKeyframe(duk_context* ctx) {
-    // ... obj
-    duk_require_object(ctx, -1);
-
-    //  Prepare command
-	UdpCmdPacket* cmd = udpCom.PrepareMovementCommand(CIU_MOVEMENT, CI_M_ADD_KEYFRAME, CS_DUKTAPE);
-    if (!cmd) return DUK_RET_ERROR;
-
+static void movementAddKeyframe(duk_context* ctx, UdpCmdPacket* cmd) {
     // fill payload data
     void* payload = shiftPointer(cmd->data, 1);
-    setPayloadNum<uint8_t>(ctx, payload, "movementId");
-    setPayloadNum<uint8_t>(ctx, payload, "keyframeId");
-    setPayloadNum<uint8_t>(ctx, payload, "motorCount");
-    setPayloadNumArray<uint8_t>(ctx, payload, "motorId");
-    setPayloadNum<uint16_t>(ctx, payload, "period");
-    setPayloadNumArray<short>(ctx, payload, "pose");
-    setPayloadNum<uint8_t>(ctx, payload, "refMovementId");
-    setPayloadNum<uint8_t>(ctx, payload, "refKeyframeId");
-    setPayloadNum<uint8_t>(ctx, payload, "refMotorId");
-    setPayloadNum<short>(ctx, payload, "timeOffset");
+    pushCtx2PayloadNum<uint8_t>(ctx, payload, "movementId");
+    pushCtx2PayloadNum<uint8_t>(ctx, payload, "keyframeId");
+    pushCtx2PayloadNum<uint8_t>(ctx, payload, "motorCount");
+    pushCtx2PayloadNumArray<uint8_t>(ctx, payload, "motorId");
+    pushCtx2PayloadNum<uint16_t>(ctx, payload, "period");
+    pushCtx2PayloadNumArray<short>(ctx, payload, "pose");
+    pushCtx2PayloadNum<uint8_t>(ctx, payload, "refMovementId");
+    pushCtx2PayloadNum<uint8_t>(ctx, payload, "refKeyframeId");
+    pushCtx2PayloadNum<uint8_t>(ctx, payload, "refMotorId");
+    pushCtx2PayloadNum<short>(ctx, payload, "timeOffset");
 
     printf("movement commandId: %i \n", *(uint8_t*)shiftPointer(cmd->data, 0));
     printf("movementId: %i \n", *(uint8_t*)shiftPointer(cmd->data, 1));
@@ -428,6 +451,83 @@ static duk_ret_t movementAddKeyframe(duk_context* ctx) {
     printf("refKeyframeId: %i \n", *(uint8_t*)shiftPointer(cmd->data, 10));
     printf("refMotorId: %i \n", *(uint8_t*)shiftPointer(cmd->data, 11));
     printf("timeOffset: %i \n", *(short*)shiftPointer(cmd->data, 12));
+}
+/* function movementPauseMov(data: {
+    movementId: number,
+    motorCount: number,
+    motorId: number[]
+}) */
+static void movementPauseMov(duk_context* ctx, UdpCmdPacket* cmd) {
+    // fill payload data
+    void* payload = shiftPointer(cmd->data, 1);
+    pushCtx2PayloadNum<uint8_t>(ctx, payload, "movementId");
+    pushCtx2PayloadNum<uint8_t>(ctx, payload, "motorCount");
+    pushCtx2PayloadNumArray<uint8_t>(ctx, payload, "motorId");
+}
+/* function movementResumeMov(data: {
+    movementId: number,
+    motorCount: number
+}) */
+static void movementResumeMov(duk_context* ctx, UdpCmdPacket* cmd) {
+    // fill payload data
+    void* payload = shiftPointer(cmd->data, 1);
+    pushCtx2PayloadNum<uint8_t>(ctx, payload, "movementId");
+    pushCtx2PayloadNum<uint8_t>(ctx, payload, "motorCount");
+}
+/* function movementClearMov(data: {
+    movementId: number,
+    motorCount: number,
+    motorId: number[]
+}) */
+static void movementClearMov(duk_context* ctx, UdpCmdPacket* cmd) {
+    // fill payload data
+    void* payload = shiftPointer(cmd->data, 1);
+    pushCtx2PayloadNum<uint8_t>(ctx, payload, "movementId");
+    pushCtx2PayloadNum<uint8_t>(ctx, payload, "motorCount");
+    pushCtx2PayloadNumArray<uint8_t>(ctx, payload, "motorId");
+}
+
+/* function setMovement(data: {
+    movementCommandId: number,
+    ...
+}) */
+static duk_ret_t setMovement(duk_context* ctx) {
+    // ... obj
+    duk_require_object(ctx, -1);
+
+    bool success = duk_get_prop_string(ctx, -1, "movementCommandId");
+    if (!success) return DUK_RET_ERROR;
+    uint8_t movementCommandId = duk_get_int(ctx, -1);
+    duk_pop(ctx);
+    if (movementCommandId >= CI_M_COUNT || movementCommandId <= CI_M_NONE) return DUK_RET_ERROR;
+
+    //  Prepare command
+	UdpCmdPacket* cmd = udpCom.PrepareMovementCommand(CIU_MOVEMENT, (CommandIdMovement)movementCommandId, CS_DUKTAPE);
+    if (!cmd) return DUK_RET_ERROR;
+
+    switch (movementCommandId) {
+        case CI_M_ADD_KEYFRAME:
+            movementAddKeyframe(ctx, cmd);   
+            break;
+        case CI_M_PAUSE_MOV:
+            movementPauseMov(ctx, cmd);
+            break;
+        case CI_M_RESUME_MOV:
+            movementResumeMov(ctx, cmd);
+            break;
+        case CI_M_CLEAR_MOV:
+            movementClearMov(ctx, cmd);
+            break;
+        case CI_M_PAUSE_INTERPOLATE:
+        case CI_M_RESUME_INTERPOLATE:
+        case CI_M_CLEAR_PAUSED:
+        case CI_M_CLEAR_ALL:
+        case CI_M_QUERY:
+            break;
+        
+        default:
+            return DUK_RET_ERROR;
+    }
 
     #ifdef PRINT_DUKTAPE_PACKET
     // print packet
@@ -436,7 +536,7 @@ static duk_ret_t movementAddKeyframe(duk_context* ctx) {
 
     //  send the packet
 	udpCom.WriteCommand();
-    printf("after write command \n");
+    printf("after setMovement \n");
 
     // ... obj
     duk_pop(ctx);
@@ -538,18 +638,23 @@ int pushDataCIBoardinfo(duk_context* ctx, void* data) {
 
     duk_push_number(ctx, ret.data[1]);
     duk_put_prop_string(ctx, -2, "nTarget");
+    boardInfo.nTarget = ret.data[1];
 
     duk_push_number(ctx, ret.data[2]);
     duk_put_prop_string(ctx, -2, "nMotor");
+    boardInfo.nMotor = ret.data[2];
 
     duk_push_number(ctx, ret.data[3]);
     duk_put_prop_string(ctx, -2, "nCurrent");
+    boardInfo.nCurrent = ret.data[3];
 
     duk_push_number(ctx, ret.data[4]);
     duk_put_prop_string(ctx, -2, "nForces");
+    boardInfo.nForces = ret.data[4];
 
     duk_push_number(ctx, ret.data[5]);
     duk_put_prop_string(ctx, -2, "nTouch");
+    boardInfo.nTouch = ret.data[5];
 
     void* p = duk_push_fixed_buffer(ctx, 6);
     std::memcpy(p, (void *)&ret.data[6], 6);
@@ -636,12 +741,53 @@ int pushDataCISetparam(duk_context* ctx, void* data) {
 int pushDataCIResetsensor(duk_context* ctx, void* data) {
     return 0;
 }
+// function pushDataCIUMovement();
+int pushDataCIUMovement(duk_context* ctx, void* data) {
+    const void* payload = data;
+
+    // header
+    uint16_t len;
+    payload = shiftPointer(payload, 2);
+    popPayloadNum(payload, len);
+    payload = shiftPointer(payload, 2);
+
+    // movement header
+    uint8_t movementCommandId;
+    popPayloadNum(payload, movementCommandId);
+
+    duk_push_object(ctx);
+    duk_push_number(ctx, movementCommandId);
+    duk_put_prop_string(ctx, -2, "movementCommandId");
+
+    switch (movementCommandId) {
+        case CI_M_ADD_KEYFRAME: {
+            popPayload2CtxNum<uint16_t>(ctx, payload, "id");
+            popPayload2CtxNum<uint8_t>(ctx, payload, "success");
+            popPayload2CtxNumArray<uint8_t>(ctx, payload, "nOccupied", boardInfo.nMotor);
+            break;
+        }
+        case CI_M_PAUSE_MOV:
+        case CI_M_RESUME_MOV:
+        case CI_M_CLEAR_MOV:
+        case CI_M_PAUSE_INTERPOLATE:
+        case CI_M_RESUME_INTERPOLATE:
+        case CI_M_CLEAR_PAUSED:
+        case CI_M_CLEAR_ALL:
+            break;
+        case CI_M_QUERY:
+            popPayload2CtxNumArray<uint8_t>(ctx, payload, "nOccupied", boardInfo.nMotor);
+            break;
+    }
+    
+    return 1;
+}
 
 void commandMessageHandler(UdpRetPacket& ret) {
     //  do not return from this function until unlock (call Give).
 
     duk_context* ctx= esp32_duk_context;
     duk_idx_t top = duk_get_top(ctx);
+    printf("duktape receive packet: %i \n", ret.command);
     switch (ret.command)
     {
         case CI_BOARD_INFO: {
@@ -755,6 +901,23 @@ void commandMessageHandler(UdpRetPacket& ret) {
         case CIU_MOVEMENT: {
             // TODO 
             printf("=========== duktape CIU_MOVEMENT received =========== \n");
+
+            std::unordered_map<std::string, uint32_t>::const_iterator iter = callback_stash_keys.find("onReceiveCIUMovement");
+            if (iter == callback_stash_keys.end()) {
+                LOGE("Callback function onReceiveCIUMovement is not registered");
+                break;
+            }
+
+            void* data = (void*)malloc(2 + ret.length);
+            memcpy(data, ret.bytes, 2 + ret.length);
+
+            event_newCallbackRequestedEvent(
+                ESP32_DUKTAPE_CALLBACK_STATIC_TYPE_FUNCTION,
+                iter->second,
+                pushDataCIUMovement,
+                data
+            );
+            
             break;
         }
         default:
@@ -774,7 +937,7 @@ extern "C" duk_ret_t ModuleSRCommand(duk_context *ctx) {
     ADD_FUNCTION("setMotorInterpolate", setMotorInterpolate, 1);
     ADD_FUNCTION("setMotorParam", setMotorParam, 1);
     ADD_FUNCTION("resetSensor", resetSensor, 1);
-    ADD_FUNCTION("movementAddKeyframe", movementAddKeyframe, 1);
+    ADD_FUNCTION("setMovement", setMovement, 1);
 
     ADD_FUNCTION("registerCallback", registerCallback, 2);
 

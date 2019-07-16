@@ -70,7 +70,7 @@ int UdpCmdPacket::CommandLen() {
 			return NHEADER*2 + 1 + (1 + 1 + allBoards.GetNTotalMotor());
 		case CI_M_RESUME_MOV:
 			return NHEADER*2 + 1 + (1 + 1);
-		case CI_M_CLEAR_MOVEMENT:
+		case CI_M_CLEAR_MOV:
 			return NHEADER*2 + 1 + (1 + 1 + allBoards.GetNTotalMotor());
 		case CI_M_CLEAR_PAUSED:
 			return NHEADER*2 + 1;
@@ -121,7 +121,7 @@ void UdpRetPacket::SetLength() {
 		case CI_M_RESUME_INTERPOLATE:
 		case CI_M_PAUSE_MOV:
 		case CI_M_RESUME_MOV:
-		case CI_M_CLEAR_MOVEMENT:
+		case CI_M_CLEAR_MOV:
 		case CI_M_CLEAR_PAUSED:
 		case CI_M_CLEAR_ALL:
 			length = NHEADER*2 + 1; break;
@@ -540,7 +540,7 @@ void UdpCom::ExecUdpCommand(UdpCmdPacket& recv) {
 				SendReturn(recv);
 				break;
 			}
-			case CI_M_CLEAR_MOVEMENT: {
+			case CI_M_CLEAR_MOV: {
 				prepareRetClearMov(shiftPointer(recv.data, 1), movement_command_data);
 				SendReturn(recv);
 				break;
