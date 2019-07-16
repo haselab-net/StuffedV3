@@ -621,8 +621,11 @@ static void movementTick() {
 static bool skippedOneLoop = false;		// forbid continuous skip (because the targetWrite will not be updated)
 static void movementManager(void* arg) {
 	while(1) {
-		xSemaphoreTake(intervalSemaphore, portMAX_DELAY);
-		if (!receivedReturn) continue;
+		xSemaphoreTake(intervalSemaphore, portMAX_DELAY);	// tick when timer alarm
+		if (!receivedReturn) {								// not tick if return packet for last command not come
+			ESP_LOGD(LOG_TAG, "Skip one loop because no return CI_INTERPOLATED received in %i ms", MS_PER_MOVEMENT_TICK);
+			continue;
+		}
 
 		short nVacancy = getInterpolateBufferVacancy();
 
@@ -638,6 +641,9 @@ static void movementManager(void* arg) {
 			xSemaphoreTake(tickSemaphore, portMAX_DELAY);
 			for (int i=0; i<allBoards.GetNTotalMotor(); i++) getInterpolateParams(i);
 			xSemaphoreGive(tickSemaphore);
+
+			// shift target write
+			targetWrite = targetCountReadMax + 2;
 		}
 
 		// avoid overflow of interpolate buffer in PIC
