@@ -562,6 +562,26 @@ void printMotorKeyframes(uint8_t motorId) {
 	printf("NULL \r\n");
 }
 
+void printKeyframe(const MovementKeyframe &keyframe) {
+	printf("Receive one keyframe: \n");
+	printf("	-id: %i \n", keyframe.id);
+	printf("	-motorCount: %i \n", keyframe.motorCount);
+	printf("	-motorId: ");
+	for (int i=0; i<keyframe.motorCount; i++) {
+		printf("%i,", keyframe.motorId[i]);
+	}
+	printf("\n");
+	printf("	-period: %i \n", keyframe.period);
+	printf("	-pose: ");
+	for (int i=0; i<keyframe.motorCount; i++) {
+		printf("%i,", keyframe.pose[i]);
+	}
+	printf("\n");
+	printf("	-refId: %i \n", keyframe.refId);
+	printf("	-refMotor: %i \n", keyframe.refMotorId);
+	printf("	-offsetTime: %i \n", keyframe.timeOffset);
+}
+
 void printAllMotorKeyframes() {
 	for (int i=0; i<allBoards.GetNTotalMotor(); i++) {
 		printf("=== motor %i === \n", i);
@@ -914,25 +934,24 @@ static void decodeKeyframe(const void* movement_command_data, MovementKeyframe& 
 	char* p = (char*)movement_command_data;
 	
 	keyframe.id = *(uint16_t*)p; p += 2;
-	printf("keyframe.id: %i \n", keyframe.id);
 	keyframe.motorCount = *(uint8_t*)p; p += 1;
-	printf("keyframe.motorCount: %i \n", keyframe.motorCount);
 	keyframe.motorId.clear(); keyframe.motorId.reserve(keyframe.motorCount);
 	for(int i=0; i<keyframe.motorCount; i++){
 		keyframe.motorId.push_back(*(uint8_t*)p); p += 1;
-		printf("keyframe.motorId: %i \n", keyframe.motorId[i]);
+		
 	}
 	keyframe.period = (*(uint16_t*)p) / MS_PER_MOVEMENT_TICK; p += 2;	// convert to movement tick
-	printf("keyframe.period: %i \n", keyframe.period);
 	keyframe.pose.clear(); keyframe.pose.reserve(keyframe.motorCount);
 	for(int i=0; i<keyframe.motorCount; i++){
 		keyframe.pose.push_back(*(uint16_t*)p); p += 2;
-		printf("keyframe.pose: %i \n", keyframe.pose[i]);
 	}
 	keyframe.refId = *(uint16_t*)p; p += 2;
-	printf("keyframe.refId: %i \n", keyframe.refId);
 	keyframe.refMotorId = *(uint8_t*)p; p += 1;
 	keyframe.timeOffset = *(short*)p; p += 2;
+
+	#if MOVEMENT_DEBUG
+		printKeyframe(keyframe);
+	#endif
 }
 void prepareRetAddKeyframe(const void* movement_command_data_rcv, void* movement_command_data_ret) {
 	/* decode received packet */
@@ -951,6 +970,52 @@ void prepareRetAddKeyframe(const void* movement_command_data_rcv, void* movement
 	}
 	pushPayload(movement_command_data_ret, &success, 1);
 	// nOccupied
+	for (int i=0; i<allBoards.GetNTotalMotor(); i++) {
+		pushPayload(movement_command_data_ret, &motorHeads[i].nOccupied, 1);
+	}
+}
+void prepareRetPauseMov(const void* movement_command_data_rcv, void* movement_command_data_ret) {
+	/* decode received packet */
+	uint8_t movementId, motorCount;
+	vector<uint8_t> motorId;
+	popPayloadNum(movement_command_data_rcv, movementId);
+	popPayloadNum(movement_command_data_rcv, motorCount);
+	popPayloadNumArray(movement_command_data_rcv, motorId, motorCount);
+
+	/* execute */
+	pauseMovement(movementId, motorCount, motorId);
+
+	/* fill return packet */
+	// empty return
+}
+void prepareRetResumeMov(const void* movement_command_data_rcv, void* movement_command_data_ret) {
+	/* decode received packet */
+	uint8_t movementId, motorCount;
+	popPayloadNum(movement_command_data_rcv, movementId);
+	popPayloadNum(movement_command_data_rcv, motorCount);
+
+	/* execute */
+	resumeMovement(movementId, motorCount);
+
+	/* fill return packet */
+	// empty return
+}
+void prepareRetClearMov(const void* movement_command_data_rcv, void* movement_command_data_ret) {
+	/* decode received packet */
+	uint8_t movementId, motorCount;
+	vector<uint8_t> motorId;
+	popPayloadNum(movement_command_data_rcv, movementId);
+	popPayloadNum(movement_command_data_rcv, motorCount);
+	popPayloadNumArray(movement_command_data_rcv, motorId, motorCount);
+
+	/* execute */
+	clearMovement(movementId, motorCount, motorId);
+
+	/* fill return packet */
+	// empty return
+}
+void prepareRetQuery(const void* movement_command_data_rcv, void* movement_command_data_ret) {
+	/* fill return packet */
 	for (int i=0; i<allBoards.GetNTotalMotor(); i++) {
 		pushPayload(movement_command_data_ret, &motorHeads[i].nOccupied, 1);
 	}

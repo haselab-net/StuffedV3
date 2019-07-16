@@ -66,6 +66,18 @@ int UdpCmdPacket::CommandLen() {
 			return NHEADER*2 + 1;
 		case CI_M_RESUME_INTERPOLATE:
 			return NHEADER*2 + 1;
+		case CI_M_PAUSE_MOV:
+			return NHEADER*2 + 1 + (1 + 1 + allBoards.GetNTotalMotor());
+		case CI_M_RESUME_MOV:
+			return NHEADER*2 + 1 + (1 + 1);
+		case CI_M_CLEAR_MOVEMENT:
+			return NHEADER*2 + 1 + (1 + 1 + allBoards.GetNTotalMotor());
+		case CI_M_CLEAR_PAUSED:
+			return NHEADER*2 + 1;
+		case CI_M_CLEAR_ALL:
+			return NHEADER*2 + 1;
+		case CI_M_QUERY:
+			return NHEADER*2 + 1;
 		default:
 			break;
 		}
@@ -106,9 +118,15 @@ void UdpRetPacket::SetLength() {
 		case CI_M_ADD_KEYFRAME:
 			length = NHEADER*2 + 1 + (2 + 1); break;
 		case CI_M_PAUSE_INTERPOLATE:
-			length = NHEADER*2 + 1; break;
 		case CI_M_RESUME_INTERPOLATE:
+		case CI_M_PAUSE_MOV:
+		case CI_M_RESUME_MOV:
+		case CI_M_CLEAR_MOVEMENT:
+		case CI_M_CLEAR_PAUSED:
+		case CI_M_CLEAR_ALL:
 			length = NHEADER*2 + 1; break;
+		case CI_M_QUERY:
+			length = NHEADER*2 + 1 + (allBoards.GetNTotalMotor()); break;
 		default:
 			break;
 		}
@@ -496,7 +514,6 @@ void UdpCom::ExecUdpCommand(UdpCmdPacket& recv) {
 			case CI_M_ADD_KEYFRAME: {
 				// execute and prepare return packet
 				prepareRetAddKeyframe(shiftPointer(recv.data, 1), movement_command_data);
-
 				SendReturn(recv);
 
 				printf("CI_M_ADD_KEYFRAME send return \n");
@@ -510,6 +527,36 @@ void UdpCom::ExecUdpCommand(UdpCmdPacket& recv) {
 			}
 			case CI_M_RESUME_INTERPOLATE: {
 				resumeInterpolate();
+				SendReturn(recv);
+				break;
+			}
+			case CI_M_PAUSE_MOV: {
+				prepareRetPauseMov(shiftPointer(recv.data, 1), movement_command_data);
+				SendReturn(recv);
+				break;
+			}
+			case CI_M_RESUME_MOV: {
+				prepareRetResumeMov(shiftPointer(recv.data, 1), movement_command_data);
+				SendReturn(recv);
+				break;
+			}
+			case CI_M_CLEAR_MOVEMENT: {
+				prepareRetClearMov(shiftPointer(recv.data, 1), movement_command_data);
+				SendReturn(recv);
+				break;
+			}
+			case CI_M_CLEAR_PAUSED: {
+				clearPausedMovements();
+				SendReturn(recv);
+				break;
+			}
+			case CI_M_CLEAR_ALL: {
+				clearInterpolateBuffer();
+				SendReturn(recv);
+				break;
+			}
+			case CI_M_QUERY: {
+				prepareRetQuery(shiftPointer(recv.data, 1), movement_command_data);
 				SendReturn(recv);
 				break;
 			}

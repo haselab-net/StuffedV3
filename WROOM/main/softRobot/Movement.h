@@ -50,7 +50,9 @@ void movementQueryInterpolateState();
 void movementOnGetPICInfo(UdpRetPacket& pkt);
 
 /////////////////////////////////////////// debug ///////////////////////////////////////////////////////
+#define MOVEMENT_DEBUG 1
 void printMotorKeyframes(uint8_t motorId);
+void printKeyframe(const MovementKeyframe &keyframe);
 void printInterpolateParams();
 void printAllMotorKeyframes();
 
@@ -73,7 +75,14 @@ void resumeInterpolate();
 void pauseMovement(uint8_t movementId, uint8_t motorCount, const vector<uint8_t> &motorId);
 void resumeMovement(uint8_t movementId, uint8_t motorCount);
 
+void clearPausedMovements();
+void clearInterpolateBuffer();
+
 /////////////////////////////////////////// api for execute and return packet ///////////////////////////////////////////////
-void prepareRetAddKeyframe(const void* movement_command_data_rcv, void* movement_command_data);
+void prepareRetAddKeyframe(const void* movement_command_data_rcv, void* movement_command_data_ret);
+void prepareRetPauseMov(const void* movement_command_data_rcv, void* movement_command_data_ret);
+void prepareRetResumeMov(const void* movement_command_data_rcv, void* movement_command_data_ret);
+void prepareRetClearMov(const void* movement_command_data_rcv, void* movement_command_data_ret);
+void prepareRetQuery(const void* movement_command_data_rcv, void* movement_command_data_ret);
 
 #endif
