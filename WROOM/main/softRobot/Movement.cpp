@@ -2,7 +2,7 @@
 #include "UdpCom.h"
 #include "../../../PIC/control.h"
 
-static char* LOG_TAG = "Movement";
+static const char* LOG_TAG = "Movement";
 
 typedef struct MotorKeyframeNode MotorKeyframeNode;
 typedef struct MotorHead MotorHead;
@@ -85,6 +85,7 @@ static void initPausedMovements() {
 
 /////////////////////////////////////////// api for accessing PIC ///////////////////////////////////////////////
 static xSemaphoreHandle picQuerySemaphore;
+static bool receivedReturn = true;		// if not received the return of formal command, not execute command this time
 
 static uint8_t targetCountReadMin = 0xfe, targetCountReadMax = 0xfe, targetWrite = 0xff;
 static uint16_t tickMin, tickMax;
@@ -129,6 +130,7 @@ void movementOnGetPICInfo(UdpRetPacket& pkt) {
 	{
 	case CI_INTERPOLATE:
 		movementUpdateInterpolateState(pkt);
+		receivedReturn = true;
 		break;
 	
 	default:
@@ -620,6 +622,7 @@ static bool skippedOneLoop = false;		// forbid continuous skip (because the targ
 static void movementManager(void* arg) {
 	while(1) {
 		xSemaphoreTake(intervalSemaphore, portMAX_DELAY);
+		if (!receivedReturn) continue;
 
 		short nVacancy = getInterpolateBufferVacancy();
 
@@ -645,6 +648,7 @@ static void movementManager(void* arg) {
 		} else if (skippedOneLoop) skippedOneLoop = false;
 
 		// do tick
+		receivedReturn = false;
 		movementTick();
 	}
 }
