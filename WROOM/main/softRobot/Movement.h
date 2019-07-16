@@ -12,6 +12,7 @@
 #include <driver/timer.h>
 
 #include "AllBoards.h"
+#include "Utils.h"
 
 using namespace std;
 
@@ -44,7 +45,7 @@ struct InterpolateState {
 };
 
 /////////////////////////////////////////// api for accessing PIC ///////////////////////////////////////////////
-#define PIC_INTERPOLATE_BUFFER_VACANCY_MIN 1		// the minimum empty interpolate buffer count
+#define PIC_INTERPOLATE_BUFFER_VACANCY_MIN 2		// the minimum empty interpolate buffer count
 void movementQueryInterpolateState();
 void movementOnGetPICInfo(UdpRetPacket& pkt);
 
@@ -61,12 +62,18 @@ void printAllMotorKeyframes();
 
 void initMovementDS();
 
-/////////////////////////////////////////// api for WROOM ///////////////////////////////////////////////
+/////////////////////////////////////////// api for command packet ///////////////////////////////////////////////
 
 bool canAddKeyframe(MovementKeyframe& keyframe);
 void addKeyframe(MovementKeyframe& keyframe);
 
 void pauseInterpolate();
 void resumeInterpolate();
+
+void pauseMovement(uint8_t movementId, uint8_t motorCount, const vector<uint8_t> &motorId);
+void resumeMovement(uint8_t movementId, uint8_t motorCount);
+
+/////////////////////////////////////////// api for execute and return packet ///////////////////////////////////////////////
+void prepareRetAddKeyframe(const void* movement_command_data_rcv, void* movement_command_data);
 
 #endif

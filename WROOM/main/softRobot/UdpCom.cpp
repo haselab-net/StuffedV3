@@ -62,7 +62,10 @@ int UdpCmdPacket::CommandLen() {
 		{
 		case CI_M_ADD_KEYFRAME:
 			return NHEADER*2 + 1 + (2 + 1 + allBoards.GetNTotalMotor() + 2 + allBoards.GetNTotalMotor() * 2 + 2 + 1 + 2);
-		
+		case CI_M_PAUSE_INTERPOLATE: 
+			return NHEADER*2 + 1;
+		case CI_M_RESUME_INTERPOLATE:
+			return NHEADER*2 + 1;
 		default:
 			break;
 		}
@@ -102,10 +105,14 @@ void UdpRetPacket::SetLength() {
 		{
 		case CI_M_ADD_KEYFRAME:
 			length = NHEADER*2 + 1 + (2 + 1); break;
-		
+		case CI_M_PAUSE_INTERPOLATE:
+			length = NHEADER*2 + 1; break;
+		case CI_M_RESUME_INTERPOLATE:
+			length = NHEADER*2 + 1; break;
 		default:
 			break;
 		}
+		break;
 	default:				//	error
 		ESP_LOGE(Tag(), "Undefined command %d set lentgh to 0", command);
 		length = 0;
@@ -486,27 +493,28 @@ void UdpCom::ExecUdpCommand(UdpCmdPacket& recv) {
 
 		switch (movement_command_id)
 		{
-		case CI_M_ADD_KEYFRAME: {
-			MovementKeyframe keyframe;
-			recv.GetKeyframe(keyframe);
+			case CI_M_ADD_KEYFRAME: {
+				// execute and prepare return packet
+				prepareRetAddKeyframe(shiftPointer(recv.data, 1), movement_command_data);
 
-			struct MovementKeyframeAddState* retP = (struct MovementKeyframeAddState*)movement_command_data;
-			retP->id = keyframe.id;
-			retP->success = false;
+				SendReturn(recv);
 
-			if (canAddKeyframe(keyframe)) {
-				addKeyframe(keyframe);
-				retP->success = true;
+				printf("CI_M_ADD_KEYFRAME send return \n");
+
+				break;
 			}
-
-			SendReturn(recv);
-
-			printf("CI_M_ADD_KEYFRAME send return \n");
-
-			break;
-		}
-		default:
-			break;
+			case CI_M_PAUSE_INTERPOLATE: {
+				pauseInterpolate();
+				SendReturn(recv);
+				break;
+			}
+			case CI_M_RESUME_INTERPOLATE: {
+				resumeInterpolate();
+				SendReturn(recv);
+				break;
+			}
+			default:
+				break;
 		}
 	} break;
 	default:

@@ -96,30 +96,6 @@ public:
 			data[0] = f;
 		}
 	}
-	void GetKeyframe(MovementKeyframe& keyframe) {
-		char* p = (char*)data; p += 1;
-		
-		keyframe.id = *(uint16_t*)p; p += 2;
-		printf("keyframe.id: %i \n", keyframe.id);
-		keyframe.motorCount = *(uint8_t*)p; p += 1;
-		printf("keyframe.motorCount: %i \n", keyframe.motorCount);
-		keyframe.motorId.clear(); keyframe.motorId.reserve(keyframe.motorCount);
-		for(int i=0; i<keyframe.motorCount; i++){
-			keyframe.motorId.push_back(*(uint8_t*)p); p += 1;
-			printf("keyframe.motorId: %i \n", keyframe.motorId[i]);
-		}
-		keyframe.period = (*(uint16_t*)p) / MS_PER_MOVEMENT_TICK; p += 2;	// convert to movement tick
-		printf("keyframe.period: %i \n", keyframe.period);
-		keyframe.pose.clear(); keyframe.pose.reserve(keyframe.motorCount);
-		for(int i=0; i<keyframe.motorCount; i++){
-			keyframe.pose.push_back(*(uint16_t*)p); p += 2;
-			printf("keyframe.pose: %i \n", keyframe.pose[i]);
-		}
-		keyframe.refId = *(uint16_t*)p; p += 2;
-		printf("keyframe.refId: %i \n", keyframe.refId);
-		keyframe.refMotorId = *(uint8_t*)p; p += 1;
-		keyframe.timeOffset = *(short*)p; p += 2;
-	}
 };
 class UdpRetPacket:public UdpPacket, public BoardRetBase{
 public:

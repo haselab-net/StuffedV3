@@ -583,11 +583,6 @@ static xTaskHandle movementManagerTask;
 static void movementTick() {
 	xSemaphoreTake(tickSemaphore, portMAX_DELAY);
 
-	if (tickPaused) {
-		xSemaphoreGive(tickSemaphore);
-        return;
-    }
-
 	movementTime++;
 
 	// prepare command
@@ -622,6 +617,9 @@ static bool skippedOneLoop = false;		// forbid continuous skip (because the targ
 static void movementManager(void* arg) {
 	while(1) {
 		xSemaphoreTake(intervalSemaphore, portMAX_DELAY);	// tick when timer alarm
+		if (tickPaused) {									// if paused, no tick
+			continue;
+		}
 		if (!receivedReturn) {								// not tick if return packet for last command not come
 			ESP_LOGD(LOG_TAG, "Skip one loop because no return CI_INTERPOLATED received in %i ms", MS_PER_MOVEMENT_TICK);
 			continue;
@@ -708,7 +706,7 @@ void initMovementDS() {
 	initMovementManager();
 }
 
-/////////////////////////////////////////// api for WROOM ///////////////////////////////////////////////
+/////////////////////////////////////////// api for command packet ///////////////////////////////////////////////
 
 bool canAddKeyframe(MovementKeyframe& keyframe) {
 	vector<uint8_t> &motorId = keyframe.motorId;
@@ -766,15 +764,7 @@ void pauseMovement(uint8_t movementId, uint8_t motorCount, const vector<uint8_t>
 }
 // pause interpolate
 void pauseInterpolate() {
-	#ifdef WROOM
-	    xSemaphoreTake(tickSemaphore, portMAX_DELAY);
-    #endif
-
 	tickPaused = true;
-
-	#ifdef WROOM
-	    xSemaphoreGive(tickSemaphore);
-    #endif
 }
 // resume one movement
 void resumeMovement(uint8_t movementId, uint8_t motorCount) {
@@ -811,21 +801,19 @@ void resumeMovement(uint8_t movementId, uint8_t motorCount) {
 }
 // resume interpolate
 void resumeInterpolate() {
-	#ifdef WROOM
-	    xSemaphoreTake(tickSemaphore, portMAX_DELAY);
-    #endif
+	if (!tickPaused) return;
 
+	calibrateCurrentPose = true;
+	movementQueryInterpolateState();
+
+	xSemaphoreTake(tickSemaphore, portMAX_DELAY);
 	// the current pos of every motor might have been changed
 	for (int i=0; i<allBoards.GetNTotalMotor(); i++) {
-		motorHeads[i].currentPose = motorState.pos[i];
 		getInterpolateParams(i);
 	}
+	xSemaphoreGive(tickSemaphore);
 
 	tickPaused = false;
-
-	#ifdef WROOM
-	    xSemaphoreGive(tickSemaphore);
-    #endif
 }
 
 // clear specified movement in the buffer (interpolate list & paused list)
@@ -918,5 +906,52 @@ void queryInterpolateState(InterpolateState* interpolateState) {
 			continue;
 		};
 		interpolateState->id[i] = motorHeads[i].head->id;
+	}
+}
+
+/////////////////////////////////////////// api for execute and return packet ///////////////////////////////////////////////
+static void decodeKeyframe(const void* movement_command_data, MovementKeyframe& keyframe) {
+	char* p = (char*)movement_command_data;
+	
+	keyframe.id = *(uint16_t*)p; p += 2;
+	printf("keyframe.id: %i \n", keyframe.id);
+	keyframe.motorCount = *(uint8_t*)p; p += 1;
+	printf("keyframe.motorCount: %i \n", keyframe.motorCount);
+	keyframe.motorId.clear(); keyframe.motorId.reserve(keyframe.motorCount);
+	for(int i=0; i<keyframe.motorCount; i++){
+		keyframe.motorId.push_back(*(uint8_t*)p); p += 1;
+		printf("keyframe.motorId: %i \n", keyframe.motorId[i]);
+	}
+	keyframe.period = (*(uint16_t*)p) / MS_PER_MOVEMENT_TICK; p += 2;	// convert to movement tick
+	printf("keyframe.period: %i \n", keyframe.period);
+	keyframe.pose.clear(); keyframe.pose.reserve(keyframe.motorCount);
+	for(int i=0; i<keyframe.motorCount; i++){
+		keyframe.pose.push_back(*(uint16_t*)p); p += 2;
+		printf("keyframe.pose: %i \n", keyframe.pose[i]);
+	}
+	keyframe.refId = *(uint16_t*)p; p += 2;
+	printf("keyframe.refId: %i \n", keyframe.refId);
+	keyframe.refMotorId = *(uint8_t*)p; p += 1;
+	keyframe.timeOffset = *(short*)p; p += 2;
+}
+void prepareRetAddKeyframe(const void* movement_command_data_rcv, void* movement_command_data_ret) {
+	/* decode received packet */
+	MovementKeyframe keyframe;
+	decodeKeyframe(movement_command_data_rcv, keyframe);
+
+	/* execute and fill return packet */
+	// id
+	pushPayload(movement_command_data_ret, &keyframe.id, 2);
+	// success
+	uint8_t success = 0;
+	if (canAddKeyframe(keyframe)) {
+		addKeyframe(keyframe);
+		success = 1;
+		printf("add keyframe \n");
+	}
+	pushPayload(movement_command_data_ret, &success, 1);
+	// nOccupied
+	for (int i=0; i<allBoards.GetNTotalMotor(); i++) {
+		pushPayload(movement_command_data_ret, &motorHeads[i].nOccupied, 1);
 	}
 }
