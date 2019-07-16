@@ -95,6 +95,6 @@ function setTimeout(callback, interval) {
 	return _timers.setTimer(callback, interval, false);
 }
 
-var cons = require("main/test");
-
-cons.log("cons.log from init.js");
+//	Tests for require()
+//var cons = require("main/test");
+//cons.log("cons.log from init.js");

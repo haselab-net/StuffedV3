@@ -69,8 +69,11 @@ static void processEvent(duk_context* ctx, esp32_duktape_event_t *pEvent) {
 	switch(pEvent->type) {
 		// Handle a new command line submitted to us.
 		case ESP32_DUKTAPE_EVENT_COMMAND_LINE: {
+			duktape_print_stack_remain(ctx, "duktape_task.c L72:processEvent");
 			LOGD("We are about to eval: %.*s", pEvent->commandLine.commandLineLength, pEvent->commandLine.commandLine);
+			duktape_print_stack_remain(ctx, "duktape_task.c L74:processEvent");
 			callRc = duk_peval_lstring(ctx,	pEvent->commandLine.commandLine, pEvent->commandLine.commandLineLength);
+			duktape_print_stack_remain(ctx, "duktape_task.c L76:processEvent");
 			// [0] - result
 		    
 			// If an error was detected, perform error logging.
@@ -192,6 +195,7 @@ void duktape_start() {
 	//	create tasks for threads
 	for(int i=0; i<NJSTHREADS; ++i){
 		xTaskCreate(dukEventHandleTask, taskNames[i], 1024*10, &jsThreads[i], tskIDLE_PRIORITY + 1, &jsThreads[i].task);
+		//xTaskCreate(dukEventHandleTask, taskNames[i], 1024*9, &jsThreads[i], tskIDLE_PRIORITY + 1, &jsThreads[i].task);
 	}
 	char* cmd = "ESP32.include('/main/runtime.js');";
 	event_newCommandLineEvent(cmd, strlen(cmd), 0);
@@ -210,4 +214,16 @@ void duktape_end(){
 	unlock_heap();
 	
 	esp32_duktape_endEvents();
+}
+
+void duktape_print_stack_remain(duk_context* ctx, const char* at){
+	JSThread* th = NULL;
+	for(int i=0; i < NJSTHREADS; ++i){
+		if (jsThreads[i].ctx == ctx){
+			th = &jsThreads[i];
+			UBaseType_t sd = uxTaskGetStackHighWaterMark(th->task);
+			printf("Stack remain: %d at %s\n", (int)sd, at);
+			break;
+		}
+	}
 }

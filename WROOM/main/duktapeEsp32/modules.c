@@ -20,6 +20,7 @@
 #include "duk_trans_socket.h" // The debug functions from Duktape.
 #include "dukf_utils.h"
 #include "duktape_utils.h"
+#include "duktape_task.h"
 #include "logging.h"
 #include "modules.h"
 #include "module_dukf.h"
@@ -394,11 +395,13 @@ static void ModuleConsole(duk_context *ctx) {
 	include just include JS file in the line.
 	The same global variables and context is used.	*/
 static duk_ret_t js_include(duk_context* ctx){
+	DUK_STACK_REMAIN(ctx);
     const char* fn = duk_get_string(ctx, -1);
-		duk_pop(ctx);	//	pop argment(filename)
-		//	run script
-		dukf_runFile(ctx, fn);
-		return 0;
+	duk_pop(ctx);	//	pop argment(filename)
+	DUK_STACK_REMAIN(ctx);
+	//	run script
+	dukf_runFile(ctx, fn);
+	return 0;
 }
 
 static duk_ret_t js_include_spiffs(duk_context* ctx) {

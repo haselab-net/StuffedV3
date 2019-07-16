@@ -18499,6 +18499,9 @@ struct duk__compile_raw_args {
 	duk_uint_t flags;
 };
 
+#include "../../../main/duktapeEsp32/include/duktape_task.h"
+
+
 /* Eval is just a wrapper now. */
 DUK_EXTERNAL duk_int_t duk_eval_raw(duk_hthread *thr, const char *src_buffer, duk_size_t src_length, duk_uint_t flags) {
 	duk_int_t rc;
@@ -18513,9 +18516,11 @@ DUK_EXTERNAL duk_int_t duk_eval_raw(duk_hthread *thr, const char *src_buffer, du
 	 */
 
 	/* [ ... source? filename? ] (depends on flags) */
+	DUK_STACK_REMAIN(thr);
 
 	rc = duk_compile_raw(thr, src_buffer, src_length, flags | DUK_COMPILE_EVAL);  /* may be safe, or non-safe depending on flags */
 
+	DUK_STACK_REMAIN(thr);
 	/* [ ... closure/error ] */
 
 	if (rc != DUK_EXEC_SUCCESS) {
@@ -18563,11 +18568,14 @@ DUK_LOCAL duk_ret_t duk__do_compile(duk_hthread *thr, void *udata) {
 	comp_args = (duk__compile_raw_args *) udata;
 	flags = comp_args->flags;
 
+	DUK_STACK_REMAIN(thr);
+
 	if (flags & DUK_COMPILE_NOFILENAME) {
 		/* Automatic filename: 'eval' or 'input'. */
 		duk_push_hstring_stridx(thr, (flags & DUK_COMPILE_EVAL) ? DUK_STRIDX_EVAL : DUK_STRIDX_INPUT);
 	}
 
+	DUK_STACK_REMAIN(thr);
 	/* [ ... source? filename ] */
 
 	if (!comp_args->src_buffer) {
@@ -18584,6 +18592,7 @@ DUK_LOCAL duk_ret_t duk__do_compile(duk_hthread *thr, void *udata) {
 		comp_args->src_length = (duk_size_t) DUK_HSTRING_GET_BYTELEN(h_sourcecode);
 	}
 	DUK_ASSERT(comp_args->src_buffer != NULL);
+	DUK_STACK_REMAIN(thr);
 
 	if (flags & DUK_COMPILE_FUNCTION) {
 		flags |= DUK_COMPILE_EVAL | DUK_COMPILE_FUNCEXPR;
@@ -18591,7 +18600,9 @@ DUK_LOCAL duk_ret_t duk__do_compile(duk_hthread *thr, void *udata) {
 
 	/* [ ... source? filename ] */
 
+	DUK_STACK_REMAIN(thr);
 	duk_js_compile(thr, comp_args->src_buffer, comp_args->src_length, flags);
+	DUK_STACK_REMAIN(thr);
 
 	/* [ ... source? func_template ] */
 
@@ -18604,11 +18615,13 @@ DUK_LOCAL duk_ret_t duk__do_compile(duk_hthread *thr, void *udata) {
 	/* [ ... func_template ] */
 
 	h_templ = (duk_hcompfunc *) duk_known_hobject(thr, -1);
+	DUK_STACK_REMAIN(thr);
 	duk_js_push_closure(thr,
 	                   h_templ,
 	                   thr->builtins[DUK_BIDX_GLOBAL_ENV],
 	                   thr->builtins[DUK_BIDX_GLOBAL_ENV],
 	                   1 /*add_auto_proto*/);
+	DUK_STACK_REMAIN(thr);
 	duk_remove_m2(thr);   /* -> [ ... closure ] */
 
 	/* [ ... closure ] */
@@ -18634,6 +18647,7 @@ DUK_EXTERNAL duk_int_t duk_compile_raw(duk_hthread *thr, const char *src_buffer,
 	comp_args->flags = flags;
 
 	/* [ ... source? filename? ] (depends on flags) */
+	DUK_STACK_REMAIN(thr);
 
 	if (flags & DUK_COMPILE_SAFE) {
 		duk_int_t rc;
@@ -18647,12 +18661,14 @@ DUK_EXTERNAL duk_int_t duk_compile_raw(duk_hthread *thr, const char *src_buffer,
 		nargs = flags & 0x07;
 		DUK_ASSERT(nargs == ((flags & DUK_COMPILE_NOSOURCE) ? 0 : 1) +
 		                    ((flags & DUK_COMPILE_NOFILENAME) ? 0 : 1));
+		DUK_STACK_REMAIN(thr);
 		rc = duk_safe_call(thr, duk__do_compile, (void *) comp_args, nargs, nrets);
 
 		/* [ ... closure ] */
 		return rc;
 	}
 
+	DUK_STACK_REMAIN(thr);
 	(void) duk__do_compile(thr, (void *) comp_args);
 
 	/* [ ... closure ] */
@@ -75701,6 +75717,7 @@ DUK_LOCAL duk_ret_t duk__js_compile_raw(duk_hthread *thr, void *udata) {
 	/*
 	 *  Arguments check
 	 */
+	DUK_STACK_REMAIN(thr);
 
 	entry_top = duk_get_top(thr);
 	DUK_ASSERT(entry_top >= 1);
@@ -75760,6 +75777,8 @@ DUK_LOCAL duk_ret_t duk__js_compile_raw(duk_hthread *thr, void *udata) {
 	DUK_ASSERT(DUK_HBUFFER_HAS_DYNAMIC(comp_ctx->lex.buf) && !DUK_HBUFFER_HAS_EXTERNAL(comp_ctx->lex.buf));
 	comp_ctx->lex.token_limit = DUK_COMPILER_TOKEN_LIMIT;
 
+	DUK_STACK_REMAIN(thr);
+
 	lex_pt->offset = 0;
 	lex_pt->line = 1;
 	DUK_LEXER_SETPOINT(&comp_ctx->lex, lex_pt);    /* fills window */
@@ -75771,6 +75790,7 @@ DUK_LOCAL duk_ret_t duk__js_compile_raw(duk_hthread *thr, void *udata) {
 
 	duk__init_func_valstack_slots(comp_ctx);
 	DUK_ASSERT(func->num_formals == 0);
+	DUK_STACK_REMAIN(thr);
 
 	if (is_funcexpr) {
 		/* Name will be filled from function expression, not by caller.
@@ -75783,6 +75803,7 @@ DUK_LOCAL duk_ret_t duk__js_compile_raw(duk_hthread *thr, void *udata) {
 		                                        DUK_STRIDX_GLOBAL));
 		func->h_name = duk_get_hstring(thr, -1);
 	}
+	DUK_STACK_REMAIN(thr);
 
 	/*
 	 *  Parse a function body or a function-like expression, depending
@@ -75817,12 +75838,15 @@ DUK_LOCAL duk_ret_t duk__js_compile_raw(duk_hthread *thr, void *udata) {
 		                     1,             /* regexp_after (does not matter) */
 		                     -1);           /* expect_token */
 	}
+	DUK_STACK_REMAIN(thr);
 
 	/*
 	 *  Convert duk_compiler_func to a function template
 	 */
 
+	DUK_STACK_REMAIN(thr);
 	duk__convert_to_func_template(comp_ctx);
+	DUK_STACK_REMAIN(thr);
 
 	/*
 	 *  Wrapping duk_safe_call() will mangle the stack, just return stack top
@@ -75834,6 +75858,7 @@ DUK_LOCAL duk_ret_t duk__js_compile_raw(duk_hthread *thr, void *udata) {
 }
 
 DUK_INTERNAL void duk_js_compile(duk_hthread *thr, const duk_uint8_t *src_buffer, duk_size_t src_length, duk_small_uint_t flags) {
+	DUK_STACK_REMAIN(thr);
 	duk__compiler_stkstate comp_stk;
 	duk_compiler_ctx *prev_ctx;
 	duk_ret_t safe_rc;
@@ -75849,6 +75874,7 @@ DUK_INTERNAL void duk_js_compile(duk_hthread *thr, const duk_uint8_t *src_buffer
 	comp_stk.comp_ctx_alloc.lex.input_length = src_length;
 	comp_stk.comp_ctx_alloc.lex.flags = flags;  /* Forward flags directly for now. */
 
+	DUK_STACK_REMAIN(thr);
 	/* [ ... filename ] */
 
 	prev_ctx = thr->compile_ctx;
@@ -75856,6 +75882,7 @@ DUK_INTERNAL void duk_js_compile(duk_hthread *thr, const duk_uint8_t *src_buffer
 	safe_rc = duk_safe_call(thr, duk__js_compile_raw, (void *) &comp_stk /*udata*/, 1 /*nargs*/, 1 /*nrets*/);
 	thr->compile_ctx = prev_ctx;  /* must restore reliably before returning */
 
+	DUK_STACK_REMAIN(thr);
 	if (safe_rc != DUK_EXEC_SUCCESS) {
 		DUK_D(DUK_DPRINT("compilation failed: %!T", duk_get_tval(thr, -1)));
 		(void) duk_throw(thr);

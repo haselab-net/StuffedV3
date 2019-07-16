@@ -4,6 +4,10 @@
 
 #include "duktape.h"
 #include "duk_module_duktape.h"
+#include "duktape_task.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+
 
 /* (v)snprintf() is missing before MSVC 2015.  Note that _(v)snprintf() does
  * NOT NUL terminate on truncation, but that's OK here.
@@ -196,11 +200,16 @@ static void duk__resolve_module_id(duk_context *ctx, const char *req_id, const c
 #define DUK__IDX_EXPORTS        9   /* default exports table */
 #define DUK__IDX_MODULE         10  /* module object containing module.exports, etc */
 
+static duk_ret_t duk__require2(duk_context *ctx);
 static duk_ret_t duk__require(duk_context *ctx) {
+	DUK_STACK_REMAIN(ctx);
+	return duk__require2(ctx);
+}
+static duk_ret_t duk__require2(duk_context *ctx) {
 	const char *str_req_id;  /* requested identifier */
 	const char *str_mod_id;  /* require.id of current module */
 	duk_int_t pcall_rc;
-
+	DUK_STACK_REMAIN(ctx);
 	/* NOTE: we try to minimize code size by avoiding unnecessary pops,
 	 * so the stack looks a bit cluttered in this function.  DUK__ASSERT_TOP()
 	 * assertions are used to ensure stack configuration is correct at each
@@ -218,6 +227,7 @@ static duk_ret_t duk__require(duk_context *ctx) {
 	duk__resolve_module_id(ctx, str_req_id, str_mod_id);
 	str_req_id = NULL;
 	str_mod_id = NULL;
+	DUK_STACK_REMAIN(ctx);
 
 	/* [ requested_id require require.id resolved_id last_comp ] */
 	DUK__ASSERT_TOP(ctx, DUK__IDX_LASTCOMP + 1);
@@ -237,6 +247,8 @@ static duk_ret_t duk__require(duk_context *ctx) {
 	duk_get_prop_string(ctx, DUK__IDX_DUKTAPE, "modLoaded");  /* Duktape.modLoaded */
 	duk_require_type_mask(ctx, DUK__IDX_MODLOADED, DUK_TYPE_MASK_OBJECT);
 	DUK__ASSERT_TOP(ctx, DUK__IDX_MODLOADED + 1);
+
+	DUK_STACK_REMAIN(ctx);
 
 	duk_dup(ctx, DUK__IDX_RESOLVED_ID);
 	if (duk_get_prop(ctx, DUK__IDX_MODLOADED)) {
@@ -265,6 +277,8 @@ static duk_ret_t duk__require(duk_context *ctx) {
 	 * XXX: require.id could also be just made non-configurable, as there
 	 * is no practical reason to touch it (at least from ECMAScript code).
 	 */
+	DUK_STACK_REMAIN(ctx);
+
 	duk_push_c_function(ctx, duk__require, 1 /*nargs*/);
 	duk_push_string(ctx, "name");
 	duk_push_string(ctx, "require");
@@ -273,6 +287,7 @@ static duk_ret_t duk__require(duk_context *ctx) {
 	duk_dup(ctx, DUK__IDX_RESOLVED_ID);
 	duk_def_prop(ctx, DUK__IDX_FRESH_REQUIRE, DUK_DEFPROP_HAVE_VALUE | DUK_DEFPROP_SET_CONFIGURABLE);  /* a fresh require() with require.id = resolved target module id */
 
+	DUK_STACK_REMAIN(ctx);
 	/* Module table:
 	 * - module.exports: initial exports table (may be replaced by user)
 	 * - module.id is non-writable and non-configurable, as the CommonJS
@@ -293,6 +308,7 @@ static duk_ret_t duk__require(duk_context *ctx) {
 	duk_compact(ctx, DUK__IDX_MODULE);  /* module table remains registered to modLoaded, minimize its size */
 	DUK__ASSERT_TOP(ctx, DUK__IDX_MODULE + 1);
 
+	DUK_STACK_REMAIN(ctx);
 	/* [ requested_id require require.id resolved_id last_comp Duktape Duktape.modLoaded undefined fresh_require exports module ] */
 
 	/* Register the module table early to modLoaded[] so that we can
@@ -303,6 +319,7 @@ static duk_ret_t duk__require(duk_context *ctx) {
 	duk_dup(ctx, DUK__IDX_MODULE);
 	duk_put_prop(ctx, DUK__IDX_MODLOADED);  /* Duktape.modLoaded[resolved_id] = module */
 
+	DUK_STACK_REMAIN(ctx);
 	/*
 	 *  Call user provided module search function and build the wrapped
 	 *  module source code (if necessary).  The module search function
@@ -419,6 +436,7 @@ static duk_ret_t duk__require(duk_context *ctx) {
 		goto delete_rethrow;
 	}
 #else	//	for low memory
+	DUK_STACK_REMAIN(ctx);
 	/* Call Duktape.modSearch(resolved_id, fresh_require, exports, module). */
 	duk_get_prop_string(ctx, DUK__IDX_DUKTAPE, "modSearch");  /* Duktape.modSearch */
 	duk_dup(ctx, DUK__IDX_RESOLVED_ID);
@@ -426,6 +444,17 @@ static duk_ret_t duk__require(duk_context *ctx) {
 	duk_dup(ctx, DUK__IDX_EXPORTS);
 	duk_dup(ctx, DUK__IDX_MODULE);  /* [ ... Duktape.modSearch resolved_id last_comp fresh_require exports module ] */
 	pcall_rc = duk_pcall(ctx, 4 /*nargs*/);  /* -> [ ... source ] */
+	DUK_STACK_REMAIN(ctx);
+
+#if 1	//hasevr	print stack vacancy.
+	{
+		str_req_id = duk_get_string(ctx, DUK__IDX_RESOLVED_ID);
+		char buf[64];
+		sprintf(buf, "duk_module_duktape.c"  "require(%s)", str_req_id);
+		duktape_print_stack_remain(ctx, buf);
+	}
+#endif
+
 	DUK__ASSERT_TOP(ctx, DUK__IDX_MODULE + 3);
 	if (pcall_rc != DUK_EXEC_SUCCESS) {
 		/* Delete entry in Duktape.modLoaded[] and rethrow. */
@@ -559,6 +588,7 @@ static duk_ret_t duk__require(duk_context *ctx) {
 	(void) duk_throw(ctx);  /* rethrow original error */
 	return 0;  /* not reachable */
 }
+
 
 void duk_module_duktape_init(duk_context *ctx) {
 	/* Stash 'Duktape' in case it's modified. */

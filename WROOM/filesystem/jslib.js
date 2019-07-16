@@ -32,6 +32,11 @@ var _core = {
     printHeap: function(str) {
         internalJSLib.print_heap(str);
     },
+
+    printStackRemain: function(str) {
+        internalJSLib.print_stack_remain(str);
+    },
+
     
     print: function(str) {
         internalJSLib.print(str);

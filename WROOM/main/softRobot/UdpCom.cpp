@@ -335,8 +335,9 @@ void UdpCom::SendReturn(UdpCmdPacket& recv) {
 #else
 #error
 #endif
-		if (recv.count == 0) SendReturnServer();
-		else if (recv.count == 1) SendReturnMovement(send);
+		SendReturnServer();
+//		if (recv.count == 0) SendReturnServer();
+//		else if (recv.count == 1) SendReturnMovement(send);
 	}
 	else {
 		SendReturnUdp(recv);

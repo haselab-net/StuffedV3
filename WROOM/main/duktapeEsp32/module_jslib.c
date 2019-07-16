@@ -46,7 +46,16 @@ static duk_ret_t printHeap(duk_context* ctx){
     const char* str = duk_get_string(ctx, -1);
     dukf_log_heap(str);
     duk_pop(ctx);
-
+    return 0;
+}
+/*
+* print remained native stack size.
+* [0] - string
+*/
+static duk_ret_t printStackRemain(duk_context* ctx){
+    const char* str = duk_get_string(ctx, -1);
+    duktape_print_stack_remain(ctx, str);
+    duk_pop(ctx);
     return 0;
 }
 
@@ -132,7 +141,7 @@ duk_ret_t ModuleJSLib(duk_context *ctx){
     ADD_FUNCTION("register_callback",   register_callback,  1);
     ADD_FUNCTION("send_command",        send_command,       1);
     ADD_FUNCTION("print_heap",          printHeap,          1);
+    ADD_FUNCTION("print_stack_remain",  printStackRemain,   1);
     ADD_FUNCTION("print",               print,              1);
-
     return 0;
 }

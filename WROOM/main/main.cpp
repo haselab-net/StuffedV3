@@ -141,7 +141,7 @@ extern "C" void app_main(){
     udpCom.Start();   //  start UDP server.
 
     // init movement manager
-    initMovementDS();
+//    initMovementDS();
 
     //  start DukTape, javascript engine and run /main/main*.js
 	if(offline_mode && !wsIsJsfileTaskRunning()) {

@@ -1,4 +1,7 @@
-var loops = require("sr_loops");
+var jslib = require("jslib");
+jslib.printStackRemain("runtime.js L2");
+
+/*var loops = require("sr_loops");
 var jslib = require("jslib");
 var console = require("console");
 
@@ -15,3 +18,4 @@ softrobot.message_command.requireBoardInfo();
 ESP32.include("/main/main.js");
 
 loops.doForever();
+*/
