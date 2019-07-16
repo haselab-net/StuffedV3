@@ -28,7 +28,7 @@ static char LOG_TAG[] = "ws_ws";
 static WebSocket* pWebSocket = NULL;
 static SRWebSocketHandler webSocketHandler = SRWebSocketHandler();
 
-bool offline_mode = true;   // offline: 1, synchronization || development: 0
+bool offline_mode = false;   // offline: 1, synchronization || development: 0
 
 void SRWebSocketHandler::onClose() {
     ESP_LOGV(LOG_TAG, "on close");
@@ -187,7 +187,7 @@ void wsOnMessageSr(UdpRetPacket& ret) {
     ESP_LOGD(LOG_TAG, "+ SR Packet");
     printPacketCommand(ret.bytes + 2, ret.length);
     
-    if (ret.count == 0) {
+    if (ret.count == CS_WEBSOCKET) {
         // send packet to browser
         char* buf = (char*)malloc(ret.length+2);
         std::memcpy(buf+2, ret.bytes+2, ret.length);
@@ -195,11 +195,10 @@ void wsOnMessageSr(UdpRetPacket& ret) {
         wsSend(buf, ret.length+2);
         free(buf);
         ESP_LOGV(LOG_TAG, "Packet softrobot -> websocket");
-    } else if (ret.count == 1) {
-        // send packet to jsfile task
-        // return_packet_to_jsfile(buffer, buffer_size);
-        if(!wsIsJsfileTaskRunning()) return;
-        if(!esp32_duk_context) return;
+    } else if (ret.count == CS_DUKTAPE) {
+        // send packet to duktape task
+
+        if(!wsIsJsfileTaskRunning() || !esp32_duk_context) return;
         
         lock_heap();
         if(!wsIsJsfileTaskRunning() || !esp32_duk_context) {

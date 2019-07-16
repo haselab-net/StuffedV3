@@ -348,8 +348,14 @@ void UdpCom::SendReturn(UdpCmdPacket& recv) {
 #else
 #error
 #endif
-		if (recv.count == CS_WEBSOCKET || recv.count == CS_DUKTAPE) SendReturnServer();
+		if (recv.count == CS_WEBSOCKET || recv.count == CS_DUKTAPE) {
+			printf("recv.count: %i \n", recv.count);
+			SendReturnServer();
+		}
 		else if (recv.count == CS_MOVEMENT_MANAGER) SendReturnMovement(send);
+		else {
+			printf("recv.count: %i \n", recv.count);
+		}
 	}
 	else {
 		SendReturnUdp(recv);
@@ -410,37 +416,37 @@ void UdpCom::ExecUdpCommand(UdpCmdPacket& recv) {
 		break;
 	case CIU_GET_IPADDRESS:
 		PrepareRetPacket(recv);
-#ifndef _WIN32
-		if (ownerIp.type ==IPADDR_TYPE_V4){
-			send.data[0] = (ownerIp.u_addr.ip4.addr>>3*8) &0xFF;
-			send.data[1] = (ownerIp.u_addr.ip4.addr>>2*8) &0xFF;
-			send.data[2] = (ownerIp.u_addr.ip4.addr>>1*8) &0xFF;
-			send.data[3] = ownerIp.u_addr.ip4.addr&0xFF;
-		}else if (ownerIp.type ==IPADDR_TYPE_V6){
-			for(int i=0; i<4; ++i){
-				u32_t a = ownerIp.u_addr.ip6.addr[i];
-				send.data[0+4*i] = (a>>3*8) &0xFF;
-				send.data[1+4*i] = (a>>2*8) &0xFF;
-				send.data[2+4*i] = (a>>1*8) &0xFF;
-				send.data[3+4*i] = a&0xFF;
-			}
-		}
-#else
-		send.data[0] = (ownerIp.addr >> 3 * 8) & 0xFF;
-		send.data[1] = (ownerIp.addr >> 2 * 8) & 0xFF;
-		send.data[2] = (ownerIp.addr >> 1 * 8) & 0xFF;
-		send.data[3] = ownerIp.addr & 0xFF;
-#endif
-#ifdef DEBUG
-		logPrintf("GetIPAddress send to ");
-		Serial.print(recv.returnIp);
-		Serial.print("  ");
-		Serial.print(port);
-		Serial.print(" Len:");
-		Serial.print(send.length);
-		Serial.println(".");
-		Serial.println();
-#endif
+		#ifndef _WIN32
+				if (ownerIp.type ==IPADDR_TYPE_V4){
+					send.data[0] = (ownerIp.u_addr.ip4.addr>>3*8) &0xFF;
+					send.data[1] = (ownerIp.u_addr.ip4.addr>>2*8) &0xFF;
+					send.data[2] = (ownerIp.u_addr.ip4.addr>>1*8) &0xFF;
+					send.data[3] = ownerIp.u_addr.ip4.addr&0xFF;
+				}else if (ownerIp.type ==IPADDR_TYPE_V6){
+					for(int i=0; i<4; ++i){
+						u32_t a = ownerIp.u_addr.ip6.addr[i];
+						send.data[0+4*i] = (a>>3*8) &0xFF;
+						send.data[1+4*i] = (a>>2*8) &0xFF;
+						send.data[2+4*i] = (a>>1*8) &0xFF;
+						send.data[3+4*i] = a&0xFF;
+					}
+				}
+		#else
+				send.data[0] = (ownerIp.addr >> 3 * 8) & 0xFF;
+				send.data[1] = (ownerIp.addr >> 2 * 8) & 0xFF;
+				send.data[2] = (ownerIp.addr >> 1 * 8) & 0xFF;
+				send.data[3] = ownerIp.addr & 0xFF;
+		#endif
+		#ifdef DEBUG
+				logPrintf("GetIPAddress send to ");
+				Serial.print(recv.returnIp);
+				Serial.print("  ");
+				Serial.print(port);
+				Serial.print(" Len:");
+				Serial.print(send.length);
+				Serial.println(".");
+				Serial.println();
+		#endif
 		SendReturn(recv);
 		break;
 	case CIU_GET_SUBBOARD_INFO:{
@@ -470,15 +476,21 @@ void UdpCom::ExecUdpCommand(UdpCmdPacket& recv) {
 	case CIU_MOVEMENT: {
 		printf("=============== CIU_MOVEMENT ================ \n");
 		uint8_t movement_command_id = *(uint8_t*)recv.data;
-		printf("command id: %i \n", movement_command_id);
+		printf("movement command id: %i \n", movement_command_id);
+
+		// prepare return packet header
+		PrepareRetPacket(recv);
+		*(uint8_t*)send.data = movement_command_id;
+		send.SetLength();
+		void* movement_command_data = (void*)((uint8_t*)send.data+1);
+
 		switch (movement_command_id)
 		{
 		case CI_M_ADD_KEYFRAME: {
 			MovementKeyframe keyframe;
 			recv.GetKeyframe(keyframe);
 
-			struct MovementKeyframeAddState* retP = (struct MovementKeyframeAddState*)((uint8_t*)send.data+1);
-			*(uint8_t*)send.data = CI_M_ADD_KEYFRAME;
+			struct MovementKeyframeAddState* retP = (struct MovementKeyframeAddState*)movement_command_data;
 			retP->id = keyframe.id;
 			retP->success = false;
 
@@ -488,9 +500,11 @@ void UdpCom::ExecUdpCommand(UdpCmdPacket& recv) {
 			}
 
 			SendReturn(recv);
-		}
+
+			printf("CI_M_ADD_KEYFRAME send return \n");
+
 			break;
-		
+		}
 		default:
 			break;
 		}

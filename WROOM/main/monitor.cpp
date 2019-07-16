@@ -524,7 +524,7 @@ static void changeCurrentPos(uint8_t myMotorId, short offset) {
     keyframe->refMotorId = 0;
     keyframe->timeOffset = 0;
 
-    UdpCom_ReceiveCommand(payload, len, CS_MOVEMENT_MANAGER);
+    UdpCom_ReceiveCommand(payload, len, CS_DUKTAPE);
 }
 class MCTest: public MonitorCommandBase{
 public:
