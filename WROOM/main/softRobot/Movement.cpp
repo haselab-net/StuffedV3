@@ -648,7 +648,7 @@ static void movementManager(void* arg) {
 
 		// avoid overflow of interpolate buffer in PIC
 		if (nVacancy <= PIC_INTERPOLATE_BUFFER_VACANCY_MIN && !skippedOneLoop) {
-			ESP_LOGD(LOG_TAG, "interpolate buffer vacany: %i, skip one loop", nVacancy);
+			ESP_LOGD(LOG_TAG, "interpolate buffer vacancy: %i, skip one loop", nVacancy);
 			skippedOneLoop = true;
 			continue;
 		} else if (skippedOneLoop) skippedOneLoop = false;
