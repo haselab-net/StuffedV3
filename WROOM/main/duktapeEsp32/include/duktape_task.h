@@ -21,6 +21,8 @@ typedef struct JSThread_struct{
     duk_context* ctx;
     duk_thread_state state;
     TaskHandle_t task;
+    int stackStart;
+    int stackPrev;
 }JSThread;
 extern JSThread jsThreads[NJSTHREADS];
 
@@ -31,9 +33,15 @@ void duktape_end();
 
 // print amount of remained native stack. 
 void duktape_print_stack_remain(duk_context* ctx, const char* at);
+
+//#define DUK_TRACE_STACK_USAGE
+#ifdef DUK_TRACE_STACK_USAGE
 #define STRINGIFY(n) #n
 #define TOSTRING(n) STRINGIFY(n)
 #define DUK_STACK_REMAIN(ctx)   duktape_print_stack_remain(ctx, __FILE__ ":" TOSTRING(__LINE__))
+#else
+#define DUK_STACK_REMAIN(ctx)   do{}while(0)
+#endif
 
 //  lock the duktape heap
 void lock_heap();

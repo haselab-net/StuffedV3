@@ -200,16 +200,11 @@ static void duk__resolve_module_id(duk_context *ctx, const char *req_id, const c
 #define DUK__IDX_EXPORTS        9   /* default exports table */
 #define DUK__IDX_MODULE         10  /* module object containing module.exports, etc */
 
-static duk_ret_t duk__require2(duk_context *ctx);
 static duk_ret_t duk__require(duk_context *ctx) {
 	DUK_STACK_REMAIN(ctx);
-	return duk__require2(ctx);
-}
-static duk_ret_t duk__require2(duk_context *ctx) {
 	const char *str_req_id;  /* requested identifier */
 	const char *str_mod_id;  /* require.id of current module */
 	duk_int_t pcall_rc;
-	DUK_STACK_REMAIN(ctx);
 	/* NOTE: we try to minimize code size by avoiding unnecessary pops,
 	 * so the stack looks a bit cluttered in this function.  DUK__ASSERT_TOP()
 	 * assertions are used to ensure stack configuration is correct at each
@@ -336,106 +331,6 @@ static duk_ret_t duk__require2(duk_context *ctx) {
 	 *  loaded, circular references for C modules should also work
 	 *  (although expected to be quite rare).
 	 */
-#if 0	//	original code use a lot of memory
-	duk_push_string(ctx, "(function(require,exports,module){");
-
-	/* Duktape.modSearch(resolved_id, fresh_require, exports, module). */
-	duk_get_prop_string(ctx, DUK__IDX_DUKTAPE, "modSearch");  /* Duktape.modSearch */
-	duk_dup(ctx, DUK__IDX_RESOLVED_ID);
-	duk_dup(ctx, DUK__IDX_FRESH_REQUIRE);
-	duk_dup(ctx, DUK__IDX_EXPORTS);
-	duk_dup(ctx, DUK__IDX_MODULE);  /* [ ... Duktape.modSearch resolved_id last_comp fresh_require exports module ] */
-	pcall_rc = duk_pcall(ctx, 4 /*nargs*/);  /* -> [ ... source ] */
-	DUK__ASSERT_TOP(ctx, DUK__IDX_MODULE + 3);
-
-	if (pcall_rc != DUK_EXEC_SUCCESS) {
-		/* Delete entry in Duktape.modLoaded[] and rethrow. */
-		goto delete_rethrow;
-	}
-
-	/* If user callback did not return source code, module loading
-	 * is finished (user callback initialized exports table directly).
-	 */
-	if (!duk_is_string(ctx, -1)) {
-		/* User callback did not return source code, so module loading
-		 * is finished: just update modLoaded with final module.exports
-		 * and we're done.
-		 */
-		goto return_exports;
-	}
-
-	/* Finish the wrapped module source.  Force module.filename as the
-	 * function .fileName so it gets set for functions defined within a
-	 * module.  This also ensures loggers created within the module get
-	 * the module ID (or overridden filename) as their default logger name.
-	 * (Note capitalization: .filename matches Node.js while .fileName is
-	 * used elsewhere in Duktape.)
-	 */
-	duk_push_string(ctx, "\n})");  /* Newline allows module last line to contain a // comment. */
-	duk_concat(ctx, 3);
-	if (!duk_get_prop_string(ctx, DUK__IDX_MODULE, "filename")) {
-		/* module.filename for .fileName, default to resolved ID if
-		 * not present.
-		 */
-		duk_pop(ctx);
-		duk_dup(ctx, DUK__IDX_RESOLVED_ID);
-	}
-	pcall_rc = duk_pcompile(ctx, DUK_COMPILE_EVAL);
-	if (pcall_rc != DUK_EXEC_SUCCESS) {
-		goto delete_rethrow;
-	}
-	pcall_rc = duk_pcall(ctx, 0);  /* -> eval'd function wrapper (not called yet) */
-	if (pcall_rc != DUK_EXEC_SUCCESS) {
-		goto delete_rethrow;
-	}
-
-	/* Module has now evaluated to a wrapped module function.  Force its
-	 * .name to match module.name (defaults to last component of resolved
-	 * ID) so that it is shown in stack traces too.  Note that we must not
-	 * introduce an actual name binding into the function scope (which is
-	 * usually the case with a named function) because it would affect the
-	 * scope seen by the module and shadow accesses to globals of the same name.
-	 * This is now done by compiling the function as anonymous and then forcing
-	 * its .name without setting a "has name binding" flag.
-	 */
-
-	duk_push_string(ctx, "name");
-	if (!duk_get_prop_string(ctx, DUK__IDX_MODULE, "name")) {
-		/* module.name for .name, default to last component if
-		 * not present.
-		 */
-		duk_pop(ctx);
-		duk_dup(ctx, DUK__IDX_LASTCOMP);
-	}
-	duk_def_prop(ctx, -3, DUK_DEFPROP_HAVE_VALUE | DUK_DEFPROP_FORCE);
-
-	/*
-	 *  Call the wrapped module function.
-	 *
-	 *  Use a protected call so that we can update Duktape.modLoaded[resolved_id]
-	 *  even if the module throws an error.
-	 */
-
-	/* [ requested_id require require.id resolved_id last_comp Duktape Duktape.modLoaded undefined fresh_require exports module mod_func ] */
-	DUK__ASSERT_TOP(ctx, DUK__IDX_MODULE + 2);
-
-	duk_dup(ctx, DUK__IDX_EXPORTS);  /* exports (this binding) */
-	duk_dup(ctx, DUK__IDX_FRESH_REQUIRE);  /* fresh require (argument) */
-	duk_get_prop_string(ctx, DUK__IDX_MODULE, "exports");  /* relookup exports from module.exports in case it was changed by modSearch */
-	duk_dup(ctx, DUK__IDX_MODULE);  /* module (argument) */
-	DUK__ASSERT_TOP(ctx, DUK__IDX_MODULE + 6);
-
-	/* [ requested_id require require.id resolved_id last_comp Duktape Duktape.modLoaded undefined fresh_require exports module mod_func exports fresh_require exports module ] */
-
-	pcall_rc = duk_pcall_method(ctx, 3 /*nargs*/);
-	if (pcall_rc != DUK_EXEC_SUCCESS) {
-		/* Module loading failed.  Node.js will forget the module
-		 * registration so that another require() will try to load
-		 * the module again.  Mimic that behavior.
-		 */
-		goto delete_rethrow;
-	}
-#else	//	for low memory
 	DUK_STACK_REMAIN(ctx);
 	/* Call Duktape.modSearch(resolved_id, fresh_require, exports, module). */
 	duk_get_prop_string(ctx, DUK__IDX_DUKTAPE, "modSearch");  /* Duktape.modSearch */
@@ -445,16 +340,6 @@ static duk_ret_t duk__require2(duk_context *ctx) {
 	duk_dup(ctx, DUK__IDX_MODULE);  /* [ ... Duktape.modSearch resolved_id last_comp fresh_require exports module ] */
 	pcall_rc = duk_pcall(ctx, 4 /*nargs*/);  /* -> [ ... source ] */
 	DUK_STACK_REMAIN(ctx);
-
-#if 1	//hasevr	print stack vacancy.
-	{
-		str_req_id = duk_get_string(ctx, DUK__IDX_RESOLVED_ID);
-		char buf[64];
-		sprintf(buf, "duk_module_duktape.c"  "require(%s)", str_req_id);
-		duktape_print_stack_remain(ctx, buf);
-	}
-#endif
-
 	DUK__ASSERT_TOP(ctx, DUK__IDX_MODULE + 3);
 	if (pcall_rc != DUK_EXEC_SUCCESS) {
 		/* Delete entry in Duktape.modLoaded[] and rethrow. */
@@ -565,7 +450,6 @@ static duk_ret_t duk__require2(duk_context *ctx) {
 		 */
 		goto delete_rethrow;
 	}
-#endif
 
 	/* [ requested_id require require.id resolved_id last_comp Duktape Duktape.modLoaded undefined fresh_require exports module result(ignored) ] */
 	DUK__ASSERT_TOP(ctx, DUK__IDX_MODULE + 2);

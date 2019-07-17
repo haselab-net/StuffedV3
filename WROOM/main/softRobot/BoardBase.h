@@ -28,6 +28,7 @@ public:
 };
 class BoardRetBase{
 public:
+	virtual ~BoardRetBase(){}
 	virtual void SetAll(ControlMode controlMode, unsigned char targetCountReadMin, unsigned char targetCountReadMax,
 		unsigned short tickMin, unsigned short tickMax, 
 		SDEC* pos, SDEC* vel, SDEC* current, SDEC* force, SDEC* touch)=0;

@@ -286,7 +286,7 @@ extern "C" duk_ret_t ModuleIoT(duk_context *ctx) {
     for (int i=3; i<6; i++) {
         sprintf(mqtt_key+strlen(mqtt_key), "%02X", macaddress[i]);
     }
-    mqtt_key[7] = '\0';
+    mqtt_key[6] = '\0';
 
     ADD_FUNCTION("httpGet", httpGet, 1);
     ADD_FUNCTION("httpPost", httpPost, 2);

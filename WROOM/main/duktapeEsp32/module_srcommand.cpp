@@ -430,7 +430,7 @@ static void putPropTou(duk_context* ctx, UdpRetPacket& ret) {
 } 
 // function onReceiveCIBoardinfo(data: {systemId: number, nTarget: number, nMotor:number, nCurrent: number, nForces:number, nTouch: number, macAddress: ArrayBuffer});
 int pushDataCIBoardinfo(duk_context* ctx, void* data) {
-    UdpRetPacket ret;
+    UdpRetPacket& ret = *new UdpRetPacket;
     unsigned short* data_short = (unsigned short*)data;
     size_t len = data_short[1];
     memcpy(ret.bytes, data, 2 + len);
@@ -457,6 +457,7 @@ int pushDataCIBoardinfo(duk_context* ctx, void* data) {
 
     void* p = duk_push_fixed_buffer(ctx, 6);
     std::memcpy(p, (void *)&ret.data[6], 6);
+    delete &ret;
     duk_push_buffer_object(ctx, -1, 0, 6, DUK_BUFOBJ_ARRAYBUFFER);
     duk_put_prop_string(ctx, -3, "macAddress");
     duk_pop(ctx);
@@ -467,7 +468,7 @@ int pushDataCIBoardinfo(duk_context* ctx, void* data) {
 }
 // function onReceiveCISensor(data: {pose: number[], current: number[], force: number[]});
 int pushDataCISensor(duk_context* ctx, void* data) {
-    UdpRetPacket ret;
+    UdpRetPacket& ret = *new UdpRetPacket;
     unsigned short* data_short = (unsigned short*)data;
     size_t len = data_short[1];
     memcpy(ret.bytes, data, 2 + len);
@@ -481,13 +482,14 @@ int pushDataCISensor(duk_context* ctx, void* data) {
     putPropFor(ctx, ret);
     putPropTou(ctx, ret);
 
+    delete &ret;
     free(data);
 
     return 1;
 }
 // function onReceiveCIDirect(data: {pose: number[], velocity: number[]});
 int pushDataCIDirect(duk_context* ctx, void* data) {
-    UdpRetPacket ret;
+    UdpRetPacket& ret = *new UdpRetPacket;
     unsigned short* data_short = (unsigned short*)data;
     size_t len = data_short[1];
     memcpy(ret.bytes, data, 2 + len);
@@ -502,13 +504,14 @@ int pushDataCIDirect(duk_context* ctx, void* data) {
     // put prop velocity
     putPropVel(ctx, ret);
 
+    delete &ret;
     free(data);
 
     return 1;
 }
 // function onReceiveCIInterpolate(data: {pose: number[], targetCountReadMin: number, targetCountReadMax: number, tickMin: number, tickMax: number});
 int pushDataCIInterpolate(duk_context* ctx, void* data) {
-    UdpRetPacket ret;
+    UdpRetPacket& ret = *new UdpRetPacket;
     unsigned short* data_short = (unsigned short*)data;
     size_t len = data_short[1];
     memcpy(ret.bytes, data, 2 + len);
@@ -528,6 +531,7 @@ int pushDataCIInterpolate(duk_context* ctx, void* data) {
     duk_push_int(ctx, ret.GetTickMax());
     duk_put_prop_string(ctx, -2, "tickMax");
 
+    delete &ret;
     free(data);
 
     return 1;

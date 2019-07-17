@@ -69,11 +69,11 @@ static void processEvent(duk_context* ctx, esp32_duktape_event_t *pEvent) {
 	switch(pEvent->type) {
 		// Handle a new command line submitted to us.
 		case ESP32_DUKTAPE_EVENT_COMMAND_LINE: {
-			duktape_print_stack_remain(ctx, "duktape_task.c L72:processEvent");
-			LOGD("We are about to eval: %.*s", pEvent->commandLine.commandLineLength, pEvent->commandLine.commandLine);
-			duktape_print_stack_remain(ctx, "duktape_task.c L74:processEvent");
+			DUK_STACK_REMAIN(ctx);
+			//LOGD("We are about to eval: %.*s", pEvent->commandLine.commandLineLength, pEvent->commandLine.commandLine);
+			DUK_STACK_REMAIN(ctx);
 			callRc = duk_peval_lstring(ctx,	pEvent->commandLine.commandLine, pEvent->commandLine.commandLineLength);
-			duktape_print_stack_remain(ctx, "duktape_task.c L76:processEvent");
+			DUK_STACK_REMAIN(ctx);
 			// [0] - result
 		    
 			// If an error was detected, perform error logging.
@@ -156,23 +156,8 @@ void unlock_heap() {
 	xSemaphoreGive(heap_mutex);
 }
 
-static void dukEventHandleTask(void* arg){
-	JSThread* th = (JSThread*)arg;
-	while(1){
-		esp32_duktape_event_t esp32_duktape_event;
-		esp32_duktape_waitForEvent(&esp32_duktape_event);
-		if (th->ctx){
-			lock_heap();
-			processEvent(th->ctx, &esp32_duktape_event);
-			esp32_duktape_freeEvent(th->ctx, &esp32_duktape_event);
-			unlock_heap();
-		}else{
-			vTaskDelete(th->task);
-			th->task = NULL;
-			return;
-		}
-	}
-}
+static void dukEventHandleTask(void* arg);
+
 void duktape_start() {
 	//	Initialize heap and threads
     dukf_init_nvs_values(); // Initialize any defaults for NVS data
@@ -194,11 +179,37 @@ void duktape_start() {
 	
 	//	create tasks for threads
 	for(int i=0; i<NJSTHREADS; ++i){
-		xTaskCreate(dukEventHandleTask, taskNames[i], 1024*10, &jsThreads[i], tskIDLE_PRIORITY + 1, &jsThreads[i].task);
-		//xTaskCreate(dukEventHandleTask, taskNames[i], 1024*9, &jsThreads[i], tskIDLE_PRIORITY + 1, &jsThreads[i].task);
+		xTaskCreate(dukEventHandleTask, taskNames[i], 1024*5, &jsThreads[i], tskIDLE_PRIORITY + 1, &jsThreads[i].task);
 	}
 	char* cmd = "ESP32.include('/main/runtime.js');";
 	event_newCommandLineEvent(cmd, strlen(cmd), 0);
+}
+
+static void dukEventHandleTask(void* arg){
+	JSThread* th = (JSThread*)arg;
+	th->stackStart = (int)&th;
+	th->stackPrev = 0;
+	while(1){
+		DUK_STACK_REMAIN(th->ctx);
+		lock_heap();
+		DUK_STACK_REMAIN(th->ctx);
+		esp32_duktape_event_t* ev = malloc(sizeof(esp32_duktape_event_t));
+		esp32_duktape_waitForEvent(ev);
+		if (!th->ctx){
+			unlock_heap();
+			break;
+		}
+		DUK_STACK_REMAIN(th->ctx);
+		processEvent(th->ctx, ev);
+		DUK_STACK_REMAIN(th->ctx);
+		esp32_duktape_freeEvent(th->ctx, ev);
+		free(ev);
+		DUK_STACK_REMAIN(th->ctx);
+		unlock_heap();
+	}
+	TaskHandle_t t = th->task;
+	th->task = NULL;
+	vTaskDelete(t);
 }
 
 void duktape_end(){
@@ -206,6 +217,18 @@ void duktape_end(){
 	for(int i=0; i<NJSTHREADS; ++i){
 		jsThreads[i].ctx = NULL;
 	}
+	bool remain;
+	do{
+		remain = false;
+		for(int i=0; i<NJSTHREADS; ++i){
+			if (jsThreads[i].task){
+				remain = true;
+				const char* cmd = ";";
+				event_newCommandLineEvent(cmd, strlen(cmd), 0);
+				vTaskDelay(1);
+			} 
+		}
+	} while(remain);
 
 	// delete heap
 	lock_heap();
@@ -221,8 +244,14 @@ void duktape_print_stack_remain(duk_context* ctx, const char* at){
 	for(int i=0; i < NJSTHREADS; ++i){
 		if (jsThreads[i].ctx == ctx){
 			th = &jsThreads[i];
-			UBaseType_t sd = uxTaskGetStackHighWaterMark(th->task);
-			printf("Stack remain: %d at %s\n", (int)sd, at);
+			int sd = th->stackStart-(int)&th;
+			UBaseType_t ws = uxTaskGetStackHighWaterMark(th->task);
+			printf("Stack: %+d = %d wm:%d at %s\n", sd-th->stackPrev, sd, ws, at);
+			th->stackPrev = sd;
+
+			//UBaseType_t sd = uxTaskGetStackHighWaterMark(th->task);
+			//printf("Stack: %d at %s\n", (int)sd, at);
+
 			break;
 		}
 	}

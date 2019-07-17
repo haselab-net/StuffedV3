@@ -368,9 +368,9 @@ public:
     bool bFirst;
     void Func(){
         wsDeleteJsfileTask();
-        heap_trace_dump();
+        //heap_trace_dump();
         if (bFirst){
-            heap_trace_start(HEAP_TRACE_LEAKS);
+            //heap_trace_start(HEAP_TRACE_LEAKS);
             bFirst = false;
         }
         ESP_LOGI(Tag(), "before wsCreateJsfileTask heap size: %d", esp_get_free_heap_size());

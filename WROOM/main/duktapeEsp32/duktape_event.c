@@ -117,23 +117,24 @@ void event_newCallbackRequestedEvent(
 	void *contextData) {
 
 	LOGD(">> event_newCallbackRequestedEvent stashKey=%d", stashKey);
-	esp32_duktape_event_t event;
-	event.type = ESP32_DUKTAPE_EVENT_CALLBACK_REQUESTED;
+	esp32_duktape_event_t* event = malloc(sizeof(esp32_duktape_event_t));
+	event->type = ESP32_DUKTAPE_EVENT_CALLBACK_REQUESTED;
 	if (callbackType != ESP32_DUKTAPE_CALLBACK_TYPE_FUNCTION &&
 			callbackType != ESP32_DUKTAPE_CALLBACK_TYPE_ISR_FUNCTION &&
 			callbackType != ESP32_DUKTAPE_CALLBACK_STATIC_TYPE_FUNCTION) {
 		LOGE("event_newCallbackRequestedEvent: Unknown callbackType: %d", callbackType);
 		return;
 	}
-	event.callbackRequested.callbackType = callbackType;
-	event.callbackRequested.stashKey     = stashKey;
-	event.callbackRequested.dataProvider = dataProvider;
-	event.callbackRequested.context      = contextData;
+	event->callbackRequested.callbackType = callbackType;
+	event->callbackRequested.stashKey     = stashKey;
+	event->callbackRequested.dataProvider = dataProvider;
+	event->callbackRequested.context      = contextData;
 	if (callbackType == ESP32_DUKTAPE_CALLBACK_TYPE_ISR_FUNCTION) {
-		postEvent(&event, true);
+		postEvent(event, true);
 	} else {
-		postEvent(&event, false);
+		postEvent(event, false);
 	}
+	free(event);
 	LOGD("<< event_newCallbackRequestedEvent");
 } // event_newCallbackRequestedEvent
 
@@ -148,7 +149,7 @@ void event_newCommandLineEvent(
 		size_t commandLength, // The length of the data received.
 		int fromKeyboard // True if it came from the keyboard
 	) {
-	esp32_duktape_event_t event;
+	esp32_duktape_event_t* event = malloc(sizeof(esp32_duktape_event_t));
 
 	if (commandLength == 0 || commandData == NULL) {
 		LOGE("event_newCommandLineEvent: problem ... length of command was %d which should be > 0 or commandData was NULL=%s ", (int)commandLength, commandData==NULL?"yes":"no");
@@ -157,15 +158,16 @@ void event_newCommandLineEvent(
 	assert(commandLength > 0);
 	assert(commandData != NULL);
 
-	event.commandLine.type = ESP32_DUKTAPE_EVENT_COMMAND_LINE;
-	event.commandLine.commandLine = malloc(commandLength);
-	assert(event.commandLine.commandLine != NULL);
+	event->commandLine.type = ESP32_DUKTAPE_EVENT_COMMAND_LINE;
+	event->commandLine.commandLine = malloc(commandLength);
+	assert(event->commandLine.commandLine != NULL);
 
-	memcpy(event.commandLine.commandLine, commandData, commandLength);
-	event.commandLine.commandLineLength = commandLength;
-	event.commandLine.fromKeyboard = fromKeyboard;
+	memcpy(event->commandLine.commandLine, commandData, commandLength);
+	event->commandLine.commandLineLength = commandLength;
+	event->commandLine.fromKeyboard = fromKeyboard;
 
-	postEvent(&event, false); // Post the event.
+	postEvent(event, false); // Post the event.
+	free(event);
 } //newCommandLineEvent
 
 
