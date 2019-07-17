@@ -28,7 +28,7 @@ static char LOG_TAG[] = "ws_ws";
 static WebSocket* pWebSocket = NULL;
 static SRWebSocketHandler webSocketHandler = SRWebSocketHandler();
 
-bool offline_mode = false;   // offline: 1, synchronization || development: 0
+bool offline_mode = true;   // offline: 1, synchronization || development: 0
 
 void SRWebSocketHandler::onClose() {
     ESP_LOGV(LOG_TAG, "on close");
@@ -230,7 +230,6 @@ void printPacketCommand(const void* pBuffer, size_t len) {
     ESP_LOGD(LOG_TAG, "|- PacketId: PI_COMMAND");
 
     uint16_t length = pBufferI16[0];
-    assert(length == len);
     ESP_LOGD(LOG_TAG, "|- Content:");
     ESP_LOGD(LOG_TAG, "   |- Length: %i", length);
     ESP_LOGD(LOG_TAG, "   |- CommandId: %i", pBufferI16[1]);
@@ -239,6 +238,12 @@ void printPacketCommand(const void* pBuffer, size_t len) {
         sprintf(buf+strlen(buf), "%i, ", pBufferI16[i]);
     }
     ESP_LOGD(LOG_TAG, "   |- Command: %s", buf);
+
+    // test
+    if (length != len) {
+        printf("!!!! length: %d, len: %d \n", length, len);
+    }
+    assert(length == len);
 }
 
 void printPacketSettings(const void* pBuffer, size_t len) {

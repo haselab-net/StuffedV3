@@ -551,9 +551,10 @@ void printNode(MotorKeyframeNode* node, bool isHead) {
 void printMotorKeyframes(uint8_t motorId) {
 	MotorHead &head = motorHeads[motorId];
 
-	printf("currentTime: %d, nextTime: %d \r\n", movementTime, head.nextTime);
+	printf("   |- currentTime: %d, nextTime: %d \r\n", movementTime, head.nextTime);
 
 	MotorKeyframeNode* node = head.head;
+	printf("   |- HEAD -> ");
 	while (node) {
 		printNode(node, node == head.read);
 		printf(" -> ");
@@ -563,28 +564,29 @@ void printMotorKeyframes(uint8_t motorId) {
 }
 
 void printKeyframe(const MovementKeyframe &keyframe) {
-	printf("Receive one keyframe: \n");
-	printf("	-id: %i \n", keyframe.id);
-	printf("	-motorCount: %i \n", keyframe.motorCount);
-	printf("	-motorId: ");
+	printf("-+ keyframe: \n");
+	printf(" |-id: %i \n", keyframe.id);
+	printf(" |-motorCount: %i \n", keyframe.motorCount);
+	printf(" |-motorId: ");
 	for (int i=0; i<keyframe.motorCount; i++) {
 		printf("%i,", keyframe.motorId[i]);
 	}
 	printf("\n");
-	printf("	-period: %i \n", keyframe.period);
-	printf("	-pose: ");
+	printf(" |-period: %i \n", keyframe.period);
+	printf(" |-pose: ");
 	for (int i=0; i<keyframe.motorCount; i++) {
 		printf("%i,", keyframe.pose[i]);
 	}
 	printf("\n");
-	printf("	-refId: %i \n", keyframe.refId);
-	printf("	-refMotor: %i \n", keyframe.refMotorId);
-	printf("	-offsetTime: %i \n", keyframe.timeOffset);
+	printf(" |-refId: %i \n", keyframe.refId);
+	printf(" |-refMotor: %i \n", keyframe.refMotorId);
+	printf(" |-offsetTime: %i \n", keyframe.timeOffset);
 }
 
 void printAllMotorKeyframes() {
+	printf("-+ current keyframes: \n");
 	for (int i=0; i<allBoards.GetNTotalMotor(); i++) {
-		printf("=== motor %i === \n", i);
+		printf(" |-+ motor %i \n", i);
 		printMotorKeyframes(i);
 	}
 }
@@ -972,6 +974,7 @@ void prepareRetAddKeyframe(const void* movement_command_data_rcv, void* movement
 	// nOccupied
 	for (int i=0; i<allBoards.GetNTotalMotor(); i++) {
 		pushPayload(movement_command_data_ret, &motorHeads[i].nOccupied, 1);
+		printf("nOccupied[%d]: %d \n", i, motorHeads[i].nOccupied);
 	}
 }
 void prepareRetPauseMov(const void* movement_command_data_rcv, void* movement_command_data_ret) {

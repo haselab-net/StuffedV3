@@ -116,7 +116,7 @@ void UdpRetPacket::SetLength() {
 		switch (*(uint8_t*)data)
 		{
 		case CI_M_ADD_KEYFRAME:
-			length = NHEADER*2 + 1 + (2 + 1); break;
+			length = NHEADER*2 + 1 + (2 + 1 + allBoards.GetNTotalMotor()); break;
 		case CI_M_PAUSE_INTERPOLATE:
 		case CI_M_RESUME_INTERPOLATE:
 		case CI_M_PAUSE_MOV:
@@ -426,7 +426,6 @@ void UdpCom::SendReturnUdp(UdpCmdPacket& recv) {
 	//	ESP_LOGI(Tag(), "Ret%d C%d L%d to %s\n", send.command, send.count, send.length, ipaddr_ntoa(&returnIp));
 }
 void UdpCom::ExecUdpCommand(UdpCmdPacket& recv) {
-	printf("=============== ExecUdpCommand: %i ================ \n", recv.command);
 	switch (recv.command)
 	{
 	case CI_BOARD_INFO: 
@@ -499,9 +498,7 @@ void UdpCom::ExecUdpCommand(UdpCmdPacket& recv) {
 		SendReturn(recv);
 	}	break;
 	case CIU_MOVEMENT: {
-		printf("=============== CIU_MOVEMENT ================ \n");
 		uint8_t movement_command_id = *(uint8_t*)recv.data;
-		printf("movement command id: %i \n", movement_command_id);
 
 		// prepare return packet header
 		PrepareRetPacket(recv);

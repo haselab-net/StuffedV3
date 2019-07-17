@@ -229,7 +229,7 @@ static int getPropConA(duk_context* ctx, UdpCmdPacket* cmd) {        // return p
 // function requireBoardInfo();
 static duk_ret_t requireBoardInfo(duk_context* ctx) {
     //  Prepare command
-	UdpCmdPacket* cmd = udpCom.PrepareCommand(CI_BOARD_INFO, 1);
+	UdpCmdPacket* cmd = udpCom.PrepareCommand(CI_BOARD_INFO, CS_DUKTAPE);
     if (!cmd) return DUK_RET_ERROR;
 
     #ifdef PRINT_DUKTAPE_PACKET
@@ -246,7 +246,7 @@ static duk_ret_t requireBoardInfo(duk_context* ctx) {
 // function requireSensorInfo();
 static duk_ret_t requireSensorInfo(duk_context* ctx) {
     //  Prepare command
-	UdpCmdPacket* cmd = udpCom.PrepareCommand(CI_SENSOR, 1);
+	UdpCmdPacket* cmd = udpCom.PrepareCommand(CI_SENSOR, CS_DUKTAPE);
     if (!cmd) return DUK_RET_ERROR;
 
     #ifdef PRINT_DUKTAPE_PACKET
@@ -266,7 +266,7 @@ static duk_ret_t setMotorDirect(duk_context* ctx) {
     duk_require_object(ctx, -1);
 
     //  Prepare command
-	UdpCmdPacket* cmd = udpCom.PrepareCommand(CI_DIRECT, 1);
+	UdpCmdPacket* cmd = udpCom.PrepareCommand(CI_DIRECT, CS_DUKTAPE);
     if (!cmd) return DUK_RET_ERROR;
 
     int n0 = getPropPos(ctx, cmd);
@@ -296,7 +296,7 @@ static duk_ret_t setMotorInterpolate(duk_context* ctx) {
     duk_require_object(ctx, -1);
 
     //  Prepare command
-	UdpCmdPacket* cmd = udpCom.PrepareCommand(CI_INTERPOLATE, 1);
+	UdpCmdPacket* cmd = udpCom.PrepareCommand(CI_INTERPOLATE, CS_DUKTAPE);
     if (!cmd) return DUK_RET_ERROR;
 
     int n0 = getPropPos(ctx, cmd);
@@ -334,7 +334,7 @@ static duk_ret_t setMotorParam(duk_context* ctx) {
     duk_require_object(ctx, -1);
 
     //  Prepare command
-	UdpCmdPacket* cmd = udpCom.PrepareCommand(CI_SETPARAM, 1);
+	UdpCmdPacket* cmd = udpCom.PrepareCommand(CI_SETPARAM, CS_DUKTAPE);
     if (!cmd) return DUK_RET_ERROR;
 
     bool flag = duk_get_prop_string(ctx, -1, "paramType");
@@ -393,7 +393,7 @@ static duk_ret_t resetSensor(duk_context* ctx) {
     duk_require_object(ctx, -1);
 
     //  Prepare command
-	UdpCmdPacket* cmd = udpCom.PrepareCommand(CI_RESET_SENSOR, 1);
+	UdpCmdPacket* cmd = udpCom.PrepareCommand(CI_RESET_SENSOR, CS_DUKTAPE);
     if (!cmd) return DUK_RET_ERROR;
 
     bool flag = duk_get_prop_string(ctx, -1, "resetSensorFlag");
@@ -507,7 +507,8 @@ static duk_ret_t setMovement(duk_context* ctx) {
 
     switch (movementCommandId) {
         case CI_M_ADD_KEYFRAME:
-            movementAddKeyframe(ctx, cmd);   
+            movementAddKeyframe(ctx, cmd); 
+            printf("=== duktape add keyframe send === \n"); 
             break;
         case CI_M_PAUSE_MOV:
             movementPauseMov(ctx, cmd);
@@ -761,9 +762,11 @@ int pushDataCIUMovement(duk_context* ctx, void* data) {
 
     switch (movementCommandId) {
         case CI_M_ADD_KEYFRAME: {
-            popPayload2CtxNum<uint16_t>(ctx, payload, "id");
+            popPayload2CtxNum<uint8_t>(ctx, payload, "movementId");
+            popPayload2CtxNum<uint8_t>(ctx, payload, "keyframeId");
             popPayload2CtxNum<uint8_t>(ctx, payload, "success");
             popPayload2CtxNumArray<uint8_t>(ctx, payload, "nOccupied", boardInfo.nMotor);
+            printf("=== duktape add keyframe receive === \n");
             break;
         }
         case CI_M_PAUSE_MOV:
@@ -899,9 +902,6 @@ void commandMessageHandler(UdpRetPacket& ret) {
             break;
         }
         case CIU_MOVEMENT: {
-            // TODO 
-            printf("=========== duktape CIU_MOVEMENT received =========== \n");
-
             std::unordered_map<std::string, uint32_t>::const_iterator iter = callback_stash_keys.find("onReceiveCIUMovement");
             if (iter == callback_stash_keys.end()) {
                 LOGE("Callback function onReceiveCIUMovement is not registered");
