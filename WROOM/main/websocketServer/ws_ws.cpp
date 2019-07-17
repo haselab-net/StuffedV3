@@ -28,7 +28,7 @@ static char LOG_TAG[] = "ws_ws";
 static WebSocket* pWebSocket = NULL;
 static SRWebSocketHandler webSocketHandler = SRWebSocketHandler();
 
-bool offline_mode = false;   // offline: 1, synchronization || development: 0
+bool offline_mode = true;   // offline: 1, synchronization || development: 0
 
 void SRWebSocketHandler::onClose() {
     ESP_LOGV(LOG_TAG, "on close");
@@ -116,7 +116,7 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
         }
 
         case PacketId::PI_COMMAND: {
-            UdpCom_ReceiveCommand((void*)(pBuffer+2), *(int16_t*)(&pBuffer[2]), 0);
+            UdpCom_ReceiveCommand((void*)(pBuffer+2), *(int16_t*)(&pBuffer[2]), CS_WEBSOCKET);
             break;
         }
 
@@ -172,7 +172,7 @@ void wsOnMessageSr(UdpRetPacket& ret) {
     ESP_LOGD(LOG_TAG, "+ SR Packet");
     printPacketCommand(ret.bytes + 2, ret.length);
     
-    if (ret.count == 0) {
+    if (ret.count == CS_WEBSOCKET) {
         // send packet to browser
         char* buf = (char*)malloc(ret.length+2);
         std::memcpy(buf+2, ret.bytes+2, ret.length);
@@ -180,22 +180,11 @@ void wsOnMessageSr(UdpRetPacket& ret) {
         wsSend(buf, ret.length+2);
         free(buf);
         ESP_LOGV(LOG_TAG, "Packet softrobot -> websocket");
-    } else if (ret.count == 1) {
-        // send packet to jsfile task
-        // return_packet_to_jsfile(buffer, buffer_size);
+    } else if (ret.count == CS_DUKTAPE) {
+        // send packet to duktape task
         if(!wsIsJsfileTaskRunning()) return;
-        if(!heap_context) return;
-        
-        lock_heap();
-        if(!wsIsJsfileTaskRunning()) {
-            unlock_heap();
-            return;
-        }
-
         commandMessageHandler(ret);
         ESP_LOGD(LOG_TAG, "Packet softrobot -> jsfile");
-        
-        unlock_heap();
     } else {
         ESP_LOGV(LOG_TAG, "Cannot find destination: %i", ret.count);
     }
@@ -216,7 +205,6 @@ void printPacketCommand(const void* pBuffer, size_t len) {
     ESP_LOGD(LOG_TAG, "|- PacketId: PI_COMMAND");
 
     uint16_t length = pBufferI16[0];
-    assert(length == len);
     ESP_LOGD(LOG_TAG, "|- Content:");
     ESP_LOGD(LOG_TAG, "   |- Length: %i", length);
     ESP_LOGD(LOG_TAG, "   |- CommandId: %i", pBufferI16[1]);
@@ -225,6 +213,12 @@ void printPacketCommand(const void* pBuffer, size_t len) {
         sprintf(buf+strlen(buf), "%i, ", pBufferI16[i]);
     }
     ESP_LOGD(LOG_TAG, "   |- Command: %s", buf);
+
+    // test
+    if (length != len) {
+        printf("!!!! length: %d, len: %d \n", length, len);
+    }
+    assert(length == len);
 }
 
 void printPacketSettings(const void* pBuffer, size_t len) {

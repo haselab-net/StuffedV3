@@ -29,6 +29,9 @@ var _ret = {
     resetSensor: function (data) {
         internalSRCommand.resetSensor(data);
     },
+    setMovement: function (data) {
+        internalSRCommand.setMovement(data);
+    },
     registerCallback: function (name, func) {
         internalSRCommand.registerCallback(name, func);
     }

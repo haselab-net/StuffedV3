@@ -12,6 +12,7 @@
 #include <driver/timer.h>
 
 #include "AllBoards.h"
+#include "Utils.h"
 
 using namespace std;
 
@@ -25,7 +26,7 @@ public:
 	uint16_t id;				// 8-bit movement id + 8-bit keyframe id
 	uint8_t motorCount;			// count of motors used in the movement
 	vector<uint8_t> motorId;	// the motorIds used
-	uint16_t period;			// note that the sum of period in list could not larger than UINT16_MAX (or the sorting might fail)
+	uint16_t period;			// note that 1. the sum of period in list could not larger than UINT16_MAX (or the sorting might fail); 2. time in movement tick, not ms
 	vector<short> pose;			// the poses correspond with motorIds
 
 	uint16_t refId;             // 0 if no ref (movement id should start from 1)
@@ -44,13 +45,16 @@ struct InterpolateState {
 };
 
 /////////////////////////////////////////// api for accessing PIC ///////////////////////////////////////////////
-#define PIC_INTERPOLATE_BUFFER_VACANCY_MIN 1		// the minimum empty interpolate buffer count
+#define PIC_INTERPOLATE_BUFFER_VACANCY_MIN 2		// the minimum empty interpolate buffer count
 void movementQueryInterpolateState();
 void movementOnGetPICInfo(UdpRetPacket& pkt);
 
 /////////////////////////////////////////// debug ///////////////////////////////////////////////////////
+#define MOVEMENT_DEBUG 1
 void printMotorKeyframes(uint8_t motorId);
+void printKeyframe(const MovementKeyframe &keyframe);
 void printInterpolateParams();
+void printAllMotorKeyframes();
 
 /////////////////////////////////////////// interface to hardware ///////////////////////////////////////
 #define MOVEMENT_MANAGER_TIMER_DIVIDER 16
@@ -60,12 +64,25 @@ void printInterpolateParams();
 
 void initMovementDS();
 
-/////////////////////////////////////////// api for WROOM ///////////////////////////////////////////////
+/////////////////////////////////////////// api for command packet ///////////////////////////////////////////////
 
 bool canAddKeyframe(MovementKeyframe& keyframe);
 void addKeyframe(MovementKeyframe& keyframe);
 
 void pauseInterpolate();
 void resumeInterpolate();
+
+void pauseMovement(uint8_t movementId, uint8_t motorCount, const vector<uint8_t> &motorId);
+void resumeMovement(uint8_t movementId, uint8_t motorCount);
+
+void clearPausedMovements();
+void clearInterpolateBuffer();
+
+/////////////////////////////////////////// api for execute and return packet ///////////////////////////////////////////////
+void prepareRetAddKeyframe(const void* movement_command_data_rcv, void* movement_command_data_ret);
+void prepareRetPauseMov(const void* movement_command_data_rcv, void* movement_command_data_ret);
+void prepareRetResumeMov(const void* movement_command_data_rcv, void* movement_command_data_ret);
+void prepareRetClearMov(const void* movement_command_data_rcv, void* movement_command_data_ret);
+void prepareRetQuery(const void* movement_command_data_rcv, void* movement_command_data_ret);
 
 #endif

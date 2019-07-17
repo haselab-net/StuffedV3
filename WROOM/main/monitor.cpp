@@ -490,14 +490,14 @@ public:
 struct MonitorMovementKeyframe {
 	uint16_t id;				// 8-bit movement id + 8-bit keyframe id
 	uint8_t motorCount;			// count of motors used in the movement
-	uint8_t motorId[3];	// the motorIds used
+	uint8_t motorId[1];	// the motorIds used
 	uint16_t period;			// note that the sum of period in list could not larger than UINT16_MAX (or the sorting might fail)
-	short pose[3];			// the poses correspond with motorIds
+	short pose[1];			// the poses correspond with motorIds
 
 	uint16_t refId;             // 0 if no ref (movement id should start from 1)
 	uint8_t refMotorId;
 	short timeOffset;
-};
+}__attribute__((packed));
 
 #define struct MonitorMovementKeyframe MonitorMovementKeyframe;
 static void print_timer_counter(uint64_t counter_value)
@@ -505,7 +505,29 @@ static void print_timer_counter(uint64_t counter_value)
     printf("Counter: 0x%08x%08x\n", (uint32_t) (counter_value >> 32), (uint32_t) (counter_value));
     printf("Time   : %.8f ms\n", (double) counter_value / MOVEMENT_MANAGER_TIMER_SCALE);
 }
-static short currentPos = 0;
+static short currentPos[3] = {0, 0, 0};
+static void changeCurrentPos(uint8_t myMotorId, short offset) {
+    size_t len = 4 + 1 + sizeof(MonitorMovementKeyframe);
+    unsigned char motorId[1] = {myMotorId};
+    currentPos[myMotorId] += offset;
+    short pose[1] = {currentPos[myMotorId]};
+
+    void* payload = (void*)malloc(len);
+    *((unsigned short*)payload) = len;
+    *((unsigned short*)payload+1) = CIU_MOVEMENT;
+    *((unsigned char*)payload+4) = CI_M_ADD_KEYFRAME;
+    MonitorMovementKeyframe* keyframe = (MonitorMovementKeyframe*)((unsigned char*)payload+5);
+    keyframe->id = 0x0100;
+    keyframe->motorCount = 1;
+    memcpy(keyframe->motorId, motorId, keyframe->motorCount);
+    keyframe->period = 2000;
+    memcpy(keyframe->pose, pose, keyframe->motorCount*2);
+    keyframe->refId = 0x0000;
+    keyframe->refMotorId = 0;
+    keyframe->timeOffset = 0;
+
+    UdpCom_ReceiveCommand(payload, len, CS_DUKTAPE);
+}
 class MCTest: public MonitorCommandBase{
 public:
     const char* Desc(){ return "p test movement"; }
@@ -517,58 +539,46 @@ public:
                 break;
             }
             case 'm': {
-                printMotorKeyframes(0);
+                printAllMotorKeyframes();
                 break;
             }
             case 'i': {
                 printInterpolateParams();
                 break;
             }
-            case '+': {
-                size_t len = 4 + 1 + sizeof(MonitorMovementKeyframe);
-                unsigned char motorId[3] = {0, 1, 2};
-                currentPos += 2000;
-                short pose[3] = {currentPos, 0, 0};
-
-                void* payload = (void*)malloc(len);
-                *((unsigned short*)payload) = len;
-                *((unsigned short*)payload+1) = CIU_MOVEMENT;
-                *((unsigned char*)payload+4) = CI_M_ADD_KEYFRAME;
-                MonitorMovementKeyframe* keyframe = (MonitorMovementKeyframe*)((unsigned char*)payload+5);
-                keyframe->id = 0x0100;
-                keyframe->motorCount = 3;
-                memcpy(keyframe->motorId, motorId, 3);
-                keyframe->period = 2000 / MS_PER_MOVEMENT_TICK;
-                memcpy(keyframe->pose, pose, 6);
-                keyframe->refId = 0x0000;
-                keyframe->refMotorId = 0;
-                keyframe->timeOffset = 0;
-
-                UdpCom_ReceiveCommand(payload, len, 0);
+            // add motor 0
+            case '3': {
+                changeCurrentPos(0, 2000);
 
                 break;
             }
-            case '-': {
-                size_t len = 4 + 1 + sizeof(MonitorMovementKeyframe);
-                unsigned char motorId[3] = {0, 1, 2};
-                currentPos -= 2000;
-                short pose[3] = {currentPos, 0, 0};
+            // minus motor 0
+            case '1': {
+                changeCurrentPos(0, -2000);
 
-                void* payload = (void*)malloc(len);
-                *((unsigned short*)payload) = len;
-                *((unsigned short*)payload+1) = CIU_MOVEMENT;
-                *((unsigned char*)payload+4) = CI_M_ADD_KEYFRAME;
-                MonitorMovementKeyframe* keyframe = (MonitorMovementKeyframe*)((unsigned char*)payload+5);
-                keyframe->id = 0x0100;
-                keyframe->motorCount = 3;
-                memcpy(keyframe->motorId, motorId, 3);
-                keyframe->period = 2000 / MS_PER_MOVEMENT_TICK;
-                memcpy(keyframe->pose, pose, 6);
-                keyframe->refId = 0x0000;
-                keyframe->refMotorId = 0;
-                keyframe->timeOffset = 0;
+                break;
+            }
+            // add motor 1
+            case '6': {
+                changeCurrentPos(1, 2000);
 
-                UdpCom_ReceiveCommand(payload, len, 0);
+                break;
+            }
+            // minus motor 1
+            case '4': {
+                changeCurrentPos(1, -2000);
+
+                break;
+            }
+            // add motor 2
+            case '9': {
+                changeCurrentPos(2, 2000);
+
+                break;
+            }
+            // minus motor 2
+            case '7': {
+                changeCurrentPos(2, -2000);
 
                 break;
             }

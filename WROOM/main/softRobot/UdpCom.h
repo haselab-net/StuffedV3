@@ -96,24 +96,6 @@ public:
 			data[0] = f;
 		}
 	}
-	void GetKeyframe(MovementKeyframe& keyframe) {
-		char* p = (char*)data; p += 1;
-		
-		keyframe.id = *(uint16_t*)p; p += 2;
-		keyframe.motorCount = *(uint8_t*)p; p += 1;
-		keyframe.motorId.clear(); keyframe.motorId.reserve(keyframe.motorCount);
-		for(int i=0; i<keyframe.motorCount; i++){
-			keyframe.motorId.push_back(*(uint8_t*)p); p += 1;
-		}
-		keyframe.period = *(uint16_t*)p; p += 2;
-		keyframe.pose.clear(); keyframe.pose.reserve(keyframe.motorCount);
-		for(int i=0; i<keyframe.motorCount; i++){
-			keyframe.pose.push_back(*(uint16_t*)p); p += 2;
-		}
-		keyframe.refId = *(uint16_t*)p; p += 2;
-		keyframe.refMotorId = *(uint8_t*)p; p += 1;
-		keyframe.timeOffset = *(short*)p; p += 2;
-	}
 };
 class UdpRetPacket:public UdpPacket, public BoardRetBase{
 public:
@@ -200,6 +182,7 @@ public:
 
 	///	prepare command to receive "from" is passed to UdpRetPacket::count, which can be used to identify caller.
 	UdpCmdPacket* PrepareCommand(CommandId cid, short from);
+	UdpCmdPacket* PrepareMovementCommand(CommandId cid, CommandIdMovement mid, short from);
 	///	Put the command to execute on the queue.
 	void WriteCommand();
 	///	Receive command packet from UDP and put it on the queue.

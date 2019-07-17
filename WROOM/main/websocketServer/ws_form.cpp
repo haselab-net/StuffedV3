@@ -73,6 +73,7 @@ void SRReplace::handle(HttpRequest& request, HttpResponse& response, std::vector
 		ppos = fileName.length();
 	}
 	std::string fileNameLang;
+	std::ifstream ifStream;
 	int start = 0;
 	for(int i=0; i<lang.length(); ++i){
 		if (lang[i] == ';'){
@@ -85,14 +86,15 @@ void SRReplace::handle(HttpRequest& request, HttpResponse& response, std::vector
 			fileNameLang.insert(ppos, ".");
 			fileNameLang.insert(ppos+1, lang, start, i);
 			ESP_LOGD(tag, "Try to open file name with language %s", fileNameLang.c_str());
-			if (access(fileNameLang.c_str(), F_OK) == 0) goto langFound;
+			ifStream.open(fileNameLang, std::ifstream::in | std::ifstream::binary);      // Attempt to open the file for reading.
+			break;
 		}
 	}
-	fileNameLang = fileName;
-langFound:
+	if (!ifStream.is_open()){
+		fileNameLang = fileName;
+		ifStream.open(fileNameLang, std::ifstream::in | std::ifstream::binary);      // Attempt to open the file for reading.
+	}
 	ESP_LOGD(tag, "hanlder(): Opening file: %s", fileNameLang.c_str());
-	std::ifstream ifStream;
-	ifStream.open(fileNameLang, std::ifstream::in | std::ifstream::binary);      // Attempt to open the file for reading.
 
 	// If we failed to open the requested file, then it probably didn't exist so return a not found.
 	if (!ifStream.is_open()) {

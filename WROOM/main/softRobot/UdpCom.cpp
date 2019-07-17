@@ -62,7 +62,22 @@ int UdpCmdPacket::CommandLen() {
 		{
 		case CI_M_ADD_KEYFRAME:
 			return NHEADER*2 + 1 + (2 + 1 + allBoards.GetNTotalMotor() + 2 + allBoards.GetNTotalMotor() * 2 + 2 + 1 + 2);
-		
+		case CI_M_PAUSE_INTERPOLATE: 
+			return NHEADER*2 + 1;
+		case CI_M_RESUME_INTERPOLATE:
+			return NHEADER*2 + 1;
+		case CI_M_PAUSE_MOV:
+			return NHEADER*2 + 1 + (1 + 1 + allBoards.GetNTotalMotor());
+		case CI_M_RESUME_MOV:
+			return NHEADER*2 + 1 + (1 + 1);
+		case CI_M_CLEAR_MOV:
+			return NHEADER*2 + 1 + (1 + 1 + allBoards.GetNTotalMotor());
+		case CI_M_CLEAR_PAUSED:
+			return NHEADER*2 + 1;
+		case CI_M_CLEAR_ALL:
+			return NHEADER*2 + 1;
+		case CI_M_QUERY:
+			return NHEADER*2 + 1;
 		default:
 			break;
 		}
@@ -101,11 +116,21 @@ void UdpRetPacket::SetLength() {
 		switch (*(uint8_t*)data)
 		{
 		case CI_M_ADD_KEYFRAME:
-			length = NHEADER*2 + 1 + (2 + 1); break;
-		
+			length = NHEADER*2 + 1 + (2 + 1 + allBoards.GetNTotalMotor()); break;
+		case CI_M_PAUSE_INTERPOLATE:
+		case CI_M_RESUME_INTERPOLATE:
+		case CI_M_PAUSE_MOV:
+		case CI_M_RESUME_MOV:
+		case CI_M_CLEAR_MOV:
+		case CI_M_CLEAR_PAUSED:
+		case CI_M_CLEAR_ALL:
+			length = NHEADER*2 + 1; break;
+		case CI_M_QUERY:
+			length = NHEADER*2 + 1 + (allBoards.GetNTotalMotor()); break;
 		default:
 			break;
 		}
+		break;
 	default:				//	error
 		ESP_LOGE(Tag(), "Undefined command %d set lentgh to 0", command);
 		length = 0;
@@ -164,8 +189,9 @@ void UdpCmdPackets::Read() {
 }
 UdpCmdPacket& UdpCmdPackets::Poke() {
 	xSemaphoreTake(smFree, portMAX_DELAY);
+	UdpCmdPacket& res = base::Poke();
 	xSemaphoreGive(smFree);
-	return base::Poke();
+	return res;
 }
 void UdpCmdPackets::Write() {
 	xSemaphoreTake(smFree, portMAX_DELAY);
@@ -277,6 +303,19 @@ UdpCmdPacket* UdpCom::PrepareCommand(CommandId cid, short from) {
 	memset(&r->returnIp, 0, sizeof(r->returnIp));
 	return r;
 }
+UdpCmdPacket* UdpCom::PrepareMovementCommand(CommandId cid, CommandIdMovement mid, short from) {
+	if (!recvs.WriteAvail()) {
+		ESP_LOGE(Tag(), "PrepareCommand(): Udp command receive buffer is full.");
+		return NULL;
+	}
+	UdpCmdPacket* r = &recvs.Poke();
+	r->command = cid;
+	*(uint8_t*)r->data = mid;
+	r->length = r->CommandLen();
+	r->count = from;
+	memset(&r->returnIp, 0, sizeof(r->returnIp));
+	return r;
+}
 void UdpCom::WriteCommand() {
 	recvs.Write();
 }
@@ -335,9 +374,14 @@ void UdpCom::SendReturn(UdpCmdPacket& recv) {
 #else
 #error
 #endif
-		SendReturnServer();
-//		if (recv.count == 0) SendReturnServer();
-//		else if (recv.count == 1) SendReturnMovement(send);
+		if (recv.count == CS_WEBSOCKET || recv.count == CS_DUKTAPE) {
+			printf("recv.count: %i \n", recv.count);
+			SendReturnServer();
+		}
+		else if (recv.count == CS_MOVEMENT_MANAGER) SendReturnMovement(send);
+		else {
+			printf("recv.count: %i \n", recv.count);
+		}
 	}
 	else {
 		SendReturnUdp(recv);
@@ -397,37 +441,37 @@ void UdpCom::ExecUdpCommand(UdpCmdPacket& recv) {
 		break;
 	case CIU_GET_IPADDRESS:
 		PrepareRetPacket(recv);
-#ifndef _WIN32
-		if (ownerIp.type ==IPADDR_TYPE_V4){
-			send.data[0] = (ownerIp.u_addr.ip4.addr>>3*8) &0xFF;
-			send.data[1] = (ownerIp.u_addr.ip4.addr>>2*8) &0xFF;
-			send.data[2] = (ownerIp.u_addr.ip4.addr>>1*8) &0xFF;
-			send.data[3] = ownerIp.u_addr.ip4.addr&0xFF;
-		}else if (ownerIp.type ==IPADDR_TYPE_V6){
-			for(int i=0; i<4; ++i){
-				u32_t a = ownerIp.u_addr.ip6.addr[i];
-				send.data[0+4*i] = (a>>3*8) &0xFF;
-				send.data[1+4*i] = (a>>2*8) &0xFF;
-				send.data[2+4*i] = (a>>1*8) &0xFF;
-				send.data[3+4*i] = a&0xFF;
-			}
-		}
-#else
-		send.data[0] = (ownerIp.addr >> 3 * 8) & 0xFF;
-		send.data[1] = (ownerIp.addr >> 2 * 8) & 0xFF;
-		send.data[2] = (ownerIp.addr >> 1 * 8) & 0xFF;
-		send.data[3] = ownerIp.addr & 0xFF;
-#endif
-#ifdef DEBUG
-		logPrintf("GetIPAddress send to ");
-		Serial.print(recv.returnIp);
-		Serial.print("  ");
-		Serial.print(port);
-		Serial.print(" Len:");
-		Serial.print(send.length);
-		Serial.println(".");
-		Serial.println();
-#endif
+		#ifndef _WIN32
+				if (ownerIp.type ==IPADDR_TYPE_V4){
+					send.data[0] = (ownerIp.u_addr.ip4.addr>>3*8) &0xFF;
+					send.data[1] = (ownerIp.u_addr.ip4.addr>>2*8) &0xFF;
+					send.data[2] = (ownerIp.u_addr.ip4.addr>>1*8) &0xFF;
+					send.data[3] = ownerIp.u_addr.ip4.addr&0xFF;
+				}else if (ownerIp.type ==IPADDR_TYPE_V6){
+					for(int i=0; i<4; ++i){
+						u32_t a = ownerIp.u_addr.ip6.addr[i];
+						send.data[0+4*i] = (a>>3*8) &0xFF;
+						send.data[1+4*i] = (a>>2*8) &0xFF;
+						send.data[2+4*i] = (a>>1*8) &0xFF;
+						send.data[3+4*i] = a&0xFF;
+					}
+				}
+		#else
+				send.data[0] = (ownerIp.addr >> 3 * 8) & 0xFF;
+				send.data[1] = (ownerIp.addr >> 2 * 8) & 0xFF;
+				send.data[2] = (ownerIp.addr >> 1 * 8) & 0xFF;
+				send.data[3] = ownerIp.addr & 0xFF;
+		#endif
+		#ifdef DEBUG
+				logPrintf("GetIPAddress send to ");
+				Serial.print(recv.returnIp);
+				Serial.print("  ");
+				Serial.print(port);
+				Serial.print(" Len:");
+				Serial.print(send.length);
+				Serial.println(".");
+				Serial.println();
+		#endif
 		SendReturn(recv);
 		break;
 	case CIU_GET_SUBBOARD_INFO:{
@@ -455,31 +499,67 @@ void UdpCom::ExecUdpCommand(UdpCmdPacket& recv) {
 		SendReturn(recv);
 	}	break;
 	case CIU_MOVEMENT: {
-		printf("=============== ExecUdpCommand ================ \n");
 		uint8_t movement_command_id = *(uint8_t*)recv.data;
-		printf("command id: %i \n", movement_command_id);
+
+		// prepare return packet header
+		PrepareRetPacket(recv);
+		*(uint8_t*)send.data = movement_command_id;
+		send.SetLength();
+		void* movement_command_data = (void*)((uint8_t*)send.data+1);
+
 		switch (movement_command_id)
 		{
-		case CI_M_ADD_KEYFRAME: {
-			MovementKeyframe keyframe;
-			recv.GetKeyframe(keyframe);
+			case CI_M_ADD_KEYFRAME: {
+				// execute and prepare return packet
+				prepareRetAddKeyframe(shiftPointer(recv.data, 1), movement_command_data);
+				SendReturn(recv);
 
-			struct MovementKeyframeAddState* retP = (struct MovementKeyframeAddState*)((uint8_t*)send.data+1);
-			*(uint8_t*)send.data = CI_M_ADD_KEYFRAME;
-			retP->id = keyframe.id;
-			retP->success = false;
+				printf("CI_M_ADD_KEYFRAME send return \n");
 
-			if (canAddKeyframe(keyframe)) {
-				addKeyframe(keyframe);
-				retP->success = true;
+				break;
 			}
-
-			SendReturn(recv);
-		}
-			break;
-		
-		default:
-			break;
+			case CI_M_PAUSE_INTERPOLATE: {
+				pauseInterpolate();
+				SendReturn(recv);
+				break;
+			}
+			case CI_M_RESUME_INTERPOLATE: {
+				resumeInterpolate();
+				SendReturn(recv);
+				break;
+			}
+			case CI_M_PAUSE_MOV: {
+				prepareRetPauseMov(shiftPointer(recv.data, 1), movement_command_data);
+				SendReturn(recv);
+				break;
+			}
+			case CI_M_RESUME_MOV: {
+				prepareRetResumeMov(shiftPointer(recv.data, 1), movement_command_data);
+				SendReturn(recv);
+				break;
+			}
+			case CI_M_CLEAR_MOV: {
+				prepareRetClearMov(shiftPointer(recv.data, 1), movement_command_data);
+				SendReturn(recv);
+				break;
+			}
+			case CI_M_CLEAR_PAUSED: {
+				clearPausedMovements();
+				SendReturn(recv);
+				break;
+			}
+			case CI_M_CLEAR_ALL: {
+				clearInterpolateBuffer();
+				SendReturn(recv);
+				break;
+			}
+			case CI_M_QUERY: {
+				prepareRetQuery(shiftPointer(recv.data, 1), movement_command_data);
+				SendReturn(recv);
+				break;
+			}
+			default:
+				break;
 		}
 	} break;
 	default:
