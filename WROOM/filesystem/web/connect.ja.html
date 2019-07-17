@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="refresh" content="2; URL=/connect.html"/>
+<title>Nuibot WiFi Setting</title>
+<style>input[type=checkbox] { display: none;}
+label{font-size:150%; vertical-align: middle;}</style>
+</head>
+<body>
+<div style="zoom: 150%;">
+<h1>Nuibot WiFi ステータス</h1>
+$ip?[
+<em>$ssid</em>のWiFiアクセスポイントに接続し、
+<a href="http://nuibot.haselab.net?ip=$ip">NuibotのMakeCodeエディタ</a>を開いてください。
+<br />
+<br />
+$]
+接続先アクセスポイント: <em>$ssid</em><br>
+状態:"$state"<br>
+IPアドレス:$ip<br>
+サブネットマスク:$mask<br>
+ゲートウェイ:$gw<br>
+<br>
+<a href="/delete.html">登録済みアクセスポイント情報を見る</a><br>
+<form action="/delete.html" method="post">
+<button class="AP" type="submit" name="selected" value="$ssid"><em>$ssid</em>を切断しアクセスポイント情報を削除する</button>
+</form>
+<form action="/connect.html" method="post">
+<input type="hidden", name="ssid" value="$ssid" />
+<button class="AP" type="submit" name="apSwitch" value="switch">Nuibotの設定用アクセスポイントの$apStart?[停止$]     $apStop?[開始$]</button>
+</form>
+</body>
+</html>
