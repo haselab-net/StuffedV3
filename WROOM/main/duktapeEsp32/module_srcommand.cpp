@@ -499,7 +499,7 @@ static duk_ret_t setMovement(duk_context* ctx) {
     if (!success) return DUK_RET_ERROR;
     uint8_t movementCommandId = duk_get_int(ctx, -1);
     duk_pop(ctx);
-    if (movementCommandId >= CI_M_COUNT || movementCommandId <= CI_M_NONE) return DUK_RET_ERROR;
+    if (movementCommandId > CI_M_COUNT || movementCommandId <= CI_M_NONE) return DUK_RET_ERROR;
 
     //  Prepare command
 	UdpCmdPacket* cmd = udpCom.PrepareMovementCommand(CIU_MOVEMENT, (CommandIdMovement)movementCommandId, CS_DUKTAPE);
