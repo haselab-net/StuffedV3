@@ -22,6 +22,7 @@
 #include "UdpCom.h"
 #include "UartForBoards.h"
 #include "CommandWROOM.h"
+#include "Movement.h"
 #ifndef _WIN32
 #include "../websocketServer/ws_ws.h"
 #endif
@@ -322,6 +323,9 @@ void UdpCom::WriteCommand() {
 
 void UdpCom::ReceiveCommand(void* payload, int len, short from) {
 	UdpCmdPacket* recv = PrepareCommand((CommandId)((short*)payload)[1], from);	//	[0] is length, [1] is command id
+	if (from == CS_DUKTAPE || from == CS_WEBSOCKET) {
+		onChangeControlMode((CommandId)((short*)payload)[1]);
+	}
 	if (!recv) return;
 	memcpy(recv->bytes + 2, payload, len);
 	WriteCommand();
@@ -374,14 +378,8 @@ void UdpCom::SendReturn(UdpCmdPacket& recv) {
 #else
 #error
 #endif
-		if (recv.count == CS_WEBSOCKET || recv.count == CS_DUKTAPE) {
-			printf("recv.count: %i \n", recv.count);
-			SendReturnServer();
-		}
+		if (recv.count == CS_WEBSOCKET || recv.count == CS_DUKTAPE) SendReturnServer();
 		else if (recv.count == CS_MOVEMENT_MANAGER) SendReturnMovement(send);
-		else {
-			printf("recv.count: %i \n", recv.count);
-		}
 	}
 	else {
 		SendReturnUdp(recv);
@@ -513,8 +511,6 @@ void UdpCom::ExecUdpCommand(UdpCmdPacket& recv) {
 				// execute and prepare return packet
 				prepareRetAddKeyframe(shiftPointer(recv.data, 1), movement_command_data);
 				SendReturn(recv);
-
-				printf("CI_M_ADD_KEYFRAME send return \n");
 
 				break;
 			}
