@@ -438,8 +438,11 @@ static void movementAddKeyframe(duk_context* ctx, UdpCmdPacket* cmd) {
     pushCtx2PayloadNumArray<uint8_t>(ctx, payload, "motorId");
     pushCtx2PayloadNum<uint16_t>(ctx, payload, "period");
     pushCtx2PayloadNumArray<short>(ctx, payload, "pose");
-    pushCtx2PayloadNum<uint8_t>(ctx, payload, "refMovementId");
+
+    // little endian
     pushCtx2PayloadNum<uint8_t>(ctx, payload, "refKeyframeId");
+    pushCtx2PayloadNum<uint8_t>(ctx, payload, "refMovementId");
+    
     pushCtx2PayloadNum<uint8_t>(ctx, payload, "refMotorId");
     pushCtx2PayloadNum<short>(ctx, payload, "timeOffset");
 
