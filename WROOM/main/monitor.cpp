@@ -532,16 +532,28 @@ public:
     void Func(){
         conPrintf("MCtest\n");
         switch (getchWait()){
+            // print current pos
             case 'p': {
                 printf("target pose: %ld, %ld, %ld \n", motorTarget.pos[0] >> 6, motorTarget.pos[1] >> 6, motorTarget.pos[2] >> 6);
                 break;
             }
+            // print keyframes
             case 'm': {
                 printAllMotorKeyframes();
                 break;
             }
+            // print interpolate params
             case 'i': {
                 printInterpolateParams();
+                break;
+            }
+            // pause all movements
+            case 'z': {
+                pauseInterpolate();
+                break;
+            }
+            case 'x': {
+                resumeInterpolate();
                 break;
             }
             // add motor 0
@@ -580,12 +592,14 @@ public:
 
                 break;
             }
+            // print timer
             case 't': {
                 uint64_t value;
                 timer_get_counter_value(TIMER_GROUP_0, TIMER_0, &value);
                 print_timer_counter(value);
                 break;
             }
+            // query interpolate state
             case 'q': {
                 movementQueryInterpolateState();
                 break;

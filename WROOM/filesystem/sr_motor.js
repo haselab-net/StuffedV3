@@ -41,15 +41,70 @@ var motor;
         return true;
     }
     motor_1.pushLocalMotorPVToRemoteInterpolateBase = pushLocalMotorPVToRemoteInterpolateBase;
-    function setMovementBase(data) {
-        return motor_1.movementSender.send(data);
+    var MovementOption;
+    (function (MovementOption) {
+        MovementOption[MovementOption["play"] = 0] = "play";
+        MovementOption[MovementOption["pause"] = 1] = "pause";
+        MovementOption[MovementOption["resume"] = 2] = "resume";
+        MovementOption[MovementOption["clear"] = 3] = "clear";
+    })(MovementOption = motor_1.MovementOption || (motor_1.MovementOption = {}));
+    var MovementAllOption;
+    (function (MovementAllOption) {
+        MovementAllOption[MovementAllOption["pause"] = 0] = "pause";
+        MovementAllOption[MovementAllOption["resume"] = 1] = "resume";
+        MovementAllOption[MovementAllOption["clear"] = 2] = "clear";
+    })(MovementAllOption = motor_1.MovementAllOption || (motor_1.MovementAllOption = {}));
+    function setMovement(option, movement) {
+        switch (option) {
+            case MovementOption.play: {
+                for (var keyframeId = 0; keyframeId < movement.keyframes.length; keyframeId++) {
+                    var data = {
+                        movementCommandId: softrobot.command.CommandIdMovement.CI_M_ADD_KEYFRAME,
+                        movementId: movement.movementId,
+                        keyframeId: keyframeId,
+                        motorCount: movement.motorIds.length,
+                        motorId: movement.motorIds,
+                        period: movement.keyframes[keyframeId].period,
+                        pose: movement.keyframes[keyframeId].pose,
+                        refMovementId: 0,
+                        refKeyframeId: 0,
+                        refMotorId: 0,
+                        timeOffset: 0
+                    };
+                    movementAddKeyframe(data);
+                }
+                break;
+            }
+            case MovementOption.pause: {
+                pauseMovement(movement);
+                break;
+            }
+            case MovementOption.resume: {
+                resumeMovement(movement);
+                break;
+            }
+            case MovementOption.clear: {
+                clearMovement(movement);
+                break;
+            }
+        }
     }
-    motor_1.setMovementBase = setMovementBase;
-    function stopInterpolate() {
-        softrobot.movement.sendKeyframeQueue.clear();
+    motor_1.setMovement = setMovement;
+    function setMovementAll(option) {
+        switch (option) {
+            case MovementAllOption.pause:
+                pauseInterpolate();
+                break;
+            case MovementAllOption.resume:
+                resumeInterpolate();
+                break;
+            case MovementAllOption.clear:
+                clearAllMovements();
+                break;
+        }
     }
-    motor_1.stopInterpolate = stopInterpolate;
-    function movementDecoder(movementStr) {
+    motor_1.setMovementAll = setMovementAll;
+        function movementDecoder(movementStr) {
         function splitToInt(str, seperator) {
             var nums_str = str.split(seperator);
             var nums = [];
@@ -106,31 +161,62 @@ var motor;
         };
     }
     motor_1.movementDecoder = movementDecoder;
-    function playMovement(movement) {
-        for (var keyframeId = 0; keyframeId < movement.keyframes.length; keyframeId++) {
-            var data = {
-                movementCommandId: softrobot.command.CommandIdMovement.CI_M_ADD_KEYFRAME,
-                movementId: movement.movementId,
-                keyframeId: keyframeId,
-                motorCount: movement.motorIds.length,
-                motorId: movement.motorIds,
-                period: movement.keyframes[keyframeId].period,
-                pose: movement.keyframes[keyframeId].pose,
-                refMovementId: 0,
-                refKeyframeId: 0,
-                refMotorId: 0,
-                timeOffset: 0
-            };
-            movementAddKeyframe(data);
-        }
-    }
-    motor_1.playMovement = playMovement;
     function movementAddKeyframe(data) {
-        while (!setMovementBase(data)) {
+        while (!motor_1.movementSender.send(data)) {
             loops.pause(100);
         }
     }
     motor_1.movementAddKeyframe = movementAddKeyframe;
+    function pauseMovement(movement) {
+        motor_1.movementSender.send({
+            movementCommandId: softrobot.command.CommandIdMovement.CI_M_PAUSE_MOV,
+            movementId: movement.movementId,
+            motorCount: movement.motorIds.length,
+            motorId: movement.motorIds
+        });
+    }
+    motor_1.pauseMovement = pauseMovement;
+    function resumeMovement(movement) {
+        motor_1.movementSender.send({
+            movementCommandId: softrobot.command.CommandIdMovement.CI_M_RESUME_MOV,
+            movementId: movement.movementId,
+            motorCount: movement.motorIds.length
+        });
+    }
+    motor_1.resumeMovement = resumeMovement;
+    function clearMovement(movement) {
+        motor_1.movementSender.send({
+            movementCommandId: softrobot.command.CommandIdMovement.CI_M_CLEAR_MOV,
+            movementId: movement.movementId,
+            motorCount: movement.motorIds.length,
+            motorId: movement.motorIds
+        });
+    }
+    motor_1.clearMovement = clearMovement;
+    function pauseInterpolate() {
+        motor_1.movementSender.send({
+            movementCommandId: softrobot.command.CommandIdMovement.CI_M_PAUSE_INTERPOLATE
+        });
+    }
+    motor_1.pauseInterpolate = pauseInterpolate;
+    function resumeInterpolate() {
+        motor_1.movementSender.send({
+            movementCommandId: softrobot.command.CommandIdMovement.CI_M_RESUME_INTERPOLATE
+        });
+    }
+    motor_1.resumeInterpolate = resumeInterpolate;
+    function clearAllMovements() {
+        motor_1.movementSender.send({
+            movementCommandId: softrobot.command.CommandIdMovement.CI_M_CLEAR_ALL
+        });
+    }
+    motor_1.clearAllMovements = clearAllMovements;
+    function clearPausedMovements() {
+        motor_1.movementSender.send({
+            movementCommandId: softrobot.command.CommandIdMovement.CI_M_CLEAR_PAUSED
+        });
+    }
+    motor_1.clearPausedMovements = clearPausedMovements;
 })(motor || (motor = {}));
 
 // module.exports = motor;

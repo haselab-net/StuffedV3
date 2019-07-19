@@ -149,7 +149,7 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
                         wsDeleteJsfileTask();
                         heap_trace_dump();
                         heap_trace_start(HEAP_TRACE_LEAKS);                        
-                        printf("delete success");
+                        ESP_LOGI(LOG_TAG, "delete success");
                     }else if(!wsIsJsfileTaskRunning()){ // switch to offline mode
                         ESP_LOGI(LOG_TAG, "before wsCreateJsfileTask heap size: %d", esp_get_free_heap_size());
                         ESP_LOGD(LOG_TAG, "switch to offline mode, start running jsfile task");
