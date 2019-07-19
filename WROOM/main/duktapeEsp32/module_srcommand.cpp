@@ -429,26 +429,38 @@ static duk_ret_t resetSensor(duk_context* ctx) {
 static void movementAddKeyframe(duk_context* ctx, UdpCmdPacket* cmd) {
     // fill payload data
     void* payload = shiftPointer(cmd->data, 1);
-    pushCtx2PayloadNum<uint8_t>(ctx, payload, "movementId");
+
+    // little endian
     pushCtx2PayloadNum<uint8_t>(ctx, payload, "keyframeId");
+    pushCtx2PayloadNum<uint8_t>(ctx, payload, "movementId");
+
     pushCtx2PayloadNum<uint8_t>(ctx, payload, "motorCount");
     pushCtx2PayloadNumArray<uint8_t>(ctx, payload, "motorId");
     pushCtx2PayloadNum<uint16_t>(ctx, payload, "period");
     pushCtx2PayloadNumArray<short>(ctx, payload, "pose");
-    pushCtx2PayloadNum<uint8_t>(ctx, payload, "refMovementId");
+
+    // little endian
     pushCtx2PayloadNum<uint8_t>(ctx, payload, "refKeyframeId");
+    pushCtx2PayloadNum<uint8_t>(ctx, payload, "refMovementId");
+    
     pushCtx2PayloadNum<uint8_t>(ctx, payload, "refMotorId");
     pushCtx2PayloadNum<short>(ctx, payload, "timeOffset");
 
     printf("movement commandId: %i \n", *(uint8_t*)shiftPointer(cmd->data, 0));
-    printf("movementId: %i \n", *(uint8_t*)shiftPointer(cmd->data, 1));
-    printf("keyframeId: %i \n", *(uint8_t*)shiftPointer(cmd->data, 2));
+
+    // little endian
+    printf("keyframeId: %i \n", *(uint8_t*)shiftPointer(cmd->data, 1));
+    printf("movementId: %i \n", *(uint8_t*)shiftPointer(cmd->data, 2));
+
     printf("motorCount: %i \n", *(uint8_t*)shiftPointer(cmd->data, 3));
     printf("motorId: %i \n", *(uint8_t*)shiftPointer(cmd->data, 4));
     printf("period: %i \n", *(uint16_t*)shiftPointer(cmd->data, 5));
     printf("pose: %i \n", *(short*)shiftPointer(cmd->data, 7));
-    printf("refMovementId: %i \n", *(uint8_t*)shiftPointer(cmd->data, 9));
-    printf("refKeyframeId: %i \n", *(uint8_t*)shiftPointer(cmd->data, 10));
+
+    // little endian
+    printf("refKeyframeId: %i \n", *(uint8_t*)shiftPointer(cmd->data, 9));
+    printf("refMovementId: %i \n", *(uint8_t*)shiftPointer(cmd->data, 10));
+
     printf("refMotorId: %i \n", *(uint8_t*)shiftPointer(cmd->data, 11));
     printf("timeOffset: %i \n", *(short*)shiftPointer(cmd->data, 12));
 }
@@ -499,7 +511,7 @@ static duk_ret_t setMovement(duk_context* ctx) {
     if (!success) return DUK_RET_ERROR;
     uint8_t movementCommandId = duk_get_int(ctx, -1);
     duk_pop(ctx);
-    if (movementCommandId >= CI_M_COUNT || movementCommandId <= CI_M_NONE) return DUK_RET_ERROR;
+    if (movementCommandId > CI_M_COUNT || movementCommandId <= CI_M_NONE) return DUK_RET_ERROR;
 
     //  Prepare command
 	UdpCmdPacket* cmd = udpCom.PrepareMovementCommand(CIU_MOVEMENT, (CommandIdMovement)movementCommandId, CS_DUKTAPE);
@@ -766,8 +778,10 @@ int pushDataCIUMovement(duk_context* ctx, void* data) {
 
     switch (movementCommandId) {
         case CI_M_ADD_KEYFRAME: {
-            popPayload2CtxNum<uint8_t>(ctx, payload, "movementId");
+            // little endian
             popPayload2CtxNum<uint8_t>(ctx, payload, "keyframeId");
+            popPayload2CtxNum<uint8_t>(ctx, payload, "movementId");
+
             popPayload2CtxNum<uint8_t>(ctx, payload, "success");
             popPayload2CtxNumArray<uint8_t>(ctx, payload, "nOccupied", boardInfo.nMotor);
             printf("=== duktape add keyframe receive === \n");

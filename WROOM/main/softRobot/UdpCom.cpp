@@ -22,6 +22,7 @@
 #include "UdpCom.h"
 #include "UartForBoards.h"
 #include "CommandWROOM.h"
+#include "Movement.h"
 #ifndef _WIN32
 #include "../websocketServer/ws_ws.h"
 #endif
@@ -176,8 +177,13 @@ void UdpRetPacket::SetAll(ControlMode controlMode, unsigned char targetCountRead
 UdpCmdPackets::UdpCmdPackets() {
 	smAvail = xSemaphoreCreateCounting(sizeof(buf) / sizeof(buf[0]), 0);
 	smFree = xSemaphoreCreateCounting(sizeof(buf) / sizeof(buf[0]), sizeof(buf) / sizeof(buf[0]));
+
+	isReading = xSemaphoreCreateMutex();
+	isWriting = xSemaphoreCreateMutex();
 }
 UdpCmdPacket& UdpCmdPackets::Peek() {
+	xSemaphoreTake(isReading, portMAX_DELAY);
+
 	xSemaphoreTake(smAvail, portMAX_DELAY);
 	xSemaphoreGive(smAvail);
 	return base::Peek();
@@ -186,17 +192,22 @@ void UdpCmdPackets::Read() {
 	xSemaphoreTake(smAvail, portMAX_DELAY);
 	base::Read();
 	xSemaphoreGive(smFree);
+
+	xSemaphoreGive(isReading);
 }
 UdpCmdPacket& UdpCmdPackets::Poke() {
+	xSemaphoreTake(isWriting, portMAX_DELAY);
+
 	xSemaphoreTake(smFree, portMAX_DELAY);
-	UdpCmdPacket& res = base::Poke();
 	xSemaphoreGive(smFree);
-	return res;
+	return base::Poke();
 }
 void UdpCmdPackets::Write() {
 	xSemaphoreTake(smFree, portMAX_DELAY);
 	base::Write();
 	xSemaphoreGive(smAvail);
+
+	xSemaphoreGive(isWriting);
 }
 
 static void onReceiveUdp(void *arg, struct udp_pcb *pcb, struct pbuf *p, const ip_addr_t *addr, u16_t port)
@@ -323,6 +334,9 @@ void UdpCom::WriteCommand() {
 void UdpCom::ReceiveCommand(void* payload, int len, short from) {
 	UdpCmdPacket* recv = PrepareCommand((CommandId)((short*)payload)[1], from);	//	[0] is length, [1] is command id
 	if (!recv) return;
+	if (from == CS_DUKTAPE || from == CS_WEBSOCKET) {
+		onChangeControlMode((CommandId)((short*)payload)[1]);
+	}
 	memcpy(recv->bytes + 2, payload, len);
 	WriteCommand();
 }
@@ -374,14 +388,8 @@ void UdpCom::SendReturn(UdpCmdPacket& recv) {
 #else
 #error
 #endif
-		if (recv.count == CS_WEBSOCKET || recv.count == CS_DUKTAPE) {
-			printf("recv.count: %i \n", recv.count);
-			SendReturnServer();
-		}
+		if (recv.count == CS_WEBSOCKET || recv.count == CS_DUKTAPE) SendReturnServer();
 		else if (recv.count == CS_MOVEMENT_MANAGER) SendReturnMovement(send);
-		else {
-			printf("recv.count: %i \n", recv.count);
-		}
 	}
 	else {
 		SendReturnUdp(recv);
@@ -513,8 +521,6 @@ void UdpCom::ExecUdpCommand(UdpCmdPacket& recv) {
 				// execute and prepare return packet
 				prepareRetAddKeyframe(shiftPointer(recv.data, 1), movement_command_data);
 				SendReturn(recv);
-
-				printf("CI_M_ADD_KEYFRAME send return \n");
 
 				break;
 			}

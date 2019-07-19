@@ -33,17 +33,17 @@ enum ResetSensorFlags {
 	RSF_FORCE=2,
 };
 enum CommandIdMovement {
-	CI_M_NONE,
-	CI_M_ADD_KEYFRAME,
-	CI_M_PAUSE_MOV,
-	CI_M_RESUME_MOV,
-	CI_M_PAUSE_INTERPOLATE,
-	CI_M_RESUME_INTERPOLATE,
-	CI_M_CLEAR_MOV,
-	CI_M_CLEAR_PAUSED,
-	CI_M_CLEAR_ALL,
-	CI_M_QUERY,
-	CI_M_COUNT
+	CI_M_NONE = 0,
+	CI_M_ADD_KEYFRAME = 1,
+	CI_M_PAUSE_MOV = 2,
+	CI_M_RESUME_MOV = 3,
+	CI_M_PAUSE_INTERPOLATE = 4,
+	CI_M_RESUME_INTERPOLATE = 5,
+	CI_M_CLEAR_MOV = 6,
+	CI_M_CLEAR_PAUSED = 7,
+	CI_M_CLEAR_ALL = 8,
+	CI_M_QUERY = 9,
+	CI_M_COUNT = 9
 };
 
 // define the source of command packet, for return packet to know where to return

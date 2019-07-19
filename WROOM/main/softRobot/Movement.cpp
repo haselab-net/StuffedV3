@@ -1,6 +1,5 @@
 #include "Movement.h"
 #include "UdpCom.h"
-#include "../../../PIC/control.h"
 
 static const char* LOG_TAG = "Movement";
 
@@ -728,6 +727,31 @@ void initMovementDS() {
 	initMovementManager();
 }
 
+static bool movementControlMode = true;
+void onChangeControlMode(CommandId newCommand) {
+	bool newMovementControlMode;
+	switch (newCommand) {
+		case CI_DIRECT:
+		case CI_CURRENT:
+		case CI_INTERPOLATE:
+		case CI_FORCE_CONTROL:
+			newMovementControlMode = false;
+			break;
+		case CIU_MOVEMENT:
+			newMovementControlMode = true;
+			break;
+		default:
+			return;
+	}
+	printf("=========================== on receive new command id: %i \n", newCommand);
+	if (newMovementControlMode != movementControlMode) {
+		if (newMovementControlMode) resumeInterpolate();
+		else pauseInterpolate();
+
+		movementControlMode = newMovementControlMode;
+	}
+}
+
 /////////////////////////////////////////// api for command packet ///////////////////////////////////////////////
 
 bool canAddKeyframe(MovementKeyframe& keyframe) {
@@ -746,6 +770,8 @@ bool canAddKeyframe(MovementKeyframe& keyframe) {
 }
 
 void addKeyframe(MovementKeyframe& keyframe) {
+	if (keyframe.period == 0) return;
+
 	xSemaphoreTake(tickSemaphore, portMAX_DELAY);
 
 	for (int i=0; i<keyframe.motorCount; i++) {

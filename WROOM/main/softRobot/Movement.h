@@ -64,6 +64,8 @@ void printAllMotorKeyframes();
 
 void initMovementDS();
 
+void onChangeControlMode(CommandId newCommand);
+
 /////////////////////////////////////////// api for command packet ///////////////////////////////////////////////
 
 bool canAddKeyframe(MovementKeyframe& keyframe);
