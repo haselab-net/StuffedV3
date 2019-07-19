@@ -244,7 +244,7 @@ var softrobot;
     softrobot.message_command = require("sr_command");
     var tmp = softrobot.message_command.setMotorDirect;
     softrobot.message_command.setMotorDirect = function (data) {
-        softrobot.movement.sendKeyframeQueue.clear();
+        // softrobot.movement.sendKeyframeQueue.clear();
         softrobot.device.robotState.interpolateTargetCountOfWrite = -1;
         softrobot.device.robotState.nInterpolateVacancy = softrobot.device.robotState.nInterpolateTotal;
         softrobot.device.robotState.nInterpolateRemain = 0;
@@ -401,7 +401,7 @@ var softrobot;
                     softrobot.device.robotState.motor[inst.motorId].velocity = inst.velocity;
                 var pose = softrobot.device.robotState.getPropArray("pose", softrobot.device.robotState.motor);
                 var velocity = softrobot.device.robotState.getPropArray("velocity", softrobot.device.robotState.motor);
-                softrobot.movement.sendKeyframeQueue.clear();
+                // softrobot.movement.sendKeyframeQueue.clear();
                 message_command.setMotorDirect({
                     pose: pose,
                     velocity: velocity
@@ -460,7 +460,7 @@ var softrobot;
         }
         message_command.updateLocalMotorState = updateLocalMotorState;
         function updateRemoteDirect() {
-            softrobot.movement.sendKeyframeQueue.clear();
+            // softrobot.movement.sendKeyframeQueue.clear();
             message_command.setMotorDirect({
                 pose: softrobot.device.robotState.getPropArray("pose", softrobot.device.robotState.motor),
                 velocity: softrobot.device.robotState.getPropArray("velocity", softrobot.device.robotState.motor)
@@ -486,101 +486,6 @@ var softrobot;
 (function (softrobot) {
     var movement;
     (function (movement) {
-        var SendKeyframeQueue = (function () {
-            function SendKeyframeQueue(stuckChecker, sender, receiver) {
-                if (sender === void 0) { sender = softrobot.message_command.setMotorInterpolate; }
-                if (receiver === void 0) { receiver = softrobot.message_command.onRcvCIInterpolateMessage; }
-                this.sender = sender;
-                this.queue = [];
-                this.blockQuery = false;
-                this.isWantQuery = false;
-                this.remoteVacancy = 0;
-                this.lastTimeWriteCount = 0;
-                receiver.push(this.onInterpolateMessage.bind(this));
-                if (stuckChecker) {
-                    this.lastTimeWriteCount = softrobot.device.robotState.interpolateTargetCountOfWrite;
-                    setInterval(this.check, SendKeyframeQueue.STUCK_CHECKER_INTERVAL);
-                }
-            }
-            SendKeyframeQueue.prototype.check = function () {
-                if (this.queue.length > 0 && softrobot.device.robotState.interpolateTargetCountOfWrite == this.lastTimeWriteCount) {
-                    this.queryVacancy();
-                }
-                else {
-                    this.lastTimeWriteCount = softrobot.device.robotState.interpolateTargetCountOfWrite;
-                }
-            };
-            SendKeyframeQueue.prototype.enqueue = function (keyframe) {
-                if (this.queue.length == SendKeyframeQueue.MAX_SIZE)
-                    return -1;
-                var len = this.queue.push(keyframe);
-                console.log("enqueue, new len: " + len.toString());
-                this.queryVacancy();
-                return len;
-            };
-            SendKeyframeQueue.prototype.dequeue = function () {
-                if (this.queue.length == 0)
-                    return undefined;
-                else
-                    return this.queue.splice(0, 1)[0];
-            };
-            SendKeyframeQueue.prototype.clear = function () {
-                this.queue = [];
-            };
-            SendKeyframeQueue.prototype.send = function (keyframe) {
-                softrobot.device.robotState.interpolateTargetCountOfWrite += 1;
-                softrobot.device.robotState.interpolateTargetCountOfWrite %= 256;
-                var dataObj = {
-                    pose: keyframe.pose,
-                    period: keyframe.period * 3,
-                    targetCountWrite: softrobot.device.robotState.interpolateTargetCountOfWrite
-                };
-                this.sender(dataObj);
-                return true;
-            };
-            SendKeyframeQueue.prototype.queryVacancy = function () {
-                var _this = this;
-                if (this.blockQuery) {
-                    this.isWantQuery = true;
-                    return;
-                }
-                var queryObj = {
-                    pose: new Array(softrobot.device.robotInfo.nMotor),
-                    period: 0,
-                    targetCountWrite: 0
-                };
-                this.sender(queryObj);
-                this.blockQuery = true;
-                setTimeout(function () {
-                    _this.blockQuery = false;
-                    if (_this.isWantQuery) {
-                        _this.queryVacancy();
-                        _this.isWantQuery = false;
-                    }
-                }, SendKeyframeQueue.BLOCK_QUERY_TIME);
-            };
-            SendKeyframeQueue.prototype.onInterpolateMessage = function () {
-                this.remoteVacancy = softrobot.device.robotState.nInterpolateVacancy;
-                if (this.remoteVacancy >= softrobot.device.robotState.nInterpolateTotal - SendKeyframeQueue.REMOTE_MAX_SIZE && this.queue.length > 0) {
-                    var keyframe = this.dequeue();
-                    this.send(keyframe);
-                }
-                else if (this.queue.length > 0) {
-                    this.wait();
-                }
-            };
-            SendKeyframeQueue.prototype.wait = function () {
-                var _this = this;
-                setTimeout(function () { _this.queryVacancy(); }, 50);
-            };
-            SendKeyframeQueue.MAX_SIZE = 5;
-            SendKeyframeQueue.REMOTE_MAX_SIZE = 6;
-            SendKeyframeQueue.STUCK_CHECKER_INTERVAL = 2000;
-            SendKeyframeQueue.BLOCK_QUERY_TIME = 1000;
-            return SendKeyframeQueue;
-        }());
-        movement.SendKeyframeQueue = SendKeyframeQueue;
-        movement.sendKeyframeQueue = new SendKeyframeQueue(false);
         var MovementSender = (function () {
             function MovementSender() {
                 this.waitResponse = false;

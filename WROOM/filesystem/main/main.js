@@ -2,7 +2,7 @@
 // iot.triggerIFTTTEvent("Mf0JcCX_5FLZiz6Svtpjn", "esp_event", "", "", "")
 
 var movement_1 = motor.movementDecoder("4 1 6005\n3 0\n842 2276\n1158 397\n2011 2765\n1994 1246")
-for (var i = 0; i < 10; i++) {
+for (var i = 0; i < 3; i++) {
     motor.playMovement(movement_1)
 }
 
