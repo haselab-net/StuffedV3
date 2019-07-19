@@ -190,9 +190,8 @@ void UdpCmdPackets::Read() {
 }
 UdpCmdPacket& UdpCmdPackets::Poke() {
 	xSemaphoreTake(smFree, portMAX_DELAY);
-	UdpCmdPacket& res = base::Poke();
 	xSemaphoreGive(smFree);
-	return res;
+	return base::Poke();
 }
 void UdpCmdPackets::Write() {
 	xSemaphoreTake(smFree, portMAX_DELAY);
