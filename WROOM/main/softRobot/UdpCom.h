@@ -142,6 +142,7 @@ public:
 #define NUDPCMDPACKETS	10
 class UdpCmdPackets:public ArrayRing<UdpCmdPacket, NUDPCMDPACKETS>{
 	xSemaphoreHandle smAvail, smFree;
+	xSemaphoreHandle isReading, isWriting;
 public:
 	typedef ArrayRing<UdpCmdPacket, NUDPCMDPACKETS> base;
 	UdpCmdPackets();

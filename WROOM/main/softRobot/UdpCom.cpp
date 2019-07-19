@@ -177,8 +177,13 @@ void UdpRetPacket::SetAll(ControlMode controlMode, unsigned char targetCountRead
 UdpCmdPackets::UdpCmdPackets() {
 	smAvail = xSemaphoreCreateCounting(sizeof(buf) / sizeof(buf[0]), 0);
 	smFree = xSemaphoreCreateCounting(sizeof(buf) / sizeof(buf[0]), sizeof(buf) / sizeof(buf[0]));
+
+	isReading = xSemaphoreCreateMutex();
+	isWriting = xSemaphoreCreateMutex();
 }
 UdpCmdPacket& UdpCmdPackets::Peek() {
+	xSemaphoreTake(isReading, portMAX_DELAY);
+
 	xSemaphoreTake(smAvail, portMAX_DELAY);
 	xSemaphoreGive(smAvail);
 	return base::Peek();
@@ -187,8 +192,12 @@ void UdpCmdPackets::Read() {
 	xSemaphoreTake(smAvail, portMAX_DELAY);
 	base::Read();
 	xSemaphoreGive(smFree);
+
+	xSemaphoreGive(isReading);
 }
 UdpCmdPacket& UdpCmdPackets::Poke() {
+	xSemaphoreTake(isWriting, portMAX_DELAY);
+
 	xSemaphoreTake(smFree, portMAX_DELAY);
 	xSemaphoreGive(smFree);
 	return base::Poke();
@@ -197,6 +206,8 @@ void UdpCmdPackets::Write() {
 	xSemaphoreTake(smFree, portMAX_DELAY);
 	base::Write();
 	xSemaphoreGive(smAvail);
+
+	xSemaphoreGive(isWriting);
 }
 
 static void onReceiveUdp(void *arg, struct udp_pcb *pcb, struct pbuf *p, const ip_addr_t *addr, u16_t port)
