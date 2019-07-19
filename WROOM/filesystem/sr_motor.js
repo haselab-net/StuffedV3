@@ -125,12 +125,6 @@ var motor;
         }
     }
     motor_1.playMovement = playMovement;
-    function pushLocalMotorPVToRemoteInterpolate(period) {
-        while (!pushLocalMotorPVToRemoteInterpolateBase(period)) {
-            loops.pause(500);
-        }
-    }
-    motor_1.pushLocalMotorPVToRemoteInterpolate = pushLocalMotorPVToRemoteInterpolate;
     function movementAddKeyframe(data) {
         while (!setMovementBase(data)) {
             loops.pause(100);
