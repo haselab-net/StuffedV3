@@ -2,6 +2,7 @@
 
 var motor;
 (function (motor_1) {
+    motor_1.movementSender = new softrobot.movement.MovementSender();
     function changeRemoteMotorParameter(motor, parameterType, value) {
         var instruction = {
             motorId: motor
@@ -40,6 +41,10 @@ var motor;
         return true;
     }
     motor_1.pushLocalMotorPVToRemoteInterpolateBase = pushLocalMotorPVToRemoteInterpolateBase;
+    function setMovementBase(data) {
+        return motor_1.movementSender.send(data);
+    }
+    motor_1.setMovementBase = setMovementBase;
     function stopInterpolate() {
         softrobot.movement.sendKeyframeQueue.clear();
     }
@@ -63,6 +68,7 @@ var motor;
         }
         if (movementStr === "")
             return {
+                movementId: softrobot.movement.getNewMovementId(),
                 motorIds: [0],
                 keyframes: [{
                         period: 1000,
@@ -94,18 +100,28 @@ var motor;
             });
         }
         return {
+            movementId: softrobot.movement.getNewMovementId(),
             motorIds: line_2.slice(1),
             keyframes: keyframes
         };
     }
     motor_1.movementDecoder = movementDecoder;
     function playMovement(movement) {
-        for (var _i = 0, _a = movement.keyframes; _i < _a.length; _i++) {
-            var keyframe = _a[_i];
-            for (var i = 0; i < keyframe.pose.length; i++) {
-                changeLocalStringLength(movement.motorIds[i], keyframe.pose[i]);
-            }
-            pushLocalMotorPVToRemoteInterpolate(keyframe.period);
+        for (var keyframeId = 0; keyframeId < movement.keyframes.length; keyframeId++) {
+            var data = {
+                movementCommandId: softrobot.command.CommandIdMovement.CI_M_ADD_KEYFRAME,
+                movementId: movement.movementId,
+                keyframeId: keyframeId,
+                motorCount: movement.motorIds.length,
+                motorId: movement.motorIds,
+                period: movement.keyframes[keyframeId].period,
+                pose: movement.keyframes[keyframeId].pose,
+                refMovementId: 0,
+                refKeyframeId: 0,
+                refMotorId: 0,
+                timeOffset: 0
+            };
+            movementAddKeyframe(data);
         }
     }
     motor_1.playMovement = playMovement;
@@ -115,6 +131,12 @@ var motor;
         }
     }
     motor_1.pushLocalMotorPVToRemoteInterpolate = pushLocalMotorPVToRemoteInterpolate;
+    function movementAddKeyframe(data) {
+        while (!setMovementBase(data)) {
+            loops.pause(100);
+        }
+    }
+    motor_1.movementAddKeyframe = movementAddKeyframe;
 })(motor || (motor = {}));
 
 // module.exports = motor;
