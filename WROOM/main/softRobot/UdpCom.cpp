@@ -323,10 +323,10 @@ void UdpCom::WriteCommand() {
 
 void UdpCom::ReceiveCommand(void* payload, int len, short from) {
 	UdpCmdPacket* recv = PrepareCommand((CommandId)((short*)payload)[1], from);	//	[0] is length, [1] is command id
+	if (!recv) return;
 	if (from == CS_DUKTAPE || from == CS_WEBSOCKET) {
 		onChangeControlMode((CommandId)((short*)payload)[1]);
 	}
-	if (!recv) return;
 	memcpy(recv->bytes + 2, payload, len);
 	WriteCommand();
 }
