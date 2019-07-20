@@ -1,6 +1,4 @@
 var jslib = require("jslib");
-jslib.printHeap("runtime.js:2");
-
 var loops = require("sr_loops");
 var console = require("console");
 

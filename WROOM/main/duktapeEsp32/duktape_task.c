@@ -179,7 +179,7 @@ void duktape_start() {
 	
 	//	create tasks for threads
 	for(int i=0; i<NJSTHREADS; ++i){
-		xTaskCreate(dukEventHandleTask, taskNames[i], 1024*5, &jsThreads[i], tskIDLE_PRIORITY + 1, &jsThreads[i].task);
+		xTaskCreate(dukEventHandleTask, taskNames[i], 1024*4, &jsThreads[i], tskIDLE_PRIORITY + 1, &jsThreads[i].task);
 	}
 	char* cmd = "ESP32.include('/main/runtime.js');";
 	event_newCommandLineEvent(cmd, strlen(cmd), 0);
