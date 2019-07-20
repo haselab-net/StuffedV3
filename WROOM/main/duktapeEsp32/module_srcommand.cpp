@@ -795,6 +795,8 @@ int pushDataCIUMovement(duk_context* ctx, void* data) {
             popPayload2CtxNumArray<uint8_t>(ctx, payload, "nOccupied", boardInfo.nMotor);
             break;
     }
+
+    free(data);
     
     return 1;
 }
