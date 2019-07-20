@@ -1,50 +1,11 @@
 // loops.pause(10000);
 // iot.triggerIFTTTEvent("Mf0JcCX_5FLZiz6Svtpjn", "esp_event", "", "", "")
+console.log("defaule main.js");
 
-function movementCallback(data) {
-    if (data.movementCommandId == 1) {
-        console.log("movement id: " + data.movementId);
-        console.log("keyframe id: " + data.keyframeId);
-        console.log("success: " + data.success);
-        console.log("nOccupied 0: " + data.nOccupied[0]);
-        console.log("nOccupied 1: " + data.nOccupied[1]);
-        console.log("nOccupied 2: " + data.nOccupied[2]);
-    }
+var movement_1 = motor.movementDecoder("4 1 6005\n3 0\n842 2276\n1158 397\n2011 2765\n1994 1246")
+for (var i = 0; i < 3; i++) {
+    motor.playMovement(movement_1)
 }
-
-softrobot.message_command.registerCallback("onReceiveCIUMovement", movementCallback);
-
-for (var i=0; i<3; i++) {
-    console.log("loop: " + i);
-    softrobot.message_command.setMovement({
-        movementCommandId: 1,
-        movementId: 1,
-        keyframeId: i*2,
-        motorCount: 1,
-        motorId: [0],
-        period: 2000,
-        pose: [2000],
-        refMovementId: 0,
-        refKeyframeId: 0,
-        refMotorId: 0,
-        timeOffset: 0
-    });
-    softrobot.message_command.setMovement({
-        movementCommandId: 1,
-        movementId: 1,
-        keyframeId: i*2 + 1,
-        motorCount: 1,
-        motorId: [0],
-        period: 2000,
-        pose: [-2000],
-        refMovementId: 0,
-        refKeyframeId: 0,
-        refMotorId: 0,
-        timeOffset: 0
-    })
-}
-
-loops.pause(10000);
 
 // iot.registerMQTTEvent("event", function (value1, value2, value3) {
 //     console.log("event");
