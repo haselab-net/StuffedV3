@@ -2873,8 +2873,7 @@ typedef struct duk_hthread duk_context;
  */
 
 #define DUK_USE_ARRAY_BUILTIN
-//#undef DUK_USE_ASSERTIONS
-#define DUK_USE_ASSERTIONS    //    hasevr
+#undef DUK_USE_ASSERTIONS
 #define DUK_USE_AVOID_PLATFORM_FUNCPTRS
 #define DUK_USE_BOOLEAN_BUILTIN
 #undef DUK_USE_BUFLEN16
