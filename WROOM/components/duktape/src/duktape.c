@@ -17094,6 +17094,9 @@ struct duk__pcall_args {
 };
 typedef struct duk__pcall_args duk__pcall_args;
 
+#include "../../../main/duktapeEsp32/include/duktape_task.h"
+#include <logging.h>
+
 /* Compute and validate idx_func for a certain 'nargs' and 'other'
  * parameter count (1 or 2, depending on whether 'this' binding is
  * present).
@@ -17120,6 +17123,7 @@ DUK_LOCAL duk_idx_t duk__call_get_idx_func(duk_hthread *thr, duk_idx_t nargs, du
  */
 DUK_LOCAL duk_idx_t duk__call_get_idx_func_unvalidated(duk_hthread *thr, duk_idx_t nargs, duk_idx_t other) {
 	duk_idx_t idx_func;
+	DUK_STACK_REMAIN(thr);
 
 	/* XXX: byte arithmetic? */
 
@@ -17265,6 +17269,7 @@ DUK_EXTERNAL duk_int_t duk_pcall(duk_hthread *thr, duk_idx_t nargs) {
 }
 
 DUK_LOCAL duk_ret_t duk__pcall_method_raw(duk_hthread *thr, void *udata) {
+	DUK_STACK_REMAIN(thr);
 	duk__pcall_method_args *args;
 	duk_idx_t idx_func;
 	duk_int_t ret;
@@ -17344,6 +17349,7 @@ DUK_EXTERNAL duk_int_t duk_safe_call(duk_hthread *thr, duk_safe_call_function fu
 	duk_int_t rc;
 
 	DUK_ASSERT_API_ENTRY(thr);
+	DUK_STACK_REMAIN(thr);
 
 	/* nargs condition; fail if: top - bottom < nargs
 	 *                      <=>  top < bottom + nargs
@@ -18499,13 +18505,11 @@ struct duk__compile_raw_args {
 	duk_uint_t flags;
 };
 
-#include "../../../main/duktapeEsp32/include/duktape_task.h"
 
 
 /* Eval is just a wrapper now. */
 DUK_EXTERNAL duk_int_t duk_eval_raw(duk_hthread *thr, const char *src_buffer, duk_size_t src_length, duk_uint_t flags) {
 	duk_int_t rc;
-
 	DUK_ASSERT_API_ENTRY(thr);
 
 	/* Note: strictness is *not* inherited from the current Duktape/C.
@@ -18549,6 +18553,7 @@ DUK_EXTERNAL duk_int_t duk_eval_raw(duk_hthread *thr, const char *src_buffer, du
 
 /* Helper which can be called both directly and with duk_safe_call(). */
 DUK_LOCAL duk_ret_t duk__do_compile(duk_hthread *thr, void *udata) {
+	DUK_STACK_REMAIN(thr);
 	duk__compile_raw_args *comp_args;
 	duk_uint_t flags;
 	duk_hcompfunc *h_templ;
@@ -18568,14 +18573,10 @@ DUK_LOCAL duk_ret_t duk__do_compile(duk_hthread *thr, void *udata) {
 	comp_args = (duk__compile_raw_args *) udata;
 	flags = comp_args->flags;
 
-	DUK_STACK_REMAIN(thr);
-
 	if (flags & DUK_COMPILE_NOFILENAME) {
 		/* Automatic filename: 'eval' or 'input'. */
 		duk_push_hstring_stridx(thr, (flags & DUK_COMPILE_EVAL) ? DUK_STRIDX_EVAL : DUK_STRIDX_INPUT);
 	}
-
-	DUK_STACK_REMAIN(thr);
 	/* [ ... source? filename ] */
 
 	if (!comp_args->src_buffer) {
@@ -18592,7 +18593,6 @@ DUK_LOCAL duk_ret_t duk__do_compile(duk_hthread *thr, void *udata) {
 		comp_args->src_length = (duk_size_t) DUK_HSTRING_GET_BYTELEN(h_sourcecode);
 	}
 	DUK_ASSERT(comp_args->src_buffer != NULL);
-	DUK_STACK_REMAIN(thr);
 
 	if (flags & DUK_COMPILE_FUNCTION) {
 		flags |= DUK_COMPILE_EVAL | DUK_COMPILE_FUNCEXPR;
@@ -18600,9 +18600,7 @@ DUK_LOCAL duk_ret_t duk__do_compile(duk_hthread *thr, void *udata) {
 
 	/* [ ... source? filename ] */
 
-	DUK_STACK_REMAIN(thr);
 	duk_js_compile(thr, comp_args->src_buffer, comp_args->src_length, flags);
-	DUK_STACK_REMAIN(thr);
 
 	/* [ ... source? func_template ] */
 
@@ -18615,13 +18613,11 @@ DUK_LOCAL duk_ret_t duk__do_compile(duk_hthread *thr, void *udata) {
 	/* [ ... func_template ] */
 
 	h_templ = (duk_hcompfunc *) duk_known_hobject(thr, -1);
-	DUK_STACK_REMAIN(thr);
 	duk_js_push_closure(thr,
 	                   h_templ,
 	                   thr->builtins[DUK_BIDX_GLOBAL_ENV],
 	                   thr->builtins[DUK_BIDX_GLOBAL_ENV],
 	                   1 /*add_auto_proto*/);
-	DUK_STACK_REMAIN(thr);
 	duk_remove_m2(thr);   /* -> [ ... closure ] */
 
 	/* [ ... closure ] */
@@ -18647,7 +18643,6 @@ DUK_EXTERNAL duk_int_t duk_compile_raw(duk_hthread *thr, const char *src_buffer,
 	comp_args->flags = flags;
 
 	/* [ ... source? filename? ] (depends on flags) */
-	DUK_STACK_REMAIN(thr);
 
 	if (flags & DUK_COMPILE_SAFE) {
 		duk_int_t rc;
@@ -20839,7 +20834,6 @@ DUK_EXTERNAL void duk_require_valid_index(duk_hthread *thr, duk_idx_t idx) {
 
 DUK_EXTERNAL duk_idx_t duk_get_top(duk_hthread *thr) {
 	DUK_ASSERT_API_ENTRY(thr);
-
 	return (duk_idx_t) (thr->valstack_top - thr->valstack_bottom);
 }
 
@@ -24343,7 +24337,7 @@ DUK_INTERNAL const char *duk_get_type_name(duk_hthread *thr, duk_idx_t idx) {
 	DUK_ASSERT_API_ENTRY(thr);
 
 	type_tag = duk_get_type(thr, idx);
-	DUK_ASSERT(type_tag >= DUK_TYPE_MIN && type_tag <= DUK_TYPE_MAX);
+	DUK_ASSERT(type_tag >= (int)DUK_TYPE_MIN && type_tag <= DUK_TYPE_MAX);
 	DUK_ASSERT(DUK_TYPE_MIN == 0 && sizeof(duk__type_names) / sizeof(const char *) == DUK_TYPE_MAX + 1);
 
 	return duk__type_names[type_tag];
@@ -34987,12 +34981,14 @@ typedef struct {
  */
 
 /* Emit UTF-8 (= CESU-8) encoded U+FFFD (replacement char), i.e. ef bf bd. */
+#if 0
 DUK_LOCAL duk_uint8_t *duk__utf8_emit_repl(duk_uint8_t *ptr) {
 	*ptr++ = 0xef;
 	*ptr++ = 0xbf;
 	*ptr++ = 0xbd;
 	return ptr;
 }
+#endif
 
 DUK_LOCAL void duk__utf8_decode_init(duk__decode_context *dec_ctx) {
 	/* (Re)init the decoding state of 'dec_ctx' but leave decoder
@@ -42523,7 +42519,7 @@ DUK_INTERNAL duk_ret_t duk_bi_regexp_prototype_shared_getter(duk_hthread *thr) {
 /*
  *  Helpers
  */
-
+#if 0
 DUK_LOCAL duk_hstring *duk__str_tostring_notregexp(duk_hthread *thr, duk_idx_t idx) {
 	duk_hstring *h;
 
@@ -42536,6 +42532,7 @@ DUK_LOCAL duk_hstring *duk__str_tostring_notregexp(duk_hthread *thr, duk_idx_t i
 
 	return h;
 }
+#endif
 
 DUK_LOCAL duk_int_t duk__str_search_shared(duk_hthread *thr, duk_hstring *h_this, duk_hstring *h_search, duk_int_t start_cpos, duk_bool_t backwards) {
 	duk_int_t cpos;
@@ -66890,28 +66887,30 @@ DUK_LOCAL void duk__call_thread_state_update(duk_hthread *thr) {
  *  Call setup may fail at any stage, even when the new activation is in
  *  place; the only guarantee is that the state is consistent for unwinding.
  */
-
 DUK_LOCAL duk_int_t duk__handle_call_raw(duk_hthread *thr,
                                          duk_idx_t idx_func,
                                          duk_small_uint_t call_flags) {
-#if defined(DUK_USE_ASSERTIONS)
-	duk_activation *entry_act;
-	duk_size_t entry_callstack_top;
-#endif
-	duk_size_t entry_valstack_bottom_byteoff;
-	duk_size_t entry_valstack_end_byteoff;
-	duk_int_t entry_call_recursion_depth;
-	duk_hthread *entry_curr_thread;
-	duk_uint_fast8_t entry_thread_state;
-	duk_instr_t **entry_ptr_curr_pc;
-	duk_idx_t idx_args;
-	duk_idx_t nargs;            /* # argument registers target function wants (< 0 => "as is") */
-	duk_idx_t nregs;            /* # total registers target function wants on entry (< 0 => "as is") */
-	duk_size_t vs_min_bytes;    /* minimum value stack size (bytes) for handling call */
-	duk_hobject *func;          /* 'func' on stack (borrowed reference) */
-	duk_activation *act;
-	duk_ret_t rc;
-	duk_small_uint_t use_tailcall;
+	DUK_STACK_REMAIN(thr);
+	struct CrCtx{
+	#if defined(DUK_USE_ASSERTIONS)
+		duk_activation *entry_act;
+		duk_size_t entry_callstack_top;
+	#endif
+		duk_size_t entry_valstack_bottom_byteoff;
+		duk_size_t entry_valstack_end_byteoff;
+		duk_int_t entry_call_recursion_depth;
+		duk_hthread *entry_curr_thread;
+		duk_uint_fast8_t entry_thread_state;
+		duk_instr_t **entry_ptr_curr_pc;
+		duk_idx_t idx_args;
+		duk_idx_t nargs;            /* # argument registers target function wants (< 0 => "as is") */
+		duk_idx_t nregs;            /* # total registers target function wants on entry (< 0 => "as is") */
+		duk_size_t vs_min_bytes;    /* minimum value stack size (bytes) for handling call */
+		duk_hobject *func;          /* 'func' on stack (borrowed reference) */
+		duk_activation *act;
+		duk_ret_t rc;
+		duk_small_uint_t use_tailcall;
+	}* crCtx = malloc(sizeof(*crCtx));
 
 	DUK_ASSERT(thr != NULL);
 	DUK_ASSERT(thr->heap != NULL);
@@ -66956,15 +66955,15 @@ DUK_LOCAL duk_int_t duk__handle_call_raw(duk_hthread *thr,
 	 */
 
 #if defined(DUK_USE_ASSERTIONS)
-	entry_act = thr->callstack_curr;
-	entry_callstack_top = thr->callstack_top;
+	crCtx->entry_act = thr->callstack_curr;
+	crCtx->entry_callstack_top = thr->callstack_top;
 #endif
-	entry_valstack_bottom_byteoff = (duk_size_t) ((duk_uint8_t *) thr->valstack_bottom - (duk_uint8_t *) thr->valstack);
-	entry_valstack_end_byteoff = (duk_size_t) ((duk_uint8_t *) thr->valstack_end - (duk_uint8_t *) thr->valstack);
-	entry_call_recursion_depth = thr->heap->call_recursion_depth;
-	entry_curr_thread = thr->heap->curr_thread;  /* may be NULL if first call */
-	entry_thread_state = thr->state;
-	entry_ptr_curr_pc = thr->ptr_curr_pc;  /* may be NULL */
+	crCtx->entry_valstack_bottom_byteoff = (duk_size_t) ((duk_uint8_t *) thr->valstack_bottom - (duk_uint8_t *) thr->valstack);
+	crCtx->entry_valstack_end_byteoff = (duk_size_t) ((duk_uint8_t *) thr->valstack_end - (duk_uint8_t *) thr->valstack);
+	crCtx->entry_call_recursion_depth = thr->heap->call_recursion_depth;
+	crCtx->entry_curr_thread = thr->heap->curr_thread;  /* may be NULL if first call */
+	crCtx->entry_thread_state = thr->state;
+	crCtx->entry_ptr_curr_pc = thr->ptr_curr_pc;  /* may be NULL */
 
 	/* If thr->ptr_curr_pc is set, sync curr_pc to act->pc.  Then NULL
 	 * thr->ptr_curr_pc so that it's not accidentally used with an incorrect
@@ -66988,11 +66987,11 @@ DUK_LOCAL duk_int_t duk__handle_call_raw(duk_hthread *thr,
 	                   (long) (idx_func + 2),
 	                   (long) thr->heap->call_recursion_depth,
 	                   (long) thr->heap->call_recursion_limit,
-	                   (long) entry_valstack_bottom_byteoff,
-	                   (long) entry_valstack_end_byteoff,
-	                   (long) entry_call_recursion_depth,
-	                   (void *) entry_curr_thread,
-	                   (long) entry_thread_state));
+	                   (long) crCtx->entry_valstack_bottom_byteoff,
+	                   (long) crCtx->entry_valstack_end_byteoff,
+	                   (long) crCtx->entry_call_recursion_depth,
+	                   (void *) crCtx->entry_curr_thread,
+	                   (long) crCtx->entry_thread_state));
 
 	/*
 	 *  Thread state check and book-keeping.
@@ -67006,17 +67005,17 @@ DUK_LOCAL duk_int_t duk__handle_call_raw(duk_hthread *thr,
 	 *  'this' binding, which replaces the current value at idx_func + 1.
 	 */
 
-	if (DUK_LIKELY(duk__resolve_target_fastpath_check(thr, idx_func, &func, call_flags) != 0U)) {
+	if (DUK_LIKELY(duk__resolve_target_fastpath_check(thr, idx_func, &crCtx->func, call_flags) != 0U)) {
 		DUK_DDD(DUK_DDDPRINT("fast path target resolve"));
 	} else {
 		DUK_DDD(DUK_DDDPRINT("slow path target resolve"));
-		func = duk__resolve_target_func_and_this_binding(thr, idx_func, &call_flags);
+		crCtx->func = duk__resolve_target_func_and_this_binding(thr, idx_func, &call_flags);
 	}
 	DUK_ASSERT(duk_get_top(thr) - idx_func >= 2);  /* at least func and this present */
 
-	DUK_ASSERT(func == NULL || !DUK_HOBJECT_HAS_BOUNDFUNC(func));
-	DUK_ASSERT(func == NULL || (DUK_HOBJECT_IS_COMPFUNC(func) ||
-	                            DUK_HOBJECT_IS_NATFUNC(func)));
+	DUK_ASSERT(crCtx->func == NULL || !DUK_HOBJECT_HAS_BOUNDFUNC(crCtx->func));
+	DUK_ASSERT(crCtx->func == NULL || (DUK_HOBJECT_IS_COMPFUNC(crCtx->func) ||
+	                            DUK_HOBJECT_IS_NATFUNC(crCtx->func)));
 
 	/* [ ... func this arg1 ... argN ] */
 
@@ -67031,49 +67030,49 @@ DUK_LOCAL duk_int_t duk__handle_call_raw(duk_hthread *thr,
 	 */
 
 	/* Should not be necessary, but initialize to silence warnings. */
-	act = NULL;
-	nargs = 0;
-	nregs = 0;
-	vs_min_bytes = 0;
+	crCtx->act = NULL;
+	crCtx->nargs = 0;
+	crCtx->nregs = 0;
+	crCtx->vs_min_bytes = 0;
 
 #if defined(DUK_USE_TAILCALL)
-	use_tailcall = (call_flags & DUK_CALL_FLAG_TAILCALL);
-	if (use_tailcall) {
-		use_tailcall = duk__call_setup_act_attempt_tailcall(thr,
+	crCtx->use_tailcall = (call_flags & DUK_CALL_FLAG_TAILCALL);
+	if (crCtx->use_tailcall) {
+		crCtx->use_tailcall = duk__call_setup_act_attempt_tailcall(thr,
 		                                                    call_flags,
 		                                                    idx_func,
-		                                                    func,
-		                                                    entry_valstack_bottom_byteoff,
-		                                                    entry_valstack_end_byteoff,
-		                                                    &nargs,
-		                                                    &nregs,
-		                                                    &vs_min_bytes,
-		                                                    &act);
+		                                                    crCtx->func,
+		                                                    crCtx->entry_valstack_bottom_byteoff,
+		                                                    crCtx->entry_valstack_end_byteoff,
+		                                                    &crCtx->nargs,
+		                                                    &crCtx->nregs,
+		                                                    &crCtx->vs_min_bytes,
+		                                                    &crCtx->act);
 	}
 #else
 	DUK_ASSERT((call_flags & DUK_CALL_FLAG_TAILCALL) == 0);  /* compiler ensures this */
 	use_tailcall = 0;
 #endif
 
-	if (use_tailcall) {
-		idx_args = 0;
+	if (crCtx->use_tailcall) {
+		crCtx->idx_args = 0;
 		DUK_STATS_INC(thr->heap, stats_call_tailcall);
 	} else {
 		duk__call_setup_act_not_tailcall(thr,
 		                                 call_flags,
 		                                 idx_func,
-		                                 func,
-		                                 entry_valstack_bottom_byteoff,
-		                                 entry_valstack_end_byteoff,
-		                                 &nargs,
-		                                 &nregs,
-		                                 &vs_min_bytes,
-		                                 &act);
-		idx_args = idx_func + 2;
+		                                 crCtx->func,
+		                                 crCtx->entry_valstack_bottom_byteoff,
+		                                 crCtx->entry_valstack_end_byteoff,
+		                                 &crCtx->nargs,
+		                                 &crCtx->nregs,
+		                                 &crCtx->vs_min_bytes,
+		                                 &crCtx->act);
+		crCtx->idx_args = idx_func + 2;
 	}
 	/* After this point idx_func is no longer valid for tailcalls. */
 
-	DUK_ASSERT(act != NULL);
+	DUK_ASSERT(crCtx->act != NULL);
 
 	/* [ ... func this arg1 ... argN ] */
 
@@ -67090,7 +67089,7 @@ DUK_LOCAL duk_int_t duk__handle_call_raw(duk_hthread *thr,
 	 *  Delayed creation (on demand) is handled in duk_js_var.c.
 	 */
 
-	duk__call_env_setup(thr, func, act, idx_args);
+	duk__call_env_setup(thr, crCtx->func, crCtx->act, crCtx->idx_args);
 
 	/* [ ... func this arg1 ... argN ] */
 
@@ -67102,17 +67101,17 @@ DUK_LOCAL duk_int_t duk__handle_call_raw(duk_hthread *thr,
 	 *  Value stack can only grow here.
 	 */
 
-	duk_valstack_grow_check_throw(thr, vs_min_bytes);
-	act->reserve_byteoff = (duk_size_t) ((duk_uint8_t *) thr->valstack_end - (duk_uint8_t *) thr->valstack);
+	duk_valstack_grow_check_throw(thr, crCtx->vs_min_bytes);
+	crCtx->act->reserve_byteoff = (duk_size_t) ((duk_uint8_t *) thr->valstack_end - (duk_uint8_t *) thr->valstack);
 
-	if (use_tailcall) {
-		DUK_ASSERT(nregs >= 0);
-		DUK_ASSERT(nregs >= nargs);
-		duk_set_top_and_wipe(thr, nregs, nargs);
+	if (crCtx->use_tailcall) {
+		DUK_ASSERT(crCtx->nregs >= 0);
+		DUK_ASSERT(crCtx->nregs >= crCtx->nargs);
+		duk_set_top_and_wipe(thr, crCtx->nregs, crCtx->nargs);
 	} else {
-		if (nregs >= 0) {
-			DUK_ASSERT(nregs >= nargs);
-			duk_set_top_and_wipe(thr, idx_func + 2 + nregs, idx_func + 2 + nargs);
+		if (crCtx->nregs >= 0) {
+			DUK_ASSERT(crCtx->nregs >= crCtx->nargs);
+			duk_set_top_and_wipe(thr, idx_func + 2 + crCtx->nregs, idx_func + 2 + crCtx->nargs);
 		} else {
 			;
 		}
@@ -67128,28 +67127,29 @@ DUK_LOCAL duk_int_t duk__handle_call_raw(duk_hthread *thr,
 	 *  the caller to reuse the running executor.
 	 */
 
-	if (func != NULL && DUK_HOBJECT_IS_COMPFUNC(func)) {
+	if (crCtx->func != NULL && DUK_HOBJECT_IS_COMPFUNC(crCtx->func)) {
 		/*
 		 *  ECMAScript call.
 		 */
 
-		DUK_ASSERT(func != NULL);
-		DUK_ASSERT(DUK_HOBJECT_HAS_COMPFUNC(func));
-		act->curr_pc = DUK_HCOMPFUNC_GET_CODE_BASE(thr->heap, (duk_hcompfunc *) func);
+		DUK_ASSERT(crCtx->func != NULL);
+		DUK_ASSERT(DUK_HOBJECT_HAS_COMPFUNC(crCtx->func));
+		crCtx->act->curr_pc = DUK_HCOMPFUNC_GET_CODE_BASE(thr->heap, (duk_hcompfunc *) crCtx->func);
 
 		if (call_flags & DUK_CALL_FLAG_ALLOW_ECMATOECMA) {
 			DUK_DD(DUK_DDPRINT("avoid native call, use existing executor"));
 			DUK_STATS_INC(thr->heap, stats_call_ecmatoecma);
-			DUK_ASSERT((act->flags & DUK_ACT_FLAG_PREVENT_YIELD) == 0);
+			DUK_ASSERT((crCtx->act->flags & DUK_ACT_FLAG_PREVENT_YIELD) == 0);
 			DUK_REFZERO_CHECK_FAST(thr);
 			DUK_ASSERT(thr->ptr_curr_pc == NULL);
+			free(crCtx);
 			return 1;  /* 1=reuse executor */
 		}
-		DUK_ASSERT(use_tailcall == 0);
+		DUK_ASSERT(crCtx->use_tailcall == 0);
 
 		/* duk_hthread_activation_unwind_norz() will decrease this on unwind */
-		DUK_ASSERT((act->flags & DUK_ACT_FLAG_PREVENT_YIELD) == 0);
-		act->flags |= DUK_ACT_FLAG_PREVENT_YIELD;
+		DUK_ASSERT((crCtx->act->flags & DUK_ACT_FLAG_PREVENT_YIELD) == 0);
+		crCtx->act->flags |= DUK_ACT_FLAG_PREVENT_YIELD;
 		thr->callstack_preventcount++;
 
 		/* XXX: we could just do this on entry regardless of reuse, as long
@@ -67182,14 +67182,14 @@ DUK_LOCAL duk_int_t duk__handle_call_raw(duk_hthread *thr,
 		 *  Native call.
 		 */
 
-		DUK_ASSERT(func == NULL || ((duk_hnatfunc *) func)->func != NULL);
-		DUK_ASSERT(use_tailcall == 0);
+		DUK_ASSERT(crCtx->func == NULL || ((duk_hnatfunc *) crCtx->func)->func != NULL);
+		DUK_ASSERT(crCtx->use_tailcall == 0);
 
 		/* [ ... func this | arg1 ... argN ] ('this' must precede new bottom) */
 
 		/* duk_hthread_activation_unwind_norz() will decrease this on unwind */
-		DUK_ASSERT((act->flags & DUK_ACT_FLAG_PREVENT_YIELD) == 0);
-		act->flags |= DUK_ACT_FLAG_PREVENT_YIELD;
+		DUK_ASSERT((crCtx->act->flags & DUK_ACT_FLAG_PREVENT_YIELD) == 0);
+		crCtx->act->flags |= DUK_ACT_FLAG_PREVENT_YIELD;
 		thr->callstack_preventcount++;
 
 		/* XXX: we could just do this on entry regardless of reuse, as long
@@ -67202,36 +67202,40 @@ DUK_LOCAL duk_int_t duk__handle_call_raw(duk_hthread *thr,
 		DUK_ASSERT(thr->ptr_curr_pc == NULL);
 
 		/* XXX: native funcptr could come out of call setup. */
-		if (func) {
-			rc = ((duk_hnatfunc *) func)->func(thr);
+		if (crCtx->func) {
+			DUK_STACK_REMAIN(thr);
+			#ifdef DUK_TRACE_STACK_USAGE
+			ESP_LOGI("duk", "duk__handle_call_raw() calls 0x%08x", (unsigned)crCtx->func);
+			#endif
+			crCtx->rc = ((duk_hnatfunc *) crCtx->func)->func(thr);
 		} else {
 			duk_tval *tv_func;
 			duk_c_function funcptr;
 
-			tv_func = &act->tv_func;
+			tv_func = &crCtx->act->tv_func;
 			DUK_ASSERT(DUK_TVAL_IS_LIGHTFUNC(tv_func));
 			funcptr = DUK_TVAL_GET_LIGHTFUNC_FUNCPTR(tv_func);
-			rc = funcptr(thr);
+			crCtx->rc = funcptr(thr);
 		}
 
 		/* Automatic error throwing, retval check. */
 
-		if (rc == 0) {
+		if (crCtx->rc == 0) {
 			DUK_ASSERT(thr->valstack < thr->valstack_end);
 			DUK_ASSERT(DUK_TVAL_IS_UNDEFINED(thr->valstack_top));
 			thr->valstack_top++;
-		} else if (rc == 1) {
+		} else if (crCtx->rc == 1) {
 			;
-		} else if (rc < 0) {
-			duk_error_throw_from_negative_rc(thr, rc);
-			DUK_WO_NORETURN(return 0;);
+		} else if (crCtx->rc < 0) {
+			duk_error_throw_from_negative_rc(thr, crCtx->rc);
+			DUK_WO_NORETURN(free(crCtx); return 0;);
 		} else {
 			DUK_ERROR_TYPE(thr, DUK_STR_INVALID_CFUNC_RC);
-			DUK_WO_NORETURN(return 0;);
+			DUK_WO_NORETURN(free(crCtx); return 0;);
 		}
 	}
 	DUK_ASSERT(thr->ptr_curr_pc == NULL);
-	DUK_ASSERT(use_tailcall == 0);
+	DUK_ASSERT(crCtx->use_tailcall == 0);
 
 	/*
 	 *  Constructor call post processing.
@@ -67252,13 +67256,13 @@ DUK_LOCAL duk_int_t duk__handle_call_raw(duk_hthread *thr,
 	 */
 
 	DUK_ASSERT(thr->callstack_curr != NULL);
-	DUK_ASSERT(thr->callstack_curr->parent == entry_act);
-	DUK_ASSERT(thr->callstack_top == entry_callstack_top + 1);
+	DUK_ASSERT(thr->callstack_curr->parent == crCtx->entry_act);
+	DUK_ASSERT(thr->callstack_top == crCtx->entry_callstack_top + 1);
 	duk_hthread_activation_unwind_norz(thr);
-	DUK_ASSERT(thr->callstack_curr == entry_act);
-	DUK_ASSERT(thr->callstack_top == entry_callstack_top);
+	DUK_ASSERT(thr->callstack_curr == crCtx->entry_act);
+	DUK_ASSERT(thr->callstack_top == crCtx->entry_callstack_top);
 
-	thr->valstack_bottom = (duk_tval *) (void *) ((duk_uint8_t *) thr->valstack + entry_valstack_bottom_byteoff);
+	thr->valstack_bottom = (duk_tval *) (void *) ((duk_uint8_t *) thr->valstack + crCtx->entry_valstack_bottom_byteoff);
 	/* keep current valstack_top */
 	DUK_ASSERT(thr->valstack_bottom >= thr->valstack);
 	DUK_ASSERT(thr->valstack_top >= thr->valstack_bottom);
@@ -67287,19 +67291,19 @@ DUK_LOCAL duk_int_t duk__handle_call_raw(duk_hthread *thr,
 	/* [ ... retval ] */
 
 	/* Restore caller's value stack reserve (cannot fail). */
-	DUK_ASSERT((duk_uint8_t *) thr->valstack + entry_valstack_end_byteoff >= (duk_uint8_t *) thr->valstack_top);
-	DUK_ASSERT((duk_uint8_t *) thr->valstack + entry_valstack_end_byteoff <= (duk_uint8_t *) thr->valstack_alloc_end);
-	thr->valstack_end = (duk_tval *) (void *) ((duk_uint8_t *) thr->valstack + entry_valstack_end_byteoff);
+	DUK_ASSERT((duk_uint8_t *) thr->valstack + crCtx->entry_valstack_end_byteoff >= (duk_uint8_t *) thr->valstack_top);
+	DUK_ASSERT((duk_uint8_t *) thr->valstack + crCtx->entry_valstack_end_byteoff <= (duk_uint8_t *) thr->valstack_alloc_end);
+	thr->valstack_end = (duk_tval *) (void *) ((duk_uint8_t *) thr->valstack + crCtx->entry_valstack_end_byteoff);
 
 	/* XXX: Trial value stack shrink would be OK here, but we'd need
 	 * to prevent side effects of the potential realloc.
 	 */
 
 	/* Restore entry thread executor curr_pc stack frame pointer. */
-	thr->ptr_curr_pc = entry_ptr_curr_pc;
+	thr->ptr_curr_pc = crCtx->entry_ptr_curr_pc;
 
-	DUK_HEAP_SWITCH_THREAD(thr->heap, entry_curr_thread);  /* may be NULL */
-	thr->state = (duk_uint8_t) entry_thread_state;
+	DUK_HEAP_SWITCH_THREAD(thr->heap, crCtx->entry_curr_thread);  /* may be NULL */
+	thr->state = (duk_uint8_t) crCtx->entry_thread_state;
 
 	/* Disabled assert: triggered with some torture tests. */
 #if 0
@@ -67308,7 +67312,7 @@ DUK_LOCAL duk_int_t duk__handle_call_raw(duk_hthread *thr,
 	           (thr->state == DUK_HTHREAD_STATE_RUNNING && thr->heap->curr_thread == thr));     /* current thread */
 #endif
 
-	thr->heap->call_recursion_depth = entry_call_recursion_depth;
+	thr->heap->call_recursion_depth = crCtx->entry_call_recursion_depth;
 
 	/* If the debugger is active we need to force an interrupt so that
 	 * debugger breakpoints are rechecked.  This is important for function
@@ -67329,16 +67333,16 @@ DUK_LOCAL duk_int_t duk__handle_call_raw(duk_hthread *thr,
 #endif
 
 #if defined(DUK_USE_INTERRUPT_COUNTER) && defined(DUK_USE_DEBUG)
-	duk__interrupt_fixup(thr, entry_curr_thread);
+	duk__interrupt_fixup(thr, crCtx->entry_curr_thread);
 #endif
 
 	/* Restored by success path. */
-	DUK_ASSERT(thr->heap->call_recursion_depth == entry_call_recursion_depth);
-	DUK_ASSERT(thr->ptr_curr_pc == entry_ptr_curr_pc);
+	DUK_ASSERT(thr->heap->call_recursion_depth == crCtx->entry_call_recursion_depth);
+	DUK_ASSERT(thr->ptr_curr_pc == crCtx->entry_ptr_curr_pc);
 	DUK_ASSERT_LJSTATE_UNSET(thr->heap);
 
 	DUK_REFZERO_CHECK_FAST(thr);
-
+	free(crCtx);
 	return 0;  /* 0=call handled inline */
 }
 
@@ -67376,7 +67380,6 @@ DUK_INTERNAL duk_int_t duk_handle_call_unprotected(duk_hthread *thr,
  *  yet the case for environment closing which may run out of memory, see
  *  XXX notes below.)
  */
-
 DUK_LOCAL void duk__handle_safe_call_inner(duk_hthread *thr,
                                            duk_safe_call_function func,
                                            void *udata,
@@ -67388,6 +67391,7 @@ DUK_LOCAL void duk__handle_safe_call_inner(duk_hthread *thr,
                                            duk_uint_fast8_t entry_thread_state,
                                            duk_idx_t idx_retbase,
                                            duk_idx_t num_stack_rets) {
+	DUK_STACK_REMAIN(thr);
 	duk_ret_t rc;
 
 	DUK_ASSERT(thr != NULL);
@@ -67410,7 +67414,12 @@ DUK_LOCAL void duk__handle_safe_call_inner(duk_hthread *thr,
 	 *  Make the C call.
 	 */
 
+	DUK_STACK_REMAIN(thr);
+	#ifdef DUK_TRACE_STACK_USAGE
+	ESP_LOGI("duk", "duk__handle_safe_call_inner() calls C function 0x%08x", (unsigned) func);
+	#endif
 	rc = func(thr, udata);
+	DUK_STACK_REMAIN(thr);
 
 	DUK_DDD(DUK_DDDPRINT("safe_call, func rc=%ld", (long) rc));
 
@@ -67573,20 +67582,25 @@ DUK_INTERNAL duk_int_t duk_handle_safe_call(duk_hthread *thr,
                                             void *udata,
                                             duk_idx_t num_stack_args,
                                             duk_idx_t num_stack_rets) {
-	duk_activation *entry_act;
-	duk_size_t entry_valstack_bottom_byteoff;
-#if defined(DUK_USE_ASSERTIONS)
-	duk_size_t entry_valstack_end_byteoff;
-	duk_size_t entry_callstack_top;
-	duk_size_t entry_callstack_preventcount;
-#endif
-	duk_int_t entry_call_recursion_depth;
-	duk_hthread *entry_curr_thread;
-	duk_uint_fast8_t entry_thread_state;
-	duk_instr_t **entry_ptr_curr_pc;
-	duk_jmpbuf *old_jmpbuf_ptr = NULL;
-	duk_jmpbuf our_jmpbuf;
-	duk_idx_t idx_retbase;
+	DUK_STACK_REMAIN(thr);
+	struct ScCtx{
+		duk_activation *entry_act;
+		duk_size_t entry_valstack_bottom_byteoff;
+	#if defined(DUK_USE_ASSERTIONS)
+		duk_size_t entry_valstack_end_byteoff;
+		duk_size_t entry_callstack_top;
+		duk_size_t entry_callstack_preventcount;
+	#endif
+		duk_int_t entry_call_recursion_depth;
+		duk_hthread *entry_curr_thread;
+		duk_uint_fast8_t entry_thread_state;
+		duk_instr_t **entry_ptr_curr_pc;
+		duk_jmpbuf *old_jmpbuf_ptr;
+		duk_jmpbuf our_jmpbuf;
+		duk_idx_t idx_retbase;
+	} * scCtx;
+	scCtx = malloc(sizeof(*scCtx));
+	scCtx->old_jmpbuf_ptr = NULL;
 	duk_int_t retval;
 
 	DUK_ASSERT(thr != NULL);
@@ -67601,22 +67615,22 @@ DUK_INTERNAL duk_int_t duk_handle_safe_call(duk_hthread *thr,
 	 */
 
 	/* Careful with indices like '-x'; if 'x' is zero, it refers to bottom */
-	entry_act = thr->callstack_curr;
-	entry_valstack_bottom_byteoff = (duk_size_t) ((duk_uint8_t *) thr->valstack_bottom - (duk_uint8_t *) thr->valstack);
+	scCtx->entry_act = thr->callstack_curr;
+	scCtx->entry_valstack_bottom_byteoff = (duk_size_t) ((duk_uint8_t *) thr->valstack_bottom - (duk_uint8_t *) thr->valstack);
 #if defined(DUK_USE_ASSERTIONS)
-	entry_valstack_end_byteoff = (duk_size_t) ((duk_uint8_t *) thr->valstack_end - (duk_uint8_t *) thr->valstack);
-	entry_callstack_top = thr->callstack_top;
-	entry_callstack_preventcount = thr->callstack_preventcount;
+	scCtx->entry_valstack_end_byteoff = (duk_size_t) ((duk_uint8_t *) thr->valstack_end - (duk_uint8_t *) thr->valstack);
+	scCtx->entry_callstack_top = thr->callstack_top;
+	scCtx->entry_callstack_preventcount = thr->callstack_preventcount;
 #endif
-	entry_call_recursion_depth = thr->heap->call_recursion_depth;
-	entry_curr_thread = thr->heap->curr_thread;  /* may be NULL if first call */
-	entry_thread_state = thr->state;
-	entry_ptr_curr_pc = thr->ptr_curr_pc;  /* may be NULL */
-	idx_retbase = duk_get_top(thr) - num_stack_args;  /* not a valid stack index if num_stack_args == 0 */
-	DUK_ASSERT(idx_retbase >= 0);
+	scCtx->entry_call_recursion_depth = thr->heap->call_recursion_depth;
+	scCtx->entry_curr_thread = thr->heap->curr_thread;  /* may be NULL if first call */
+	scCtx->entry_thread_state = thr->state;
+	scCtx->entry_ptr_curr_pc = thr->ptr_curr_pc;  /* may be NULL */
+	scCtx->idx_retbase = duk_get_top(thr) - num_stack_args;  /* not a valid stack index if num_stack_args == 0 */
+	DUK_ASSERT(scCtx->idx_retbase >= 0);
 
 	DUK_ASSERT((duk_idx_t) (thr->valstack_top - thr->valstack_bottom) >= num_stack_args);  /* Caller ensures. */
-	DUK_ASSERT((duk_idx_t) (thr->valstack_end - (thr->valstack_bottom + idx_retbase)) >= num_stack_rets);  /* Caller ensures. */
+	DUK_ASSERT((duk_idx_t) (thr->valstack_end - (thr->valstack_bottom + scCtx->idx_retbase)) >= num_stack_rets);  /* Caller ensures. */
 
 	/* Cannot portably debug print a function pointer, hence 'func' not printed! */
 	DUK_DD(DUK_DDPRINT("duk_handle_safe_call: thr=%p, num_stack_args=%ld, num_stack_rets=%ld, "
@@ -67627,18 +67641,18 @@ DUK_INTERNAL duk_int_t duk_handle_safe_call(duk_hthread *thr,
 	                   (long) num_stack_args,
 	                   (long) num_stack_rets,
 	                   (long) duk_get_top(thr),
-	                   (long) idx_retbase,
+	                   (long) scCtx->idx_retbase,
 	                   (long) thr->heap->call_recursion_depth,
 	                   (long) thr->heap->call_recursion_limit,
-	                   (void *) entry_act,
-	                   (long) entry_valstack_bottom_byteoff,
-	                   (long) entry_call_recursion_depth,
-	                   (void *) entry_curr_thread,
-	                   (long) entry_thread_state));
+	                   (void *) scCtx->entry_act,
+	                   (long) scCtx->entry_valstack_bottom_byteoff,
+	                   (long) scCtx->entry_call_recursion_depth,
+	                   (void *) scCtx->entry_curr_thread,
+	                   (long) scCtx->entry_thread_state));
 
 	/* Setjmp catchpoint setup. */
-	old_jmpbuf_ptr = thr->heap->lj.jmpbuf_ptr;
-	thr->heap->lj.jmpbuf_ptr = &our_jmpbuf;
+	scCtx->old_jmpbuf_ptr = thr->heap->lj.jmpbuf_ptr;
+	thr->heap->lj.jmpbuf_ptr = &scCtx->our_jmpbuf;
 
 	/* Prevent yields for the duration of the safe call.  This only
 	 * matters if the executor makes safe calls to functions that
@@ -67649,8 +67663,8 @@ DUK_INTERNAL duk_int_t duk_handle_safe_call(duk_hthread *thr,
 #if defined(DUK_USE_CPP_EXCEPTIONS)
 	try {
 #else
-	DUK_ASSERT(thr->heap->lj.jmpbuf_ptr == &our_jmpbuf);
-	if (DUK_SETJMP(our_jmpbuf.jb) == 0) {
+	DUK_ASSERT(thr->heap->lj.jmpbuf_ptr == &scCtx->our_jmpbuf);
+	if (DUK_SETJMP(scCtx->our_jmpbuf.jb) == 0) {
 		/* Success path. */
 #endif
 		DUK_DDD(DUK_DDDPRINT("safe_call setjmp catchpoint setup complete"));
@@ -67659,24 +67673,24 @@ DUK_INTERNAL duk_int_t duk_handle_safe_call(duk_hthread *thr,
 		                            func,
 		                            udata,
 #if defined(DUK_USE_ASSERTIONS)
-		                            entry_valstack_bottom_byteoff,
-		                            entry_callstack_top,
+		                            scCtx->entry_valstack_bottom_byteoff,
+		                            scCtx->entry_callstack_top,
 #endif
-		                            entry_curr_thread,
-		                            entry_thread_state,
-		                            idx_retbase,
+		                            scCtx->entry_curr_thread,
+		                            scCtx->entry_thread_state,
+		                            scCtx->idx_retbase,
 		                            num_stack_rets);
 
-		DUK_STATS_INC(thr->heap, stats_safecall_nothrow);
+		DUK_STATS_INC(thr->heap, scCtx->stats_safecall_nothrow);
 
 		/* Either pointer may be NULL (at entry), so don't assert */
-		thr->heap->lj.jmpbuf_ptr = old_jmpbuf_ptr;
+		thr->heap->lj.jmpbuf_ptr = scCtx->old_jmpbuf_ptr;
 
 		/* If calls happen inside the safe call, these are restored by
 		 * whatever calls are made.  Reserve cannot decrease.
 		 */
-		DUK_ASSERT(thr->callstack_curr == entry_act);
-		DUK_ASSERT((duk_size_t) ((duk_uint8_t *) thr->valstack_end - (duk_uint8_t *) thr->valstack) >= entry_valstack_end_byteoff);
+		DUK_ASSERT(thr->callstack_curr == scCtx->entry_act);
+		DUK_ASSERT((duk_size_t) ((duk_uint8_t *) thr->valstack_end - (duk_uint8_t *) thr->valstack) >= scCtx->entry_valstack_end_byteoff);
 
 		retval = DUK_EXEC_SUCCESS;
 #if defined(DUK_USE_CPP_EXCEPTIONS)
@@ -67686,21 +67700,21 @@ DUK_INTERNAL duk_int_t duk_handle_safe_call(duk_hthread *thr,
 	} else {
 		/* Error path. */
 #endif
-		DUK_ASSERT((duk_size_t) ((duk_uint8_t *) thr->valstack_end - (duk_uint8_t *) thr->valstack) >= entry_valstack_end_byteoff);
+		DUK_ASSERT((duk_size_t) ((duk_uint8_t *) thr->valstack_end - (duk_uint8_t *) thr->valstack) >= scCtx->entry_valstack_end_byteoff);
 
-		DUK_STATS_INC(thr->heap, stats_safecall_throw);
+		DUK_STATS_INC(thr->heap, scCtx->stats_safecall_throw);
 
 		duk__handle_safe_call_error(thr,
-		                            entry_act,
+		                            scCtx->entry_act,
 #if defined(DUK_USE_ASSERTIONS)
-		                            entry_callstack_top,
+		                            scCtx->entry_callstack_top,
 #endif
-		                            entry_curr_thread,
-		                            entry_thread_state,
-		                            idx_retbase,
+		                            scCtx->entry_curr_thread,
+		                            scCtx->entry_thread_state,
+		                            scCtx->idx_retbase,
 		                            num_stack_rets,
-		                            entry_valstack_bottom_byteoff,
-		                            old_jmpbuf_ptr);
+		                            scCtx->entry_valstack_bottom_byteoff,
+		                            scCtx->old_jmpbuf_ptr);
 
 		retval = DUK_EXEC_ERROR;
 	}
@@ -67761,40 +67775,41 @@ DUK_INTERNAL duk_int_t duk_handle_safe_call(duk_hthread *thr,
 	}
 #endif
 
-	DUK_ASSERT(thr->heap->lj.jmpbuf_ptr == old_jmpbuf_ptr);  /* success/error path both do this */
+	DUK_ASSERT(thr->heap->lj.jmpbuf_ptr == scCtx->old_jmpbuf_ptr);  /* success/error path both do this */
 
 	DUK_ASSERT_LJSTATE_UNSET(thr->heap);
 
-	DUK_ASSERT((duk_size_t) ((duk_uint8_t *) thr->valstack_end - (duk_uint8_t *) thr->valstack) >= entry_valstack_end_byteoff);
+	DUK_ASSERT((duk_size_t) ((duk_uint8_t *) thr->valstack_end - (duk_uint8_t *) thr->valstack) >= scCtx->entry_valstack_end_byteoff);
 	duk__handle_safe_call_shared_unwind(thr,
-	                                    idx_retbase,
+	                                    scCtx->idx_retbase,
 	                                    num_stack_rets,
 #if defined(DUK_USE_ASSERTIONS)
-	                                    entry_callstack_top,
+	                                    scCtx->entry_callstack_top,
 #endif
-	                                    entry_call_recursion_depth,
-	                                    entry_curr_thread,
-	                                    entry_ptr_curr_pc);
+	                                    scCtx->entry_call_recursion_depth,
+	                                    scCtx->entry_curr_thread,
+	                                    scCtx->entry_ptr_curr_pc);
 
 	/* Restore preventcount. */
 	thr->callstack_preventcount--;
-	DUK_ASSERT(thr->callstack_preventcount == entry_callstack_preventcount);
+	DUK_ASSERT(thr->callstack_preventcount == scCtx->entry_callstack_preventcount);
 
 	/* Final asserts. */
-	DUK_ASSERT(thr->callstack_curr == entry_act);
-	DUK_ASSERT((duk_size_t) ((duk_uint8_t *) thr->valstack_bottom - (duk_uint8_t *) thr->valstack) == entry_valstack_bottom_byteoff);
-	DUK_ASSERT((duk_size_t) ((duk_uint8_t *) thr->valstack_end - (duk_uint8_t *) thr->valstack) >= entry_valstack_end_byteoff);
-	DUK_ASSERT(thr->callstack_top == entry_callstack_top);
-	DUK_ASSERT(thr->heap->call_recursion_depth == entry_call_recursion_depth);
-	DUK_ASSERT(thr->heap->curr_thread == entry_curr_thread);
-	DUK_ASSERT(thr->state == entry_thread_state);
-	DUK_ASSERT(thr->ptr_curr_pc == entry_ptr_curr_pc);
-	DUK_ASSERT(duk_get_top(thr) == idx_retbase + num_stack_rets);
+	DUK_ASSERT(thr->callstack_curr == scCtx->entry_act);
+	DUK_ASSERT((duk_size_t) ((duk_uint8_t *) thr->valstack_bottom - (duk_uint8_t *) thr->valstack) == scCtx->entry_valstack_bottom_byteoff);
+	DUK_ASSERT((duk_size_t) ((duk_uint8_t *) thr->valstack_end - (duk_uint8_t *) thr->valstack) >= scCtx->entry_valstack_end_byteoff);
+	DUK_ASSERT(thr->callstack_top == scCtx->entry_callstack_top);
+	DUK_ASSERT(thr->heap->call_recursion_depth == scCtx->entry_call_recursion_depth);
+	DUK_ASSERT(thr->heap->curr_thread == scCtx->entry_curr_thread);
+	DUK_ASSERT(thr->state == scCtx->entry_thread_state);
+	DUK_ASSERT(thr->ptr_curr_pc == scCtx->entry_ptr_curr_pc);
+	DUK_ASSERT(duk_get_top(thr) == scCtx->idx_retbase + num_stack_rets);
 	DUK_ASSERT_LJSTATE_UNSET(thr->heap);
 
 	/* Pending side effects. */
 	DUK_REFZERO_CHECK_FAST(thr);
 
+	free(scCtx);
 	return retval;
 }
 
@@ -75713,6 +75728,7 @@ DUK_LOCAL duk_ret_t duk__js_compile_raw(duk_hthread *thr, void *udata) {
 
 	DUK_ASSERT(thr != NULL);
 	DUK_ASSERT(udata != NULL);
+	DUK_STACK_REMAIN(thr);
 
 	/*
 	 *  Arguments check
@@ -75728,6 +75744,7 @@ DUK_LOCAL duk_ret_t duk__js_compile_raw(duk_hthread *thr, void *udata) {
 	DUK_ASSERT(comp_ctx != NULL);
 	DUK_ASSERT(lex_pt != NULL);
 
+	DUK_STACK_REMAIN(thr);
 	flags = comp_stk->flags;
 	is_eval = (flags & DUK_COMPILE_EVAL ? 1 : 0);
 	is_strict = (flags & DUK_COMPILE_STRICT ? 1 : 0);
@@ -75777,8 +75794,6 @@ DUK_LOCAL duk_ret_t duk__js_compile_raw(duk_hthread *thr, void *udata) {
 	DUK_ASSERT(DUK_HBUFFER_HAS_DYNAMIC(comp_ctx->lex.buf) && !DUK_HBUFFER_HAS_EXTERNAL(comp_ctx->lex.buf));
 	comp_ctx->lex.token_limit = DUK_COMPILER_TOKEN_LIMIT;
 
-	DUK_STACK_REMAIN(thr);
-
 	lex_pt->offset = 0;
 	lex_pt->line = 1;
 	DUK_LEXER_SETPOINT(&comp_ctx->lex, lex_pt);    /* fills window */
@@ -75790,7 +75805,6 @@ DUK_LOCAL duk_ret_t duk__js_compile_raw(duk_hthread *thr, void *udata) {
 
 	duk__init_func_valstack_slots(comp_ctx);
 	DUK_ASSERT(func->num_formals == 0);
-	DUK_STACK_REMAIN(thr);
 
 	if (is_funcexpr) {
 		/* Name will be filled from function expression, not by caller.
@@ -75803,7 +75817,6 @@ DUK_LOCAL duk_ret_t duk__js_compile_raw(duk_hthread *thr, void *udata) {
 		                                        DUK_STRIDX_GLOBAL));
 		func->h_name = duk_get_hstring(thr, -1);
 	}
-	DUK_STACK_REMAIN(thr);
 
 	/*
 	 *  Parse a function body or a function-like expression, depending
@@ -75838,15 +75851,12 @@ DUK_LOCAL duk_ret_t duk__js_compile_raw(duk_hthread *thr, void *udata) {
 		                     1,             /* regexp_after (does not matter) */
 		                     -1);           /* expect_token */
 	}
-	DUK_STACK_REMAIN(thr);
 
 	/*
 	 *  Convert duk_compiler_func to a function template
 	 */
 
-	DUK_STACK_REMAIN(thr);
 	duk__convert_to_func_template(comp_ctx);
-	DUK_STACK_REMAIN(thr);
 
 	/*
 	 *  Wrapping duk_safe_call() will mangle the stack, just return stack top
@@ -75859,7 +75869,7 @@ DUK_LOCAL duk_ret_t duk__js_compile_raw(duk_hthread *thr, void *udata) {
 
 DUK_INTERNAL void duk_js_compile(duk_hthread *thr, const duk_uint8_t *src_buffer, duk_size_t src_length, duk_small_uint_t flags) {
 	DUK_STACK_REMAIN(thr);
-	duk__compiler_stkstate comp_stk;
+	duk__compiler_stkstate* comp_stk = malloc(sizeof(*comp_stk));
 	duk_compiler_ctx *prev_ctx;
 	duk_ret_t safe_rc;
 
@@ -75867,20 +75877,21 @@ DUK_INTERNAL void duk_js_compile(duk_hthread *thr, const duk_uint8_t *src_buffer
 	DUK_ASSERT(src_buffer != NULL);
 
 	/* preinitialize lexer state partially */
-	duk_memzero(&comp_stk, sizeof(comp_stk));
-	comp_stk.flags = flags;
-	DUK_LEXER_INITCTX(&comp_stk.comp_ctx_alloc.lex);
-	comp_stk.comp_ctx_alloc.lex.input = src_buffer;
-	comp_stk.comp_ctx_alloc.lex.input_length = src_length;
-	comp_stk.comp_ctx_alloc.lex.flags = flags;  /* Forward flags directly for now. */
+	duk_memzero(comp_stk, sizeof(*comp_stk));
+	comp_stk->flags = flags;
+	DUK_LEXER_INITCTX(&comp_stk->comp_ctx_alloc.lex);
+	comp_stk->comp_ctx_alloc.lex.input = src_buffer;
+	comp_stk->comp_ctx_alloc.lex.input_length = src_length;
+	comp_stk->comp_ctx_alloc.lex.flags = flags;  /* Forward flags directly for now. */
 
-	DUK_STACK_REMAIN(thr);
 	/* [ ... filename ] */
 
 	prev_ctx = thr->compile_ctx;
-	thr->compile_ctx = &comp_stk.comp_ctx_alloc;  /* for duk_error_augment.c */
-	safe_rc = duk_safe_call(thr, duk__js_compile_raw, (void *) &comp_stk /*udata*/, 1 /*nargs*/, 1 /*nrets*/);
+	thr->compile_ctx = &comp_stk->comp_ctx_alloc;  /* for duk_error_augment.c */
+	safe_rc = duk_safe_call(thr, duk__js_compile_raw, (void *) comp_stk /*udata*/, 1 /*nargs*/, 1 /*nrets*/);
 	thr->compile_ctx = prev_ctx;  /* must restore reliably before returning */
+
+	free(comp_stk);
 
 	DUK_STACK_REMAIN(thr);
 	if (safe_rc != DUK_EXEC_SUCCESS) {
@@ -78846,13 +78857,16 @@ DUK_LOCAL void duk__handle_executor_error(duk_heap *heap,
 
 /* Outer executor with setjmp/longjmp handling. */
 DUK_INTERNAL void duk_js_execute_bytecode(duk_hthread *exec_thr) {
+	DUK_STACK_REMAIN(exec_thr);
 	/* Entry level info. */
-	duk_hthread *entry_thread;
-	duk_activation *entry_act;
-	duk_int_t entry_call_recursion_depth;
-	duk_jmpbuf *entry_jmpbuf_ptr;
-	duk_jmpbuf our_jmpbuf;
-	duk_heap *heap;
+	struct ECtx{
+		duk_hthread *entry_thread;
+		duk_activation *entry_act;
+		duk_int_t entry_call_recursion_depth;
+		duk_jmpbuf *entry_jmpbuf_ptr;
+		duk_jmpbuf our_jmpbuf;
+		duk_heap *heap;
+	}* eCtx = malloc(sizeof(*eCtx));
 
 	DUK_ASSERT(exec_thr != NULL);
 	DUK_ASSERT(exec_thr->heap != NULL);
@@ -78865,12 +78879,12 @@ DUK_INTERNAL void duk_js_execute_bytecode(duk_hthread *exec_thr) {
 
 	DUK_GC_TORTURE(exec_thr->heap);
 
-	entry_thread = exec_thr;
-	heap = entry_thread->heap;
-	entry_act = entry_thread->callstack_curr;
-	DUK_ASSERT(entry_act != NULL);
-	entry_call_recursion_depth = entry_thread->heap->call_recursion_depth;
-	entry_jmpbuf_ptr = entry_thread->heap->lj.jmpbuf_ptr;
+	eCtx->entry_thread = exec_thr;
+	eCtx->heap = eCtx->entry_thread->heap;
+	eCtx->entry_act = eCtx->entry_thread->callstack_curr;
+	DUK_ASSERT(eCtx->entry_act != NULL);
+	eCtx->entry_call_recursion_depth = eCtx->entry_thread->heap->call_recursion_depth;
+	eCtx->entry_jmpbuf_ptr = eCtx->entry_thread->heap->lj.jmpbuf_ptr;
 
 	/*
 	 *  Note: we currently assume that the setjmp() catchpoint is
@@ -78882,21 +78896,22 @@ DUK_INTERNAL void duk_js_execute_bytecode(duk_hthread *exec_thr) {
 	 */
 
 	for (;;) {
-		heap->lj.jmpbuf_ptr = &our_jmpbuf;
-		DUK_ASSERT(heap->lj.jmpbuf_ptr != NULL);
+		eCtx->heap->lj.jmpbuf_ptr = &eCtx->our_jmpbuf;
+		DUK_ASSERT(eCtx->heap->lj.jmpbuf_ptr != NULL);
 
 #if defined(DUK_USE_CPP_EXCEPTIONS)
 		try {
 #else
-		DUK_ASSERT(heap->lj.jmpbuf_ptr == &our_jmpbuf);
-		if (DUK_SETJMP(our_jmpbuf.jb) == 0) {
+		DUK_ASSERT(eCtx->heap->lj.jmpbuf_ptr == &eCtx->our_jmpbuf);
+		if (DUK_SETJMP(eCtx->our_jmpbuf.jb) == 0) {
 #endif
 			/* Execute bytecode until returned or longjmp(). */
-			duk__js_execute_bytecode_inner(entry_thread, entry_act);
+			duk__js_execute_bytecode_inner(eCtx->entry_thread, eCtx->entry_act);
 
 			/* Successful return: restore jmpbuf and return to caller. */
-			heap->lj.jmpbuf_ptr = entry_jmpbuf_ptr;
+			eCtx->heap->lj.jmpbuf_ptr = eCtx->entry_jmpbuf_ptr;
 
+			free(eCtx);
 			return;
 #if defined(DUK_USE_CPP_EXCEPTIONS)
 		} catch (duk_internal_exception &exc) {
@@ -78909,10 +78924,10 @@ DUK_INTERNAL void duk_js_execute_bytecode(duk_hthread *exec_thr) {
 			DUK_DDD(DUK_DDDPRINT("longjmp caught by bytecode executor"));
 			DUK_STATS_INC(exec_thr->heap, stats_exec_throw);
 
-			duk__handle_executor_error(heap,
-			                           entry_act,
-			                           entry_call_recursion_depth,
-			                           entry_jmpbuf_ptr);
+			duk__handle_executor_error(eCtx->heap,
+			                           eCtx->entry_act,
+			                           eCtx->entry_call_recursion_depth,
+			                           eCtx->entry_jmpbuf_ptr);
 		}
 #if defined(DUK_USE_CPP_EXCEPTIONS)
 		catch (duk_fatal_exception &exc) {
@@ -78928,7 +78943,7 @@ DUK_INTERNAL void duk_js_execute_bytecode(duk_hthread *exec_thr) {
 			try {
 				DUK_ASSERT(heap->curr_thread != NULL);
 				DUK_ERROR_FMT1(heap->curr_thread, DUK_ERR_TYPE_ERROR, "caught invalid c++ std::exception '%s' (perhaps thrown by user code)", what);
-				DUK_WO_NORETURN(return;);
+				DUK_WO_NORETURN(free(eCtx); return;);
 			} catch (duk_internal_exception exc) {
 				DUK_D(DUK_DPRINT("caught api error thrown from unexpected c++ std::exception"));
 				DUK_UNREF(exc);
@@ -78943,7 +78958,7 @@ DUK_INTERNAL void duk_js_execute_bytecode(duk_hthread *exec_thr) {
 			try {
 				DUK_ASSERT(heap->curr_thread != NULL);
 				DUK_ERROR_TYPE(heap->curr_thread, "caught invalid c++ exception (perhaps thrown by user code)");
-				DUK_WO_NORETURN(return;);
+				DUK_WO_NORETURN(free(eCtx); return;);
 			} catch (duk_internal_exception exc) {
 				DUK_D(DUK_DPRINT("caught api error thrown from unexpected c++ exception"));
 				DUK_UNREF(exc);
@@ -78955,12 +78970,12 @@ DUK_INTERNAL void duk_js_execute_bytecode(duk_hthread *exec_thr) {
 		}
 #endif
 	}
-
-	DUK_WO_NORETURN(return;);
+	DUK_WO_NORETURN(free(eCtx); return;);
 }
 
 /* Inner executor, performance critical. */
 DUK_LOCAL DUK_NOINLINE DUK_HOT void duk__js_execute_bytecode_inner(duk_hthread *entry_thread, duk_activation *entry_act) {
+	DUK_STACK_REMAIN(entry_thread);
 	/* Current PC, accessed by other functions through thr->ptr_to_curr_pc.
 	 * Critical for performance.  It would be safest to make this volatile,
 	 * but that eliminates performance benefits; aliasing guarantees
@@ -88414,8 +88429,8 @@ DUK_INTERNAL void duk_numconv_stringify(duk_hthread *thr, duk_small_int_t radix,
 	duk_small_int_t c;
 	duk_small_int_t neg;
 	duk_uint32_t uval;
-	duk__numconv_stringify_ctx nc_ctx_alloc;  /* large context; around 2kB now */
-	duk__numconv_stringify_ctx *nc_ctx = &nc_ctx_alloc;
+	//duk__numconv_stringify_ctx nc_ctx_alloc;  /* large context; around 2kB now */
+	duk__numconv_stringify_ctx *nc_ctx = malloc(sizeof(*nc_ctx));// &nc_ctx_alloc;
 
 	x = (duk_double_t) duk_require_number(thr, -1);
 	duk_pop(thr);
@@ -88437,6 +88452,7 @@ DUK_INTERNAL void duk_numconv_stringify(duk_hthread *thr, duk_small_int_t radix,
 
 	if (c == DUK_FP_NAN) {
 		duk_push_hstring_stridx(thr, DUK_STRIDX_NAN);
+		free(nc_ctx);
 		return;
 	} else if (c == DUK_FP_INFINITE) {
 		if (neg) {
@@ -88446,6 +88462,7 @@ DUK_INTERNAL void duk_numconv_stringify(duk_hthread *thr, duk_small_int_t radix,
 			/* Infinity */
 			duk_push_hstring_stridx(thr, DUK_STRIDX_INFINITY);
 		}
+		free(nc_ctx);
 		return;
 	} else if (c == DUK_FP_ZERO) {
 		/* We can't shortcut zero here if it goes through special formatting
@@ -88479,6 +88496,7 @@ DUK_INTERNAL void duk_numconv_stringify(duk_hthread *thr, duk_small_int_t radix,
 		}
 		p += duk__dragon4_format_uint32(p, uval, radix);
 		duk_push_lstring(thr, (const char *) buf, (duk_size_t) (p - buf));
+		free(nc_ctx);
 		return;
 	}
 
@@ -88600,6 +88618,8 @@ DUK_INTERNAL void duk_numconv_stringify(duk_hthread *thr, duk_small_int_t radix,
 	}
 
 	duk__dragon4_convert_and_push(nc_ctx, thr, radix, digits, flags, neg);
+	free(nc_ctx);
+	return;
 }
 
 /*
@@ -88613,8 +88633,8 @@ DUK_INTERNAL void duk_numconv_stringify(duk_hthread *thr, duk_small_int_t radix,
  */
 
 DUK_INTERNAL void duk_numconv_parse(duk_hthread *thr, duk_small_int_t radix, duk_small_uint_t flags) {
-	duk__numconv_stringify_ctx nc_ctx_alloc;  /* large context; around 2kB now */
-	duk__numconv_stringify_ctx *nc_ctx = &nc_ctx_alloc;
+	//duk__numconv_stringify_ctx nc_ctx_alloc;  /* large context; around 2kB now */
+	duk__numconv_stringify_ctx *nc_ctx = malloc(sizeof(*nc_ctx));// &nc_ctx_alloc;
 	duk_double_t res;
 	duk_hstring *h_str;
 	duk_int_t expt;
@@ -89120,18 +89140,20 @@ DUK_INTERNAL void duk_numconv_parse(duk_hthread *thr, duk_small_int_t radix, duk
 	duk_pop(thr);
 	duk_push_number(thr, (double) res);
 	DUK_DDD(DUK_DDDPRINT("result: %!T", (duk_tval *) duk_get_tval(thr, -1)));
+	free(nc_ctx);
 	return;
 
  parse_fail:
 	DUK_DDD(DUK_DDDPRINT("parse failed"));
 	duk_pop(thr);
 	duk_push_nan(thr);
+	free(nc_ctx);
 	return;
 
  parse_explimit_error:
 	DUK_DDD(DUK_DDDPRINT("parse failed, internal error, can't return a value"));
 	DUK_ERROR_RANGE(thr, "exponent too large");
-	DUK_WO_NORETURN(return;);
+	DUK_WO_NORETURN(free(nc_ctx); return;);
 }
 
 /* automatic undefs */
