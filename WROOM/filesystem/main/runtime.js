@@ -1,7 +1,7 @@
 var jslib = require("jslib");
-jslib.printStackRemain("runtime.js L2");
+jslib.printHeap("runtime.js:2");
+
 var loops = require("sr_loops");
-var jslib = require("jslib");
 var console = require("console");
 
 // ESP32.include("iot.js");

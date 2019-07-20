@@ -1,4 +1,6 @@
+jslib.printHeap("sr_loop.js:1");
 var jslib = require("jslib");
+jslib.printHeap("sr_loop.js:3");
 
 var loops = {
     pause: function (ms) {
@@ -10,16 +12,13 @@ var loops = {
     forever: function (func) {
         loops._foreverFunc = func;
         loops.doForever = function () {
-            while(1) {
-                loops._foreverFunc();
-                loops.pause(1000);
-            }
+            loops._foreverFunc();
         }
     },
 
     _foreverFunc: function() {
         console.log("default forever");
-        jslib.blockPause(10000);
+        jslib.blockPause(1000);
     },
 
     doForever: function () {

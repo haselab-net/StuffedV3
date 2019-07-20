@@ -34,7 +34,7 @@ void duktape_end();
 // print amount of remained native stack. 
 void duktape_print_stack_remain(duk_context* ctx, const char* at);
 
-//#define DUK_TRACE_STACK_USAGE
+#define DUK_TRACE_STACK_USAGE
 #ifdef DUK_TRACE_STACK_USAGE
 #define STRINGIFY(n) #n
 #define TOSTRING(n) STRINGIFY(n)

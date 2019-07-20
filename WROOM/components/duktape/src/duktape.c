@@ -24345,7 +24345,7 @@ DUK_INTERNAL const char *duk_get_type_name(duk_hthread *thr, duk_idx_t idx) {
 	DUK_ASSERT_API_ENTRY(thr);
 
 	type_tag = duk_get_type(thr, idx);
-	DUK_ASSERT(type_tag >= DUK_TYPE_MIN && type_tag <= DUK_TYPE_MAX);
+	DUK_ASSERT(type_tag >= (int)DUK_TYPE_MIN && type_tag <= DUK_TYPE_MAX);
 	DUK_ASSERT(DUK_TYPE_MIN == 0 && sizeof(duk__type_names) / sizeof(const char *) == DUK_TYPE_MAX + 1);
 
 	return duk__type_names[type_tag];
@@ -67148,16 +67148,16 @@ DUK_LOCAL duk_int_t duk__handle_call_raw(duk_hthread *thr,
 		if (call_flags & DUK_CALL_FLAG_ALLOW_ECMATOECMA) {
 			DUK_DD(DUK_DDPRINT("avoid native call, use existing executor"));
 			DUK_STATS_INC(thr->heap, stats_call_ecmatoecma);
-			DUK_ASSERT((act->flags & DUK_ACT_FLAG_PREVENT_YIELD) == 0);
+			DUK_ASSERT((crCtx->act->flags & DUK_ACT_FLAG_PREVENT_YIELD) == 0);
 			DUK_REFZERO_CHECK_FAST(thr);
 			DUK_ASSERT(thr->ptr_curr_pc == NULL);
 			free(crCtx);
 			return 1;  /* 1=reuse executor */
 		}
-		DUK_ASSERT(use_tailcall == 0);
+		DUK_ASSERT(crCtx->use_tailcall == 0);
 
 		/* duk_hthread_activation_unwind_norz() will decrease this on unwind */
-		DUK_ASSERT((act->flags & DUK_ACT_FLAG_PREVENT_YIELD) == 0);
+		DUK_ASSERT((crCtx->act->flags & DUK_ACT_FLAG_PREVENT_YIELD) == 0);
 		crCtx->act->flags |= DUK_ACT_FLAG_PREVENT_YIELD;
 		thr->callstack_preventcount++;
 
@@ -67237,16 +67237,14 @@ DUK_LOCAL duk_int_t duk__handle_call_raw(duk_hthread *thr,
 			;
 		} else if (crCtx->rc < 0) {
 			duk_error_throw_from_negative_rc(thr, crCtx->rc);
-			free(crCtx);
-			DUK_WO_NORETURN(return 0;);
+			DUK_WO_NORETURN(free(crCtx); return 0;);
 		} else {
 			DUK_ERROR_TYPE(thr, DUK_STR_INVALID_CFUNC_RC);
-			free(crCtx);
-			DUK_WO_NORETURN(return 0;);
+			DUK_WO_NORETURN(free(crCtx); return 0;);
 		}
 	}
 	DUK_ASSERT(thr->ptr_curr_pc == NULL);
-	DUK_ASSERT(use_tailcall == 0);
+	DUK_ASSERT(crCtx->use_tailcall == 0);
 
 	/*
 	 *  Constructor call post processing.
@@ -68124,7 +68122,7 @@ DUK_INTERNAL duk_int_t duk_handle_safe_call(duk_hthread *thr,
 	 */
 	thr->callstack_preventcount++;
 
-	DUK_ASSERT(thr->heap->lj.jmpbuf_ptr == &our_jmpbuf);
+	DUK_ASSERT(thr->heap->lj.jmpbuf_ptr == &scCtx->our_jmpbuf);
 	if (DUK_SETJMP(scCtx->our_jmpbuf.jb) == 0) {
 		/* Success path. */
 		DUK_DDD(DUK_DDDPRINT("safe_call setjmp catchpoint setup complete"));
@@ -76500,7 +76498,7 @@ DUK_LOCAL duk_ret_t duk__js_compile_raw(duk_hthread *thr, void *udata) {
 
 DUK_INTERNAL void duk_js_compile(duk_hthread *thr, const duk_uint8_t *src_buffer, duk_size_t src_length, duk_small_uint_t flags) {
 	DUK_STACK_REMAIN(thr);
-	duk__compiler_stkstate* comp_stk = malloc(sizeof(duk__compiler_stkstate));
+	duk__compiler_stkstate* comp_stk = malloc(sizeof(*comp_stk));
 	duk_compiler_ctx *prev_ctx;
 	duk_ret_t safe_rc;
 
@@ -79513,7 +79511,7 @@ DUK_INTERNAL void duk_js_execute_bytecode(duk_hthread *exec_thr) {
 	eCtx->entry_thread = exec_thr;
 	eCtx->heap = eCtx->entry_thread->heap;
 	eCtx->entry_act = eCtx->entry_thread->callstack_curr;
-	DUK_ASSERT(entry_act != NULL);
+	DUK_ASSERT(eCtx->entry_act != NULL);
 	eCtx->entry_call_recursion_depth = eCtx->entry_thread->heap->call_recursion_depth;
 	eCtx->entry_jmpbuf_ptr = eCtx->entry_thread->heap->lj.jmpbuf_ptr;
 
@@ -79574,8 +79572,7 @@ DUK_INTERNAL void duk_js_execute_bytecode(duk_hthread *exec_thr) {
 			try {
 				DUK_ASSERT(heap->curr_thread != NULL);
 				DUK_ERROR_FMT1(heap->curr_thread, DUK_ERR_TYPE_ERROR, "caught invalid c++ std::exception '%s' (perhaps thrown by user code)", what);
-				free(eCtx);
-				DUK_WO_NORETURN(return;);
+				DUK_WO_NORETURN(free(eCtx); return;);
 			} catch (duk_internal_exception exc) {
 				DUK_D(DUK_DPRINT("caught api error thrown from unexpected c++ std::exception"));
 				DUK_UNREF(exc);
@@ -79590,8 +79587,7 @@ DUK_INTERNAL void duk_js_execute_bytecode(duk_hthread *exec_thr) {
 			try {
 				DUK_ASSERT(heap->curr_thread != NULL);
 				DUK_ERROR_TYPE(heap->curr_thread, "caught invalid c++ exception (perhaps thrown by user code)");
-				free(eCtx);
-				DUK_WO_NORETURN(return;);
+				DUK_WO_NORETURN(free(eCtx); return;);
 			} catch (duk_internal_exception exc) {
 				DUK_D(DUK_DPRINT("caught api error thrown from unexpected c++ exception"));
 				DUK_UNREF(exc);
@@ -79603,8 +79599,7 @@ DUK_INTERNAL void duk_js_execute_bytecode(duk_hthread *exec_thr) {
 		}
 #endif
 	}
-	free(eCtx);
-	DUK_WO_NORETURN(return;);
+	DUK_WO_NORETURN(free(eCtx); return;);
 }
 
 /* Inner executor, performance critical. */
@@ -89268,7 +89263,7 @@ DUK_INTERNAL void duk_numconv_stringify(duk_hthread *thr, duk_small_int_t radix,
 
 DUK_INTERNAL void duk_numconv_parse(duk_hthread *thr, duk_small_int_t radix, duk_small_uint_t flags) {
 	//duk__numconv_stringify_ctx nc_ctx_alloc;  /* large context; around 2kB now */
-	duk__numconv_stringify_ctx *nc_ctx = malloc(sizeof(duk__numconv_stringify_ctx));// &nc_ctx_alloc;
+	duk__numconv_stringify_ctx *nc_ctx = malloc(sizeof(*nc_ctx));// &nc_ctx_alloc;
 	duk_double_t res;
 	duk_hstring *h_str;
 	duk_int_t expt;
@@ -89787,8 +89782,7 @@ DUK_INTERNAL void duk_numconv_parse(duk_hthread *thr, duk_small_int_t radix, duk
  parse_explimit_error:
 	DUK_DDD(DUK_DDDPRINT("parse failed, internal error, can't return a value"));
 	DUK_ERROR_RANGE(thr, "exponent too large");
-	free(nc_ctx);
-	DUK_WO_NORETURN(return;);
+	DUK_WO_NORETURN(free(nc_ctx); return;);
 }
 
 /* automatic undefs */
