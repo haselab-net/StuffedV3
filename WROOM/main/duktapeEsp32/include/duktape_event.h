@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <duktape.h>
+#include <freertos/portmacro.h>
 enum {
 	ESP32_DUKTAPE_EVENT_COMMAND_LINE,
 	ESP32_DUKTAPE_EVENT_HTTPSERVER_REQUEST,
@@ -73,7 +74,7 @@ void  event_newISREvent(int isrType, void* data);
 void  esp32_duktape_freeEvent(duk_context* ctx, esp32_duktape_event_t* pEvent);
 void  esp32_duktape_initEvents();
 void  esp32_duktape_endEvents();
-void  esp32_duktape_waitForEvent();	//	blocking waitForEvent	
+int  esp32_duktape_waitForEvent(esp32_duktape_event_t* pEvent, TickType_t ticks);	//	blocking waitForEvent	
 char* event_eventTypeToString(int eventType);
 void  event_newCallbackRequestedEvent(
 	uint32_t callbackType,

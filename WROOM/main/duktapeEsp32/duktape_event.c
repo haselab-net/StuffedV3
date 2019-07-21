@@ -76,8 +76,8 @@ void esp32_duktape_endEvents() {
  *
  * We return 0 to indicate that no event was caught.
  */
-void esp32_duktape_waitForEvent(esp32_duktape_event_t* pEvent) {
-	xQueueReceive(esp32_duktape_event_queue, pEvent, portMAX_DELAY);
+int esp32_duktape_waitForEvent(esp32_duktape_event_t* pEvent, TickType_t ticks) {
+	return xQueueReceive(esp32_duktape_event_queue, pEvent, ticks);
 }
 
 
