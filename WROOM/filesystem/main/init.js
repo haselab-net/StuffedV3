@@ -54,20 +54,21 @@ var _timers = {
 		log("Added a new timer: id=" + id + " due to fire in " + interval);
 		return id;
 	}, // setTimer
+	compare: function(a, b) {
+		if (a.fire > b.fire) {
+			return 1;
+		}
+		if (a.fire < b.fire) {
+			return -1;
+		}
+		return 0;
+	},
 	// Sort the array of timer entries such that the one which fires soonest is at the
 	// start of the array.  This way, we only need to check the first entry to determine
 	// if we need to fire a timer.  If now < the fire time of the first entry, then there
 	// is nothing further to do since all the timers after this are later.
 	sort: function() {
-		_timers.timerEntries.sort(function(a, b) {
-			if (a.fire > b.fire) {
-				return 1;
-			}
-			if (a.fire < b.fire) {
-				return -1;
-			}
-			return 0;
-		});
+		_timers.timerEntries.sort(_timers.compare);
 	}, // sort
 	cancelTimer: function(id) {
 		for (var i=0; i<_timers.timerEntries.length; i++) {
