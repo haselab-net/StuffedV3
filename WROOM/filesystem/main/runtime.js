@@ -14,15 +14,12 @@ function handleTimer() {
         //log("Processing timer fired for id: " + _timers.timerEntries[0].id);
         var timerCallback = _timers.timerEntries[0].callback;
         if (_timers.timerEntries[0].interval > 0) {
-            jslib.printHeap("before sort timers");
             _timers.timerEntries[0].fire = new Date().getTime() + _timers.timerEntries[0].interval;
             _timers.sort();
-            jslib.printHeap("after sort timers");
         } else {
             _timers.timerEntries.splice(0, 1);
         }
         timerCallback();
-        jslib.printHeap("after call timer callback");
     }
 };
 global.handleTimer = handleTimer;

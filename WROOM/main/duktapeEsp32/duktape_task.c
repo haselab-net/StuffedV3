@@ -108,8 +108,6 @@ static void processEvent(duk_context* ctx, esp32_duktape_event_t *pEvent) {
 					pEvent->callbackRequested.callbackType == ESP32_DUKTAPE_CALLBACK_TYPE_ISR_FUNCTION ||
 					pEvent->callbackRequested.callbackType == ESP32_DUKTAPE_CALLBACK_STATIC_TYPE_FUNCTION) {
 
-				dukf_log_heap("before handle callback");
-
 				int topStart = duk_get_top(ctx);
 
 				// In this case, the stashKey points to a stashed array which starts with a callback function and parameters.
@@ -139,9 +137,6 @@ static void processEvent(duk_context* ctx, esp32_duktape_event_t *pEvent) {
 
 				duk_pop(ctx);
 				// <empty stack>
-
-				dukf_log_heap("after handle callback");
-				printf("========================== \n");
 			}
 
 			break;
@@ -203,7 +198,6 @@ static void dukEventHandleTask(void* arg){
 		// dukf_runFile(th->ctx, "/main/handleTimer.js");
 		duk_get_global_string(th->ctx, "handleTimer");
 		if (duk_is_function(th->ctx, -1)) {
-			dukf_log_heap("before call timerhandler");
 			duk_call(th->ctx, 0);
 		}
 		duk_pop(th->ctx);
