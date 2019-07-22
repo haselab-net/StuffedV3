@@ -1,4 +1,5 @@
 // var softrobot = require("sr_softrobot");
+var jslib = require("jslib");
 
 var callbacks;
 (function (callbacks) {
@@ -22,7 +23,9 @@ var callbacks;
     softrobot.message_command.callbacks.touchThresholdArray = [];
     if (!softrobot.message_command.callbacks.touchQueryer) {
         softrobot.message_command.callbacks.touchQueryer = setInterval(function () {
+            jslib.printHeap("before require sensor info");
             softrobot.message_command.requireSensorInfo();
+            jslib.printHeap("after require sensor info");
         }, softrobot.message_command.callbacks.touchQueryerInterval);
     }
     var touchSensorCallbacks = new CallbacksMap(function (keyOptions) {

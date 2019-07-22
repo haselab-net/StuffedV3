@@ -259,7 +259,7 @@ var softrobot;
             callbacks.touchThresholdArray = [];
             callbacks.callTouchCallback = undefined;
             callbacks.touchQueryer = undefined;
-            callbacks.touchQueryerInterval = 500;
+            callbacks.touchQueryerInterval = 1000;
             callbacks.onRcvTouchMessage = function (oldValue, newValue) {
                 if (!callbacks.callTouchCallback)
                     return;
