@@ -2,7 +2,7 @@
 
 var motor;
 (function (motor_1) {
-    // motor_1.movementSender = new softrobot.movement.MovementSender();
+    motor_1.movementSender = new softrobot.movement.MovementSender();
     function changeRemoteMotorParameter(motor, parameterType, value) {
         var instruction = {
             motorId: motor

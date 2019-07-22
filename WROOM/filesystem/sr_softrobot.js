@@ -259,7 +259,7 @@ var softrobot;
             callbacks.touchThresholdArray = [];
             callbacks.callTouchCallback = undefined;
             callbacks.touchQueryer = undefined;
-            callbacks.touchQueryerInterval = 1000;
+            callbacks.touchQueryerInterval = 500;
             callbacks.onRcvTouchMessage = function (oldValue, newValue) {
                 if (!callbacks.callTouchCallback)
                     return;
@@ -501,7 +501,7 @@ var softrobot;
             MovementSender.prototype.onRcvCIUMovementMessage = function (data) {
                 this.waitResponse = false;
                 if (data.movementCommandId == softrobot.command.CommandIdMovement.CI_M_ADD_KEYFRAME || softrobot.command.CommandIdMovement.CI_M_QUERY) {
-                    clearTimeout(this.queryTimer);
+                    cancelTimeout(this.queryTimer);
                     this.queryTimer = setTimeout(this.queryNOccupied.bind(this), MovementSender.OCCUPATION_QUERY_INTERVAL_MS);
                 }
             };

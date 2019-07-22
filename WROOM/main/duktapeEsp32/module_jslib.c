@@ -136,6 +136,25 @@ static duk_ret_t send_command(duk_context* ctx) {
     return 0;
 }
 
+static int nullDataProvider(duk_context* ctx, void* data) {
+    return 0;
+}
+/**
+ * Push a new event with no parameters into event queue
+ * function pushEventQueue(func: () => void): void;
+ */
+static duk_ret_t pushEventQueue(duk_context* ctx) {
+    uint32_t key = esp32_duktape_stash_array(ctx, 1);
+    event_newCallbackRequestedEvent(
+        ESP32_DUKTAPE_CALLBACK_TYPE_FUNCTION,
+        key,
+        nullDataProvider,
+        NULL
+    );
+
+    return 0;
+}
+
 duk_ret_t ModuleJSLib(duk_context *ctx){
     ADD_FUNCTION("block_pause",         block_pause,        1);
     ADD_FUNCTION("register_callback",   register_callback,  1);
@@ -143,5 +162,6 @@ duk_ret_t ModuleJSLib(duk_context *ctx){
     ADD_FUNCTION("print_heap",          printHeap,          1);
     ADD_FUNCTION("print_stack_remain",  printStackRemain,   1);
     ADD_FUNCTION("print",               print,              1);
+    ADD_FUNCTION("pushEventQueue",      pushEventQueue,     1);
     return 0;
 }
