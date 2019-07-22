@@ -27,6 +27,7 @@
 extern "C" {
 #include "duktapeEsp32/include/module_jslib.h"
 #include "duktapeEsp32/include/duktape_task.h"
+#include "duktapeEsp32/include/duktape_utils.h"
 }
 #include "duktapeEsp32/include/module_srcommand.h"
 
@@ -360,6 +361,39 @@ class MCTargetUnderflow: public MonitorCommandBase{
         }
     }
 } mcShowTargetUnderflow;
+
+static uint32_t test_callback = 0;
+static int test_callback_push_values(duk_context* ctx, void* data) {
+    // event
+    duk_push_string(ctx, "test");
+    return 1;
+}
+extern "C" duk_ret_t registerTestCallback(duk_context* ctx) {
+    test_callback = esp32_duktape_stash_array(ctx, 1);
+    conPrintf("stashed Test callback with key: %i\n", test_callback);
+    return 0;
+}
+
+class MCJSTest: public MonitorCommandBase{
+public:
+    const char* Desc(){ return "c call main.js or call test handler"; }
+    void Func(){
+		conPrintf("Heap before put event: %d bytes\n", esp_get_free_heap_size());
+#if 0
+        char* cmd = "ESP32.include('/main/main.js');";
+        event_newCommandLineEvent(cmd, strlen(cmd), 0);
+#else
+        event_newCallbackRequestedEvent(
+            ESP32_DUKTAPE_CALLBACK_STATIC_TYPE_FUNCTION,
+            test_callback,
+            test_callback_push_values,
+            NULL
+        );
+#endif
+		conPrintf("Heap after put event: %d bytes\n", esp_get_free_heap_size());
+    }
+} mcJSTest;
+
 
 class MCJSRestart: public MonitorCommandBase{
 public:

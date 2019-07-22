@@ -412,6 +412,7 @@ static duk_ret_t js_include_spiffs(duk_context* ctx) {
 		return 0;
 }
 
+extern duk_ret_t registerTestCallback(duk_context* ctx);	//	at main/monitor.cpp
 /**
  * Register the ESP32 module with its functions.
  */
@@ -514,6 +515,8 @@ static void ModuleESP32(duk_context *ctx) {
 	duk_put_prop_string(ctx, -2, "include_spiffs"); // Add include to new ESP32
 	// [0] - Global object
 	// [1] - New object
+
+    ADD_FUNCTION("registerTestCallback", registerTestCallback, 1);
 
 	duk_put_prop_string(ctx, -2, "ESP32"); // Add ESP32 to global
 	// [0] - Global object
