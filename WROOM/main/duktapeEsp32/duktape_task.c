@@ -157,6 +157,8 @@ void unlock_heap() {
 }
 
 static void dukEventHandleTask(void* arg);
+static void dukTimerTask(void* arg);
+static TaskHandle_t taskJsTimer = NULL;
 
 void duktape_start() {
 	//	Initialize heap and threads
@@ -181,54 +183,49 @@ void duktape_start() {
 	for(int i=0; i<NJSTHREADS; ++i){
 		xTaskCreate(dukEventHandleTask, taskNames[i], 1024*8, &jsThreads[i], tskIDLE_PRIORITY + 1, &jsThreads[i].task);
 	}
+	if (!taskJsTimer){
+		xTaskCreate(dukTimerTask, "jsTimer", 1024, NULL, tskIDLE_PRIORITY, &taskJsTimer);
+	}
 	char* cmd = "ESP32.include('/main/runtime.js');";
 	event_newCommandLineEvent(cmd, strlen(cmd), 0);
 }
-
+static void dukTimerTask(void* arg){
+	while(1){
+		if (heap_context){
+			char* cmd = "handleTimer();";
+			event_newCommandLineEvent(cmd, strlen(cmd), 0);
+		}
+		vTaskDelay(1);	//	every 1 tick.
+	}
+}
 static void dukEventHandleTask(void* arg){
 	JSThread* th = (JSThread*)arg;
 	th->stackStart = (int)&th;
 	th->stackPrev = 0;
-
-	esp32_duktape_event_t* ev = malloc(sizeof(esp32_duktape_event_t));
-
 	while(1){
-		// process timer
-		lock_heap();
-		// dukf_runFile(th->ctx, "/main/handleTimer.js");
-		duk_get_global_string(th->ctx, "handleTimer");
-		if (duk_is_function(th->ctx, -1)) {
-			duk_call(th->ctx, 0);
-		}
-		duk_pop(th->ctx);
-		unlock_heap();
-
 		// process events
+		lock_heap();	
 		DUK_STACK_REMAIN(th->ctx);
-		lock_heap();
-		DUK_STACK_REMAIN(th->ctx);
-		int haveEvent = esp32_duktape_waitForEvent(ev, pdMS_TO_TICKS(200));
+		//	malloc after lock reduce memory usage. Because only one thread can lock heap.
+		esp32_duktape_event_t* ev = malloc(sizeof(esp32_duktape_event_t));
+		esp32_duktape_waitForEvent(ev, portMAX_DELAY);
 		if (!th->ctx){
 			unlock_heap();
 			break;
-		}
-		if (haveEvent == 0) {	// no event need handle
-			unlock_heap();
-			continue;
 		}
 		DUK_STACK_REMAIN(th->ctx);
 		processEvent(th->ctx, ev);
 		DUK_STACK_REMAIN(th->ctx);
 		esp32_duktape_freeEvent(th->ctx, ev);
 		DUK_STACK_REMAIN(th->ctx);
+		free(ev);
 		unlock_heap();
 	}
-	
-	free(ev);
-
-	TaskHandle_t t = th->task;
-	th->task = NULL;
-	vTaskDelete(t);
+	{
+		TaskHandle_t t = th->task;
+		th->task = NULL;
+		vTaskDelete(t);
+	}
 }
 
 void duktape_end(){
