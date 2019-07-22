@@ -40,6 +40,9 @@ var _core = {
     
     print: function(str) {
         internalJSLib.print(str);
+    },
+    pushEventQueue: function(func) {
+        internalJSLib.pushEventQueue(func);
     }
 }
 
