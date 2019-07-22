@@ -501,7 +501,7 @@ var softrobot;
             MovementSender.prototype.onRcvCIUMovementMessage = function (data) {
                 this.waitResponse = false;
                 if (data.movementCommandId == softrobot.command.CommandIdMovement.CI_M_ADD_KEYFRAME || softrobot.command.CommandIdMovement.CI_M_QUERY) {
-                    clearTimeout(this.queryTimer);
+                    cancelTimeout(this.queryTimer);
                     this.queryTimer = setTimeout(this.queryNOccupied.bind(this), MovementSender.OCCUPATION_QUERY_INTERVAL_MS);
                 }
             };
