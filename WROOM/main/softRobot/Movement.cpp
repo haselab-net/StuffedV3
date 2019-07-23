@@ -484,12 +484,18 @@ static void insertToPausedMovementList(uint8_t motorId, MotorKeyframeNode* motor
 // insert ordered keyframes into specified motor (NOTE: min time in the keyframes is current time)
 static void insertMotorKeyframes(uint8_t motorId, MotorKeyframeNode* keyframes) {
 	MotorHead &head = motorHeads[motorId];
-	if (!head.head) head.head = keyframes;
-	uint16_t minimum = head.read ? head.head->start : movementTime;
+	if (!head.head) {	// interpolate list of the motor is empty
+		head.head = keyframes;
+		head.read = keyframes;
+		getInterpolateParams(motorId);
+		return;
+	}
+	
+	uint16_t minimum = head.read ? head.head->start : movementTime;		// min time
 	MotorKeyframeNode* before_node = NULL, *next_node = head.head;
 
 	head.read = keyframes;
-	if (minTime(keyframes->start, head.head->start, minimum) != head.head->start) {
+	if (minTime(keyframes->start, head.head->start, minimum) != head.head->start) {	// head should be replaced
 		head.head = keyframes;
 		before_node = keyframes;
 		keyframes = keyframes->next;
@@ -542,9 +548,19 @@ static void shiftMotorKeyframes(MotorKeyframeNode* keyframes, uint16_t timeOffse
 }
 
 /////////////////////////////////////////// debug ///////////////////////////////////////////////////////
-void printNode(MotorKeyframeNode* node, bool isHead) {
+void printNode(MotorKeyframeNode* node, bool isRead) {
 	printf("[id: %d, %d - %d, pose: %d]", getMovementId(node->id), node->start, node->end, node->pose);
-	if (isHead) printf("(READ)");
+	if (isRead) printf("(READ)");
+}
+
+void printPausedKeyframes(MotorKeyframeNode* node) {
+	printf("   |- HEAD -> ");
+	while (node) {
+		printNode(node, false);
+		printf(" -> ");
+		node = node->next;
+	}
+	printf("NULL \r\n");
 }
 
 void printMotorKeyframes(uint8_t motorId) {
@@ -801,10 +817,14 @@ void pauseMovement(uint8_t movementId, uint8_t motorCount, const vector<uint8_t>
 	    xSemaphoreTake(tickSemaphore, portMAX_DELAY);
     #endif
 
+	printf("---- pauseMovement start \n");
+
 	for (int i=0; i<motorCount; i++) {
 		MotorKeyframeNode* pausedNode = pickMotorKeyframes(motorId[i], movementId);
 		if(pausedNode) insertToPausedMovementList(motorId[i], pausedNode);
 	}
+
+	printf("---- pauseMovement end \n");
 
 	#ifdef WROOM
 	    xSemaphoreGive(tickSemaphore);
@@ -820,16 +840,24 @@ void resumeMovement(uint8_t movementId, uint8_t motorCount) {
 	    xSemaphoreTake(tickSemaphore, portMAX_DELAY);
     #endif
 
+	printf("---- resumeMovement start \n");
+
 	PausedMovementHead* head = pausedMovements;
 	while (motorCount && head->next) {
 		MotorKeyframeNode* pausedNode = head->next->head;
+		printPausedKeyframes(pausedNode);
 
 		// resume one motor keyframes
 		if (getMovementId(pausedNode->id) == movementId) {
+			printf("---- find one \n");
 			// insert to interpolate list
 			uint8_t motorId = head->next->motorId;
 			shiftMotorKeyframes(pausedNode, movementTime - head->next->pausedTime);
+			printf("---- shiftMotorKeyframes \n");
+			printPausedKeyframes(pausedNode);
+
 			insertMotorKeyframes(motorId, pausedNode);
+			printf("---- insertMotorKeyframes \n");
 
 			// delete node
 			PausedMovementHead* next = head->next->next;
@@ -842,6 +870,8 @@ void resumeMovement(uint8_t movementId, uint8_t motorCount) {
 
 		head = head->next;
 	}
+
+	printf("---- resumeMovement end \n");
 
 	#ifdef WROOM
 	    xSemaphoreGive(tickSemaphore);
@@ -932,12 +962,16 @@ void clearInterpolateBuffer() {
 	    xSemaphoreTake(tickSemaphore, portMAX_DELAY);
     #endif
 
+	printf("---- clearInterpolateBuffer \n");
+
 	// clear interpolate list
 	for (int i=0; i<allBoards.GetNTotalMotor(); i++) {
 		clearMotorKeyframes(i, motorHeads[i].head);
+		printf("---- clearMotorKeyframes: %i \n", i);
 	}
 
 	initMotorHeads();
+	printf("---- initMotorHeads \n");
 
 	#ifdef WROOM
 	    xSemaphoreGive(tickSemaphore);

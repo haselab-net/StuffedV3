@@ -7,10 +7,10 @@ console.log("defaule main.js");
 //     loops.pause
 // }
 
-// var movement_1 = motor.movementDecoder("4 1 6005\n3 0\n842 2276\n1158 397\n2011 2765\n1994 1246")
-// for (var i = 0; i < 3; i++) {
-//     motor.setMovement(motor.MovementOption.play, movement_1)
-// }
+var movement_1 = motor.movementDecoder("4 1 6005\n3 0\n842 2276\n1158 397\n2011 2765\n1994 1246")
+for (var i = 0; i < 3; i++) {
+    motor.setMovement(motor.MovementOption.play, movement_1)
+}
 
 // iot.registerMQTTEvent("event", function (value1, value2, value3) {
 //     console.log("event");

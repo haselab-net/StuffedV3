@@ -202,17 +202,25 @@ void printPacketJsfile(const void* pBuffer, size_t len) {
 
 void printPacketCommand(const void* pBuffer, size_t len) {
     int16_t* pBufferI16 = (int16_t*)pBuffer;
+    int8_t* pBufferI8 = (int8_t*)pBuffer;
     ESP_LOGD(LOG_TAG, "|- PacketId: PI_COMMAND");
 
     uint16_t length = pBufferI16[0];
     ESP_LOGD(LOG_TAG, "|- Content:");
     ESP_LOGD(LOG_TAG, "   |- Length: %i", length);
     ESP_LOGD(LOG_TAG, "   |- CommandId: %i", pBufferI16[1]);
-    char buf[1024]={'\0'};
+
+    char bufI16[1024]={'\0'};
     for(size_t i = 2; i < len/2; i++){
-        sprintf(buf+strlen(buf), "%i, ", pBufferI16[i]);
+        sprintf(bufI16+strlen(bufI16), "%i, ", pBufferI16[i]);
     }
-    ESP_LOGD(LOG_TAG, "   |- Command: %s", buf);
+    ESP_LOGD(LOG_TAG, "   |- Command I16: %s", bufI16);
+
+    char bufI8[1024]={'\0'};
+    for(size_t i = 4; i < len; i++){
+        sprintf(bufI8+strlen(bufI8), "%i, ", pBufferI8[i]);
+    }
+    ESP_LOGD(LOG_TAG, "   |- Command I8: %s", bufI8);
 
     // test
     if (length != len) {
