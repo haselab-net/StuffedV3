@@ -519,7 +519,7 @@ static void ModuleESP32(duk_context *ctx) {
 	// [1] - New object
 
     ADD_FUNCTION("registerTestCallback", registerTestCallback, 1);		//	arg: msg
-    ADD_FUNCTION("registerTimerCallback", registerTimerCallback, 2);	//	arg: time and func
+    ADD_FUNCTION("registerTimerCallback", registerTimerCallback, 3);	//	arg: time and func
     ADD_FUNCTION("cancelTimerCallback", cancelTimerCallback, 1);		//	arg: stash
 
 	duk_put_prop_string(ctx, -2, "ESP32"); // Add ESP32 to global
