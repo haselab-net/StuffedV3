@@ -30,7 +30,6 @@ void* duk_alloc_hybrid_udata = NULL;
  * create environment for running js file
  */
 static void createDuktapeHeap() {
-    LOGD("About to create heap");
 	//	Heap selection
 #if 0
 	heap_context = duk_create_heap_default();
@@ -56,10 +55,6 @@ static void createDuktapeHeap() {
 
     dukf_runFile(heap_context, "/main/init.js");
     dukf_log_heap("Heap after init.js");
-
-    #if defined(ESP_PLATFORM)
-	    LOGD("Free heap at start of JavaScript main loop: %d", esp_get_free_heap_size());
-    #endif /* ESP_PLATFORM */
 }
 
 static void processEvent(duk_context* ctx, esp32_duktape_event_t *pEvent) {
@@ -70,7 +65,7 @@ static void processEvent(duk_context* ctx, esp32_duktape_event_t *pEvent) {
 		// Handle a new command line submitted to us.
 		case ESP32_DUKTAPE_EVENT_COMMAND_LINE: {
 			DUK_STACK_REMAIN(ctx);
-			//LOGD("We are about to eval: %.*s", pEvent->commandLine.commandLineLength, pEvent->commandLine.commandLine);
+			LOGV("We are about to eval: %.*s", pEvent->commandLine.commandLineLength, pEvent->commandLine.commandLine);
 			DUK_STACK_REMAIN(ctx);
 			callRc = duk_peval_lstring(ctx,	pEvent->commandLine.commandLine, pEvent->commandLine.commandLineLength);
 			DUK_STACK_REMAIN(ctx);
@@ -100,7 +95,7 @@ static void processEvent(duk_context* ctx, esp32_duktape_event_t *pEvent) {
 			// * context      - void * - a Duktape heapptr
 			// * dataProvider - A function to be called that will add parameters to the stack.  If NULL, then
 			//                  no data provider function is present.
-			LOGD("Process a callback requested event: callbackType=%d, stashKey=%d",
+			LOGV("Process a callback requested event: callbackType=%d, stashKey=%d",
 				pEvent->callbackRequested.callbackType,
 				pEvent->callbackRequested.stashKey
 			);
@@ -119,7 +114,7 @@ static void processEvent(duk_context* ctx, esp32_duktape_event_t *pEvent) {
 
 				int numberParams = duk_get_top(ctx) - topStart -1;
 
-				LOGD("ESP32_DUKTAPE_EVENT_CALLBACK_REQUESTED: #params: %d", numberParams);
+				LOGV("ESP32_DUKTAPE_EVENT_CALLBACK_REQUESTED: #params: %d", numberParams);
 
 				if (!duk_is_function(ctx, topStart)) {
 					LOGE("ESP32_DUKTAPE_EVENT_CALLBACK_REQUESTED: Not a function!");
@@ -132,7 +127,9 @@ static void processEvent(duk_context* ctx, esp32_duktape_event_t *pEvent) {
 					numberParams += numberAdditionalStackItems;
 				}
 
-				duk_pcall(ctx, numberParams);
+				if (duk_pcall(ctx, numberParams) != 0){
+					esp32_duktape_log_error(ctx);
+				}
 				// [0] - Ret val
 
 				duk_pop(ctx);
@@ -162,59 +159,123 @@ static int32_t timerCount = 0;
 static TaskHandle_t taskJsTimer = NULL;
 xSemaphoreHandle smTimerCallbacks = NULL;
 struct TimerCallback{
-	uint32_t stash;
+	uint16_t id;
+	uint16_t stash;
 	int tick;
 	int period;
 } timerCallbacks[NTIMERCALLBACKS];
+#if 0
+static void dumpCallbacks(const char* msg){
+	char buf[80];
+	buf[0] = 0;
+	for(int i=0; i<NTIMERCALLBACKS; ++i){
+		sprintf(buf + strlen(buf), "%d, ", timerCallbacks[i].stash);
+	}
+	LOGD("%s Callbacks: %s", msg, buf);
+}
+#else
+#define dumpCallbacks(x)	do{} while(0)
+#endif
 
 duk_ret_t registerTimerCallback(duk_context* ctx){
 	xSemaphoreTake(smTimerCallbacks, portMAX_DELAY);
-	if (timerCallbacks[NTIMERCALLBACKS-1].stash){
+	dumpCallbacks("Before register");
+	if (timerCallbacks[NTIMERCALLBACKS-1].id){
 		duk_push_number(ctx, 0);
 		xSemaphoreGive(smTimerCallbacks);
-		return 1;	//	return 0 means timerCallbacks is full.
+		LOGE("Timer is full at registerTimerCallback().");
+		return 0;	//	return 0 means timerCallbacks is full.
 	}
     int tick = duk_get_uint(ctx, -2) / portTICK_PERIOD_MS;
-	if (tick > 0x80000000) tick = 0x7FFFFFFF;
+	if ((uint32_t)tick >= 0x80000000) tick = 0x7FFFFFFF;
 	if (tick == 0) tick = 1;
 	int period = tick;
 	tick += timerCount;
 	int i=0;
+	uint16_t id = 1;
 	for(;; ++i){
-		if (!timerCallbacks[i].stash || tick - timerCallbacks[i].tick < 0) break;
+		if (!timerCallbacks[i].id || tick - timerCallbacks[i].tick < 0) break;
+		id = timerCallbacks[i].id;
 	}
 	memmove(&timerCallbacks[i+1], &timerCallbacks[i], sizeof(timerCallbacks[0])*(NTIMERCALLBACKS-i-1));
-	timerCallbacks[i].tick = tick;
-    if (duk_get_boolean_default(ctx, -1, true)){
-		timerCallbacks[i].period = period;
+	for(int j=0; j<NTIMERCALLBACKS; ++j){
+		if (timerCallbacks[j].id == id){
+			id ++; 
+			if (id==0) id++;
+			j = 0;
+			continue;
+		}
 	}
-	duk_pop_2(ctx);
-	if (!duk_is_function(ctx, -1)) {
+	timerCallbacks[i].id = id;
+	timerCallbacks[i].tick = tick;
+    if (duk_get_boolean(ctx, -1)){
+		timerCallbacks[i].period = period;
+	}else{
+		timerCallbacks[i].period = 0;
+	}
+	if (!duk_is_function(ctx, -3)) {
         duk_push_context_dump(ctx);
 		LOGE("Not a function ! %s", duk_to_string(ctx, -1));
 		duk_pop(ctx);
 	}
-	timerCallbacks[i].stash = esp32_duktape_stash_array(ctx, 1);
-    LOGI("Timer callback with stash %x tick %d period %d registered.", timerCallbacks[i].stash, timerCallbacks[i].tick, timerCallbacks[i].period);
-	duk_push_number(ctx, timerCallbacks[i].stash);
+	duk_pop_2(ctx);
+	//	search stash key
+	duk_push_global_object(ctx);	//	[func global]
+	uint16_t stash=0;
+	if (duk_get_prop_string(ctx, -1, CALLBACK_STASH_OBJECT_NAME) == 0) {
+		LOGE("Failed to find stash_array");
+		duk_push_number(ctx, 0);
+	}else{		//	[func global stash]
+		duk_enum(ctx, -1, DUK_ENUM_ARRAY_INDICES_ONLY); //	[func global stash enum]
+		while(duk_next(ctx, -1, true)){ 	//	[func global stash enum key val]
+			duk_get_prop_index(ctx, -1, 0);	//	[func global stash enum key val val[0]]
+#if 0
+				LOGI("-7 isFunc = %d", duk_is_function(ctx, -7));
+				LOGI("-1 isFunc = %d", duk_is_function(ctx, -1));	
+			 	duk_push_context_dump(ctx);
+				LOGI("Stack: %s", duk_to_string(ctx, -1));
+				duk_pop(ctx);										
+#endif
+			if (duk_samevalue(ctx, -7, -1)){
+				stash = atoi(duk_get_string(ctx, -3));
+				duk_pop_3(ctx);
+				LOGV("Stash %d found.", stash);
+				break;
+			}
+			duk_pop_3(ctx);
+		}	//	[func global stash enum]
+		duk_pop_3(ctx);	//	[func]
+		if (!stash){
+			if (!duk_is_function(ctx, -1)) {
+				duk_push_context_dump(ctx);
+				LOGE("Not a function ! %s", duk_to_string(ctx, -1));
+				duk_pop(ctx);
+			}
+			stash = esp32_duktape_stash_array(ctx, 1);
+			LOGV("Stash %d created.", stash);
+		}
+		timerCallbacks[i].stash = stash;
+	    LOGD("Timer callback with id %d stash %d tick %d period %d registered.", timerCallbacks[i].id, timerCallbacks[i].stash, timerCallbacks[i].tick, timerCallbacks[i].period);
+		duk_push_number(ctx, timerCallbacks[i].id);
+		duk_push_context_dump(ctx);
+		duk_pop(ctx);
+	}
+	dumpCallbacks("After register");
 	xSemaphoreGive(smTimerCallbacks);
     return 1;   //  1 = return value at top
 }
 duk_ret_t cancelTimerCallback(duk_context* ctx){
-    uint32_t stash = duk_get_uint(ctx, -1);
+    int16_t id = duk_get_uint(ctx, -1);
 	xSemaphoreTake(smTimerCallbacks, portMAX_DELAY);
+	dumpCallbacks("Before cancel");
 	for(int i=0; i<NTIMERCALLBACKS; ++i){
-		if (timerCallbacks[i].stash == stash){
-		    LOGI("Timer callback with stash %x tick %d period %d canceled.", timerCallbacks[i].stash, timerCallbacks[i].tick, timerCallbacks[i].period);
-			{
-				char cmd[50];
-				sprintf(cmd, "delete " CALLBACK_STASH_OBJECT_NAME "[%d]", timerCallbacks[0].stash);
-				event_newCommandLineEvent(cmd, strlen(cmd), 0);
-			}			
+		if (timerCallbacks[i].id == id){
+		    LOGD("Timer callback with id %d stash %d tick %d period %d canceled.", timerCallbacks[i].id, timerCallbacks[i].stash, timerCallbacks[i].tick, timerCallbacks[i].period);
 			memmove(&timerCallbacks[i], &timerCallbacks[i+1], sizeof(timerCallbacks[i])*(NTIMERCALLBACKS-i-1));
 			memset(&timerCallbacks[NTIMERCALLBACKS-1], 0, sizeof(timerCallbacks[0]));
 			xSemaphoreGive(smTimerCallbacks);
 			duk_push_boolean(ctx, true);
+			dumpCallbacks("After cancel");
 			return 1;
 		}
 	}
@@ -224,41 +285,33 @@ duk_ret_t cancelTimerCallback(duk_context* ctx){
 }
 static void dukTimerTask(void* arg){
 	while(1){
-#if 0
-		if (heap_context){
-			char* cmd = "handleTimer();";
-			event_newCommandLineEvent(cmd, strlen(cmd), 0);
-		}
-#else
 		timerCount ++;
 		xSemaphoreTake(smTimerCallbacks, portMAX_DELAY);
 		while (timerCallbacks[0].stash && timerCallbacks[0].tick - timerCount <= 0){
-			LOGI("Call timer id %x tick %d", timerCallbacks[0].stash, timerCallbacks[0].tick);
+			//LOGI("Call timer id %x tick %d", timerCallbacks[0].stash, timerCallbacks[0].tick);
 			event_newCallbackRequestedEvent( ESP32_DUKTAPE_CALLBACK_STATIC_TYPE_FUNCTION,
 				timerCallbacks[0].stash, NULL, NULL);
 			if (timerCallbacks[0].period){	//	periodic: move the top to an appropriate place.
 				struct TimerCallback tmp = timerCallbacks[0];
 				tmp.tick += tmp.period;
 				int i=1;
-				while(timerCallbacks[i].stash){
+				while(timerCallbacks[i].id){
 					timerCallbacks[i-1] = timerCallbacks[i];	
-					if (timerCallbacks[i].tick - tmp.tick >= 0){
+					if (timerCallbacks[i-1].tick - tmp.tick >= 0){
 						break;
 					}
-					if (i == NTIMERCALLBACKS-1) break;
 					++i;
+					if (i == NTIMERCALLBACKS) break;
 				}
-				timerCallbacks[i] = tmp;
+				timerCallbacks[i-1] = tmp;
+				dumpCallbacks("After interval");
 			}else{	//	remove the top
-				char cmd[50];
-				sprintf(cmd, "delete " CALLBACK_STASH_OBJECT_NAME "[%d]", timerCallbacks[0].stash);
-				event_newCommandLineEvent(cmd, strlen(cmd), 0);
 				memmove(&timerCallbacks[0], &timerCallbacks[1], sizeof(timerCallbacks) - sizeof(timerCallbacks[0]));
 				memset(&timerCallbacks[NTIMERCALLBACKS-1], 0, sizeof(timerCallbacks[0]));
+				dumpCallbacks("After timeout");
 			}
 		}
 		xSemaphoreGive(smTimerCallbacks);
-#endif
 		vTaskDelay(1);	//	every 1 tick.
 	}
 }
@@ -270,7 +323,6 @@ static void dukEventHandleTask(void* arg){
 	while(1){
 		// process events
 		lock_heap();	
-		DUK_STACK_REMAIN(th->ctx);
 		//	malloc after lock reduce memory usage. Because only one thread can lock heap.
 		esp32_duktape_event_t* ev = malloc(sizeof(esp32_duktape_event_t));
 		esp32_duktape_waitForEvent(ev, portMAX_DELAY);
@@ -278,11 +330,8 @@ static void dukEventHandleTask(void* arg){
 			unlock_heap();
 			break;
 		}
-		DUK_STACK_REMAIN(th->ctx);
 		processEvent(th->ctx, ev);
-		DUK_STACK_REMAIN(th->ctx);
 		esp32_duktape_freeEvent(th->ctx, ev);
-		DUK_STACK_REMAIN(th->ctx);
 		free(ev);
 		unlock_heap();
 	}
