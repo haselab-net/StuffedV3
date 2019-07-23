@@ -583,13 +583,33 @@ public:
                 printInterpolateParams();
                 break;
             }
-            // pause all movements
+            // z pause all movements
             case 'z': {
                 pauseInterpolate();
                 break;
             }
+            // x resume all movements
             case 'x': {
                 resumeInterpolate();
+                break;
+            }
+            // c clear all buffer
+            case 'c': {
+                clearInterpolateBuffer();
+                break;
+            }
+            // v pause movement 1
+            case 'v': {
+                vector<uint8_t> motorId;
+                motorId.push_back(0);
+                pauseMovement(1, 1, motorId);
+                break;
+            }
+            // b resume movement 1
+            case 'b': {
+                vector<uint8_t> motorId;
+                motorId.push_back(0);
+                resumeMovement(1, 1);
                 break;
             }
             // add motor 0
