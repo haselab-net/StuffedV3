@@ -412,6 +412,8 @@ static duk_ret_t js_include_spiffs(duk_context* ctx) {
 		return 0;
 }
 
+extern duk_ret_t registerTimerCallback(duk_context* ctx);	//	at duktape_task.cpp
+extern duk_ret_t cancelTimerCallback(duk_context* ctx);		//	at duktape_task.cpp
 extern duk_ret_t registerTestCallback(duk_context* ctx);	//	at main/monitor.cpp
 /**
  * Register the ESP32 module with its functions.
@@ -516,7 +518,9 @@ static void ModuleESP32(duk_context *ctx) {
 	// [0] - Global object
 	// [1] - New object
 
-    ADD_FUNCTION("registerTestCallback", registerTestCallback, 1);
+    ADD_FUNCTION("registerTestCallback", registerTestCallback, 1);		//	arg: msg
+    ADD_FUNCTION("registerTimerCallback", registerTimerCallback, 2);	//	arg: time and func
+    ADD_FUNCTION("cancelTimerCallback", cancelTimerCallback, 1);		//	arg: stash
 
 	duk_put_prop_string(ctx, -2, "ESP32"); // Add ESP32 to global
 	// [0] - Global object

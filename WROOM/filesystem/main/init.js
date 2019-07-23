@@ -39,44 +39,23 @@ Duktape.modSearch = function(id, require, exports, module) {
 }; // Duktape.modSearch
 
 var _timers = {
-	nextId: 1,
-	timerEntries: [],
 	setTimer: function(callback, interval, isInterval) {
-		var id = _timers.nextId;
-		_timers.timerEntries.push({
-			id: id,
-			callback: callback,
-			fire: new Date().getTime() + interval,
-			interval: isInterval?interval:0
-		});
-		_timers.nextId++;
-		_timers.sort();
-		log("Added a new timer: id=" + id + " due to fire in " + interval);
+		id = ESP32.registerTimerCallback(callback, interval, isInterval);
+		if (id == 0){
+			log("Failed to add a new timer for " + callback);
+		}else{
+			log("Added a new timer " + rv + " interval " + interval + " for " + callback);
+		}
 		return id;
-	}, // setTimer
-	compare: function(a, b) {
-		if (a.fire > b.fire) {
-			return 1;
-		}
-		if (a.fire < b.fire) {
-			return -1;
-		}
-		return 0;
 	},
-	// Sort the array of timer entries such that the one which fires soonest is at the
-	// start of the array.  This way, we only need to check the first entry to determine
-	// if we need to fire a timer.  If now < the fire time of the first entry, then there
-	// is nothing further to do since all the timers after this are later.
-	sort: function() {
-		_timers.timerEntries.sort(_timers.compare);
-	}, // sort
-	cancelTimer: function(id) {
-		for (var i=0; i<_timers.timerEntries.length; i++) {
-			if (_timers.timerEntries[i].id == id) {
-				_timers.timerEntries.splice(i, 1);
-				return;
-			}
+	cancelTimer: function(id) {	//	success = true  fail = false
+		rv = ESP32.cancelTimerCallback(id);
+		if (rv){
+			log("Failed to cancel a timer " + id);
+		}else{
+			log("cancel a timer " + id);
 		}
+		return rv;
 	} // cancelTimer
 };
 
@@ -95,7 +74,3 @@ function setInterval(callback, interval) {
 function setTimeout(callback, interval) {
 	return _timers.setTimer(callback, interval, false);
 }
-
-//	Tests for require()
-//var cons = require("main/test");
-//cons.log("cons.log from init.js");
