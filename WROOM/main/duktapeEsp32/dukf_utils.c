@@ -84,7 +84,9 @@ void dukf_runFile(duk_context *ctx, const char *fileName) {
 	// At this point we have the file in memory and we know its size.  Now we push it onto
 	// the stack and run the script.
 	duk_push_string(ctx, fileName);
-	duk_compile_lstring_filename(ctx, 0, fileData, fileSize);
+	if (duk_pcompile_lstring_filename(ctx, 0, fileData, fileSize) != 0){
+	    printf("compile failed: %s\n", duk_safe_to_string(ctx, -1));
+	}
 	if (loadedFromPOSIX) {
 		free(fileData);
 		fileData = NULL;
