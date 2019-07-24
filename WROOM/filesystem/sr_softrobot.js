@@ -490,19 +490,17 @@ var softrobot;
             softrobot.message_command.setMovement({
                 movementCommandId: softrobot.command.CommandIdMovement.CI_M_QUERY
             });
-            this.queryTimer = setTimeout(queryNOccupied, MovementSender.OCCUPATION_QUERY_INTERVAL_MS);
+            jslib.printHeap("---------- queryNOccupied");
         }
         var MovementSender = (function () {
             function MovementSender() {
                 this.waitResponse = false;
                 softrobot.message_command.onRcvCIUMovementMessage.push(this.onRcvCIUMovementMessage.bind(this));
-                this.queryTimer = setTimeout(queryNOccupied, MovementSender.OCCUPATION_QUERY_INTERVAL_MS);
+                this.queryTimer = setInterval(queryNOccupied, MovementSender.OCCUPATION_QUERY_INTERVAL_MS);
             }
             MovementSender.prototype.onRcvCIUMovementMessage = function (data) {
-                this.waitResponse = false;
                 if (data.movementCommandId == softrobot.command.CommandIdMovement.CI_M_ADD_KEYFRAME || softrobot.command.CommandIdMovement.CI_M_QUERY) {
-                    cancelTimeout(this.queryTimer);
-                    this.queryTimer = setTimeout(queryNOccupied, MovementSender.OCCUPATION_QUERY_INTERVAL_MS);
+                    this.waitResponse = false;
                 }
             };
             MovementSender.prototype.canAddKeyframe = function (data) {
