@@ -165,6 +165,8 @@ void mqtt_data_event_handler (char* data) {
     p_str += strlen(value2)+1;
     strcpy(p_str, value3);
 
+    cJSON_Delete(obj);
+
     // call callback
     event_newCallbackRequestedEvent(
         ESP32_DUKTAPE_CALLBACK_STATIC_TYPE_FUNCTION,
@@ -232,6 +234,7 @@ static duk_ret_t startWaitingMQTTEvent(duk_context* ctx) {
     // mqtt_cfg.keepalive = 10 * 60;    // 10 min, 2 min default
     mqtt_cfg.disable_auto_reconnect = false;
     mqtt_cfg.task_prio = tskIDLE_PRIORITY;
+    mqtt_cfg.task_stack = 1024 * 2;
 
     // start
     mqtt_client = esp_mqtt_client_init(&mqtt_cfg);
