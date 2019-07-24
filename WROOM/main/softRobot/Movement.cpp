@@ -759,7 +759,6 @@ void onChangeControlMode(CommandId newCommand) {
 		default:
 			return;
 	}
-	printf("=========================== on receive new command id: %i \n", newCommand);
 	if (newMovementControlMode != movementControlMode) {
 		if (newMovementControlMode) resumeInterpolate();
 		else pauseInterpolate();
@@ -962,16 +961,10 @@ void clearInterpolateBuffer() {
 	    xSemaphoreTake(tickSemaphore, portMAX_DELAY);
     #endif
 
-	printf("---- clearInterpolateBuffer \n");
-
 	// clear interpolate list
-	for (int i=0; i<allBoards.GetNTotalMotor(); i++) {
-		clearMotorKeyframes(i, motorHeads[i].head);
-		printf("---- clearMotorKeyframes: %i \n", i);
-	}
+	for (int i=0; i<allBoards.GetNTotalMotor(); i++) clearMotorKeyframes(i, motorHeads[i].head);
 
-	initMotorHeads();
-	printf("---- initMotorHeads \n");
+	// TODO get new current pose (use movementQueryInterpolateState or UdpCom_ReceiveCommand would cause dead block, because only one thread deal with commands)
 
 	#ifdef WROOM
 	    xSemaphoreGive(tickSemaphore);
