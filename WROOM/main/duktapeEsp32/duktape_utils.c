@@ -513,3 +513,27 @@ void esp32_duktape_unstash_object(duk_context *ctx, uint32_t key) {
 	// [0] - Previously stashed object
 
 } // esp32_duktape_unstash_object
+
+duk_ret_t duktape_print_callstack(duk_context* ctx){
+	printf("Stack trace:\n");
+	for(int i=0; i<20; ++i){
+		duk_inspect_callstack_entry(ctx, -1-i);
+		#if 0
+		duk_push_context_dump(ctx);
+		printf("Dump:%s\n", duk_to_string(ctx, -1));
+		duk_pop(ctx);
+		#endif
+		duk_get_prop_string(ctx, -1, "function");
+		duk_dup_top(ctx);
+		if (duk_is_ecmascript_function(ctx, -1)){
+			duk_dump_function(ctx);
+		}else{
+			duk_pop(ctx);
+			duk_push_string(ctx, "C func");
+		}
+		duk_get_prop_string(ctx, -2, "lineNumber");	//	[stack func code line]
+		printf("%d Func:%s L%d = %s\n", i, duk_to_string(ctx, -3), duk_to_int(ctx, -1), duk_to_string(ctx, -2));
+		duk_pop_n(ctx, 4);
+	}
+	return 0;
+}
