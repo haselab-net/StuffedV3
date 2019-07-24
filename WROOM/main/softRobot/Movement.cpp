@@ -760,7 +760,16 @@ void onChangeControlMode(CommandId newCommand) {
 			return;
 	}
 	if (newMovementControlMode != movementControlMode) {
-		if (newMovementControlMode) resumeInterpolate();	// goto movementControlMode
+		if (newMovementControlMode) {						// goto movementControlMode
+			// get the new current pose
+			calibrateCurrentPose = true;
+			movementQueryInterpolateState();				// block until CI_INTERPOLATE returns
+
+			// update targetWrite
+			targetWrite = targetCountReadMax + 1;
+
+			resumeInterpolate();
+		}
 		else pauseInterpolate();							// quit movementControlMode
 
 		movementControlMode = newMovementControlMode;
@@ -880,9 +889,6 @@ void resumeMovement(uint8_t movementId, uint8_t motorCount) {
 void resumeInterpolate() {
 	if (!tickPaused) return;
 
-	// calibrateCurrentPose = true;
-	// movementQueryInterpolateState();		// TODO post event in handling event is not allowed
-
 	xSemaphoreTake(tickSemaphore, portMAX_DELAY);
 	// the current pos of every motor might have been changed
 	for (int i=0; i<allBoards.GetNTotalMotor(); i++) {
@@ -963,8 +969,6 @@ void clearInterpolateBuffer() {
 
 	// clear interpolate list
 	for (int i=0; i<allBoards.GetNTotalMotor(); i++) clearMotorKeyframes(i, motorHeads[i].head);
-
-	// TODO get new current pose (use movementQueryInterpolateState or UdpCom_ReceiveCommand would cause dead block, because only one thread deal with commands)
 
 	#ifdef WROOM
 	    xSemaphoreGive(tickSemaphore);
