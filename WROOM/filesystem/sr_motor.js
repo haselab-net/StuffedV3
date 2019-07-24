@@ -104,7 +104,15 @@ var motor;
         }
     }
     motor_1.setMovementAll = setMovementAll;
-        function movementDecoder(movementStr) {
+    motor_1.movementNames = ["default_name"];
+    function getMovementId(name) {
+        for (let i = 0 ; i < movementNames.length; i++) {
+            if (movementNames[i] == name) return i;
+        }
+        movementNames.push(name);
+        return movementNames.length - 1;
+    }
+    function movementDecoder(movementStr) {
         function splitToInt(str, seperator) {
             var nums_str = str.split(seperator);
             var nums = [];
@@ -123,14 +131,15 @@ var motor;
         }
         if (movementStr === "")
             return {
-                movementId: softrobot.movement.getNewMovementId(),
+                movementId: getMovementId("default_name"),
                 motorIds: [0],
                 keyframes: [{
                         period: 1000,
                         pose: [0]
-                    }]
-            };
+                }]
+        };
         var lines = movementStr.split("\n");
+        var name = lines.splice(0, 1)[0];
         var line_1 = splitToInt(lines[0], " ");
         var line_2 = splitToInt(lines[1], " ");
         var keyframes_lines = lines.slice(2, 2 + line_1[0]);
@@ -155,7 +164,7 @@ var motor;
             });
         }
         return {
-            movementId: softrobot.movement.getNewMovementId(),
+            movementId: getNewMovementId(name),
             motorIds: line_2.slice(1),
             keyframes: keyframes
         };
