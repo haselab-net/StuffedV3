@@ -39,7 +39,7 @@ static heap_trace_record_t trace_record[NUM_RECORDS]; // This buffer must be in 
 void setLogLevel(){
 #ifndef _WIN32
     //  Set all log level to DEBUG
-	esp_log_level_set("*", ESP_LOG_INFO);
+	esp_log_level_set("*", ESP_LOG_DEBUG);
 
 	//  Components set to info
     esp_log_level_set("clk", ESP_LOG_INFO);
@@ -84,14 +84,14 @@ void setLogLevel(){
     esp_log_level_set("WiFi", ESP_LOG_INFO);
     esp_log_level_set("WiFiEventHandler", ESP_LOG_INFO);
     esp_log_level_set("ws_fs", ESP_LOG_INFO);
-//    esp_log_level_set("ws_wifi", ESP_LOG_INFO);
+    esp_log_level_set("ws_wifi", ESP_LOG_INFO);
     esp_log_level_set("ws_task", ESP_LOG_INFO);
     esp_log_level_set("ws_main", ESP_LOG_INFO);
-//    esp_log_level_set("ws_form", ESP_LOG_INFO);
+    esp_log_level_set("ws_form", ESP_LOG_INFO);
     esp_log_level_set("ws_ws", ESP_LOG_DEBUG);
 
     //  Duktape
-    esp_log_level_set("duktape_jsfile", ESP_LOG_INFO);
+    esp_log_level_set("duktape_task", ESP_LOG_INFO);
     esp_log_level_set("duktape_event", ESP_LOG_INFO);
     esp_log_level_set("duk_utils", ESP_LOG_INFO);
     esp_log_level_set("dukf_utils", ESP_LOG_INFO);

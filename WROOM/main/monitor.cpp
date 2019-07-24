@@ -376,12 +376,20 @@ extern "C" duk_ret_t registerTestCallback(duk_context* ctx) {
 
 class MCJSTest: public MonitorCommandBase{
 public:
-    const char* Desc(){ return "c call main.js or call test handler"; }
+    const char* Desc(){ return "c JS call commandline or call test handler"; }
     void Func(){
 		conPrintf("Heap before put event: %d bytes\n", esp_get_free_heap_size());
-#if 0
-        char* cmd = "ESP32.include('/main/main.js');";
-        event_newCommandLineEvent(cmd, strlen(cmd), 0);
+#if 1
+        const char* cmd = "jslib.print('"
+            "Very long message aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n');";
+        event_newCommandLineEvent((char*)cmd, strlen(cmd), 0);
 #else
         event_newCallbackRequestedEvent(
             ESP32_DUKTAPE_CALLBACK_STATIC_TYPE_FUNCTION,

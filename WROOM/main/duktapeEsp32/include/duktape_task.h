@@ -15,6 +15,7 @@
 
 //  The first context created from duktape heap.
 extern duk_context *heap_context;
+#define NTIMERCALLBACKS 4
 
 #define NJSTHREADS  2   //  Number of threads to process duktape events.
 typedef struct JSThread_struct{

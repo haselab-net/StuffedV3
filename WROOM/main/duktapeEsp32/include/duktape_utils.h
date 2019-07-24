@@ -9,6 +9,8 @@
 #define MAIN_DUKTAPE_UTILS_H_
 #include <duktape.h>
 
+#define CALLBACK_STASH_OBJECT_NAME "_dukf_callbackStash"
+
 void        esp32_duktape_addGlobalFunction(
 	duk_context *ctx,
 	char *functionName,
