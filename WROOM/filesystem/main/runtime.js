@@ -5,7 +5,7 @@ var console = require("console");
 // ESP32.include("iot.js");
 ESP32.include("sr_softrobot.js");
 ESP32.include("sr_motor.js");
-ESP32.include("sr_callbacks.js");
+// ESP32.include("sr_callbacks.js");
 
 jslib.printHeap("heap size after require: ");
 

@@ -20,11 +20,11 @@ var callbacks;
     }());
     callbacks.CallbacksMap = CallbacksMap;
     softrobot.message_command.callbacks.touchThresholdArray = [];
-    // if (!softrobot.message_command.callbacks.touchQueryer) {
-    //     softrobot.message_command.callbacks.touchQueryer = setInterval(function () {
-    //         softrobot.message_command.requireSensorInfo();
-    //     }, softrobot.message_command.callbacks.touchQueryerInterval);
-    // }
+    if (!softrobot.message_command.callbacks.touchQueryer) {
+        softrobot.message_command.callbacks.touchQueryer = setInterval(function () {
+            softrobot.message_command.requireSensorInfo();
+        }, softrobot.message_command.callbacks.touchQueryerInterval);
+    }
     var touchSensorCallbacks = new CallbacksMap(function (keyOptions) {
         return keyOptions.sensorId * 2 + keyOptions.threshold * 100 + (keyOptions.exceed ? 1 : 0);
     });

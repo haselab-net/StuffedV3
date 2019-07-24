@@ -47,7 +47,7 @@ static esp_err_t _http_event_handle(esp_http_client_event_t *evt) {
         case HTTP_EVENT_ON_DATA:
             ESP_LOGI(LOG_TAG, "HTTP_EVENT_ON_DATA, len=%d", evt->data_len);
             if (!esp_http_client_is_chunked_response(evt->client)) {
-                printf("%.*s", evt->data_len, (char*)evt->data);
+                printf("%.*s \n", evt->data_len, (char*)evt->data);
             }
 
             break;
@@ -165,6 +165,8 @@ void mqtt_data_event_handler (char* data) {
     p_str += strlen(value2)+1;
     strcpy(p_str, value3);
 
+    cJSON_Delete(obj);
+
     // call callback
     event_newCallbackRequestedEvent(
         ESP32_DUKTAPE_CALLBACK_STATIC_TYPE_FUNCTION,
@@ -232,6 +234,7 @@ static duk_ret_t startWaitingMQTTEvent(duk_context* ctx) {
     // mqtt_cfg.keepalive = 10 * 60;    // 10 min, 2 min default
     mqtt_cfg.disable_auto_reconnect = false;
     mqtt_cfg.task_prio = tskIDLE_PRIORITY;
+    mqtt_cfg.task_stack = 1024 * 2;
 
     // start
     mqtt_client = esp_mqtt_client_init(&mqtt_cfg);

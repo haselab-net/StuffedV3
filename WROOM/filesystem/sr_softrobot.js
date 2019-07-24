@@ -486,23 +486,21 @@ var softrobot;
 (function (softrobot) {
     var movement;
     (function (movement) {
+        function queryNOccupied() {
+            softrobot.message_command.setMovement({
+                movementCommandId: softrobot.command.CommandIdMovement.CI_M_QUERY
+            });
+            jslib.printHeap("---------- queryNOccupied");
+        }
         var MovementSender = (function () {
             function MovementSender() {
                 this.waitResponse = false;
                 softrobot.message_command.onRcvCIUMovementMessage.push(this.onRcvCIUMovementMessage.bind(this));
-                this.queryTimer = setTimeout(this.queryNOccupied.bind(this), MovementSender.OCCUPATION_QUERY_INTERVAL_MS);
+                this.queryTimer = setInterval(queryNOccupied, MovementSender.OCCUPATION_QUERY_INTERVAL_MS);
             }
-            MovementSender.prototype.queryNOccupied = function () {
-                softrobot.message_command.setMovement({
-                    movementCommandId: softrobot.command.CommandIdMovement.CI_M_QUERY
-                });
-                this.queryTimer = setTimeout(this.queryNOccupied.bind(this), MovementSender.OCCUPATION_QUERY_INTERVAL_MS);
-            };
             MovementSender.prototype.onRcvCIUMovementMessage = function (data) {
-                this.waitResponse = false;
                 if (data.movementCommandId == softrobot.command.CommandIdMovement.CI_M_ADD_KEYFRAME || softrobot.command.CommandIdMovement.CI_M_QUERY) {
-                    cancelTimeout(this.queryTimer);
-                    this.queryTimer = setTimeout(this.queryNOccupied.bind(this), MovementSender.OCCUPATION_QUERY_INTERVAL_MS);
+                    this.waitResponse = false;
                 }
             };
             MovementSender.prototype.canAddKeyframe = function (data) {

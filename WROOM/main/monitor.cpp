@@ -402,13 +402,14 @@ public:
     }
 } mcJSTest;
 
-
+extern bool offline_mode;
 class MCJSRestart: public MonitorCommandBase{
 public:
     MCJSRestart() { bFirst = true; } 
     const char* Desc(){ return "J Restart java script"; }
     bool bFirst;
     void Func(){
+        offline_mode = false;
         wsDeleteJsfileTask();
         //heap_trace_dump();
         if (bFirst){
@@ -416,6 +417,7 @@ public:
             bFirst = false;
         }
         ESP_LOGI(Tag(), "before wsCreateJsfileTask heap size: %d", esp_get_free_heap_size());
+        offline_mode = true;
         wsCreateJsfileTask();
         ESP_LOGI(Tag(), "After wsCreateJsfileTask heap size: %d", esp_get_free_heap_size());
     }
