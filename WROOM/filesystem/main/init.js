@@ -40,16 +40,16 @@ Duktape.modSearch = function(id, require, exports, module) {
 
 var _timers = {
 	setTimer: function(callback, interval, isInterval) {
-		id = ESP32.registerTimerCallback(callback, interval, isInterval);
+		var id = ESP32.registerTimerCallback(callback, interval, isInterval);
 		if (id == 0){
 			log("Failed to add a new timer for " + callback);
 		}else{
-			log("Added a new timer " + rv + " interval " + interval + " for " + callback);
+			log("Added a new timer " + id + " interval " + interval + " for " + callback);
 		}
 		return id;
 	},
 	cancelTimer: function(id) {	//	success = true  fail = false
-		rv = ESP32.cancelTimerCallback(id);
+		var rv = ESP32.cancelTimerCallback(id);
 		if (rv){
 			log("Failed to cancel a timer " + id);
 		}else{

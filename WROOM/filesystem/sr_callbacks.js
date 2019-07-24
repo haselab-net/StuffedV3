@@ -23,7 +23,6 @@ var callbacks;
     if (!softrobot.message_command.callbacks.touchQueryer) {
         softrobot.message_command.callbacks.touchQueryer = setInterval(function () {
             softrobot.message_command.requireSensorInfo();
-            jslib.print("setInterval callback is called");
         }, softrobot.message_command.callbacks.touchQueryerInterval);
     }
     var touchSensorCallbacks = new CallbacksMap(function (keyOptions) {
