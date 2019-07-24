@@ -535,8 +535,10 @@ static void clearMotorKeyframes(uint8_t motorId, MotorKeyframeNode* keyframes) {
 		count++;
 	}
 	uint8_t newOccipied = head.nOccupied - count;
+	int16_t currentPose = head.currentPose;
     initMotorHead(motorId);
     head.nOccupied = newOccipied;
+	head.currentPose = currentPose;
 }
 
 static void shiftMotorKeyframes(MotorKeyframeNode* keyframes, uint16_t timeOffset) {
