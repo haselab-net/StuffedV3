@@ -71,6 +71,7 @@ void setLogLevel(){
     esp_log_level_set("sr_main", ESP_LOG_INFO);
     esp_log_level_set("Uart", ESP_LOG_INFO);
     esp_log_level_set("MotorDriver", ESP_LOG_INFO);
+    esp_log_level_set("Movement", ESP_LOG_DEBUG);
 
     //  Web Server
     esp_log_level_set("Socket", ESP_LOG_INFO);

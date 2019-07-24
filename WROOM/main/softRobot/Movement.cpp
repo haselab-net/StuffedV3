@@ -760,8 +760,8 @@ void onChangeControlMode(CommandId newCommand) {
 			return;
 	}
 	if (newMovementControlMode != movementControlMode) {
-		if (newMovementControlMode) resumeInterpolate();
-		else pauseInterpolate();
+		if (newMovementControlMode) resumeInterpolate();	// goto movementControlMode
+		else pauseInterpolate();							// quit movementControlMode
 
 		movementControlMode = newMovementControlMode;
 	}
@@ -880,8 +880,8 @@ void resumeMovement(uint8_t movementId, uint8_t motorCount) {
 void resumeInterpolate() {
 	if (!tickPaused) return;
 
-	calibrateCurrentPose = true;
-	movementQueryInterpolateState();
+	// calibrateCurrentPose = true;
+	// movementQueryInterpolateState();		// TODO post event in handling event is not allowed
 
 	xSemaphoreTake(tickSemaphore, portMAX_DELAY);
 	// the current pos of every motor might have been changed
