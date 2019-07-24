@@ -809,7 +809,6 @@ void commandMessageHandler(UdpRetPacket& ret) {
     //hase: now ctx is not needed here. It is assigned at dukEventHandleTask() in duktape_task.c
     //  duk_context* ctx= esp32_duk_context;
     //  duk_idx_t top = duk_get_top(ctx);
-    printf("duktape receive packet: %i \n", ret.command);
     switch (ret.command)
     {
         case CI_BOARD_INFO: {
