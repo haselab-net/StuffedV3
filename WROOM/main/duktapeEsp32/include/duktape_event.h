@@ -17,7 +17,8 @@ enum {
 	ESP32_DUKTAPE_EVENT_TIMER_ADDED,
 	ESP32_DUKTAPE_EVENT_TIMER_FIRED,
 	ESP32_DUKTAPE_EVENT_TIMER_CLEARED,
-	ESP32_DUKTAPE_EVENT_CALLBACK_REQUESTED
+	ESP32_DUKTAPE_EVENT_CALLBACK_REQUESTED,
+	ESP32_DUKTAPE_EVENT_QUIT
 };
 
 enum {
@@ -82,6 +83,8 @@ void  event_newCallbackRequestedEvent(
 	esp32_duktape_callback_dataprovider dataProvider,
 	void* contextData);
 void  event_newCommandLineEvent(char* commandData, size_t commandLength, int fromKeyboard);
+void  event_newQuitEvent();
+
 //void  event_newHTTPServerRequestEvent(char *uri, char *method);
 //void  event_newTimerAddedEvent(unsigned long);
 //void  event_newTimerClearedEvent(unsigned long id);

@@ -138,6 +138,12 @@ void event_newCallbackRequestedEvent(
 	LOGD("<< event_newCallbackRequestedEvent");
 } // event_newCallbackRequestedEvent
 
+void event_newQuitEvent(){
+	esp32_duktape_event_t* event = malloc(sizeof(esp32_duktape_event_t));
+	event->type = ESP32_DUKTAPE_EVENT_QUIT;
+	postEvent(event, false); // Post the event.
+	free(event);
+}
 
 /**
  * Post a new command line event.  The commandData is expected to have been

@@ -326,7 +326,8 @@ static void dukEventHandleTask(void* arg){
 		//	malloc after lock reduce memory usage. Because only one thread can lock heap.
 		esp32_duktape_event_t* ev = malloc(sizeof(esp32_duktape_event_t));
 		esp32_duktape_waitForEvent(ev, portMAX_DELAY);
-		if (!th->ctx){
+		if (ev->type == ESP32_DUKTAPE_EVENT_QUIT){
+			free(ev);
 			unlock_heap();
 			break;
 		}
@@ -380,7 +381,7 @@ void duktape_start() {
 void duktape_end(){
 	iotBeforeStopJSTask();
 	for(int i=0; i<NJSTHREADS; ++i){
-		jsThreads[i].ctx = NULL;
+		event_newQuitEvent();
 	}
 	bool remain;
 	do{
@@ -388,8 +389,6 @@ void duktape_end(){
 		for(int i=0; i<NJSTHREADS; ++i){
 			if (jsThreads[i].task){
 				remain = true;
-				char* cmd = ";";
-				event_newCommandLineEvent(cmd, strlen(cmd), 0);
 				vTaskDelay(1);
 			} 
 		}
