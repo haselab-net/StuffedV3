@@ -2,29 +2,6 @@ var softrobot;
 (function (softrobot) {
     var command;
     (function (command) {
-        var CommandId;
-        (function (CommandId) {
-            CommandId[CommandId["CI_NONE"] = 0] = "CI_NONE";
-            CommandId[CommandId["CI_BOARD_INFO"] = 1] = "CI_BOARD_INFO";
-            CommandId[CommandId["CI_SET_CMDLEN"] = 2] = "CI_SET_CMDLEN";
-            CommandId[CommandId["CI_ALL"] = 3] = "CI_ALL";
-            CommandId[CommandId["CI_SENSOR"] = 4] = "CI_SENSOR";
-            CommandId[CommandId["CI_DIRECT"] = 5] = "CI_DIRECT";
-            CommandId[CommandId["CI_CURRENT"] = 6] = "CI_CURRENT";
-            CommandId[CommandId["CI_INTERPOLATE"] = 7] = "CI_INTERPOLATE";
-            CommandId[CommandId["CI_FORCE_CONTROL"] = 8] = "CI_FORCE_CONTROL";
-            CommandId[CommandId["CI_SETPARAM"] = 9] = "CI_SETPARAM";
-            CommandId[CommandId["CI_RESET_SENSOR"] = 10] = "CI_RESET_SENSOR";
-            CommandId[CommandId["CI_NCOMMAND"] = 11] = "CI_NCOMMAND";
-            CommandId[CommandId["CIU_TEXT"] = 11] = "CIU_TEXT";
-            CommandId[CommandId["CIU_SET_IPADDRESS"] = 12] = "CIU_SET_IPADDRESS";
-            CommandId[CommandId["CIU_GET_IPADDRESS"] = 13] = "CIU_GET_IPADDRESS";
-            CommandId[CommandId["CIU_GET_SUBBOARD_INFO"] = 14] = "CIU_GET_SUBBOARD_INFO";
-            CommandId[CommandId["CIU_MOVEMENT"] = 15] = "CIU_MOVEMENT";
-            CommandId[CommandId["CIU_NCOMMAND"] = 15] = "CIU_NCOMMAND";
-            CommandId[CommandId["CIU_NONE"] = -1] = "CIU_NONE";
-        })(CommandId = command.CommandId || (command.CommandId = {}));
-        ;
         var SetParamType;
         (function (SetParamType) {
             SetParamType[SetParamType["PT_PD"] = 0] = "PT_PD";
@@ -32,25 +9,6 @@ var softrobot;
             SetParamType[SetParamType["PT_TORQUE_LIMIT"] = 2] = "PT_TORQUE_LIMIT";
             SetParamType[SetParamType["PT_BOARD_ID"] = 3] = "PT_BOARD_ID";
         })(SetParamType = command.SetParamType || (command.SetParamType = {}));
-        ;
-        var ResetSensorFlags;
-        (function (ResetSensorFlags) {
-            ResetSensorFlags[ResetSensorFlags["RSF_NONE"] = 0] = "RSF_NONE";
-            ResetSensorFlags[ResetSensorFlags["RSF_MOTOR"] = 1] = "RSF_MOTOR";
-            ResetSensorFlags[ResetSensorFlags["RSF_FORCE"] = 2] = "RSF_FORCE";
-        })(ResetSensorFlags = command.ResetSensorFlags || (command.ResetSensorFlags = {}));
-        var PacketId;
-        (function (PacketId) {
-            PacketId[PacketId["PI_NONE"] = 0] = "PI_NONE";
-            PacketId[PacketId["PI_JSFILE"] = 1] = "PI_JSFILE";
-            PacketId[PacketId["PI_COMMAND"] = 2] = "PI_COMMAND";
-            PacketId[PacketId["PI_SETTINGS"] = 3] = "PI_SETTINGS";
-        })(PacketId = command.PacketId || (command.PacketId = {}));
-        var SettingId;
-        (function (SettingId) {
-            SettingId[SettingId["SI_NONE"] = 0] = "SI_NONE";
-            SettingId[SettingId["SI_DEVELOPMENT_MODE"] = 1] = "SI_DEVELOPMENT_MODE";
-        })(SettingId = command.SettingId || (command.SettingId = {}));
         var CommandIdMovement;
         (function (CommandIdMovement) {
             CommandIdMovement[CommandIdMovement["CI_M_NONE"] = 0] = "CI_M_NONE";
