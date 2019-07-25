@@ -514,6 +514,7 @@ void esp32_duktape_unstash_object(duk_context *ctx, uint32_t key) {
 
 } // esp32_duktape_unstash_object
 
+#if 0	//	tried to dump callstack. But it was not very helpful. Also error throw in JS shows stack dump and it is better.
 duk_ret_t duktape_print_callstack(duk_context* ctx){
 	printf("Stack trace:\n");
 	for(int i=0; i<20; ++i){
@@ -537,3 +538,4 @@ duk_ret_t duktape_print_callstack(duk_context* ctx){
 	}
 	return 0;
 }
+#endif

@@ -421,7 +421,6 @@ duk_ret_t espPrint(duk_context* ctx){
 	printf("%s", str);
 	return 0;
 }
-duk_ret_t duktape_print_callstack(duk_context* ctx);
 
 /**
  * Register the ESP32 module with its functions.
@@ -530,7 +529,6 @@ static void ModuleESP32(duk_context *ctx) {
     ADD_FUNCTION("registerTimerCallback", registerTimerCallback, 3);	//	arg: (func, time, interval flag)
     ADD_FUNCTION("cancelTimerCallback", cancelTimerCallback, 1);		//	arg: (stash)
     ADD_FUNCTION("print", espPrint, 1);	//	arg: (str)
-    ADD_FUNCTION("print_callstack", duktape_print_callstack, 0);	//	arg: (str)
 
 	duk_put_prop_string(ctx, -2, "ESP32"); // Add ESP32 to global
 	// [0] - Global object

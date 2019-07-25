@@ -90,6 +90,8 @@ char *event_eventTypeToString(int eventType) {
 			return "ESP32_DUKTAPE_EVENT_COMMAND_LINE";
 		case ESP32_DUKTAPE_EVENT_CALLBACK_REQUESTED:
 			return "ESP32_DUKTAPE_EVENT_CALLBACK_REQUESTED";
+		case ESP32_DUKTAPE_EVENT_QUIT:
+			return "ESP32_DUKTAPE_EVENT_QUIT";
 		default:
 			return "Unknown event type";
 	}
