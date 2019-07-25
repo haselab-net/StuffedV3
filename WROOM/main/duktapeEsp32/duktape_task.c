@@ -326,7 +326,7 @@ static void dukEventHandleTask(void* arg){
 		esp32_duktape_waitForEvent(ev, portMAX_DELAY);
 		// process events
 		lock_heap();
-		if (ev->type == ESP32_DUKTAPE_EVENT_QUIT){
+		if (ev->type == ESP32_DUKTAPE_EVENT_QUIT || th->ctx == NULL){
 			free(ev);
 			unlock_heap();
 			break;
@@ -382,6 +382,7 @@ void duktape_end(){
 	iotBeforeStopJSTask();
 	for(int i=0; i<NJSTHREADS; ++i){
 		event_newQuitEvent();
+		jsThreads[i].ctx = NULL;
 	}
 	bool remain;
 	do{
@@ -401,6 +402,16 @@ void duktape_end(){
 	unlock_heap();
 	
 	esp32_duktape_endEvents();
+}
+duk_ret_t jsIsQuiting(duk_context* ctx){
+	for(int i=0; i<NJSTHREADS; ++i){
+		if (jsThreads[i].ctx == ctx){
+			duk_push_boolean(false);
+			return 1;
+		}
+	}
+	duk_push_boolean(true);
+	return 1;
 }
 
 void duktape_print_stack_remain(duk_context* ctx, const char* at){
