@@ -32,4 +32,12 @@ void popPayloadNumArray(const void* &payload, std::vector<T> &vec, size_t len) {
     }
 }
 
+/////////////////////////////////// functions for duktape ////////////////////////////////
+template <class T>
+T saturateCast(T val, T min, T max) {
+    if (val < min) return min;
+    if (val > max) return max;
+    return val;
+}
+
 #endif
