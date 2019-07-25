@@ -838,6 +838,8 @@ void commandMessageHandler(UdpRetPacket& ret) {
             break;
         }
         case CI_INTERPOLATE: {
+            break;  // NOTE not needed for JS
+
             std::unordered_map<std::string, uint32_t>::const_iterator iter = callback_stash_keys.find("onReceiveCIInterpolate");
             if (iter == callback_stash_keys.end()) {
                 LOGE("Callback function onReceiveCIInterpolate is not registered");
@@ -857,6 +859,8 @@ void commandMessageHandler(UdpRetPacket& ret) {
             break;
         }
         case CI_SETPARAM: {
+            break;  // NOTE not needed for JS
+
             std::unordered_map<std::string, uint32_t>::const_iterator iter = callback_stash_keys.find("onReceiveCISetparam");
             if (iter == callback_stash_keys.end()) {
                 LOGE("Callback function onReceiveCISetparam is not registered");
@@ -873,6 +877,8 @@ void commandMessageHandler(UdpRetPacket& ret) {
             break;
         }
         case CI_RESET_SENSOR: {
+            break;  // NOTE not needed for JS
+            
             std::unordered_map<std::string, uint32_t>::const_iterator iter = callback_stash_keys.find("onReceiveCIResetsensor");
             if (iter == callback_stash_keys.end()) {
                 LOGE("Callback function onReceiveCIResetsensor is not registered");

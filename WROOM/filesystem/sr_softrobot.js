@@ -194,13 +194,6 @@ var softrobot;
 // sr_command
 (function(softrobot) {
     softrobot.message_command = require("sr_command");
-    var tmp = softrobot.message_command.setMotorDirect;
-    softrobot.message_command.setMotorDirect = function (data) {
-        // softrobot.movement.sendKeyframeQueue.clear();
-        softrobot.device.robotState.interpolateTargetCountOfWrite = -1;
-        softrobot.device.robotState.nInterpolateVacancy = softrobot.device.robotState.nInterpolateTotal;
-        softrobot.device.robotState.nInterpolateRemain = 0;
-    }
 })(softrobot || (softrobot = {}));
 
 (function (softrobot) {
@@ -228,42 +221,6 @@ var softrobot;
         function onReceiveCIDirect(data) {
         }
         message_command.onReceiveCIDirect = onReceiveCIDirect;
-        function onReceiveCIInterpolate(data) {
-            function calculateInterpolateState() {
-                var rmin = softrobot.device.robotState.interpolateTargetCountOfReadMin;
-                var rmax = softrobot.device.robotState.interpolateTargetCountOfReadMax;
-                var tmin = softrobot.device.robotState.interpolateTickMin;
-                var tmax = softrobot.device.robotState.interpolateTickMax;
-                var wc = softrobot.device.robotState.interpolateTargetCountOfWrite;
-                softrobot.device.robotState.nInterpolateRemain = wc >= rmax ? wc - rmax + 1 : wc - rmax + 1 + 256;
-                var readDiff = rmax >= rmin ? rmax - rmin : rmax - rmin + 256;
-                softrobot.device.robotState.nInterpolateVacancy = softrobot.device.robotState.nInterpolateTotal - softrobot.device.robotState.nInterpolateRemain - readDiff;
-            }
-            // softrobot.device.robotState.setPropArray("pose", data.pose, softrobot.device.robotState.motor);
-            softrobot.device.robotState.interpolateTargetCountOfReadMin = data.targetCountReadMin;
-            softrobot.device.robotState.interpolateTargetCountOfReadMax = data.targetCountReadMax;
-            softrobot.device.robotState.interpolateTickMin = data.tickMin;
-            softrobot.device.robotState.interpolateTickMax = data.tickMax;
-            calculateInterpolateState();
-            if (softrobot.device.robotState.nInterpolateVacancy > softrobot.device.robotState.nInterpolateTotal - 2 || softrobot.device.robotState.nInterpolateVacancy < 0) {
-                softrobot.device.robotState.interpolateTargetCountOfWrite = (softrobot.device.robotState.interpolateTargetCountOfReadMax + 1) % 256;
-                calculateInterpolateState();
-            }
-            for (var i = 0; i < message_command.onRcvCIInterpolateMessage.length; i++) {
-                message_command.onRcvCIInterpolateMessage[i]();
-            }
-        }
-        message_command.onReceiveCIInterpolate = onReceiveCIInterpolate;
-        function onReceiveCISetparam() {
-            return;
-        }
-        message_command.onReceiveCISetparam = onReceiveCISetparam;
-        function onReceiveCIResetsensor() {
-            for (var i = 0; i < message_command.onRcvCIResetSensorMessage.length; i++) {
-                message_command.onRcvCIResetSensorMessage[i]();
-            }
-        }
-        message_command.onReceiveCIResetsensor = onReceiveCIResetsensor;
         function onReceiveCIUMovement(data) {
             switch (data.movementCommandId) {
                 case softrobot.command.CommandIdMovement.CI_M_ADD_KEYFRAME:
@@ -279,10 +236,7 @@ var softrobot;
         }
         message_command.onReceiveCIUMovement = onReceiveCIUMovement;
         message_command.onRcvCIBoardInfoMessage = [];
-        message_command.onRcvCISensorMessage = [];
         message_command.onRcvCIDirectMessage = [];
-        message_command.onRcvCIInterpolateMessage = [];
-        message_command.onRcvCIResetSensorMessage = [];
         message_command.onRcvCIUMovementMessage = [];
         function setMotorState(to, from) {
             var id = from.motorId;
@@ -395,9 +349,6 @@ var softrobot;
     (function (message_command) {
         message_command.registerCallback("onReceiveCIBoardinfo", message_command.onReceiveCIBoardinfo);
         message_command.registerCallback("onReceiveCIDirect", message_command.onReceiveCIDirect);
-        message_command.registerCallback("onReceiveCIInterpolate", message_command.onReceiveCIInterpolate);
-        message_command.registerCallback("onReceiveCISetparam", message_command.onReceiveCISetparam);
-        message_command.registerCallback("onReceiveCIResetsensor", message_command.onReceiveCIResetsensor);
         message_command.registerCallback("onReceiveCIUMovement", message_command.onReceiveCIUMovement);
     })(message_command = softrobot.message_command || (softrobot.message_command = {}));
 })(softrobot || (softrobot = {}));
