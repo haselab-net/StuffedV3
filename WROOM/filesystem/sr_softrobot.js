@@ -110,14 +110,6 @@ var softrobot;
                 for (var index = 0; index < this.force.length; index++) {
                     this.force[index] = 0;
                 }
-                this.nInterpolateTotal = 12;
-                this.interpolateTargetCountOfWrite = -1;
-                this.interpolateTargetCountOfReadMin = 0;
-                this.interpolateTargetCountOfReadMax = 0;
-                this.interpolateTickMin = 0;
-                this.interpolateTickMax = 0;
-                this.nInterpolateRemain = 0;
-                this.nInterpolateVacancy = 12;
                 this.movementState = new MovementState();
             };
             RobotState.prototype.getPropArray = function (name, array) {
@@ -177,7 +169,6 @@ var softrobot;
                     array.slice(0, size);
                 return array;
             }
-            device.robotState.nInterpolateTotal = device.robotInfo.nTarget;
             if (device.robotState.motor.length != device.robotInfo.nMotor)
                 device.robotState.motor = resizeMotorStateArray(device.robotState.motor, device.robotInfo.nMotor);
             if (device.robotState.current.length != device.robotInfo.nCurrent)
@@ -275,7 +266,6 @@ var softrobot;
                     softrobot.device.robotState.motor[inst.motorId].velocity = inst.velocity;
                 var pose = softrobot.device.robotState.getPropArray("pose", softrobot.device.robotState.motor);
                 var velocity = softrobot.device.robotState.getPropArray("velocity", softrobot.device.robotState.motor);
-                // softrobot.movement.sendKeyframeQueue.clear();
                 message_command.setMotorDirect({
                     pose: pose,
                     velocity: velocity
