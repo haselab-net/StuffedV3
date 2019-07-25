@@ -190,17 +190,6 @@ var softrobot;
 (function (softrobot) {
     var message_command;
     (function (message_command) {
-        var callbacks;
-        (function (callbacks) {
-            callbacks.touchQueryer = undefined;
-            callbacks.touchQueryerInterval = 500;
-        })(callbacks = message_command.callbacks || (message_command.callbacks = {}));
-    })(message_command = softrobot.message_command || (softrobot.message_command = {}));
-})(softrobot || (softrobot = {}));
-
-(function (softrobot) {
-    var message_command;
-    (function (message_command) {
         function onReceiveCIBoardinfo(data) {
             softrobot.device.robotInfo = data;
             softrobot.device.checkRobotState();

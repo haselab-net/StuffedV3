@@ -10,7 +10,7 @@ ESP32.include("sr_softrobot.js");
 jslib.printHeap("after sr_softrobot");
 ESP32.include("sr_motor.js");
 jslib.printHeap("after sr_motor");
-ESP32.include("sr_callbacks.js");
+var callbacks = require("sr_callbacks.js");
 jslib.printHeap("after sr_callbacks");
 
 jslib.printHeap("heap size after require: ");
