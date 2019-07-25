@@ -406,11 +406,11 @@ void duktape_end(){
 duk_ret_t jsIsQuiting(duk_context* ctx){
 	for(int i=0; i<NJSTHREADS; ++i){
 		if (jsThreads[i].ctx == ctx){
-			duk_push_boolean(false);
+			duk_push_boolean(ctx, false);
 			return 1;
 		}
 	}
-	duk_push_boolean(true);
+	duk_push_boolean(ctx, true);
 	return 1;
 }
 
