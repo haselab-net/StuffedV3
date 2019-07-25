@@ -730,7 +730,7 @@ static void initMovementManager() {
 	tickSemaphore = xSemaphoreCreateMutex();
 	vSemaphoreCreateBinary(intervalSemaphore);
 
-	xTaskCreate(movementManager, "movement_manager", 1024*3, NULL, tskIDLE_PRIORITY+2, &movementManagerTask);
+	xTaskCreate(movementManager, "movement", 1024*3, NULL, tskIDLE_PRIORITY+4, &movementManagerTask);
 
 	initTimer();
 }
