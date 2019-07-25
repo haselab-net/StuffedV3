@@ -610,7 +610,7 @@ void printAllMotorKeyframes() {
 
 void printInterpolateParams() {
 	for (int i=0; i<allBoards.GetNTotalMotor(); i++) {
-		printf("motor %i: slopeInteger: %i, slopeDecimal: %i\n", i, motorHeads[i].slopeInteger, motorHeads[i].slopeDecimal);
+		printf("motor %i: nOccupied: %i, slopeInteger: %i, slopeDecimal: %i\n", i, motorHeads[i].nOccupied, motorHeads[i].slopeInteger, motorHeads[i].slopeDecimal);
 	}
 }
 
@@ -661,6 +661,7 @@ static void movementManager(void* arg) {
 		}
 		if (!receivedReturn) {								// not tick if return packet for last command not come
 			ESP_LOGD(LOG_TAG, "Skip one loop because no return CI_INTERPOLATED received in %i ms", MS_PER_MOVEMENT_TICK);
+			receivedReturn = true;							// NOTE avoid lose of packet
 			continue;
 		}
 

@@ -1,5 +1,3 @@
-// var softrobot = require("sr_softrobot");
-
 var motor;
 (function (motor_1) {
     motor_1.movementSender = new softrobot.movement.MovementSender();
@@ -106,12 +104,14 @@ var motor;
     motor_1.setMovementAll = setMovementAll;
     motor_1.movementNames = ["default_name"];
     function getMovementId(name) {
-        for (let i = 0 ; i < movementNames.length; i++) {
-            if (movementNames[i] == name) return i;
+        for (var i = 0; i < motor_1.movementNames.length; i++) {
+            if (motor_1.movementNames[i] == name)
+                return i;
         }
-        movementNames.push(name);
-        return movementNames.length - 1;
+        motor_1.movementNames.push(name);
+        return motor_1.movementNames.length - 1;
     }
+    motor_1.getMovementId = getMovementId;
     function movementDecoder(movementStr) {
         function splitToInt(str, seperator) {
             var nums_str = str.split(seperator);
@@ -164,7 +164,7 @@ var motor;
             });
         }
         return {
-            movementId: getNewMovementId(name),
+            movementId: getMovementId(name),
             motorIds: line_2.slice(1),
             keyframes: keyframes
         };
@@ -227,5 +227,3 @@ var motor;
     }
     motor_1.clearPausedMovements = clearPausedMovements;
 })(motor || (motor = {}));
-
-// module.exports = motor;

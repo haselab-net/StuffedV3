@@ -504,8 +504,10 @@ var softrobot;
                 }
             };
             MovementSender.prototype.canAddKeyframe = function (data) {
-                if (this.waitResponse)
+                if (this.waitResponse) {
+                    jslib.print("---- wait for response");
                     return false;
+                }
                 for (var i = 0; i < data.motorCount; i++) {
                     if (softrobot.device.robotState.movementState.nOccupied[data.motorId[i]] >= MovementSender.MAX_NOCCUPIED)
                         return false;
@@ -538,14 +540,6 @@ var softrobot;
             return MovementSender;
         }());
         movement.MovementSender = MovementSender;
-        var lastMovementId = 0;
-        function getNewMovementId() {
-            lastMovementId = lastMovementId + 1;
-            if (lastMovementId > 255)
-                lastMovementId = 1;
-            return lastMovementId;
-        }
-        movement.getNewMovementId = getNewMovementId;
     })(movement = softrobot.movement || (softrobot.movement = {}));
 })(softrobot || (softrobot = {}));
 (function (softrobot) {
