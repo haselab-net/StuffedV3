@@ -23,21 +23,14 @@ Duktape.modSearch = function(id, require, exports, module) {
 	if (!StringUtils.endsWith(id, ".js")) {
 		name += ".js";
 	}
-	/*
-	if (!id.endsWith(".js")) {
-		name += ".js";
-	}
-	*/
 	module.filename = name;
 	var dir = ESP32.NetVFSDir;
 	if(dir && name.slice(0,dir.length+1) == dir + '/')
 		return ESP32.loadFile('/' + name);
 	return DUKF.loadFile(name);
-	//var data = DUKF.loadFile(name);
-	//log(data);
-	//return data;
 }; // Duktape.modSearch
 
+/*
 var _timers = {
 	setTimer: function(callback, interval, isInterval) {
 		var id = ESP32.registerTimerCallback(callback, interval, isInterval);
@@ -58,19 +51,19 @@ var _timers = {
 		return rv;
 	} // cancelTimer
 };
-
+*/
 function cancelInterval(id) {
-	_timers.cancelTimer(id);
+	ESP32.cancelTimerCallback(id);
 }
 
 function cancelTimeout(id) {
-	_timers.cancelTimer(id);
+	ESP32.cancelTimerCallback(id);
 }
 
 function setInterval(callback, interval) {
-	return _timers.setTimer(callback, interval, true);
+	return ESP32.registerTimerCallback(callback, interval, true);
 }
 
 function setTimeout(callback, interval) {
-	return _timers.setTimer(callback, interval, false);
+	return ESP32.registerTimerCallback(callback, interval, false);
 }

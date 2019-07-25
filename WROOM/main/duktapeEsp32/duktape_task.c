@@ -27,6 +27,12 @@ volatile bool bJsQuitting = false;
 static xSemaphoreHandle heap_mutex = NULL;
 
 void* duk_alloc_hybrid_udata = NULL;
+
+static duk_ret_t dukPrint(duk_context* ctx){
+    const char* str = duk_get_string(ctx, -1);
+	printf("%s", str);
+	return 0;
+}
 /**
  * create environment for running js file
  */
@@ -45,8 +51,12 @@ static void createDuktapeHeap() {
     dukf_log_heap("Heap after duk create heap");
     
 	duk_eval_string_noresult(heap_context, "new Function('return this')().Duktape = Object.create(Duktape);");
-
 	duk_module_duktape_init(heap_context); // Initialize the duktape module functions.
+	duk_get_global_string(heap_context, "Duktape");
+	duk_push_c_function(heap_context, dukPrint, 1);	//	print(string)
+	duk_put_prop_string(heap_context, -2, "print");
+	duk_pop(heap_context);
+
 	dukf_log_heap("Heap after duk_module_duktape_init");
 
 	esp32_duktape_stash_init(heap_context); // Initialize the stash environment.
@@ -345,15 +355,16 @@ static void dukEventHandleTask(void* arg){
 }
 
 void duktape_start() {
+    if(heap_context){
+		LOGE("heap_context must be NULL at duktape_start().");
+		return;
+	}
 	//	Initialize heap and threads
     dukf_init_nvs_values(); // Initialize any defaults for NVS data
     esp32_duktape_initEvents();
 	if(!heap_mutex) heap_mutex = xSemaphoreCreateMutex();	// only create once
 	lock_heap();
-    if(!heap_context) createDuktapeHeap();					// only create once
-	else {
-		dukf_runFile(heap_context, "/main/reinit.js");
-	}
+	createDuktapeHeap();
 	jsThreads[0].ctx = heap_context;
 	for(int i=1; i<NJSTHREADS; ++i){
 		// create new context on the same heap
