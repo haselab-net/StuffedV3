@@ -22,6 +22,7 @@ LOG_TAG("duktape_task");
 duk_context *heap_context = NULL;
 //	Threads
 JSThread jsThreads[NJSTHREADS];
+volatile bool bJsQuitting = false;
 // mutex for heap
 static xSemaphoreHandle heap_mutex = NULL;
 
@@ -379,10 +380,10 @@ void duktape_start() {
 
 
 void duktape_end(){
+	bJsQuitting = true;
 	iotBeforeStopJSTask();
 	for(int i=0; i<NJSTHREADS; ++i){
 		event_newQuitEvent();
-		jsThreads[i].ctx = NULL;
 	}
 	bool remain;
 	do{
@@ -402,15 +403,10 @@ void duktape_end(){
 	unlock_heap();
 	
 	esp32_duktape_endEvents();
+	bJsQuitting = false;
 }
 duk_ret_t jsIsQuiting(duk_context* ctx){
-	for(int i=0; i<NJSTHREADS; ++i){
-		if (jsThreads[i].ctx == ctx){
-			duk_push_boolean(ctx, false);
-			return 1;
-		}
-	}
-	duk_push_boolean(ctx, true);
+	duk_push_boolean(ctx, bJsQuitting);
 	return 1;
 }
 
