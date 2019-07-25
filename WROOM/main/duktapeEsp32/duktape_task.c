@@ -320,12 +320,12 @@ static void dukEventHandleTask(void* arg){
 	JSThread* th = (JSThread*)arg;
 	th->stackStart = (int)&th;
 	th->stackPrev = 0;
-	while(1){
-		// process events
-		lock_heap();	
+	while(1){	
 		//	malloc after lock reduce memory usage. Because only one thread can lock heap.
 		esp32_duktape_event_t* ev = malloc(sizeof(esp32_duktape_event_t));
 		esp32_duktape_waitForEvent(ev, portMAX_DELAY);
+		// process events
+		lock_heap();
 		if (ev->type == ESP32_DUKTAPE_EVENT_QUIT){
 			free(ev);
 			unlock_heap();
@@ -360,7 +360,7 @@ void duktape_start() {
 		jsThreads[i].ctx = duk_get_context(heap_context, -1);
 	}
 	unlock_heap();
-	const char* taskNames[NJSTHREADS] = {"js0", "js1"};
+	const char* taskNames[NJSTHREADS] = {"js0", "js1", "js2"};
 	
 	//	create tasks for threads
 	for(int i=0; i<NJSTHREADS; ++i){

@@ -17,7 +17,7 @@
 extern duk_context *heap_context;
 #define NTIMERCALLBACKS 4
 
-#define NJSTHREADS  2   //  Number of threads to process duktape events.
+#define NJSTHREADS  3   //  Number of threads to process duktape events.
 typedef struct JSThread_struct{
     duk_context* ctx;
     duk_thread_state state;

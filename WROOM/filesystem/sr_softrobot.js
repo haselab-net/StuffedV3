@@ -534,7 +534,7 @@ var softrobot;
                 return true;
             };
             MovementSender.MAX_NOCCUPIED = 5;
-            MovementSender.OCCUPATION_QUERY_INTERVAL_MS = 1000;
+            MovementSender.OCCUPATION_QUERY_INTERVAL_MS = 3000;
             return MovementSender;
         }());
         movement.MovementSender = MovementSender;

@@ -45,7 +45,7 @@ struct InterpolateState {
 };
 
 /////////////////////////////////////////// api for accessing PIC ///////////////////////////////////////////////
-#define PIC_INTERPOLATE_BUFFER_VACANCY_MIN 2		// the minimum empty interpolate buffer count
+#define PIC_INTERPOLATE_BUFFER_VACANCY_MIN 8		// the minimum empty interpolate buffer count
 void movementQueryInterpolateState();
 void movementOnGetPICInfo(UdpRetPacket& pkt);
 
