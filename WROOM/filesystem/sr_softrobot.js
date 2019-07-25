@@ -538,14 +538,6 @@ var softrobot;
             return MovementSender;
         }());
         movement.MovementSender = MovementSender;
-        var lastMovementId = 0;
-        function getNewMovementId() {
-            lastMovementId = lastMovementId + 1;
-            if (lastMovementId > 255)
-                lastMovementId = 1;
-            return lastMovementId;
-        }
-        movement.getNewMovementId = getNewMovementId;
     })(movement = softrobot.movement || (softrobot.movement = {}));
 })(softrobot || (softrobot = {}));
 (function (softrobot) {
@@ -562,49 +554,6 @@ var softrobot;
             return res;
         }
         util.limitNum = limitNum;
-        function ab2str(buf) {
-            return String.fromCharCode.apply(null, new Uint16Array(buf));
-        }
-        util.ab2str = ab2str;
-        function str2ab(str) {
-            var buf = new ArrayBuffer(str.length * 2);
-            var bufView = new Uint16Array(buf);
-            for (var i = 0, strLen = str.length; i < strLen; i++) {
-                bufView[i] = str.charCodeAt(i);
-            }
-            return buf;
-        }
-        util.str2ab = str2ab;
-        function str2abAscii(str) {
-            var buf = new ArrayBuffer(str.length);
-            var bufView = new Uint8Array(buf);
-            for (var i = 0, strLen = str.length; i < strLen; i++) {
-                bufView[i] = str.charCodeAt(i) >= 128 ? 63 : str.charCodeAt(i);
-            }
-            return buf;
-        }
-        util.str2abAscii = str2abAscii;
-        function arrayEncoder(array, func, delimiter) {
-            var res = "";
-            if (array.length < 0)
-                return res;
-            res += func(array[0]);
-            for (var i = 1; i < array.length; i++) {
-                res += delimiter + func(array[i]);
-            }
-            return res;
-        }
-        util.arrayEncoder = arrayEncoder;
-        function arrayDecoder(str, func, delimiter) {
-            var res = [];
-            var strArray = str.split(delimiter);
-            for (var _i = 0, strArray_1 = strArray; _i < strArray_1.length; _i++) {
-                var str_1 = strArray_1[_i];
-                res.push(func(str_1));
-            }
-            return res;
-        }
-        util.arrayDecoder = arrayDecoder;
         function interpolate(x1, y1, x2, y2, x) {
             return (y2 - y1) / (x2 - x1) * (x - x1) + y1;
         }
