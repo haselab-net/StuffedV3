@@ -2,7 +2,7 @@ var jslib = require("jslib");
 var loops = require("sr_loops");
 var console = require("console");
 
-ESP32.include("iot.js");
+// ESP32.include("iot.js");
 ESP32.include("sr_softrobot.js");
 ESP32.include("sr_motor.js");
 ESP32.include("sr_callbacks.js");
@@ -14,4 +14,6 @@ softrobot.message_command.requireBoardInfo();
 
 ESP32.include("/main/main.js");
 
-// jslib.pushEventQueue(loops.doForever);
+jslib.printHeap("heap size after main.js: ");
+
+jslib.pushEventQueue(loops.doForever);

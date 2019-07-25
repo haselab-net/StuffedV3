@@ -1,9 +1,14 @@
 console.log("defaule main.js");
 
 var movement_1 = motor.movementDecoder("4 1 6005\n3 0\n842 2276\n1158 397\n2011 2765\n1994 1246")
-for (var i = 0; i < 3; i++) {
+var movement_2 = motor.movementDecoder("4 1 6005\n3 1\n842 2276\n1158 397\n2011 2765\n1994 1246")
+loops.forever(function () {
     motor.setMovement(motor.MovementOption.play, movement_1)
-}
+    loops.pause(1000)
+})
+callbacks.onStartTouch(1, 250, function () {
+    motor.setMovement(motor.MovementOption.play, movement_2)
+})
 
 // iot.registerMQTTEvent("hello", function (value1, value2, value3) {
 //     console.log("hello");
