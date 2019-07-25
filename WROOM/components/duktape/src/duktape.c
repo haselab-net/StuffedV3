@@ -75160,6 +75160,7 @@ DUK_LOCAL void duk__parse_func_body(duk_compiler_ctx *comp_ctx, duk_bool_t expec
 	 */
 
 	/* XXX: this is pointless here because pass 1 is throw-away */
+	DUK_STACK_REMAIN(thr);
 	if (implicit_return_value) {
 		reg_stmt_value = DUK__ALLOCTEMP(comp_ctx);
 
@@ -75184,6 +75185,7 @@ DUK_LOCAL void duk__parse_func_body(duk_compiler_ctx *comp_ctx, duk_bool_t expec
 	 *  Gather variable/function declarations needed for second pass.
 	 *  Code generated is dummy and discarded.
 	 */
+	DUK_STACK_REMAIN(thr);
 
 	func->in_directive_prologue = 1;
 	func->in_scanning = 1;
@@ -75214,6 +75216,7 @@ DUK_LOCAL void duk__parse_func_body(duk_compiler_ctx *comp_ctx, duk_bool_t expec
 		comp_ctx->curr_token.t = 0;
 		duk__advance(comp_ctx);
 	}
+	DUK_STACK_REMAIN(thr);
 
 	DUK_DDD(DUK_DDDPRINT("begin 1st pass"));
 	duk__parse_stmts(comp_ctx,
@@ -75221,6 +75224,7 @@ DUK_LOCAL void duk__parse_func_body(duk_compiler_ctx *comp_ctx, duk_bool_t expec
 	                 expect_eof,    /* expect EOF instead of } */
 	                 regexp_after); /* regexp after */
 	DUK_DDD(DUK_DDDPRINT("end 1st pass"));
+	DUK_STACK_REMAIN(thr);
 
 	/*
 	 *  Second (and possibly third) pass.
@@ -75231,6 +75235,7 @@ DUK_LOCAL void duk__parse_func_body(duk_compiler_ctx *comp_ctx, duk_bool_t expec
 	 *  needed (see GH-115).
 	 */
 
+	DUK_STACK_REMAIN(thr);
 	for (;;) {
 		duk_bool_t needs_shuffle_before = comp_ctx->curr_func.needs_shuffle;
 		compile_round++;
@@ -75246,10 +75251,12 @@ DUK_LOCAL void duk__parse_func_body(duk_compiler_ctx *comp_ctx, duk_bool_t expec
 		 */
 
 		DUK_DDD(DUK_DDDPRINT("rewind lexer"));
+	DUK_STACK_REMAIN(thr);
 		DUK_LEXER_SETPOINT(&comp_ctx->lex, &lex_pt);
 		comp_ctx->curr_token.t = 0;  /* this is needed for regexp mode */
 		comp_ctx->curr_token.start_line = 0;  /* needed for line number tracking (becomes prev_token.start_line) */
 		duk__advance(comp_ctx);
+	DUK_STACK_REMAIN(thr);
 
 		/*
 		 *  Reset function state and perform register allocation, which creates
@@ -75266,6 +75273,7 @@ DUK_LOCAL void duk__parse_func_body(duk_compiler_ctx *comp_ctx, duk_bool_t expec
 		duk__reset_func_for_pass2(comp_ctx);
 		func->in_directive_prologue = 1;
 		func->in_scanning = 0;
+	DUK_STACK_REMAIN(thr);
 
 		/* must be able to emit code, alloc consts, etc. */
 
@@ -75322,6 +75330,7 @@ DUK_LOCAL void duk__parse_func_body(duk_compiler_ctx *comp_ctx, duk_bool_t expec
 			             DUK_OP_LDUNDEF,
 			             0);
 		}
+	DUK_STACK_REMAIN(thr);
 
 		DUK_DDD(DUK_DDDPRINT("begin 2nd pass"));
 		duk__parse_stmts(comp_ctx,
@@ -75766,6 +75775,7 @@ DUK_LOCAL duk_ret_t duk__js_compile_raw(duk_hthread *thr, void *udata) {
 	comp_ctx->curr_token.str2 = NULL;
 #endif
 
+	DUK_STACK_REMAIN(thr);
 	duk_require_stack(thr, DUK__COMPILE_ENTRY_SLOTS);
 
 	duk_push_dynamic_buffer(thr, 0);       /* entry_top + 0 */
@@ -75773,6 +75783,7 @@ DUK_LOCAL duk_ret_t duk__js_compile_raw(duk_hthread *thr, void *udata) {
 	duk_push_undefined(thr);               /* entry_top + 2 */
 	duk_push_undefined(thr);               /* entry_top + 3 */
 	duk_push_undefined(thr);               /* entry_top + 4 */
+	DUK_STACK_REMAIN(thr);
 
 	comp_ctx->thr = thr;
 	comp_ctx->h_filename = h_filename;
@@ -75802,6 +75813,7 @@ DUK_LOCAL duk_ret_t duk__js_compile_raw(duk_hthread *thr, void *udata) {
 	/*
 	 *  Initialize function state for a zero-argument function
 	 */
+	DUK_STACK_REMAIN(thr);
 
 	duk__init_func_valstack_slots(comp_ctx);
 	DUK_ASSERT(func->num_formals == 0);
@@ -75836,7 +75848,9 @@ DUK_LOCAL duk_ret_t duk__js_compile_raw(duk_hthread *thr, void *udata) {
 
 		duk__advance(comp_ctx);  /* init 'curr_token' */
 		duk__advance_expect(comp_ctx, DUK_TOK_FUNCTION);
+	DUK_STACK_REMAIN(thr);
 		(void) duk__parse_func_like_raw(comp_ctx, 0 /*flags*/);
+	DUK_STACK_REMAIN(thr);
 	} else {
 		DUK_ASSERT(func->is_function == 0);
 		DUK_ASSERT(is_eval == 0 || is_eval == 1);
@@ -75845,6 +75859,7 @@ DUK_LOCAL duk_ret_t duk__js_compile_raw(duk_hthread *thr, void *udata) {
 		DUK_ASSERT(func->is_namebinding == 0);
 		DUK_ASSERT(func->is_constructable == 0);
 
+	DUK_STACK_REMAIN(thr);
 		duk__parse_func_body(comp_ctx,
 		                     1,             /* expect_eof */
 		                     1,             /* implicit_return_value */
@@ -75852,11 +75867,13 @@ DUK_LOCAL duk_ret_t duk__js_compile_raw(duk_hthread *thr, void *udata) {
 		                     -1);           /* expect_token */
 	}
 
+	DUK_STACK_REMAIN(thr);
 	/*
 	 *  Convert duk_compiler_func to a function template
 	 */
 
 	duk__convert_to_func_template(comp_ctx);
+	DUK_STACK_REMAIN(thr);
 
 	/*
 	 *  Wrapping duk_safe_call() will mangle the stack, just return stack top

@@ -365,12 +365,21 @@ void duktape_start() {
     dukf_init_nvs_values(); // Initialize any defaults for NVS data
     esp32_duktape_initEvents();
 	if(!heap_mutex) heap_mutex = xSemaphoreCreateMutex();	// only create once
+	//	init timer task
+	memset(timerCallbacks, 0, sizeof(timerCallbacks));
+	if (!taskJsTimer){
+		if (!smTimerCallbacks){
+			smTimerCallbacks = xSemaphoreCreateMutex();
+		}
+		xTaskCreate(dukTimerTask, "jsTimer", 1024, NULL, tskIDLE_PRIORITY, &taskJsTimer);
+	}
 
 	// init data structure in C/C++
 	initModuleDevice();
 
 	lock_heap();
 	createDuktapeHeap();
+
 	jsThreads[0].ctx = heap_context;
 	for(int i=1; i<NJSTHREADS; ++i){
 		// create new context on the same heap
@@ -382,15 +391,8 @@ void duktape_start() {
 	
 	//	create tasks for threads
 	for(int i=0; i<NJSTHREADS; ++i){
-		xTaskCreate(dukEventHandleTask, taskNames[i], 1024*8, &jsThreads[i], tskIDLE_PRIORITY + 1, &jsThreads[i].task);
+		xTaskCreate(dukEventHandleTask, taskNames[i], 1024*5, &jsThreads[i], tskIDLE_PRIORITY + 1, &jsThreads[i].task);
 	}	
-	memset(timerCallbacks, 0, sizeof(timerCallbacks));
-	if (!taskJsTimer){
-		if (!smTimerCallbacks){
-			smTimerCallbacks = xSemaphoreCreateMutex();
-		}
-		xTaskCreate(dukTimerTask, "jsTimer", 1024*4, NULL, tskIDLE_PRIORITY, &taskJsTimer);
-	}
 	char* cmd = "ESP32.include('/main/runtime.js');";
 	event_newCommandLineEvent(cmd, strlen(cmd), 0);
 }
