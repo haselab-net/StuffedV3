@@ -28,6 +28,7 @@
 #include "module_jslib.h"
 #include "module_srcommand.h"
 #include "module_iot.h"
+#include "module_callbacks.h"
 LOG_TAG("modules");
 
 /**
@@ -77,6 +78,7 @@ functionTableEntry_t functionTable[] = {
 	{ "ModuleJSLib",	  ModuleJSLib,		1},			// register jslib module
 	{ "ModuleSRCommand",  ModuleSRCommand,	1},			// register srcommand module
 	{ "ModuleIoT",	      ModuleIoT,		1},			// register IoT module
+	{ "ModuleCallbacks",  ModuleCallbacks,  1},			// register	callbacks module
 	// Must be last entry
 	{NULL, NULL, 0 } // *** DO NOT DELETE *** - MUST BE LAST ENTRY.
 };

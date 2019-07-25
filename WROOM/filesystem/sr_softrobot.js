@@ -152,10 +152,6 @@ var softrobot;
                 for (var index = 0; index < this.force.length; index++) {
                     this.force[index] = 0;
                 }
-                this.touch = new Array(device.robotInfo.nTouch);
-                for (var index = 0; index < this.touch.length; index++) {
-                    this.touch[index] = 0;
-                }
                 this.nInterpolateTotal = 12;
                 this.interpolateTargetCountOfWrite = -1;
                 this.interpolateTargetCountOfReadMin = 0;
@@ -230,10 +226,8 @@ var softrobot;
                 device.robotState.current = resizeArray(device.robotState.current, device.robotInfo.nCurrent);
             if (device.robotState.force.length != device.robotInfo.nForces)
                 device.robotState.force = resizeArray(device.robotState.force, device.robotInfo.nForces);
-            if (device.robotState.touch.length != device.robotInfo.nTouch)
-                device.robotState.touch = resizeArray(device.robotState.touch, device.robotInfo.nTouch);
-                if (device.robotState.movementState.nOccupied.length != device.robotInfo.nMotor)
-                device.robotState.movementState.nOccupied = resizeArray(device.robotState.movementState.nOccupied, device.robotInfo.nMotor);
+            if (device.robotState.movementState.nOccupied.length != device.robotInfo.nMotor)
+            device.robotState.movementState.nOccupied = resizeArray(device.robotState.movementState.nOccupied, device.robotInfo.nMotor);
         }
         device.checkRobotState = checkRobotState;
     })(device = softrobot.device || (softrobot.device = {}));
@@ -256,29 +250,8 @@ var softrobot;
     (function (message_command) {
         var callbacks;
         (function (callbacks) {
-            callbacks.touchThresholdArray = [];
-            callbacks.callTouchCallback = undefined;
             callbacks.touchQueryer = undefined;
             callbacks.touchQueryerInterval = 500;
-            callbacks.onRcvTouchMessage = function (oldValue, newValue) {
-                if (!callbacks.callTouchCallback)
-                    return;
-                for (var i = 0; i < callbacks.touchThresholdArray.length; i++) {
-                    var threshold = callbacks.touchThresholdArray[i];
-                    if (threshold.sensorId >= oldValue.length) {
-                        console.log("No touch sensor with id " + threshold.sensorId);
-                        continue;
-                    }
-                    var oldV = oldValue[threshold.sensorId], newV = newValue[threshold.sensorId];
-                    var lowV = oldV > newV ? newV : oldV, highV = oldV > newV ? oldV : newV;
-                    if (lowV >= threshold.threshold || highV < threshold.threshold)
-                        continue;
-                    if ((newV > oldV) !== threshold.exceed)
-                        continue;
-                    console.log("with rcv touch message: ", oldValue, newValue, ", touch threshold is called: ", callbacks.touchThresholdArray[i]);
-                    callbacks.callTouchCallback(threshold, []);
-                }
-            };
         })(callbacks = message_command.callbacks || (message_command.callbacks = {}));
     })(message_command = softrobot.message_command || (softrobot.message_command = {}));
 })(softrobot || (softrobot = {}));
@@ -294,17 +267,6 @@ var softrobot;
             }
         }
         message_command.onReceiveCIBoardinfo = onReceiveCIBoardinfo;
-        function onReceiveCISensor(data) {
-            message_command.callbacks.onRcvTouchMessage(softrobot.device.robotState.touch, data.touch);
-            // softrobot.device.robotState.setPropArray("pose", data.pose, softrobot.device.robotState.motor);
-            softrobot.device.robotState.current = data.current;
-            softrobot.device.robotState.force = data.force;
-            softrobot.device.robotState.touch = data.touch;
-            for (var i = 0; i < message_command.onRcvCISensorMessage.length; i++) {
-                message_command.onRcvCISensorMessage[i]();
-            }
-        }
-        message_command.onReceiveCISensor = onReceiveCISensor;
         function onReceiveCIDirect(data) {
         }
         message_command.onReceiveCIDirect = onReceiveCIDirect;
@@ -474,7 +436,6 @@ var softrobot;
 (function(softrobot) {
     (function (message_command) {
         message_command.registerCallback("onReceiveCIBoardinfo", message_command.onReceiveCIBoardinfo);
-        message_command.registerCallback("onReceiveCISensor", message_command.onReceiveCISensor);
         message_command.registerCallback("onReceiveCIDirect", message_command.onReceiveCIDirect);
         message_command.registerCallback("onReceiveCIInterpolate", message_command.onReceiveCIInterpolate);
         message_command.registerCallback("onReceiveCISetparam", message_command.onReceiveCISetparam);
