@@ -587,16 +587,7 @@ static duk_ret_t registerCallback(duk_context* ctx) {
 ////////////////////////////////////////////////////////
 //////////////////////// receive functions /////////////
 ////////////////////////////////////////////////////////
-// deprecated
-static bool pushFunction(duk_context* ctx, const char* name) {
-    bool ret = duk_get_global_string(ctx, "callbacks"); // we store all callback functions in global.callbacks 
-    if (!ret) { return false;}
-    
-    ret = duk_get_prop_string(ctx, -1, name);
-    if (!ret) { return false;}
 
-    return true;
-}
 static void putPropPos(duk_context* ctx, UdpRetPacket& ret) {
     duk_push_array(ctx);
     for(size_t i=0; i<allBoards.GetNTotalMotor(); i++){
@@ -680,27 +671,19 @@ int pushDataCIBoardinfo(duk_context* ctx, void* data) {
 
     return 1;
 }
-// function onReceiveCISensor(data: {pose: number[], current: number[], force: number[]});
-int pushDataCISensor(duk_context* ctx, void* data) {
-    UdpRetPacket& ret = *new UdpRetPacket;
-    unsigned short* data_short = (unsigned short*)data;
-    size_t len = data_short[1];
-    memcpy(ret.bytes, data, 2 + len);
+void onReceiveCISensor(UdpRetPacket& ret) {
+    vector<int16_t> newTouch;
+    for (int i=0; i<allBoards.GetNTotalTouch(); i++) {
+        newTouch.push_back(ret.GetTouch(i));
+    }
 
-    // get parameter
-    duk_push_object(ctx);
-    // ... obj
+    onRcvTouchMessage(robotState.touch, newTouch);
 
-    putPropPos(ctx, ret);
-    putPropCur(ctx, ret);
-    putPropFor(ctx, ret);
-    putPropTou(ctx, ret);
-
-    delete &ret;
-    free(data);
-
-    return 1;
+    for (int i=0; i<allBoards.GetNTotalTouch(); i++) {
+        robotState.touch[i] = newTouch[i];
+    }
 }
+
 // function onReceiveCIDirect(data: {pose: number[], velocity: number[]});
 int pushDataCIDirect(duk_context* ctx, void* data) {
     UdpRetPacket& ret = *new UdpRetPacket;
@@ -831,21 +814,7 @@ void commandMessageHandler(UdpRetPacket& ret) {
             break;
         }
         case CI_SENSOR:{
-            std::unordered_map<std::string, uint32_t>::const_iterator iter = callback_stash_keys.find("onReceiveCISensor");
-            if (iter == callback_stash_keys.end()) {
-                LOGE("Callback function onReceiveCISensor is not registered");
-                break;
-            }
-
-            void* data = (void*)malloc(2 + ret.length);
-            memcpy(data, ret.bytes, 2 + ret.length);
-
-            event_newCallbackRequestedEvent(
-                ESP32_DUKTAPE_CALLBACK_STATIC_TYPE_FUNCTION,
-                iter->second,
-                pushDataCISensor,
-                data
-            );
+            onReceiveCISensor(ret);
 
             break;
         }
