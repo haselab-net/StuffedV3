@@ -162,7 +162,7 @@ var motor;
     }
     motor_1.movementDecoder = movementDecoder;
     function movementAddKeyframe(data) {
-        while (!motor_1.movementSender.send(data)) {
+        while (!motor_1.movementSender.send(data) && !ESP32.isQuitting()) {
             loops.pause(100);
         }
     }
