@@ -1,8 +1,6 @@
-
 var ModuleCallbacks = ESP32.getNativeFunction("ModuleCallbacks");
 if (ModuleCallbacks === null) {
     log("Unable to find ModuleCallbacks");
-    module.exports = null;
 	exit;
 }
 
@@ -13,7 +11,7 @@ ModuleCallbacks(internalCallbacks);
 var touchQueryerInterval = 500;
 var touchQueryer = setInterval(function () {
     softrobot.message_command.requireSensorInfo();
-}, softrobot.message_command.callbacks.touchQueryerInterval);;
+}, touchQueryerInterval);
 
 var callbacks = {
     onStartTouch: function(touchSensorId, threshold, callback) {
@@ -24,5 +22,3 @@ var callbacks = {
         internalCallbacks.bindTouchCallback(touchSensorId, threshold, true, callback);
     }
 }
-
-module.exports = callbacks;
