@@ -229,58 +229,7 @@ var softrobot;
 (function (softrobot) {
     var movement;
     (function (movement) {
-        function queryNOccupied() {
-            softrobot.message_command.setMovement({
-                movementCommandId: softrobot.command.CommandIdMovement.CI_M_QUERY
-            });
-            jslib.printHeap("---------- queryNOccupied");
-        }
-        var MovementSender = (function () {
-            function MovementSender() {
-                this.waitResponse = false;
-                softrobot.message_command.onRcvCIUMovementMessage.push(this.onRcvCIUMovementMessage.bind(this));
-                this.queryTimer = setInterval(queryNOccupied, MovementSender.OCCUPATION_QUERY_INTERVAL_MS);
-            }
-            MovementSender.prototype.onRcvCIUMovementMessage = function (data) {
-                if (data.movementCommandId == softrobot.command.CommandIdMovement.CI_M_ADD_KEYFRAME || softrobot.command.CommandIdMovement.CI_M_QUERY) {
-                    this.waitResponse = false;
-                }
-            };
-            MovementSender.prototype.canAddKeyframe = function (data) {
-                if (this.waitResponse)
-                    return false;
-                for (var i = 0; i < data.motorCount; i++) {
-                    if (softrobot.device.robotState.movementState.nOccupied[data.motorId[i]] >= MovementSender.MAX_NOCCUPIED)
-                        return false;
-                }
-                if (softrobot.device.robotState.movementState.isPaused(data.movementId) >= 0)
-                    return false;
-                return true;
-            };
-            MovementSender.prototype.send = function (data) {
-                switch (data.movementCommandId) {
-                    case softrobot.command.CommandIdMovement.CI_M_ADD_KEYFRAME:
-                        if (!this.canAddKeyframe(data))
-                            return false;
-                        this.waitResponse = true;
-                        break;
-                    case softrobot.command.CommandIdMovement.CI_M_PAUSE_MOV:
-                        softrobot.device.robotState.movementState.pause(data.movementId);
-                        break;
-                    case softrobot.command.CommandIdMovement.CI_M_RESUME_MOV:
-                        softrobot.device.robotState.movementState.resume(data.movementId);
-                        break;
-                    default:
-                        break;
-                }
-                softrobot.message_command.setMovement(data);
-                return true;
-            };
-            MovementSender.MAX_NOCCUPIED = 5;
-            MovementSender.OCCUPATION_QUERY_INTERVAL_MS = 3000;
-            return MovementSender;
-        }());
-        movement.MovementSender = MovementSender;
+        var movementSender = require("sr_movement");
         var lastMovementId = 0;
         function getNewMovementId() {
             lastMovementId = lastMovementId + 1;

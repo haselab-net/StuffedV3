@@ -7,6 +7,18 @@
 #include "../../softRobot/AllBoards.h"
 using namespace std;
 
+class JSMovementState {
+    public:
+    vector<uint8_t> nOccupied;
+    vector<uint8_t> pausedMovements;
+
+    JSMovementState(AllBoards& allBoards);
+
+    void pause(uint8_t movementId);
+    void resume(uint8_t movementId);
+    bool isPaused(uint8_t movementId);
+};
+
 struct JSMotorState {
     int16_t pose;
     int16_t velocity;
@@ -19,16 +31,17 @@ struct JSMotorState {
     int16_t torqueMax; 
 };
 
-class RobotState {
+class JSRobotState {
     public:
     vector<struct JSMotorState> motor;
     vector<int16_t> current;
     vector<int16_t> force;
     vector<int16_t> touch;
+    class JSMovementState movement;
 
-    RobotState(AllBoards& allBoards);
+    JSRobotState(AllBoards& allBoards);
 };
-extern RobotState robotState;
+extern JSRobotState jsRobotState;
 
 extern "C" {
 #endif
