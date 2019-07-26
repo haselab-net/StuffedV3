@@ -2,29 +2,6 @@ var softrobot;
 (function (softrobot) {
     var command;
     (function (command) {
-        var CommandId;
-        (function (CommandId) {
-            CommandId[CommandId["CI_NONE"] = 0] = "CI_NONE";
-            CommandId[CommandId["CI_BOARD_INFO"] = 1] = "CI_BOARD_INFO";
-            CommandId[CommandId["CI_SET_CMDLEN"] = 2] = "CI_SET_CMDLEN";
-            CommandId[CommandId["CI_ALL"] = 3] = "CI_ALL";
-            CommandId[CommandId["CI_SENSOR"] = 4] = "CI_SENSOR";
-            CommandId[CommandId["CI_DIRECT"] = 5] = "CI_DIRECT";
-            CommandId[CommandId["CI_CURRENT"] = 6] = "CI_CURRENT";
-            CommandId[CommandId["CI_INTERPOLATE"] = 7] = "CI_INTERPOLATE";
-            CommandId[CommandId["CI_FORCE_CONTROL"] = 8] = "CI_FORCE_CONTROL";
-            CommandId[CommandId["CI_SETPARAM"] = 9] = "CI_SETPARAM";
-            CommandId[CommandId["CI_RESET_SENSOR"] = 10] = "CI_RESET_SENSOR";
-            CommandId[CommandId["CI_NCOMMAND"] = 11] = "CI_NCOMMAND";
-            CommandId[CommandId["CIU_TEXT"] = 11] = "CIU_TEXT";
-            CommandId[CommandId["CIU_SET_IPADDRESS"] = 12] = "CIU_SET_IPADDRESS";
-            CommandId[CommandId["CIU_GET_IPADDRESS"] = 13] = "CIU_GET_IPADDRESS";
-            CommandId[CommandId["CIU_GET_SUBBOARD_INFO"] = 14] = "CIU_GET_SUBBOARD_INFO";
-            CommandId[CommandId["CIU_MOVEMENT"] = 15] = "CIU_MOVEMENT";
-            CommandId[CommandId["CIU_NCOMMAND"] = 15] = "CIU_NCOMMAND";
-            CommandId[CommandId["CIU_NONE"] = -1] = "CIU_NONE";
-        })(CommandId = command.CommandId || (command.CommandId = {}));
-        ;
         var SetParamType;
         (function (SetParamType) {
             SetParamType[SetParamType["PT_PD"] = 0] = "PT_PD";
@@ -32,25 +9,6 @@ var softrobot;
             SetParamType[SetParamType["PT_TORQUE_LIMIT"] = 2] = "PT_TORQUE_LIMIT";
             SetParamType[SetParamType["PT_BOARD_ID"] = 3] = "PT_BOARD_ID";
         })(SetParamType = command.SetParamType || (command.SetParamType = {}));
-        ;
-        var ResetSensorFlags;
-        (function (ResetSensorFlags) {
-            ResetSensorFlags[ResetSensorFlags["RSF_NONE"] = 0] = "RSF_NONE";
-            ResetSensorFlags[ResetSensorFlags["RSF_MOTOR"] = 1] = "RSF_MOTOR";
-            ResetSensorFlags[ResetSensorFlags["RSF_FORCE"] = 2] = "RSF_FORCE";
-        })(ResetSensorFlags = command.ResetSensorFlags || (command.ResetSensorFlags = {}));
-        var PacketId;
-        (function (PacketId) {
-            PacketId[PacketId["PI_NONE"] = 0] = "PI_NONE";
-            PacketId[PacketId["PI_JSFILE"] = 1] = "PI_JSFILE";
-            PacketId[PacketId["PI_COMMAND"] = 2] = "PI_COMMAND";
-            PacketId[PacketId["PI_SETTINGS"] = 3] = "PI_SETTINGS";
-        })(PacketId = command.PacketId || (command.PacketId = {}));
-        var SettingId;
-        (function (SettingId) {
-            SettingId[SettingId["SI_NONE"] = 0] = "SI_NONE";
-            SettingId[SettingId["SI_DEVELOPMENT_MODE"] = 1] = "SI_DEVELOPMENT_MODE";
-        })(SettingId = command.SettingId || (command.SettingId = {}));
         var CommandIdMovement;
         (function (CommandIdMovement) {
             CommandIdMovement[CommandIdMovement["CI_M_NONE"] = 0] = "CI_M_NONE";
@@ -152,14 +110,6 @@ var softrobot;
                 for (var index = 0; index < this.force.length; index++) {
                     this.force[index] = 0;
                 }
-                this.nInterpolateTotal = 12;
-                this.interpolateTargetCountOfWrite = -1;
-                this.interpolateTargetCountOfReadMin = 0;
-                this.interpolateTargetCountOfReadMax = 0;
-                this.interpolateTickMin = 0;
-                this.interpolateTickMax = 0;
-                this.nInterpolateRemain = 0;
-                this.nInterpolateVacancy = 12;
                 this.movementState = new MovementState();
             };
             RobotState.prototype.getPropArray = function (name, array) {
@@ -219,7 +169,6 @@ var softrobot;
                     array.slice(0, size);
                 return array;
             }
-            device.robotState.nInterpolateTotal = device.robotInfo.nTarget;
             if (device.robotState.motor.length != device.robotInfo.nMotor)
                 device.robotState.motor = resizeMotorStateArray(device.robotState.motor, device.robotInfo.nMotor);
             if (device.robotState.current.length != device.robotInfo.nCurrent)
@@ -236,24 +185,6 @@ var softrobot;
 // sr_command
 (function(softrobot) {
     softrobot.message_command = require("sr_command");
-    var tmp = softrobot.message_command.setMotorDirect;
-    softrobot.message_command.setMotorDirect = function (data) {
-        // softrobot.movement.sendKeyframeQueue.clear();
-        softrobot.device.robotState.interpolateTargetCountOfWrite = -1;
-        softrobot.device.robotState.nInterpolateVacancy = softrobot.device.robotState.nInterpolateTotal;
-        softrobot.device.robotState.nInterpolateRemain = 0;
-    }
-})(softrobot || (softrobot = {}));
-
-(function (softrobot) {
-    var message_command;
-    (function (message_command) {
-        var callbacks;
-        (function (callbacks) {
-            callbacks.touchQueryer = undefined;
-            callbacks.touchQueryerInterval = 500;
-        })(callbacks = message_command.callbacks || (message_command.callbacks = {}));
-    })(message_command = softrobot.message_command || (softrobot.message_command = {}));
 })(softrobot || (softrobot = {}));
 
 (function (softrobot) {
@@ -267,45 +198,6 @@ var softrobot;
             }
         }
         message_command.onReceiveCIBoardinfo = onReceiveCIBoardinfo;
-        function onReceiveCIDirect(data) {
-        }
-        message_command.onReceiveCIDirect = onReceiveCIDirect;
-        function onReceiveCIInterpolate(data) {
-            function calculateInterpolateState() {
-                var rmin = softrobot.device.robotState.interpolateTargetCountOfReadMin;
-                var rmax = softrobot.device.robotState.interpolateTargetCountOfReadMax;
-                var tmin = softrobot.device.robotState.interpolateTickMin;
-                var tmax = softrobot.device.robotState.interpolateTickMax;
-                var wc = softrobot.device.robotState.interpolateTargetCountOfWrite;
-                softrobot.device.robotState.nInterpolateRemain = wc >= rmax ? wc - rmax + 1 : wc - rmax + 1 + 256;
-                var readDiff = rmax >= rmin ? rmax - rmin : rmax - rmin + 256;
-                softrobot.device.robotState.nInterpolateVacancy = softrobot.device.robotState.nInterpolateTotal - softrobot.device.robotState.nInterpolateRemain - readDiff;
-            }
-            // softrobot.device.robotState.setPropArray("pose", data.pose, softrobot.device.robotState.motor);
-            softrobot.device.robotState.interpolateTargetCountOfReadMin = data.targetCountReadMin;
-            softrobot.device.robotState.interpolateTargetCountOfReadMax = data.targetCountReadMax;
-            softrobot.device.robotState.interpolateTickMin = data.tickMin;
-            softrobot.device.robotState.interpolateTickMax = data.tickMax;
-            calculateInterpolateState();
-            if (softrobot.device.robotState.nInterpolateVacancy > softrobot.device.robotState.nInterpolateTotal - 2 || softrobot.device.robotState.nInterpolateVacancy < 0) {
-                softrobot.device.robotState.interpolateTargetCountOfWrite = (softrobot.device.robotState.interpolateTargetCountOfReadMax + 1) % 256;
-                calculateInterpolateState();
-            }
-            for (var i = 0; i < message_command.onRcvCIInterpolateMessage.length; i++) {
-                message_command.onRcvCIInterpolateMessage[i]();
-            }
-        }
-        message_command.onReceiveCIInterpolate = onReceiveCIInterpolate;
-        function onReceiveCISetparam() {
-            return;
-        }
-        message_command.onReceiveCISetparam = onReceiveCISetparam;
-        function onReceiveCIResetsensor() {
-            for (var i = 0; i < message_command.onRcvCIResetSensorMessage.length; i++) {
-                message_command.onRcvCIResetSensorMessage[i]();
-            }
-        }
-        message_command.onReceiveCIResetsensor = onReceiveCIResetsensor;
         function onReceiveCIUMovement(data) {
             switch (data.movementCommandId) {
                 case softrobot.command.CommandIdMovement.CI_M_ADD_KEYFRAME:
@@ -321,114 +213,7 @@ var softrobot;
         }
         message_command.onReceiveCIUMovement = onReceiveCIUMovement;
         message_command.onRcvCIBoardInfoMessage = [];
-        message_command.onRcvCISensorMessage = [];
-        message_command.onRcvCIDirectMessage = [];
-        message_command.onRcvCIInterpolateMessage = [];
-        message_command.onRcvCIResetSensorMessage = [];
         message_command.onRcvCIUMovementMessage = [];
-        function setMotorState(to, from) {
-            var id = from.motorId;
-            if (id >= to.motor.length)
-                return;
-            if (softrobot.util.haveProp(from.pose))
-                to.motor[id].pose = softrobot.util.limitNum(from.pose, to.motor[id].lengthMin, to.motor[id].lengthMax);
-            if (softrobot.util.haveProp(from.velocity))
-                to.motor[id].velocity = from.velocity;
-            if (softrobot.util.haveProp(from.lengthMin))
-                to.motor[id].lengthMin = from.lengthMin;
-            if (softrobot.util.haveProp(from.lengthMax))
-                to.motor[id].lengthMax = from.lengthMax;
-            if (softrobot.util.haveProp(from.controlK))
-                to.motor[id].controlK = from.controlK;
-            if (softrobot.util.haveProp(from.controlB))
-                to.motor[id].controlB = from.controlB;
-            if (softrobot.util.haveProp(from.controlA))
-                to.motor[id].controlA = from.controlA;
-            if (softrobot.util.haveProp(from.torqueMin))
-                to.motor[id].torqueMin = from.torqueMin;
-            if (softrobot.util.haveProp(from.torqueMax))
-                to.motor[id].torqueMax = from.torqueMax;
-            to.motor[id].pose = softrobot.util.limitNum(to.motor[id].pose, to.motor[id].lengthMin, to.motor[id].lengthMax);
-        }
-        message_command.setMotorState = setMotorState;
-        function updateRemoteMotorState(inst) {
-            if (inst.motorId >= softrobot.device.robotInfo.nMotor) {
-                console.log("motorId larger than motor number");
-                return;
-            }
-            if (softrobot.util.haveProp(inst.pose) || softrobot.util.haveProp(inst.velocity)) {
-                if (softrobot.util.haveProp(inst.pose))
-                    softrobot.device.robotState.motor[inst.motorId].pose = softrobot.util.limitNum(inst.pose, softrobot.device.robotState.motor[inst.motorId].lengthMin, softrobot.device.robotState.motor[inst.motorId].lengthMax);
-                if (softrobot.util.haveProp(inst.velocity))
-                    softrobot.device.robotState.motor[inst.motorId].velocity = inst.velocity;
-                var pose = softrobot.device.robotState.getPropArray("pose", softrobot.device.robotState.motor);
-                var velocity = softrobot.device.robotState.getPropArray("velocity", softrobot.device.robotState.motor);
-                // softrobot.movement.sendKeyframeQueue.clear();
-                message_command.setMotorDirect({
-                    pose: pose,
-                    velocity: velocity
-                });
-            }
-            if (softrobot.util.haveProp(inst.lengthMin) || softrobot.util.haveProp(inst.lengthMax)) {
-                if (softrobot.util.haveProp(inst.lengthMin))
-                    softrobot.device.robotState.motor[inst.motorId].lengthMin = inst.lengthMin;
-                if (softrobot.util.haveProp(inst.lengthMax))
-                    softrobot.device.robotState.motor[inst.motorId].lengthMax = inst.lengthMax;
-            }
-            if (softrobot.util.haveProp(inst.controlK) || softrobot.util.haveProp(inst.controlB)) {
-                if (softrobot.util.haveProp(inst.controlK))
-                    softrobot.device.robotState.motor[inst.motorId].controlK = inst.controlK;
-                if (softrobot.util.haveProp(inst.controlB))
-                    softrobot.device.robotState.motor[inst.motorId].controlB = inst.controlB;
-                var controlK = softrobot.device.robotState.getPropArray("controlK", softrobot.device.robotState.motor);
-                var controlB = softrobot.device.robotState.getPropArray("controlB", softrobot.device.robotState.motor);
-                message_command.setMotorParam({
-                    paramType: softrobot.command.SetParamType.PT_PD,
-                    params1: controlK,
-                    params2: controlB
-                });
-            }
-            if (softrobot.util.haveProp(inst.controlA)) {
-                if (softrobot.util.haveProp(inst.controlA))
-                    softrobot.device.robotState.motor[inst.motorId].controlA = inst.controlA;
-                var controlA = softrobot.device.robotState.getPropArray("controlA", softrobot.device.robotState.motor);
-                message_command.setMotorParam({
-                    paramType: softrobot.command.SetParamType.PT_CURRENT,
-                    params1: controlA,
-                    params2: undefined
-                });
-            }
-            if (softrobot.util.haveProp(inst.torqueMin) || softrobot.util.haveProp(inst.torqueMax)) {
-                if (softrobot.util.haveProp(inst.torqueMin))
-                    softrobot.device.robotState.motor[inst.motorId].torqueMin = inst.torqueMin;
-                if (softrobot.util.haveProp(inst.torqueMax))
-                    softrobot.device.robotState.motor[inst.motorId].torqueMax = inst.torqueMax;
-                var torqueMin = softrobot.device.robotState.getPropArray("torqueMin", softrobot.device.robotState.motor);
-                var torqueMax = softrobot.device.robotState.getPropArray("torqueMax", softrobot.device.robotState.motor);
-                message_command.setMotorParam({
-                    paramType: softrobot.command.SetParamType.PT_TORQUE_LIMIT,
-                    params1: torqueMin,
-                    params2: torqueMax
-                });
-            }
-        }
-        message_command.updateRemoteMotorState = updateRemoteMotorState;
-        function updateLocalMotorState(inst) {
-            if (inst.motorId >= softrobot.device.robotInfo.nMotor) {
-                console.log("motorId larger than motor number");
-                return;
-            }
-            setMotorState(softrobot.device.robotState, inst);
-        }
-        message_command.updateLocalMotorState = updateLocalMotorState;
-        function updateRemoteDirect() {
-            // softrobot.movement.sendKeyframeQueue.clear();
-            message_command.setMotorDirect({
-                pose: softrobot.device.robotState.getPropArray("pose", softrobot.device.robotState.motor),
-                velocity: softrobot.device.robotState.getPropArray("velocity", softrobot.device.robotState.motor)
-            });
-        }
-        message_command.updateRemoteDirect = updateRemoteDirect;
     })(message_command = softrobot.message_command || (softrobot.message_command = {}));
 })(softrobot || (softrobot = {}));
 
@@ -437,9 +222,6 @@ var softrobot;
     (function (message_command) {
         message_command.registerCallback("onReceiveCIBoardinfo", message_command.onReceiveCIBoardinfo);
         message_command.registerCallback("onReceiveCIDirect", message_command.onReceiveCIDirect);
-        message_command.registerCallback("onReceiveCIInterpolate", message_command.onReceiveCIInterpolate);
-        message_command.registerCallback("onReceiveCISetparam", message_command.onReceiveCISetparam);
-        message_command.registerCallback("onReceiveCIResetsensor", message_command.onReceiveCIResetsensor);
         message_command.registerCallback("onReceiveCIUMovement", message_command.onReceiveCIUMovement);
     })(message_command = softrobot.message_command || (softrobot.message_command = {}));
 })(softrobot || (softrobot = {}));
@@ -508,26 +290,6 @@ var softrobot;
         }
         movement.getNewMovementId = getNewMovementId;
     })(movement = softrobot.movement || (softrobot.movement = {}));
-})(softrobot || (softrobot = {}));
-(function (softrobot) {
-    var util;
-    (function (util) {
-        function haveProp(obj) {
-            return !!obj || obj == 0;
-        }
-        util.haveProp = haveProp;
-        function limitNum(num, min, max) {
-            var res = num;
-            res > max ? (res = max) : (res = res);
-            res < min ? (res = min) : (res = res);
-            return res;
-        }
-        util.limitNum = limitNum;
-        function interpolate(x1, y1, x2, y2, x) {
-            return (y2 - y1) / (x2 - x1) * (x - x1) + y1;
-        }
-        util.interpolate = interpolate;
-    })(util = softrobot.util || (softrobot.util = {}));
 })(softrobot || (softrobot = {}));
 
 // module.exports = softrobot;
