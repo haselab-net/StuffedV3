@@ -99,6 +99,7 @@ void setLogLevel(){
     esp_log_level_set("module_dukf", ESP_LOG_INFO);
     esp_log_level_set("modules", ESP_LOG_INFO);
     esp_log_level_set("module_os", ESP_LOG_INFO);
+    esp_log_level_set("module_iot", ESP_LOG_DEBUG);
     esp_log_level_set("log", ESP_LOG_INFO);
 #endif
 }
