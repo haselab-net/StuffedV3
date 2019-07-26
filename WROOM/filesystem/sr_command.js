@@ -18,9 +18,6 @@ var _ret = {
     resetSensor: function (data) {
         internalSRCommand.resetSensor(data);
     },
-    setMovement: function (data) {
-        internalSRCommand.setMovement(data);
-    },
     updateLocalMotorState: function (inst) {
         internalSRCommand.updateLocalMotorState(inst);
     },

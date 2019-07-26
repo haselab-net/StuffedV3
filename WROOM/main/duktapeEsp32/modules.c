@@ -29,6 +29,7 @@
 #include "module_srcommand.h"
 #include "module_iot.h"
 #include "module_callbacks.h"
+#include "module_srmovement.h"
 LOG_TAG("modules");
 
 /**
@@ -79,6 +80,7 @@ functionTableEntry_t functionTable[] = {
 	{ "ModuleSRCommand",  ModuleSRCommand,	1},			// register srcommand module
 	{ "ModuleIoT",	      ModuleIoT,		1},			// register IoT module
 	{ "ModuleCallbacks",  ModuleCallbacks,  1},			// register	callbacks module
+	{ "ModuleSRMovement", ModuleSRMovement, 1},			// register	movement module
 	// Must be last entry
 	{NULL, NULL, 0 } // *** DO NOT DELETE *** - MUST BE LAST ENTRY.
 };

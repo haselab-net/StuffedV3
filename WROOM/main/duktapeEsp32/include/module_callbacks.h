@@ -11,7 +11,7 @@ extern "C"{
 
 duk_ret_t ModuleCallbacks(duk_context *ctx);
 
-void callbacksBeforeStopJSTask();       // TODO refer before end task
+void callbacksBeforeStopJSTask();
 
 #ifdef __cplusplus
 }

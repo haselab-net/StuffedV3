@@ -12,6 +12,8 @@ extern "C" {
 #include "logging.h"
 }
 #include "module_srcommand.h"
+#include "module_srmovement.h"
+#include "module_device.h"
 #include "../websocketServer/ws_ws.h"
 #include "../softRobot/UdpCom.h"
 #include "../softRobot/AllBoards.h"
@@ -268,10 +270,12 @@ static void setMotorDirect() {
         return;
     };
 
+    jsRobotState.write_lock();
     for (int i=0; i<allBoards.GetNTotalMotor(); i++) {
-        cmd->SetMotorPos(robotState.motor[i].pose, i);
-        cmd->SetMotorVel(robotState.motor[i].velocity, i);
+        cmd->SetMotorPos(jsRobotState.motor[i].pose, i);
+        cmd->SetMotorVel(jsRobotState.motor[i].velocity, i);
     }
+    jsRobotState.write_unlock();
 
     #ifdef PRINT_DUKTAPE_PACKET
     // print packet
@@ -293,21 +297,27 @@ static void setMotorParam(enum SetParamType type) {
     {
         case PT_PD: {
             for (int i=0; i<allBoards.GetNTotalMotor(); i++) {
-                cmd->SetControlK(robotState.motor[i].controlK, i);
-                cmd->SetControlB(robotState.motor[i].controlB, i);
+                jsRobotState.write_lock();
+                cmd->SetControlK(jsRobotState.motor[i].controlK, i);
+                cmd->SetControlB(jsRobotState.motor[i].controlB, i);
+                jsRobotState.write_unlock();
             }
             break;
         }
         case PT_CURRENT: {
             for (int i=0; i<allBoards.GetNTotalMotor(); i++) {
-                cmd->SetControlA(robotState.motor[i].controlA, i);
+                jsRobotState.write_lock();
+                cmd->SetControlA(jsRobotState.motor[i].controlA, i);
+                jsRobotState.write_unlock();
             }
             break;
         }
         case PT_TORQUE_LIMIT: {
             for (int i=0; i<allBoards.GetNTotalMotor(); i++) {
-                cmd->SetTorqueMin(robotState.motor[i].torqueMin, i);
-                cmd->SetTorqueMax(robotState.motor[i].torqueMax, i);
+                jsRobotState.write_lock();
+                cmd->SetTorqueMin(jsRobotState.motor[i].torqueMin, i);
+                cmd->SetTorqueMax(jsRobotState.motor[i].torqueMax, i);
+                jsRobotState.write_unlock();
             }
             break;
         }
@@ -347,11 +357,13 @@ static duk_ret_t updateLocalMotorState(duk_context* ctx) {
     if (motorId >= allBoards.GetNTotalMotor()) return 0;
     duk_pop(ctx);
 
+    jsRobotState.write_lock();
+
     // lengthMin
     duk_bool_t haveProp = duk_get_prop_string(ctx, -1, "lengthMin");
     if (haveProp) {
         int16_t lengthMin = duk_get_int(ctx, -1);
-        robotState.motor[motorId].lengthMin = lengthMin;
+        jsRobotState.motor[motorId].lengthMin = lengthMin;
     }
     duk_pop(ctx);
 
@@ -359,7 +371,7 @@ static duk_ret_t updateLocalMotorState(duk_context* ctx) {
     haveProp = duk_get_prop_string(ctx, -1, "lengthMax");
     if (haveProp) {
         int16_t lengthMax = duk_get_int(ctx, -1);
-        robotState.motor[motorId].lengthMax = lengthMax;
+        jsRobotState.motor[motorId].lengthMax = lengthMax;
     }
     duk_pop(ctx);
 
@@ -367,7 +379,7 @@ static duk_ret_t updateLocalMotorState(duk_context* ctx) {
     haveProp = duk_get_prop_string(ctx, -1, "pose");
     if (haveProp) {
         int16_t pose = duk_get_int(ctx, -1);
-        robotState.motor[motorId].pose = saturateCast(pose, robotState.motor[motorId].lengthMin, robotState.motor[motorId].lengthMax);
+        jsRobotState.motor[motorId].pose = saturateCast(pose, jsRobotState.motor[motorId].lengthMin, jsRobotState.motor[motorId].lengthMax);
     }
     duk_pop(ctx);
 
@@ -375,7 +387,7 @@ static duk_ret_t updateLocalMotorState(duk_context* ctx) {
     haveProp = duk_get_prop_string(ctx, -1, "velocity");
     if (haveProp) {
         int16_t velocity = duk_get_int(ctx, -1);
-        robotState.motor[motorId].velocity = velocity;
+        jsRobotState.motor[motorId].velocity = velocity;
     }
     duk_pop(ctx);
 
@@ -383,7 +395,7 @@ static duk_ret_t updateLocalMotorState(duk_context* ctx) {
     haveProp = duk_get_prop_string(ctx, -1, "controlK");
     if (haveProp) {
         int16_t controlK = duk_get_int(ctx, -1);
-        robotState.motor[motorId].controlK = controlK;
+        jsRobotState.motor[motorId].controlK = controlK;
     }
     duk_pop(ctx);
 
@@ -391,7 +403,7 @@ static duk_ret_t updateLocalMotorState(duk_context* ctx) {
     haveProp = duk_get_prop_string(ctx, -1, "controlB");
     if (haveProp) {
         int16_t controlB = duk_get_int(ctx, -1);
-        robotState.motor[motorId].controlB = controlB;
+        jsRobotState.motor[motorId].controlB = controlB;
     }
     duk_pop(ctx);
 
@@ -399,7 +411,7 @@ static duk_ret_t updateLocalMotorState(duk_context* ctx) {
     haveProp = duk_get_prop_string(ctx, -1, "controlA");
     if (haveProp) {
         int16_t controlA = duk_get_int(ctx, -1);
-        robotState.motor[motorId].controlA = controlA;
+        jsRobotState.motor[motorId].controlA = controlA;
     }
     duk_pop(ctx);
 
@@ -407,7 +419,7 @@ static duk_ret_t updateLocalMotorState(duk_context* ctx) {
     haveProp = duk_get_prop_string(ctx, -1, "torqueMin");
     if (haveProp) {
         int16_t torqueMin = duk_get_int(ctx, -1);
-        robotState.motor[motorId].torqueMin = torqueMin;
+        jsRobotState.motor[motorId].torqueMin = torqueMin;
     }
     duk_pop(ctx);
 
@@ -415,9 +427,11 @@ static duk_ret_t updateLocalMotorState(duk_context* ctx) {
     haveProp = duk_get_prop_string(ctx, -1, "torqueMax");
     if (haveProp) {
         int16_t torqueMax = duk_get_int(ctx, -1);
-        robotState.motor[motorId].torqueMax = torqueMax;
+        jsRobotState.motor[motorId].torqueMax = torqueMax;
     }
     duk_pop(ctx);
+
+    jsRobotState.write_unlock();
 
     duk_pop(ctx);
     // ..
@@ -433,18 +447,20 @@ static duk_ret_t updateRemoteMotorState(duk_context* ctx) {
     if (motorId >= allBoards.GetNTotalMotor()) return 0;
     duk_pop(ctx);
 
+    jsRobotState.write_lock();
+
     // lengthMin
     duk_bool_t haveProp = duk_get_prop_string(ctx, -1, "lengthMin");
     if (haveProp) {
         int16_t lengthMin = duk_get_int(ctx, -1);
-        robotState.motor[motorId].lengthMin = lengthMin;
+        jsRobotState.motor[motorId].lengthMin = lengthMin;
     }
     duk_pop(ctx);
     // lengthMax
     haveProp = duk_get_prop_string(ctx, -1, "lengthMax");
     if (haveProp) {
         int16_t lengthMax = duk_get_int(ctx, -1);
-        robotState.motor[motorId].lengthMax = lengthMax;
+        jsRobotState.motor[motorId].lengthMax = lengthMax;
     }
     duk_pop(ctx);
 
@@ -453,7 +469,7 @@ static duk_ret_t updateRemoteMotorState(duk_context* ctx) {
     haveProp = duk_get_prop_string(ctx, -1, "pose");
     if (haveProp) {
         int16_t pose = duk_get_int(ctx, -1);
-        robotState.motor[motorId].pose = saturateCast(pose, robotState.motor[motorId].lengthMin, robotState.motor[motorId].lengthMax);
+        jsRobotState.motor[motorId].pose = saturateCast(pose, jsRobotState.motor[motorId].lengthMin, jsRobotState.motor[motorId].lengthMax);
         flag = true;
     }
     duk_pop(ctx);
@@ -461,7 +477,7 @@ static duk_ret_t updateRemoteMotorState(duk_context* ctx) {
     haveProp = duk_get_prop_string(ctx, -1, "velocity");
     if (haveProp) {
         int16_t velocity = duk_get_int(ctx, -1);
-        robotState.motor[motorId].velocity = velocity;
+        jsRobotState.motor[motorId].velocity = velocity;
         flag = true;
     }
     duk_pop(ctx);
@@ -473,7 +489,7 @@ static duk_ret_t updateRemoteMotorState(duk_context* ctx) {
     haveProp = duk_get_prop_string(ctx, -1, "controlK");
     if (haveProp) {
         int16_t controlK = duk_get_int(ctx, -1);
-        robotState.motor[motorId].controlK = controlK;
+        jsRobotState.motor[motorId].controlK = controlK;
         flag = true;
     }
     duk_pop(ctx);
@@ -481,7 +497,7 @@ static duk_ret_t updateRemoteMotorState(duk_context* ctx) {
     haveProp = duk_get_prop_string(ctx, -1, "controlB");
     if (haveProp) {
         int16_t controlB = duk_get_int(ctx, -1);
-        robotState.motor[motorId].controlB = controlB;
+        jsRobotState.motor[motorId].controlB = controlB;
         flag = true;
     }
     duk_pop(ctx);
@@ -493,7 +509,7 @@ static duk_ret_t updateRemoteMotorState(duk_context* ctx) {
     haveProp = duk_get_prop_string(ctx, -1, "controlA");
     if (haveProp) {
         int16_t controlA = duk_get_int(ctx, -1);
-        robotState.motor[motorId].controlA = controlA;
+        jsRobotState.motor[motorId].controlA = controlA;
         flag = true;
     }
     duk_pop(ctx);
@@ -505,7 +521,7 @@ static duk_ret_t updateRemoteMotorState(duk_context* ctx) {
     haveProp = duk_get_prop_string(ctx, -1, "torqueMin");
     if (haveProp) {
         int16_t torqueMin = duk_get_int(ctx, -1);
-        robotState.motor[motorId].torqueMin = torqueMin;
+        jsRobotState.motor[motorId].torqueMin = torqueMin;
         flag = true;
     }
     duk_pop(ctx);
@@ -513,12 +529,14 @@ static duk_ret_t updateRemoteMotorState(duk_context* ctx) {
     haveProp = duk_get_prop_string(ctx, -1, "torqueMax");
     if (haveProp) {
         int16_t torqueMax = duk_get_int(ctx, -1);
-        robotState.motor[motorId].torqueMax = torqueMax;
+        jsRobotState.motor[motorId].torqueMax = torqueMax;
         flag = true;
     }
     duk_pop(ctx);
     // Send CI_SETPARAM
     if(flag) setMotorParam(PT_TORQUE_LIMIT);
+
+    jsRobotState.write_unlock();
 
     duk_pop(ctx);
     // ..
@@ -647,19 +665,24 @@ static void movementClearMov(duk_context* ctx, UdpCmdPacket* cmd) {
     movementCommandId: number,
     ...
 }) */
-static duk_ret_t setMovement(duk_context* ctx) {
+void setMovement(duk_context* ctx) {
     // ... obj
     duk_require_object(ctx, -1);
 
     bool success = duk_get_prop_string(ctx, -1, "movementCommandId");
-    if (!success) return DUK_RET_ERROR;
     uint8_t movementCommandId = duk_get_int(ctx, -1);
     duk_pop(ctx);
-    if (movementCommandId > CI_M_COUNT || movementCommandId <= CI_M_NONE) return DUK_RET_ERROR;
+    if (movementCommandId > CI_M_COUNT || movementCommandId <= CI_M_NONE) {
+        ESP_LOGE(tag, "setMovement: wrong movementCommandId - %i", movementCommandId);
+        return;
+    };
 
     //  Prepare command
 	UdpCmdPacket* cmd = udpCom.PrepareMovementCommand(CIU_MOVEMENT, (CommandIdMovement)movementCommandId, CS_DUKTAPE);
-    if (!cmd) return DUK_RET_ERROR;
+    if (!cmd) {
+        ESP_LOGE(tag, "setMovement: Failed to prepare command");
+        return;
+    };
 
     switch (movementCommandId) {
         case CI_M_ADD_KEYFRAME:
@@ -683,7 +706,8 @@ static duk_ret_t setMovement(duk_context* ctx) {
             break;
         
         default:
-            return DUK_RET_ERROR;
+            ESP_LOGE(tag, "setMovement: wrong movementCommandId - %i", movementCommandId);
+            return;
     }
 
     #ifdef PRINT_DUKTAPE_PACKET
@@ -693,13 +717,8 @@ static duk_ret_t setMovement(duk_context* ctx) {
 
     //  send the packet
 	udpCom.WriteCommand();
-    printf("after setMovement \n");
 
     // ... obj
-    duk_pop(ctx);
-    // ...
-
-    return 0;
 }
 
 ////////////////////////////////////////////////////////
@@ -821,23 +840,29 @@ void onReceiveCISensor(UdpRetPacket& ret) {
     for (int i=0; i<allBoards.GetNTotalTouch(); i++) {
         newTouch.push_back(ret.GetTouch(i));
     }
-    onRcvTouchMessage(robotState.touch, newTouch);
+    onRcvTouchMessage(jsRobotState.touch, newTouch);
+
+    jsRobotState.write_lock();
 
     // get pos info
-    for (int i=0; i<allBoards.GetNTotalMotor(); i++) robotState.motor[i].pose = ret.GetMotorPos(i);
+    for (int i=0; i<allBoards.GetNTotalMotor(); i++) jsRobotState.motor[i].pose = ret.GetMotorPos(i);
     // get current info
-    for (int i=0; i<allBoards.GetNTotalCurrent(); i++) robotState.current[i] = ret.GetCurrent(i);
+    for (int i=0; i<allBoards.GetNTotalCurrent(); i++) jsRobotState.current[i] = ret.GetCurrent(i);
     // get force info
-    for (int i=0; i<allBoards.GetNTotalForce(); i++) robotState.force[i] = ret.GetForce(i);
+    for (int i=0; i<allBoards.GetNTotalForce(); i++) jsRobotState.force[i] = ret.GetForce(i);
     // get touch sensor info
-    for (int i=0; i<allBoards.GetNTotalTouch(); i++) robotState.touch[i] = ret.GetTouch(i);
+    for (int i=0; i<allBoards.GetNTotalTouch(); i++) jsRobotState.touch[i] = ret.GetTouch(i);
+
+    jsRobotState.write_unlock();
 }
 void onReceiveCIDirect(UdpRetPacket& ret) {
+    jsRobotState.write_lock();
     // get pos & velocity info
     for (int i=0; i<allBoards.GetNTotalMotor(); i++) {
-        robotState.motor[i].pose = ret.GetMotorPos(i);
-        robotState.motor[i].velocity = ret.GetMotorVel(i);
+        jsRobotState.motor[i].pose = ret.GetMotorPos(i);
+        jsRobotState.motor[i].velocity = ret.GetMotorVel(i);
     }
+    jsRobotState.write_unlock();
 }
 // function onReceiveCIInterpolate(data: {pose: number[], targetCountReadMin: number, targetCountReadMax: number, tickMin: number, tickMax: number});
 int pushDataCIInterpolate(duk_context* ctx, void* data) {
@@ -919,6 +944,30 @@ int pushDataCIUMovement(duk_context* ctx, void* data) {
     free(data);
     
     return 1;
+}
+void onReceiveCIUMovement(void* data) {
+    const void* payload = data;
+
+    payload = shiftPointer(payload, 6);
+    const void* movementData = payload;
+
+    // update device
+    uint8_t movementCommandId;
+    popPayloadNum(payload, movementCommandId);
+    switch(movementCommandId) {
+        case CI_M_ADD_KEYFRAME:
+            payload = shiftPointer(payload, 3);
+        case CI_M_QUERY:
+            jsRobotState.write_lock();
+            popPayloadNumArray(payload, jsRobotState.movement.nOccupied, allBoards.GetNTotalMotor());
+            jsRobotState.write_unlock();
+            break;
+        default:
+            break;
+    }
+
+    // inform movement sender
+    onSrMovementReceiveCIUMovement(movementData);
 }
 
 void commandMessageHandler(UdpRetPacket& ret) {
@@ -1014,21 +1063,7 @@ void commandMessageHandler(UdpRetPacket& ret) {
             break;
         }
         case CIU_MOVEMENT: {
-            std::unordered_map<std::string, uint32_t>::const_iterator iter = callback_stash_keys.find("onReceiveCIUMovement");
-            if (iter == callback_stash_keys.end()) {
-                LOGE("Callback function onReceiveCIUMovement is not registered");
-                break;
-            }
-
-            void* data = (void*)malloc(2 + ret.length);
-            memcpy(data, ret.bytes, 2 + ret.length);
-
-            event_newCallbackRequestedEvent(
-                ESP32_DUKTAPE_CALLBACK_STATIC_TYPE_FUNCTION,
-                iter->second,
-                pushDataCIUMovement,
-                data
-            );
+            onReceiveCIUMovement(ret.bytes);
             
             break;
         }
@@ -1047,7 +1082,6 @@ extern "C" duk_ret_t ModuleSRCommand(duk_context *ctx) {
     ADD_FUNCTION("requireBoardInfo", requireBoardInfo, 0);      // receive 1 parameter as input
     ADD_FUNCTION("requireSensorInfo", requireSensorInfo, 0);
     ADD_FUNCTION("resetSensor", resetSensor, 1);
-    ADD_FUNCTION("setMovement", setMovement, 1);
     ADD_FUNCTION("updateLocalMotorState", updateLocalMotorState, 1);
     ADD_FUNCTION("updateRemoteMotorState", updateRemoteMotorState, 1);
     ADD_FUNCTION("updateRemoteDirect", updateRemoteDirect, 0);

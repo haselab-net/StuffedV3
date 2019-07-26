@@ -17,6 +17,7 @@
 #include "module_iot.h"
 #include "module_callbacks.h"
 #include "module_device.h"
+#include "module_srmovement.h"
 
 LOG_TAG("duktape_task");
 
