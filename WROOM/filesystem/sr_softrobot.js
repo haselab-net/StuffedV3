@@ -198,22 +198,7 @@ var softrobot;
             }
         }
         message_command.onReceiveCIBoardinfo = onReceiveCIBoardinfo;
-        function onReceiveCIUMovement(data) {
-            switch (data.movementCommandId) {
-                case softrobot.command.CommandIdMovement.CI_M_ADD_KEYFRAME:
-                case softrobot.command.CommandIdMovement.CI_M_QUERY:
-                    softrobot.device.robotState.movementState.nOccupied = data.nOccupied;
-                    break;
-                default:
-                    break;
-            }
-            for (var i = 0; i < message_command.onRcvCIUMovementMessage.length; i++) {
-                message_command.onRcvCIUMovementMessage[i](data);
-            }
-        }
-        message_command.onReceiveCIUMovement = onReceiveCIUMovement;
         message_command.onRcvCIBoardInfoMessage = [];
-        message_command.onRcvCIUMovementMessage = [];
     })(message_command = softrobot.message_command || (softrobot.message_command = {}));
 })(softrobot || (softrobot = {}));
 
@@ -221,8 +206,6 @@ var softrobot;
 (function(softrobot) {
     (function (message_command) {
         message_command.registerCallback("onReceiveCIBoardinfo", message_command.onReceiveCIBoardinfo);
-        message_command.registerCallback("onReceiveCIDirect", message_command.onReceiveCIDirect);
-        message_command.registerCallback("onReceiveCIUMovement", message_command.onReceiveCIUMovement);
     })(message_command = softrobot.message_command || (softrobot.message_command = {}));
 })(softrobot || (softrobot = {}));
 

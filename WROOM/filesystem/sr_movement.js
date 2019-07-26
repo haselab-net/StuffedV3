@@ -1,6 +1,6 @@
-var moduleSRMovement = ESP32.getNativeFunction("moduleSRMovement");
+var moduleSRMovement = ESP32.getNativeFunction("ModuleSRMovement");
 if (moduleSRMovement === null) {
-	log("Unable to find moduleSRMovement");
+	log("Unable to find ModuleSRMovement");
 	module.exports = null;
 	exit;
 }

@@ -37,7 +37,8 @@ var motor;
         });
         jslib.printHeap("---------- queryNOccupied");
     }
-    setInterval(softrobot.movement.queryNOccupied);
+    motor_1.queryNOccupied = queryNOccupied;
+    setInterval(motor_1.queryNOccupied, 2000);
     var MovementOption;
     (function (MovementOption) {
         MovementOption[MovementOption["play"] = 0] = "play";
