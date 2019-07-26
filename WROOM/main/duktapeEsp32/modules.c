@@ -28,6 +28,8 @@
 #include "module_jslib.h"
 #include "module_srcommand.h"
 #include "module_iot.h"
+#include "module_callbacks.h"
+#include "module_srmovement.h"
 LOG_TAG("modules");
 
 /**
@@ -77,6 +79,8 @@ functionTableEntry_t functionTable[] = {
 	{ "ModuleJSLib",	  ModuleJSLib,		1},			// register jslib module
 	{ "ModuleSRCommand",  ModuleSRCommand,	1},			// register srcommand module
 	{ "ModuleIoT",	      ModuleIoT,		1},			// register IoT module
+	{ "ModuleCallbacks",  ModuleCallbacks,  1},			// register	callbacks module
+	{ "ModuleSRMovement", ModuleSRMovement, 1},			// register	movement module
 	// Must be last entry
 	{NULL, NULL, 0 } // *** DO NOT DELETE *** - MUST BE LAST ENTRY.
 };
@@ -415,6 +419,7 @@ static duk_ret_t js_include_spiffs(duk_context* ctx) {
 extern duk_ret_t registerTimerCallback(duk_context* ctx);	//	at duktape_task.cpp
 extern duk_ret_t cancelTimerCallback(duk_context* ctx);		//	at duktape_task.cpp
 extern duk_ret_t registerTestCallback(duk_context* ctx);	//	at main/monitor.cpp
+extern duk_ret_t jsIsQuiting(duk_context* ctx);				//	at duktape_task.cpp
 
 duk_ret_t espPrint(duk_context* ctx){
     const char* str = duk_get_string(ctx, -1);
@@ -529,6 +534,7 @@ static void ModuleESP32(duk_context *ctx) {
     ADD_FUNCTION("registerTimerCallback", registerTimerCallback, 3);	//	arg: (func, time, interval flag)
     ADD_FUNCTION("cancelTimerCallback", cancelTimerCallback, 1);		//	arg: (stash)
     ADD_FUNCTION("print", espPrint, 1);	//	arg: (str)
+    ADD_FUNCTION("isQuitting", jsIsQuiting, 0);	//	arg: ()
 
 	duk_put_prop_string(ctx, -2, "ESP32"); // Add ESP32 to global
 	// [0] - Global object

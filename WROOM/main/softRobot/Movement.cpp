@@ -381,7 +381,7 @@ static void cleanInterpolatedKeyframes(uint8_t motorId) {
 		MotorKeyframeNode* node = head.head;
 		while (node != NULL) {
 			MotorKeyframeNode* tmp = node->next;
-			if (minTime(node->end, head.nextTime, head.head->start) == node->end) deleteNode(motorId, node, false);	// TODO inform js
+			if (minTime(node->end, head.nextTime, head.head->start) == node->end) deleteNode(motorId, node, false);
 
 			// increase node
 			if (node == head.read) break;
@@ -731,7 +731,7 @@ static void initMovementManager() {
 	tickSemaphore = xSemaphoreCreateMutex();
 	vSemaphoreCreateBinary(intervalSemaphore);
 
-	xTaskCreate(movementManager, "movement_manager", 1024*3, NULL, tskIDLE_PRIORITY+2, &movementManagerTask);
+	xTaskCreate(movementManager, "movement", 1024*3, NULL, tskIDLE_PRIORITY+4, &movementManagerTask);
 
 	initTimer();
 }

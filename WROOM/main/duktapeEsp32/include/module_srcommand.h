@@ -12,6 +12,11 @@ duk_ret_t ModuleSRCommand(duk_context *ctx);
 }
 #include "../../softRobot/UdpCom.h"
 void commandMessageHandler(UdpRetPacket& ret);
+
+#include "module_device.h"
+#include "module_callbacks.h"
+
+void setMovement(duk_context* ctx);
 #endif
 
 #endif /* MAIN_INCLUDE_MODULE_SRCOMMAND_H_ */

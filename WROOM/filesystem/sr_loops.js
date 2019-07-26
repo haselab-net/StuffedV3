@@ -5,7 +5,7 @@ jslib.printHeap("sr_loop.js:3");
 var loops = {
     pause: function (ms) {
         if(ms<=0) return;
-        console.log("pause for " + ms + " ms");
+        jslib.printHeap("pause for " + ms + " ms");
         jslib.blockPause(ms);
     },
 
@@ -14,7 +14,7 @@ var loops = {
     },
 
     _foreverFunc: function() {
-        console.log("default forever");
+        jslib.printHeap("default forever");
         jslib.blockPause(1000);
     },
 

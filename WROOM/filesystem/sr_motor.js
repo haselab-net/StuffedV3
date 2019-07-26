@@ -1,6 +1,5 @@
 var motor;
 (function (motor_1) {
-    motor_1.movementSender = new softrobot.movement.MovementSender();
     function changeRemoteMotorParameter(motor, parameterType, value) {
         var instruction = {
             motorId: motor
@@ -29,16 +28,15 @@ var motor;
         softrobot.message_command.updateRemoteDirect();
     }
     motor_1.pushLocalMotorPVToRemoteDirect = pushLocalMotorPVToRemoteDirect;
-    function pushLocalMotorPVToRemoteInterpolateBase(period) {
-        var keyframe = {
-            pose: softrobot.device.robotState.getPropArray("pose", softrobot.device.robotState.motor),
-            period: period
-        };
-        if (softrobot.movement.sendKeyframeQueue.enqueue(keyframe) == -1)
-            return false;
-        return true;
+
+    function queryNOccupied() {
+        var success = softrobot.movement.movementSender.send({
+            movementCommandId: softrobot.command.CommandIdMovement.CI_M_QUERY
+        });
+        jslib.printHeap("---------- queryNOccupied");
     }
-    motor_1.pushLocalMotorPVToRemoteInterpolateBase = pushLocalMotorPVToRemoteInterpolateBase;
+    motor_1.queryNOccupied = queryNOccupied;
+    setInterval(motor_1.queryNOccupied, 2000);
     var MovementOption;
     (function (MovementOption) {
         MovementOption[MovementOption["play"] = 0] = "play";
@@ -171,13 +169,13 @@ var motor;
     }
     motor_1.movementDecoder = movementDecoder;
     function movementAddKeyframe(data) {
-        while (!motor_1.movementSender.send(data)) {
-            loops.pause(100);
+        while (!ESP32.isQuitting() && !softrobot.movement.movementSender.send(data)) {
+            loops.pause(200);
         }
     }
     motor_1.movementAddKeyframe = movementAddKeyframe;
     function pauseMovement(movement) {
-        motor_1.movementSender.send({
+        softrobot.movement.movementSender.send({
             movementCommandId: softrobot.command.CommandIdMovement.CI_M_PAUSE_MOV,
             movementId: movement.movementId,
             motorCount: movement.motorIds.length,
@@ -186,7 +184,7 @@ var motor;
     }
     motor_1.pauseMovement = pauseMovement;
     function resumeMovement(movement) {
-        motor_1.movementSender.send({
+        softrobot.movement.movementSender.send({
             movementCommandId: softrobot.command.CommandIdMovement.CI_M_RESUME_MOV,
             movementId: movement.movementId,
             motorCount: movement.motorIds.length
@@ -194,7 +192,7 @@ var motor;
     }
     motor_1.resumeMovement = resumeMovement;
     function clearMovement(movement) {
-        motor_1.movementSender.send({
+        softrobot.movement.movementSender.send({
             movementCommandId: softrobot.command.CommandIdMovement.CI_M_CLEAR_MOV,
             movementId: movement.movementId,
             motorCount: movement.motorIds.length,
@@ -203,25 +201,25 @@ var motor;
     }
     motor_1.clearMovement = clearMovement;
     function pauseInterpolate() {
-        motor_1.movementSender.send({
+        softrobot.movement.movementSender.send({
             movementCommandId: softrobot.command.CommandIdMovement.CI_M_PAUSE_INTERPOLATE
         });
     }
     motor_1.pauseInterpolate = pauseInterpolate;
     function resumeInterpolate() {
-        motor_1.movementSender.send({
+        softrobot.movement.movementSender.send({
             movementCommandId: softrobot.command.CommandIdMovement.CI_M_RESUME_INTERPOLATE
         });
     }
     motor_1.resumeInterpolate = resumeInterpolate;
     function clearAllMovements() {
-        motor_1.movementSender.send({
+        softrobot.movement.movementSender.send({
             movementCommandId: softrobot.command.CommandIdMovement.CI_M_CLEAR_ALL
         });
     }
     motor_1.clearAllMovements = clearAllMovements;
     function clearPausedMovements() {
-        motor_1.movementSender.send({
+        softrobot.movement.movementSender.send({
             movementCommandId: softrobot.command.CommandIdMovement.CI_M_CLEAR_PAUSED
         });
     }

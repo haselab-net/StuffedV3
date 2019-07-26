@@ -15,6 +15,9 @@
 #include "duk_alloc_hybrid.h"
 
 #include "module_iot.h"
+#include "module_callbacks.h"
+#include "module_device.h"
+#include "module_srmovement.h"
 
 LOG_TAG("duktape_task");
 
@@ -22,6 +25,7 @@ LOG_TAG("duktape_task");
 duk_context *heap_context = NULL;
 //	Threads
 JSThread jsThreads[NJSTHREADS];
+volatile bool bJsQuitting = false;
 // mutex for heap
 static xSemaphoreHandle heap_mutex = NULL;
 
@@ -31,14 +35,14 @@ void* duk_alloc_hybrid_udata = NULL;
  */
 static void createDuktapeHeap() {
 	//	Heap selection
-#if 0
-	heap_context = duk_create_heap_default();
-#else
-	if (!duk_alloc_hybrid_udata){
-		duk_alloc_hybrid_udata = duk_alloc_hybrid_init();
-	}
-	heap_context = duk_create_heap(duk_alloc_hybrid, duk_realloc_hybrid, duk_free_hybrid, duk_alloc_hybrid_udata, NULL);
-#endif
+	#if 0
+		heap_context = duk_create_heap_default();
+	#else
+		if (!duk_alloc_hybrid_udata){
+			duk_alloc_hybrid_udata = duk_alloc_hybrid_init();
+		}
+		heap_context = duk_create_heap(duk_alloc_hybrid, duk_realloc_hybrid, duk_free_hybrid, duk_alloc_hybrid_udata, NULL);
+	#endif
 
     if (!heap_context) { exit(1); }
     dukf_log_heap("Heap after duk create heap");
@@ -229,13 +233,13 @@ duk_ret_t registerTimerCallback(duk_context* ctx){
 		duk_enum(ctx, -1, DUK_ENUM_ARRAY_INDICES_ONLY); //	[func global stash enum]
 		while(duk_next(ctx, -1, true)){ 	//	[func global stash enum key val]
 			duk_get_prop_index(ctx, -1, 0);	//	[func global stash enum key val val[0]]
-#if 0
-				LOGI("-7 isFunc = %d", duk_is_function(ctx, -7));
-				LOGI("-1 isFunc = %d", duk_is_function(ctx, -1));	
-			 	duk_push_context_dump(ctx);
-				LOGI("Stack: %s", duk_to_string(ctx, -1));
-				duk_pop(ctx);										
-#endif
+	#if 0
+					LOGI("-7 isFunc = %d", duk_is_function(ctx, -7));
+					LOGI("-1 isFunc = %d", duk_is_function(ctx, -1));	
+					duk_push_context_dump(ctx);
+					LOGI("Stack: %s", duk_to_string(ctx, -1));
+					duk_pop(ctx);										
+	#endif
 			if (duk_samevalue(ctx, -7, -1)){
 				stash = atoi(duk_get_string(ctx, -3));
 				duk_pop_3(ctx);
@@ -320,13 +324,14 @@ static void dukEventHandleTask(void* arg){
 	JSThread* th = (JSThread*)arg;
 	th->stackStart = (int)&th;
 	th->stackPrev = 0;
-	while(1){
-		// process events
-		lock_heap();	
+	while(1){	
 		//	malloc after lock reduce memory usage. Because only one thread can lock heap.
 		esp32_duktape_event_t* ev = malloc(sizeof(esp32_duktape_event_t));
 		esp32_duktape_waitForEvent(ev, portMAX_DELAY);
-		if (!th->ctx){
+		// process events
+		lock_heap();
+		if (ev->type == ESP32_DUKTAPE_EVENT_QUIT || th->ctx == NULL){
+			free(ev);
 			unlock_heap();
 			break;
 		}
@@ -347,6 +352,10 @@ void duktape_start() {
     dukf_init_nvs_values(); // Initialize any defaults for NVS data
     esp32_duktape_initEvents();
 	if(!heap_mutex) heap_mutex = xSemaphoreCreateMutex();	// only create once
+
+	// init data structure in C/C++
+	initModuleDevice();
+
 	lock_heap();
     if(!heap_context) createDuktapeHeap();					// only create once
 	else {
@@ -359,7 +368,7 @@ void duktape_start() {
 		jsThreads[i].ctx = duk_get_context(heap_context, -1);
 	}
 	unlock_heap();
-	const char* taskNames[NJSTHREADS] = {"js0", "js1"};
+	const char* taskNames[NJSTHREADS] = {"js0", "js1", "js2"};
 	
 	//	create tasks for threads
 	for(int i=0; i<NJSTHREADS; ++i){
@@ -378,9 +387,14 @@ void duktape_start() {
 
 
 void duktape_end(){
+	bJsQuitting = true;
+
+	// clear data stored in C
 	iotBeforeStopJSTask();
+	callbacksBeforeStopJSTask();
+
 	for(int i=0; i<NJSTHREADS; ++i){
-		jsThreads[i].ctx = NULL;
+		event_newQuitEvent();
 	}
 	bool remain;
 	do{
@@ -388,8 +402,6 @@ void duktape_end(){
 		for(int i=0; i<NJSTHREADS; ++i){
 			if (jsThreads[i].task){
 				remain = true;
-				char* cmd = ";";
-				event_newCommandLineEvent(cmd, strlen(cmd), 0);
 				vTaskDelay(1);
 			} 
 		}
@@ -402,6 +414,11 @@ void duktape_end(){
 	unlock_heap();
 	
 	esp32_duktape_endEvents();
+	bJsQuitting = false;
+}
+duk_ret_t jsIsQuiting(duk_context* ctx){
+	duk_push_boolean(ctx, bJsQuitting);
+	return 1;
 }
 
 void duktape_print_stack_remain(duk_context* ctx, const char* at){

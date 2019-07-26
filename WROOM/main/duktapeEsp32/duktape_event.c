@@ -90,6 +90,8 @@ char *event_eventTypeToString(int eventType) {
 			return "ESP32_DUKTAPE_EVENT_COMMAND_LINE";
 		case ESP32_DUKTAPE_EVENT_CALLBACK_REQUESTED:
 			return "ESP32_DUKTAPE_EVENT_CALLBACK_REQUESTED";
+		case ESP32_DUKTAPE_EVENT_QUIT:
+			return "ESP32_DUKTAPE_EVENT_QUIT";
 		default:
 			return "Unknown event type";
 	}
@@ -138,6 +140,12 @@ void event_newCallbackRequestedEvent(
 	LOGD("<< event_newCallbackRequestedEvent");
 } // event_newCallbackRequestedEvent
 
+void event_newQuitEvent(){
+	esp32_duktape_event_t* event = malloc(sizeof(esp32_duktape_event_t));
+	event->type = ESP32_DUKTAPE_EVENT_QUIT;
+	postEvent(event, false); // Post the event.
+	free(event);
+}
 
 /**
  * Post a new command line event.  The commandData is expected to have been

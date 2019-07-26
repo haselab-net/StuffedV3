@@ -15,22 +15,17 @@ var _ret = {
     requireSensorInfo: function () {
         internalSRCommand.requireSensorInfo();
     },
-    setMotorDirect: function (data) {
-        console.log("Set motor direct");
-        internalSRCommand.setMotorDirect(data);
-    },
-    setMotorInterpolate: function (data) {
-        console.log("Set motor interpolate");
-        internalSRCommand.setMotorInterpolate(data);
-    },
-    setMotorParam: function (data) {
-        internalSRCommand.setMotorParam(data);
-    },
     resetSensor: function (data) {
         internalSRCommand.resetSensor(data);
     },
-    setMovement: function (data) {
-        internalSRCommand.setMovement(data);
+    updateLocalMotorState: function (inst) {
+        internalSRCommand.updateLocalMotorState(inst);
+    },
+    updateRemoteMotorState: function (inst) {
+        internalSRCommand.updateRemoteMotorState(inst);
+    },
+    updateRemoteDirect: function () {
+        internalSRCommand.updateRemoteDirect();
     },
     registerCallback: function (name, func) {
         internalSRCommand.registerCallback(name, func);

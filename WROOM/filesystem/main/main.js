@@ -6,7 +6,8 @@ loops.forever(function () {
     motor.setMovement(motor.MovementOption.play, movement_1)
     loops.pause(1000)
 })
-callbacks.onStartTouch(1, 250, function () {
+callbacks.onStartTouch(1, 200, function () {
+    console.log("on touch");
     motor.setMovement(motor.MovementOption.play, movement_2)
 })
 
