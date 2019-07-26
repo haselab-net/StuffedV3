@@ -88,3 +88,7 @@ jslib.printHeap("after sr_callbacks");
 
 // init board
 softrobot.message_command.requireBoardInfo();
+
+
+ESP32.include("/main/main.js");
+jslib.printHeap("heap size after main.js: ");
