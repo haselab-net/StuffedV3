@@ -212,7 +212,11 @@ var softrobot;
 (function (softrobot) {
     var movement;
     (function (movement) {
-        movement.movementSender = require("sr_movement");
+        var moduleSRMovement = ESP32.getNativeFunction("ModuleSRMovement");
+        if (moduleSRMovement === null) log("Unable to find ModuleSRMovement");
+        movement.movementSender = {};
+        moduleSRMovement(movement.movementSender);
+
         var lastMovementId = 0;
         function getNewMovementId() {
             lastMovementId = lastMovementId + 1;
