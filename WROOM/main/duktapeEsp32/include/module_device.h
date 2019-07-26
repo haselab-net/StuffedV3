@@ -42,6 +42,7 @@ class JSRobotState {
     class JSMovementState movement;
 
     JSRobotState(AllBoards& allBoards);
+    ~JSRobotState();
 
     void read_lock();
     void read_unlock();

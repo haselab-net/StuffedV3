@@ -44,7 +44,6 @@ static bool canAddKeyframe(duk_context * ctx) {
 }
 
 static duk_ret_t send(duk_context *ctx) {
-    printf("top1: %i\n", duk_get_top(ctx));
     // .. command
 
     duk_get_prop_string(ctx, -1, "movementCommandId");
@@ -96,8 +95,6 @@ void onSrMovementReceiveCIUMovement(const void *movementData) {
 
     uint8_t movementCommandId;
     popPayloadNum(payload, movementCommandId);
-
-    printf("--- receive CIU_MOVEMENT: %i \n", movementCommandId);
 
     switch (movementCommandId)
     {

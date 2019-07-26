@@ -42,6 +42,11 @@ JSRobotState::JSRobotState(AllBoards& allBoards) : movement(allBoards)  {
     writeSemaphore = xSemaphoreCreateMutex();
 }
 
+JSRobotState::~JSRobotState() {
+    vSemaphoreDelete(readSemaphore);
+    vSemaphoreDelete(writeSemaphore);
+}
+
 void JSRobotState::read_lock() {
     //xSemaphoreTake(writeSemaphore, portMAX_DELAY);
 }

@@ -56,7 +56,6 @@ var motor;
         switch (option) {
             case MovementOption.play: {
                 for (var keyframeId = 0; keyframeId < movement.keyframes.length; keyframeId++) {
-                    console.log(keyframeId.toString() + "," + movement.keyframes.length.toString());
                     var data = {
                         movementCommandId: softrobot.command.CommandIdMovement.CI_M_ADD_KEYFRAME,
                         movementId: movement.movementId,
@@ -162,7 +161,6 @@ var motor;
     motor_1.movementDecoder = movementDecoder;
     function movementAddKeyframe(data) {
         while (!ESP32.isQuitting() && !softrobot.movement.movementSender.send(data)) {
-            console.log("send failed");
             loops.pause(200);
         }
     }
