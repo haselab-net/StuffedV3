@@ -16,6 +16,8 @@ duk_ret_t ModuleSRMovement(duk_context *ctx);
 #ifdef __cplusplus
 }
 
+#include "module_srcommand.h"
+
 void onSrMovementReceiveCIUMovement(const void *movementData);
 #endif
 

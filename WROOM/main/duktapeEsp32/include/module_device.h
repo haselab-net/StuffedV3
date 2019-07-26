@@ -5,6 +5,8 @@
 
 #include <vector>
 #include "../../softRobot/AllBoards.h"
+#include <freertos/freertos.h>
+#include <freertos/semphr.h>
 using namespace std;
 
 class JSMovementState {
@@ -40,6 +42,15 @@ class JSRobotState {
     class JSMovementState movement;
 
     JSRobotState(AllBoards& allBoards);
+
+    void read_lock();
+    void read_unlock();
+    void write_lock();
+    void write_unlock();
+
+    private:
+    xSemaphoreHandle readSemaphore;
+    xSemaphoreHandle writeSemaphore;
 };
 extern JSRobotState jsRobotState;
 

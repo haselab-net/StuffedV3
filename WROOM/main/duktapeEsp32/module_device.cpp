@@ -37,6 +37,24 @@ JSRobotState::JSRobotState(AllBoards& allBoards) : movement(allBoards)  {
     current.resize(allBoards.GetNTotalCurrent(), 0);
     force.resize(allBoards.GetNTotalForce(), 0);
     touch.resize(allBoards.GetNTotalTouch(), 0);
+
+    readSemaphore = xSemaphoreCreateMutex();
+    writeSemaphore = xSemaphoreCreateMutex();
+}
+
+void JSRobotState::read_lock() {
+    //xSemaphoreTake(writeSemaphore, portMAX_DELAY);
+}
+void JSRobotState::read_unlock() {
+    //xSemaphoreGive(writeSemaphore);
+}
+void JSRobotState::write_lock() {
+    //xSemaphoreTake(writeSemaphore, portMAX_DELAY);
+    //xSemaphoreTake(readSemaphore, portMAX_DELAY);
+}
+void JSRobotState::write_unlock() {
+    //xSemaphoreGive(readSemaphore);
+    //xSemaphoreGive(writeSemaphore);
 }
 
 extern "C" void initModuleDevice() {

@@ -32,7 +32,7 @@ var motor;
     motor_1.pushLocalMotorPVToRemoteDirect = pushLocalMotorPVToRemoteDirect;
 
     function queryNOccupied() {
-        softrobot.message_command.setMovement({
+        var success = softrobot.movement.movementSender.send({
             movementCommandId: softrobot.command.CommandIdMovement.CI_M_QUERY
         });
         jslib.printHeap("---------- queryNOccupied");
@@ -56,6 +56,7 @@ var motor;
         switch (option) {
             case MovementOption.play: {
                 for (var keyframeId = 0; keyframeId < movement.keyframes.length; keyframeId++) {
+                    console.log(keyframeId.toString() + "," + movement.keyframes.length.toString());
                     var data = {
                         movementCommandId: softrobot.command.CommandIdMovement.CI_M_ADD_KEYFRAME,
                         movementId: movement.movementId,
@@ -102,7 +103,7 @@ var motor;
         }
     }
     motor_1.setMovementAll = setMovementAll;
-        function movementDecoder(movementStr) {
+    function movementDecoder(movementStr) {
         function splitToInt(str, seperator) {
             var nums_str = str.split(seperator);
             var nums = [];
@@ -160,7 +161,8 @@ var motor;
     }
     motor_1.movementDecoder = movementDecoder;
     function movementAddKeyframe(data) {
-        while (!softrobot.movement.movementSender.send(data) && !ESP32.isQuitting()) {
+        while (!ESP32.isQuitting() && !softrobot.movement.movementSender.send(data)) {
+            console.log("send failed");
             loops.pause(200);
         }
     }

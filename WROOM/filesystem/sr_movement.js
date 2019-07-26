@@ -6,11 +6,11 @@ if (moduleSRMovement === null) {
 }
 
 var internalSRMovement = {};
-moduleSRMovement(moduleSRMovement);
+moduleSRMovement(internalSRMovement);
 
 var _ret = {
     send: function (movData) {
-        internalSRMovement.send(movData);
+        return internalSRMovement.send(movData);
     }
 }
 

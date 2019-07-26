@@ -212,7 +212,7 @@ var softrobot;
 (function (softrobot) {
     var movement;
     (function (movement) {
-        var movementSender = require("sr_movement");
+        movement.movementSender = require("sr_movement");
         var lastMovementId = 0;
         function getNewMovementId() {
             lastMovementId = lastMovementId + 1;

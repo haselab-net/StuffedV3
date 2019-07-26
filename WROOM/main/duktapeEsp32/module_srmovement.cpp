@@ -1,6 +1,6 @@
 #include "module_srmovement.h"
 
-static bool waitResponse = false;       // wair nOccupied after send one keyframe
+static bool waitResponse = false;       // wait nOccupied after send one keyframe
 static uint8_t MAX_NOCCUPIED = 5;
 
 static char* LOG_TAG = "module_srmovement";
@@ -22,22 +22,31 @@ static bool canAddKeyframe(duk_context * ctx) {
             ESP_LOGE(LOG_TAG, "canAddKeyframe: motorId larger than motor count");
             return false;
         }
-        if (jsRobotState.movement.nOccupied[motorId] > MAX_NOCCUPIED) {
+        jsRobotState.read_lock();
+        if (jsRobotState.movement.nOccupied[motorId] >= MAX_NOCCUPIED) {
             duk_pop(ctx);
             return false;
         }
+        jsRobotState.read_unlock();
     }
     duk_pop(ctx);
+    printf("--- pass nOccupied \n");
 
     duk_get_prop_string(ctx, -1, "movementId");
     uint8_t movementId = duk_get_int(ctx, -1);
     duk_pop(ctx);
+    jsRobotState.read_lock();
     if (jsRobotState.movement.isPaused(movementId)) return false;
+    jsRobotState.read_unlock();
+    printf("--- pass isPaused \n");
 
     return true;
 }
 
 static duk_ret_t send(duk_context *ctx) {
+    printf("top1: %i\n", duk_get_top(ctx));
+    // .. command
+
     duk_get_prop_string(ctx, -1, "movementCommandId");
     uint8_t movementCommandId = duk_get_int(ctx, -1);
     duk_pop(ctx);
@@ -47,7 +56,7 @@ static duk_ret_t send(duk_context *ctx) {
     case CI_M_ADD_KEYFRAME:
         if (!canAddKeyframe(ctx)) {
             duk_pop(ctx);
-            duk_push_boolean(ctx, false);
+            duk_push_false(ctx);
             return 1;
         }
         waitResponse = true;
@@ -56,22 +65,29 @@ static duk_ret_t send(duk_context *ctx) {
         duk_get_prop_string(ctx, -1, "movementId");
         uint8_t movementId = duk_get_int(ctx, -1);
         duk_pop(ctx);
+        jsRobotState.write_lock();
         jsRobotState.movement.pause(movementId);
+        jsRobotState.write_unlock();
         break;
     }
     case CI_M_RESUME_MOV: {
         duk_get_prop_string(ctx, -1, "movementId");
         uint8_t movementId = duk_get_int(ctx, -1);
         duk_pop(ctx);
+        jsRobotState.write_lock();
         jsRobotState.movement.resume(movementId);
+        jsRobotState.write_unlock();
         break;
     }
     default:
         break;
     }
 
+    setMovement(ctx);
     duk_pop(ctx);
-    duk_push_boolean(ctx, true);
+
+    duk_push_true(ctx);
+
     return 1;
 }
 
@@ -81,10 +97,11 @@ void onSrMovementReceiveCIUMovement(const void *movementData) {
     uint8_t movementCommandId;
     popPayloadNum(payload, movementCommandId);
 
+    printf("--- receive CIU_MOVEMENT: %i \n", movementCommandId);
+
     switch (movementCommandId)
     {
-    case CIU_MOVEMENT:
-    case CI_M_QUERY:
+    case CI_M_ADD_KEYFRAME:
         waitResponse = false;
         break;
     

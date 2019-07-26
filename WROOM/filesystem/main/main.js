@@ -6,7 +6,8 @@ var movement_2 = motor.movementDecoder("4 1 6005\n3 1\n842 2276\n1158 397\n2011 
 //     motor.setMovement(motor.MovementOption.play, movement_1)
 //     loops.pause(1000)
 // })
-callbacks.onStartTouch(1, 250, function () {
+callbacks.onStartTouch(1, 200, function () {
+    console.log("on touch");
     motor.setMovement(motor.MovementOption.play, movement_2)
 })
 
