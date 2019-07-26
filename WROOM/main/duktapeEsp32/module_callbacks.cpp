@@ -72,6 +72,7 @@ void onRcvTouchMessage(const vector<int16_t> &oldTouch, const vector<int16_t> &n
 }
 
 extern "C" void callbacksBeforeStopJSTask() {
+    if (!head) return;
     // clear registered functions
     struct CallbackFunc* p = head;
     while (p->next) {
