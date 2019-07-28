@@ -254,11 +254,12 @@ static duk_ret_t startWaitingMQTTEvent(duk_context* ctx) {
 static duk_ret_t stopWaitingMQTTEvent(duk_context* ctx) {
     if (!mqtt_client) return 0;
 
-    esp_err_t err = esp_mqtt_client_stop(mqtt_client);
-    if (err != ESP_OK) {
-        ESP_LOGE(LOG_TAG, "Stop mqtt client failed");
-        return 0;
-    }
+    // NOTE no need to call esp_mqtt_client_stop, it is called in esp_mqtt_client_destroy
+    // esp_err_t err = esp_mqtt_client_stop(mqtt_client);
+    // if (err != ESP_OK) {
+    //     ESP_LOGE(LOG_TAG, "Stop mqtt client failed");
+    //     return 0;
+    // }
     esp_mqtt_client_destroy(mqtt_client);
     mqtt_client = NULL;
 
