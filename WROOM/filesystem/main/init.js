@@ -38,6 +38,7 @@ Duktape.modSearch = function(id, require, exports, module) {
 	//return data;
 }; // Duktape.modSearch
 
+/*
 var _timers = {
 	setTimer: function(callback, interval, isInterval) {
 		var id = ESP32.registerTimerCallback(callback, interval, isInterval);
@@ -58,19 +59,44 @@ var _timers = {
 		return rv;
 	} // cancelTimer
 };
-
+*/
 function cancelInterval(id) {
-	_timers.cancelTimer(id);
+	ESP32.cancelTimerCallback(id);
 }
 
 function cancelTimeout(id) {
-	_timers.cancelTimer(id);
+	ESP32.cancelTimerCallback(id);
 }
 
 function setInterval(callback, interval) {
-	return _timers.setTimer(callback, interval, true);
+	return ESP32.registerTimerCallback(callback, interval, true);
 }
 
 function setTimeout(callback, interval) {
-	return _timers.setTimer(callback, interval, false);
+	return ESP32.registerTimerCallback(callback, interval, false);
 }
+
+var jslib = require("jslib");
+jslib.printHeap("<< after jslib");
+var loops = require("sr_loops");
+jslib.printHeap("<< after sr_loops");
+var console = require("console");
+jslib.printHeap("<< after console");
+
+ESP32.include("iot.js");
+jslib.printHeap("<< after iot");
+ESP32.include("sr_softrobot.js");
+jslib.printHeap("<< after sr_softrobot");
+ESP32.include("sr_motor.js");
+jslib.printHeap("<< after sr_motor");
+ESP32.include("sr_callbacks.js");
+jslib.printHeap("<< after sr_callbacks");
+
+jslib.printHeap("heap size after require: ");
+
+// init board
+softrobot.message_command.requireBoardInfo();
+
+ESP32.include("/main/main.js");
+
+jslib.printHeap("heap size after main.js: ");

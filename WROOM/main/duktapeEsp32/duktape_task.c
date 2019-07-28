@@ -21,18 +21,81 @@
 
 LOG_TAG("duktape_task");
 
-// The heap context
-duk_context *heap_context = NULL;
-//	Threads
+//-------------------------------------------------------------------------------
+//	Static variables 
+
+//	The heap for duktape
+duk_context *heap_context = NULL;		// The heap context
+void* duk_alloc_hybrid_udata = NULL;
+static xSemaphoreHandle heap_mutex = NULL;	// mutex for heap
+
+//	Threads for js
 JSThread jsThreads[NJSTHREADS];
 volatile bool bJsQuitting = false;
-// mutex for heap
-static xSemaphoreHandle heap_mutex = NULL;
 
-void* duk_alloc_hybrid_udata = NULL;
-/**
- * create environment for running js file
- */
+//	Timers for js
+static void dukTimerTask(void* arg);
+static int32_t timerCount = 0;
+static TaskHandle_t taskJsTimer = NULL;
+xSemaphoreHandle smTimerCallbacks = NULL;
+struct TimerCallback{
+	uint16_t id;
+	uint16_t stash;
+	int tick;
+	int period;
+} timerCallbacks[NTIMERCALLBACKS];
+
+//-------------------------------------------------------------------------------
+//	Utilities for this file 
+void lock_heap() {
+	xSemaphoreTake(heap_mutex, portMAX_DELAY);
+}
+void unlock_heap() {
+	xSemaphoreGive(heap_mutex);
+}
+static duk_ret_t dukPrint(duk_context* ctx){
+    const char* str = duk_get_string(ctx, -1);
+	printf("%s", str);
+	return 0;
+}
+duk_ret_t jsIsQuiting(duk_context* ctx){
+	duk_push_boolean(ctx, bJsQuitting);
+	return 1;
+}
+void duktape_print_stack_remain(duk_context* ctx, const char* at){
+	JSThread* th = NULL;
+	for(int i=0; i < NJSTHREADS; ++i){
+		if (jsThreads[i].ctx == ctx){
+			th = &jsThreads[i];
+			int sd = th->stackStart-(int)&th;
+			UBaseType_t ws = uxTaskGetStackHighWaterMark(th->task);
+			printf("Stack: %+d = %d wm:%d at %s\n", sd-th->stackPrev, sd, ws, at);
+			th->stackPrev = sd;
+
+			//UBaseType_t sd = uxTaskGetStackHighWaterMark(th->task);
+			//printf("Stack: %d at %s\n", (int)sd, at);
+
+			break;
+		}
+	}
+}
+#if 0	//	dumpCallbacks for timers
+static void dumpCallbacks(const char* msg){
+	char buf[80];
+	buf[0] = 0;
+	for(int i=0; i<NTIMERCALLBACKS; ++i){
+		sprintf(buf + strlen(buf), "%d, ", timerCallbacks[i].stash);
+	}
+	LOGD("%s Callbacks: %s", msg, buf);
+}
+#else
+#define dumpCallbacks(x)	do{} while(0)
+#endif
+
+//-------------------------------------------------------------------------------
+//	Initializers for duktape 
+//	
+
 static void createDuktapeHeap() {
 	//	Heap selection
 	#if 0
@@ -48,8 +111,12 @@ static void createDuktapeHeap() {
     dukf_log_heap("Heap after duk create heap");
     
 	duk_eval_string_noresult(heap_context, "new Function('return this')().Duktape = Object.create(Duktape);");
-
 	duk_module_duktape_init(heap_context); // Initialize the duktape module functions.
+	duk_get_global_string(heap_context, "Duktape");
+	duk_push_c_function(heap_context, dukPrint, 1);	//	print(string)
+	duk_put_prop_string(heap_context, -2, "print");
+	duk_pop(heap_context);
+
 	dukf_log_heap("Heap after duk_module_duktape_init");
 
 	esp32_duktape_stash_init(heap_context); // Initialize the stash environment.
@@ -60,7 +127,101 @@ static void createDuktapeHeap() {
     dukf_runFile(heap_context, "/main/init.js");
     dukf_log_heap("Heap after init.js");
 }
+void dukInitTask(){
+	lock_heap();
+	createDuktapeHeap();
+	TaskHandle_t task = jsThreads[0].task;
+	jsThreads[0].task = NULL;
+	unlock_heap();
+	vTaskDelete(task);
+}
 
+static void dukEventHandleTask(void* arg);
+/*	Duktape's start point.
+	Initialize duktape, exec "init.js" and create jsThreads and exec "runtime.js"	*/ 
+void duktape_start() {
+    if(heap_context){
+		LOGE("heap_context must be NULL at duktape_start().");
+		return;
+	}
+	//	Initialize heap and threads
+    dukf_init_nvs_values(); // Initialize any defaults for NVS data
+    esp32_duktape_initEvents();
+	if(!heap_mutex) heap_mutex = xSemaphoreCreateMutex();	// only create once
+	//	init timer task
+	memset(timerCallbacks, 0, sizeof(timerCallbacks));
+	if (!taskJsTimer){
+		if (!smTimerCallbacks){
+			smTimerCallbacks = xSemaphoreCreateMutex();
+		}
+		xTaskCreate(dukTimerTask, "jsTimer", 1024, NULL, tskIDLE_PRIORITY, &taskJsTimer);
+	}
+
+	// init data structure in C/C++
+	initModuleDevice();
+	#if 1
+	xTaskCreate(dukInitTask, "jsInit", 1024*10, NULL, tskIDLE_PRIORITY+1, &jsThreads[0].task);
+	#else
+	createDuktapeHeap();
+	#endif
+	while(jsThreads[0].task){
+		vTaskDelay(1);
+	}
+	vTaskDelay(1);
+	lock_heap();
+	jsThreads[0].ctx = heap_context;
+	for(int i=1; i<NJSTHREADS; ++i){
+		// create new context on the same heap
+		duk_push_thread(heap_context);
+		jsThreads[i].ctx = duk_get_context(heap_context, -1);
+	}
+	unlock_heap();
+	
+	//	create tasks for threads
+	const char* taskNames[NJSTHREADS] = {"js0", "js1", "js2"};
+	for(int i=0; i<NJSTHREADS; ++i){
+		xTaskCreate(dukEventHandleTask, taskNames[i], 1024*5, &jsThreads[i], tskIDLE_PRIORITY + 1, &jsThreads[i].task);
+	}	
+	char* cmd = "ESP32.include('/main/runtime.js');";
+	event_newCommandLineEvent(cmd, strlen(cmd), 0);
+}
+
+//	Cleaup of duktape
+void duktape_end(){
+	bJsQuitting = true;
+
+	// clear data stored in C
+	iotBeforeStopJSTask();
+	callbacksBeforeStopJSTask();
+
+	for(int i=0; i<NJSTHREADS; ++i){
+		event_newQuitEvent();
+	}
+	bool remain;
+	do{
+		remain = false;
+		for(int i=0; i<NJSTHREADS; ++i){
+			if (jsThreads[i].task){
+				remain = true;
+				vTaskDelay(1);
+			} 
+		}
+	} while(remain);
+
+	// delete heap
+	lock_heap();
+	duk_destroy_heap( heap_context );
+	heap_context = NULL;
+	unlock_heap();
+	
+	esp32_duktape_endEvents();
+	bJsQuitting = false;
+}
+
+
+//-------------------------------------------------------------------------------
+//	Event handling for duktape 
+//	
 static void processEvent(duk_context* ctx, esp32_duktape_event_t *pEvent) {
 	duk_int_t callRc;
 	LOGV(">> processEvent: eventType=%s", event_eventTypeToString(pEvent->type));
@@ -150,36 +311,32 @@ static void processEvent(duk_context* ctx, esp32_duktape_event_t *pEvent) {
 	LOGV("<< processEvent");
 } // processEvent
 
-void lock_heap() {
-	xSemaphoreTake(heap_mutex, portMAX_DELAY);
-}
-void unlock_heap() {
-	xSemaphoreGive(heap_mutex);
-}
-
-static void dukEventHandleTask(void* arg);
-static void dukTimerTask(void* arg);
-static int32_t timerCount = 0;
-static TaskHandle_t taskJsTimer = NULL;
-xSemaphoreHandle smTimerCallbacks = NULL;
-struct TimerCallback{
-	uint16_t id;
-	uint16_t stash;
-	int tick;
-	int period;
-} timerCallbacks[NTIMERCALLBACKS];
-#if 0
-static void dumpCallbacks(const char* msg){
-	char buf[80];
-	buf[0] = 0;
-	for(int i=0; i<NTIMERCALLBACKS; ++i){
-		sprintf(buf + strlen(buf), "%d, ", timerCallbacks[i].stash);
+static void dukEventHandleTask(void* arg){
+	JSThread* th = (JSThread*)arg;
+	th->stackStart = (int)&th;
+	th->stackPrev = 0;
+	while(1){	
+		//	malloc after lock reduce memory usage. Because only one thread can lock heap.
+		esp32_duktape_event_t* ev = malloc(sizeof(esp32_duktape_event_t));
+		esp32_duktape_waitForEvent(ev, portMAX_DELAY);
+		// process events
+		lock_heap();
+		if (ev->type == ESP32_DUKTAPE_EVENT_QUIT || th->ctx == NULL){
+			free(ev);
+			unlock_heap();
+			break;
+		}
+		processEvent(th->ctx, ev);
+		esp32_duktape_freeEvent(th->ctx, ev);
+		free(ev);
+		unlock_heap();
 	}
-	LOGD("%s Callbacks: %s", msg, buf);
+	{
+		TaskHandle_t t = th->task;
+		th->task = NULL;
+		vTaskDelete(t);
+	}
 }
-#else
-#define dumpCallbacks(x)	do{} while(0)
-#endif
 
 duk_ret_t registerTimerCallback(duk_context* ctx){
 	xSemaphoreTake(smTimerCallbacks, portMAX_DELAY);
@@ -317,124 +474,5 @@ static void dukTimerTask(void* arg){
 		}
 		xSemaphoreGive(smTimerCallbacks);
 		vTaskDelay(1);	//	every 1 tick.
-	}
-}
-
-static void dukEventHandleTask(void* arg){
-	JSThread* th = (JSThread*)arg;
-	th->stackStart = (int)&th;
-	th->stackPrev = 0;
-	while(1){	
-		//	malloc after lock reduce memory usage. Because only one thread can lock heap.
-		esp32_duktape_event_t* ev = malloc(sizeof(esp32_duktape_event_t));
-		esp32_duktape_waitForEvent(ev, portMAX_DELAY);
-		// process events
-		lock_heap();
-		if (ev->type == ESP32_DUKTAPE_EVENT_QUIT || th->ctx == NULL){
-			free(ev);
-			unlock_heap();
-			break;
-		}
-		processEvent(th->ctx, ev);
-		esp32_duktape_freeEvent(th->ctx, ev);
-		free(ev);
-		unlock_heap();
-	}
-	{
-		TaskHandle_t t = th->task;
-		th->task = NULL;
-		vTaskDelete(t);
-	}
-}
-
-void duktape_start() {
-	//	Initialize heap and threads
-    dukf_init_nvs_values(); // Initialize any defaults for NVS data
-    esp32_duktape_initEvents();
-	if(!heap_mutex) heap_mutex = xSemaphoreCreateMutex();	// only create once
-
-	// init data structure in C/C++
-	initModuleDevice();
-
-	lock_heap();
-    if(!heap_context) createDuktapeHeap();					// only create once
-	else {
-		dukf_runFile(heap_context, "/main/reinit.js");
-	}
-	jsThreads[0].ctx = heap_context;
-	for(int i=1; i<NJSTHREADS; ++i){
-		// create new context on the same heap
-		duk_push_thread(heap_context);
-		jsThreads[i].ctx = duk_get_context(heap_context, -1);
-	}
-	unlock_heap();
-	const char* taskNames[NJSTHREADS] = {"js0", "js1", "js2"};
-	
-	//	create tasks for threads
-	for(int i=0; i<NJSTHREADS; ++i){
-		xTaskCreate(dukEventHandleTask, taskNames[i], 1024*8, &jsThreads[i], tskIDLE_PRIORITY + 1, &jsThreads[i].task);
-	}	
-	memset(timerCallbacks, 0, sizeof(timerCallbacks));
-	if (!taskJsTimer){
-		if (!smTimerCallbacks){
-			smTimerCallbacks = xSemaphoreCreateMutex();
-		}
-		xTaskCreate(dukTimerTask, "jsTimer", 1024*4, NULL, tskIDLE_PRIORITY, &taskJsTimer);
-	}
-	char* cmd = "ESP32.include('/main/runtime.js');";
-	event_newCommandLineEvent(cmd, strlen(cmd), 0);
-}
-
-
-void duktape_end(){
-	bJsQuitting = true;
-
-	// clear data stored in C
-	iotBeforeStopJSTask();
-	callbacksBeforeStopJSTask();
-
-	for(int i=0; i<NJSTHREADS; ++i){
-		event_newQuitEvent();
-	}
-	bool remain;
-	do{
-		remain = false;
-		for(int i=0; i<NJSTHREADS; ++i){
-			if (jsThreads[i].task){
-				remain = true;
-				vTaskDelay(1);
-			} 
-		}
-	} while(remain);
-
-	// delete heap
-	lock_heap();
-	duk_destroy_heap( heap_context );
-	heap_context = NULL;
-	unlock_heap();
-	
-	esp32_duktape_endEvents();
-	bJsQuitting = false;
-}
-duk_ret_t jsIsQuiting(duk_context* ctx){
-	duk_push_boolean(ctx, bJsQuitting);
-	return 1;
-}
-
-void duktape_print_stack_remain(duk_context* ctx, const char* at){
-	JSThread* th = NULL;
-	for(int i=0; i < NJSTHREADS; ++i){
-		if (jsThreads[i].ctx == ctx){
-			th = &jsThreads[i];
-			int sd = th->stackStart-(int)&th;
-			UBaseType_t ws = uxTaskGetStackHighWaterMark(th->task);
-			printf("Stack: %+d = %d wm:%d at %s\n", sd-th->stackPrev, sd, ws, at);
-			th->stackPrev = sd;
-
-			//UBaseType_t sd = uxTaskGetStackHighWaterMark(th->task);
-			//printf("Stack: %d at %s\n", (int)sd, at);
-
-			break;
-		}
 	}
 }
