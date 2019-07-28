@@ -84,7 +84,7 @@ static void initPausedMovements() {
 
 /////////////////////////////////////////// api for accessing PIC ///////////////////////////////////////////////
 static xSemaphoreHandle picQuerySemaphore;
-static bool receivedReturn = true;		// if not received the return of formal command, not execute command this time
+static volatile bool receivedReturn = true;		// if not received the return of formal command, not execute command this time
 
 static uint8_t targetCountReadMin = 0xfe, targetCountReadMax = 0xfe, targetWrite = 0xff;
 static uint16_t tickMin, tickMax;
@@ -661,7 +661,7 @@ static void movementManager(void* arg) {
 		}
 		if (!receivedReturn) {								// not tick if return packet for last command not come
 			ESP_LOGD(LOG_TAG, "Skip one loop because no return CI_INTERPOLATED received in %i ms", MS_PER_MOVEMENT_TICK);
-			receivedReturn = true;							// NOTE avoid lose of packet
+			// receivedReturn = true;							// NOTE would packet lost?
 			continue;
 		}
 
