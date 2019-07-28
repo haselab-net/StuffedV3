@@ -422,6 +422,15 @@ public:
         ESP_LOGI(Tag(), "After wsCreateJsfileTask heap size: %d", esp_get_free_heap_size());
     }
 } mcJSRestart;
+class MCJSDelete: public MonitorCommandBase{
+public:
+    MCJSDelete() { } 
+    const char* Desc(){ return "D delete java script"; }
+    void Func(){
+        offline_mode = false;
+        wsDeleteJsfileTask();
+    }
+} mcJSDelete;
 
 class MCJSStack: public MonitorCommandBase{
 public:

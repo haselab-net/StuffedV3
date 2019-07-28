@@ -190,9 +190,11 @@ void duktape_start() {
 void duktape_end(){
 	bJsQuitting = true;
 
+	printf("--- before delete data stored in C \n");
 	// clear data stored in C
 	iotBeforeStopJSTask();
 	callbacksBeforeStopJSTask();
+	printf("--- after delete data stored in C \n");
 
 	for(int i=0; i<NJSTHREADS; ++i){
 		event_newQuitEvent();
@@ -208,13 +210,18 @@ void duktape_end(){
 		}
 	} while(remain);
 
+	printf("--- after stop tasks \n");
+
 	// delete heap
 	lock_heap();
 	duk_destroy_heap( heap_context );
 	heap_context = NULL;
 	unlock_heap();
+
+	printf("--- after delete heap \n");
 	
 	esp32_duktape_endEvents();
+	printf("--- after end events \n");
 	bJsQuitting = false;
 }
 
