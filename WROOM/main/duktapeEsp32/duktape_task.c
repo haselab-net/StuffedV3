@@ -189,6 +189,10 @@ void duktape_start() {
 //	Cleaup of duktape
 void duktape_end(){
 	bJsQuitting = true;
+	//	Stop timer. Stop to put new timer callback events.
+	xSemaphoreTake(smTimerCallbacks, portMAX_DELAY);
+	memset(timerCallbacks, 0, sizeof(timerCallbacks));	//	clear time callbacks.
+	xSemaphoreGive(smTimerCallbacks);
 
 	printf("--- before delete data stored in C \n");
 	// clear data stored in C
