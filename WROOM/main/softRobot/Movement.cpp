@@ -14,6 +14,9 @@ typedef struct InterpolateState InterpolateState;
 static uint16_t movementTime = 0;                // current time in movement tick
 static bool tickPaused = false;
 
+static bool movementControlMode = true;
+static bool newMovementControlMode = true; 
+
 static xSemaphoreHandle tickSemaphore;		// semaphore for lock movement linked list
 
 struct MotorKeyframeNode {
@@ -664,6 +667,16 @@ static void movementManager(void* arg) {
 			// receivedReturn = true;							// NOTE would packet lost?
 			continue;
 		}
+		if (newMovementControlMode != movementControlMode && newMovementControlMode == true) {
+			// get the new current pose
+			calibrateCurrentPose = true;
+			movementQueryInterpolateState();				// block until CI_INTERPOLATE returns
+
+			// update targetWrite
+			targetWrite = targetCountReadMax + 1;
+
+			movementControlMode = newMovementControlMode;
+		}
 
 		short nVacancy = getInterpolateBufferVacancy();
 
@@ -746,9 +759,7 @@ void initMovementDS() {
 	initMovementManager();
 }
 
-static bool movementControlMode = true;
 void onChangeControlMode(CommandId newCommand) {
-	bool newMovementControlMode;
 	switch (newCommand) {
 		case CI_DIRECT:
 		case CI_CURRENT:
@@ -764,18 +775,12 @@ void onChangeControlMode(CommandId newCommand) {
 	}
 	if (newMovementControlMode != movementControlMode) {
 		if (newMovementControlMode) {						// goto movementControlMode
-			// get the new current pose
-			calibrateCurrentPose = true;
-			movementQueryInterpolateState();				// block until CI_INTERPOLATE returns
-
-			// update targetWrite
-			targetWrite = targetCountReadMax + 1;
-
 			resumeInterpolate();
 		}
-		else pauseInterpolate();							// quit movementControlMode
-
-		movementControlMode = newMovementControlMode;
+		else {												// quit movementControlMode
+			pauseInterpolate();
+			movementControlMode = newMovementControlMode;
+		}						
 	}
 }
 

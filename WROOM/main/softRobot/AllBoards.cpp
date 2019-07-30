@@ -1,6 +1,7 @@
 #include "AllBoards.h"
 #include "UartForBoards.h"
 #include "Board.h"
+#include "Movement.h"
 #include "driver/uart.h"
 
 //	PIN definition
@@ -38,6 +39,12 @@ static void execLoop(void* arg){
 void AllBoards::ExecLoop(){
 	while (1){
 		UdpCmdPacket* recv = &udpCom.recvs.Peek();
+
+		// change resume/pause movement manager
+		if (recv->count == CS_DUKTAPE || recv->count == CS_WEBSOCKET) {
+			onChangeControlMode((CommandId)recv->command);
+		}
+
 		ESP_LOGV(Tag(), "ExecLoop(): command %d received.", recv->command);
 		if (CI_BOARD_INFO < recv->command && recv->command < CI_NCOMMAND) {
 			//	send packet to allBoards
