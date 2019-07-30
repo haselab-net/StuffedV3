@@ -22,6 +22,9 @@ var iot = {
         });
         internalIoT.httpPost(url, data);
     },
+    triggerNuibotEvent: function (nuibotId, event) {
+        internalIoT.httpGet("http://haselab.net:5001/trigger/" + event + "/with/key/" + nuibotId);
+    },
     triggerWebhook: function (url, params) {
         internalIoT.httpGet(url + "?" + params);
     },
@@ -33,6 +36,9 @@ var iot = {
     },
     unregisterMQTTEvent: function(event) {
         if (iot.mqttCallbacks[event]) iot.mqttCallbacks[event] = undefined;
+    },
+    startWaitingMQTTEventDefault: function() {
+        internalIoT.startWaitingMQTTEventDefault();
     },
     startWaitingMQTTEvent: function (remoteAddress, remotePort) {
         internalIoT.startWaitingMQTTEvent(remoteAddress, remotePort);

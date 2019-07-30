@@ -214,6 +214,34 @@ static esp_err_t mqtt_event_handler(esp_mqtt_event_handle_t event) {
     return ESP_OK;
 }
 
+static duk_ret_t startWaitingMQTTEventDefault(duk_context* ctx) {
+    if (mqtt_client) return 0;
+
+    // broker config
+    esp_mqtt_client_config_t mqtt_cfg = {};
+    mqtt_cfg.event_handle = mqtt_event_handler;
+    mqtt_cfg.uri = "mqtt://haselab.net:5000";
+    // mqtt_cfg.port = 5000;
+    // mqtt_cfg.keepalive = 10 * 60;    // 10 min, 2 min default
+    mqtt_cfg.disable_auto_reconnect = false;
+    mqtt_cfg.task_prio = tskIDLE_PRIORITY;
+    mqtt_cfg.task_stack = 1024 * 2;
+
+    // start
+    mqtt_client = esp_mqtt_client_init(&mqtt_cfg);
+    if (!mqtt_client) {
+        ESP_LOGE(LOG_TAG, "Init mqtt client failed");
+        return 0;
+    }
+    esp_err_t err = esp_mqtt_client_start(mqtt_client);
+    if (err != ESP_OK) {
+        ESP_LOGE(LOG_TAG, "Start mqtt client failed");
+        return 0;
+    }
+
+    return 0;
+}
+
 // function startWaitingMQTTEvent(remoteAddress: string, remotePort: number)
 static duk_ret_t startWaitingMQTTEvent(duk_context* ctx) {
     if (mqtt_client) return 0;
@@ -295,6 +323,7 @@ extern "C" duk_ret_t ModuleIoT(duk_context *ctx) {
     ADD_FUNCTION("httpGet", httpGet, 1);
     ADD_FUNCTION("httpPost", httpPost, 2);
     ADD_FUNCTION("registerMQTTCallback", registerMQTTCallback, 1);
+    ADD_FUNCTION("startWaitingMQTTEventDefault", startWaitingMQTTEventDefault, 0);
     ADD_FUNCTION("startWaitingMQTTEvent", startWaitingMQTTEvent, 2);
     ADD_FUNCTION("stopWaitingMQTTEvent", stopWaitingMQTTEvent, 0);
 
