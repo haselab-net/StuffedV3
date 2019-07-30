@@ -655,7 +655,6 @@ static void movementTick() {
 	xSemaphoreGive(tickSemaphore);
 }
 
-static bool skippedOneLoop = false;		// forbid continuous skip (because the targetWrite will not be updated)
 static void movementManager(void* arg) {
 	while(1) {
 		xSemaphoreTake(intervalSemaphore, portMAX_DELAY);	// tick when timer alarm
@@ -667,7 +666,7 @@ static void movementManager(void* arg) {
 			// receivedReturn = true;							// NOTE would packet lost?
 			continue;
 		}
-		if (newMovementControlMode != movementControlMode && newMovementControlMode == true) {
+		if (newMovementControlMode != movementControlMode && newMovementControlMode == true) {	// get current pose and count write when switch to movement control mode 
 			// get the new current pose
 			calibrateCurrentPose = true;
 			movementQueryInterpolateState();				// block until CI_INTERPOLATE returns
@@ -698,11 +697,11 @@ static void movementManager(void* arg) {
 		}
 
 		// avoid overflow of interpolate buffer in PIC
-		if (nVacancy <= PIC_INTERPOLATE_BUFFER_VACANCY_MIN && !skippedOneLoop) {
+		if (nVacancy <= PIC_INTERPOLATE_BUFFER_VACANCY_MIN) {			// NOTE not sure any risk that skip forever
 			ESP_LOGD(LOG_TAG, "interpolate buffer vacancy: %i, skip one loop", nVacancy);
-			skippedOneLoop = true;
+			movementQueryInterpolateState();	// query new read count for next loop
 			continue;
-		} else if (skippedOneLoop) skippedOneLoop = false;
+		}
 
 		// do tick
 		receivedReturn = false;
