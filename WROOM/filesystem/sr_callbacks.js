@@ -8,7 +8,7 @@ var internalCallbacks = {};
 ModuleCallbacks(internalCallbacks);
 
 // init queryer
-var touchQueryerInterval = 500;
+var touchQueryerInterval = 200;
 var touchQueryer = setInterval(function () {
     softrobot.message_command.requireSensorInfo();
 }, touchQueryerInterval);
