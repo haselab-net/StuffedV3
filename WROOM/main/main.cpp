@@ -147,12 +147,26 @@ extern "C" void app_main(){
     initMovementDS();
 
     //  start DukTape, javascript engine and run /main/main*.js
+    nvs_handle nvsHandle;
+    nvs_open("motor", NVS_READWRITE, &nvsHandle);
+    uint8_t auto_start;
+    esp_err_t err = nvs_get_u8(nvsHandle, "auto_start", &auto_start);
+    if (err != ESP_OK) {
+        auto_start = false;     // not auto start on default
+        nvs_set_u8(nvsHandle, "auto_start", auto_start);
+        nvs_commit(nvsHandle);
+    }
+    offline_mode = auto_start;
+    nvs_close(nvsHandle);
+
 	if(offline_mode && !wsIsJsfileTaskRunning()) {
         wsCreateJsfileTask();
         LOGI("Start running default jsfile task");
     } else {
         LOGI("JS is NOT started.");
     }
+
+    
     //  start monitor
     Monitor::theMonitor.Init();
     Monitor::theMonitor.Run();  //  monitor start. never return;
