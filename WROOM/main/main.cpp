@@ -147,6 +147,16 @@ extern "C" void app_main(){
     initMovementDS();
 
     //  start DukTape, javascript engine and run /main/main*.js
+    nvs_handle nvsHandle;
+    nvs_open("motor", NVS_READWRITE, &nvsHandle);
+    uint8_t u8_offline_mode;
+    esp_err_t err = nvs_get_u8(nvsHandle, "offline_mode", &u8_offline_mode);
+    if (err != ESP_OK) {
+        u8_offline_mode = offline_mode;
+        nvs_set_u8(nvsHandle, "offline_mode", u8_offline_mode);
+        nvs_commit(nvsHandle);
+    } else offline_mode = u8_offline_mode;
+    nvs_close(nvsHandle);
 	if(offline_mode && !wsIsJsfileTaskRunning()) {
         wsCreateJsfileTask();
         LOGI("Start running default jsfile task");
