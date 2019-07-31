@@ -165,12 +165,12 @@ class MCEraseNvs: public MonitorCommandBase{
 } mcEraseNvs;
 
 inline void resumeControl(){
-    motorDrive.bControl = true;
+    motorDriver.bControl = true;
     resumeInterpolate();
 }
 inline void pauseControl(){
     pauseInterpolate();
-    motorDrive.bControl = false;
+    motorDriver.bControl = false;
 }
 
 class MCPwmTest: public MonitorCommandBase{
