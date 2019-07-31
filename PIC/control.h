@@ -33,6 +33,8 @@ extern SDEC mcos[NAXIS], msin[NAXIS];
 extern SDEC currentSense[NMOTOR];
 extern const SDEC mcosOffset[NAXIS];
 extern const SDEC msinOffset[NAXIS];
+extern long motorHeat[NMOTOR];
+extern SDEC lastRatio[NMOTOR];
 
 struct PdParam{
     SDEC k[NMOTOR];
@@ -104,6 +106,8 @@ void controlInit();
 void controlSetMode(enum ControlMode m);
 void controlLoop();
 void updateMotorState();
+void setPwmWithLimit(int ch, SDEC ratio);
+
 
 extern SDEC forceOffset[NFORCE];
 

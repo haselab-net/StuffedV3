@@ -72,7 +72,7 @@ void MotorDriver::AdcReadTask(){
                         controlLoop();
                         gpio_set_level(GPIO_LED, 0);
                     }else{
-                        updateMotorState();                    
+                        updateMotorState();
                     }
                 }
             }

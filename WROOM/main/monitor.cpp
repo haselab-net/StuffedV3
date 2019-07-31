@@ -205,18 +205,23 @@ class MCPwmTest: public MonitorCommandBase{
             }else if (ch == '\r' || ch == ' '){
                 conPrintf("PWM duty = ");
                 for(int i=0; i<MotorDriver::NMOTOR_DIRECT; ++i){
-                    conPrintf("  %8.1f", duty[i]);
+                    conPrintf("  %4.1f/%2.1f", SDEC2DBL(lastRatio[i]), duty[i]);
                 }
                 conPrintf("   Angle =");
                 for(int i=0; i<MotorDriver::NMOTOR_DIRECT; ++i){
-                    conPrintf("  %8.2f", LDEC2DBL(motorState.pos[i]));
+                    conPrintf("  %4.2f", LDEC2DBL(motorState.pos[i]));
+                }
+                conPrintf(" heat =");
+                for(int i=0; i<MotorDriver::NMOTOR_DIRECT; ++i){
+                    conPrintf(" %ld", motorHeat[i]);
                 }
                 conPrintf("\n");
             }else{
                 break;
             }
             for(int i=0; i<MotorDriver::NMOTOR_DIRECT; ++i){
-                motorDriver.Pwm(i, (SDEC)(duty[i] * SDEC_ONE));
+                setPwmWithLimit(i, (SDEC)(duty[i] * SDEC_ONE));
+                //motorDriver.Pwm(i, (SDEC)(duty[i] * SDEC_ONE));
             }
         }
         resumeControl();
