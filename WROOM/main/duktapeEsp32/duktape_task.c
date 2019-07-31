@@ -19,6 +19,8 @@
 #include "module_device.h"
 #include "module_srmovement.h"
 
+#include "../softRobot/Movement.h"
+
 LOG_TAG("duktape_task");
 
 //-------------------------------------------------------------------------------
@@ -213,6 +215,9 @@ void duktape_end(){
 			} 
 		}
 	} while(remain);
+
+	// clear data stored in C
+	movementAfterStopJSTask();
 
 	// delete heap
 	lock_heap();

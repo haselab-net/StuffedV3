@@ -96,7 +96,8 @@
         "ratio": "cpp",
         "portmacro.h": "c",
         "dirent.h": "c",
-        "module_callbacks.h": "c"
+        "module_callbacks.h": "c",
+        "movement.h": "c"
     },
     "terminal.integrated.shell.windows": "c:\\msys32\\usr\\bin\\bash.exe",
     "terminal.integrated.env.windows": {

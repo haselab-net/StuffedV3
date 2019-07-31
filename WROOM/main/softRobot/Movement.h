@@ -2,6 +2,8 @@
 #define _SR_MOVEMENT_H
 
 #include <stdio.h>
+
+#ifdef __cplusplus
 #include <vector>
 
 #include <freertos/FreeRTOS.h>
@@ -86,5 +88,11 @@ void prepareRetPauseMov(const void* movement_command_data_rcv, void* movement_co
 void prepareRetResumeMov(const void* movement_command_data_rcv, void* movement_command_data_ret);
 void prepareRetClearMov(const void* movement_command_data_rcv, void* movement_command_data_ret);
 void prepareRetQuery(const void* movement_command_data_rcv, void* movement_command_data_ret);
+
+#else
+
+void movementAfterStopJSTask();
+
+#endif
 
 #endif
