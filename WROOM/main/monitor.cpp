@@ -164,6 +164,14 @@ class MCEraseNvs: public MonitorCommandBase{
     }
 } mcEraseNvs;
 
+inline void resumeControl(){
+    motorDrive.bControl = true;
+    resumeInterpolate();
+}
+inline void pauseControl(){
+    pauseInterpolate();
+    motorDrive.bControl = false;
+}
 
 class MCPwmTest: public MonitorCommandBase{
     const char* Desc(){ return "m Motor PWM Test"; }
@@ -172,7 +180,7 @@ class MCPwmTest: public MonitorCommandBase{
         const char* up =   "qwertyu";
         const char* down = "asdfghj";
         float duty[MotorDriver::NMOTOR_DIRECT];
-        motorDriver.bControl = false;
+        pauseControl();
         for(int i=0; i<MotorDriver::NMOTOR_DIRECT; ++i){
             duty[i] = 0.0f;
         }
@@ -211,7 +219,7 @@ class MCPwmTest: public MonitorCommandBase{
                 motorDriver.Pwm(i, (SDEC)(duty[i] * SDEC_ONE));
             }
         }
-        motorDriver.bControl = true;
+        resumeControl();
     }
 } mcPwmTest;
 
@@ -237,7 +245,7 @@ class MCMotorAngleTest: public MonitorCommandBase{
     const char* Desc(){ return "M Motor angle test"; }
     void Func(){
         int dir = 1;
-        motorDriver.bControl = false;
+        pauseControl();
         for(int i=0; i<MotorDriver::NMOTOR_DIRECT; ++i){
             motorDriver.Pwm(i, 0);
         }
@@ -267,7 +275,7 @@ class MCMotorAngleTest: public MonitorCommandBase{
             }
             conPrintf("\n\n\n\nHit any key\n");
             getchWait();
-            motorDriver.bControl = true;
+            resumeControl();
         }
     }
 } mcMotorAngleTest;
