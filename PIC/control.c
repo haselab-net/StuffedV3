@@ -26,10 +26,9 @@ SDEC currentSense[NMOTOR];
 #ifdef USE_HEAT_LIMIT
 LDEC motorHeat[NMOTOR];
 #define MOTOR_HEAT_LIMIT	(1000 * LDEC_ONE)
+#define MOTOR_HEAT_RELASE	(10)
 #define MOTOR_VEL_MAX		(15 * LDEC_ONE / 3000)		//	900PRM / 60s / 3000Hz
 LDEC motorVelMax[NMOTOR];
-#define MOTOR_HEATING_C		(1)
-#define MOTOR_HEAT_RELASE	(10)
 struct TorqueLimit torqueLimitHeat;
 #endif	//	USE_HEAT_LIMIT
 
