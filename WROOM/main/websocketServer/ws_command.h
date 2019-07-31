@@ -15,8 +15,20 @@ enum PacketId {
 };
 
 enum PacketSettingsId {
+    PSI_NONE = 0,
     PSI_OFFLINE_MODE = 1,
-    PSI_FIRMWARE_INFO = 2
+    PSI_FIRMWARE_INFO = 2,
+    PSI_WRITE_NVS = 3
+};
+
+enum DataType {
+    DT_U8 = 0,
+    DT_I8 = 1,
+    DT_U16 = 2,
+    DT_I16 = 3,
+    DT_U32 = 4,
+    DT_I32 = 5,
+    DT_STR = 6
 };
 
 inline std::string getPacketIdStr(int id){
@@ -39,6 +51,8 @@ inline std::string getPacketSettingsIdStr(int id){
         case PacketSettingsId::PSI_OFFLINE_MODE:
             return "PSI_OFFLINE_MODE";
         case PacketSettingsId::PSI_FIRMWARE_INFO:
+            return "PSI_FIRMWARE_INFO";
+        case PacketSettingsId::PSI_WRITE_NVS:
             return "PSI_FIRMWARE_INFO";
         default:
             return "UNRECOGNIZED";

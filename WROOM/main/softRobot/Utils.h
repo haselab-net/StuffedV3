@@ -20,6 +20,8 @@ void popPayloadNum(const void* &payload, T &target) {
     payload = shiftPointer(payload, sizeof(T));
 }
 
+size_t popPayloadStr(const void* &payload, const char* &target);
+
 template <class T>
 void popPayloadNumArray(const void* &payload, std::vector<T> &vec, size_t len) {
     vec.clear();

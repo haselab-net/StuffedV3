@@ -15,6 +15,8 @@
 extern "C" {
 #include "module_jslib.h"
 #include "duktape_task.h"
+#include "nvs_flash.h"
+#include "nvs.h"
 }
 #include "../SoftRobot/UdpCom.h"
 #include "module_srcommand.h"
@@ -123,6 +125,7 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
         case PacketId::PI_SETTINGS: {
             uint16_t* pBufferI16 = (uint16_t*)pBuffer;
             uint16_t id = pBufferI16[1];
+            printf("---- rcv PI_SETTINGS with id: %i\n", id);
             switch (id)
             {
                 case PacketSettingsId::PSI_OFFLINE_MODE: {
@@ -159,6 +162,70 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
                     wsSend((void*)retBuffer, ret_size);
                     delete[] retBuffer;
                     retBuffer = NULL;
+
+                    break;
+                }
+                case PacketSettingsId::PSI_WRITE_NVS: {
+                    const void* payload = (void*)(pBufferI16+2);
+                    uint8_t dataType;
+                    popPayloadNum(payload, dataType);
+                    nvs_handle nvsHandle = 0;     // TODO assign to this handle
+
+                    const char* key;
+                    size_t key_len = popPayloadStr(payload, key);
+                    printf("---- rcv PSI_WRITE_NVS with dataType: %i\n", dataType);
+                    switch (dataType) {
+                        case DT_U8: {
+                            uint8_t number;
+                            popPayloadNum(payload, number);
+                            // nvs_set_u8(nvsHandle, key, number);
+                            printf("---- set nvs u8, key: %s, val: %i \n", key, number);
+                            break;
+                        }
+                        case DT_I8: {
+                            int8_t number;
+                            popPayloadNum(payload, number);
+                            // nvs_set_i8(nvsHandle, key, number);
+                            printf("---- set nvs i8, key: %s, val: %i \n", key, number);
+                            break;
+                        }
+                        case DT_U16: {
+                            uint16_t number;
+                            popPayloadNum(payload, number);
+                            // nvs_set_u16(nvsHandle, key, number);
+                            printf("---- set nvs u16, key: %s, val: %i \n", key, number);
+                            break;
+                        }
+                        case DT_I16: {
+                            int16_t number;
+                            popPayloadNum(payload, number);
+                            // nvs_set_i16(nvsHandle, key, number);
+                            printf("---- set nvs i16, key: %s, val: %i \n", key, number);
+                            break;
+                        }
+                        case DT_U32: {
+                            uint32_t number;
+                            popPayloadNum(payload, number);
+                            nvs_set_u32(nvsHandle, key, number);
+                            break;
+                        }
+                        case DT_I32: {
+                            int32_t number;
+                            popPayloadNum(payload, number);
+                            nvs_set_i32(nvsHandle, key, number);
+                            break;
+                        }
+                        case DT_STR: {
+                            const char* val;
+                            size_t val_len = popPayloadStr(payload, val);
+                            // nvs_set_str(nvsHandle, key, val);
+                            printf("---- set nvs str, key: %s, val: %s \n", key, val);
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+                    break;
                 }
                 default:
                     ESP_LOGV(LOG_TAG, "Unknown packet settings id (%i)", pBufferI16[1]);
