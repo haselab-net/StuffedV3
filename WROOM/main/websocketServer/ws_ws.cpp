@@ -125,7 +125,7 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
             uint16_t id = pBufferI16[1];
             switch (id)
             {
-                case PacketSettingsId::OFFLINE_MODE: {
+                case PacketSettingsId::PSI_OFFLINE_MODE: {
                     bool new_offline_mode = pBufferI16[2];
                     if (new_offline_mode == offline_mode) break;
                     else offline_mode = new_offline_mode;
@@ -141,6 +141,24 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
                         wsCreateJsfileTask();
                     }
                     break;
+                }
+                case PacketSettingsId::PSI_FIRMWARE_INFO: {
+                    string message = "";
+                    message = message + "{" + "\"version\": \"" + FIRMWARE_VERSION + "\"}";
+                    size_t ret_size = 2 * sizeof(short) + message.size();
+
+                    // return packet to pxt
+                    void* retBuffer = malloc(ret_size);        // return packet for download success
+                    void* p = retBuffer;
+                    *(short*)p = PacketId::PI_SETTINGS;
+                    p = shiftPointer(p, 2);
+                    *(short*)p = PacketSettingsId::PSI_FIRMWARE_INFO;
+                    p = shiftPointer(p, 2);
+                    pushPayload(p, message.c_str(), message.size());
+
+                    wsSend((void*)retBuffer, ret_size);
+                    delete[] retBuffer;
+                    retBuffer = NULL;
                 }
                 default:
                     ESP_LOGV(LOG_TAG, "Unknown packet settings id (%i)", pBufferI16[1]);
@@ -237,10 +255,10 @@ void printPacketSettings(const void* pBuffer, size_t len) {
     char buf[1024]={'\0'};
     switch (id)
     {
-        case PacketSettingsId::OFFLINE_MODE:
+        case PacketSettingsId::PSI_OFFLINE_MODE:
             sprintf(buf, "%i ", pBufferI16[1]);
             break;
-    
+        case PacketSettingsId::PSI_FIRMWARE_INFO:
         default:
             break;
     }

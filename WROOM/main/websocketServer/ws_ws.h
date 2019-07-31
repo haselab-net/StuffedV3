@@ -3,6 +3,8 @@
 
 #include "WebSocket.h"
 #include "../softRobot/UdpCom.h"
+#include "../WroomEnv.h"
+#include "../softRobot/Utils.h"
 
 extern bool offline_mode;
 
