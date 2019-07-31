@@ -15,7 +15,8 @@ enum PacketId {
 };
 
 enum PacketSettingsId {
-    OFFLINE_MODE = 1
+    PSI_OFFLINE_MODE = 1,
+    PSI_FIRMWARE_INFO = 2
 };
 
 inline std::string getPacketIdStr(int id){
@@ -35,9 +36,10 @@ inline std::string getPacketIdStr(int id){
 inline std::string getPacketSettingsIdStr(int id){
     switch (id)
     {
-        case PacketSettingsId::OFFLINE_MODE:
-            return "OFFLINE_MODE";
-    
+        case PacketSettingsId::PSI_OFFLINE_MODE:
+            return "PSI_OFFLINE_MODE";
+        case PacketSettingsId::PSI_FIRMWARE_INFO:
+            return "PSI_FIRMWARE_INFO";
         default:
             return "UNRECOGNIZED";
     }
