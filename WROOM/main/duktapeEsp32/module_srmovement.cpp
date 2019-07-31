@@ -3,7 +3,7 @@
 static bool waitResponse = false;       // wait nOccupied after send one keyframe
 static uint8_t MAX_NOCCUPIED = 5;
 
-static char* LOG_TAG = "module_srmovement";
+static const char* LOG_TAG = "module_srmovement";
 
 static bool canAddKeyframe(duk_context * ctx) {
     if (waitResponse) return false;

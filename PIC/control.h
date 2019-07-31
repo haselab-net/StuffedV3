@@ -10,6 +10,14 @@
 #endif
 #include <assert.h>
 
+///	heat limit for motor
+#define MOTOR_HEAT_RELEASE	(SDEC)(0.5 * SDEC_ONE)  
+#define MOTOR_HEAT_LIMIT	(long)(20 * 10 * MOTOR_HEAT_RELEASE)	//	20sec * 10Hz
+extern SDEC motorHeatRelease[NMOTOR];		//	heat release from motor / loop (10Hz)
+extern long motorHeatLimit[NMOTOR];			//	limit for heat amount of the motor
+extern long motorHeat[NMOTOR];				//	current heat amount
+extern SDEC lastRatio[NMOTOR];				//	pwm ratio actually applied to motor
+
 //	device depended functions
 void readADC();								//	read adc and set it to mcos and msin
 void setPwm(int ch, SDEC torque);			//	set pwm of motor
@@ -33,8 +41,6 @@ extern SDEC mcos[NAXIS], msin[NAXIS];
 extern SDEC currentSense[NMOTOR];
 extern const SDEC mcosOffset[NAXIS];
 extern const SDEC msinOffset[NAXIS];
-extern long motorHeat[NMOTOR];
-extern SDEC lastRatio[NMOTOR];
 
 struct PdParam{
     SDEC k[NMOTOR];

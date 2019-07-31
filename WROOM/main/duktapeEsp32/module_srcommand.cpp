@@ -669,7 +669,8 @@ void setMovement(duk_context* ctx) {
     // ... obj
     duk_require_object(ctx, -1);
 
-    bool success = duk_get_prop_string(ctx, -1, "movementCommandId");
+    //bool success = 
+    duk_get_prop_string(ctx, -1, "movementCommandId");
     uint8_t movementCommandId = duk_get_int(ctx, -1);
     duk_pop(ctx);
     if (movementCommandId > CI_M_COUNT || movementCommandId <= CI_M_NONE) {

@@ -184,9 +184,9 @@ class MCPwmTest: public MonitorCommandBase{
         for(int i=0; i<MotorDriver::NMOTOR_DIRECT; ++i){
             duty[i] = 0.0f;
         }
-        conPrintf("[ENTER/SPACE]:show state, [%s]:forward, [%s]:backword, other:quit\n" ,up, down);
+        conPrintf("[SPACE]:show state, [%s]:forward, [%s]:backword, other:quit\n" ,up, down);
         while(1){
-            vTaskDelay(10);
+            vTaskDelay(1);
             int ch = getchNoWait();
             if (ch == -1) continue;
             const char* f = NULL;
@@ -202,14 +202,14 @@ class MCPwmTest: public MonitorCommandBase{
                     duty[channel] -= delta;
                     if (duty[channel] < -1.0f) duty[channel] = -1.0f;
                 }
-            }else if (ch == '\r' || ch == ' '){
+            }else if (ch == ' '){
                 conPrintf("PWM duty = ");
                 for(int i=0; i<MotorDriver::NMOTOR_DIRECT; ++i){
-                    conPrintf("  %4.1f/%2.1f", SDEC2DBL(lastRatio[i]), duty[i]);
+                    conPrintf(" %3.2f/%2.2f", SDEC2DBL(lastRatio[i]), duty[i]);
                 }
                 conPrintf("   Angle =");
                 for(int i=0; i<MotorDriver::NMOTOR_DIRECT; ++i){
-                    conPrintf("  %4.2f", LDEC2DBL(motorState.pos[i]));
+                    conPrintf(" %4.2f", LDEC2DBL(motorState.pos[i]));
                 }
                 conPrintf(" heat =");
                 for(int i=0; i<MotorDriver::NMOTOR_DIRECT; ++i){
@@ -376,11 +376,13 @@ class MCTargetUnderflow: public MonitorCommandBase{
 } mcShowTargetUnderflow;
 
 static uint32_t test_callback = 0;
+#if 0
 static int test_callback_push_values(duk_context* ctx, void* data) {
     // event
     duk_push_string(ctx, "test");
     return 1;
 }
+#endif
 extern "C" duk_ret_t registerTestCallback(duk_context* ctx) {
     test_callback = esp32_duktape_stash_array(ctx, 1);
     conPrintf("stashed Test callback with key: %i\n", test_callback);

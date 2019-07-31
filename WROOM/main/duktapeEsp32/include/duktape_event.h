@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <duktape.h>
-#include <freertos/portmacro.h>
+#include <freertos/FreeRTOS.h>
 enum {
 	ESP32_DUKTAPE_EVENT_COMMAND_LINE,
 	ESP32_DUKTAPE_EVENT_HTTPSERVER_REQUEST,

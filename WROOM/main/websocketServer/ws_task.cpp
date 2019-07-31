@@ -10,7 +10,7 @@ extern "C" {
 }
 #include "../softRobot/UdpCom.h"
 
-static char LOG_TAG[] = "ws_task";
+//static char LOG_TAG[] = "ws_task";
 
 void wsCreateJsfileTask() {
     if (!wsIsJsfileTaskRunning()){

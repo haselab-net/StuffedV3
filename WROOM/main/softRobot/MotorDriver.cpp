@@ -3,6 +3,7 @@
 #include "esp_event_loop.h"
 #include <logging.h>
 #ifndef _WIN32
+#include "CPPNVS.h"
 #include "esp_adc_cal.h"
 extern "C"{
 #include "soc/syscon_struct.h"
@@ -89,7 +90,6 @@ void MotorDriver::AdcReadTask(){
 }
 
 void MotorDriver::Init(){
-    bControl = true;
 #ifndef _WIN32
 	//  PWM Init
     mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM0A, pwmPins[0]);
@@ -114,6 +114,21 @@ void MotorDriver::Init(){
     controlInit();
     commandInit();
 
+    //  load from nvs (overwrite constants)
+    NVS nvs("motor");
+    bControl = true;
+    for(int i=0; i<NMOTOR; ++i){
+        char keyLimit[11]   = "heatLimit0";
+        char keyRelease[13] = "heatRelease0";
+        keyLimit[9] = '0' + i;
+        keyRelease[11] = '0' + i;
+        int v;
+        if (nvs.get(keyLimit, v) == ESP_OK) motorHeatLimit[i] = v;
+        nvs.set(keyLimit, (int)motorHeatLimit[i]);
+        if (nvs.get(keyRelease, v) == ESP_OK) motorHeatRelease[i] = v;
+        nvs.set(keyRelease, (int)motorHeatRelease[i]);
+    }
+    nvs.commit();
     //  ADC with DMA and I2S mode init. This also start periodic interrupt for control.
     //  i2s settings
     for(int i=0; i < sizeof(adcChsRev) / sizeof(adcChsRev[0]);++i){
@@ -175,13 +190,13 @@ void MotorDriver::Init(){
 
 void MotorDriver::Pwm(int ch, SDEC duty){  //   SDEC -1 to 1 (-1024 - 1024)
 #ifndef _WIN32
-    uint32_t set_duty = (MCPWM0.timer[(mcpwm_timer_t)ch].period.period) * duty / SDEC_ONE;
 	if (duty > 0){
+        uint32_t set_duty = (MCPWM0.timer[(mcpwm_timer_t)ch].period.period) * duty / SDEC_ONE;
         mcpwm_set_signal_low(MCPWM_UNIT_0, (mcpwm_timer_t)ch, MCPWM_OPR_B);
         mcpwm_set_duty_in_us(MCPWM_UNIT_0, (mcpwm_timer_t)ch, MCPWM_OPR_A, set_duty);
         mcpwm_set_duty_type(MCPWM_UNIT_0, (mcpwm_timer_t)ch, MCPWM_OPR_A, MCPWM_DUTY_MODE_0); //call this each time, if operator was previously in low/high state
     }else{
-        duty *= -1;
+        uint32_t set_duty = (MCPWM0.timer[(mcpwm_timer_t)ch].period.period) * -duty / SDEC_ONE;
         mcpwm_set_signal_low(MCPWM_UNIT_0, (mcpwm_timer_t)ch, MCPWM_OPR_A);
         mcpwm_set_duty_in_us(MCPWM_UNIT_0, (mcpwm_timer_t)ch, MCPWM_OPR_B, set_duty);
         mcpwm_set_duty_type(MCPWM_UNIT_0, (mcpwm_timer_t)ch, MCPWM_OPR_B, MCPWM_DUTY_MODE_0); //call this each time, if operator was previously in low/high state

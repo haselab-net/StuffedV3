@@ -157,7 +157,7 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
                     pushPayload(p, message.c_str(), message.size());
 
                     wsSend((void*)retBuffer, ret_size);
-                    delete[] retBuffer;
+                    free(retBuffer);
                     retBuffer = NULL;
                 }
                 default:

@@ -25,9 +25,9 @@ SDEC currentSense[NMOTOR];
 #define USE_HEAT_LIMIT
 #ifdef USE_HEAT_LIMIT
 long motorHeat[NMOTOR];
-#define MOTOR_HEAT_RELASE	(0.1 * SDEC_ONE)
-#define MOTOR_HEAT_LIMIT	(30 * 10 * MOTOR_HEAT_RELASE)	//	30sec * 10Hz
-#define MOTOR_VEL_MAX		(10 * LDEC_ONE / 3000)			//	600PRM / 60s / 3000Hz
+SDEC motorHeatRelease[NMOTOR];
+long motorHeatLimit[NMOTOR];
+#define MOTOR_VEL_MAX		(5 * LDEC_ONE / 3000)			//	300PRM / 60s / 3000Hz
 LDEC motorVelMax[NMOTOR];
 struct TorqueLimit torqueLimitHeat;
 #endif	//	USE_HEAT_LIMIT
@@ -90,16 +90,23 @@ void updateMotorState(){
 			if (vel > motorVelMax[i]) motorVelMax[i] = vel;
 			SDEC ratio = lastRatio[i];
 			if (ratio < 0) ratio = -ratio;
-			SDEC deltaH = (long)L2SDEC((motorVelMax[i] - vel) * LDEC_ONE / motorVelMax[i]) * ratio / SDEC_ONE;
+			SDEC velRatio = L2SDEC((motorVelMax[i] - vel*2) * LDEC_ONE / motorVelMax[i]);
+			if (velRatio < 0) velRatio = 0;
+			if (velRatio > SDEC_ONE) velRatio = SDEC_ONE;
+			SDEC deltaH = (long)velRatio * ratio / SDEC_ONE;
 			assert(deltaH >= 0);
 			motorHeat[i] += deltaH;				//	heating by motor
-			motorHeat[i] -= MOTOR_HEAT_RELASE;	//	heat release to out air
+			motorHeat[i] -= motorHeatRelease[i];	//	heat release to out air
 			if (motorHeat[i] < 0) motorHeat[i] = 0;
 			torqueLimitHeat.max[i] = torqueLimit.max[i];
 			torqueLimitHeat.min[i] = torqueLimit.min[i];
-			if (motorHeat[i] > MOTOR_HEAT_LIMIT){
-				if (torqueLimitHeat.max[i] > MOTOR_HEAT_RELASE) torqueLimitHeat.max[i] = MOTOR_HEAT_RELASE; 
-				if (torqueLimitHeat.min[i] < -MOTOR_HEAT_RELASE) torqueLimitHeat.min[i] = -MOTOR_HEAT_RELASE; 
+			if (motorHeat[i] > (motorHeatLimit[i] >> 2)){
+				SDEC ratio = (motorHeatLimit[i] - motorHeat[i]) * (SDEC_ONE*4/3) / motorHeatLimit[i];
+				if (ratio < 0) ratio = 0;
+				if (ratio > SDEC_ONE) ratio = SDEC_ONE; 
+				SDEC limit =  (SDEC)((long)(SDEC_ONE - motorHeatRelease[i]) * ratio / SDEC_ONE) + motorHeatRelease[i];
+				if (torqueLimitHeat.max[i] > limit) torqueLimitHeat.max[i] = limit;
+				if (torqueLimitHeat.min[i] < -limit) torqueLimitHeat.min[i] = -limit; 
 			}
 		}
 	}
@@ -384,6 +391,8 @@ void controlInit(){
 	for(i=0; i<NMOTOR; ++i){
 #ifdef USE_HEAT_LIMIT
 		motorVelMax[i] = MOTOR_VEL_MAX;
+		motorHeatLimit[i] = MOTOR_HEAT_LIMIT;
+		motorHeatRelease[i] = MOTOR_HEAT_RELEASE;
 #endif
 		pdParam.k[i] = SDEC_ONE;
 		pdParam.b[i] = (SDEC)(SDEC_ONE * 1.5);
