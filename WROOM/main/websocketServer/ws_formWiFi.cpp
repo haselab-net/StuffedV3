@@ -23,11 +23,15 @@ inline std::string str(ip4_addr_t ip){
 
 static void pushIpStatus(std::vector<SRReplace::Replace>& replaces){
     if (SRWiFi::wifi.state == SRWiFi::WIFI_STA_GOT_IP){
+        replaces.push_back(SRReplace::Replace("noip", ""));
+        replaces.push_back(SRReplace::Replace("gotip", "YES"));
         replaces.push_back(SRReplace::Replace("ip", str(SRWiFi::wifi.ipInfo.ip)));
         replaces.push_back(SRReplace::Replace("mask", str(SRWiFi::wifi.ipInfo.netmask)));                
         replaces.push_back(SRReplace::Replace("gw", str(SRWiFi::wifi.ipInfo.gw)));                
         replaces.push_back(SRReplace::Replace("state", "got ip address from DHCP"));
     }else{
+        replaces.push_back(SRReplace::Replace("noip", "YES"));
+        replaces.push_back(SRReplace::Replace("gotip", ""));
         replaces.push_back(SRReplace::Replace("ip", ""));                
         replaces.push_back(SRReplace::Replace("mask", ""));                
         replaces.push_back(SRReplace::Replace("gw", ""));                
@@ -70,6 +74,10 @@ public:
                 }
             }
         }else if (ssid.length()){
+            //  disconnect if WiFi AP's ssid == ssid
+            if (SRWiFi::wifi.getStaSSID() == ssid){
+                SRWiFi::wifi.disconnect();
+            }
             int lastAP = 0;
             SRWiFi::wifiNvs->get("lastAP", lastAP);
             for(int i=0; i<SRWiFi::N_AP_RECORD_MAX; ++i){

@@ -2,25 +2,25 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Nuibot WiFi Setting</title>
+<title>Nuibot WiFi 設定</title>
 <style>button.AP{width:23%;}</style>
 </head>
 <body>
 <div style="zoom: 150%;">
-<h1>Nuibot WiFi Setting</h1>
+<h1>Nuibot WiFi 設定</h1>
 $nDel[
-<em>$ssidDel*</em> &nbsp;
+<em>$ssidDel*</em>&nbsp;
 $]
-$nDel?[ deleted.<br> $]
+$nDel?[を削除しました。<br> $]
 
 
 <form action="/delete.html" method="post">
-<h2>Delete WiFi Access Point Records</h2>
+<h2>WiFi アクセスポイント情報の削除</h2>
 $nRec[
 <button class="AP" type="submit" name="selected" value="$ssid*">$ssid*<br>&nbsp;</button>
 $]
 <br><br>
-<button class="AP" type="submit" name="all" value="all">Delete All<br>&nbsp;</button>
+<button class="AP" type="submit" name="all" value="all">すべて削除<br>&nbsp;</button>
 </form>
 <h3><a href="/index.html">Back</a></h3>
 </div>

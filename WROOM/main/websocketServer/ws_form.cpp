@@ -142,7 +142,9 @@ void SRReplace::handle(HttpRequest& request, HttpResponse& response, std::vector
 						if (r.from.compare(key) == 0){
 							//ESP_LOGD(tag, "Repeat: %s -> %s", r.from.c_str(), r.to.c_str());
 							nRepeat = -1;
-							nRepeat = atoi(r.to.c_str());
+							if (isdigit(r.to.c_str()[0])){
+								nRepeat = atoi(r.to.c_str());
+							}
 							if (bIf){
 								if (nRepeat > 0) nRepeat = 1;
 								if (nRepeat < 0){
