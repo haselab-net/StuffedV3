@@ -36,9 +36,7 @@ var motor;
         jslib.printHeap("---------- queryNOccupied");
     }
     motor_1.queryNOccupied = queryNOccupied;
-    console.log("before set interval");
     setInterval(motor_1.queryNOccupied, 2000);
-    console.log("after set interval");
     var MovementOption;
     (function (MovementOption) {
         MovementOption[MovementOption["play"] = 0] = "play";

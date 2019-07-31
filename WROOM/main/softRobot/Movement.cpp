@@ -783,6 +783,11 @@ void onChangeControlMode(CommandId newCommand) {
 	}
 }
 
+extern "C" void movementAfterStopJSTask() {
+	clearInterpolateBuffer();
+	resumeInterpolate();
+}
+
 /////////////////////////////////////////// api for command packet ///////////////////////////////////////////////
 
 bool canAddKeyframe(MovementKeyframe& keyframe) {
