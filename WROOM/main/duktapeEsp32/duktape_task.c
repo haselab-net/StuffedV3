@@ -188,17 +188,17 @@ void duktape_start() {
 
 //	Cleaup of duktape
 void duktape_end(){
+	ESP_LOGD(tag, ">>> duktape_end");
+
 	bJsQuitting = true;
 	//	Stop timer. Stop to put new timer callback events.
 	xSemaphoreTake(smTimerCallbacks, portMAX_DELAY);
 	memset(timerCallbacks, 0, sizeof(timerCallbacks));	//	clear time callbacks.
 	xSemaphoreGive(smTimerCallbacks);
 
-	printf("--- before delete data stored in C \n");
 	// clear data stored in C
 	iotBeforeStopJSTask();
 	callbacksBeforeStopJSTask();
-	printf("--- after delete data stored in C \n");
 
 	for(int i=0; i<NJSTHREADS; ++i){
 		event_newQuitEvent();
@@ -214,19 +214,16 @@ void duktape_end(){
 		}
 	} while(remain);
 
-	printf("--- after stop tasks \n");
-
 	// delete heap
 	lock_heap();
 	duk_destroy_heap( heap_context );
 	heap_context = NULL;
 	unlock_heap();
-
-	printf("--- after delete heap \n");
 	
 	esp32_duktape_endEvents();
-	printf("--- after end events \n");
 	bJsQuitting = false;
+
+	ESP_LOGD(tag, "<<< duktape_end");
 }
 
 

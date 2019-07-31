@@ -30,7 +30,6 @@ static bool canAddKeyframe(duk_context * ctx) {
         jsRobotState.read_unlock();
     }
     duk_pop(ctx);
-    printf("--- pass nOccupied \n");
 
     duk_get_prop_string(ctx, -1, "movementId");
     uint8_t movementId = duk_get_int(ctx, -1);
@@ -38,7 +37,6 @@ static bool canAddKeyframe(duk_context * ctx) {
     jsRobotState.read_lock();
     if (jsRobotState.movement.isPaused(movementId)) return false;
     jsRobotState.read_unlock();
-    printf("--- pass isPaused \n");
 
     return true;
 }

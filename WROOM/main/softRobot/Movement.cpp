@@ -14,6 +14,9 @@ typedef struct InterpolateState InterpolateState;
 static uint16_t movementTime = 0;                // current time in movement tick
 static bool tickPaused = false;
 
+static bool movementControlMode = true;
+static bool newMovementControlMode = true; 
+
 static xSemaphoreHandle tickSemaphore;		// semaphore for lock movement linked list
 
 struct MotorKeyframeNode {
@@ -652,7 +655,6 @@ static void movementTick() {
 	xSemaphoreGive(tickSemaphore);
 }
 
-static bool skippedOneLoop = false;		// forbid continuous skip (because the targetWrite will not be updated)
 static void movementManager(void* arg) {
 	while(1) {
 		xSemaphoreTake(intervalSemaphore, portMAX_DELAY);	// tick when timer alarm
@@ -663,6 +665,16 @@ static void movementManager(void* arg) {
 			ESP_LOGD(LOG_TAG, "Skip one loop because no return CI_INTERPOLATED received in %i ms", MS_PER_MOVEMENT_TICK);
 			// receivedReturn = true;							// NOTE would packet lost?
 			continue;
+		}
+		if (newMovementControlMode != movementControlMode && newMovementControlMode == true) {	// get current pose and count write when switch to movement control mode 
+			// get the new current pose
+			calibrateCurrentPose = true;
+			movementQueryInterpolateState();				// block until CI_INTERPOLATE returns
+
+			// update targetWrite
+			targetWrite = targetCountReadMax + 1;
+
+			movementControlMode = newMovementControlMode;
 		}
 
 		short nVacancy = getInterpolateBufferVacancy();
@@ -685,11 +697,11 @@ static void movementManager(void* arg) {
 		}
 
 		// avoid overflow of interpolate buffer in PIC
-		if (nVacancy <= PIC_INTERPOLATE_BUFFER_VACANCY_MIN && !skippedOneLoop) {
+		if (nVacancy <= PIC_INTERPOLATE_BUFFER_VACANCY_MIN) {			// NOTE not sure any risk that skip forever
 			ESP_LOGD(LOG_TAG, "interpolate buffer vacancy: %i, skip one loop", nVacancy);
-			skippedOneLoop = true;
+			movementQueryInterpolateState();	// query new read count for next loop
 			continue;
-		} else if (skippedOneLoop) skippedOneLoop = false;
+		}
 
 		// do tick
 		receivedReturn = false;
@@ -746,9 +758,7 @@ void initMovementDS() {
 	initMovementManager();
 }
 
-static bool movementControlMode = true;
 void onChangeControlMode(CommandId newCommand) {
-	bool newMovementControlMode;
 	switch (newCommand) {
 		case CI_DIRECT:
 		case CI_CURRENT:
@@ -764,18 +774,12 @@ void onChangeControlMode(CommandId newCommand) {
 	}
 	if (newMovementControlMode != movementControlMode) {
 		if (newMovementControlMode) {						// goto movementControlMode
-			// get the new current pose
-			calibrateCurrentPose = true;
-			movementQueryInterpolateState();				// block until CI_INTERPOLATE returns
-
-			// update targetWrite
-			targetWrite = targetCountReadMax + 1;
-
 			resumeInterpolate();
 		}
-		else pauseInterpolate();							// quit movementControlMode
-
-		movementControlMode = newMovementControlMode;
+		else {												// quit movementControlMode
+			pauseInterpolate();
+			movementControlMode = newMovementControlMode;
+		}						
 	}
 }
 

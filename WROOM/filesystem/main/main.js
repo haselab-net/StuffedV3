@@ -27,7 +27,9 @@ console.log("defaule main.js");
 //     ""
 //     )
 // })
-// iot.startWaitingMQTTEvent("192.168.91.146", 5000)
+
+iot.startWaitingMQTTEventDefault();
+// iot.startWaitingMQTTEvent("192.168.91.3", 5000)
 
 // loops.pause(30000)
 // loops.forever(function () {
