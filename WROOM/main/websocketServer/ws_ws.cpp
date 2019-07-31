@@ -169,7 +169,8 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
                     const void* payload = (void*)(pBufferI16+2);
                     uint8_t dataType;
                     popPayloadNum(payload, dataType);
-                    nvs_handle nvsHandle = 0;     // TODO assign to this handle
+                    nvs_handle nvsHandle;
+                    nvs_open("motor", NVS_READWRITE, &nvsHandle);
 
                     const char* key;
                     size_t key_len = popPayloadStr(payload, key);
@@ -178,28 +179,28 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
                         case DT_U8: {
                             uint8_t number;
                             popPayloadNum(payload, number);
-                            // nvs_set_u8(nvsHandle, key, number);
+                            nvs_set_u8(nvsHandle, key, number);
                             printf("---- set nvs u8, key: %s, val: %i \n", key, number);
                             break;
                         }
                         case DT_I8: {
                             int8_t number;
                             popPayloadNum(payload, number);
-                            // nvs_set_i8(nvsHandle, key, number);
+                            nvs_set_i8(nvsHandle, key, number);
                             printf("---- set nvs i8, key: %s, val: %i \n", key, number);
                             break;
                         }
                         case DT_U16: {
                             uint16_t number;
                             popPayloadNum(payload, number);
-                            // nvs_set_u16(nvsHandle, key, number);
+                            nvs_set_u16(nvsHandle, key, number);
                             printf("---- set nvs u16, key: %s, val: %i \n", key, number);
                             break;
                         }
                         case DT_I16: {
                             int16_t number;
                             popPayloadNum(payload, number);
-                            // nvs_set_i16(nvsHandle, key, number);
+                            nvs_set_i16(nvsHandle, key, number);
                             printf("---- set nvs i16, key: %s, val: %i \n", key, number);
                             break;
                         }
@@ -218,15 +219,138 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
                         case DT_STR: {
                             const char* val;
                             size_t val_len = popPayloadStr(payload, val);
-                            // nvs_set_str(nvsHandle, key, val);
+                            nvs_set_str(nvsHandle, key, val);
                             printf("---- set nvs str, key: %s, val: %s \n", key, val);
                             break;
                         }
                         default:
                             break;
                     }
+                    nvs_commit(nvsHandle);
+                    nvs_close(nvsHandle);
                     break;
                 }
+                case PacketSettingsId::PSI_READ_NVS: {
+                    const void* payload = (void*)(pBufferI16+2);
+                    uint8_t dataType;
+                    popPayloadNum(payload, dataType);
+                    nvs_handle nvsHandle;
+                    nvs_open("motor", NVS_READWRITE, &nvsHandle);
+
+                    const char* key;
+                    size_t key_len = popPayloadStr(payload, key);
+                    printf("---- rcv PSI_READ_NVS with dataType: %i\n", dataType);
+
+                    switch (dataType) {
+                        case DT_U8: {
+                            uint8_t number;
+                            esp_err_t err = nvs_get_u8(nvsHandle, key, &number);
+                            if (err != ESP_OK) break;
+
+                            void* retBuffer = malloc(5 + key_len + 1);
+                            void* p = retBuffer;
+                            pushPayload(p, (void*)pBuffer, 5 + key_len);
+                            pushPayload(p, &number, 1);
+                            printf("---- get nvs u8, key: %s, val: %i \n", key, number);
+                            wsSend(retBuffer, 5 + key_len + 1);
+                            delete[] retBuffer;
+                            break;
+                        }
+                        case DT_I8: {
+                            int8_t number;
+                            esp_err_t err = nvs_get_i8(nvsHandle, key, &number);
+                            if (err != ESP_OK) break;
+
+                            void* retBuffer = malloc(5 + key_len + 1);
+                            void* p = retBuffer;
+                            pushPayload(p, (void*)pBuffer, 5 + key_len);
+                            pushPayload(p, &number, 1);
+                            printf("---- get nvs i8, key: %s, val: %i \n", key, number);
+                            wsSend(retBuffer, 5 + key_len + 1);
+                            delete[] retBuffer;
+                            break;
+                        }
+                        case DT_U16: {
+                            uint16_t number;
+                            esp_err_t err = nvs_get_u16(nvsHandle, key, &number);
+                            if (err != ESP_OK) break;
+
+                            void* retBuffer = malloc(5 + key_len + 2);
+                            void* p = retBuffer;
+                            pushPayload(p, (void*)pBuffer, 5 + key_len);
+                            pushPayload(p, &number, 2);
+                            printf("---- get nvs u16, key: %s, val: %i \n", key, number);
+                            wsSend(retBuffer, 5 + key_len + 2);
+                            delete[] retBuffer;
+                            break;
+                        }
+                        case DT_I16: {
+                            int16_t number;
+                            esp_err_t err = nvs_get_i16(nvsHandle, key, &number);
+                            if (err != ESP_OK) break;
+
+                            void* retBuffer = malloc(5 + key_len + 2);
+                            void* p = retBuffer;
+                            pushPayload(p, (void*)pBuffer, 5 + key_len);
+                            pushPayload(p, &number, 2);
+                            printf("---- get nvs i16, key: %s, val: %i \n", key, number);
+                            wsSend(retBuffer, 5 + key_len + 2);
+                            delete[] retBuffer;
+                            break;
+                        }
+                        case DT_U32: {
+                            uint32_t number;
+                            esp_err_t err = nvs_get_u32(nvsHandle, key, &number);
+                            if (err != ESP_OK) break;
+
+                            void* retBuffer = malloc(5 + key_len + 4);
+                            void* p = retBuffer;
+                            pushPayload(p, (void*)pBuffer, 5 + key_len);
+                            pushPayload(p, &number, 4);
+                            printf("---- get nvs u32, key: %s, val: %i \n", key, number);
+                            wsSend(retBuffer, 5 + key_len + 4);
+                            delete[] retBuffer;
+                            break;
+                        }
+                        case DT_I32: {
+                            int32_t number;
+                            esp_err_t err = nvs_get_i32(nvsHandle, key, &number);
+                            if (err != ESP_OK) break;
+
+                            void* retBuffer = malloc(5 + key_len + 4);
+                            void* p = retBuffer;
+                            pushPayload(p, (void*)pBuffer, 5 + key_len);
+                            pushPayload(p, &number, 4);
+                            printf("---- get nvs i32, key: %s, val: %i \n", key, number);
+                            wsSend(retBuffer, 5 + key_len + 4);
+                            delete[] retBuffer;
+                            break;
+                        }
+                        case DT_STR: {
+                            size_t required_size;
+                            esp_err_t err = nvs_get_str(nvsHandle, key, NULL, &required_size);
+                            if (err != ESP_OK) break;
+                            char* val = (char*)malloc(required_size);
+                            nvs_get_str(nvsHandle, key, val, &required_size);
+
+                            void* retBuffer = malloc(5 + key_len + required_size);
+                            void* p = retBuffer;
+                            pushPayload(p, (void*)pBuffer, 5 + key_len);
+                            pushPayload(p, val, required_size);
+                            printf("---- get nvs str, key: %s, val: %s \n", key, val);
+                            wsSend(retBuffer, 5 + key_len + required_size);
+                            delete[] retBuffer;
+                            delete[] val;
+                            break;
+                        }
+                        default:
+                            break;
+                    }
+
+                    nvs_close(nvsHandle);
+                    break;
+                }
+
                 default:
                     ESP_LOGV(LOG_TAG, "Unknown packet settings id (%i)", pBufferI16[1]);
                     break;
