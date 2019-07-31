@@ -24,10 +24,10 @@ SDEC currentSense[NMOTOR];
 //	motor heat limit
 #define USE_HEAT_LIMIT
 #ifdef USE_HEAT_LIMIT
-LDEC motorHeat[NMOTOR];
-#define MOTOR_HEAT_LIMIT	(1000 * LDEC_ONE)
-#define MOTOR_HEAT_RELASE	(10)
-#define MOTOR_VEL_MAX		(15 * LDEC_ONE / 3000)		//	900PRM / 60s / 3000Hz
+long motorHeat[NMOTOR];
+#define MOTOR_HEAT_RELASE	(0.1 * SDEC_ONE)
+#define MOTOR_HEAT_LIMIT	(30 * 10 * MOTOR_HEAT_RELASE)	//	30sec * 10Hz
+#define MOTOR_VEL_MAX		(10 * LDEC_ONE / 3000)			//	600PRM / 60s / 3000Hz
 LDEC motorVelMax[NMOTOR];
 struct TorqueLimit torqueLimitHeat;
 #endif	//	USE_HEAT_LIMIT
@@ -56,7 +56,7 @@ static xSemaphoreHandle mutexForControl;
 //	Control
 //
 void updateMotorState(){
-    static u_char count;
+    static u_short count;
 	int i;
 	readADC();
     for(i=0; i<NMOTOR; ++i){
@@ -74,16 +74,24 @@ void updateMotorState(){
 			motorState.pos[i] = cur;
 			motorState.vel[i] = motorState.pos[i] - prev;
 		}
+#if 0
+		if (i==0){
+			logPrintf("p %f,  s %f, (%d,%d) %d\r\n", LDEC2DBL(motorState.pos[i]), LDEC2DBL(sense), msin[i], mcos[i], diff);
+		}
+#endif
+    }
 #ifdef USE_HEAT_LIMIT	//	motor heat
-		count ++;
-		if (count > 30){	//	100Hz
-			count = 0;
+	count ++;
+	if (count > 300){	//	10Hz
+		count = 0;
+		for(i=0; i<NMOTOR; ++i){
 			LDEC vel = motorState.vel[i];
 			if (vel < 0) vel = -vel;
 			if (vel > motorVelMax[i]) motorVelMax[i] = vel;
 			SDEC ratio = lastRatio[i];
 			if (ratio < 0) ratio = -ratio;
-			LDEC deltaH = (motorVelMax[i] - vel) / motorVelMax[i] * ratio / SDEC_ONE;
+			SDEC deltaH = (long)L2SDEC((motorVelMax[i] - vel) * LDEC_ONE / motorVelMax[i]) * ratio / SDEC_ONE;
+			assert(deltaH >= 0);
 			motorHeat[i] += deltaH;				//	heating by motor
 			motorHeat[i] -= MOTOR_HEAT_RELASE;	//	heat release to out air
 			if (motorHeat[i] < 0) motorHeat[i] = 0;
@@ -92,22 +100,13 @@ void updateMotorState(){
 			if (motorHeat[i] > MOTOR_HEAT_LIMIT){
 				if (torqueLimitHeat.max[i] > MOTOR_HEAT_RELASE) torqueLimitHeat.max[i] = MOTOR_HEAT_RELASE; 
 				if (torqueLimitHeat.min[i] < -MOTOR_HEAT_RELASE) torqueLimitHeat.min[i] = -MOTOR_HEAT_RELASE; 
-				PIC_LOGW("HeatLimit[%d] = %d\r\n", i, motorHeat[i]);
-			}
-			if (deltaH < 0){
-				PIC_LOGE("deltaH[%d]= %d < 0\r\n", i, deltaH);
 			}
 		}
+	}
 #endif
-#if 0
-		if (i==0){
-			logPrintf("p %f,  s %f, (%d,%d) %d\r\n", LDEC2DBL(motorState.pos[i]), LDEC2DBL(sense), msin[i], mcos[i], diff);
-		}
-#endif
-    }
 }
 
-inline void setPwmWithLimit(int ch, SDEC ratio){
+void setPwmWithLimit(int ch, SDEC ratio){
 #ifdef USE_HEAT_LIMIT
     if (ratio > torqueLimitHeat.max[ch]) ratio = torqueLimitHeat.max[ch];
     if (ratio < torqueLimitHeat.min[ch]) ratio = torqueLimitHeat.min[ch];
