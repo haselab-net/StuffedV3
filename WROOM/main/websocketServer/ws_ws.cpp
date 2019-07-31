@@ -174,53 +174,54 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
 
                     const char* key;
                     size_t key_len = popPayloadStr(payload, key);
-                    printf("---- rcv PSI_WRITE_NVS with dataType: %i\n", dataType);
                     switch (dataType) {
                         case DT_U8: {
                             uint8_t number;
                             popPayloadNum(payload, number);
                             nvs_set_u8(nvsHandle, key, number);
-                            printf("---- set nvs u8, key: %s, val: %i \n", key, number);
+                            ESP_LOGD(LOG_TAG, "set nvs u8, key: %s, val: %i \n", key, number);
                             break;
                         }
                         case DT_I8: {
                             int8_t number;
                             popPayloadNum(payload, number);
                             nvs_set_i8(nvsHandle, key, number);
-                            printf("---- set nvs i8, key: %s, val: %i \n", key, number);
+                            ESP_LOGD(LOG_TAG, "set nvs i8, key: %s, val: %i \n", key, number);
                             break;
                         }
                         case DT_U16: {
                             uint16_t number;
                             popPayloadNum(payload, number);
                             nvs_set_u16(nvsHandle, key, number);
-                            printf("---- set nvs u16, key: %s, val: %i \n", key, number);
+                            ESP_LOGD(LOG_TAG, "set nvs u16, key: %s, val: %i \n", key, number);
                             break;
                         }
                         case DT_I16: {
                             int16_t number;
                             popPayloadNum(payload, number);
                             nvs_set_i16(nvsHandle, key, number);
-                            printf("---- set nvs i16, key: %s, val: %i \n", key, number);
+                            ESP_LOGD(LOG_TAG, "set nvs i16, key: %s, val: %i \n", key, number);
                             break;
                         }
                         case DT_U32: {
                             uint32_t number;
                             popPayloadNum(payload, number);
                             nvs_set_u32(nvsHandle, key, number);
+                            ESP_LOGD(LOG_TAG, "set nvs u32, key: %s, val: %i \n", key, number);
                             break;
                         }
                         case DT_I32: {
                             int32_t number;
                             popPayloadNum(payload, number);
                             nvs_set_i32(nvsHandle, key, number);
+                            ESP_LOGD(LOG_TAG, "set nvs i32, key: %s, val: %i \n", key, number);
                             break;
                         }
                         case DT_STR: {
                             const char* val;
                             size_t val_len = popPayloadStr(payload, val);
                             nvs_set_str(nvsHandle, key, val);
-                            printf("---- set nvs str, key: %s, val: %s \n", key, val);
+                            ESP_LOGD(LOG_TAG, "set nvs str, key: %s, val: %s \n", key, val);
                             break;
                         }
                         default:
@@ -228,6 +229,13 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
                     }
                     nvs_commit(nvsHandle);
                     nvs_close(nvsHandle);
+
+                    void* retBuffer = malloc(5 + key_len);
+                    void* p = retBuffer;
+                    pushPayload(p, (void*)pBuffer, 5 + key_len);
+                    wsSend(retBuffer, 5 + key_len);
+                    delete[] retBuffer;
+
                     break;
                 }
                 case PacketSettingsId::PSI_READ_NVS: {
@@ -239,7 +247,6 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
 
                     const char* key;
                     size_t key_len = popPayloadStr(payload, key);
-                    printf("---- rcv PSI_READ_NVS with dataType: %i\n", dataType);
 
                     switch (dataType) {
                         case DT_U8: {
@@ -251,7 +258,7 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
                             void* p = retBuffer;
                             pushPayload(p, (void*)pBuffer, 5 + key_len);
                             pushPayload(p, &number, 1);
-                            printf("---- get nvs u8, key: %s, val: %i \n", key, number);
+                            ESP_LOGD(LOG_TAG, "get nvs u8, key: %s, val: %i \n", key, number);
                             wsSend(retBuffer, 5 + key_len + 1);
                             delete[] retBuffer;
                             break;
@@ -265,7 +272,7 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
                             void* p = retBuffer;
                             pushPayload(p, (void*)pBuffer, 5 + key_len);
                             pushPayload(p, &number, 1);
-                            printf("---- get nvs i8, key: %s, val: %i \n", key, number);
+                            ESP_LOGD(LOG_TAG, "get nvs i8, key: %s, val: %i \n", key, number);
                             wsSend(retBuffer, 5 + key_len + 1);
                             delete[] retBuffer;
                             break;
@@ -279,7 +286,7 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
                             void* p = retBuffer;
                             pushPayload(p, (void*)pBuffer, 5 + key_len);
                             pushPayload(p, &number, 2);
-                            printf("---- get nvs u16, key: %s, val: %i \n", key, number);
+                            ESP_LOGD(LOG_TAG, "get nvs u16, key: %s, val: %i \n", key, number);
                             wsSend(retBuffer, 5 + key_len + 2);
                             delete[] retBuffer;
                             break;
@@ -293,7 +300,7 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
                             void* p = retBuffer;
                             pushPayload(p, (void*)pBuffer, 5 + key_len);
                             pushPayload(p, &number, 2);
-                            printf("---- get nvs i16, key: %s, val: %i \n", key, number);
+                            ESP_LOGD(LOG_TAG, "get nvs i16, key: %s, val: %i \n", key, number);
                             wsSend(retBuffer, 5 + key_len + 2);
                             delete[] retBuffer;
                             break;
@@ -307,7 +314,7 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
                             void* p = retBuffer;
                             pushPayload(p, (void*)pBuffer, 5 + key_len);
                             pushPayload(p, &number, 4);
-                            printf("---- get nvs u32, key: %s, val: %i \n", key, number);
+                            ESP_LOGD(LOG_TAG, "get nvs u32, key: %s, val: %i \n", key, number);
                             wsSend(retBuffer, 5 + key_len + 4);
                             delete[] retBuffer;
                             break;
@@ -321,7 +328,7 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
                             void* p = retBuffer;
                             pushPayload(p, (void*)pBuffer, 5 + key_len);
                             pushPayload(p, &number, 4);
-                            printf("---- get nvs i32, key: %s, val: %i \n", key, number);
+                            ESP_LOGD(LOG_TAG, "get nvs i32, key: %s, val: %i \n", key, number);
                             wsSend(retBuffer, 5 + key_len + 4);
                             delete[] retBuffer;
                             break;
@@ -337,7 +344,7 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
                             void* p = retBuffer;
                             pushPayload(p, (void*)pBuffer, 5 + key_len);
                             pushPayload(p, val, required_size);
-                            printf("---- get nvs str, key: %s, val: %s \n", key, val);
+                            ESP_LOGD(LOG_TAG, "get nvs str, key: %s, val: %s \n", key, val);
                             wsSend(retBuffer, 5 + key_len + required_size);
                             delete[] retBuffer;
                             delete[] val;
