@@ -151,7 +151,8 @@ public:
 	void Write();
 	UdpCmdPacket& Peek();
 	UdpCmdPacket& Poke();
-	void CancelPoke();
+	void Lock();
+	void Unlock();
 };
 
 class UdpCom {

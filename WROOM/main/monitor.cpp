@@ -340,11 +340,13 @@ class MCShowHeap: public MonitorCommandBase{
 class MCWriteCmd: public MonitorCommandBase{
     const char* Desc(){ return "w Write command to UART"; }
     void Func(){
+        udpCom.recvs.Lock();
         UdpCmdPacket* recv = &udpCom.recvs.Poke();
         recv->command = CI_DIRECT;
         recv->length = recv->CommandLen();
         recv->count = udpCom.commandCount + 1;
         udpCom.recvs.Write();
+        udpCom.recvs.Unlock();
     }
 } mcWriteCmd;
 
