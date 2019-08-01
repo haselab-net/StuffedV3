@@ -87,11 +87,11 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
 
 
     size_t bufferSize = 4096;
-    char* pBuffer = new char[bufferSize];
+    char* pBuffer = (char*)malloc(bufferSize);
     std::streamsize ssize = pWebSocketInputStreambuf->sgetn(pBuffer, bufferSize);
     if(ssize>=bufferSize) {
         ESP_LOGI(LOG_TAG ,"WS command to long (longer than 4096)!!!!!!!!!");
-        delete [] pBuffer;
+        free(pBuffer);
         return;
     }
 
@@ -111,7 +111,7 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
             *retBuffer = PacketId::PI_JSFILE;
             *(retBuffer+1) = 1;
             wsSend((void*)retBuffer, 4);
-            delete[] retBuffer;
+            free(retBuffer);
             retBuffer = NULL;
             
             break;
@@ -219,7 +219,8 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
                         }
                         case DT_STR: {
                             const char* val;
-                            size_t val_len = popPayloadStr(payload, val);
+                            //size_t val_len = 
+                            popPayloadStr(payload, val);
                             nvs_set_str(nvsHandle, key, val);
                             ESP_LOGD(LOG_TAG, "set nvs str, key: %s, val: %s \n", key, val);
                             break;
@@ -234,7 +235,7 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
                     void* p = retBuffer;
                     pushPayload(p, (void*)pBuffer, 5 + key_len);
                     wsSend(retBuffer, 5 + key_len);
-                    delete[] retBuffer;
+                    free(retBuffer);
 
                     break;
                 }
@@ -260,7 +261,7 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
                             pushPayload(p, &number, 1);
                             ESP_LOGD(LOG_TAG, "get nvs u8, key: %s, val: %i \n", key, number);
                             wsSend(retBuffer, 5 + key_len + 1);
-                            delete[] retBuffer;
+                            free(retBuffer);
                             break;
                         }
                         case DT_I8: {
@@ -274,7 +275,7 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
                             pushPayload(p, &number, 1);
                             ESP_LOGD(LOG_TAG, "get nvs i8, key: %s, val: %i \n", key, number);
                             wsSend(retBuffer, 5 + key_len + 1);
-                            delete[] retBuffer;
+                            free(retBuffer);
                             break;
                         }
                         case DT_U16: {
@@ -288,7 +289,7 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
                             pushPayload(p, &number, 2);
                             ESP_LOGD(LOG_TAG, "get nvs u16, key: %s, val: %i \n", key, number);
                             wsSend(retBuffer, 5 + key_len + 2);
-                            delete[] retBuffer;
+                            free(retBuffer);
                             break;
                         }
                         case DT_I16: {
@@ -302,7 +303,7 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
                             pushPayload(p, &number, 2);
                             ESP_LOGD(LOG_TAG, "get nvs i16, key: %s, val: %i \n", key, number);
                             wsSend(retBuffer, 5 + key_len + 2);
-                            delete[] retBuffer;
+                            free(retBuffer);
                             break;
                         }
                         case DT_U32: {
@@ -316,7 +317,7 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
                             pushPayload(p, &number, 4);
                             ESP_LOGD(LOG_TAG, "get nvs u32, key: %s, val: %i \n", key, number);
                             wsSend(retBuffer, 5 + key_len + 4);
-                            delete[] retBuffer;
+                            free(retBuffer);
                             break;
                         }
                         case DT_I32: {
@@ -330,7 +331,7 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
                             pushPayload(p, &number, 4);
                             ESP_LOGD(LOG_TAG, "get nvs i32, key: %s, val: %i \n", key, number);
                             wsSend(retBuffer, 5 + key_len + 4);
-                            delete[] retBuffer;
+                            free(retBuffer);
                             break;
                         }
                         case DT_STR: {
@@ -346,8 +347,8 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
                             pushPayload(p, val, required_size);
                             ESP_LOGD(LOG_TAG, "get nvs str, key: %s, val: %s \n", key, val);
                             wsSend(retBuffer, 5 + key_len + required_size);
-                            delete[] retBuffer;
-                            delete[] val;
+                            free(retBuffer);
+                            free(val);
                             break;
                         }
                         default:
@@ -369,7 +370,7 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
             short* retBuffer = (short*)malloc(1 * sizeof(short));
             *retBuffer = PacketId::PI_PINGPONG;
             wsSend((void*)retBuffer, 2);
-            delete[] retBuffer;
+            free(retBuffer);
             retBuffer = NULL;
         }
     
@@ -377,7 +378,7 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
             break;
     }
 
-    if(pBuffer) delete[] pBuffer;
+    if(pBuffer) free(pBuffer);
 }
 
 /**

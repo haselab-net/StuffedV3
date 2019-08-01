@@ -68,9 +68,11 @@ void setLogLevel(){
     //  Application
     esp_log_level_set("main", ESP_LOG_INFO);
     //  SoftRobot  
-    esp_log_level_set("sr_main", ESP_LOG_INFO);
-    esp_log_level_set("Uart", ESP_LOG_INFO);
-    esp_log_level_set("MotorDriver", ESP_LOG_INFO);
+//  esp_log_level_set("sr_main", ESP_LOG_DEBUG);
+//  esp_log_level_set("Uart", ESP_LOG_DEBUG);
+//  esp_log_level_set("UdpCom", ESP_LOG_DEBUG);    
+//  esp_log_level_set("AllB", ESP_LOG_DEBUG);
+//  esp_log_level_set("MotorDriver", ESP_LOG_DEBUG);
     esp_log_level_set("Movement", ESP_LOG_DEBUG);
 
     //  Web Server
@@ -144,7 +146,7 @@ extern "C" void app_main(){
     udpCom.Start();   //  start UDP server.
 
     // init movement manager
-    initMovementDS();
+//    initMovementDS();
 
     //  start DukTape, javascript engine and run /main/main*.js
     nvs_handle nvsHandle;

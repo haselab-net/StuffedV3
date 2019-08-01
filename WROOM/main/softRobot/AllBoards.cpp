@@ -45,15 +45,15 @@ void AllBoards::ExecLoop(){
 			onChangeControlMode((CommandId)recv->command);
 		}
 
-		ESP_LOGV(Tag(), "ExecLoop(): command %d received.", recv->command);
+		ESP_LOGD(Tag(), "ExecLoop(): command %d received.", recv->command);
 		if (CI_BOARD_INFO < recv->command && recv->command < CI_NCOMMAND) {
 			//	send packet to allBoards
-			ESP_LOGV(Tag(), "ExecLoop(): write cmd %d.", recv->command);
+			ESP_LOGD(Tag(), "ExecLoop(): write cmd %d.", recv->command);
 			WriteCmd(recv->command, *recv);
 			udpCom.PrepareRetPacket(*recv);
 			if (HasRet(recv->command)){
 				ReadRet(recv->command, udpCom.send);
-				ESP_LOGV(Tag(), "ExecLoop() read ret %d.", recv->command);
+				ESP_LOGD(Tag(), "ExecLoop() read ret %d.", recv->command);
 			}
 			udpCom.SendReturn(*recv);
 		}
@@ -134,7 +134,7 @@ bool AllBoards::HasRet(unsigned short id){
 }
 
 void AllBoards::WriteCmd(unsigned short commandId, BoardCmdBase& packet) {
-	ESP_LOGV(Tag(), "WriteCmd() cmd=%d\r\n", commandId);
+	ESP_LOGD(Tag(), "WriteCmd() cmd=%d\r\n", commandId);
 	//	Copy UDP command to the command buffers of each borad;
 	boardDirect->WriteCmd(commandId, packet);
 	for (int i = 0; i < NUART; ++i) {
@@ -179,7 +179,7 @@ void AllBoards::ReadRet(unsigned short commandId, BoardRetBase& packet){
 		packet.SetTargetCountReadMax(tcrMax);
 		packet.SetTickMin(tickMin);
 		packet.SetTickMax(tickMax);
-		ESP_LOGV(Tag(), "ReadRet(): Cor:%d--%d", (int)tcrMin, (int) tcrMax);
+		ESP_LOGD(Tag(), "ReadRet(): Cor:%d--%d", (int)tcrMin, (int) tcrMax);
 	}else{
 		boardDirect->ReadRet(commandId, packet);
 		for (int i = 0; i < NUART; ++i) {

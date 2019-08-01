@@ -202,6 +202,9 @@ UdpCmdPacket& UdpCmdPackets::Poke() {
 	xSemaphoreGive(smFree);
 	return base::Poke();
 }
+void UdpCmdPackets::CancelPoke() {
+	xSemaphoreGive(isWriting);
+}
 void UdpCmdPackets::Write() {
 	xSemaphoreTake(smFree, portMAX_DELAY);
 	base::Write();
@@ -237,18 +240,19 @@ void UdpCom::ReceiveCommandFromUdp(struct udp_pcb * upcb, struct pbuf * top, con
 	int readLen = 0;
 	int cur = 0;
 	int cmdLen = UdpPacket::HEADERLEN;
-	UdpCmdPacket* recv = &recvs.Poke();
+	UdpCmdPacket* recv = NULL;
 	int countDiffMax = 0;
 	while (1) {
 		int l = p->len - cur;
 		if (l > cmdLen+2 - readLen) l = cmdLen+2 - readLen;
+		if (!recv) recv = &recvs.Poke();
 		memcpy(recv->bytes + readLen, ((char*)p->payload) + cur, l);
 		readLen += l;
 		cur += l;
 		if (readLen == cmdLen+2) {
 			if (cmdLen == UdpPacket::HEADERLEN) {
 				cmdLen = recv->CommandLen();
-				ESP_LOGV(Tag(), "L=%d Cm=%d Ct=%d received from %s.", recv->length, recv->command, recv->count, ipaddr_ntoa(addr));
+				ESP_LOGD(Tag(), "L=%d Cm=%d Ct=%d received from %s.", recv->length, recv->command, recv->count, ipaddr_ntoa(addr));
 			}
 			if (readLen == cmdLen+2) {
 				recv->returnIp = *addr;
@@ -262,6 +266,7 @@ void UdpCom::ReceiveCommandFromUdp(struct udp_pcb * upcb, struct pbuf * top, con
 						ESP_LOGI(Tag(), "CI_INT tcw:%d, peri=%d, ct=%d", recv->GetTargetCountWrite(), recv->GetPeriod(), recv->count);
 					}*/
 					recvs.Write();
+					recv = NULL;
 				}
 				else if (recv->count == (unsigned short)(commandCount + 1) ){		// check and update counter
 					commandCount++;
@@ -269,6 +274,7 @@ void UdpCom::ReceiveCommandFromUdp(struct udp_pcb * upcb, struct pbuf * top, con
 						ESP_LOGI(Tag(), "CI_INT tcw:%d, peri=%d, ct=%d", recv->GetTargetCountWrite(), recv->GetPeriod(), recv->count);
 					}*/
 					recvs.Write();
+					recv = NULL;
 					if (countDiffMax > 0) {
 						ESP_LOGI(Tag(), "ignored %d packets Ct:%d Cm:%d", countDiffMax, commandCount, recv->command);
 						countDiffMax = 0;
@@ -278,18 +284,18 @@ void UdpCom::ReceiveCommandFromUdp(struct udp_pcb * upcb, struct pbuf * top, con
 					int diff = (short)((short)commandCount - (short)recv->count);
 					if (countDiffMax < diff) countDiffMax = diff;
 					//	Command count is not matched. There was some packet losses or delay. 
-					ESP_LOGV(Tag(), "ignore packet with Count:%d!=%d, Cmd:%d", recv->count, commandCount+1, recv->command);
+					ESP_LOGD(Tag(), "ignore packet with Count:%d!=%d, Cmd:%d", recv->count, commandCount+1, recv->command);
 				}
 				if (!recvs.WriteAvail()) {
 					ESP_LOGE(Tag(), "Udp recv buffer full.\n");
 					pbuf_free(top);
+					if (recv) recvs.CancelPoke();
 					return;
 				}
-				recv = &recvs.Poke();
 				cmdLen = UdpPacket::HEADERLEN;
 				readLen = 0;
-				}
 			}
+		}
 		if (p->len == cur) {
 			if (p->len != p->tot_len) {
 				p = p->next;
@@ -300,6 +306,7 @@ void UdpCom::ReceiveCommandFromUdp(struct udp_pcb * upcb, struct pbuf * top, con
 			}
 		}
 	}
+	if (recv) recvs.CancelPoke();
 	pbuf_free(top);
 }
 UdpCmdPacket* UdpCom::PrepareCommand(CommandId cid, short from) {
