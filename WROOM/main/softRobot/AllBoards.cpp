@@ -41,7 +41,7 @@ void AllBoards::ExecLoop(){
 		UdpCmdPacket* recv = &udpCom.recvs.Peek();
 
 		// change resume/pause movement manager
-		if (recv->count == CS_DUKTAPE || recv->count == CS_WEBSOCKET || recv.returnIp.ip4.addr) {
+		if (recv->count == CS_DUKTAPE || recv->count == CS_WEBSOCKET || recv->returnIp.u_addr.ip4.addr) {
 			onChangeControlMode((CommandId)recv->command);
 		}
 
