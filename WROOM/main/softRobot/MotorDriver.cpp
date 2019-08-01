@@ -147,11 +147,14 @@ void MotorDriver::Init(){
     i2s_config.dma_buf_len = ADC_DMA_LEN;
     //  Install and start I2S driver
     i2s_driver_install(ADCI2SNUM, &i2s_config, 1, &queue);
+    vTaskDelay(1);
     //  Start ADC task
 	xTaskCreate(AdcReadTaskStatic, "ADC", 512+256, this, configMAX_PRIORITIES-1, &task);
+    vTaskDelay(1);
     //  Start ADC
     ESP_ERROR_CHECK(i2s_set_adc_mode(ADC_UNIT_1, ADC1_CHANNEL_0));
     ESP_ERROR_CHECK(i2s_adc_enable(ADCI2SNUM));
+    vTaskDelay(1);
 
 #if defined BOARD3_SEPARATE || defined BOARD4
     SYSCON.saradc_ctrl.sar1_patt_len = NMOTOR_DIRECT*2-1;   // table length - 1
