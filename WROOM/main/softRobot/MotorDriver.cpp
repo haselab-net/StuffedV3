@@ -216,7 +216,7 @@ int MotorDriver::GetAdcRaw(int ch){
     return adcRaws[ch];
 }
 
-#define ADC_CENTER  ((0x700+0x35C0)/2)
+#define ADC_CENTER  (16353/2)
 const SDEC mcosOffset[NAXIS] ={
     ADC_CENTER, ADC_CENTER, ADC_CENTER
 };
