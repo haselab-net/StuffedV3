@@ -73,7 +73,7 @@ void setLogLevel(){
 //  esp_log_level_set("UdpCom", ESP_LOG_DEBUG);    
 //  esp_log_level_set("AllB", ESP_LOG_DEBUG);
 //  esp_log_level_set("MotorDriver", ESP_LOG_DEBUG);
-    esp_log_level_set("Movement", ESP_LOG_DEBUG);
+//    esp_log_level_set("Movement", ESP_LOG_DEBUG);
 
     //  Web Server
     esp_log_level_set("Socket", ESP_LOG_INFO);
@@ -90,7 +90,7 @@ void setLogLevel(){
     esp_log_level_set("ws_task", ESP_LOG_INFO);
     esp_log_level_set("ws_main", ESP_LOG_INFO);
     esp_log_level_set("ws_form", ESP_LOG_INFO);
-    esp_log_level_set("ws_ws", ESP_LOG_DEBUG);
+    //esp_log_level_set("ws_ws", ESP_LOG_DEBUG);
     esp_log_level_set("Movement", ESP_LOG_INFO);
 
     //  Duktape
