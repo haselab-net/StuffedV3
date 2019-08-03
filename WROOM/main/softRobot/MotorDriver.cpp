@@ -153,6 +153,7 @@ void MotorDriver::Init(){
     vTaskDelay(1);
     //  Start ADC
     ESP_ERROR_CHECK(i2s_set_adc_mode(ADC_UNIT_1, ADC1_CHANNEL_0));
+    vTaskDelay(1);
     ESP_ERROR_CHECK(i2s_adc_enable(ADCI2SNUM));
     vTaskDelay(1);
 
