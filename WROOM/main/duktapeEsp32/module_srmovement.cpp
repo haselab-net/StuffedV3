@@ -1,4 +1,5 @@
 #include "module_srmovement.h"
+#include "../softRobot/Movement.h"
 
 static bool waitResponse = false;       // wait nOccupied after send one keyframe
 static uint8_t MAX_NOCCUPIED = 5;
@@ -22,12 +23,10 @@ static bool canAddKeyframe(duk_context * ctx) {
             ESP_LOGE(LOG_TAG, "canAddKeyframe: motorId larger than motor count");
             return false;
         }
-        jsRobotState.read_lock();
-        if (jsRobotState.movement.nOccupied[motorId] >= MAX_NOCCUPIED) {
+        if (motorHeads[motorId].nOccupied >= MAX_NOCCUPIED) {
             duk_pop(ctx);
             return false;
         }
-        jsRobotState.read_unlock();
     }
     duk_pop(ctx);
 
@@ -35,7 +34,10 @@ static bool canAddKeyframe(duk_context * ctx) {
     uint8_t movementId = duk_get_int(ctx, -1);
     duk_pop(ctx);
     jsRobotState.read_lock();
-    if (jsRobotState.movement.isPaused(movementId)) return false;
+    if (jsRobotState.movement.isPaused(movementId)) {
+        jsRobotState.read_unlock();
+        return false;
+    }
     jsRobotState.read_unlock();
 
     return true;

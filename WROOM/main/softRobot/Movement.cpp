@@ -3,8 +3,6 @@
 
 static const char* LOG_TAG = "Movement";
 
-typedef struct MotorKeyframeNode MotorKeyframeNode;
-typedef struct MotorHead MotorHead;
 typedef struct PausedMovementHead PausedMovementHead;
 
 typedef struct InterpolateState InterpolateState;
@@ -18,29 +16,6 @@ static bool movementControlMode = true;
 static bool newMovementControlMode = true; 
 
 static xSemaphoreHandle tickSemaphore;		// semaphore for lock movement linked list
-
-struct MotorKeyframeNode {
-	uint16_t id;              // id of the keyframe (movement id + index)
-	uint16_t start;           // start time
-	uint16_t end;          // end time = start time + period
-	int16_t pose;                     // target pose
-	MotorKeyframeNode* next; // next node
-};
-
-struct MotorHead {
-	uint8_t nOccupied;        // count of occupied buffer, includes paused keyframes
-
-	// interpolate parameters, please refer to Bresenham's Line Algorithm
-	int16_t currentPose;	// current pose of motor
-	uint16_t nextTime;	// the differntial should change when time exceeds nextTime
-	bool minus;
-	uint8_t slopeInteger;
-	uint16_t slopeDecimal;
-	uint16_t slopeError;
-
-	MotorKeyframeNode* head; // head of linked list of keyframes
-	MotorKeyframeNode* read; // last node of read (since multi keyframes is used in interpolate)
-};
 
 vector<MotorHead> motorHeads;
 

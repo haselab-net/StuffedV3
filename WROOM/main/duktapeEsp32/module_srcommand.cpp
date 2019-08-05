@@ -608,23 +608,27 @@ static void movementAddKeyframe(duk_context* ctx, UdpCmdPacket* cmd) {
     pushCtx2PayloadNum<uint8_t>(ctx, payload, "refMotorId");
     pushCtx2PayloadNum<short>(ctx, payload, "timeOffset");
 
-    printf("movement commandId: %i \n", *(uint8_t*)shiftPointer(cmd->data, 0));
+    #ifdef PRINT_MOVEMENT_ADD_KEYFRAME
 
-    // little endian
-    printf("keyframeId: %i \n", *(uint8_t*)shiftPointer(cmd->data, 1));
-    printf("movementId: %i \n", *(uint8_t*)shiftPointer(cmd->data, 2));
+        printf("movement commandId: %i \n", *(uint8_t*)shiftPointer(cmd->data, 0));
 
-    printf("motorCount: %i \n", *(uint8_t*)shiftPointer(cmd->data, 3));
-    printf("motorId: %i \n", *(uint8_t*)shiftPointer(cmd->data, 4));
-    printf("period: %i \n", *(uint16_t*)shiftPointer(cmd->data, 5));
-    printf("pose: %i \n", *(short*)shiftPointer(cmd->data, 7));
+        // little endian
+        printf("keyframeId: %i \n", *(uint8_t*)shiftPointer(cmd->data, 1));
+        printf("movementId: %i \n", *(uint8_t*)shiftPointer(cmd->data, 2));
 
-    // little endian
-    printf("refKeyframeId: %i \n", *(uint8_t*)shiftPointer(cmd->data, 9));
-    printf("refMovementId: %i \n", *(uint8_t*)shiftPointer(cmd->data, 10));
+        printf("motorCount: %i \n", *(uint8_t*)shiftPointer(cmd->data, 3));
+        printf("motorId: %i \n", *(uint8_t*)shiftPointer(cmd->data, 4));
+        printf("period: %i \n", *(uint16_t*)shiftPointer(cmd->data, 5));
+        printf("pose: %i \n", *(short*)shiftPointer(cmd->data, 7));
 
-    printf("refMotorId: %i \n", *(uint8_t*)shiftPointer(cmd->data, 11));
-    printf("timeOffset: %i \n", *(short*)shiftPointer(cmd->data, 12));
+        // little endian
+        printf("refKeyframeId: %i \n", *(uint8_t*)shiftPointer(cmd->data, 9));
+        printf("refMovementId: %i \n", *(uint8_t*)shiftPointer(cmd->data, 10));
+
+        printf("refMotorId: %i \n", *(uint8_t*)shiftPointer(cmd->data, 11));
+        printf("timeOffset: %i \n", *(short*)shiftPointer(cmd->data, 12));
+
+    #endif
 }
 /* function movementPauseMov(data: {
     movementId: number,

@@ -18,6 +18,34 @@
 
 using namespace std;
 
+typedef struct MotorKeyframeNode MotorKeyframeNode;
+typedef struct MotorHead MotorHead;
+
+struct MotorKeyframeNode {
+	uint16_t id;              // id of the keyframe (movement id + index)
+	uint16_t start;           // start time
+	uint16_t end;          // end time = start time + period
+	int16_t pose;                     // target pose
+	MotorKeyframeNode* next; // next node
+};
+
+struct MotorHead {
+	uint8_t nOccupied;        // count of occupied buffer, includes paused keyframes
+
+	// interpolate parameters, please refer to Bresenham's Line Algorithm
+	int16_t currentPose;	// current pose of motor
+	uint16_t nextTime;	// the differntial should change when time exceeds nextTime
+	bool minus;
+	uint8_t slopeInteger;
+	uint16_t slopeDecimal;
+	uint16_t slopeError;
+
+	MotorKeyframeNode* head; // head of linked list of keyframes
+	MotorKeyframeNode* read; // last node of read (since multi keyframes is used in interpolate)
+};
+
+extern vector<MotorHead> motorHeads;
+
 ///////////////////////////////////////// data structure for WROOM interface ///////////////////////////// 
 
 #define MOTOR_KEYFRAME_BUFFER_SIZE 10        // size of buffer for every motor

@@ -29,14 +29,6 @@ var motor;
     }
     motor_1.pushLocalMotorPVToRemoteDirect = pushLocalMotorPVToRemoteDirect;
 
-    function queryNOccupied() {
-        var success = softrobot.movement.movementSender.send({
-            movementCommandId: softrobot.command.CommandIdMovement.CI_M_QUERY
-        });
-        jslib.printHeap("---------- queryNOccupied");
-    }
-    motor_1.queryNOccupied = queryNOccupied;
-    setInterval(motor_1.queryNOccupied, 2000);
     var MovementOption;
     (function (MovementOption) {
         MovementOption[MovementOption["play"] = 0] = "play";
