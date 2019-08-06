@@ -103,6 +103,7 @@ void addKeyframe(MovementKeyframe& keyframe);
 
 void pauseInterpolate();
 void resumeInterpolate();
+void clearMovement(uint8_t movementId, uint8_t motorCount, const vector<uint8_t> motorId);
 
 void pauseMovement(uint8_t movementId, uint8_t motorCount, const vector<uint8_t> &motorId);
 void resumeMovement(uint8_t movementId, uint8_t motorCount);

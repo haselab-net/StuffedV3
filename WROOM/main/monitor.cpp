@@ -648,6 +648,13 @@ public:
                 resumeMovement(1, 1);
                 break;
             }
+            // n clear movement 1
+            case 'n': {
+                vector<uint8_t> motorId;
+                motorId.push_back(0);
+                clearMovement(1, 1, motorId);
+                break;
+            }
             // add motor 0
             case '3': {
                 changeCurrentPos(0, 2000);

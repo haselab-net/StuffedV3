@@ -861,9 +861,9 @@ void resumeMovement(uint8_t movementId, uint8_t motorCount) {
 
 			// decrease count
 			motorCount--;
+		} else {
+			head = head->next;
 		}
-
-		head = head->next;
 	}
 
 	printf("---- resumeMovement end \n");
