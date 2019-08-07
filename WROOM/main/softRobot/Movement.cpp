@@ -812,14 +812,14 @@ void pauseMovement(uint8_t movementId, uint8_t motorCount, const vector<uint8_t>
 	    xSemaphoreTake(tickSemaphore, portMAX_DELAY);
     #endif
 
-	printf("---- pauseMovement start \n");
+	ESP_LOGD(LOG_TAG, ">>> pauseMovement %d start", movementId);
 
 	for (int i=0; i<motorCount; i++) {
 		MotorKeyframeNode* pausedNode = pickMotorKeyframes(motorId[i], movementId);
 		if(pausedNode) insertToPausedMovementList(motorId[i], pausedNode);
 	}
 
-	printf("---- pauseMovement end \n");
+	ESP_LOGD(LOG_TAG, "<<< pauseMovement %d end", movementId);
 
 	#ifdef WROOM
 	    xSemaphoreGive(tickSemaphore);
@@ -835,7 +835,7 @@ void resumeMovement(uint8_t movementId, uint8_t motorCount) {
 	    xSemaphoreTake(tickSemaphore, portMAX_DELAY);
     #endif
 
-	printf("---- resumeMovement start \n");
+	ESP_LOGD(LOG_TAG, ">>> resumeMovement %d start", movementId);
 
 	PausedMovementHead* head = pausedMovements;
 	while (motorCount && head->next) {
@@ -866,7 +866,7 @@ void resumeMovement(uint8_t movementId, uint8_t motorCount) {
 		}
 	}
 
-	printf("---- resumeMovement end \n");
+	ESP_LOGD(LOG_TAG, "<<< resumeMovement %d end", movementId);
 
 	#ifdef WROOM
 	    xSemaphoreGive(tickSemaphore);
@@ -892,10 +892,12 @@ void clearMovement(uint8_t movementId, uint8_t motorCount, const vector<uint8_t>
 	    xSemaphoreTake(tickSemaphore, portMAX_DELAY);
     #endif
 
+	ESP_LOGD(LOG_TAG, ">>> clear movement %d \n", movementId);
+
 	// clear interpolate list
 	for (int i=0; i<motorCount; i++) {
 		MotorKeyframeNode* keyframes = pickMotorKeyframes(motorId[i], movementId);
-		clearMotorKeyframes(i, keyframes);
+		clearMotorKeyframes(motorId[i], keyframes);
 	}
 
 	// clear paused list
@@ -920,6 +922,8 @@ void clearMovement(uint8_t movementId, uint8_t motorCount, const vector<uint8_t>
 
 		head = head->next;
 	}
+
+	ESP_LOGD(LOG_TAG, "<<< clear movement %d \n", movementId);
 
 	#ifdef WROOM
 	    xSemaphoreGive(tickSemaphore);
