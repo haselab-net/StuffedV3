@@ -62,7 +62,7 @@ int UdpCmdPacket::CommandLen() {
 		switch (*(uint8_t*)data)
 		{
 		case CI_M_ADD_KEYFRAME:
-			return NHEADER*2 + 1 + (2 + 1 + allBoards.GetNTotalMotor() + 2 + allBoards.GetNTotalMotor() * 2 + 2 + 1 + 2);
+			return NHEADER*2 + 1 + (2 + 1 + allBoards.GetNTotalMotor() + 2 + allBoards.GetNTotalMotor() * 4 + 2 + 1 + 2);
 		case CI_M_PAUSE_INTERPOLATE: 
 			return NHEADER*2 + 1;
 		case CI_M_RESUME_INTERPOLATE:

@@ -25,7 +25,7 @@ struct MotorKeyframeNode {
 	uint16_t id;              // id of the keyframe (movement id + index)
 	uint16_t start;           // start time
 	uint16_t end;          // end time = start time + period
-	int16_t pose;                     // target pose
+	int32_t pose;                     // target pose
 	MotorKeyframeNode* next; // next node
 };
 
@@ -33,10 +33,10 @@ struct MotorHead {
 	uint8_t nOccupied;        // count of occupied buffer, includes paused keyframes
 
 	// interpolate parameters, please refer to Bresenham's Line Algorithm
-	int16_t currentPose;	// current pose of motor
+	int32_t currentPose;	// current pose of motor
 	uint16_t nextTime;	// the differntial should change when time exceeds nextTime
 	bool minus;
-	uint8_t slopeInteger;
+	uint16_t slopeInteger;
 	uint16_t slopeDecimal;
 	uint16_t slopeError;
 
@@ -57,7 +57,7 @@ public:
 	uint8_t motorCount;			// count of motors used in the movement
 	vector<uint8_t> motorId;	// the motorIds used
 	uint16_t period;			// note that 1. the sum of period in list could not larger than UINT16_MAX (or the sorting might fail); 2. time in movement tick, not ms
-	vector<short> pose;			// the poses correspond with motorIds
+	vector<int32_t> pose;			// the poses correspond with motorIds
 
 	uint16_t refId;             // 0 if no ref (movement id should start from 1)
 	uint8_t refMotorId;

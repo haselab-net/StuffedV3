@@ -91,7 +91,7 @@ static void movementUpdateInterpolateState(UdpRetPacket& pkt) {
 	if (calibrateCurrentPose) {
 		xSemaphoreTake(tickSemaphore, portMAX_DELAY);
 		for(int i=0; i<allBoards.GetNTotalMotor(); i++) {
-			motorHeads[i].currentPose = pkt.GetMotorPos(i);
+			motorHeads[i].currentPose = pkt.GetMotorPos(i);	// TODO read value in board
 		}
 		xSemaphoreGive(tickSemaphore);
 		calibrateCurrentPose = false;
@@ -161,7 +161,7 @@ static void getInterpolateParams(uint8_t motorId) {
 
 	// differential
 	uint16_t count = 0;
-	int32_t dif_sum = 0;
+	int64_t dif_sum = 0;
 
 	// nextTime
 	uint16_t minimum = movementTime;
@@ -170,7 +170,7 @@ static void getInterpolateParams(uint8_t motorId) {
 	MotorKeyframeNode* tmp = head.head;
 	while (1) {
 		// get dif for every keyframe
-		int32_t dif = ((int32_t)(tmp->pose - head.currentPose)<<16) / (tmp->end - movementTime);
+		int64_t dif = ((int64_t)(tmp->pose - head.currentPose)<<16) / (tmp->end - movementTime);
 
 		dif_sum += dif;
 		count += 1;
@@ -194,7 +194,7 @@ static void getInterpolateParams(uint8_t motorId) {
 	else {
 		head.minus = false;
 	}
-	head.slopeInteger = (dif_sum >> 16) & 0x00ff;
+	head.slopeInteger = (dif_sum >> 16) & 0xffff;
 	head.slopeDecimal = dif_sum & 0xffff;
 	head.slopeError = 0x8000;
 	head.nextTime = min_time;
@@ -513,7 +513,7 @@ static void clearMotorKeyframes(uint8_t motorId, MotorKeyframeNode* keyframes) {
 		count++;
 	}
 	uint8_t newOccipied = head.nOccupied - count;
-	int16_t currentPose = head.currentPose;
+	int32_t currentPose = head.currentPose;
     initMotorHead(motorId);
     head.nOccupied = newOccipied;
 	head.currentPose = currentPose;
@@ -612,14 +612,14 @@ static void movementTick() {
 	for (int i = 0; i < allBoards.GetNTotalMotor(); i++) {
 		// change pose
 		MotorHead &head = motorHeads[i];
-		uint8_t differece = head.slopeInteger;
+		uint16_t differece = head.slopeInteger;
 		uint16_t newError = head.slopeError + head.slopeDecimal;
 		if (newError < head.slopeError) differece += 1;
 		head.slopeError = newError;
 		head.currentPose += head.minus ? -differece : differece;
 
 		// update motor
-		cmd.SetMotorPos(head.currentPose, i);
+		cmd.SetMotorPos((int16_t)head.currentPose, i);
 
 		// change interpolating keyframes
 		if (movementTime == motorHeads[i].nextTime && motorHeads[i].head) finishKeyframe(i);
@@ -993,7 +993,7 @@ static void decodeKeyframe(const void* movement_command_data, MovementKeyframe& 
 	keyframe.period = (*(uint16_t*)p) / MS_PER_MOVEMENT_TICK; p += 2;	// convert to movement tick
 	keyframe.pose.clear(); keyframe.pose.reserve(keyframe.motorCount);
 	for(int i=0; i<keyframe.motorCount; i++){
-		keyframe.pose.push_back(*(uint16_t*)p); p += 2;
+		keyframe.pose.push_back(*(int32_t*)p); p += 4;
 	}
 	keyframe.refId = *(uint16_t*)p; p += 2;
 	keyframe.refMotorId = *(uint8_t*)p; p += 1;
