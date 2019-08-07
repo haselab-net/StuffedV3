@@ -91,7 +91,6 @@ void setLogLevel(){
     esp_log_level_set("ws_main", ESP_LOG_INFO);
     esp_log_level_set("ws_form", ESP_LOG_INFO);
     //esp_log_level_set("ws_ws", ESP_LOG_DEBUG);
-    esp_log_level_set("Movement", ESP_LOG_DEBUG);
 
     //  Duktape
     esp_log_level_set("duktape_task", ESP_LOG_INFO);

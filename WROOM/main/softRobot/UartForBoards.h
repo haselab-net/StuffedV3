@@ -23,7 +23,7 @@ public:
 	Boards boards;
 	UartForBoards(uart_port_t ch, AllBoards* u);
 	void Init(uart_config_t conf, int rxPin, int txPin);
-	void EnumerateBoard();
+	void EnumerateBoard(char uartId);
 	void RecvUart();
 	void SendUart();
 };

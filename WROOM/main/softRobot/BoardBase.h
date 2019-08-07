@@ -10,6 +10,7 @@ extern "C"{
 
 class BoardCmdBase{
 public:
+	virtual ~BoardCmdBase(){}
 	virtual short GetControlMode()=0;
 	virtual short GetMotorPos(int i)=0;
 	virtual short GetMotorVel(int i)=0;
@@ -52,10 +53,10 @@ public:
 	static const char* Tag(){ return "Board"; };
 	const unsigned char * cmdPacketLen;
 	const unsigned char * retPacketLen;
-	std::vector<int> motorMap;
-	std::vector<int> currentMap;
-	std::vector<int> forceMap;
-	std::vector<int> touchMap;
+	std::vector<char> motorMap;
+	std::vector<char> currentMap;
+	std::vector<char> forceMap;
+	std::vector<char> touchMap;
 	virtual ~BoardBase(){}
 	virtual const char* GetName() = 0;
 	virtual int GetModelNumber() = 0;

@@ -57,7 +57,9 @@ int getchNoWait(){
 }
 int getchWait(){
     uint8_t ch;
-    uart_read_bytes(UART_NUM_0, &ch, 1, portMAX_DELAY);
+    while(uart_read_bytes(UART_NUM_0, &ch, 1, 10) != 1){
+        allBoards.SaveMotorPos();
+    }
     return ch;
 }
 #else

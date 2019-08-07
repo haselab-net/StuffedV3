@@ -79,7 +79,7 @@ void UartForBoards::RecvUart(){
 		ESP_LOGE(Tag(), "Uart #%d %d bytes remains. cmd %x ret %x  remain:%s", port, remain, boards[i]->CmdStart()[0], boards[i]->RetStart()[0], str);
 	}
 }
-void UartForBoards::EnumerateBoard() {
+void UartForBoards::EnumerateBoard(char uartId) {
 	boards.clear();
 	CommandPacketBD0 cmd;
 	ReturnPacketBD0 ret;
@@ -111,19 +111,19 @@ void UartForBoards::EnumerateBoard() {
 					BoardBase* b = boards.Create(ret.boardInfo.modelNumber, i);
 					for (int m = 0; m < b->GetNMotor(); ++m) {
 						b->motorMap.push_back(allBoards->motorMap.size());
-						allBoards->motorMap.push_back(DeviceMap(i, m));
+						allBoards->motorMap.push_back(DeviceMap(uartId, i, m));
 					}
 					for (int m = 0; m < b->GetNCurrent(); ++m) {
 						b->currentMap.push_back(allBoards->currentMap.size());
-						allBoards->currentMap.push_back(DeviceMap(i, m));
+						allBoards->currentMap.push_back(DeviceMap(uartId, i, m));
 					}
 					for (int m = 0; m < b->GetNForce(); ++m) {
 						b->forceMap.push_back(allBoards->forceMap.size());
-						allBoards->forceMap.push_back(DeviceMap(i, m));
+						allBoards->forceMap.push_back(DeviceMap(uartId, i, m));
 					}
 					for (int m = 0; m < b->GetNTouch(); ++m) {
 						b->touchMap.push_back(allBoards->touchMap.size());
-						allBoards->touchMap.push_back(DeviceMap(i, m));
+						allBoards->touchMap.push_back(DeviceMap(uartId, i, m));
 					}
 					sprintf(msg + strlen(msg), "%dT%dM%dC%dF%d", ret.boardInfo.modelNumber, ret.boardInfo.nTarget,
 						ret.boardInfo.nMotor, ret.boardInfo.nCurrent, ret.boardInfo.nForce);

@@ -3,6 +3,11 @@
 #include "UdpCom.h"
 #include "esp_log.h"
 
+inline void updateMotorPos(SDEC mpos, char index){
+	SDEC diff = mpos - (SDEC)(allBoards.motorPos[(int)index]);
+	allBoards.motorPos[(int)index] += diff;
+}
+#define MOTOROFFSET(i)	allBoards.motorOffset[(int)motorMap[i]]
 template <class CMD, class RET>
 class Board: public BoardBase{
 public:
@@ -51,7 +56,7 @@ public:
 			cmd.all.targetCountWrite = packet.GetTargetCountWrite();
 			cmd.all.period = packet.GetPeriod();
 			for (int i = 0; i < GetNMotor(); ++i) {
-				cmd.all.pos[i] = packet.GetMotorPos(motorMap[i]);
+				cmd.all.pos[i] = packet.GetMotorPos(motorMap[i]) + MOTOROFFSET(i);
 				for (int j = 0; j < GetNForce(); ++j) {
 /*					assert(GetNMotor() == 3);
 					assert(GetNForce() == 2);
@@ -62,7 +67,7 @@ public:
 			break;
 		case CI_DIRECT:
 			for (int i = 0; i < GetNMotor(); ++i) {
-				cmd.direct.pos[i] = packet.GetMotorPos(motorMap[i]);
+				cmd.direct.pos[i] = packet.GetMotorPos(motorMap[i]) + MOTOROFFSET(i);
 				cmd.direct.vel[i] = packet.GetMotorVel(motorMap[i]);
 			}
 			break;
@@ -73,14 +78,14 @@ public:
 			break;
 		case CI_INTERPOLATE:
 			for (int i = 0; i < GetNMotor(); ++i) {
-				cmd.interpolate.pos[i] = packet.GetMotorPos(motorMap[i]);
+				cmd.interpolate.pos[i] = packet.GetMotorPos(motorMap[i]) + MOTOROFFSET(i);
 			}
 			cmd.interpolate.period = packet.GetPeriod();
 			cmd.interpolate.targetCountWrite = packet.GetTargetCountWrite();
 			break;
 		case CI_FORCE_CONTROL:
 			for (int i = 0; i < GetNMotor(); ++i) {
-				cmd.forceControl.pos[i] = packet.GetMotorPos(motorMap[i]);
+				cmd.forceControl.pos[i] = packet.GetMotorPos(motorMap[i]) + MOTOROFFSET(i);
 				for (int j = 0; j < GetNForce(); ++j) {
 					assert(GetNMotor() == 3);
 					assert(GetNForce() == 2);
@@ -123,7 +128,8 @@ public:
 		switch (cmd) {
 		case CI_ALL:
 			for (int i = 0; i < GetNMotor(); ++i) {
-				packet.SetMotorPos(ret.all.pos[i], motorMap[i]);
+				updateMotorPos(ret.all.pos[i] - MOTOROFFSET(i), motorMap[i]);
+				packet.SetMotorPos(ret.all.pos[i] - MOTOROFFSET(i), motorMap[i]);
 				packet.SetMotorVel(ret.all.vel[i], motorMap[i]);
 			}
 			for (int i = 0; i < GetNCurrent(); ++i) {
@@ -138,14 +144,16 @@ public:
 			break;
 		case CI_DIRECT:
 			for (int i = 0; i < GetNMotor(); ++i) {
-				packet.SetMotorPos(ret.direct.pos[i], motorMap[i]);
+				updateMotorPos(ret.direct.pos[i] - MOTOROFFSET(i), motorMap[i]);
+				packet.SetMotorPos(ret.direct.pos[i] - MOTOROFFSET(i), motorMap[i]);
 				packet.SetMotorVel(ret.direct.vel[i], motorMap[i]);
 			}
 			//ESP_LOGI(Tag(), "Direct Motor Pos: %d %d %d %d\n", packet.MotorPos(0),  packet.MotorPos(1), packet.MotorPos(2),  packet.MotorPos(3));
 			break;
 		case CI_CURRENT:
 			for (int i = 0; i < GetNMotor(); ++i) {
-				packet.SetMotorPos(ret.direct.pos[i], motorMap[i]);
+				updateMotorPos(ret.direct.pos[i] - MOTOROFFSET(i), motorMap[i]);
+				packet.SetMotorPos(ret.direct.pos[i] - MOTOROFFSET(i), motorMap[i]);
 				packet.SetMotorVel(ret.direct.vel[i], motorMap[i]);
 			}
 			//ESP_LOGI(Tag(), "Direct Motor Pos: %d %d %d %d\n", packet.MotorPos(0),  packet.MotorPos(1), packet.MotorPos(2),  packet.MotorPos(3));
@@ -153,14 +161,16 @@ public:
 		case CI_INTERPOLATE:
 		case CI_FORCE_CONTROL:
 			for (int i = 0; i < GetNMotor(); ++i) {
-				packet.SetMotorPos(ret.interpolate.pos[i], motorMap[i]);
+				updateMotorPos(ret.interpolate.pos[i] - MOTOROFFSET(i), motorMap[i]);
+				packet.SetMotorPos(ret.interpolate.pos[i] - MOTOROFFSET(i), motorMap[i]);
 			}
 			//ESP_LOGI(Tag(), "Motor Pos: %d %d %d %d\n", packet.MotorPos(0),  packet.MotorPos(1), packet.MotorPos(2),  packet.MotorPos(3));
 			break;
 		case CI_SENSOR:
 			//ESP_LOGI(Tag(), "M0:%x", (int)ret.sensor.pos[0]);
 			for (int i = 0; i < GetNMotor(); ++i) {
-				packet.SetMotorPos(ret.sensor.pos[i], motorMap[i]);
+				updateMotorPos(ret.sensor.pos[i] - MOTOROFFSET(i), motorMap[i]);
+				packet.SetMotorPos(ret.sensor.pos[i] - MOTOROFFSET(i), motorMap[i]);
 			}
 			for (int i = 0; i < GetNCurrent(); ++i) {
 				packet.SetCurrent(ret.sensor.current[i], currentMap[i]);
