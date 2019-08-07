@@ -3,6 +3,7 @@
 #include "Board.h"
 #include "Movement.h"
 #include "driver/uart.h"
+#include "CPPNVS.h"
 
 //	PIN definition
 #if defined BOARD3_SEPARATE || defined BOARD4
@@ -28,7 +29,7 @@
 AllBoards allBoards;
 UartForBoards uart1(UART_NUM_1, &allBoards);
 UartForBoards uart2(UART_NUM_2, &allBoards);
-AllBoards::AllBoards(){
+AllBoards::AllBoards(): motorPos(NULL), motorOffset(NULL){
 }
 AllBoards::~AllBoards(){
 	delete boardDirect;
@@ -91,23 +92,29 @@ void AllBoards::EnumerateBoard() {
 	touchMap.clear();
 	for(int m=0; m<boardDirect->GetNMotor(); ++m){
 		boardDirect->motorMap.push_back((int)allBoards.motorMap.size());
-		allBoards.motorMap.push_back(DeviceMap(-1, m));
+		allBoards.motorMap.push_back(DeviceMap(m));
 	}
 	for (int m = 0; m<boardDirect->GetNCurrent(); ++m) {
 		boardDirect->currentMap.push_back((int)allBoards.currentMap.size());
-		allBoards.currentMap.push_back(DeviceMap(-1, m));
+		allBoards.currentMap.push_back(DeviceMap(m));
 	}
 	for (int m = 0; m<boardDirect->GetNForce(); ++m) {
 		boardDirect->forceMap.push_back((int)allBoards.forceMap.size());
-		allBoards.forceMap.push_back(DeviceMap(-1, m));
+		allBoards.forceMap.push_back(DeviceMap(m));
 	}
 	for (int m = 0; m<boardDirect->GetNTouch(); ++m) {
 		boardDirect->touchMap.push_back((int)allBoards.touchMap.size());
-		allBoards.touchMap.push_back(DeviceMap(-1, m));
+		allBoards.touchMap.push_back(DeviceMap(m));
 	}
 	for (int i = 0; i < NUART; ++i) {
-		uart[i]->EnumerateBoard();
+		uart[i]->EnumerateBoard(i);
 	}
+	if (motorPos) free((void*)motorPos);
+	if (motorOffset) free(motorOffset);
+	motorPos = (volatile int *) malloc(sizeof(volatile int) * motorMap.size());
+	memset((void*)motorPos, 0, sizeof(int) * motorMap.size());
+	motorOffset = (short*) malloc(sizeof(short) * motorMap.size());
+	memset(motorOffset, 0, sizeof(short) * motorMap.size());
 	motorMap.shrink_to_fit();	
 	currentMap.shrink_to_fit();
 	forceMap.shrink_to_fit();
@@ -121,6 +128,7 @@ void AllBoards::EnumerateBoard() {
 			nTargetMin = nt < nTargetMin ? nt : nTargetMin;
 		}
 	}
+	LoadMotorPos();
 }
 
 bool AllBoards::HasRet(unsigned short id){
@@ -189,4 +197,58 @@ void AllBoards::ReadRet(unsigned short commandId, BoardRetBase& packet){
 		}		
 	}
 }
+BoardBase& AllBoards::Board(char uid, char bid){
+	if (uid != 0xFF && bid != 0xFF){
+		return *uart[(int)uid]->boards[(int)bid];
+	}
+	return *boardDirect;
+}
+void AllBoards::SaveMotorPos(){
+	//	prepare previous motor angles.
+	static int* prevMotorPos = NULL;
+	static char motorPosLen = 0;
+	if (!prevMotorPos || motorPosLen != motorMap.size()){
+		motorPosLen = motorMap.size();
+		if(prevMotorPos) free(prevMotorPos);
+		prevMotorPos = (int*)malloc(sizeof(int)*motorPosLen);
+		for(int i=0; i<motorPosLen; ++i){
+			prevMotorPos[i] = motorPos[i];
+		}
+	}
+	//	save motor angles
+	NVS* nvs=NULL;
+	for(int i=0; i<motorPosLen; ++i){
+		int diff = motorPos[i] - prevMotorPos[i];
+		if (diff > (SDEC_ONE/8) || diff < (-SDEC_ONE/8)){
+			if (!nvs) nvs = new NVS("motor");
+			prevMotorPos[i] = motorPos[i];
+			char key[]="key012";
+			itoa(i, key+3, 10);
+	        nvs->set(key, prevMotorPos[i]);
+		}
+	}
+	if (nvs){
+		nvs->commit();
+		delete nvs;
+		ESP_LOGD(Tag(), "SaveMotorPos Saved:%d %d %d off: %d %d %d", prevMotorPos[0], prevMotorPos[1], prevMotorPos[2], (int)motorOffset[0], (int)motorOffset[1], (int)motorOffset[2]);
+	}
+}
+void AllBoards::LoadMotorPos(){
+	UdpCmdPacket* recv = new UdpCmdPacket;
+	recv->command = CI_SENSOR;
+	WriteCmd(recv->command, *recv);
+	udpCom.PrepareRetPacket(*recv);
+	ReadRet(recv->command, udpCom.send);
+	delete recv;
 
+	NVS nvs("motor");
+	for(int i=0; i<motorMap.size(); ++i){
+		char key[]="key012";
+		itoa(i, key+3, 10);
+		int m = motorPos[i];
+		nvs.get(key, m);
+		motorOffset[i] = (short)motorPos[i] - (short)m;	//	motorPos[i]: in board, m: WROOM side
+		motorPos[i] = m;
+	}
+	ESP_LOGI(Tag(), "LoadMotorPos:%d %d %d offset: %d %d %d", motorPos[0], motorPos[1], motorPos[2], (int)motorOffset[0], (int)motorOffset[1], (int)motorOffset[2]);
+}

@@ -9,11 +9,12 @@
 
 class DeviceMap {
 public:
-	int board;
-	int id;
-	DeviceMap(int b, int m): board(b), id(m){
-	}
-};
+	char uart;
+	char board;
+	char id;
+	DeviceMap(char m): uart(0xFF), board(0xFF), id(m){}
+	DeviceMap(char u, char b, char m): uart(u), board(b), id(m){}
+} __attribute__((__packed__));
 
 class UartForBoards;
 class BoardDirect;
@@ -32,6 +33,8 @@ public:
 	std::vector<DeviceMap> currentMap;
 	std::vector<DeviceMap> forceMap;
 	std::vector<DeviceMap> touchMap;
+	volatile int* motorPos;
+	short* motorOffset;
 	UartForBoards* uart[NUART];
 	BoardDirect* boardDirect;
 	xTaskHandle taskExec;
@@ -44,6 +47,7 @@ public:
 	AllBoards();
 	~AllBoards();
 	void EnumerateBoard();	
+	BoardBase& Board(char uid, char bid);
 	void Init();
 	bool HasRet(unsigned short id);
 	///	Write contents of the UdpCmdPacket to all boards. 
@@ -52,5 +56,8 @@ public:
 	void ReadRet(unsigned short commandId, BoardRetBase& packet);
 
 	void ExecLoop();
+
+	void SaveMotorPos();
+	void LoadMotorPos();
 };
 extern AllBoards allBoards;

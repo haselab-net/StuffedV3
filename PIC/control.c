@@ -27,7 +27,7 @@ SDEC currentSense[NMOTOR];
 long motorHeat[NMOTOR];
 SDEC motorHeatRelease[NMOTOR];
 long motorHeatLimit[NMOTOR];
-#define MOTOR_VEL_MAX		(5 * LDEC_ONE / 3000)			//	300PRM / 60s / 3000Hz
+#define MOTOR_VEL_MAX		(5 * LDEC_ONE / 3000)			//	(300PRM/60s = 5rps) / 3000Hz
 LDEC motorVelMax[NMOTOR];
 struct TorqueLimit torqueLimitHeat;
 #endif	//	USE_HEAT_LIMIT
@@ -71,6 +71,9 @@ void updateMotorState(){
 			}else if (diff > LDEC_ONE/2){
 				cur -= LDEC_ONE;
 			}
+			#if 0	//	hasevr tmp debug
+			cur = prev + ((i%2)*2 - 1) * (SDEC)(SDEC_ONE*0.01);
+			#endif
 			motorState.pos[i] = cur;
 			motorState.vel[i] = motorState.pos[i] - prev;
 		}
@@ -90,7 +93,7 @@ void updateMotorState(){
 			if (vel > motorVelMax[i]) motorVelMax[i] = vel;
 			SDEC ratio = lastRatio[i];
 			if (ratio < 0) ratio = -ratio;
-			SDEC velRatio = L2SDEC((motorVelMax[i] - vel*2) * LDEC_ONE / motorVelMax[i]);
+			SDEC velRatio = L2SDEC((motorVelMax[i] - vel*3/2) * LDEC_ONE / motorVelMax[i]);
 			if (velRatio < 0) velRatio = 0;
 			if (velRatio > SDEC_ONE) velRatio = SDEC_ONE;
 			SDEC deltaH = (long)velRatio * ratio / SDEC_ONE;
