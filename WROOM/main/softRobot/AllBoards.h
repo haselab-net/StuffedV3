@@ -57,7 +57,9 @@ public:
 
 	void ExecLoop();
 
-	void SaveMotorPos();
-	void LoadMotorPos();
+	void LoadMotorPos();	//	load motor position afte enumerate boards
+	void SaveMotorPos();	//	save motor position to nvs
+	void LoadMotorParam();	//	load pd and a parameter for motors on BoardDirect.
+    void SaveMotorParam();
 };
 extern AllBoards allBoards;

@@ -1,5 +1,6 @@
 #ifndef NVM_H
 #define NVM_H
+#include "control.h"
 
 //  NVM (Flash Program Memory) Utilities
 unsigned int NVMUnlock (unsigned int nvmop);
@@ -14,6 +15,7 @@ void NVMUnprotectPFM(unsigned int address);
 //  Non volatile memory data structre. Add variable here to add nv variables.
 typedef struct {
     unsigned char boardId;
+    struct PdParam param;
 } __attribute__((__packed__)) NvData;
 
 #define NVPAGE      0x9D00F800

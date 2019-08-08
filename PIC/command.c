@@ -95,11 +95,28 @@ void ecSetParam(){
             pdParam.k[i] = command.param.pd.k[i];
             pdParam.b[i] = command.param.pd.b[i];
         }
+        #ifdef PIC
+        {
+            NvData nvData;
+            NVMRead(&nvData);
+            nvData.param.k[i] = pdParam.k[i];
+            nvData.param.b[i] = pdParam.b[i];
+            NVMWrite(&nvData);
+        }
+        #endif
         break;
     case PT_CURRENT:
         for(i=0; i<NMOTOR; ++i){
             pdParam.a[i] = command.param.a[i];
         }
+        #ifdef PIC
+        {
+            NvData nvData;
+            NVMRead(&nvData);
+            nvData.param.a[i] = pdParam.a[i];
+            NVMWrite(&nvData);
+        }
+        #endif
         break;
     case PT_TORQUE_LIMIT:
         for(i=0; i<NMOTOR; ++i){
@@ -108,7 +125,7 @@ void ecSetParam(){
         }
         break;
     case PT_BOARD_ID:{
-#ifndef WROOM
+#ifdef PIC
         NvData nvData;
         NVMRead(&nvData);
         nvData.boardId = command.param.boardId;

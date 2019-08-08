@@ -46,15 +46,15 @@ void AllBoards::ExecLoop(){
 			onChangeControlMode((CommandId)recv->command);
 		}
 
-		ESP_LOGD(Tag(), "ExecLoop(): command %d received.", recv->command);
+		ESP_LOGV(Tag(), "ExecLoop(): command %d received.", recv->command);
 		if (CI_BOARD_INFO < recv->command && recv->command < CI_NCOMMAND) {
 			//	send packet to allBoards
-			ESP_LOGD(Tag(), "ExecLoop(): write cmd %d.", recv->command);
+			ESP_LOGV(Tag(), "ExecLoop(): write cmd %d.", recv->command);
 			WriteCmd(recv->command, *recv);
 			udpCom.PrepareRetPacket(*recv);
 			if (HasRet(recv->command)){
 				ReadRet(recv->command, udpCom.send);
-				ESP_LOGD(Tag(), "ExecLoop() read ret %d.", recv->command);
+				ESP_LOGV(Tag(), "ExecLoop() read ret %d.", recv->command);
 			}
 			udpCom.SendReturn(*recv);
 		}
@@ -129,6 +129,7 @@ void AllBoards::EnumerateBoard() {
 		}
 	}
 	LoadMotorPos();
+	LoadMotorParam();
 }
 
 bool AllBoards::HasRet(unsigned short id){
@@ -142,7 +143,7 @@ bool AllBoards::HasRet(unsigned short id){
 }
 
 void AllBoards::WriteCmd(unsigned short commandId, BoardCmdBase& packet) {
-	ESP_LOGD(Tag(), "WriteCmd() cmd=%d\r\n", commandId);
+	ESP_LOGV(Tag(), "WriteCmd() cmd=%d\r\n", commandId);
 	//	Copy UDP command to the command buffers of each borad;
 	boardDirect->WriteCmd(commandId, packet);
 	for (int i = 0; i < NUART; ++i) {
@@ -187,7 +188,7 @@ void AllBoards::ReadRet(unsigned short commandId, BoardRetBase& packet){
 		packet.SetTargetCountReadMax(tcrMax);
 		packet.SetTickMin(tickMin);
 		packet.SetTickMax(tickMax);
-		ESP_LOGD(Tag(), "ReadRet(): Cor:%d--%d", (int)tcrMin, (int) tcrMax);
+		ESP_LOGV(Tag(), "ReadRet(): Cor:%d--%d", (int)tcrMin, (int) tcrMax);
 	}else{
 		boardDirect->ReadRet(commandId, packet);
 		for (int i = 0; i < NUART; ++i) {
@@ -222,7 +223,7 @@ void AllBoards::SaveMotorPos(){
 		if (diff > (SDEC_ONE/8) || diff < (-SDEC_ONE/8)){
 			if (!nvs) nvs = new NVS("motor");
 			prevMotorPos[i] = motorPos[i];
-			char key[]="key012";
+			char key[]="pos012";
 			itoa(i, key+3, 10);
 	        nvs->set(key, prevMotorPos[i]);
 		}
@@ -233,6 +234,42 @@ void AllBoards::SaveMotorPos(){
 		ESP_LOGD(Tag(), "SaveMotorPos Saved:%d %d %d off: %d %d %d", prevMotorPos[0], prevMotorPos[1], prevMotorPos[2], (int)motorOffset[0], (int)motorOffset[1], (int)motorOffset[2]);
 	}
 }
+void AllBoards::LoadMotorParam(){
+	NVS nvs("motor");
+	for(int i=0; i<NMOTOR; ++i){
+		char key[8]="paramK0";
+		key[6] = '0' + i;
+		int v;
+		if (nvs.get(key, v) == ESP_OK) pdParam.k[i] = v;
+		key[5] = 'B';
+		if (nvs.get(key, v) == ESP_OK) pdParam.b[i] = v;
+		key[5] = 'A';
+		if (nvs.get(key, v) == ESP_OK) pdParam.a[i] = v;
+	}
+	ESP_LOGI(Tag(), "LoadMotorParam:K B A: %d %d %d, %d %d %d, %d %d %d", 
+		(int)pdParam.k[0], (int)pdParam.b[0], (int)pdParam.a[0], 
+		(int)pdParam.k[1], (int)pdParam.b[1], (int)pdParam.a[1], 
+		(int)pdParam.k[2], (int)pdParam.b[2], (int)pdParam.a[2]);
+}
+void AllBoards::SaveMotorParam(){
+	NVS nvs("motor");
+	for(int i=0; i<NMOTOR; ++i){
+		char key[8]="paramK0";
+		key[6] = '0' + i;
+		int v;
+		v = pdParam.k[i]; nvs.set(key, v);
+		key[5] = 'B';
+		v = pdParam.b[i]; nvs.set(key, v);
+		key[5] = 'A';
+		v = pdParam.a[i]; nvs.set(key, v);
+	}
+	nvs.commit();
+	ESP_LOGD(Tag(), "SaveMotorParam:K B A: %d %d %d, %d %d %d, %d %d %d", 
+		(int)pdParam.k[0], (int)pdParam.b[0], (int)pdParam.a[0], 
+		(int)pdParam.k[1], (int)pdParam.b[1], (int)pdParam.a[1], 
+		(int)pdParam.k[2], (int)pdParam.b[2], (int)pdParam.a[2]);
+}
+
 void AllBoards::LoadMotorPos(){
 	UdpCmdPacket* recv = new UdpCmdPacket;
 	recv->command = CI_SENSOR;
@@ -243,7 +280,7 @@ void AllBoards::LoadMotorPos(){
 
 	NVS nvs("motor");
 	for(int i=0; i<motorMap.size(); ++i){
-		char key[]="key012";
+		char key[]="pos012";
 		itoa(i, key+3, 10);
 		int m = motorPos[i];
 		nvs.get(key, m);
