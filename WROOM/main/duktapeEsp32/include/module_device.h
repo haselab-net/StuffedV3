@@ -22,10 +22,10 @@ class JSMovementState {
 };
 
 struct JSMotorState {
-    int16_t pose;
+    int32_t pose;
     int16_t velocity;
-    int16_t lengthMin;
-    int16_t lengthMax;
+    int32_t lengthMin;
+    int32_t lengthMax;
     int16_t controlK;
     int16_t controlB;
     int16_t controlA;

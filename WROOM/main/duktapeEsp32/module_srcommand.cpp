@@ -272,7 +272,7 @@ static void setMotorDirect() {
 
     jsRobotState.write_lock();
     for (int i=0; i<allBoards.GetNTotalMotor(); i++) {
-        cmd->SetMotorPos(jsRobotState.motor[i].pose, i);
+        cmd->SetMotorPos((int16_t)jsRobotState.motor[i].pose, i);
         cmd->SetMotorVel(jsRobotState.motor[i].velocity, i);
     }
     jsRobotState.write_unlock();
@@ -362,7 +362,7 @@ static duk_ret_t updateLocalMotorState(duk_context* ctx) {
     // lengthMin
     duk_bool_t haveProp = duk_get_prop_string(ctx, -1, "lengthMin");
     if (haveProp) {
-        int16_t lengthMin = duk_get_int(ctx, -1);
+        int32_t lengthMin = duk_get_int(ctx, -1);
         jsRobotState.motor[motorId].lengthMin = lengthMin;
     }
     duk_pop(ctx);
@@ -370,7 +370,7 @@ static duk_ret_t updateLocalMotorState(duk_context* ctx) {
     // lengthMax
     haveProp = duk_get_prop_string(ctx, -1, "lengthMax");
     if (haveProp) {
-        int16_t lengthMax = duk_get_int(ctx, -1);
+        int32_t lengthMax = duk_get_int(ctx, -1);
         jsRobotState.motor[motorId].lengthMax = lengthMax;
     }
     duk_pop(ctx);
@@ -378,7 +378,7 @@ static duk_ret_t updateLocalMotorState(duk_context* ctx) {
     // pose
     haveProp = duk_get_prop_string(ctx, -1, "pose");
     if (haveProp) {
-        int16_t pose = duk_get_int(ctx, -1);
+        int32_t pose = duk_get_int(ctx, -1);
         jsRobotState.motor[motorId].pose = saturateCast(pose, jsRobotState.motor[motorId].lengthMin, jsRobotState.motor[motorId].lengthMax);
     }
     duk_pop(ctx);
@@ -452,14 +452,14 @@ static duk_ret_t updateRemoteMotorState(duk_context* ctx) {
     // lengthMin
     duk_bool_t haveProp = duk_get_prop_string(ctx, -1, "lengthMin");
     if (haveProp) {
-        int16_t lengthMin = duk_get_int(ctx, -1);
+        int32_t lengthMin = duk_get_int(ctx, -1);
         jsRobotState.motor[motorId].lengthMin = lengthMin;
     }
     duk_pop(ctx);
     // lengthMax
     haveProp = duk_get_prop_string(ctx, -1, "lengthMax");
     if (haveProp) {
-        int16_t lengthMax = duk_get_int(ctx, -1);
+        int32_t lengthMax = duk_get_int(ctx, -1);
         jsRobotState.motor[motorId].lengthMax = lengthMax;
     }
     duk_pop(ctx);
@@ -468,7 +468,7 @@ static duk_ret_t updateRemoteMotorState(duk_context* ctx) {
     // pose
     haveProp = duk_get_prop_string(ctx, -1, "pose");
     if (haveProp) {
-        int16_t pose = duk_get_int(ctx, -1);
+        int32_t pose = duk_get_int(ctx, -1);
         jsRobotState.motor[motorId].pose = saturateCast(pose, jsRobotState.motor[motorId].lengthMin, jsRobotState.motor[motorId].lengthMax);
         flag = true;
     }
