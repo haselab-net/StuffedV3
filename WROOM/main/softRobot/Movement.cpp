@@ -91,7 +91,7 @@ static void movementUpdateInterpolateState(UdpRetPacket& pkt) {
 	if (calibrateCurrentPose) {
 		xSemaphoreTake(tickSemaphore, portMAX_DELAY);
 		for(int i=0; i<allBoards.GetNTotalMotor(); i++) {
-			motorHeads[i].currentPose = pkt.GetMotorPos(i);	// TODO read value in board
+			motorHeads[i].currentPose = allBoards.motorPos[i];
 		}
 		xSemaphoreGive(tickSemaphore);
 		calibrateCurrentPose = false;

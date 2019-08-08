@@ -564,7 +564,7 @@ struct MonitorMovementKeyframe {
 	uint8_t motorCount;			// count of motors used in the movement
 	uint8_t motorId[1];	// the motorIds used
 	uint16_t period;			// note that the sum of period in list could not larger than UINT16_MAX (or the sorting might fail)
-	short pose[1];			// the poses correspond with motorIds
+	int32_t pose[1];			// the poses correspond with motorIds
 
 	uint16_t refId;             // 0 if no ref (movement id should start from 1)
 	uint8_t refMotorId;
@@ -577,12 +577,12 @@ static void print_timer_counter(uint64_t counter_value)
     printf("Counter: 0x%08x%08x\n", (uint32_t) (counter_value >> 32), (uint32_t) (counter_value));
     printf("Time   : %.8f ms\n", (double) counter_value / MOVEMENT_MANAGER_TIMER_SCALE);
 }
-static short currentPos[3] = {0, 0, 0};
+static int32_t currentPos[3] = {0, 0, 0};
 static void changeCurrentPos(uint8_t myMotorId, short offset) {
     size_t len = 4 + 1 + sizeof(MonitorMovementKeyframe);
     unsigned char motorId[1] = {myMotorId};
     currentPos[myMotorId] += offset;
-    short pose[1] = {currentPos[myMotorId]};
+    int32_t pose[1] = {currentPos[myMotorId]};
 
     void* payload = (void*)malloc(len);
     *((unsigned short*)payload) = len;
@@ -593,7 +593,7 @@ static void changeCurrentPos(uint8_t myMotorId, short offset) {
     keyframe->motorCount = 1;
     memcpy(keyframe->motorId, motorId, keyframe->motorCount);
     keyframe->period = 2000;
-    memcpy(keyframe->pose, pose, keyframe->motorCount*2);
+    memcpy(keyframe->pose, pose, keyframe->motorCount*4);
     keyframe->refId = 0x0000;
     keyframe->refMotorId = 0;
     keyframe->timeOffset = 0;
