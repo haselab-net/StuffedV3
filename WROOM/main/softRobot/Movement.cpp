@@ -125,11 +125,11 @@ void initPICPacketHandler() {
 static uint8_t getMovementId(uint16_t id) {
 	return (id >> 8);
 }
-
+#if 0
 static uint8_t getKeyframeId(uint16_t id) {
 	return (id & 0x00ff);
 }
-
+#endif
 static MotorKeyframeNode* getNode(uint8_t motorId, uint16_t id) {
 	MotorHead& head = motorHeads[motorId];
 	MotorKeyframeNode* res = head.head;
@@ -390,6 +390,7 @@ static void finishKeyframe(uint8_t motorId) {
 	getInterpolateParams(motorId);
 }
 
+#if 0
 // clear all keyframes on certain motor with specified movementId
 static void clearMotorMovement(uint8_t motorId, uint8_t movementId) {
 	MotorHead &head = motorHeads[motorId];
@@ -403,7 +404,7 @@ static void clearMotorMovement(uint8_t motorId, uint8_t movementId) {
 	}
 	getInterpolateParams(motorId);
 }
-
+#endif
 /////////////////////////////////////////// basic api for pause & resume //////////////////////////////////////////
 // pick out keyframes with specified movementId on one motor
 static MotorKeyframeNode* pickMotorKeyframes(uint8_t motorId, uint8_t movementId) {

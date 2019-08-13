@@ -51,6 +51,17 @@ void AllBoards::ExecLoop(){
 			//	send packet to allBoards
 			ESP_LOGV(Tag(), "ExecLoop(): write cmd %d.", recv->command);
 			WriteCmd(recv->command, *recv);
+			if (recv->command == CI_RESET_SENSOR){
+				short rsf = recv->GetResetSensorFlags();
+				if (rsf & RSF_MOTOR){
+					for(int i=0; i<motorMap.size(); ++i){
+						motorPos[i] = motorPos[i] + motorOffset[i];		//	motorPos comes to board's value
+						motorOffset[i] = motorPos[i] % SDEC_ONE;		//	resting offset in board
+						motorPos[i] = 0;								//	set motorPos to 0. 
+					}
+					ESP_LOGD(Tag(), "ExecLoop(): motorPos reset.");
+				}
+			}
 			udpCom.PrepareRetPacket(*recv);
 			if (HasRet(recv->command)){
 				ReadRet(recv->command, udpCom.send);

@@ -71,9 +71,9 @@ void updateMotorState(){
 			}else if (diff > LDEC_ONE/2){
 				cur -= LDEC_ONE;
 			}
-			#if 0	//	hasevr tmp debug
+#if 0	//	move motor pos for debug. (by hasevr) 
 			cur = prev + ((i%2)*2 - 1) * (SDEC)(SDEC_ONE*0.01);
-			#endif
+#endif
 			motorState.pos[i] = cur;
 			motorState.vel[i] = motorState.pos[i] - prev;
 		}

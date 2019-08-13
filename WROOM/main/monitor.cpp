@@ -109,7 +109,8 @@ void Monitor::ShowList(){
 	conPrintf("Top level commands:\n");
 	for(int i=0; i<(int)commands.size(); ++i){
         MonitorCommandBase* mc = commands[i];
-        conPrintf(" %s\n", mc->Desc());
+        conPrintf(" %-35s", mc->Desc());
+        if (i%2 == 1 || i == (int)commands.size()-1) conPrintf("\n");
     }
 }
 void Monitor::Init(){
@@ -140,9 +141,10 @@ MonitorCommandBase::MonitorCommandBase(){
 class MCTaskList: public MonitorCommandBase{
     const char* Desc(){ return "t Show task list"; }
     void Func(){
-        char buf[1024*2];
+        char* buf = (char*)malloc(1024*2);
         vTaskList(buf);
         conPrintf("Task\t\tState\tPrio\tStack\tNum\n%s\n", buf);
+        free(buf);
     }
 } mcTaskList;
  
@@ -153,7 +155,7 @@ class MCEraseNvs: public MonitorCommandBase{
         while(1){
             int ch = getchNoWait();
             if (ch == 'y' || ch == 'Y'){
-#ifndef _WIN32
+#ifdef WROOM
 				nvs_flash_erase();
 #endif
 				conPrintf("erased.\n");
@@ -287,6 +289,26 @@ class MCMotorAngleTest: public MonitorCommandBase{
     }
 } mcMotorAngleTest;
 
+class MCShowMotorPos: public MonitorCommandBase{
+    const char* Desc(){ return "P Show motor positions"; }
+    void Func(){
+        conPrintf("Off:\t");
+        for(int i=0; i<allBoards.motorMap.size(); ++i){
+            conPrintf("%d\t", (int) allBoards.motorOffset[i]);
+        }
+        conPrintf("\n");
+        while(1){
+            conPrintf("Pos:\t");
+            for(int i=0; i<allBoards.motorMap.size(); ++i){
+                conPrintf("%d\t", allBoards.motorPos[i]);
+            }
+            conPrintf("\n");
+            vTaskDelay(20);
+            if (getchNoWait() >= 0) break;
+        }
+    }
+} mcShowMotorPos;
+
 
 class MCShowTouch: public MonitorCommandBase{
     const char* Desc(){ return "T Show Touch sensors"; }
@@ -342,13 +364,27 @@ class MCShowHeap: public MonitorCommandBase{
 class MCWriteCmd: public MonitorCommandBase{
     const char* Desc(){ return "w Write command to UART"; }
     void Func(){
-        udpCom.recvs.Lock();
-        UdpCmdPacket* recv = &udpCom.recvs.Poke();
-        recv->command = CI_DIRECT;
-        recv->length = recv->CommandLen();
-        recv->count = udpCom.commandCount + 1;
-        udpCom.recvs.Write();
-        udpCom.recvs.Unlock();
+        conPrintf("Command ID in digit? ");
+        char buf[20];
+        getLine(buf, sizeof(buf));
+        conPrintf("\n");
+        int ci = atoi(buf);
+        if (CI_NONE < ci && ci < CI_NCOMMAND){
+            udpCom.recvs.Lock();
+            UdpCmdPacket* recv = &udpCom.recvs.Poke();
+            memset(recv->data, 0, sizeof(recv->data));
+            recv->command = ci;
+            if (recv->command == CI_RESET_SENSOR){
+                conPrintf("CI_RESET_SENSOR\n");
+                recv->SetResetSensorFlags(RSF_FORCE | RSF_MOTOR);
+            }
+            recv->length = recv->CommandLen();
+            recv->count = udpCom.commandCount + 1;
+            udpCom.recvs.Write();
+            udpCom.recvs.Unlock();
+        }else{
+            conPrintf("Cmmand ID %d is invalid.\n", ci);
+        }
     }
 } mcWriteCmd;
 
@@ -372,9 +408,9 @@ class MCTargetUnderflow: public MonitorCommandBase{
         while(1){
             int uc = underflowCount;
             underflowCount = 0;
-            conPrintf("Underflow count = %d\n", uc);
-            vTaskDelay(100);
+            conPrintf("control.c: target's underflowCount = %d\n", uc);
             if (getchNoWait() >= 0) break;
+            vTaskDelay(100);
         }
     }
 } mcShowTargetUnderflow;
@@ -395,7 +431,7 @@ extern "C" duk_ret_t registerTestCallback(duk_context* ctx) {
 
 class MCJSTest: public MonitorCommandBase{
 public:
-    const char* Desc(){ return "c JS call commandline or call test handler"; }
+    const char* Desc(){ return "c JS call test"; }
     void Func(){
 		conPrintf("Heap before put event: %d bytes\n", esp_get_free_heap_size());
 #if 1
