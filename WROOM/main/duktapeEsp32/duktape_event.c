@@ -25,6 +25,7 @@ static QueueHandle_t esp32_duktape_event_queue; // The event queue (provided by 
 #endif /* ESP_PLATFORM */
 
 static void postEvent(esp32_duktape_event_t *pEvent, bool isISR);
+static void insertEvent(esp32_duktape_event_t *pEvent, bool isISR);
 
 
 /**
@@ -143,7 +144,7 @@ void event_newCallbackRequestedEvent(
 void event_newQuitEvent(){
 	esp32_duktape_event_t* event = malloc(sizeof(esp32_duktape_event_t));
 	event->type = ESP32_DUKTAPE_EVENT_QUIT;
-	postEvent(event, false); // Post the event.
+	insertEvent(event, false); // insert the event before the other waiting events in the queue.
 	free(event);
 }
 
@@ -188,6 +189,21 @@ static void postEvent(esp32_duktape_event_t *pEvent, bool isISR) {
 		xQueueSendToBackFromISR(esp32_duktape_event_queue, pEvent, NULL);
 	} else {
 		xQueueSendToBack(esp32_duktape_event_queue, pEvent, portMAX_DELAY);
+	}
+#else /* ESP_PLATFORM */
+	assert(0);
+#endif  /* ESP_PLATFORM */
+} // postEvent
+
+/**
+ * Post the event onto the queue for handling when idle.
+ */
+static void insertEvent(esp32_duktape_event_t *pEvent, bool isISR) {
+#if defined(ESP_PLATFORM)
+	if (isISR) {
+		xQueueSendToFrontFromISR(esp32_duktape_event_queue, pEvent, NULL);
+	} else {
+		xQueueSendToFront(esp32_duktape_event_queue, pEvent, portMAX_DELAY);
 	}
 #else /* ESP_PLATFORM */
 	assert(0);

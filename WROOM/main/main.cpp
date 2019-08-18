@@ -129,6 +129,7 @@ extern "C" void app_main(){
     setLogLevel();
 
     //  Start soft robot controller
+    LOGI("Before softRobot_main()");
     softRobot_main();
 
 	//  Start file system (espFs)
@@ -137,6 +138,7 @@ extern "C" void app_main(){
     //LOGI("after espFsInit heap size: %d", esp_get_free_heap_size());
 	
     //  Start web server with web socket
+    LOGI("Before ws_main()");
     ws_main();
 
     //LOGI("after ws_main heap size: %d", esp_get_free_heap_size());

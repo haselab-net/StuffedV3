@@ -18,9 +18,18 @@ void wsCreateJsfileTask() {
     }
 }
 
+static void callDuktapeEnd(void* arg){
+    TaskHandle_t* task = (TaskHandle_t*)arg;
+    TaskHandle_t t = *task;
+    free(task);
+    duktape_end();
+    vTaskDelete(t);
+}
+
 void wsDeleteJsfileTask() {
     if (wsIsJsfileTaskRunning()){
-        duktape_end();
+        TaskHandle_t* task = (TaskHandle_t*)malloc(sizeof(TaskHandle_t));
+        xTaskCreate(callDuktapeEnd, "dukEnd", 1024*4, task, tskIDLE_PRIORITY+1, task);
     }
 }
 

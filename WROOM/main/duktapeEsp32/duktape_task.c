@@ -190,8 +190,11 @@ void duktape_start() {
 
 //	Cleaup of duktape
 void duktape_end(){
+	if (bJsQuitting){
+		ESP_LOGD(tag, ">>> duktape_end already running. <<<");
+		return;
+	}
 	ESP_LOGD(tag, ">>> duktape_end");
-
 	bJsQuitting = true;
 	//	Stop timer. Stop to put new timer callback events.
 	xSemaphoreTake(smTimerCallbacks, portMAX_DELAY);
