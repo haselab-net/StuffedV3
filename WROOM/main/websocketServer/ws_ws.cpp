@@ -77,6 +77,23 @@ static void wsSend(void* data, size_t length) {
 }
 
 /**
+ * inform pxt when delete / create js task finished
+ */
+void switchOfflineModeSuccess() {
+    // return packet to pxt
+    void* retBuffer = malloc(2 * sizeof(short));        // return packet for download success
+    void* p = retBuffer;
+    *(short*)p = PacketId::PI_SETTINGS;
+    p = shiftPointer(p, 2);
+    *(short*)p = PacketSettingsId::PSI_OFFLINE_MODE;
+    p = shiftPointer(p, 2);
+
+    wsSend((void*)retBuffer, 2 * sizeof(short));
+    free(retBuffer);
+    retBuffer = NULL;
+}
+
+/**
  * Handle message from websocket
  */
 void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket* pWebSocket) {
@@ -134,10 +151,10 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
                     else offline_mode = new_offline_mode;
                     if(!offline_mode) { // exit offline mode
                         ESP_LOGD(LOG_TAG, "switch to development mode, stop running jsfile task");
+                        ESP_LOGI(LOG_TAG, "quit offline mode, deleting jsfile task...");
                         wsDeleteJsfileTask();
                         //heap_trace_dump();
                         //heap_trace_start(HEAP_TRACE_LEAKS);                        
-                        ESP_LOGI(LOG_TAG, "delete success");
                     }else if(!wsIsJsfileTaskRunning()){ // switch to offline mode
                         ESP_LOGI(LOG_TAG, "before wsCreateJsfileTask heap size: %d", esp_get_free_heap_size());
                         ESP_LOGD(LOG_TAG, "switch to offline mode, start running jsfile task");
@@ -145,7 +162,7 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
                     }
                     break;
                 }
-                case PacketSettingsId::PSI_FIRMWARE_INFO: {
+                case PacketSettingsId::PSI_FIRMWARE_INFO: {     // get version of firmware
                     string message = "";
                     message = message + "{" + "\"version\": \"" + FIRMWARE_VERSION + "\"}";
                     size_t ret_size = 2 * sizeof(short) + message.size();

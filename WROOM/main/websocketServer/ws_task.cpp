@@ -10,12 +10,16 @@ extern "C" {
 }
 #include "../softRobot/UdpCom.h"
 
-//static char LOG_TAG[] = "ws_task";
+#include "ws_ws.h"
+
+static char LOG_TAG[] = "ws_task";
 
 void wsCreateJsfileTask() {
     if (!wsIsJsfileTaskRunning()){
         duktape_start();
     }
+
+    switchOfflineModeSuccess();
 }
 
 static void callDuktapeEnd(void* arg){
@@ -23,6 +27,10 @@ static void callDuktapeEnd(void* arg){
     TaskHandle_t t = *task;
     free(task);
     duktape_end();
+
+    ESP_LOGI(LOG_TAG, "jsfile task deleted");
+    switchOfflineModeSuccess();
+
     vTaskDelete(t);
 }
 
@@ -30,6 +38,8 @@ void wsDeleteJsfileTask() {
     if (wsIsJsfileTaskRunning()){
         TaskHandle_t* task = (TaskHandle_t*)malloc(sizeof(TaskHandle_t));
         xTaskCreate(callDuktapeEnd, "dukEnd", 1024*4, task, tskIDLE_PRIORITY+1, task);
+    } else {
+        switchOfflineModeSuccess();
     }
 }
 

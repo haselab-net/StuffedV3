@@ -16,6 +16,7 @@ class SRWebSocketHandler: public WebSocketHandler {
 
 void wsOnConnected(WebSocket* pWS);
 
+void switchOfflineModeSuccess();
 void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket* pWebSocket);
 
 void wsOnMessageSr(UdpRetPacket& ret);
