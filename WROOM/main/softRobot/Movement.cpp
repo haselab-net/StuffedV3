@@ -61,7 +61,7 @@ static void initPausedMovements() {
 ////////////////////////////////////////// data structure for movement information ///////////////////////////////////////////
 
 vector<MovementInfoNode> movementInfos;
-static vector<MovementInfoNode>::iterator getMovementInfo(uint8_t movementId) {
+vector<MovementInfoNode>::iterator getMovementInfo(uint8_t movementId) {
 	vector<MovementInfoNode>::iterator it = movementInfos.begin();
 	for (; it != movementInfos.end(); ++it) {
 		if (it->movementId == movementId) {
@@ -837,7 +837,6 @@ bool canAddKeyframe(MovementKeyframe& keyframe) {
 	// check motor
 	for (int i=0; i<keyframe.motorCount; i++) {
 		if (motorId[i] >= allBoards.GetNTotalMotor()) return false;	// wrong motor id
-		else if (motorHeads[motorId[i]].nOccupied == MOTOR_KEYFRAME_BUFFER_SIZE) return false;	// keyframe list is full
 	}
 	
 	// check ref
@@ -869,7 +868,7 @@ void addKeyframe(MovementKeyframe& keyframe) {
 
 	xSemaphoreGive(tickSemaphore);
 
-	printAllMotorKeyframes();
+	// printAllMotorKeyframes();
 }
 
 // pause one movement

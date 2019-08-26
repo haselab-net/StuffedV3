@@ -2,7 +2,8 @@
 #include "../softRobot/Movement.h"
 
 static bool waitResponse = false;       // wait nOccupied after send one keyframe
-static uint8_t MAX_NOCCUPIED = 5;
+static uint16_t MAX_MOTOR_KEYFRAME_COUNT = 256;
+static uint8_t MAX_MOVEMENT_KEYFRAME_COUNT = 32;
 
 static const char* LOG_TAG = "module_srmovement";
 
@@ -23,16 +24,22 @@ static bool canAddKeyframe(duk_context * ctx) {
             ESP_LOGE(LOG_TAG, "canAddKeyframe: motorId larger than motor count");
             return false;
         }
-        if (motorHeads[motorId].nOccupied >= MAX_NOCCUPIED) {
-            duk_pop(ctx);
-            return false;
-        }
     }
     duk_pop(ctx);
 
+    // validate total count of keyframes
+    uint16_t totalMotorKeyframes = 0;
+    for (int i = 0; i < allBoards.GetNTotalMotor(); i++) totalMotorKeyframes += motorHeads[i].nOccupied;
+    if (totalMotorKeyframes >= MAX_MOTOR_KEYFRAME_COUNT) return false;
+
+    // validate count of keyframes of movement
     duk_get_prop_string(ctx, -1, "movementId");
     uint8_t movementId = duk_get_int(ctx, -1);
     duk_pop(ctx);
+    vector<MovementInfoNode>::iterator it = getMovementInfo(movementId);
+    if (it != movementInfos.end() && it->keyframeCount >= MAX_MOVEMENT_KEYFRAME_COUNT) return false;
+
+    // check if paused
     jsRobotState.read_lock();
     if (jsRobotState.movement.isPaused(movementId)) {
         jsRobotState.read_unlock();

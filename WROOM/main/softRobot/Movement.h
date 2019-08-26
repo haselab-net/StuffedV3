@@ -20,6 +20,7 @@ using namespace std;
 
 typedef struct MotorKeyframeNode MotorKeyframeNode;
 typedef struct MotorHead MotorHead;
+typedef struct MovementInfoNode MovementInfoNode;
 
 struct MotorKeyframeNode {
 	uint16_t id;              // id of the keyframe (movement id + index)
@@ -56,9 +57,10 @@ struct MovementInfoNode {
 extern vector<MotorHead> motorHeads;
 extern vector<MovementInfoNode> movementInfos;
 
+vector<MovementInfoNode>::iterator getMovementInfo(uint8_t movementId);
+
 ///////////////////////////////////////// data structure for WROOM interface ///////////////////////////// 
 
-#define MOTOR_KEYFRAME_BUFFER_SIZE 10        // size of buffer for every motor
 #define MS_PER_MOVEMENT_TICK 50				// 50 ms = 1 movement tick
 
 class MovementKeyframe {
