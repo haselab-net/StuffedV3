@@ -15,6 +15,17 @@ void* shiftPointer(const void* p, int8_t offsetBytes);
 void pushPayload(void* &payload, const void* source, size_t byteSize);
 
 template <class T>
+void pushPayloadNum(const void* &payload, const T &target) {
+    pushPayload(payload, (void*)&target, sizeof(T));
+}
+template <class T>
+void pushPayloadNumArray(const void* &payload, const std::vector<T> &vec) {
+    for (int i=0; i<vec.size(); i++) {
+        pushPayloadNum(payload, vec[i]);
+    }
+}
+
+template <class T>
 void popPayloadNum(const void* &payload, T &target) {
     memcpy(&target, payload, sizeof(T));
     payload = shiftPointer(payload, sizeof(T));
