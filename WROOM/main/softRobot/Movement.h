@@ -48,7 +48,7 @@ struct MovementInfoNode {
 	uint8_t movementId;		// movement id
 	uint8_t lastDeletedKeyframeId;	// index of last deleted keyframe after interpolation (0xff for none)
 	uint8_t lastAddedKeyframeId;	// index of last added keyframe of this movement
-	uint16_t remainKeyframeTime;	// sum of time of remaining keyframes (in movement tick, NOT ms)
+	uint16_t remainKeyframeTime;	// FIXME not work well after pause movement, DONNOT USE // sum of time of remaining keyframes (in movement tick, NOT ms)
 	uint8_t keyframeCount;	// number of remaining keyframes
 	bool paused;			// true if the movement is currently paused
 };
