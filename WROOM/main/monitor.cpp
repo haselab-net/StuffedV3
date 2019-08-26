@@ -627,7 +627,7 @@ static void changeCurrentPos(uint8_t myMotorId, short offset) {
     MonitorMovementKeyframe* keyframe = (MonitorMovementKeyframe*)((unsigned char*)payload+5);
     static uint8_t keyframeId = 0;
     keyframe->id = 0x0100 + keyframeId;
-    keyframeId[myMotorId] += 1;
+    keyframeId += 1;
     keyframeId = keyframeId % 20;
     keyframe->motorCount = 1;
     memcpy(keyframe->motorId, motorId, keyframe->motorCount);

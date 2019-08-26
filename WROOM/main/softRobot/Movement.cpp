@@ -882,13 +882,12 @@ void pauseMovement(uint8_t movementId, uint8_t motorCount, const vector<uint8_t>
 
 	for (int i=0; i<motorCount; i++) {
 		MotorKeyframeNode* pausedNode = pickMotorKeyframes(motorId[i], movementId);
-		if(pausedNode) {
-			insertToPausedMovementList(motorId[i], pausedNode);
-
-			// mark paused for movement info
-			getMovementInfo(movementId)->paused = true;
-		}
+		if(pausedNode) insertToPausedMovementList(motorId[i], pausedNode);
 	}
+
+	// mark paused for movement info
+	vector<MovementInfoNode>::iterator it = getMovementInfo(movementId);
+	if(it!=movementInfos.end()) it->paused = true;
 
 	ESP_LOGD(LOG_TAG, "<<< pauseMovement %d end", movementId);
 
@@ -938,7 +937,8 @@ void resumeMovement(uint8_t movementId, uint8_t motorCount) {
 	}
 
 	// mark unpaused for movement info
-	getMovementInfo(movementId)->paused = false;
+	vector<MovementInfoNode>::iterator it = getMovementInfo(movementId);
+	if(it!=movementInfos.end()) it->paused = false;
 
 	ESP_LOGD(LOG_TAG, "<<< resumeMovement %d end", movementId);
 
@@ -998,7 +998,8 @@ void clearMovement(uint8_t movementId, uint8_t motorCount, const vector<uint8_t>
 	}
 
 	// clear movement info (specified movement)
-	movementInfos.erase(getMovementInfo(movementId));
+	vector<MovementInfoNode>::iterator it = getMovementInfo(movementId);
+	if(it!=movementInfos.end()) movementInfos.erase(it);
 
 	ESP_LOGD(LOG_TAG, "<<< clear movement %d \n", movementId);
 
