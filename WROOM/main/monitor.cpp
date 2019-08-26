@@ -625,7 +625,10 @@ static void changeCurrentPos(uint8_t myMotorId, short offset) {
     *((unsigned short*)payload+1) = CIU_MOVEMENT;
     *((unsigned char*)payload+4) = CI_M_ADD_KEYFRAME;
     MonitorMovementKeyframe* keyframe = (MonitorMovementKeyframe*)((unsigned char*)payload+5);
-    keyframe->id = 0x0100;
+    static uint8_t keyframeId = 0;
+    keyframe->id = 0x0100 + keyframeId;
+    keyframeId[myMotorId] += 1;
+    keyframeId = keyframeId % 20;
     keyframe->motorCount = 1;
     memcpy(keyframe->motorId, motorId, keyframe->motorCount);
     keyframe->period = 2000;
@@ -640,12 +643,12 @@ class MCTest: public MonitorCommandBase{
 public:
     const char* Desc(){ return "p test movement"; }
     void Func(){
-        conPrintf("MCtest, \n");
-        conPrintf("p: get motor pose        m: print all motor keyframes        i: print interpolate parameters \n");
-        conPrintf("z: pause all movements   x: resume all movements             c: clear interpolate buffer \n");
-        conPrintf("v: pause movement 1      b: resume movement 1                n: clear movement 1 \n");
-        conPrintf("o: print movement info \n");
-        conPrintf("t: print timer \n");
+        conPrintf("MCtest: \n");
+        conPrintf(" p: get motor pose        m: print all motor keyframes        i: print interpolate parameters \n");
+        conPrintf(" z: pause all movements   x: resume all movements             c: clear interpolate buffer \n");
+        conPrintf(" v: pause movement 1      b: resume movement 1                n: clear movement 1 \n");
+        conPrintf(" o: print movement info \n");
+        conPrintf(" t: print timer \n");
         switch (getchWait()){
             // print current pos
             case 'p': {
