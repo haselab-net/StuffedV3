@@ -116,8 +116,7 @@ void UdpRetPacket::SetLength() {
 	case CIU_MOVEMENT:
 		switch (*(uint8_t*)data)
 		{
-		case CI_M_ADD_KEYFRAME:
-			length = NHEADER*2 + 1 + (2 + 1 + allBoards.GetNTotalMotor()); break;
+		length = 0;
 		case CI_M_PAUSE_INTERPOLATE:
 		case CI_M_RESUME_INTERPOLATE:
 		case CI_M_PAUSE_MOV:
@@ -126,8 +125,10 @@ void UdpRetPacket::SetLength() {
 		case CI_M_CLEAR_PAUSED:
 		case CI_M_CLEAR_ALL:
 			length = NHEADER*2 + 1; break;
+		case CI_M_ADD_KEYFRAME:
+			length = NHEADER*2 + 1 + (2 + 1);
 		case CI_M_QUERY:
-			length = NHEADER*2 + 1 + (allBoards.GetNTotalMotor()); break;
+			length += NHEADER*2 + 1 + (allBoards.GetNTotalMotor() + 1 + movementInfos.size() * 2); break;
 		default:
 			break;
 		}

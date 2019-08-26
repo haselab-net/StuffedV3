@@ -5,8 +5,6 @@ static const char* LOG_TAG = "Movement";
 
 typedef struct PausedMovementHead PausedMovementHead;
 
-typedef struct InterpolateState InterpolateState;
-
 ////////////////////////////////////////// data structure for interpolate ///////////////////////////////////////////
 
 static uint16_t movementTime = 0;                // current time in movement tick
@@ -1052,15 +1050,19 @@ void clearInterpolateBuffer() {
 }
 
 // query interpolate state (return the head node of all motors)
-void queryInterpolateState(InterpolateState* interpolateState) {
+void queryInterpolateState(void* payload) {
+	// nOccupied
 	for (int i=0; i<allBoards.GetNTotalMotor(); i++) {
-		interpolateState->nOccupied[i] = motorHeads[i].nOccupied;
+		pushPayloadNum(payload, motorHeads[i].nOccupied);
+	}
 
-		if (!motorHeads[i].head) {
-			interpolateState->id[i] = 0;
-			continue;
-		};
-		interpolateState->id[i] = motorHeads[i].head->id;
+	// movementId + keyframeCount
+	pushPayloadNum<uint8_t>(payload, movementInfos.size());
+	for (int i=0; i<movementInfos.size(); i++) {
+		pushPayloadNum(payload, movementInfos[i].movementId);
+	}
+	for (int i=0; i<movementInfos.size(); i++) {
+		pushPayloadNum(payload, movementInfos[i].keyframeCount);
 	}
 }
 
@@ -1104,11 +1106,9 @@ void prepareRetAddKeyframe(const void* movement_command_data_rcv, void* movement
 		printf("add keyframe \n");
 	}
 	pushPayload(movement_command_data_ret, &success, 1);
-	// nOccupied
-	for (int i=0; i<allBoards.GetNTotalMotor(); i++) {
-		pushPayload(movement_command_data_ret, &motorHeads[i].nOccupied, 1);
-		printf("nOccupied[%d]: %d \n", i, motorHeads[i].nOccupied);
-	}
+
+	// interpolate state
+	queryInterpolateState(movement_command_data_ret);
 }
 void prepareRetPauseMov(const void* movement_command_data_rcv, void* movement_command_data_ret) {
 	/* decode received packet */
@@ -1151,8 +1151,5 @@ void prepareRetClearMov(const void* movement_command_data_rcv, void* movement_co
 	// empty return
 }
 void prepareRetQuery(const void* movement_command_data_rcv, void* movement_command_data_ret) {
-	/* fill return packet */
-	for (int i=0; i<allBoards.GetNTotalMotor(); i++) {
-		pushPayload(movement_command_data_ret, &motorHeads[i].nOccupied, 1);
-	}
+	queryInterpolateState(movement_command_data_ret);
 }
