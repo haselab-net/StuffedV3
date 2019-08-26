@@ -54,6 +54,7 @@ struct MovementInfoNode {
 };
 
 extern vector<MotorHead> motorHeads;
+extern vector<MovementInfoNode> movementInfos;
 
 ///////////////////////////////////////// data structure for WROOM interface ///////////////////////////// 
 
@@ -89,6 +90,7 @@ void printMotorKeyframes(uint8_t motorId);
 void printKeyframe(const MovementKeyframe &keyframe);
 void printInterpolateParams();
 void printAllMotorKeyframes();
+void printMovementInfo();
 
 /////////////////////////////////////////// interface to hardware ///////////////////////////////////////
 #define MOVEMENT_MANAGER_TIMER_DIVIDER 16

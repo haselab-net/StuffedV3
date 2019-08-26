@@ -651,6 +651,13 @@ void printInterpolateParams() {
 	}
 }
 
+void printMovementInfo() {
+	printf("movement info: \n");
+	for (int i=0; i<movementInfos.size(); i++) {
+		printf("	- movementId: %i, lastDeletedKeyframeId: %i, lastAddedKeyframeId: %i, remainKeyframeTime: %i, keyframeCount: %i, paused: %i \n", movementInfos[i].movementId, movementInfos[i].lastDeletedKeyframeId, movementInfos[i].lastAddedKeyframeId, movementInfos[i].remainKeyframeTime, movementInfos[i].keyframeCount, movementInfos[i].paused);
+	}
+}
+
 /////////////////////////////////////////// interface to hardware ///////////////////////////////////////
 
 static xSemaphoreHandle intervalSemaphore;	// semaphore to allow movement manager send interpolate buffer in specified interval

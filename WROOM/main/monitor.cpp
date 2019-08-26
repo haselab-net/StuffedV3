@@ -640,7 +640,12 @@ class MCTest: public MonitorCommandBase{
 public:
     const char* Desc(){ return "p test movement"; }
     void Func(){
-        conPrintf("MCtest\n");
+        conPrintf("MCtest, \n");
+        conPrintf("p: get motor pose        m: print all motor keyframes        i: print interpolate parameters \n");
+        conPrintf("z: pause all movements   x: resume all movements             c: clear interpolate buffer \n");
+        conPrintf("v: pause movement 1      b: resume movement 1                n: clear movement 1 \n");
+        conPrintf("o: print movement info \n");
+        conPrintf("t: print timer \n");
         switch (getchWait()){
             // print current pos
             case 'p': {
@@ -727,6 +732,11 @@ public:
             case '7': {
                 changeCurrentPos(2, -2000);
 
+                break;
+            }
+            // print movement info
+            case 'o': {
+                printMovementInfo();
                 break;
             }
             // print timer
