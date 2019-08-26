@@ -65,7 +65,7 @@ vector<MovementInfoNode>::iterator getMovementInfo(uint8_t movementId);
 
 class MovementKeyframe {
 public:
-	uint16_t id;				// 8-bit movement id + 8-bit keyframe id
+	uint16_t id;				// 8-bit movement id (start from 1) + 8-bit keyframe id
 	uint8_t motorCount;			// count of motors used in the movement
 	vector<uint8_t> motorId;	// the motorIds used
 	uint16_t period;			// note that 1. the sum of period in list could not larger than UINT16_MAX (or the sorting might fail); 2. time in movement tick, not ms
