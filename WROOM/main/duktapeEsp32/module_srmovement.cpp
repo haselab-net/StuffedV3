@@ -110,12 +110,13 @@ static duk_ret_t isMovementPlaying(duk_context* ctx) {
     // ..
 
     vector<MovementInfoNode>::iterator it = getMovementInfo(movementId);
-    if (it == movementInfos.end()) duk_push_false();
+    if (it == movementInfos.end()) duk_push_false(ctx);
     else {
-        JSRobotState.read_lock();
-        if (jsRobotState.movement.isPaused(movementId)) duk_push_false();
-        JSRobotState.read_unlock();
-        else duk_push_true();
+        jsRobotState.read_lock();
+        bool paused = jsRobotState.movement.isPaused(movementId);
+        jsRobotState.read_unlock();
+        if (paused) duk_push_false(ctx);
+        else duk_push_true(ctx);
     }
 
     return 1;
