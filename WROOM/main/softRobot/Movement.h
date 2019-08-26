@@ -44,12 +44,21 @@ struct MotorHead {
 	MotorKeyframeNode* read; // last node of read (since multi keyframes is used in interpolate)
 };
 
+struct MovementInfoNode {
+	uint8_t movementId;		// movement id
+	uint8_t lastDeletedKeyframeId;	// index of last deleted keyframe after interpolation (0xff for none)
+	uint8_t lastAddedKeyframeId;	// index of last added keyframe of this movement
+	uint16_t remainKeyframeTime;	// sum of time of remaining keyframes (in movement tick, NOT ms)
+	uint8_t keyframeCount;	// number of remaining keyframes
+	bool paused;			// true if the movement is currently paused
+};
+
 extern vector<MotorHead> motorHeads;
 
 ///////////////////////////////////////// data structure for WROOM interface ///////////////////////////// 
 
 #define MOTOR_KEYFRAME_BUFFER_SIZE 10        // size of buffer for every motor
-#define MS_PER_MOVEMENT_TICK 50				// 20 ms = 1 movement tick
+#define MS_PER_MOVEMENT_TICK 50				// 50 ms = 1 movement tick
 
 class MovementKeyframe {
 public:
@@ -68,11 +77,6 @@ struct MovementKeyframeAddState {
     uint16_t id;
     uint8_t success;
 }__attribute__((packed));
-
-struct InterpolateState {
-	vector<uint16_t> id;
-	vector<uint8_t> nOccupied;
-};
 
 /////////////////////////////////////////// api for accessing PIC ///////////////////////////////////////////////
 #define PIC_INTERPOLATE_BUFFER_VACANCY_MIN 8		// the minimum empty interpolate buffer count

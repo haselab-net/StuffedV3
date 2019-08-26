@@ -60,6 +60,57 @@ static void initPausedMovements() {
 	pausedMovements->next = NULL;
 }
 
+////////////////////////////////////////// data structure for movement information ///////////////////////////////////////////
+
+vector<MovementInfoNode> movementInfos;
+static vector<MovementInfoNode>::iterator getMovementInfo(uint8_t movementId) {
+	vector<MovementInfoNode>::iterator it = movementInfos.begin();
+	for (; it != movementInfos.end(); ++it) {
+		if (it->movementId == movementId) {
+			return it;
+		}
+	}
+	return it;
+}
+
+// increase remainKeyframeTime & keyframeCount when new keyframe added
+void increaseMovementInfo(uint8_t movementId, uint8_t keyframeId, uint16_t period) {
+	vector<MovementInfoNode>::iterator it = getMovementInfo(movementId);
+	if (it == movementInfos.end()) {	// no such movement in buffer, add new node
+		struct MovementInfoNode node = {
+			movementId,
+			0xff,
+			keyframeId,
+			period,
+			1,
+			false
+		};
+		movementInfos.push_back(node);
+	} else {	// already have movement in buffer
+		if (it->lastAddedKeyframeId == keyframeId) return;	// the keyframe already added by one motor
+		else {
+			it->lastAddedKeyframeId = keyframeId;
+			it->remainKeyframeTime += period;
+			it->keyframeCount += 1;
+		}
+	}
+}
+// decrease remainKeyframeTime & keyframeCount when a keyframe deleted
+void decreaseMovementInfo(uint8_t movementId, uint8_t keyframeId, uint16_t period) {
+	vector<MovementInfoNode>::iterator it = getMovementInfo(movementId);
+	if (it == movementInfos.end()) return;	// last keyframe have been deleted from one motor
+	if (it->keyframeCount == 1) {	// last keyframe of the movement
+		movementInfos.erase(it);	// delete keyframe
+	} else {	// not last keyframe
+		if (it->lastDeletedKeyframeId == keyframeId) return;	// the keyframe have been handled from one motor
+		else {	
+			it->lastDeletedKeyframeId = keyframeId;
+			it->remainKeyframeTime -= period;
+			it->keyframeCount -= 1;
+		}
+	}
+}
+
 /////////////////////////////////////////// api for accessing PIC ///////////////////////////////////////////////
 static xSemaphoreHandle picQuerySemaphore;
 static volatile bool receivedReturn = true;		// if not received the return of formal command, not execute command this time
@@ -125,11 +176,10 @@ void initPICPacketHandler() {
 static uint8_t getMovementId(uint16_t id) {
 	return (id >> 8);
 }
-#if 0
 static uint8_t getKeyframeId(uint16_t id) {
 	return (id & 0x00ff);
 }
-#endif
+
 static MotorKeyframeNode* getNode(uint8_t motorId, uint16_t id) {
 	MotorHead& head = motorHeads[motorId];
 	MotorKeyframeNode* res = head.head;
@@ -213,7 +263,7 @@ static MotorKeyframeNode* lastSmallerNode(MotorKeyframeNode* smallerNode, MotorK
 }
 
 // add [ behind the same movement ] || [ at current time if no same movement ]
-static void addNodeDefault(uint8_t motorId, MotorKeyframeNode* node, bool recalInterParams) {
+static void addNodeDefault(uint8_t motorId, MotorKeyframeNode* const node, bool recalInterParams) {
 	MotorHead &head = motorHeads[motorId];
 	bool changeDifferential = false;
 
@@ -267,16 +317,20 @@ static void addNodeDefault(uint8_t motorId, MotorKeyframeNode* node, bool recalI
 	// alter head
 	head.nOccupied += 1;
 	if (changeDifferential && recalInterParams) getInterpolateParams(motorId);
+
+	// alter movement info
+	increaseMovementInfo(getMovementId(node->id), getKeyframeId(node->id), node->end - node->start);
 }
 
 // add node with absolute time
-static void addNodeAtTime(uint8_t motorId, MotorKeyframeNode* node, bool recalInterParams, uint16_t abTime) {
+static void addNodeAtTime(uint8_t motorId, MotorKeyframeNode* const node, bool recalInterParams, uint16_t abTime) {
 	MotorHead &head = motorHeads[motorId];
 	node->start = abTime;
 	node->end = node->start + node->end;
 
 	bool changeDifferential = false;
 
+	// add node
 	uint16_t minimum =minTime(node->end, movementTime, abTime) != node->end ? abTime : movementTime;		// judge wether time is larger than abTime through judge whether the new node should interpolate right now
 	if (!head.head) {		// array is empty
 		head.head = node;
@@ -313,9 +367,12 @@ static void addNodeAtTime(uint8_t motorId, MotorKeyframeNode* node, bool recalIn
 	// alter head
 	head.nOccupied += 1;
 	if (changeDifferential && recalInterParams) getInterpolateParams(motorId);
+
+	// alter movement info
+	increaseMovementInfo(getMovementId(node->id), getKeyframeId(node->id), node->end - node->start);
 }
 
-static void deleteNode(uint8_t motorId, MotorKeyframeNode* node, bool recalInterParams) {
+static void deleteNode(uint8_t motorId, MotorKeyframeNode* const node, bool recalInterParams) {
 	MotorHead &head = motorHeads[motorId];
 	// judge wether the node participate in the interpolate
 	bool changeDifferential = true;
@@ -335,6 +392,9 @@ static void deleteNode(uint8_t motorId, MotorKeyframeNode* node, bool recalInter
 
 	// change read pointer if needed
 	if (head.read == node) head.read = nodeBefore;
+
+	// alter movement info
+	decreaseMovementInfo(getMovementId(node->id), getKeyframeId(node->id), node->end - node->start);
 
 	// delete node
 	if (head.head == node) {
@@ -817,7 +877,12 @@ void pauseMovement(uint8_t movementId, uint8_t motorCount, const vector<uint8_t>
 
 	for (int i=0; i<motorCount; i++) {
 		MotorKeyframeNode* pausedNode = pickMotorKeyframes(motorId[i], movementId);
-		if(pausedNode) insertToPausedMovementList(motorId[i], pausedNode);
+		if(pausedNode) {
+			insertToPausedMovementList(motorId[i], pausedNode);
+
+			// mark paused for movement info
+			getMovementInfo(movementId)->paused = true;
+		}
 	}
 
 	ESP_LOGD(LOG_TAG, "<<< pauseMovement %d end", movementId);
@@ -866,6 +931,9 @@ void resumeMovement(uint8_t movementId, uint8_t motorCount) {
 			head = head->next;
 		}
 	}
+
+	// mark unpaused for movement info
+	getMovementInfo(movementId)->paused = false;
 
 	ESP_LOGD(LOG_TAG, "<<< resumeMovement %d end", movementId);
 
@@ -924,6 +992,9 @@ void clearMovement(uint8_t movementId, uint8_t motorCount, const vector<uint8_t>
 		head = head->next;
 	}
 
+	// clear movement info (specified movement)
+	movementInfos.erase(getMovementInfo(movementId));
+
 	ESP_LOGD(LOG_TAG, "<<< clear movement %d \n", movementId);
 
 	#ifdef WROOM
@@ -949,6 +1020,16 @@ void clearPausedMovements() {
 
 		tmp = pausedMovements->next;
 	}
+
+	// clear movement info (only paused)
+	int i = 0;
+	while (i!=movementInfos.size()) {
+		if (movementInfos[i].paused) {
+			// clear one paused movement info
+			movementInfos.erase(movementInfos.begin()+i);
+		}
+		else i++;
+	}
 }
 
 // clear interpolate list & paused list
@@ -961,6 +1042,9 @@ void clearInterpolateBuffer() {
 
 	// clear interpolate list
 	for (int i=0; i<allBoards.GetNTotalMotor(); i++) clearMotorKeyframes(i, motorHeads[i].head);
+
+	// clear movement info (all)
+	movementInfos.clear();
 
 	#ifdef WROOM
 	    xSemaphoreGive(tickSemaphore);
