@@ -97,6 +97,30 @@ static duk_ret_t send(duk_context *ctx) {
     return 1;
 }
 
+// export function isMovementPlaying(movement: Movement): boolean {
+static duk_ret_t isMovementPlaying(duk_context* ctx) {
+    // .. movement
+
+    duk_get_prop_string(ctx, -1, "movementId");
+    duk_int_t movementId = duk_get_int(ctx, -1);
+    duk_pop(ctx);
+    // .. movement
+
+    duk_pop(ctx);
+    // ..
+
+    vector<MovementInfoNode>::iterator it = getMovementInfo(movementId);
+    if (it == movementInfos.end()) duk_push_false();
+    else {
+        JSRobotState.read_lock();
+        if (jsRobotState.movement.isPaused(movementId)) duk_push_false();
+        JSRobotState.read_unlock();
+        else duk_push_true();
+    }
+
+    return 1;
+}
+
 void onSrMovementReceiveCIUMovement(const void *movementData) {
     const void* payload = movementData;
 
@@ -118,6 +142,7 @@ extern "C" duk_ret_t ModuleSRMovement(duk_context *ctx) {
     waitResponse = false;
 
     ADD_FUNCTION("send", send, 1);
+    ADD_FUNCTION("isMovementPlaying", isMovementPlaying, 1);
 
     return 0;
 }

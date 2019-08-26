@@ -219,4 +219,8 @@ var motor;
         });
     }
     motor_1.clearPausedMovements = clearPausedMovements;
+    function isMovementPlaying(movement) {
+        return softrobot.movement.movementSender.isMovementPlaying(movement);
+    }
+    motor_1.isMovementPlaying = isMovementPlaying;
 })(motor || (motor = {}));
