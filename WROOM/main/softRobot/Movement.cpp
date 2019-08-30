@@ -325,13 +325,13 @@ static void addNodeDefault(uint8_t motorId, MotorKeyframeNode* const node, bool 
 
 	// alter head
 	head.nOccupied += 1;
-	if (changeDifferential && recalInterParams) getInterpolateParams(motorId);
+	if (changeDifferential || recalInterParams) getInterpolateParams(motorId);
 
 	// alter movement info
 	increaseMovementInfo(getMovementId(node->id), getKeyframeId(node->id), node->end - node->start);
 }
 
-// add node with absolute time
+// add node with absolute time. If not recalInterParams, only recalculate interpolate params when differential should change
 static void addNodeAtTime(uint8_t motorId, MotorKeyframeNode* const node, bool recalInterParams, uint16_t abTime) {
 	MotorHead &head = motorHeads[motorId];
 	node->start = abTime;
@@ -375,7 +375,7 @@ static void addNodeAtTime(uint8_t motorId, MotorKeyframeNode* const node, bool r
 
 	// alter head
 	head.nOccupied += 1;
-	if (changeDifferential && recalInterParams) getInterpolateParams(motorId);
+	if (changeDifferential || recalInterParams) getInterpolateParams(motorId);
 
 	// alter movement info
 	increaseMovementInfo(getMovementId(node->id), getKeyframeId(node->id), node->end - node->start);
@@ -892,7 +892,7 @@ void addKeyframe(MovementKeyframe& keyframe) {
 				uint8_t refMovementId = getKeyframeId(keyframe.refId);	// NOTE not wrong code, just the encoding way is strange
 				printf("real play after %i \n", refMovementId);
 				MotorKeyframeNode* refNode = getMovementLastNode(keyframe.refMotorId, refMovementId);
-				addNodeAtTime(keyframe.motorId[i], node, false, refNode->end + keyframe.timeOffset);
+				addNodeAtTime(keyframe.motorId[i], node, true, refNode->end + keyframe.timeOffset);
 			}
 		}
 	}
