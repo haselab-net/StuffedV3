@@ -194,7 +194,7 @@ static MotorKeyframeNode* getMovementLastNode(uint8_t motorId, uint8_t movementI
 	MotorKeyframeNode* iter = head.head;
 	while (iter)
 	{
-		if (getMovementId(res->id) == movementId) res = iter;
+		if (getMovementId(iter->id) == movementId) res = iter;
 		iter = iter->next;
 	}
 	return res;
@@ -852,7 +852,7 @@ bool canAddKeyframe(MovementKeyframe& keyframe) {
 
 	// check movement
 	auto movementInfo = getMovementInfo(getMovementId(keyframe.id));
-	if (movementInfo == movementInfos.end() && movementInfo->paused == true) return false;	// can not add to paused queue
+	if (movementInfo != movementInfos.end() && movementInfo->paused == true) return false;	// can not add to paused queue
 
 	// check ref
 	if (getMovementId(keyframe.refId)) {		// have ref to specified keyframe
@@ -860,6 +860,7 @@ bool canAddKeyframe(MovementKeyframe& keyframe) {
 	}
 	else if (getKeyframeId(keyframe.refId)) {	// have ref to specified movement
 		uint8_t refMovementId = getKeyframeId(keyframe.refId);	// NOTE not wrong code, just the encoding way is strange
+		printf("play after %i \n", refMovementId);
 		auto refMovementInfo = getMovementInfo(refMovementId);
 		if (refMovementInfo == movementInfos.end() || refMovementInfo->paused == true) return false;	// not such movement or its paused
 	}
@@ -881,14 +882,15 @@ void addKeyframe(MovementKeyframe& keyframe) {
 		node->next = NULL;
 
 		// add node
-		if (!getMovementId(keyframe.refId)) addNodeDefault(keyframe.motorId[i], node, true);	// add after last node with same movement id
+		if (keyframe.refId == 0) addNodeDefault(keyframe.motorId[i], node, true);	// add after last node with same movement id
 		else {
-			if (!getKeyframeId(keyframe.refId)) {	// add to start time of specified keyframe
+			if (getMovementId(keyframe.refId) != 0) {	// add to start time of specified keyframe
 				MotorKeyframeNode* refNode = getNode(keyframe.refMotorId, keyframe.id);
 				addNodeAtTime(keyframe.motorId[i], node, true, refNode->start + keyframe.timeOffset);
 			}
 			else {									// add to end time of the last keyframe of specified movement
 				uint8_t refMovementId = getKeyframeId(keyframe.refId);	// NOTE not wrong code, just the encoding way is strange
+				printf("real play after %i \n", refMovementId);
 				MotorKeyframeNode* refNode = getMovementLastNode(keyframe.refMotorId, refMovementId);
 				addNodeAtTime(keyframe.motorId[i], node, false, refNode->end + keyframe.timeOffset);
 			}
