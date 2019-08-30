@@ -223,4 +223,27 @@ var motor;
         return softrobot.movement.movementSender.isMovementPlaying(movement);
     }
     motor_1.isMovementPlaying = isMovementPlaying;
+    function playAfter(movement, refMovement) {
+        for (var keyframeId = 0; keyframeId < movement.keyframes.length; keyframeId++) {
+            var data = {
+                movementCommandId: softrobot.command.CommandIdMovement.CI_M_ADD_KEYFRAME,
+                movementId: movement.movementId,
+                keyframeId: keyframeId,
+                motorCount: movement.motorIds.length,
+                motorId: movement.motorIds,
+                period: movement.keyframes[keyframeId].period,
+                pose: movement.keyframes[keyframeId].pose,
+                refMovementId: 0,
+                refKeyframeId: 0,
+                refMotorId: 0,
+                timeOffset: 0
+            };
+            if (keyframeId == 0) {
+                data.refKeyframeId = refMovement.movementId;
+                data.refMotorId = refMovement.motorIds[0];
+            }
+            movementAddKeyframe(data);
+        }
+    }
+    motor_1.playAfter = playAfter;
 })(motor || (motor = {}));

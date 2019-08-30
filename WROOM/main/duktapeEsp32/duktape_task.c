@@ -24,7 +24,7 @@
 LOG_TAG("duktape_task");
 
 //-------------------------------------------------------------------------------
-//	Static variables 
+//	Static variables
 
 //	The heap for duktape
 duk_context *heap_context = NULL;		// The heap context
@@ -48,7 +48,7 @@ struct TimerCallback{
 } timerCallbacks[NTIMERCALLBACKS];
 
 //-------------------------------------------------------------------------------
-//	Utilities for this file 
+//	Utilities for this file
 void lock_heap() {
 	xSemaphoreTake(heap_mutex, portMAX_DELAY);
 }
@@ -95,8 +95,8 @@ static void dumpCallbacks(const char* msg){
 #endif
 
 //-------------------------------------------------------------------------------
-//	Initializers for duktape 
-//	
+//	Initializers for duktape
+//
 
 static void createDuktapeHeap() {
 	//	Heap selection
@@ -111,7 +111,7 @@ static void createDuktapeHeap() {
 
     if (!heap_context) { exit(1); }
     dukf_log_heap("Heap after duk create heap");
-    
+
 	duk_eval_string_noresult(heap_context, "new Function('return this')().Duktape = Object.create(Duktape);");
 	duk_module_duktape_init(heap_context); // Initialize the duktape module functions.
 	duk_get_global_string(heap_context, "Duktape");
@@ -140,7 +140,7 @@ void dukInitTask(){
 
 static void dukEventHandleTask(void* arg);
 /*	Duktape's start point.
-	Initialize duktape, exec "init.js" and create jsThreads and exec "runtime.js"	*/ 
+	Initialize duktape, exec "init.js" and create jsThreads and exec "runtime.js"	*/
 void duktape_start() {
     if(heap_context){
 		LOGE("heap_context must be NULL at duktape_start().");
@@ -178,12 +178,12 @@ void duktape_start() {
 		jsThreads[i].ctx = duk_get_context(heap_context, -1);
 	}
 	unlock_heap();
-	
+
 	//	create tasks for threads
 	const char* taskNames[NJSTHREADS] = {"js0", "js1", "js2"};
 	for(int i=0; i<NJSTHREADS; ++i){
-		xTaskCreate(dukEventHandleTask, taskNames[i], 1024*5, &jsThreads[i], tskIDLE_PRIORITY + 1, &jsThreads[i].task);
-	}	
+		xTaskCreate(dukEventHandleTask, taskNames[i], 1024*8, &jsThreads[i], tskIDLE_PRIORITY + 1, &jsThreads[i].task);
+	}
 	char* cmd = "ESP32.include('/main/runtime.js');";
 	event_newCommandLineEvent(cmd, strlen(cmd), 0);
 }
@@ -215,7 +215,7 @@ void duktape_end(){
 			if (jsThreads[i].task){
 				remain = true;
 				vTaskDelay(1);
-			} 
+			}
 		}
 	} while(remain);
 
@@ -227,7 +227,7 @@ void duktape_end(){
 	duk_destroy_heap( heap_context );
 	heap_context = NULL;
 	unlock_heap();
-	
+
 	esp32_duktape_endEvents();
 	bJsQuitting = false;
 
@@ -236,8 +236,8 @@ void duktape_end(){
 
 
 //-------------------------------------------------------------------------------
-//	Event handling for duktape 
-//	
+//	Event handling for duktape
+//
 static void processEvent(duk_context* ctx, esp32_duktape_event_t *pEvent) {
 	duk_int_t callRc;
 	LOGV(">> processEvent: eventType=%s", event_eventTypeToString(pEvent->type));
@@ -251,7 +251,7 @@ static void processEvent(duk_context* ctx, esp32_duktape_event_t *pEvent) {
 			callRc = duk_peval_lstring(ctx,	pEvent->commandLine.commandLine, pEvent->commandLine.commandLineLength);
 			DUK_STACK_REMAIN(ctx);
 			// [0] - result
-		    
+
 			// If an error was detected, perform error logging.
 			if (callRc != 0) {
 				esp32_duktape_log_error(ctx);
@@ -331,7 +331,7 @@ static void dukEventHandleTask(void* arg){
 	JSThread* th = (JSThread*)arg;
 	th->stackStart = (int)&th;
 	th->stackPrev = 0;
-	while(1){	
+	while(1){
 		//	malloc after lock reduce memory usage. Because only one thread can lock heap.
 		esp32_duktape_event_t* ev = malloc(sizeof(esp32_duktape_event_t));
 		esp32_duktape_waitForEvent(ev, portMAX_DELAY);
@@ -377,7 +377,7 @@ duk_ret_t registerTimerCallback(duk_context* ctx){
 	memmove(&timerCallbacks[i+1], &timerCallbacks[i], sizeof(timerCallbacks[0])*(NTIMERCALLBACKS-i-1));
 	for(int j=0; j<NTIMERCALLBACKS; ++j){
 		if (timerCallbacks[j].id == id){
-			id ++; 
+			id ++;
 			if (id==0) id++;
 			j = 0;
 			continue;
@@ -408,10 +408,10 @@ duk_ret_t registerTimerCallback(duk_context* ctx){
 			duk_get_prop_index(ctx, -1, 0);	//	[func global stash enum key val val[0]]
 	#if 0
 					LOGI("-7 isFunc = %d", duk_is_function(ctx, -7));
-					LOGI("-1 isFunc = %d", duk_is_function(ctx, -1));	
+					LOGI("-1 isFunc = %d", duk_is_function(ctx, -1));
 					duk_push_context_dump(ctx);
 					LOGI("Stack: %s", duk_to_string(ctx, -1));
-					duk_pop(ctx);										
+					duk_pop(ctx);
 	#endif
 			if (duk_samevalue(ctx, -7, -1)){
 				stash = atoi(duk_get_string(ctx, -3));
@@ -473,7 +473,7 @@ static void dukTimerTask(void* arg){
 				tmp.tick += tmp.period;
 				int i=1;
 				while(timerCallbacks[i].id){
-					timerCallbacks[i-1] = timerCallbacks[i];	
+					timerCallbacks[i-1] = timerCallbacks[i];
 					if (timerCallbacks[i-1].tick - tmp.tick >= 0){
 						break;
 					}

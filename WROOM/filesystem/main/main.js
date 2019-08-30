@@ -1,7 +1,7 @@
 console.log("defaule main.js");
 
-var movement_1 = motor.movementDecoder("taco\n6 2 6000\n3 0 1\n944 4694 0\n1023 -298 4624\n1078 783 -108\n988 4624 -80\n1050 4649 4624\n917 -8 23")
-motor.setMovement(motor.MovementOption.play, movement_1);
+motor.setMovement(motor.MovementOption.play, motor.movementDecoder("default1\n4 1 4000\n3 0\n810 2211\n834 0\n797 2005\n810 63"))
+motor.playAfter(motor.movementDecoder("default2\n4 1 4000\n3 1\n810 2211\n834 0\n797 2005\n810 63"), motor.movementDecoder("default1\n4 1 4000\n3 0\n810 2211\n834 0\n797 2005\n810 63"))
 
 // var movement_1 = motor.movementDecoder("default1\n4 1 6005\n3 0\n842 2276\n1158 397\n2011 2765\n1994 1246")
 // var movement_2 = motor.movementDecoder("default2\n4 1 6005\n3 1\n842 2276\n1158 397\n2011 2765\n1994 1246")
