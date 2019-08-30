@@ -44,7 +44,7 @@ LOG_TAG("Monitor");
 Monitor Monitor::theMonitor;
 
 const char* MonitorCommandBase::Tag(){
-    return "Mon"; 
+    return "Mon";
 }
 
 #ifndef _WIN32
@@ -147,7 +147,7 @@ class MCTaskList: public MonitorCommandBase{
         free(buf);
     }
 } mcTaskList;
- 
+
 class MCEraseNvs: public MonitorCommandBase{
     const char* Desc(){ return "E Erase NVS flash"; }
     void Func(){
@@ -460,7 +460,7 @@ public:
 extern bool offline_mode;
 class MCJSRestart: public MonitorCommandBase{
 public:
-    MCJSRestart() { bFirst = true; } 
+    MCJSRestart() { bFirst = true; }
     const char* Desc(){ return "J Restart java script"; }
     bool bFirst;
     void Func(){
@@ -479,7 +479,7 @@ public:
 } mcJSRestart;
 class MCJSDelete: public MonitorCommandBase{
 public:
-    MCJSDelete() { } 
+    MCJSDelete() { }
     const char* Desc(){ return "D delete java script"; }
     void Func(){
         offline_mode = false;
@@ -614,7 +614,7 @@ static void print_timer_counter(uint64_t counter_value)
     printf("Time   : %.8f ms\n", (double) counter_value / MOVEMENT_MANAGER_TIMER_SCALE);
 }
 static int32_t currentPos[3] = {0, 0, 0};
-static void changeCurrentPos(uint8_t myMotorId, short offset) {
+static void changeCurrentPos(uint8_t myMotorId, short offset, bool newMovement = false, bool playAfter = false) {
     size_t len = 4 + 1 + sizeof(MonitorMovementKeyframe);
     unsigned char motorId[1] = {myMotorId};
     currentPos[myMotorId] += offset;
@@ -626,14 +626,14 @@ static void changeCurrentPos(uint8_t myMotorId, short offset) {
     *((unsigned char*)payload+4) = CI_M_ADD_KEYFRAME;
     MonitorMovementKeyframe* keyframe = (MonitorMovementKeyframe*)((unsigned char*)payload+5);
     static uint8_t keyframeId = 0;
-    keyframe->id = 0x0100 + keyframeId;
+    keyframe->id = 0x0100 + (newMovement ? 0x0100 : 0) + keyframeId;
     keyframeId += 1;
     keyframeId = keyframeId % 20;
     keyframe->motorCount = 1;
     memcpy(keyframe->motorId, motorId, keyframe->motorCount);
     keyframe->period = 2000;
     memcpy(keyframe->pose, pose, keyframe->motorCount*4);
-    keyframe->refId = 0x0000;
+    keyframe->refId = 0x0000 + (playAfter ? 0x0001 : 0);
     keyframe->refMotorId = 0;
     keyframe->timeOffset = 0;
 
@@ -644,11 +644,10 @@ public:
     const char* Desc(){ return "p test movement"; }
     void Func(){
         conPrintf("MCtest: \n");
-        conPrintf(" p: get motor pose        m: print all motor keyframes        i: print interpolate parameters \n");
-        conPrintf(" z: pause all movements   x: resume all movements             c: clear interpolate buffer \n");
-        conPrintf(" v: pause movement 1      b: resume movement 1                n: clear movement 1 \n");
-        conPrintf(" o: print movement info \n");
-        conPrintf(" t: print timer \n");
+        conPrintf(" p: get motor pose           m: print all motor keyframes        i: print interpolate parameters \n");
+        conPrintf(" z: pause all movements      x: resume all movements             c: clear interpolate buffer \n");
+        conPrintf(" v: pause movement 1         b: resume movement 1                n: clear movement 1 \n");
+        conPrintf(" o: print movement info      t: print timer \n");
         switch (getchWait()){
             // print current pos
             case 'p': {
@@ -699,6 +698,15 @@ public:
                 vector<uint8_t> motorId;
                 motorId.push_back(0);
                 clearMovement(1, 1, motorId);
+                break;
+            }
+            // REVIEW add after
+            case '+': {
+                changeCurrentPos(1, 1000, true, true);
+                break;
+            }
+            case '-': {
+                changeCurrentPos(1, -1000, true, true);
                 break;
             }
             // add motor 0

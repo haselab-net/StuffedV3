@@ -11,7 +11,7 @@ static uint16_t movementTime = 0;                // current time in movement tic
 static bool tickPaused = false;
 
 static bool movementControlMode = true;
-static bool newMovementControlMode = true; 
+static bool newMovementControlMode = true;
 
 static xSemaphoreHandle tickSemaphore;		// semaphore for lock movement linked list
 
@@ -101,7 +101,7 @@ void decreaseMovementInfo(uint8_t movementId, uint8_t keyframeId, uint16_t perio
 		movementInfos.erase(it);	// delete keyframe
 	} else {	// not last keyframe
 		if (it->lastDeletedKeyframeId == keyframeId) return;	// the keyframe have been handled from one motor
-		else {	
+		else {
 			it->lastDeletedKeyframeId = keyframeId;
 			it->remainKeyframeTime -= period;
 			it->keyframeCount -= 1;
@@ -158,7 +158,7 @@ void movementOnGetPICInfo(UdpRetPacket& pkt) {
 		movementUpdateInterpolateState(pkt);
 		receivedReturn = true;
 		break;
-	
+
 	default:
 		break;
 	}
@@ -185,6 +185,17 @@ static MotorKeyframeNode* getNode(uint8_t motorId, uint16_t id) {
 	{
 		if (res->id == id) return res;
 		res = res->next;
+	}
+	return res;
+}
+static MotorKeyframeNode* getMovementLastNode(uint8_t motorId, uint8_t movementId) {
+	MotorHead& head = motorHeads[motorId];
+	MotorKeyframeNode* res = NULL;
+	MotorKeyframeNode* iter = head.head;
+	while (iter)
+	{
+		if (getMovementId(res->id) == movementId) res = iter;
+		iter = iter->next;
 	}
 	return res;
 }
@@ -254,7 +265,7 @@ static MotorKeyframeNode* lastSmallerNode(MotorKeyframeNode* smallerNode, MotorK
 	if (node->start < res->start) {		// the time is have been moded
 		while (res->next && res->next->start >= res->start) res = res->next;
 	}
-	while (res->next && res->next->start < node->start && 
+	while (res->next && res->next->start < node->start &&
 		(res->next->start >= res->start || node->start < res->start)) res = res->next;
 
 	return res;
@@ -527,7 +538,7 @@ static void insertMotorKeyframes(uint8_t motorId, MotorKeyframeNode* keyframes) 
 		getInterpolateParams(motorId);
 		return;
 	}
-	
+
 	uint16_t minimum = head.read ? head.head->start : movementTime;		// min time
 	MotorKeyframeNode* before_node = NULL, *next_node = head.head;
 
@@ -670,7 +681,7 @@ static void movementTick() {
 
 	// prepare command
 	UdpCmdPacket cmd;
-	cmd.command = CI_INTERPOLATE; 
+	cmd.command = CI_INTERPOLATE;
 	cmd.length = cmd.CommandLen();
 	cmd.SetPeriod(MS_PER_MOVEMENT_TICK * 3);
 	cmd.SetTargetCountWrite(++targetWrite);
@@ -707,7 +718,7 @@ static void movementManager(void* arg) {
 			// receivedReturn = true;							// NOTE would packet lost?
 			continue;
 		}
-		if (newMovementControlMode != movementControlMode && newMovementControlMode == true) {	// get current pose and count write when switch to movement control mode 
+		if (newMovementControlMode != movementControlMode && newMovementControlMode == true) {	// get current pose and count write when switch to movement control mode
 			// get the new current pose
 			calibrateCurrentPose = true;
 			movementQueryInterpolateState();				// block until CI_INTERPOLATE returns
@@ -753,7 +764,7 @@ static void movementManager(void* arg) {
 static void IRAM_ATTR onTimerTriggered(void* arg) {
 	TIMERG0.int_clr_timers.t0 = 1;
 	TIMERG0.hw_timer[MOVEMENT_MANAGER_TIMER_IDX].config.alarm_en = TIMER_ALARM_EN;
-	
+
 	xSemaphoreGive(intervalSemaphore);
 }
 
@@ -820,7 +831,7 @@ void onChangeControlMode(CommandId newCommand) {
 		else {												// quit movementControlMode
 			pauseInterpolate();
 			movementControlMode = newMovementControlMode;
-		}						
+		}
 	}
 }
 
@@ -838,9 +849,20 @@ bool canAddKeyframe(MovementKeyframe& keyframe) {
 	for (int i=0; i<keyframe.motorCount; i++) {
 		if (motorId[i] >= allBoards.GetNTotalMotor()) return false;	// wrong motor id
 	}
-	
+
+	// check movement
+	auto movementInfo = getMovementInfo(getMovementId(keyframe.id));
+	if (movementInfo == movementInfos.end() && movementInfo->paused == true) return false;	// can not add to paused queue
+
 	// check ref
-	if (keyframe.refId && !getNode(keyframe.refMotorId, keyframe.id)) return false;	// can not find reference node
+	if (getMovementId(keyframe.refId)) {		// have ref to specified keyframe
+		if (!getNode(keyframe.refMotorId, keyframe.id)) return false;	// can not find reference motor keyframe
+	}
+	else if (getKeyframeId(keyframe.refId)) {	// have ref to specified movement
+		uint8_t refMovementId = getKeyframeId(keyframe.refId);	// NOTE not wrong code, just the encoding way is strange
+		auto refMovementInfo = getMovementInfo(refMovementId);
+		if (refMovementInfo == movementInfos.end() || refMovementInfo->paused == true) return false;	// not such movement or its paused
+	}
 
 	return true;
 }
@@ -859,10 +881,17 @@ void addKeyframe(MovementKeyframe& keyframe) {
 		node->next = NULL;
 
 		// add node
-		if (!keyframe.refId) addNodeDefault(keyframe.motorId[i], node, true);
+		if (!getMovementId(keyframe.refId)) addNodeDefault(keyframe.motorId[i], node, true);	// add after last node with same movement id
 		else {
-			MotorKeyframeNode* refNode = getNode(keyframe.motorId[i], keyframe.id);
-			addNodeAtTime(keyframe.motorId[i], node, true, refNode->start + keyframe.timeOffset);
+			if (!getKeyframeId(keyframe.refId)) {	// add to start time of specified keyframe
+				MotorKeyframeNode* refNode = getNode(keyframe.refMotorId, keyframe.id);
+				addNodeAtTime(keyframe.motorId[i], node, true, refNode->start + keyframe.timeOffset);
+			}
+			else {									// add to end time of the last keyframe of specified movement
+				uint8_t refMovementId = getKeyframeId(keyframe.refId);	// NOTE not wrong code, just the encoding way is strange
+				MotorKeyframeNode* refNode = getMovementLastNode(keyframe.refMotorId, refMovementId);
+				addNodeAtTime(keyframe.motorId[i], node, false, refNode->end + keyframe.timeOffset);
+			}
 		}
 	}
 
@@ -1076,13 +1105,13 @@ void queryInterpolateState(void* payload) {
 /////////////////////////////////////////// api for execute and return packet ///////////////////////////////////////////////
 static void decodeKeyframe(const void* movement_command_data, MovementKeyframe& keyframe) {
 	char* p = (char*)movement_command_data;
-	
+
 	keyframe.id = *(uint16_t*)p; p += 2;
 	keyframe.motorCount = *(uint8_t*)p; p += 1;
 	keyframe.motorId.clear(); keyframe.motorId.reserve(keyframe.motorCount);
 	for(int i=0; i<keyframe.motorCount; i++){
 		keyframe.motorId.push_back(*(uint8_t*)p); p += 1;
-		
+
 	}
 	keyframe.period = (*(uint16_t*)p) / MS_PER_MOVEMENT_TICK; p += 2;	// convert to movement tick
 	keyframe.pose.clear(); keyframe.pose.reserve(keyframe.motorCount);
