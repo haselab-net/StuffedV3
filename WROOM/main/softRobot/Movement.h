@@ -59,7 +59,7 @@ extern vector<MovementInfoNode> movementInfos;
 
 vector<MovementInfoNode>::iterator getMovementInfo(uint8_t movementId);
 
-///////////////////////////////////////// data structure for WROOM interface ///////////////////////////// 
+///////////////////////////////////////// data structure for WROOM interface /////////////////////////////
 
 #define MS_PER_MOVEMENT_TICK 50				// 50 ms = 1 movement tick
 
@@ -71,7 +71,9 @@ public:
 	uint16_t period;			// note that 1. the sum of period in list could not larger than UINT16_MAX (or the sorting might fail); 2. time in movement tick, not ms
 	vector<int32_t> pose;			// the poses correspond with motorIds
 
-	uint16_t refId;             // 0 if no ref (movement id should start from 1)
+	uint16_t refId;             // 8-bit movement id (start from 1) + 8-bit keyframe id
+								// NOTE When Movement id == 0: If keyframe id ==	0, NO reference
+								// 													else, after movement id = keyframe id
 	uint8_t refMotorId;
 	short timeOffset;
 };
