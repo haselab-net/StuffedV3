@@ -1,18 +1,18 @@
 console.log("defaule main.js");
 
-motor.setMovement(motor.MovementOption.play, motor.movementDecoder("default1\n4 1 4000\n3 0\n810 2211\n834 0\n797 2005\n810 63"))
-motor.playAfter(motor.movementDecoder("default2\n4 1 4000\n3 1\n810 2211\n834 0\n797 2005\n810 63"), motor.movementDecoder("default1\n4 1 4000\n3 0\n810 2211\n834 0\n797 2005\n810 63"))
-
-// var movement_1 = motor.movementDecoder("default1\n4 1 6005\n3 0\n842 2276\n1158 397\n2011 2765\n1994 1246")
-// var movement_2 = motor.movementDecoder("default2\n4 1 6005\n3 1\n842 2276\n1158 397\n2011 2765\n1994 1246")
-// loops.forever(function () {
-//     motor.setMovement(motor.MovementOption.play, movement_1)
-//     loops.pause(1000)
-// })
-// callbacks.onStartTouch(1, 200, function () {
-//     console.log("on touch");
-//     motor.setMovement(motor.MovementOption.play, movement_2)
-// })
+loops.forever(function () {
+    if (motor.isMovementState(movement1, motor.MovementState.playing)) {
+        console.log("playing")
+    } else {
+        console.log("not playing")
+    }
+    loops.pause(100)
+})
+var movement1 = motor.movementDecoder("default1\n4 1 4000\n3 0\n810 2211\n834 0\n797 2005\n810 63");
+for (var i = 0; i < 4; i++) {
+    motor.setMovement(motor.MovementOption.play, movement1)
+}
+// motor.playAfter(motor.movementDecoder("default2\n4 1 4000\n3 1\n810 2211\n834 0\n797 2005\n810 63"), motor.movementDecoder("default1\n4 1 4000\n3 0\n810 2211\n834 0\n797 2005\n810 63"))
 
 // iot.registerMQTTEvent("hello", function (value1, value2, value3) {
 //     console.log("hello");
@@ -31,7 +31,7 @@ motor.playAfter(motor.movementDecoder("default2\n4 1 4000\n3 1\n810 2211\n834 0\
 //     )
 // })
 
-iot.startWaitingMQTTEventDefault();
+// iot.startWaitingMQTTEventDefault();
 // iot.startWaitingMQTTEvent("192.168.91.3", 5000)
 
 // loops.pause(30000)

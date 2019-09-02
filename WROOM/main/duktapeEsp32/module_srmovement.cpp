@@ -157,7 +157,7 @@ extern "C" duk_ret_t ModuleSRMovement(duk_context *ctx) {
     waitResponse = false;
 
     ADD_FUNCTION("send", send, 1);
-    ADD_FUNCTION("isMovementPlaying", isMovementState, 2);
+    ADD_FUNCTION("isMovementState", isMovementState, 2);
 
     return 0;
 }
