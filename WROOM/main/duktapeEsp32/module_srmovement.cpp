@@ -85,6 +85,12 @@ static duk_ret_t send(duk_context *ctx) {
         jsRobotState.write_unlock();
         break;
     }
+    case CI_M_CLEAR_PAUSED: {
+        jsRobotState.write_lock();
+        jsRobotState.movement.resume(movementId);
+        jsRobotState.write_unlock();
+        break;
+    }
     default:
         break;
     }
@@ -133,7 +139,7 @@ void onSrMovementReceiveCIUMovement(const void *movementData) {
     case CI_M_ADD_KEYFRAME:
         waitResponse = false;
         break;
-    
+
     default:
         break;
     }

@@ -20,6 +20,10 @@ void JSMovementState::resume(uint8_t movementId) {
     }
 }
 
+void JSMovementState::clearPaused() {
+    pausedMovements.clear();
+}
+
 bool JSMovementState::isPaused(uint8_t movementId) {
     for (int i=0; i<pausedMovements.size(); i++) {
         if (pausedMovements[i] == movementId) return true;

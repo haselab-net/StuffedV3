@@ -18,6 +18,7 @@ class JSMovementState {
 
     void pause(uint8_t movementId);
     void resume(uint8_t movementId);
+    void clearPaused();
     bool isPaused(uint8_t movementId);
 };
 
@@ -30,7 +31,7 @@ struct JSMotorState {
     int16_t controlB;
     int16_t controlA;
     int16_t torqueMin;
-    int16_t torqueMax; 
+    int16_t torqueMax;
 };
 
 class JSRobotState {
