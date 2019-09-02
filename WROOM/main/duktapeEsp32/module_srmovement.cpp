@@ -71,6 +71,12 @@ static duk_ret_t send(duk_context *ctx) {
         duk_get_prop_string(ctx, -1, "movementId");
         uint8_t movementId = duk_get_int(ctx, -1);
         duk_pop(ctx);
+
+        // check movement state
+        vector<MovementInfoNode>::iterator it = getMovementInfo(movementId);
+        if (it == movementInfos.end() || it->isPaused) return false;
+
+        // update movement state
         jsRobotState.write_lock();
         jsRobotState.movement.pause(movementId);
         jsRobotState.write_unlock();
@@ -80,6 +86,12 @@ static duk_ret_t send(duk_context *ctx) {
         duk_get_prop_string(ctx, -1, "movementId");
         uint8_t movementId = duk_get_int(ctx, -1);
         duk_pop(ctx);
+
+        // check movement state
+        vector<MovementInfoNode>::iterator it = getMovementInfo(movementId);
+        if (it == movementInfos.end() || !it->isPaused) return false;
+
+        // update movement state
         jsRobotState.write_lock();
         jsRobotState.movement.resume(movementId);
         jsRobotState.write_unlock();
