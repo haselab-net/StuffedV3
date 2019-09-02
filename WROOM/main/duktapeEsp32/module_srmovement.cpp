@@ -40,12 +40,7 @@ static bool canAddKeyframe(duk_context * ctx) {
     if (it != movementInfos.end() && it->keyframeCount >= MAX_MOVEMENT_KEYFRAME_COUNT) return false;
 
     // check if paused
-    jsRobotState.read_lock();
-    if (jsRobotState.movement.isPaused(movementId)) {
-        jsRobotState.read_unlock();
-        return false;
-    }
-    jsRobotState.read_unlock();
+    if (it != movementInfos.end() && it->paused) return false;
 
     return true;
 }
@@ -76,10 +71,6 @@ static duk_ret_t send(duk_context *ctx) {
         vector<MovementInfoNode>::iterator it = getMovementInfo(movementId);
         if (it == movementInfos.end() || it->paused) return false;
 
-        // update movement state
-        jsRobotState.write_lock();
-        jsRobotState.movement.pause(movementId);
-        jsRobotState.write_unlock();
         break;
     }
     case CI_M_RESUME_MOV: {
@@ -91,10 +82,6 @@ static duk_ret_t send(duk_context *ctx) {
         vector<MovementInfoNode>::iterator it = getMovementInfo(movementId);
         if (it == movementInfos.end() || !it->paused) return false;
 
-        // update movement state
-        jsRobotState.write_lock();
-        jsRobotState.movement.resume(movementId);
-        jsRobotState.write_unlock();
         break;
     }
     default:
@@ -109,24 +96,41 @@ static duk_ret_t send(duk_context *ctx) {
     return 1;
 }
 
-// export function isMovementPlaying(movement: Movement): boolean {
-static duk_ret_t isMovementPlaying(duk_context* ctx) {
-    // .. movement
+enum MovementState {
+    playing = 0,
+    paused = 1,
+    finished = 2
+};
 
-    duk_get_prop_string(ctx, -1, "movementId");
+// export function isMovementState(movement: Movement, state: MovementState): boolean {
+static duk_ret_t isMovementState(duk_context* ctx) {
+    // .. movement state
+
+    duk_get_prop_string(ctx, -2, "movementId");
     duk_int_t movementId = duk_get_int(ctx, -1);
     duk_pop(ctx);
-    // .. movement
+    // .. movement state
 
-    duk_pop(ctx);
+    MovementState state = (MovementState)duk_get_int(ctx, -1);
+    // .. movement state
+
+    duk_pop_2(ctx);
     // ..
 
     vector<MovementInfoNode>::iterator it = getMovementInfo(movementId);
-    if (it == movementInfos.end()) duk_push_false(ctx);
-    else {
-        bool paused = it->paused;
-        if (paused) duk_push_false(ctx);
-        else duk_push_true(ctx);
+    switch (state) {
+        case MovementState::playing:
+            if (it != movementInfos.end() && !it->paused) duk_push_true(ctx);
+            else duk_push_false(ctx);
+            break;
+        case MovementState::paused:
+            if (it != movementInfos.end() && it->paused) duk_push_true(ctx);
+            else duk_push_false(ctx);
+            break;
+        case MovementState::finished:
+            if (it == movementInfos.end()) duk_push_true(ctx);
+            else duk_push_false(ctx);
+            break;
     }
 
     return 1;
@@ -153,7 +157,7 @@ extern "C" duk_ret_t ModuleSRMovement(duk_context *ctx) {
     waitResponse = false;
 
     ADD_FUNCTION("send", send, 1);
-    ADD_FUNCTION("isMovementPlaying", isMovementPlaying, 1);
+    ADD_FUNCTION("isMovementPlaying", isMovementState, 2);
 
     return 0;
 }

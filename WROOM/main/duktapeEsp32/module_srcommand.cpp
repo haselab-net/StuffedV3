@@ -238,7 +238,7 @@ static duk_ret_t requireBoardInfo(duk_context* ctx) {
     // print packet
     printDTPacket(cmd->bytes+2, cmd->length);
     #endif
-    
+
     //  send the packet
 	udpCom.WriteCommand();
 
@@ -255,7 +255,7 @@ static duk_ret_t requireSensorInfo(duk_context* ctx) {
     // print packet
     printDTPacket(cmd->bytes+2, cmd->length);
     #endif
-    
+
     //  send the packet
 	udpCom.WriteCommand();
 
@@ -567,7 +567,7 @@ static duk_ret_t resetSensor(duk_context* ctx) {
     // print packet
     printDTPacket(cmd->bytes+2, cmd->length);
     #endif
-    
+
     //  send the packet
 	udpCom.WriteCommand();
 
@@ -604,7 +604,7 @@ static void movementAddKeyframe(duk_context* ctx, UdpCmdPacket* cmd) {
     // little endian
     pushCtx2PayloadNum<uint8_t>(ctx, payload, "refKeyframeId");
     pushCtx2PayloadNum<uint8_t>(ctx, payload, "refMovementId");
-    
+
     pushCtx2PayloadNum<uint8_t>(ctx, payload, "refMotorId");
     pushCtx2PayloadNum<short>(ctx, payload, "timeOffset");
 
@@ -673,7 +673,7 @@ void setMovement(duk_context* ctx) {
     // ... obj
     duk_require_object(ctx, -1);
 
-    //bool success = 
+    //bool success =
     duk_get_prop_string(ctx, -1, "movementCommandId");
     uint8_t movementCommandId = duk_get_int(ctx, -1);
     duk_pop(ctx);
@@ -691,8 +691,8 @@ void setMovement(duk_context* ctx) {
 
     switch (movementCommandId) {
         case CI_M_ADD_KEYFRAME:
-            movementAddKeyframe(ctx, cmd); 
-            printf("=== duktape add keyframe send === \n"); 
+            movementAddKeyframe(ctx, cmd);
+            printf("=== duktape add keyframe send === \n");
             break;
         case CI_M_PAUSE_MOV:
             movementPauseMov(ctx, cmd);
@@ -709,7 +709,7 @@ void setMovement(duk_context* ctx) {
         case CI_M_CLEAR_ALL:
         case CI_M_QUERY:
             break;
-        
+
         default:
             ESP_LOGE(tag, "setMovement: wrong movementCommandId - %i", movementCommandId);
             return;
@@ -741,7 +741,7 @@ static duk_ret_t registerCallback(duk_context* ctx) {
     duk_pop(ctx);
 
     LOGI("register callback %s", name);
-    
+
     return 0;
 }
 
@@ -779,7 +779,7 @@ static void putPropCur(duk_context* ctx, UdpRetPacket& ret) {
         duk_put_prop_index(ctx, -2, i);
     }
     duk_put_prop_string(ctx, -2, "current");
-} 
+}
 static void putPropFor(duk_context* ctx, UdpRetPacket& ret) {
     duk_push_array(ctx);
     for(size_t i=0; i<allBoards.GetNTotalForce(); i++){
@@ -787,7 +787,7 @@ static void putPropFor(duk_context* ctx, UdpRetPacket& ret) {
         duk_put_prop_index(ctx, -2, i);
     }
     duk_put_prop_string(ctx, -2, "force");
-} 
+}
 static void putPropTou(duk_context* ctx, UdpRetPacket& ret) {
     duk_push_array(ctx);
     for(size_t i=0; i<allBoards.GetNTotalTouch(); i++){
@@ -795,7 +795,7 @@ static void putPropTou(duk_context* ctx, UdpRetPacket& ret) {
         duk_put_prop_index(ctx, -2, i);
     }
     duk_put_prop_string(ctx, -2, "touch");
-} 
+}
 // function onReceiveCIBoardinfo(data: {systemId: number, nTarget: number, nMotor:number, nCurrent: number, nForces:number, nTouch: number, macAddress: ArrayBuffer});
 int pushDataCIBoardinfo(duk_context* ctx, void* data) {
     UdpRetPacket& ret = *new UdpRetPacket;
@@ -947,7 +947,7 @@ int pushDataCIUMovement(duk_context* ctx, void* data) {
     }
 
     free(data);
-    
+
     return 1;
 }
 void onReceiveCIUMovement(void* data) {
@@ -962,11 +962,6 @@ void onReceiveCIUMovement(void* data) {
     switch(movementCommandId) {
         case CI_M_ADD_KEYFRAME:
             payload = shiftPointer(payload, 3);
-        case CI_M_QUERY:
-            jsRobotState.write_lock();
-            popPayloadNumArray(payload, jsRobotState.movement.nOccupied, allBoards.GetNTotalMotor());
-            jsRobotState.write_unlock();
-            break;
         default:
             break;
     }
@@ -1007,7 +1002,7 @@ void commandMessageHandler(UdpRetPacket& ret) {
         }
         case CI_DIRECT: {
             onReceiveCIDirect(ret);
-            
+
             break;
         }
         case CI_INTERPOLATE: {
@@ -1028,7 +1023,7 @@ void commandMessageHandler(UdpRetPacket& ret) {
                 pushDataCIInterpolate,
                 data
             );
-            
+
             break;
         }
         case CI_SETPARAM: {
@@ -1046,7 +1041,7 @@ void commandMessageHandler(UdpRetPacket& ret) {
                 pushDataCISetparam,
                 NULL
             );
-            
+
             break;
         }
         case CI_RESET_SENSOR: {
@@ -1064,18 +1059,18 @@ void commandMessageHandler(UdpRetPacket& ret) {
                 pushDataCIResetsensor,
                 NULL
             );
-            
+
             break;
         }
         case CIU_MOVEMENT: {
             onReceiveCIUMovement(ret.bytes);
-            
+
             break;
         }
         default:
             break;
     }
-    
+
     //  ctx is assigned dukEventHandleTask() in duktape_task.c
     //  duk_pop_n(ctx, duk_get_top(ctx)-top);
 }

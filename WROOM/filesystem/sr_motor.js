@@ -219,11 +219,14 @@ var motor;
         });
     }
     motor_1.clearPausedMovements = clearPausedMovements;
-    function isMovementPlaying(movement) {
-        return softrobot.movement.movementSender.isMovementPlaying(movement);
-    }
-    motor_1.isMovementPlaying = isMovementPlaying;
+    (function (MovementState) {
+        MovementState[MovementState["playing"] = 0] = "playing";
+        MovementState[MovementState["paused"] = 1] = "paused";
+        MovementState[MovementState["finished"] = 2] = "finished";
+    })(MovementState = motor_1.MovementState || (motor_1.MovementState = {}));
+    motor_1.isMovementState = softrobot.movement.movementSender.isMovementState;
     function playAfter(movement, refMovement) {
+        if (!motor_1.isMovementState(movement, motor_1.MovementState.playing)) return;
         for (var keyframeId = 0; keyframeId < movement.keyframes.length; keyframeId++) {
             var data = {
                 movementCommandId: softrobot.command.CommandIdMovement.CI_M_ADD_KEYFRAME,

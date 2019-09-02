@@ -1,39 +1,8 @@
 #include "module_device.h"
 
-JSMovementState::JSMovementState(AllBoards& allBoards) {
-    nOccupied.resize(allBoards.GetNTotalMotor(), 0);
-}
-
-void JSMovementState::pause(uint8_t movementId) {
-    for (int i=0; i<pausedMovements.size(); i++) {
-        if (pausedMovements[i] == movementId) return;
-    }
-    pausedMovements.push_back(movementId);
-}
-
-void JSMovementState::resume(uint8_t movementId) {
-    for (int i=0; i<pausedMovements.size(); i++) {
-        if (pausedMovements[i] == movementId) {
-            pausedMovements.erase(pausedMovements.begin() + i);
-            return;
-        }
-    }
-}
-
-void JSMovementState::clearPaused() {
-    pausedMovements.clear();
-}
-
-bool JSMovementState::isPaused(uint8_t movementId) {
-    for (int i=0; i<pausedMovements.size(); i++) {
-        if (pausedMovements[i] == movementId) return true;
-    }
-    return false;
-}
-
 JSRobotState jsRobotState(allBoards);
 
-JSRobotState::JSRobotState(AllBoards& allBoards) : movement(allBoards)  {
+JSRobotState::JSRobotState(AllBoards& allBoards)  {
     struct JSMotorState template_motor_state = {
         0, 0, -5000, 5000, 4096, 2048, 0, -1024, 1024
     };

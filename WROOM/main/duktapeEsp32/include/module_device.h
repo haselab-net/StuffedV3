@@ -9,19 +9,6 @@
 #include <freertos/semphr.h>
 using namespace std;
 
-class JSMovementState {
-    public:
-    vector<uint8_t> nOccupied;
-    vector<uint8_t> pausedMovements;
-
-    JSMovementState(AllBoards& allBoards);
-
-    void pause(uint8_t movementId);
-    void resume(uint8_t movementId);
-    void clearPaused();
-    bool isPaused(uint8_t movementId);
-};
-
 struct JSMotorState {
     int32_t pose;
     int16_t velocity;
@@ -40,7 +27,6 @@ class JSRobotState {
     vector<int16_t> current;
     vector<int16_t> force;
     vector<int16_t> touch;
-    class JSMovementState movement;
 
     JSRobotState(AllBoards& allBoards);
     ~JSRobotState();
