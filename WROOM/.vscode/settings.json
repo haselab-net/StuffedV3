@@ -98,7 +98,10 @@
         "dirent.h": "c",
         "module_callbacks.h": "c",
         "movement.h": "c",
-        "nvs_flash.h": "c"
+        "nvs_flash.h": "c",
+        "forward_list": "cpp",
+        "rope": "cpp",
+        "slist": "cpp"
     },
     "terminal.integrated.shell.windows": "c:\\msys32\\usr\\bin\\bash.exe",
     "terminal.integrated.env.windows": {

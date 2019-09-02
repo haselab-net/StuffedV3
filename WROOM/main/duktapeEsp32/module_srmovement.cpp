@@ -74,7 +74,7 @@ static duk_ret_t send(duk_context *ctx) {
 
         // check movement state
         vector<MovementInfoNode>::iterator it = getMovementInfo(movementId);
-        if (it == movementInfos.end() || it->isPaused) return false;
+        if (it == movementInfos.end() || it->paused) return false;
 
         // update movement state
         jsRobotState.write_lock();
@@ -89,15 +89,9 @@ static duk_ret_t send(duk_context *ctx) {
 
         // check movement state
         vector<MovementInfoNode>::iterator it = getMovementInfo(movementId);
-        if (it == movementInfos.end() || !it->isPaused) return false;
+        if (it == movementInfos.end() || !it->paused) return false;
 
         // update movement state
-        jsRobotState.write_lock();
-        jsRobotState.movement.resume(movementId);
-        jsRobotState.write_unlock();
-        break;
-    }
-    case CI_M_CLEAR_PAUSED: {
         jsRobotState.write_lock();
         jsRobotState.movement.resume(movementId);
         jsRobotState.write_unlock();
@@ -130,9 +124,7 @@ static duk_ret_t isMovementPlaying(duk_context* ctx) {
     vector<MovementInfoNode>::iterator it = getMovementInfo(movementId);
     if (it == movementInfos.end()) duk_push_false(ctx);
     else {
-        jsRobotState.read_lock();
-        bool paused = jsRobotState.movement.isPaused(movementId);
-        jsRobotState.read_unlock();
+        bool paused = it->paused;
         if (paused) duk_push_false(ctx);
         else duk_push_true(ctx);
     }

@@ -63,36 +63,6 @@ var softrobot;
             return MotorState;
         }());
         device.MotorState = MotorState;
-        var MovementState = (function () {
-            function MovementState() {
-                this.initialize();
-            }
-            MovementState.prototype.initialize = function () {
-                this.nOccupied = new Array(device.robotInfo.nMotor);
-                for (var index = 0; index < this.nOccupied.length; index++) {
-                    this.nOccupied[index] = 0;
-                }
-                this.pausedMovements = [];
-            };
-            MovementState.prototype.isPaused = function (movementId) {
-                for (var i = 0; i < this.pausedMovements.length; i++) {
-                    if (this.pausedMovements[i] == movementId)
-                        return i;
-                }
-                return -1;
-            };
-            MovementState.prototype.pause = function (movementId) {
-                if (this.isPaused(movementId) < 0)
-                    this.pausedMovements.push(movementId);
-            };
-            MovementState.prototype.resume = function (movementId) {
-                var id = this.isPaused(movementId);
-                if (id >= 0)
-                    this.pausedMovements.splice(id, 1);
-            };
-            return MovementState;
-        }());
-        device.MovementState = MovementState;
         var RobotState = (function () {
             function RobotState() {
                 this.initialize();
@@ -110,7 +80,6 @@ var softrobot;
                 for (var index = 0; index < this.force.length; index++) {
                     this.force[index] = 0;
                 }
-                this.movementState = new MovementState();
             };
             RobotState.prototype.getPropArray = function (name, array) {
                 if (!(name in array[0])) {
@@ -175,8 +144,6 @@ var softrobot;
                 device.robotState.current = resizeArray(device.robotState.current, device.robotInfo.nCurrent);
             if (device.robotState.force.length != device.robotInfo.nForces)
                 device.robotState.force = resizeArray(device.robotState.force, device.robotInfo.nForces);
-            if (device.robotState.movementState.nOccupied.length != device.robotInfo.nMotor)
-            device.robotState.movementState.nOccupied = resizeArray(device.robotState.movementState.nOccupied, device.robotInfo.nMotor);
         }
         device.checkRobotState = checkRobotState;
     })(device = softrobot.device || (softrobot.device = {}));
