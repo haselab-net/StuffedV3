@@ -856,7 +856,7 @@ bool canAddKeyframe(MovementKeyframe& keyframe) {
 
 	// check ref
 	if (getMovementId(keyframe.refId)) {		// have ref to specified keyframe
-		if (!getNode(keyframe.refMotorId, keyframe.id)) return false;	// can not find reference motor keyframe
+		if (!getNode(keyframe.refMotorId, keyframe.refId)) return false;	// can not find reference motor keyframe
 	}
 	else if (getKeyframeId(keyframe.refId)) {	// have ref to specified movement
 		uint8_t refMovementId = getKeyframeId(keyframe.refId);	// NOTE not wrong code, just the encoding way is strange
@@ -885,8 +885,9 @@ void addKeyframe(MovementKeyframe& keyframe) {
 		if (keyframe.refId == 0) addNodeDefault(keyframe.motorId[i], node, true);	// add after last node with same movement id
 		else {
 			if (getMovementId(keyframe.refId) != 0) {	// add to start time of specified keyframe
-				MotorKeyframeNode* refNode = getNode(keyframe.refMotorId, keyframe.id);
+				MotorKeyframeNode* refNode = getNode(keyframe.refMotorId, keyframe.refId);
 				addNodeAtTime(keyframe.motorId[i], node, true, refNode->start + keyframe.timeOffset);
+				printAllMotorKeyframes();
 			}
 			else {									// add to end time of the last keyframe of specified movement
 				uint8_t refMovementId = getKeyframeId(keyframe.refId);	// NOTE not wrong code, just the encoding way is strange
