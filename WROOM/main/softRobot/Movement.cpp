@@ -351,6 +351,7 @@ static void addNodeAtTime(uint8_t motorId, MotorKeyframeNode* const node, bool r
 		}
 	}
 	else {
+		minimum = minTime(head.head->end, minimum, head.head->start) == head.head->end ? minimum : head.head->start;
 		MotorKeyframeNode* tmp = head.head;
 		if (minTime(tmp->start, abTime, minimum) == abTime) {		// add to first
 			head.head = node;
