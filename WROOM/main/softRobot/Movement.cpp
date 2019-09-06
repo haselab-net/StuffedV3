@@ -1123,7 +1123,7 @@ static void decodeKeyframe(const void* movement_command_data, MovementKeyframe& 
 	}
 	keyframe.refId = *(uint16_t*)p; p += 2;
 	keyframe.refMotorId = *(uint8_t*)p; p += 1;
-	keyframe.timeOffset = *(short*)p; p += 2;
+	keyframe.timeOffset = *(short*)p / MS_PER_MOVEMENT_TICK; p += 2;
 
 	#if MOVEMENT_DEBUG
 		printKeyframe(keyframe);
