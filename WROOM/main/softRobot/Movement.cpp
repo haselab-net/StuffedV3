@@ -843,7 +843,7 @@ extern "C" void movementAfterStopJSTask() {
 
 /////////////////////////////////////////// api for command packet ///////////////////////////////////////////////
 
-bool canAddKeyframe(MovementKeyframe& keyframe) {
+bool canAddKeyframe(MovementKeyframe& keyframe, bool strict) {
 	vector<uint8_t> &motorId = keyframe.motorId;
 
 	// check motor
@@ -854,6 +854,8 @@ bool canAddKeyframe(MovementKeyframe& keyframe) {
 	// check movement
 	auto movementInfo = getMovementInfo(getMovementId(keyframe.id));
 	if (movementInfo != movementInfos.end() && movementInfo->paused == true) return false;	// can not add to paused queue
+
+	if (!strict) return true;
 
 	// check ref
 	if (getMovementId(keyframe.refId)) {		// have ref to specified keyframe
@@ -869,7 +871,7 @@ bool canAddKeyframe(MovementKeyframe& keyframe) {
 	return true;
 }
 
-void addKeyframe(MovementKeyframe& keyframe) {
+void addKeyframe(MovementKeyframe& keyframe, bool strict) {
 	if (keyframe.period == 0) return;
 
 	xSemaphoreTake(tickSemaphore, portMAX_DELAY);
@@ -882,8 +884,11 @@ void addKeyframe(MovementKeyframe& keyframe) {
 		node->end = keyframe.period;
 		node->next = NULL;
 
+		// add default if ref failed in non strict mode
+		bool useFallback = !strict && !canAddKeyframe(keyframe, true);
+
 		// add node
-		if (keyframe.refId == 0) addNodeDefault(keyframe.motorId[i], node, true);	// add after last node with same movement id
+		if (keyframe.refId == 0 || useFallback) addNodeDefault(keyframe.motorId[i], node, true);	// add after last node with same movement id
 		else {
 			if (getMovementId(keyframe.refId) != 0) {	// add to start time of specified keyframe
 				MotorKeyframeNode* refNode = getNode(keyframe.refMotorId, keyframe.refId);
@@ -1140,8 +1145,8 @@ void prepareRetAddKeyframe(const void* movement_command_data_rcv, void* movement
 	pushPayload(movement_command_data_ret, &keyframe.id, 2);
 	// success
 	uint8_t success = 0;
-	if (canAddKeyframe(keyframe)) {
-		addKeyframe(keyframe);
+	if (canAddKeyframe(keyframe, false)) {
+		addKeyframe(keyframe, false);
 		success = 1;
 		printf("add keyframe \n");
 	}
