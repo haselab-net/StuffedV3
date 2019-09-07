@@ -225,28 +225,72 @@ var motor;
         MovementState[MovementState["finished"] = 2] = "finished";
     })(MovementState = motor_1.MovementState || (motor_1.MovementState = {}));
     motor_1.isMovementState = softrobot.movement.movementSender.isMovementState;
-    function playAfter(movement, refMovement) {
-        if (!motor_1.isMovementState(movement, motor_1.MovementState.playing)) return;
-        for (var keyframeId = 0; keyframeId < movement.keyframes.length; keyframeId++) {
-            var data = {
-                movementCommandId: softrobot.command.CommandIdMovement.CI_M_ADD_KEYFRAME,
-                movementId: movement.movementId,
-                keyframeId: keyframeId,
-                motorCount: movement.motorIds.length,
-                motorId: movement.motorIds,
-                period: movement.keyframes[keyframeId].period,
-                pose: movement.keyframes[keyframeId].pose,
-                refMovementId: 0,
-                refKeyframeId: 0,
-                refMotorId: 0,
-                timeOffset: 0
-            };
-            if (keyframeId == 0) {
-                data.refKeyframeId = refMovement.movementId;
-                data.refMotorId = refMovement.motorIds[0];
+    (function (TimeRelationship) {
+        TimeRelationship[TimeRelationship["with"] = 0] = "with";
+        TimeRelationship[TimeRelationship["after"] = 1] = "after";
+    })(TimeRelationship = motor_1.TimeRelationship || (motor_1.TimeRelationship = {}));
+    function playRelativeToTime(movement, relationship, refMovement, offset) {
+        switch (relationship) {
+            case TimeRelationship.with: {
+                var timeOffset = offset;
+                var refKeyframeId = 0;
+                for (var keyframeId = 0; keyframeId < movement.keyframes.length; keyframeId++) {
+                    var data = {
+                        movementCommandId: softrobot.command.CommandIdMovement.CI_M_ADD_KEYFRAME,
+                        movementId: movement.movementId,
+                        keyframeId: keyframeId,
+                        motorCount: movement.motorIds.length,
+                        motorId: movement.motorIds,
+                        period: movement.keyframes[keyframeId].period,
+                        pose: movement.keyframes[keyframeId].pose,
+                        refMovementId: 0,
+                        refKeyframeId: 0,
+                        refMotorId: 0,
+                        timeOffset: 0
+                    };
+
+                    data.refMovementId = refMovement.movementId;
+                    data.refMotorId = refMovement.motorIds[0];
+
+                    while ((refKeyframeId < refMovement.keyframes.length - 1) && (timeOffset - refMovement.keyframes[refKeyframeId + 1].period >= 0)) {
+                        timeOffset -= refMovement.keyframes[refKeyframeId].period;
+                        refKeyframeId += 1;
+                    }
+                    data.refKeyframeId = refKeyframeId;
+                    data.timeOffset = timeOffset;
+
+                    movementAddKeyframe(data);
+
+                    timeOffset += data.period;
+                }
             }
-            movementAddKeyframe(data);
+            case TimeRelationship.after: {
+                var timeOffset = offset;
+                for (var keyframeId = 0; keyframeId < movement.keyframes.length; keyframeId++) {
+                    var data = {
+                        movementCommandId: softrobot.command.CommandIdMovement.CI_M_ADD_KEYFRAME,
+                        movementId: movement.movementId,
+                        keyframeId: keyframeId,
+                        motorCount: movement.motorIds.length,
+                        motorId: movement.motorIds,
+                        period: movement.keyframes[keyframeId].period,
+                        pose: movement.keyframes[keyframeId].pose,
+                        refMovementId: 0,
+                        refKeyframeId: 0,
+                        refMotorId: 0,
+                        timeOffset: 0
+                    };
+
+                    data.refKeyframeId = refMovement.movementId;
+                    data.refMotorId = refMovement.motorIds[0];
+                    data.timeOffset = timeOffset;
+
+                    movementAddKeyframe(data);
+
+                    timeOffset += data.period;
+                }
+            }
         }
     }
-    motor_1.playAfter = playAfter;
+    motor_1.playRelativeToTime = playRelativeToTime;
 })(motor || (motor = {}));
