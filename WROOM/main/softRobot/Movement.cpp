@@ -1145,8 +1145,8 @@ void prepareRetAddKeyframe(const void* movement_command_data_rcv, void* movement
 	pushPayload(movement_command_data_ret, &keyframe.id, 2);
 	// success
 	uint8_t success = 0;
-	if (canAddKeyframe(keyframe, false)) {
-		addKeyframe(keyframe, false);
+	if (canAddKeyframe(keyframe, true)) {
+		addKeyframe(keyframe, true);
 		success = 1;
 		printf("add keyframe \n");
 	}
