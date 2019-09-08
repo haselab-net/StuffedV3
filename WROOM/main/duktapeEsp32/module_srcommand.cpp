@@ -608,6 +608,8 @@ static void movementAddKeyframe(duk_context* ctx, UdpCmdPacket* cmd) {
     pushCtx2PayloadNum<uint8_t>(ctx, payload, "refMotorId");
     pushCtx2PayloadNum<short>(ctx, payload, "timeOffset");
 
+    pushCtx2PayloadNum<uint8_t>(ctx, payload, "flags");
+
     #ifdef PRINT_MOVEMENT_ADD_KEYFRAME
 
         printf("movement commandId: %i \n", *(uint8_t*)shiftPointer(cmd->data, 0));
