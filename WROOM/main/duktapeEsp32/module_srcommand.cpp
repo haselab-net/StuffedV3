@@ -608,7 +608,13 @@ static void movementAddKeyframe(duk_context* ctx, UdpCmdPacket* cmd) {
     pushCtx2PayloadNum<uint8_t>(ctx, payload, "refMotorId");
     pushCtx2PayloadNum<short>(ctx, payload, "timeOffset");
 
-    pushCtx2PayloadNum<uint8_t>(ctx, payload, "flags");
+    uint8_t flags = 0;
+    duk_get_prop_string(ctx, -1, "strictMode");
+    bool strictMode = duk_get_boolean(ctx, -1);
+    duk_pop(ctx);
+    flags |= (strictMode ? 1 : 0) << 7;
+
+    pushPayloadNum(payload, flags);
 
     #ifdef PRINT_MOVEMENT_ADD_KEYFRAME
 
@@ -630,6 +636,7 @@ static void movementAddKeyframe(duk_context* ctx, UdpCmdPacket* cmd) {
         printf("refMotorId: %i \n", *(uint8_t*)shiftPointer(cmd->data, 11));
         printf("timeOffset: %i \n", *(short*)shiftPointer(cmd->data, 12));
 
+        printf("flags: %o (octal) \n", *(uint8_t*)shiftPointer(cmd->data, 14));
     #endif
 }
 /* function movementPauseMov(data: {
