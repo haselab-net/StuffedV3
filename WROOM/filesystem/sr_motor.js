@@ -42,23 +42,28 @@ var motor;
         MovementAllOption[MovementAllOption["resume"] = 1] = "resume";
         MovementAllOption[MovementAllOption["clear"] = 2] = "clear";
     })(MovementAllOption = motor_1.MovementAllOption || (motor_1.MovementAllOption = {}));
+    function getKeyframe(movement, keyframeId) {
+        return {
+            movementCommandId: softrobot.command.CommandIdMovement.CI_M_ADD_KEYFRAME,
+            movementId: movement.movementId,
+            keyframeId: keyframeId,
+            motorCount: movement.motorIds.length,
+            motorId: movement.motorIds,
+            period: movement.keyframes[keyframeId].period,
+            pose: movement.keyframes[keyframeId].pose,
+            refMovementId: 0,
+            refKeyframeId: 0,
+            refMotorId: 0,
+            timeOffset: 0,
+            strictMode: true
+        };
+    }
+    motor_1.getKeyframe = getKeyframe;
     function setMovement(option, movement) {
         switch (option) {
             case MovementOption.play: {
                 for (var keyframeId = 0; keyframeId < movement.keyframes.length; keyframeId++) {
-                    var data = {
-                        movementCommandId: softrobot.command.CommandIdMovement.CI_M_ADD_KEYFRAME,
-                        movementId: movement.movementId,
-                        keyframeId: keyframeId,
-                        motorCount: movement.motorIds.length,
-                        motorId: movement.motorIds,
-                        period: movement.keyframes[keyframeId].period,
-                        pose: movement.keyframes[keyframeId].pose,
-                        refMovementId: 0,
-                        refKeyframeId: 0,
-                        refMotorId: 0,
-                        timeOffset: 0
-                    };
+                    var data = getKeyframe();
                     movementAddKeyframe(data);
                 }
                 break;
@@ -235,19 +240,7 @@ var motor;
                 var timeOffset = offset;
                 var refKeyframeId = 0;
                 for (var keyframeId = 0; keyframeId < movement.keyframes.length; keyframeId++) {
-                    var data = {
-                        movementCommandId: softrobot.command.CommandIdMovement.CI_M_ADD_KEYFRAME,
-                        movementId: movement.movementId,
-                        keyframeId: keyframeId,
-                        motorCount: movement.motorIds.length,
-                        motorId: movement.motorIds,
-                        period: movement.keyframes[keyframeId].period,
-                        pose: movement.keyframes[keyframeId].pose,
-                        refMovementId: 0,
-                        refKeyframeId: 0,
-                        refMotorId: 0,
-                        timeOffset: 0
-                    };
+                    var data = getKeyframe();
 
                     data.refMovementId = refMovement.movementId;
                     data.refMotorId = refMovement.motorIds[0];
@@ -267,19 +260,7 @@ var motor;
             case TimeRelationship.after: {
                 var timeOffset = offset;
                 for (var keyframeId = 0; keyframeId < movement.keyframes.length; keyframeId++) {
-                    var data = {
-                        movementCommandId: softrobot.command.CommandIdMovement.CI_M_ADD_KEYFRAME,
-                        movementId: movement.movementId,
-                        keyframeId: keyframeId,
-                        motorCount: movement.motorIds.length,
-                        motorId: movement.motorIds,
-                        period: movement.keyframes[keyframeId].period,
-                        pose: movement.keyframes[keyframeId].pose,
-                        refMovementId: 0,
-                        refKeyframeId: 0,
-                        refMotorId: 0,
-                        timeOffset: 0
-                    };
+                    var data = getKeyframe();
 
                     data.refKeyframeId = refMovement.movementId;
                     data.refMotorId = refMovement.motorIds[0];
