@@ -265,6 +265,7 @@ var motor;
                     data.refKeyframeId = refMovement.movementId;
                     data.refMotorId = refMovement.motorIds[0];
                     data.timeOffset = timeOffset;
+                    data.strictMode = false;
 
                     movementAddKeyframe(data);
 

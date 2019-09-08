@@ -650,7 +650,7 @@ void printKeyframe(const MovementKeyframe &keyframe) {
 	printf(" |-refId: %i \n", keyframe.refId);
 	printf(" |-refMotor: %i \n", keyframe.refMotorId);
 	printf(" |-offsetTime: %i \n", keyframe.timeOffset);
-	printf(" |-flags: %o (octal number) \n", keyframe.flags);
+	printf(" |-strictMode: %i \n", keyframe.strictMode);
 }
 
 void printAllMotorKeyframes() {
@@ -859,7 +859,7 @@ bool canAddKeyframe(MovementKeyframe& keyframe) {
 	auto movementInfo = getMovementInfo(getMovementId(keyframe.id));
 	if (movementInfo != movementInfos.end() && movementInfo->paused == true) return false;	// can not add to paused queue
 
-	if (!keyframe.strict) return true;
+	if (!keyframe.strictMode) return true;
 
 	// check ref
 	if (getMovementId(keyframe.refId)) {		// have ref to specified keyframe
@@ -889,8 +889,8 @@ void addKeyframe(MovementKeyframe& keyframe) {
 		node->next = NULL;
 
 		// add default if ref failed in non strict mode
-		bool useFallback = !keyframe.strict;
-		keyframe.strict = true;
+		bool useFallback = !keyframe.strictMode;
+		keyframe.strictMode = true;
 		useFallback = useFallback && !canAddKeyframe(keyframe);
 
 		// add node
@@ -1136,7 +1136,9 @@ static void decodeKeyframe(const void* movement_command_data, MovementKeyframe& 
 	keyframe.refId = *(uint16_t*)p; p += 2;
 	keyframe.refMotorId = *(uint8_t*)p; p += 1;
 	keyframe.timeOffset = *(short*)p / MS_PER_MOVEMENT_TICK; p += 2;
-	keyframe.flags = *(uint8_t*)p; p += 1;
+
+	uint8_t flags = *(uint8_t*)p; p += 1;
+	keyframe.strictMode = (flags & (0b10000000)) != 0;
 
 	#if MOVEMENT_DEBUG
 		printKeyframe(keyframe);
