@@ -177,6 +177,9 @@ static uint8_t getMovementId(uint16_t id) {
 static uint8_t getKeyframeId(uint16_t id) {
 	return (id & 0x00ff);
 }
+static bool getStrictMode(uint8_t flags) {
+	return (flags & 0b10000000) == 0b10000000;
+}
 
 static MotorKeyframeNode* getNode(uint8_t motorId, uint16_t id) {
 	MotorHead& head = motorHeads[motorId];
@@ -647,6 +650,7 @@ void printKeyframe(const MovementKeyframe &keyframe) {
 	printf(" |-refId: %i \n", keyframe.refId);
 	printf(" |-refMotor: %i \n", keyframe.refMotorId);
 	printf(" |-offsetTime: %i \n", keyframe.timeOffset);
+	printf(" |-flags: %o (octal number) \n", keyframe.flags);
 }
 
 void printAllMotorKeyframes() {
@@ -843,7 +847,7 @@ extern "C" void movementAfterStopJSTask() {
 
 /////////////////////////////////////////// api for command packet ///////////////////////////////////////////////
 
-bool canAddKeyframe(MovementKeyframe& keyframe, bool strict) {
+bool canAddKeyframe(MovementKeyframe& keyframe) {
 	vector<uint8_t> &motorId = keyframe.motorId;
 
 	// check motor
@@ -855,7 +859,7 @@ bool canAddKeyframe(MovementKeyframe& keyframe, bool strict) {
 	auto movementInfo = getMovementInfo(getMovementId(keyframe.id));
 	if (movementInfo != movementInfos.end() && movementInfo->paused == true) return false;	// can not add to paused queue
 
-	if (!strict) return true;
+	if (!keyframe.strict) return true;
 
 	// check ref
 	if (getMovementId(keyframe.refId)) {		// have ref to specified keyframe
@@ -871,7 +875,7 @@ bool canAddKeyframe(MovementKeyframe& keyframe, bool strict) {
 	return true;
 }
 
-void addKeyframe(MovementKeyframe& keyframe, bool strict) {
+void addKeyframe(MovementKeyframe& keyframe) {
 	if (keyframe.period == 0) return;
 
 	xSemaphoreTake(tickSemaphore, portMAX_DELAY);
@@ -885,7 +889,9 @@ void addKeyframe(MovementKeyframe& keyframe, bool strict) {
 		node->next = NULL;
 
 		// add default if ref failed in non strict mode
-		bool useFallback = !strict && !canAddKeyframe(keyframe, true);
+		bool useFallback = !keyframe.strict;
+		keyframe.strict = true;
+		useFallback = useFallback && !canAddKeyframe(keyframe);
 
 		// add node
 		if (keyframe.refId == 0 || useFallback) addNodeDefault(keyframe.motorId[i], node, true);	// add after last node with same movement id
@@ -1130,6 +1136,7 @@ static void decodeKeyframe(const void* movement_command_data, MovementKeyframe& 
 	keyframe.refId = *(uint16_t*)p; p += 2;
 	keyframe.refMotorId = *(uint8_t*)p; p += 1;
 	keyframe.timeOffset = *(short*)p / MS_PER_MOVEMENT_TICK; p += 2;
+	keyframe.flags = *(uint8_t*)p; p += 1;
 
 	#if MOVEMENT_DEBUG
 		printKeyframe(keyframe);
@@ -1145,8 +1152,8 @@ void prepareRetAddKeyframe(const void* movement_command_data_rcv, void* movement
 	pushPayload(movement_command_data_ret, &keyframe.id, 2);
 	// success
 	uint8_t success = 0;
-	if (canAddKeyframe(keyframe, true)) {
-		addKeyframe(keyframe, true);
+	if (canAddKeyframe(keyframe)) {
+		addKeyframe(keyframe);
 		success = 1;
 		printf("add keyframe \n");
 	}

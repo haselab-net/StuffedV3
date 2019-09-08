@@ -33,12 +33,12 @@ static const int NHEADER = UdpPacket::HEADERLEN/2;
 int UdpCmdPacket::CommandLen() {
 	switch (command)
 	{
-	case CI_BOARD_INFO:		//	
+	case CI_BOARD_INFO:		//
 		return NHEADER * 2;
 	//	case CI_SET_CMDLEN is only for uart
-	case CI_ALL:			// direct/interpolate/forceControl + mode 
-	 	return (NHEADER + allBoards.GetNTotalMotor()*3 + 2 + 1) * 2; 
-	case CI_SENSOR:			//	
+	case CI_ALL:			// direct/interpolate/forceControl + mode
+	 	return (NHEADER + allBoards.GetNTotalMotor()*3 + 2 + 1) * 2;
+	case CI_SENSOR:			//
 		return NHEADER * 2;
 	case CI_DIRECT:			//	pos vel
 		return (NHEADER + allBoards.GetNTotalMotor() * 2) * 2;
@@ -47,7 +47,7 @@ int UdpCmdPacket::CommandLen() {
 	case CI_INTERPOLATE: 	//	pos period targetCount
 		return (NHEADER + allBoards.GetNTotalMotor() + 2) * 2;
 	case CI_FORCE_CONTROL: 	//	pos JK period targetCount
-		return (NHEADER + allBoards.GetNTotalMotor() + allBoards.GetNTotalForce()*3 + 2) * 2;	
+		return (NHEADER + allBoards.GetNTotalMotor() + allBoards.GetNTotalForce()*3 + 2) * 2;
 	case CI_SETPARAM: 		//	KB, torque min/max, a, boardId ...
 		return (NHEADER + 1 + allBoards.GetNTotalMotor() * 2) * 2;
 	case CI_RESET_SENSOR:
@@ -62,8 +62,8 @@ int UdpCmdPacket::CommandLen() {
 		switch (*(uint8_t*)data)
 		{
 		case CI_M_ADD_KEYFRAME:
-			return NHEADER*2 + 1 + (2 + 1 + allBoards.GetNTotalMotor() + 2 + allBoards.GetNTotalMotor() * 4 + 2 + 1 + 2);
-		case CI_M_PAUSE_INTERPOLATE: 
+			return NHEADER*2 + 1 + (2 + 1 + allBoards.GetNTotalMotor() + 2 + allBoards.GetNTotalMotor() * 4 + 2 + 1 + 2 + 1);
+		case CI_M_PAUSE_INTERPOLATE:
 			return NHEADER*2 + 1;
 		case CI_M_RESUME_INTERPOLATE:
 			return NHEADER*2 + 1;
@@ -100,7 +100,7 @@ void UdpRetPacket::SetLength() {
 	case CI_CURRENT:			//	pos vel current
 		length = (NHEADER + allBoards.GetNTotalMotor() * 2 + allBoards.GetNTotalCurrent()) * 2; break;
 	case CI_INTERPOLATE:	//	pos targetCountReadMin targetCountReadMax tickMin tickMax
-	case CI_FORCE_CONTROL: 
+	case CI_FORCE_CONTROL:
 		length = (NHEADER + allBoards.GetNTotalMotor() + 4) * 2; break;
 	case CI_SETPARAM:
 	case CI_RESET_SENSOR:
@@ -144,7 +144,7 @@ void UdpRetPacket::ClearData() {
 	memset(data, 0, length - NHEADER);
 }
 void UdpRetPacket::SetAll(ControlMode controlMode, unsigned char targetCountReadMin, unsigned char targetCountReadMax,
-		unsigned short tickMin, unsigned short tickMax, 
+		unsigned short tickMin, unsigned short tickMax,
 		SDEC* pos, SDEC* vel, SDEC* current, SDEC* force, SDEC* touch)
 	{
 	assert(command == CI_ALL);
@@ -259,7 +259,7 @@ void UdpCom::ReceiveCommandFromUdp(struct udp_pcb * upcb, struct pbuf * top, con
 				if (recv->length != cmdLen) {
 					ESP_LOGE(Tag(), "cmdLen %d != recvLen %d in cmd:%d \n", cmdLen, recv->length, recv->command);
 				}
-				if (recv->command == CIU_GET_IPADDRESS 
+				if (recv->command == CIU_GET_IPADDRESS
 					|| (recv->command == CI_INTERPOLATE && recv->GetPeriod() == 0)
 					|| (recv->command == CI_FORCE_CONTROL && recv->GetPeriod() == 0) ){
 					/*if (recv->command == CI_INTERPOLATE){
@@ -281,7 +281,7 @@ void UdpCom::ReceiveCommandFromUdp(struct udp_pcb * upcb, struct pbuf * top, con
 				else {
 					int diff = (short)((short)commandCount - (short)recv->count);
 					if (countDiffMax < diff) countDiffMax = diff;
-					//	Command count is not matched. There was some packet losses or delay. 
+					//	Command count is not matched. There was some packet losses or delay.
 					ESP_LOGD(Tag(), "ignore packet with Count:%d!=%d, Cmd:%d", recv->count, commandCount+1, recv->command);
 				}
 				if (!recvs.WriteAvail()) {
@@ -358,7 +358,7 @@ void UdpCom::SendText(char* text, short errorlevel) {
 	send.count = commandCount;
 	send.data[0] = errorlevel;
 	int len = strlen(text);
-	const int MAXSTRLEN = UdpCmdPacket::MAXLEN - UdpCmdPacket::HEADERLEN - 2; 
+	const int MAXSTRLEN = UdpCmdPacket::MAXLEN - UdpCmdPacket::HEADERLEN - 2;
 	if (len > MAXSTRLEN) len = MAXSTRLEN;
 	send.data[1] = len;
 	send.SetLength();
@@ -439,13 +439,13 @@ void UdpCom::SendReturnUdp(UdpCmdPacket& recv) {
     	pbuf_free(pbStart); //De-allocate packet buffer
 		pbStart = NULL;
 		sendLen = 0;
-	}	
+	}
 	//	ESP_LOGI(Tag(), "Ret%d C%d L%d to %s\n", send.command, send.count, send.length, ipaddr_ntoa(&returnIp));
 }
 void UdpCom::ExecUdpCommand(UdpCmdPacket& recv) {
 	switch (recv.command)
 	{
-	case CI_BOARD_INFO: 
+	case CI_BOARD_INFO:
 		PrepareRetPacket(recv);
 		send.SetBoardInfo(allBoards.GetSystemId(), allBoards.GetNTarget(), allBoards.GetNTotalMotor(), allBoards.GetNTotalCurrent(), allBoards.GetNTotalForce(), allBoards.GetNTotalTouch());
 		SendReturn(recv);
@@ -577,7 +577,7 @@ void UdpCom::ExecUdpCommand(UdpCmdPacket& recv) {
 		}
 	} break;
 	default:
-		ESP_LOGE(Tag(), "Invalid command %d count %d received from %s at %x.\n", 
+		ESP_LOGE(Tag(), "Invalid command %d count %d received from %s at %x.\n",
 			(int)recv.command, (int)recv.count, ipaddr_ntoa(&recv.returnIp), (unsigned)&recv);
 		break;
 	}

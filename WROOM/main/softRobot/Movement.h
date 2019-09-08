@@ -76,6 +76,7 @@ public:
 								// 													else, after movement id = keyframe id
 	uint8_t refMotorId;
 	short timeOffset;
+	uint8_t flags;				// [1 bit strict mode] + [7 bits empty]
 };
 
 struct MovementKeyframeAddState {
