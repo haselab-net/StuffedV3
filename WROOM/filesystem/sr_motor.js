@@ -63,7 +63,7 @@ var motor;
         switch (option) {
             case MovementOption.play: {
                 for (var keyframeId = 0; keyframeId < movement.keyframes.length; keyframeId++) {
-                    var data = getKeyframe();
+                    var data = getKeyframe(movement, keyframeId);
                     movementAddKeyframe(data);
                 }
                 break;
@@ -240,7 +240,7 @@ var motor;
                 var timeOffset = offset;
                 var refKeyframeId = 0;
                 for (var keyframeId = 0; keyframeId < movement.keyframes.length; keyframeId++) {
-                    var data = getKeyframe();
+                    var data = getKeyframe(movement, keyframeId);
 
                     data.refMovementId = refMovement.movementId;
                     data.refMotorId = refMovement.motorIds[0];
@@ -256,11 +256,12 @@ var motor;
 
                     timeOffset += data.period;
                 }
+                break;
             }
             case TimeRelationship.after: {
                 var timeOffset = offset;
                 for (var keyframeId = 0; keyframeId < movement.keyframes.length; keyframeId++) {
-                    var data = getKeyframe();
+                    var data = getKeyframe(movement, keyframeId);
 
                     data.refKeyframeId = refMovement.movementId;
                     data.refMotorId = refMovement.motorIds[0];
@@ -271,6 +272,7 @@ var motor;
 
                     timeOffset += data.period;
                 }
+                break;
             }
         }
     }
