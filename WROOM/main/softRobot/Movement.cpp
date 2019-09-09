@@ -1115,6 +1115,9 @@ void queryInterpolateState(void* payload) {
 	for (int i=0; i<movementInfos.size(); i++) {
 		pushPayloadNum(payload, movementInfos[i].keyframeCount);
 	}
+
+	// time pointer
+	pushPayloadNum<uint16_t>(payload, movementTime * MS_PER_MOVEMENT_TICK);
 }
 
 /////////////////////////////////////////// api for execute and return packet ///////////////////////////////////////////////
