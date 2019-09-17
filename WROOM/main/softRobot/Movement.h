@@ -111,7 +111,7 @@ void onChangeControlMode(CommandId newCommand);
 /////////////////////////////////////////// api for command packet ///////////////////////////////////////////////
 
 bool canAddKeyframe(MovementKeyframe& keyframe);
-void addKeyframe(MovementKeyframe& keyframe);
+struct MotorKeyframeNode* addKeyframe(MovementKeyframe& keyframe);
 
 void pauseInterpolate();
 void resumeInterpolate();

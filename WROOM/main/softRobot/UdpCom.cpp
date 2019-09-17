@@ -126,9 +126,10 @@ void UdpRetPacket::SetLength() {
 		case CI_M_CLEAR_ALL:
 			length = NHEADER*2 + 1; break;
 		case CI_M_ADD_KEYFRAME:
-			length = NHEADER*2 + 1 + (2 + 1);
+			length = NHEADER*2 + 1 + (2 + 1 + 2 * 2);
 		case CI_M_QUERY:
-			length += NHEADER*2 + 1 + (allBoards.GetNTotalMotor() + 1 + movementInfos.size() * 2 + 2); break;
+			length += NHEADER*2 + 1 + (allBoards.GetNTotalMotor() + 1 + movementInfos.size() * 2 + 2);
+			break;
 		default:
 			break;
 		}

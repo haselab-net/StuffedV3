@@ -850,6 +850,9 @@ extern "C" void movementAfterStopJSTask() {
 bool canAddKeyframe(MovementKeyframe& keyframe) {
 	vector<uint8_t> &motorId = keyframe.motorId;
 
+	// check period
+	if (keyframe.period == 0) return false;
+
 	// check motor
 	for (int i=0; i<keyframe.motorCount; i++) {
 		if (motorId[i] >= allBoards.GetNTotalMotor()) return false;	// wrong motor id
@@ -875,14 +878,15 @@ bool canAddKeyframe(MovementKeyframe& keyframe) {
 	return true;
 }
 
-void addKeyframe(MovementKeyframe& keyframe) {
-	if (keyframe.period == 0) return;
+// add keyframe and return the last added node
+MotorKeyframeNode* addKeyframe(MovementKeyframe& keyframe) {
+	struct MotorKeyframeNode* node = NULL;
 
 	xSemaphoreTake(tickSemaphore, portMAX_DELAY);
 
 	for (int i=0; i<keyframe.motorCount; i++) {
 		// init node
-		struct MotorKeyframeNode* node = (struct MotorKeyframeNode*)malloc(sizeof(struct MotorKeyframeNode));
+		node = (struct MotorKeyframeNode*)malloc(sizeof(struct MotorKeyframeNode));
 		node->id = keyframe.id;
 		node->pose = keyframe.pose[i];
 		node->end = keyframe.period;
@@ -913,6 +917,7 @@ void addKeyframe(MovementKeyframe& keyframe) {
 	xSemaphoreGive(tickSemaphore);
 
 	// printAllMotorKeyframes();
+	return node;
 }
 
 // pause one movement
@@ -1157,12 +1162,17 @@ void prepareRetAddKeyframe(const void* movement_command_data_rcv, void* movement
 	pushPayload(movement_command_data_ret, &keyframe.id, 2);
 	// success
 	uint8_t success = 0;
+	uint16_t startTime = 0, endTime = 0;
 	if (canAddKeyframe(keyframe)) {
-		addKeyframe(keyframe);
+		struct MotorKeyframeNode* node = addKeyframe(keyframe);
 		success = 1;
+		startTime = node->start * MS_PER_MOVEMENT_TICK;
+		endTime = node->end * MS_PER_MOVEMENT_TICK;
 		printf("add keyframe \n");
 	}
 	pushPayload(movement_command_data_ret, &success, 1);
+	pushPayload(movement_command_data_ret, &startTime, 2);
+	pushPayload(movement_command_data_ret, &endTime, 2);
 
 	// interpolate state
 	queryInterpolateState(movement_command_data_ret);

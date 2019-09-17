@@ -936,12 +936,16 @@ int pushDataCIUMovement(duk_context* ctx, void* data) {
             // little endian
             popPayload2CtxNum<uint8_t>(ctx, payload, "keyframeId");
             popPayload2CtxNum<uint8_t>(ctx, payload, "movementId");
-
             popPayload2CtxNum<uint8_t>(ctx, payload, "success");
-            popPayload2CtxNumArray<uint8_t>(ctx, payload, "nOccupied", boardInfo.nMotor);
+            popPayload2CtxNum<uint16_t>(ctx, payload, "startTime");
+            popPayload2CtxNum<uint16_t>(ctx, payload, "endTime");
+
             printf("=== duktape add keyframe receive === \n");
-            break;
         }
+        case CI_M_QUERY:
+            popPayload2CtxNumArray<uint8_t>(ctx, payload, "nOccupied", boardInfo.nMotor);
+            // FIXME not full implemented
+            break;
         case CI_M_PAUSE_MOV:
         case CI_M_RESUME_MOV:
         case CI_M_CLEAR_MOV:
@@ -949,9 +953,6 @@ int pushDataCIUMovement(duk_context* ctx, void* data) {
         case CI_M_RESUME_INTERPOLATE:
         case CI_M_CLEAR_PAUSED:
         case CI_M_CLEAR_ALL:
-            break;
-        case CI_M_QUERY:
-            popPayload2CtxNumArray<uint8_t>(ctx, payload, "nOccupied", boardInfo.nMotor);
             break;
     }
 
