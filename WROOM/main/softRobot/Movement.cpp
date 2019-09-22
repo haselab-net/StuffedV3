@@ -1136,14 +1136,14 @@ static void decodeKeyframe(const void* movement_command_data, MovementKeyframe& 
 		keyframe.motorId.push_back(*(uint8_t*)p); p += 1;
 
 	}
-	keyframe.period = (*(uint16_t*)p) / MS_PER_MOVEMENT_TICK; p += 2;	// convert to movement tick
+	keyframe.period = ((*(uint16_t*)p) + (MS_PER_MOVEMENT_TICK / 2)) / MS_PER_MOVEMENT_TICK; p += 2;	// convert to movement tick, with round
 	keyframe.pose.clear(); keyframe.pose.reserve(keyframe.motorCount);
 	for(int i=0; i<keyframe.motorCount; i++){
 		keyframe.pose.push_back(*(int32_t*)p); p += 4;
 	}
 	keyframe.refId = *(uint16_t*)p; p += 2;
 	keyframe.refMotorId = *(uint8_t*)p; p += 1;
-	keyframe.timeOffset = *(short*)p / MS_PER_MOVEMENT_TICK; p += 2;
+	keyframe.timeOffset = (*(short*)p + (MS_PER_MOVEMENT_TICK / 2)) / MS_PER_MOVEMENT_TICK; p += 2;		// convert to movement tick, with round
 
 	uint8_t flags = *(uint8_t*)p; p += 1;
 	keyframe.strictMode = (flags & (0b10000000)) != 0;
