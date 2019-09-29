@@ -16,7 +16,7 @@ std::vector<SRFormBase*> SRFormHandler::forms;
 
 static void handlerStatic(HttpRequest* pRequest, HttpResponse* pResponse){
     for(SRFormBase* form : SRFormHandler::theFormHandler.forms){
-        if ( (form->method==NULL || pRequest->getMethod().compare(form->method) == 0) 
+        if ( (form->method==NULL || pRequest->getMethod().compare(form->method) == 0)
 			&& pRequest->getPath().compare(form->path) == 0 ){
             form->handler(*pRequest, *pResponse);
         }
@@ -49,7 +49,18 @@ void SRReplace::handle(HttpRequest& request, HttpResponse& response, std::vector
 	handle(request, response, replaces, filenameReplaces);
 }
 void SRReplace::handle(HttpRequest& request, HttpResponse& response, std::vector<Replace>& replaces, std::vector<Replace>& filenameReplaces){
-    // Serve up the content from the file on the file system ... if found ...
+	// do not respond when heap is not enough
+	uint32_t remainingHeapSize = esp_get_free_heap_size();
+	if (remainingHeapSize < 20000) {
+		ESP_LOGE(tag, "Free heap size is lower than 20000");
+		response.setStatus(429, "Too many requests");
+		response.addHeader(HttpRequest::HTTP_HEADER_CONTENT_TYPE, "text/plain");
+		response.sendData("Free heap size is lower than 20000");
+		response.close();
+		return;
+	}
+
+	// Serve up the content from the file on the file system ... if found ...
     std::string fileName = pHttpServer->getRootPath() + request.getPath(); // Build the absolute file name to read.
     // If the file name ends with a '/' then remove it ... we are normalizing to NO trailing slashes.
     if (GeneralUtils::endsWith(fileName, '/')) {
@@ -114,13 +125,13 @@ void SRReplace::handle(HttpRequest& request, HttpResponse& response, std::vector
 	uint8_t *pData = new uint8_t[pHttpServer->getFileBufferSize()];
 	int keyLen = -1;
 	char key[64];	//	keyword
-	std::string repeat;
+	// std::string repeat; //REVIEW seems not used
 	int inParen = 0;
 	int nRepeat = -1;
 	int repeatCount = 0;
 	/*	The grammer
 		$key $(key) are replaced based on replaces.
-		$num[text$] will repeat $num times. $num must be replaced into number.		
+		$num[text$] will repeat $num times. $num must be replaced into number.
 	*/
 	while (!ifStream.eof()) {
 		ifStream.read((char*) pData, pHttpServer->getFileBufferSize());
@@ -203,7 +214,7 @@ void SRReplace::handle(HttpRequest& request, HttpResponse& response, std::vector
 				}else{
 					key[keyLen] = '\0';
 					//ESP_LOGD(tag, "Got key:%s.", key);
-					if (inParen && pData[pos] == ')'){	
+					if (inParen && pData[pos] == ')'){
 						inParen--;
 						if (inParen < 0){
 							inParen = 0;
@@ -219,12 +230,12 @@ void SRReplace::handle(HttpRequest& request, HttpResponse& response, std::vector
 					for(Replace& r: replaces){
 						if (r.from.compare(key) == 0){
 							response.sendData((uint8_t*) r.to.c_str(), r.to.length());
-							//ESP_LOGD(tag, "SRReplace: key='%s' is replaced to %s.", r.from.c_str(), r.to.c_str());	
+							//ESP_LOGD(tag, "SRReplace: key='%s' is replaced to %s.", r.from.c_str(), r.to.c_str());
 							goto foundKey;
 						}
 					}
 					//	not found
-					ESP_LOGE(tag, "SRReplace: Undefined key='%s' is used in %s.", key, fileNameLang.c_str());	
+					ESP_LOGE(tag, "SRReplace: Undefined key='%s' is used in %s.", key, fileNameLang.c_str());
 				foundKey:
 					keyLen = -1;
 					sentPos = pos;
