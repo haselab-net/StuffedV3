@@ -49,13 +49,19 @@ void SRReplace::handle(HttpRequest& request, HttpResponse& response, std::vector
 	handle(request, response, replaces, filenameReplaces);
 }
 void SRReplace::handle(HttpRequest& request, HttpResponse& response, std::vector<Replace>& replaces, std::vector<Replace>& filenameReplaces){
+	printf("receive one request on wifi: %i \n", esp_get_free_heap_size());
+
 	// do not respond when heap is not enough
 	uint32_t remainingHeapSize = esp_get_free_heap_size();
-	if (remainingHeapSize < 20000) {
-		ESP_LOGE(tag, "Free heap size is lower than 20000");
+	if (remainingHeapSize < 25000) {
+		ESP_LOGE(tag, "Free heap size is lower than 25000");
 		response.setStatus(429, "Too many requests");
 		response.addHeader(HttpRequest::HTTP_HEADER_CONTENT_TYPE, "text/plain");
-		response.sendData("Free heap size is lower than 20000");
+		response.sendData("	\
+			Free heap size is lower than 20000 \n \
+			Try this: \n \
+			1. Wait for a while and refresh page again. Then wait for response. \n \
+			2. If your Nuibot is running in synchronization mode or offline mode, switch to development mode.");
 		response.close();
 		return;
 	}

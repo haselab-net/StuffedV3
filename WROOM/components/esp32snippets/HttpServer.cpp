@@ -52,7 +52,7 @@ HttpServer::~HttpServer() {
  */
 class HttpServerTask: public Task {
 public:
-	HttpServerTask(std::string name): Task(name, 12 * 1024, tskIDLE_PRIORITY + 3) {
+	HttpServerTask(std::string name): Task(name, 12 * 1024, tskIDLE_PRIORITY + 6) {
 		m_pHttpServer = nullptr;
 	};
 
