@@ -3,7 +3,7 @@
 
 #define USE_DUKTAPE true        //  use Duktape or WifiMan
 
-#define FIRMWARE_VERSION "2.0.2"         // version of firmware
+#define FIRMWARE_VERSION "2.0.2d"         // version of firmware
 
 #ifdef __cplusplus
 extern "C"{
