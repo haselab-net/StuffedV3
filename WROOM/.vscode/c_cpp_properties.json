@@ -35,7 +35,8 @@
                 "C:/msys32/home/espressif/esp/esp-idf/components/lwip/port/esp32/include",
                 "C:/msys32/home/espressif/esp/esp-idf/components/esp_ringbuf/include",
                 "C:/msys32/home/espressif/esp/esp-idf/components/esp_http_client/include",
-                "C:/msys32/home/espressif/esp/esp-idf/components/mqtt/esp-mqtt/include"
+                "C:/msys32/home/espressif/esp/esp-idf/components/mqtt/esp-mqtt/include",
+                "C:/msys32/home/espressif/esp/esp-idf/components/spi_flash/include"
             ],
             "intelliSenseMode": "gcc-x64",
             "defines": [

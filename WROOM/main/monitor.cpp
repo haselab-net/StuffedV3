@@ -639,11 +639,11 @@ static void changeCurrentPos(uint8_t myMotorId, short offset, bool newMovement =
 
     UdpCom_ReceiveCommand(payload, len, CS_DUKTAPE);
 }
-class MCTest: public MonitorCommandBase{
+class MCMovement: public MonitorCommandBase{
 public:
     const char* Desc(){ return "p test movement"; }
     void Func(){
-        conPrintf("MCtest: \n");
+        conPrintf("MCMovement: \n");
         conPrintf(" p: get motor pose           m: print all motor keyframes        i: print interpolate parameters \n");
         conPrintf(" z: pause all movements      x: resume all movements             c: clear interpolate buffer \n");
         conPrintf(" v: pause movement 1         b: resume movement 1                n: clear movement 1 \n");
@@ -762,6 +762,36 @@ public:
                 movementQueryInterpolateState();
                 break;
             }
+        }
+    }
+} mcMovement;
+
+extern "C" {
+    #include "websocketServer/CoreDumpReader.h"
+}
+class MCTest: public MonitorCommandBase {
+    public:
+    const char * Desc(){ return "H error handle";}
+    void Func() {
+        conPrintf(" a: produce error            s: read error                       d: mark error\n");
+        switch (getchWait()) {
+            case 'a':
+                assert(1 == 0);
+                break;
+            case 's':
+                if (haveUnmarkedCoreDump()) {
+                    printf("Have unmarked core dump \n");
+                }
+                else {
+                    printf("Have no unmarked core dump \n");
+                }
+                break;
+            case 'd':
+                markCoreDump();
+                break;
+            default:
+                printf("Unsupported command \n");
+                break;
         }
     }
 } mcTest;

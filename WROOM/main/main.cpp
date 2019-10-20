@@ -22,6 +22,10 @@
 #include "softRobot/Movement.h"
 #include "duktapeEsp32/include/logging.h"
 
+extern "C" {
+    #include "websocketServer/CoreDumpReader.h"
+}
+
 LOG_TAG("main");
 
 extern "C" void softRobot_main();
@@ -67,10 +71,10 @@ void setLogLevel(){
 
     //  Application
     esp_log_level_set("main", ESP_LOG_INFO);
-    //  SoftRobot  
+    //  SoftRobot
 //  esp_log_level_set("sr_main", ESP_LOG_DEBUG);
 //  esp_log_level_set("Uart", ESP_LOG_DEBUG);
-//  esp_log_level_set("UdpCom", ESP_LOG_DEBUG);    
+//  esp_log_level_set("UdpCom", ESP_LOG_DEBUG);
 //  esp_log_level_set("AllB", ESP_LOG_DEBUG);
 //  esp_log_level_set("MotorDriver", ESP_LOG_DEBUG);
 //    esp_log_level_set("Movement", ESP_LOG_DEBUG);
@@ -105,6 +109,26 @@ void setLogLevel(){
 #endif
 }
 
+extern "C" void readAutoStart() {
+    nvs_handle nvsHandle;
+    nvs_open("motor", NVS_READWRITE, &nvsHandle);
+    uint8_t auto_start;
+    esp_err_t err = nvs_get_u8(nvsHandle, "auto_start", &auto_start);
+    if (err != ESP_OK) {
+        auto_start = false;     // not auto start on default
+        nvs_set_u8(nvsHandle, "auto_start", auto_start);
+        nvs_commit(nvsHandle);
+    }
+
+    if (haveUnmarkedCoreDump()) {
+        auto_start = false;
+        markCoreDump();
+    }
+
+    offline_mode = auto_start;
+    nvs_close(nvsHandle);
+}
+
 extern "C" void app_main(){
     #ifndef _WIN32
     {
@@ -123,7 +147,7 @@ extern "C" void app_main(){
     #if CONFIG_HEAP_TRACING
     ESP_ERROR_CHECK( heap_trace_init_standalone(trace_record, NUM_RECORDS) );
     #endif
-    #endif 
+    #endif
 
     //  set log level
     setLogLevel();
@@ -136,13 +160,13 @@ extern "C" void app_main(){
     int flashSize = 1024*1024;
 	espFsInit((void *)0x300000, flashSize);
     //LOGI("after espFsInit heap size: %d", esp_get_free_heap_size());
-	
+
     //  Start web server with web socket
     LOGI("Before ws_main()");
     ws_main();
 
     //LOGI("after ws_main heap size: %d", esp_get_free_heap_size());
-    
+
     //  start soft robot's udp command server.
     udpCom.Start();   //  start UDP server.
 
@@ -150,17 +174,7 @@ extern "C" void app_main(){
     initMovementDS();
 
     //  start DukTape, javascript engine and run /main/main*.js
-    nvs_handle nvsHandle;
-    nvs_open("motor", NVS_READWRITE, &nvsHandle);
-    uint8_t auto_start;
-    esp_err_t err = nvs_get_u8(nvsHandle, "auto_start", &auto_start);
-    if (err != ESP_OK) {
-        auto_start = false;     // not auto start on default
-        nvs_set_u8(nvsHandle, "auto_start", auto_start);
-        nvs_commit(nvsHandle);
-    }
-    offline_mode = auto_start;
-    nvs_close(nvsHandle);
+    readAutoStart();
 
 	if(offline_mode && !wsIsJsfileTaskRunning()) {
         wsCreateJsfileTask();
@@ -169,7 +183,7 @@ extern "C" void app_main(){
         LOGI("JS is NOT started.");
     }
 
-    
+
     //  start monitor
     Monitor::theMonitor.Init();
     Monitor::theMonitor.Run();  //  monitor start. never return;
