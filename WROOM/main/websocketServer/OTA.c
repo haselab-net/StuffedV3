@@ -5,7 +5,6 @@
 #include "esp_http_client.h"
 #include "esp_https_ota.h"
 
-#define FIRMWARE_UPGRADE_URL "https://192.168.91.117:8070/Nuibot.bin"
 #define FIRMWARE_UPDATER_UPGRADE_URL "https://192.168.91.117:8070/ota.bin"
 
 static const char *TAG = "OTA";

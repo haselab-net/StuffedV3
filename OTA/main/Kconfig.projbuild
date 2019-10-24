@@ -1,4 +1,4 @@
-menu "Example Configuration"
+menu "Custom Configuration"
 
 config FIRMWARE_UPGRADE_URL
     string "firmware upgrade url endpoint"
