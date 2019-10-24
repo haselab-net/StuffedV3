@@ -22,8 +22,9 @@
 #include "nvs_flash.h"
 
 #include "include/wifi.h"
+#include <string.h>
 
-static const char *TAG = "simple_ota_example";
+static const char *TAG = "ota_updater";
 extern const uint8_t server_cert_pem_start[] asm("_binary_ca_cert_pem_start");
 extern const uint8_t server_cert_pem_end[] asm("_binary_ca_cert_pem_end");
 
@@ -55,18 +56,21 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
     return ESP_OK;
 }
 
-void simple_ota_example_task(void * pvParameter)
+void ota_task(void * pvParameter)
 {
     ESP_LOGI(TAG, "Starting OTA example...");
 
     wait_wifi_connection();
-    ESP_LOGI(TAG, "Connect to Wifi ! Start to Connect to Server....");
+    ESP_LOGI(TAG, "Connect to Wifi !");
 
     esp_http_client_config_t config;
     memset(&config, 0, sizeof(config));
     config.url = CONFIG_FIRMWARE_UPGRADE_URL;
     config.cert_pem = (char *)server_cert_pem_start;
     config.event_handler = _http_event_handler;
+
+    ESP_LOGI(TAG, "Start to Connect to Server: %s ....", config.url);
+
     esp_err_t ret = esp_https_ota(&config);
     if (ret == ESP_OK) {
         esp_restart();
@@ -95,5 +99,5 @@ extern "C" void app_main()
     ESP_ERROR_CHECK( err );
 
     initialise_wifi();
-    xTaskCreate(&simple_ota_example_task, "ota_example_task", 8192, NULL, 5, NULL);
+    xTaskCreate(&ota_task, "ota_task", 8192, NULL, 5, NULL);
 }

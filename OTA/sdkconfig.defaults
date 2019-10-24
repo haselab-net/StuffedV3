@@ -80,7 +80,7 @@ CONFIG_MONITOR_BAUD=921600
 #
 # Custom Configuration
 #
-CONFIG_FIRMWARE_UPGRADE_URL="https://nuibot.haselab.net:3001/firmware/Nuibot.bin"
+CONFIG_FIRMWARE_UPGRADE_URL="https://nuibot.haselab.net:5003/firmware/Nuibot.bin"
 
 #
 # Partition Table
