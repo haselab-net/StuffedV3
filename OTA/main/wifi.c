@@ -10,6 +10,10 @@
 #include "esp_wifi.h"
 #include "esp_event_loop.h"
 #include "esp_log.h"
+#include "nvs_flash.h"
+
+#define WIFI_NVS_NAME "wifinvs"
+#define WIFI_LAST_AP_KEY "lastAP"
 
 /* FreeRTOS event group to signal when we are connected & ready to make a request */
 static EventGroupHandle_t wifi_event_group;
@@ -42,6 +46,29 @@ static esp_err_t event_handler(void *ctx, system_event_t *event)
     return ESP_OK;
 }
 
+static wifi_config_t get_sta_info() {
+    nvs_handle wifi_nvs;
+	nvs_open(WIFI_NVS_NAME, NVS_READONLY, &wifi_nvs);
+    int32_t last_ap;
+    nvs_get_i32(wifi_nvs, WIFI_LAST_AP_KEY, &last_ap);
+    assert(last_ap >= 0 && last_ap < 10);
+    char ssid_key[6], pass_key[6];
+    sprintf(ssid_key, "ssid%1d", last_ap);
+    sprintf(pass_key, "pass%1d", last_ap);
+    char ssid[32], pass[64];
+    size_t ssid_len, pass_len;
+    nvs_get_str(wifi_nvs, ssid_key, ssid, &ssid_len);
+    nvs_get_str(wifi_nvs, pass_key, pass, &pass_len);
+
+    wifi_config_t wifi_config;
+    memset(&wifi_config, 0, sizeof(wifi_config));
+	memcpy(wifi_config.sta.ssid, ssid, strlen(ssid));
+	memcpy(wifi_config.sta.password, pass, strlen(pass));
+	wifi_config.sta.bssid_set = 0;
+
+    return wifi_config;
+}
+
 void initialise_wifi(void)
 {
     tcpip_adapter_init();
@@ -50,11 +77,7 @@ void initialise_wifi(void)
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK( esp_wifi_init(&cfg) );
     ESP_ERROR_CHECK( esp_wifi_set_storage(WIFI_STORAGE_RAM) );
-    wifi_config_t wifi_config;
-    memset(&wifi_config, 0, sizeof(wifi_config));
-	memcpy(wifi_config.sta.ssid, CONFIG_WIFI_SSID, strlen(CONFIG_WIFI_SSID));
-	memcpy(wifi_config.sta.password, CONFIG_WIFI_PASSWORD, strlen(CONFIG_WIFI_PASSWORD));
-	wifi_config.sta.bssid_set = 0;
+    wifi_config_t wifi_config = get_sta_info();
     ESP_LOGI(TAG, "Setting WiFi configuration SSID %s, password %s ...", wifi_config.sta.ssid, wifi_config.sta.password);
     ESP_ERROR_CHECK( esp_wifi_set_mode(WIFI_MODE_STA) );
     ESP_ERROR_CHECK( esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config) );
