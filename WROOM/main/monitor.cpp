@@ -768,9 +768,8 @@ public:
 
 extern "C" {
     #include "websocketServer/CoreDumpReader.h"
-    #include "websocketServer/OTA.h"
 }
-// #include "websocketServer/ws_wifi.h"
+#include "websocketServer/OTA.h"
 class MCTest: public MonitorCommandBase {
     public:
     const char * Desc(){ return "H error handle";}

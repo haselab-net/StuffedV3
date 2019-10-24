@@ -43,11 +43,11 @@ uint8_t haveUpdate();
 void updateFirmware() {
     ESP_LOGI(TAG, "Start to Connect to Server....");
 
-    esp_http_client_config_t config = {
-        .url = FIRMWARE_UPDATER_UPGRADE_URL,
-        .cert_pem = (char *)server_cert_pem_start,
-        .event_handler = _http_event_handler,
-    };
+    esp_http_client_config_t config;
+    config.url = FIRMWARE_UPDATER_UPGRADE_URL;
+    config.cert_pem = (char *)server_cert_pem_start;
+    config.event_handler = _http_event_handler;
+
     // printf("cert: %s", config.cert_pem);
     esp_err_t ret = esp_https_ota(&config);
     if (ret == ESP_OK) {
