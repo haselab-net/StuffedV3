@@ -17,6 +17,7 @@ extern "C" {
 #include "duktape_task.h"
 #include "nvs_flash.h"
 #include "nvs.h"
+#include "OTA.h"
 }
 #include "../SoftRobot/UdpCom.h"
 #include "module_srcommand.h"
@@ -24,7 +25,6 @@ extern "C" {
 #include "ws_command.h"
 #include "ws_task.h"
 #include "ws_fs.h"
-#include "OTA.h"
 
 static char LOG_TAG[] = "ws_ws";
 
