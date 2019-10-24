@@ -12,6 +12,8 @@
 #include "esp_log.h"
 #include "nvs_flash.h"
 
+#include "CPPNVS.h"
+
 #define WIFI_NVS_NAME "wifinvs"
 #define WIFI_LAST_AP_KEY "lastAP"
 
@@ -47,23 +49,21 @@ static esp_err_t event_handler(void *ctx, system_event_t *event)
 }
 
 static wifi_config_t get_sta_info() {
-    nvs_handle wifi_nvs;
-	nvs_open(WIFI_NVS_NAME, NVS_READONLY, &wifi_nvs);
+    NVS wifi_nvs = NVS(WIFI_NVS_NAME);
     int32_t last_ap;
-    nvs_get_i32(wifi_nvs, WIFI_LAST_AP_KEY, &last_ap);
+    wifi_nvs.get(WIFI_LAST_AP_KEY, last_ap);
     assert(last_ap >= 0 && last_ap < 10);
     char ssid_key[6], pass_key[6];
     sprintf(ssid_key, "ssid%1d", last_ap);
     sprintf(pass_key, "pass%1d", last_ap);
-    char ssid[32], pass[64];
-    size_t ssid_len, pass_len;
-    nvs_get_str(wifi_nvs, ssid_key, ssid, &ssid_len);
-    nvs_get_str(wifi_nvs, pass_key, pass, &pass_len);
+    std::string ssid, pass;
+    wifi_nvs.get(ssid_key, ssid);
+    wifi_nvs.get(pass_key, pass);
 
     wifi_config_t wifi_config;
     memset(&wifi_config, 0, sizeof(wifi_config));
-	memcpy(wifi_config.sta.ssid, ssid, strlen(ssid));
-	memcpy(wifi_config.sta.password, pass, strlen(pass));
+	memcpy(wifi_config.sta.ssid, ssid.c_str(), ssid.size());
+	memcpy(wifi_config.sta.password, pass.c_str(), pass.size());
 	wifi_config.sta.bssid_set = 0;
 
     return wifi_config;

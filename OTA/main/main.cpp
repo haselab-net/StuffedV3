@@ -77,7 +77,7 @@ void simple_ota_example_task(void * pvParameter)
     }
 }
 
-void app_main()
+extern "C" void app_main()
 {
     printf("----------------- OTA start ------------------- \n");
 
