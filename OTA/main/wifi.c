@@ -51,9 +51,11 @@ void initialise_wifi(void)
     ESP_ERROR_CHECK( esp_wifi_init(&cfg) );
     ESP_ERROR_CHECK( esp_wifi_set_storage(WIFI_STORAGE_RAM) );
     wifi_config_t wifi_config;
-    strcpy((char*)wifi_config.sta.ssid, CONFIG_WIFI_SSID);
-    strcpy((char*)wifi_config.sta.password, CONFIG_WIFI_PASSWORD);
-    ESP_LOGI(TAG, "Setting WiFi configuration SSID %s...", wifi_config.sta.ssid);
+    memset(&wifi_config, 0, sizeof(wifi_config));
+	memcpy(wifi_config.sta.ssid, CONFIG_WIFI_SSID, strlen(CONFIG_WIFI_SSID));
+	memcpy(wifi_config.sta.password, CONFIG_WIFI_PASSWORD, strlen(CONFIG_WIFI_PASSWORD));
+	wifi_config.sta.bssid_set = 0;
+    ESP_LOGI(TAG, "Setting WiFi configuration SSID %s, password %s ...", wifi_config.sta.ssid, wifi_config.sta.password);
     ESP_ERROR_CHECK( esp_wifi_set_mode(WIFI_MODE_STA) );
     ESP_ERROR_CHECK( esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config) );
     ESP_ERROR_CHECK( esp_wifi_start() );
