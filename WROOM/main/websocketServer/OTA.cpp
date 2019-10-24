@@ -5,6 +5,8 @@
 #include "esp_http_client.h"
 #include "esp_https_ota.h"
 
+#include <string.h>
+
 #define FIRMWARE_UPDATER_UPGRADE_URL "https://nuibot.haselab.net:5003/ota.bin"
 
 static const char *TAG = "OTA";
@@ -44,6 +46,7 @@ void updateFirmware() {
     ESP_LOGI(TAG, "Start to Connect to Server....");
 
     esp_http_client_config_t config;
+    memset(&config, 0, sizeof(config));
     config.url = FIRMWARE_UPDATER_UPGRADE_URL;
     config.cert_pem = (char *)server_cert_pem_start;
     config.event_handler = _http_event_handler;

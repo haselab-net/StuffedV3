@@ -63,6 +63,7 @@ void simple_ota_example_task(void * pvParameter)
     ESP_LOGI(TAG, "Connect to Wifi ! Start to Connect to Server....");
 
     esp_http_client_config_t config;
+    memset(&config, 0, sizeof(config));
     config.url = CONFIG_FIRMWARE_UPGRADE_URL;
     config.cert_pem = (char *)server_cert_pem_start;
     config.event_handler = _http_event_handler;
