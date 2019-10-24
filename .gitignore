@@ -13,4 +13,7 @@ WROOM/GTAGS
 PCRobokey/bin
 PCRobokey/obj
 PCRobokey/.vs
-
+OTA/build
+OTA/.vscode
+OTA/sdkconfig
+OTA/sdkconfig.old
