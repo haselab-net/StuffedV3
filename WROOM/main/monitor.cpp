@@ -768,12 +768,15 @@ public:
 
 extern "C" {
     #include "websocketServer/CoreDumpReader.h"
+    #include "websocketServer/OTA.h"
 }
+// #include "websocketServer/ws_wifi.h"
 class MCTest: public MonitorCommandBase {
     public:
     const char * Desc(){ return "H error handle";}
     void Func() {
         conPrintf(" a: produce error            s: read error                       d: mark error\n");
+        conPrintf(" o: start ota                c: connect wifi \n");
         switch (getchWait()) {
             case 'a':
                 assert(1 == 0);
@@ -788,6 +791,12 @@ class MCTest: public MonitorCommandBase {
                 break;
             case 'd':
                 markCoreDump();
+                break;
+            case 'o':
+                updateFirmware();
+                break;
+            case 'c':
+                // SRWiFi::wifi.connectAP("haselab_pi_G", "2human2human2");
                 break;
             default:
                 printf("Unsupported command \n");
