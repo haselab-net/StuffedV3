@@ -7,7 +7,7 @@
 
 #include <string.h>
 
-#define FIRMWARE_UPDATER_UPGRADE_URL "https://nuibot.haselab.net:5003/ota.bin"
+#define FIRMWARE_UPDATER_UPGRADE_URL "https://nuibot.haselab.net:5003/firmware/ota.bin"
 
 static const char *TAG = "OTA";
 extern const uint8_t server_cert_pem_start[] asm("_binary_ca_cert_pem_start");
