@@ -390,6 +390,7 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
             wsSend((void*)retBuffer, 2);
             free(retBuffer);
             retBuffer = NULL;
+            break;
         }
 
         case PacketId::PI_OTA: {
@@ -400,6 +401,7 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
             retBuffer = NULL;
 
             updateFirmware();
+            break;
         }
 
         default:
