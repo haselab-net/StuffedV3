@@ -101,7 +101,9 @@
         "nvs_flash.h": "c",
         "forward_list": "cpp",
         "rope": "cpp",
-        "slist": "cpp"
+        "slist": "cpp",
+        "*.ipp": "cpp",
+        "ota.h": "c"
     },
     "terminal.integrated.shell.windows": "c:\\msys32\\usr\\bin\\bash.exe",
     "terminal.integrated.env.windows": {

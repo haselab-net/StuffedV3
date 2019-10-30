@@ -1,0 +1,9 @@
+menu "Custom Configuration"
+
+config FIRMWARE_UPGRADE_URL
+    string "firmware upgrade url endpoint"
+    default "https://192.168.0.12:8070/Nuibot.bin"
+    help
+        URL of server which hosts the firmware
+        image.
+endmenu

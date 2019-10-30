@@ -36,7 +36,11 @@
                 "C:/msys32/home/espressif/esp/esp-idf/components/esp_ringbuf/include",
                 "C:/msys32/home/espressif/esp/esp-idf/components/esp_http_client/include",
                 "C:/msys32/home/espressif/esp/esp-idf/components/mqtt/esp-mqtt/include",
-                "C:/msys32/home/espressif/esp/esp-idf/components/spi_flash/include"
+                "C:/msys32/home/espressif/esp/esp-idf/components/spi_flash/include",
+                "C:/msys32/home/espressif/esp/esp-idf/components/app_update/include",
+                "C:/msys32/home/espressif/esp/esp-idf/components/nghttp/nghttp2/third-party/http-parser",
+                "C:/msys32/home/espressif/esp/esp-idf/components/esp_https_ota/include",
+                "C:/msys32/home/espressif/esp/esp-idf/components/esp_event/include"
             ],
             "intelliSenseMode": "gcc-x64",
             "defines": [
