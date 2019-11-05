@@ -78,6 +78,8 @@ void setLogLevel(){
 //  esp_log_level_set("AllB", ESP_LOG_DEBUG);
 //  esp_log_level_set("MotorDriver", ESP_LOG_DEBUG);
 //    esp_log_level_set("Movement", ESP_LOG_DEBUG);
+    esp_log_level_set("FileTransferWebSocketHandler", ESP_LOG_DEBUG);
+    esp_log_level_set("espfs", ESP_LOG_DEBUG);
 
     //  Web Server
     esp_log_level_set("Socket", ESP_LOG_INFO);
@@ -157,8 +159,8 @@ extern "C" void app_main(){
     softRobot_main();
 
 	//  Start file system (espFs)
-    int flashSize = 1024*1024;
-	espFsInit((void *)0x300000, flashSize);
+    int flashSize = 128 * 1024;
+	espFsInit((void *)0x3d0000, flashSize);
     //LOGI("after espFsInit heap size: %d", esp_get_free_heap_size());
 
     //  Start web server with web socket
