@@ -1122,7 +1122,7 @@ void queryInterpolateState(void* payload) {
 	}
 
 	// time pointer
-	pushPayloadNum<uint16_t>(payload, movementTime * MS_PER_MOVEMENT_TICK);
+	pushPayloadNum<uint16_t>(payload, movementTime);
 }
 
 /////////////////////////////////////////// api for execute and return packet ///////////////////////////////////////////////
@@ -1166,8 +1166,8 @@ void prepareRetAddKeyframe(const void* movement_command_data_rcv, void* movement
 	if (canAddKeyframe(keyframe)) {
 		struct MotorKeyframeNode* node = addKeyframe(keyframe);
 		success = 1;
-		startTime = node->start * MS_PER_MOVEMENT_TICK;
-		endTime = node->end * MS_PER_MOVEMENT_TICK;
+		startTime = node->start;
+		endTime = node->end;
 		printf("add keyframe \n");
 	}
 	pushPayload(movement_command_data_ret, &success, 1);
