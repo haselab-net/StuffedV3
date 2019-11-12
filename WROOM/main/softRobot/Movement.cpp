@@ -92,9 +92,13 @@ void increaseMovementInfo(uint8_t movementId, uint8_t keyframeId, uint16_t perio
 			it->keyframeCount += 1;
 		}
 	}
+
+	// increase movement count
+	if (it->keyframeCount == 1) it->movementCount += 1;
+	else if (keyframeId == 0) it->movementCount += 1;
 }
 // decrease remainKeyframeTime & keyframeCount when a keyframe deleted
-void decreaseMovementInfo(uint8_t movementId, uint8_t keyframeId, uint16_t period) {
+void decreaseMovementInfo(uint8_t movementId, uint8_t keyframeId, uint16_t period, MotorKeyframeNode* node) {
 	vector<MovementInfoNode>::iterator it = getMovementInfo(movementId);
 	if (it == movementInfos.end()) return;	// last keyframe have been deleted from one motor
 	if (it->keyframeCount == 1) {	// last keyframe of the movement
@@ -107,6 +111,13 @@ void decreaseMovementInfo(uint8_t movementId, uint8_t keyframeId, uint16_t perio
 			it->keyframeCount -= 1;
 		}
 	}
+
+	// decrease movement count
+	while (node && getMovementId(node->id) != movementId) {
+		node = node->next;
+	}
+	if (!node) it->movementCount = 0;
+	else if (getKeyframeId(node->id) <= keyframeId) it->movementCount -= 1;
 }
 
 /////////////////////////////////////////// api for accessing PIC ///////////////////////////////////////////////
@@ -407,7 +418,7 @@ static void deleteNode(uint8_t motorId, MotorKeyframeNode* const node, bool reca
 	if (head.read == node) head.read = nodeBefore;
 
 	// alter movement info
-	decreaseMovementInfo(getMovementId(node->id), getKeyframeId(node->id), node->end - node->start);
+	decreaseMovementInfo(getMovementId(node->id), getKeyframeId(node->id), node->end - node->start, node);
 
 	// delete node
 	if (head.head == node) {
