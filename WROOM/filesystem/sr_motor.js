@@ -277,4 +277,16 @@ var motor;
         }
     }
     motor_1.playRelativeToTime = playRelativeToTime;
+    function getDuration(movement) {
+        var duration = 0
+        for (var i = 0; i < movement.keyframes.length; i++) {
+            duration += movement.keyframes[i].period
+        }
+        return duration
+    }
+    motor_1.getDuration = getDuration;
+    function remainingCount(movement) {
+        return softrobot.movement.movementSender.getMovementCount(movement.movementId);
+    }
+    motor_1.remainingCount = remainingCount;
 })(motor || (motor = {}));
