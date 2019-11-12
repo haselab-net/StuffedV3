@@ -81,6 +81,7 @@ void increaseMovementInfo(uint8_t movementId, uint8_t keyframeId, uint16_t perio
 			keyframeId,
 			period,
 			1,
+			1,
 			false
 		};
 		movementInfos.push_back(node);
@@ -90,12 +91,12 @@ void increaseMovementInfo(uint8_t movementId, uint8_t keyframeId, uint16_t perio
 			it->lastAddedKeyframeId = keyframeId;
 			it->remainKeyframeTime += period;
 			it->keyframeCount += 1;
+
+			// increase movement count
+			if (it->keyframeCount == 1) it->movementCount += 1;
+			else if (keyframeId == 0) it->movementCount += 1;
 		}
 	}
-
-	// increase movement count
-	if (it->keyframeCount == 1) it->movementCount += 1;
-	else if (keyframeId == 0) it->movementCount += 1;
 }
 // decrease remainKeyframeTime & keyframeCount when a keyframe deleted
 void decreaseMovementInfo(uint8_t movementId, uint8_t keyframeId, uint16_t period, MotorKeyframeNode* node) {
@@ -109,15 +110,15 @@ void decreaseMovementInfo(uint8_t movementId, uint8_t keyframeId, uint16_t perio
 			it->lastDeletedKeyframeId = keyframeId;
 			it->remainKeyframeTime -= period;
 			it->keyframeCount -= 1;
+
+			// decrease movement count
+			while (node && getMovementId(node->id) != movementId) {
+				node = node->next;
+			}
+			if (!node) it->movementCount = 0;
+			else if (getKeyframeId(node->id) <= keyframeId) it->movementCount -= 1;
 		}
 	}
-
-	// decrease movement count
-	while (node && getMovementId(node->id) != movementId) {
-		node = node->next;
-	}
-	if (!node) it->movementCount = 0;
-	else if (getKeyframeId(node->id) <= keyframeId) it->movementCount -= 1;
 }
 
 /////////////////////////////////////////// api for accessing PIC ///////////////////////////////////////////////
