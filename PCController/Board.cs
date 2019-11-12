@@ -22,7 +22,7 @@ namespace PCController
         public List<int> currentMap = new List<int>();
         public List<int> forceMap = new List<int>();
         public List<int> touchMap = new List<int>();
-        public Board(byte[] info, Board prev) {
+        public Board(byte[] info, Boards boards) {
             int cur = 0;
             boardId = GetBoardId(info[cur++]);
             modelNumber = info[cur++];
@@ -32,25 +32,26 @@ namespace PCController
             nForce = info[cur++];
             nTouch = info[cur++];
             int c = 0;
-            if (prev != null) c = prev.motorMap[prev.motorMap.Count - 1] + 1;
+            
+            if (boards != null) c = boards.NMotor;
             for (int i = 0; i < nMotor; ++i)
             {
                 motorMap.Add(c++);
             }
             c = 0;
-            if (prev != null) c = prev.currentMap[prev.currentMap.Count - 1] + 1;
+            if (boards != null) c = boards.NCurrent;
             for (int i = 0; i < nCurrent; ++i)
             {
                 currentMap.Add(c++);
             }
             c = 0;
-            if (prev != null) c = prev.forceMap[prev.forceMap.Count - 1] + 1;
+            if (boards != null) c = boards.NForce;
             for (int i = 0; i < nForce; ++i)
             {
                 forceMap.Add(c++);
             }
             c = 0;
-            if (prev != null) c = prev.touchMap[prev.touchMap.Count - 1] + 1;
+            if (boards != null) c = boards.NTouch;
             for (int i = 0; i < nTouch; ++i)
             {
                 touchMap.Add(c++);

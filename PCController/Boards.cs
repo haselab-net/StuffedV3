@@ -326,13 +326,18 @@ namespace PCController
             byte[] sendBuf = Enumerable.Repeat((byte)0, bufLen).ToArray();
             byte[] recvBuf = new byte[retLen];
             //  get information of all boards.
+            nMotor = 0; nCurrent = 0; nForce = 0; nTouch = 0;
             for (int bi = 0; bi < 8; ++bi) {
                 sendBuf[0] = Board.MakeHeader(CommandId.CI_BOARD_INFO, bi);
                 Serial.Write(sendBuf, 0, bufLen);
                 for (int t = 0; t < 10; ++t) {
                     if (Serial.BytesToRead == retLen) {
                         Serial.Read(recvBuf, 0, retLen);
-                        Board board = new Board(recvBuf, Count > 0 ? this[Count-1] : null);
+                        Board board = new Board(recvBuf, this);
+                        nMotor += board.nMotor;
+                        nCurrent += board.nCurrent;
+                        nForce += board.nForce;
+                        nTouch += board.nTouch;
                         Add(board);
                     }
                     Thread.Sleep(2);
@@ -347,14 +352,10 @@ namespace PCController
                 }
                 Serial.Write(sendBuf, 0, bufLen);
             }
-            //  Calc nXXX.
-            nTarget = int.MaxValue; nMotor = 0; nCurrent = 0; nForce = 0; nTouch = 0;
+            //  update nTarget
+            nTarget = int.MaxValue;
             foreach (Board board in this) {
                 nTarget = board.nTarget < nTarget ? board.nTarget : nTarget;
-                nMotor += board.nMotor;
-                nCurrent += board.nCurrent;
-                nForce += board.nForce;
-                nTouch += board.nTouch;
             }
             pos = Enumerable.Repeat((short)0, NMotor).ToArray();
             vel = Enumerable.Repeat((short)0, NMotor).ToArray();

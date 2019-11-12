@@ -195,6 +195,7 @@ namespace PCController
             if (tick < 1) tick = 1;
             timer.Interval = tick;
         }
+
     }
     public class CurrentControl
     {

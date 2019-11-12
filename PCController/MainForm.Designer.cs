@@ -30,6 +30,10 @@
         {
             this.components = new System.ComponentModel.Container();
             this.uartBin = new System.IO.Ports.SerialPort(this.components);
+            this.timer = new System.Windows.Forms.Timer(this.components);
+            this.openPose = new System.Windows.Forms.OpenFileDialog();
+            this.savePose = new System.Windows.Forms.SaveFileDialog();
+            this.splitContainer3 = new System.Windows.Forms.SplitContainer();
             this.tbControl = new System.Windows.Forms.TabControl();
             this.tpPos = new System.Windows.Forms.TabPage();
             this.flPos = new System.Windows.Forms.FlowLayoutPanel();
@@ -56,7 +60,6 @@
             this.flCurrent = new System.Windows.Forms.FlowLayoutPanel();
             this.tpParam = new System.Windows.Forms.TabPage();
             this.flParam = new System.Windows.Forms.FlowLayoutPanel();
-            this.timer = new System.Windows.Forms.Timer(this.components);
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.panel1 = new System.Windows.Forms.Panel();
             this.cmbPortBin = new System.Windows.Forms.ComboBox();
@@ -65,8 +68,9 @@
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
             this.trBoards = new System.Windows.Forms.TreeView();
             this.txMsg = new System.Windows.Forms.TextBox();
-            this.openPose = new System.Windows.Forms.OpenFileDialog();
-            this.savePose = new System.Windows.Forms.SaveFileDialog();
+            this.splitContainer3.Panel1.SuspendLayout();
+            this.splitContainer3.Panel2.SuspendLayout();
+            this.splitContainer3.SuspendLayout();
             this.tbControl.SuspendLayout();
             this.tpPos.SuspendLayout();
             this.panel2.SuspendLayout();
@@ -90,6 +94,41 @@
             // 
             this.uartBin.BaudRate = 2000000;
             // 
+            // timer
+            // 
+            this.timer.Enabled = true;
+            this.timer.Tick += new System.EventHandler(this.timer_Tick);
+            // 
+            // openPose
+            // 
+            this.openPose.FileName = "pose.txt";
+            this.openPose.Filter = "姿勢ファイル|*.txt|姿勢CSV|*.csv|すべてのファイル|*.*";
+            this.openPose.FileOk += new System.ComponentModel.CancelEventHandler(this.openPose_FileOk);
+            // 
+            // savePose
+            // 
+            this.savePose.DefaultExt = "txt";
+            this.savePose.FileName = "pose.txt";
+            this.savePose.Filter = "姿勢ファイル|*.txt|姿勢ファイル(csv)|*.csv|すべてのファイル|*.*";
+            this.savePose.FileOk += new System.ComponentModel.CancelEventHandler(this.savePose_FileOk);
+            // 
+            // splitContainer3
+            // 
+            this.splitContainer3.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer3.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer3.Name = "splitContainer3";
+            // 
+            // splitContainer3.Panel1
+            // 
+            this.splitContainer3.Panel1.Controls.Add(this.tbControl);
+            // 
+            // splitContainer3.Panel2
+            // 
+            this.splitContainer3.Panel2.Controls.Add(this.splitContainer1);
+            this.splitContainer3.Size = new System.Drawing.Size(590, 464);
+            this.splitContainer3.SplitterDistance = 451;
+            this.splitContainer3.TabIndex = 4;
+            // 
             // tbControl
             // 
             this.tbControl.Controls.Add(this.tpPos);
@@ -99,8 +138,8 @@
             this.tbControl.Location = new System.Drawing.Point(0, 0);
             this.tbControl.Name = "tbControl";
             this.tbControl.SelectedIndex = 0;
-            this.tbControl.Size = new System.Drawing.Size(463, 464);
-            this.tbControl.TabIndex = 4;
+            this.tbControl.Size = new System.Drawing.Size(451, 464);
+            this.tbControl.TabIndex = 5;
             // 
             // tpPos
             // 
@@ -111,7 +150,7 @@
             this.tpPos.Location = new System.Drawing.Point(4, 25);
             this.tpPos.Name = "tpPos";
             this.tpPos.Padding = new System.Windows.Forms.Padding(3);
-            this.tpPos.Size = new System.Drawing.Size(455, 435);
+            this.tpPos.Size = new System.Drawing.Size(443, 435);
             this.tpPos.TabIndex = 3;
             this.tpPos.Text = "Pos";
             this.tpPos.UseVisualStyleBackColor = true;
@@ -121,7 +160,7 @@
             this.flPos.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flPos.Location = new System.Drawing.Point(3, 98);
             this.flPos.Name = "flPos";
-            this.flPos.Size = new System.Drawing.Size(449, 334);
+            this.flPos.Size = new System.Drawing.Size(437, 334);
             this.flPos.TabIndex = 98;
             // 
             // panel2
@@ -145,7 +184,7 @@
             this.panel2.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel2.Location = new System.Drawing.Point(3, 42);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(449, 56);
+            this.panel2.Size = new System.Drawing.Size(437, 56);
             this.panel2.TabIndex = 99;
             // 
             // btCopy
@@ -363,7 +402,7 @@
             this.track.Margin = new System.Windows.Forms.Padding(0);
             this.track.Maximum = 10000;
             this.track.Name = "track";
-            this.track.Size = new System.Drawing.Size(449, 39);
+            this.track.Size = new System.Drawing.Size(437, 39);
             this.track.TabIndex = 1;
             this.track.TickStyle = System.Windows.Forms.TickStyle.None;
             this.track.ValueChanged += new System.EventHandler(this.track_ValueChanged);
@@ -374,7 +413,7 @@
             this.tpCurrent.Location = new System.Drawing.Point(4, 25);
             this.tpCurrent.Name = "tpCurrent";
             this.tpCurrent.Padding = new System.Windows.Forms.Padding(3);
-            this.tpCurrent.Size = new System.Drawing.Size(455, 435);
+            this.tpCurrent.Size = new System.Drawing.Size(443, 435);
             this.tpCurrent.TabIndex = 1;
             this.tpCurrent.Text = "Current";
             this.tpCurrent.UseVisualStyleBackColor = true;
@@ -384,7 +423,7 @@
             this.flCurrent.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flCurrent.Location = new System.Drawing.Point(3, 3);
             this.flCurrent.Name = "flCurrent";
-            this.flCurrent.Size = new System.Drawing.Size(449, 429);
+            this.flCurrent.Size = new System.Drawing.Size(437, 429);
             this.flCurrent.TabIndex = 0;
             // 
             // tpParam
@@ -393,7 +432,7 @@
             this.tpParam.Location = new System.Drawing.Point(4, 25);
             this.tpParam.Name = "tpParam";
             this.tpParam.Padding = new System.Windows.Forms.Padding(3);
-            this.tpParam.Size = new System.Drawing.Size(455, 435);
+            this.tpParam.Size = new System.Drawing.Size(443, 435);
             this.tpParam.TabIndex = 2;
             this.tpParam.Text = "Param";
             this.tpParam.UseVisualStyleBackColor = true;
@@ -403,7 +442,7 @@
             this.flParam.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flParam.Location = new System.Drawing.Point(3, 3);
             this.flParam.Name = "flParam";
-            this.flParam.Size = new System.Drawing.Size(449, 429);
+            this.flParam.Size = new System.Drawing.Size(437, 429);
             this.flParam.TabIndex = 0;
             // 
             // timer
@@ -413,8 +452,8 @@
             // 
             // splitContainer1
             // 
-            this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Right;
-            this.splitContainer1.Location = new System.Drawing.Point(463, 0);
+            this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer1.Location = new System.Drawing.Point(0, 0);
             this.splitContainer1.Name = "splitContainer1";
             this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
@@ -425,9 +464,9 @@
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.splitContainer2);
-            this.splitContainer1.Size = new System.Drawing.Size(127, 464);
+            this.splitContainer1.Size = new System.Drawing.Size(135, 464);
             this.splitContainer1.SplitterDistance = 232;
-            this.splitContainer1.TabIndex = 3;
+            this.splitContainer1.TabIndex = 4;
             // 
             // panel1
             // 
@@ -437,7 +476,7 @@
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(127, 232);
+            this.panel1.Size = new System.Drawing.Size(135, 232);
             this.panel1.TabIndex = 6;
             // 
             // cmbPortBin
@@ -447,6 +486,7 @@
             this.cmbPortBin.Name = "cmbPortBin";
             this.cmbPortBin.Size = new System.Drawing.Size(121, 23);
             this.cmbPortBin.TabIndex = 0;
+            this.cmbPortBin.SelectedIndexChanged += new System.EventHandler(this.cmbPortBin_TextChanged);
             // 
             // label1
             // 
@@ -481,7 +521,7 @@
             // splitContainer2.Panel2
             // 
             this.splitContainer2.Panel2.Controls.Add(this.txMsg);
-            this.splitContainer2.Size = new System.Drawing.Size(127, 228);
+            this.splitContainer2.Size = new System.Drawing.Size(135, 228);
             this.splitContainer2.SplitterDistance = 124;
             this.splitContainer2.TabIndex = 5;
             // 
@@ -491,7 +531,7 @@
             this.trBoards.LabelEdit = true;
             this.trBoards.Location = new System.Drawing.Point(0, 0);
             this.trBoards.Name = "trBoards";
-            this.trBoards.Size = new System.Drawing.Size(127, 124);
+            this.trBoards.Size = new System.Drawing.Size(135, 124);
             this.trBoards.TabIndex = 4;
             this.trBoards.BeforeLabelEdit += new System.Windows.Forms.NodeLabelEditEventHandler(this.trBoards_BeforeLabelEdit);
             this.trBoards.AfterLabelEdit += new System.Windows.Forms.NodeLabelEditEventHandler(this.trBoards_AfterLabelEdit);
@@ -503,7 +543,7 @@
             this.txMsg.Multiline = true;
             this.txMsg.Name = "txMsg";
             this.txMsg.ReadOnly = true;
-            this.txMsg.Size = new System.Drawing.Size(127, 100);
+            this.txMsg.Size = new System.Drawing.Size(135, 100);
             this.txMsg.TabIndex = 0;
             // 
             // openPose
@@ -524,10 +564,12 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(590, 464);
-            this.Controls.Add(this.tbControl);
-            this.Controls.Add(this.splitContainer1);
+            this.Controls.Add(this.splitContainer3);
             this.Name = "MainForm";
             this.Text = "PCController";
+            this.splitContainer3.Panel1.ResumeLayout(false);
+            this.splitContainer3.Panel2.ResumeLayout(false);
+            this.splitContainer3.ResumeLayout(false);
             this.tbControl.ResumeLayout(false);
             this.tpPos.ResumeLayout(false);
             this.panel2.ResumeLayout(false);
@@ -554,21 +596,12 @@
 
         #endregion
         private System.IO.Ports.SerialPort uartBin;
-        private System.Windows.Forms.TabControl tbControl;
-        private System.Windows.Forms.TabPage tpCurrent;
-        private System.Windows.Forms.FlowLayoutPanel flCurrent;
         private System.Windows.Forms.Timer timer;
-        private System.Windows.Forms.TabPage tpParam;
-        private System.Windows.Forms.FlowLayoutPanel flParam;
+        private System.Windows.Forms.OpenFileDialog openPose;
+        private System.Windows.Forms.SaveFileDialog savePose;
+        private System.Windows.Forms.SplitContainer splitContainer3;
+        private System.Windows.Forms.TabControl tbControl;
         private System.Windows.Forms.TabPage tpPos;
-        private System.Windows.Forms.Label laCurTime;
-        private System.Windows.Forms.TrackBar track;
-        private System.Windows.Forms.SplitContainer splitContainer1;
-        private System.Windows.Forms.Panel panel1;
-        private System.Windows.Forms.ComboBox cmbPortBin;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Button btListBoards;
-        private System.Windows.Forms.TreeView trBoards;
         private System.Windows.Forms.FlowLayoutPanel flPos;
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.Button btCopy;
@@ -587,9 +620,19 @@
         private System.Windows.Forms.Label lbCurTime;
         private System.Windows.Forms.CheckBox ckRun;
         private System.Windows.Forms.CheckBox ckRunOnce;
-        private System.Windows.Forms.OpenFileDialog openPose;
-        private System.Windows.Forms.SaveFileDialog savePose;
+        private System.Windows.Forms.Label laCurTime;
+        private System.Windows.Forms.TrackBar track;
+        private System.Windows.Forms.TabPage tpCurrent;
+        private System.Windows.Forms.FlowLayoutPanel flCurrent;
+        private System.Windows.Forms.TabPage tpParam;
+        private System.Windows.Forms.FlowLayoutPanel flParam;
+        private System.Windows.Forms.SplitContainer splitContainer1;
+        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.ComboBox cmbPortBin;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Button btListBoards;
         private System.Windows.Forms.SplitContainer splitContainer2;
+        private System.Windows.Forms.TreeView trBoards;
         private System.Windows.Forms.TextBox txMsg;
     }
 }
