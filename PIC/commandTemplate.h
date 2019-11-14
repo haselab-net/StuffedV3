@@ -31,6 +31,10 @@ union CommandHeader{
 } __attribute__((__packed__));
 
 #define DEFINE_CommandPacket(BOARD)									\
+struct MotorHeatLimit##BOARD{                                       \
+    SDEC limit[BOARD##_NMOTOR];                                     \
+    SDEC release[BOARD##_NMOTOR];                                   \
+} __attribute__((__packed__));                                      \
 union CommandPacket##BOARD {										\
 	BOARDINFOFUNCS(BOARD)											\
 	struct {														\
@@ -96,6 +100,8 @@ union CommandPacket##BOARD {										\
                     }__attribute__((__packed__)) torque;            \
                     SDEC a[BOARD##_NMOTOR];	/* Current */           \
                     unsigned char boardId;	/* boardId */           \
+                    unsigned long baudrate[2];	/* baudrate */      \
+                    struct MotorHeatLimit##BOARD heat;              \
                 } __attribute__((__packed__));                      \
 			} __attribute__((__packed__)) param;					\
 			struct {				 /*	 CI_RESET_SENSOR	 */		\
@@ -233,5 +239,6 @@ typedef union CommandPacket##BOARD CommandPacket;				\
 typedef union ReturnPacket##BOARD ReturnPacket;					\
 const unsigned char* const cmdPacketLen = cmdPacketLen##BOARD;	\
 const unsigned char* const retPacketLen = retPacketLen##BOARD;	\
+typedef struct MotorHeatLimit##BOARD MotorHeatLimit;            \
 
 #endif

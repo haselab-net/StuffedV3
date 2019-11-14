@@ -7,8 +7,8 @@ using System.Diagnostics;
 
 namespace PCController
 {
-    class Boards: List<Board>{
-        System.IO.Ports.SerialPort serial=null;
+    class Boards : List<Board> {
+        System.IO.Ports.SerialPort serial = null;
         public System.IO.Ports.SerialPort Serial
         {
             get { return serial; }
@@ -72,6 +72,10 @@ namespace PCController
         public int NTarget { get { return nTarget; } }
         public int NTouch { get { return nTouch; } }
         public void SetNMotor(int n) { nMotor = n; }
+        public short GetPos(int i) { return pos[i]; }
+        public short GetVel(int i) { return vel[i]; }
+        public short GetCurrent(int i) { return current[i]; }
+        public short GetForce(int i) { return force[i]; }
         short[] pos;
         short[] vel;
         short[] current;

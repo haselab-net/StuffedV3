@@ -68,6 +68,7 @@
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
             this.trBoards = new System.Windows.Forms.TreeView();
             this.txMsg = new System.Windows.Forms.TextBox();
+            this.btSend = new System.Windows.Forms.Button();
             this.splitContainer3.Panel1.SuspendLayout();
             this.splitContainer3.Panel2.SuspendLayout();
             this.splitContainer3.SuspendLayout();
@@ -428,6 +429,7 @@
             // 
             // tpParam
             // 
+            this.tpParam.Controls.Add(this.btSend);
             this.tpParam.Controls.Add(this.flParam);
             this.tpParam.Location = new System.Drawing.Point(4, 25);
             this.tpParam.Name = "tpParam";
@@ -439,16 +441,11 @@
             // 
             // flParam
             // 
-            this.flParam.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.flParam.Location = new System.Drawing.Point(3, 3);
+            this.flParam.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.flParam.Location = new System.Drawing.Point(3, 30);
             this.flParam.Name = "flParam";
-            this.flParam.Size = new System.Drawing.Size(437, 429);
+            this.flParam.Size = new System.Drawing.Size(437, 402);
             this.flParam.TabIndex = 0;
-            // 
-            // timer
-            // 
-            this.timer.Enabled = true;
-            this.timer.Tick += new System.EventHandler(this.timer_Tick);
             // 
             // splitContainer1
             // 
@@ -546,18 +543,15 @@
             this.txMsg.Size = new System.Drawing.Size(135, 100);
             this.txMsg.TabIndex = 0;
             // 
-            // openPose
+            // btSend
             // 
-            this.openPose.FileName = "pose.txt";
-            this.openPose.Filter = "姿勢ファイル|*.txt|姿勢CSV|*.csv|すべてのファイル|*.*";
-            this.openPose.FileOk += new System.ComponentModel.CancelEventHandler(this.openPose_FileOk);
-            // 
-            // savePose
-            // 
-            this.savePose.DefaultExt = "txt";
-            this.savePose.FileName = "pose.txt";
-            this.savePose.Filter = "姿勢ファイル|*.txt|姿勢ファイル(csv)|*.csv|すべてのファイル|*.*";
-            this.savePose.FileOk += new System.ComponentModel.CancelEventHandler(this.savePose_FileOk);
+            this.btSend.Location = new System.Drawing.Point(6, 3);
+            this.btSend.Name = "btSend";
+            this.btSend.Size = new System.Drawing.Size(75, 23);
+            this.btSend.TabIndex = 1;
+            this.btSend.Text = "Send";
+            this.btSend.UseVisualStyleBackColor = true;
+            this.btSend.Click += new System.EventHandler(this.btSend_Click);
             // 
             // MainForm
             // 
@@ -634,6 +628,7 @@
         private System.Windows.Forms.SplitContainer splitContainer2;
         private System.Windows.Forms.TreeView trBoards;
         private System.Windows.Forms.TextBox txMsg;
+        private System.Windows.Forms.Button btSend;
     }
 }
 

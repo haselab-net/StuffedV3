@@ -110,20 +110,6 @@ namespace PCController
                 currentControls[i].lbCurrent.Text = "" + curCurrents[i];
             }
         }
-        private void UpdateParam()
-        {
-            short[] k = new short[boards.NMotor];
-            short[] b = new short[boards.NMotor];
-            short[] a = new short[boards.NMotor];
-            for (int i = 0; i < motors.Count; ++i)
-            {
-                k[i] = (short)motors[i].pd.K;
-                b[i] = (short)motors[i].pd.B;
-                a[i] = (short)motors[i].pd.A;
-            }
-            boards.SendParamPd(k, b);
-            boards.SendParamCurrent(a);
-        }
 
         private void timer_Tick(object sender, EventArgs e)
         {
@@ -135,9 +121,11 @@ namespace PCController
             {
                 UpdateCurrent();
             }
-            if (tbControl.SelectedTab == tpParam)
+            txMsg.Text = "";
+            for (int i=0; i< boards.NMotor; ++i)
             {
-                UpdateParam();
+                txMsg.Text += boards.GetPos(i);
+                txMsg.Text += " ";
             }
         }
 
@@ -196,6 +184,21 @@ namespace PCController
             timer.Interval = tick;
         }
 
+        private void btSend_Click(object sender, EventArgs e)
+        {
+            short[] k = new short[boards.NMotor];
+            short[] b = new short[boards.NMotor];
+            short[] a = new short[boards.NMotor];
+            for (int i = 0; i < motors.Count; ++i)
+            {
+                k[i] = (short)motors[i].pd.K;
+                b[i] = (short)motors[i].pd.B;
+                a[i] = (short)motors[i].pd.A;
+            }
+            boards.SendParamPd(k, b);
+            System.Threading.Thread.Sleep(100);
+            boards.SendParamCurrent(a);
+        }
     }
     public class CurrentControl
     {

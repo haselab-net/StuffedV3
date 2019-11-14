@@ -15,13 +15,16 @@ void NVMUnprotectPFM(unsigned int address);
 //  Non volatile memory data structre. Add variable here to add nv variables.
 typedef struct {
     unsigned char boardId;
+    unsigned char pad[3];
+    unsigned long baudrate[2];
     struct PdParam param;
+    MotorHeatLimit heat;
 } __attribute__((__packed__)) NvData;
 
 #define NVPAGE      0x9D00F800
 #define NVPAGESIZE  0x800
 #define NVROWSIZE   0x100
-#define PNVDATA     ((NvData*)NVPAGE)
+#define PNVDATA     ((NvData*)(void*)NVPAGE)
 unsigned int NVMWrite(NvData* p);
 void NVMRead(NvData* p);
 

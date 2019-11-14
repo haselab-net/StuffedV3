@@ -3,6 +3,7 @@
 #include "control.h"
 #include "boardType.h"
 #include "nvm.h"
+#include "uart.h"
 #include <string.h>
 #ifdef WROOM
 #include "../WROOM/main/SoftRobot/commandWROOM.h"
@@ -99,8 +100,10 @@ void ecSetParam(){
         {
             NvData nvData;
             NVMRead(&nvData);
-            nvData.param.k[i] = pdParam.k[i];
-            nvData.param.b[i] = pdParam.b[i];
+            for(i=0; i<NMOTOR; ++i){
+                nvData.param.k[i] = pdParam.k[i];
+                nvData.param.b[i] = pdParam.b[i];
+            }
             NVMWrite(&nvData);
         }
         #endif
@@ -113,7 +116,9 @@ void ecSetParam(){
         {
             NvData nvData;
             NVMRead(&nvData);
-            nvData.param.a[i] = pdParam.a[i];
+            for(i=0; i<NMOTOR; ++i){
+                nvData.param.a[i] = pdParam.a[i];
+            }
             NVMWrite(&nvData);
         }
         #endif
@@ -133,6 +138,24 @@ void ecSetParam(){
         boardId = PNVDATA->boardId;
         if (boardId > 7) boardId = 7;
 #endif
+        } break;
+    case PT_BAUDRATE:{
+#ifdef PIC
+        NvData nvData;
+        NVMRead(&nvData);
+        memcpy(nvData.baudrate, command.param.baudrate, sizeof(nvData.baudrate));
+        setBaudrate(UCBRG, nvData.baudrate[0]);
+        setBaudrate(UMBRG, nvData.baudrate[1]);
+        NVMWrite(&nvData);
+#endif
+        } break;
+    case PT_MOTOR_HEAT:{
+#ifdef PIC
+        NvData nvData;
+        NVMRead(&nvData);
+        nvData.heat = command.param.heat;
+        NVMWrite(&nvData);
+#endif        
         } break;
     }
 }

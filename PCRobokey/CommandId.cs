@@ -22,10 +22,12 @@ enum CommandId {
 	CIU_NONE = -1           //  no command is in receiving state.
 };
 enum SetParamType{
-	PT_PD,
-    PT_CURRENT,
+	PT_PD,          //  PD param (k, b)
+    PT_CURRENT,     //  PD param (a)
 	PT_TORQUE_LIMIT,
 	PT_BOARD_ID,
+	PT_BAUDRATE,
+    PT_MOTOR_HEAT,
 };
 enum ResetSensorFlags {
 	RSF_NONE=0,
