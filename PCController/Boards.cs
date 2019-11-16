@@ -80,6 +80,11 @@ namespace PCController
         short[] vel;
         short[] current;
         short[] force;
+        public static void WriteUShort(byte[] buf, ref int cur, ushort v)
+        {
+            buf[cur++] = (byte)(v & 0xFF);
+            buf[cur++] = (byte)(v >> 8);
+        }
         public static void WriteShort(byte[] buf, ref int cur, short v)
         {
             buf[cur++] = (byte)(v & 0xFF);
@@ -247,6 +252,32 @@ namespace PCController
                 for (int i = 0; i < board.nMotor; ++i)
                 {
                     WriteShort(sendBuf, ref cur, b[bi++]);
+                }
+                Serial.Write(sendBuf, 0, bufLen);
+            }
+        }
+        public void SendParamHeat(ushort[] limit, short[] release)
+        {
+            int ki = 0;
+            int bi = 0;
+            foreach (Board board in this)
+            {
+                //  compute length
+                int wait = board.GetWaitLen(CommandId.CI_SETPARAM);
+                int bufLen = wait + board.CommandLen(CommandId.CI_SETPARAM);
+                int retLen = board.ReturnLen(CommandId.CI_SETPARAM);
+                byte[] sendBuf = Enumerable.Repeat((byte)0, bufLen).ToArray();
+                byte[] recvBuf = new byte[retLen];
+                sendBuf[0] = Board.MakeHeader(CommandId.CI_SETPARAM, board.boardId);
+                sendBuf[1] = (byte)SetParamType.PT_MOTOR_HEAT;
+                int cur = 2;
+                for (int i = 0; i < board.nMotor; ++i)
+                {
+                    WriteUShort(sendBuf, ref cur, limit[ki++]);
+                }
+                for (int i = 0; i < board.nMotor; ++i)
+                {
+                    WriteShort(sendBuf, ref cur, release[bi++]);
                 }
                 Serial.Write(sendBuf, 0, bufLen);
             }

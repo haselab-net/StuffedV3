@@ -268,36 +268,103 @@ namespace PCController
             B = 1024 * 2;
             A = 1024/2;
             udK.Top = 0;
-            Label la = new Label();
-            la.Width = 20;
-            la.Text = "K:";
-            la.Top = udK.Top;
-            udK.Left = la.Width;
-            panel.Controls.Add(udK);
-            panel.Controls.Add(la);
+            Label lK = new Label();
+            lK.Margin = new Padding(0, 0, 0, 0);
+            lK.Padding = new Padding(0, 0, 0, 0);
+            lK.Width = 20;
+            lK.Text = "K:";
+            lK.Top = udK.Top;
+            udK.Left = lK.Width;
             udB.Top = udK.Top + udK.Height;
-            la = new Label();
-            la.Margin = new Padding(0, 0, 0, 0);
-            la.Padding = new Padding(0, 0, 0, 0);
-            la.Width = 20;
-            la.Text = "B:";
-            la.Top = udB.Top;
-            udB.Left = la.Width;
-            panel.Controls.Add(udB);
-            panel.Controls.Add(la);
+            Label lB = new Label();
+            lB.Margin = new Padding(0, 0, 0, 0);
+            lB.Padding = new Padding(0, 0, 0, 0);
+            lB.Width = 20;
+            lB.Text = "B:";
+            lB.Top = udB.Top;
+            udB.Left = lB.Width;
             udA.Top = udB.Top + udB.Height;
-            la = new Label();
-            la.Width = 20;
-            la.Text = "A:";
-            la.Top = udA.Top;
-            udA.Left = la.Width;
+            Label lA = new Label();
+            lA.Margin = new Padding(0, 0, 0, 0);
+            lA.Padding = new Padding(0, 0, 0, 0);
+            lA.Width = 20;
+            lA.Text = "A:";
+            lA.Top = udA.Top;
+            udA.Left = lA.Width;
+
             panel.Controls.Add(udA);
-            panel.Controls.Add(la);
+            panel.Controls.Add(lA);
+            panel.Controls.Add(udB);
+            panel.Controls.Add(lB);
+            panel.Controls.Add(udK);
+            panel.Controls.Add(lK);
 
             panel.Height = udK.Height + udB.Height + udA.Height;
-            panel.Width = udK.Width + la.Width;
+            panel.Width = udK.Width + lA.Width;
         }
     }
+
+    [DataContract]
+    public class MotorHeat
+    {
+        public Panel panel;
+        public NumericUpDown udHeatLimit;
+        public NumericUpDown udHeatRelease;
+        [DataMember]
+        public int HeatLimit
+        {
+            set { udHeatLimit.Value = value; }
+            get { return (int)udHeatLimit.Value; }
+        }
+        public int HeatRelease
+        {
+            set { udHeatRelease.Value = value; }
+            get { return (int)udHeatRelease.Value; }
+        }
+        [OnDeserializing]
+        private void OnDeserializing(StreamingContext context) { Init(); }
+        public MotorHeat() { Init(); }
+        private void Init()
+        {
+            int width = 100;
+            udHeatLimit = new NumericUpDown();
+            udHeatRelease = new NumericUpDown();
+            udHeatRelease.Width = width;
+            udHeatLimit.Width = width;
+            panel = new Panel();
+            udHeatLimit.Minimum = 0;
+            udHeatLimit.Maximum = 65000U * 0x10000;
+            udHeatRelease.Minimum = 0;
+            udHeatRelease.Maximum = 32000;
+            HeatRelease = (int)(0.5 * SDEC.ONE);
+            HeatLimit = 20 * 10 * HeatRelease;  //   (20 sec * 10Hz)
+
+            udHeatRelease.Top = udHeatLimit.Top + udHeatLimit.Height;
+            Label lHeatRelease = new Label();
+            lHeatRelease.Margin = new Padding(0, 0, 0, 0);
+            lHeatRelease.Padding = new Padding(0, 0, 0, 0);
+            lHeatRelease.Width = 40;
+            lHeatRelease.Text = "Release:";
+            lHeatRelease.Top = udHeatRelease.Top;
+            udHeatRelease.Left = lHeatRelease.Width;
+            panel.Controls.Add(udHeatRelease);
+            panel.Controls.Add(lHeatRelease);
+
+            Label lHeatLimit = new Label();
+            lHeatLimit.Margin = new Padding(0, 0, 0, 0);
+            lHeatLimit.Padding = new Padding(0, 0, 0, 0);
+            lHeatLimit.Width = 40;
+            lHeatLimit.Text = "Limit:";
+            lHeatLimit.Top = udHeatLimit.Top;
+            udHeatLimit.Left = lHeatLimit.Width;
+            panel.Controls.Add(udHeatLimit);
+            panel.Controls.Add(lHeatLimit);
+            udHeatRelease.Top = udHeatLimit.Top + udHeatLimit.Height;
+            panel.Height = udHeatLimit.Height + udHeatRelease.Height;
+            panel.Width = udHeatRelease.Width + lHeatRelease.Width;
+        }
+    }
+
     [DataContract]
     public class Motor {
         public MotorPosition position;
@@ -306,6 +373,8 @@ namespace PCController
         public MotorTorque torque;
         [DataMember]
         public MotorPd pd;
+        [DataMember]
+        public MotorHeat heat;
         public Motor()
         {
             Init();
@@ -317,6 +386,7 @@ namespace PCController
             limit = new MotorLimit();
             torque = new MotorTorque();
             pd = new MotorPd();
+            heat = new MotorHeat();
             Minimum = -10000;
             Maximum = 30000;
             limit.udMax.ValueChanged += MaximumChanged;

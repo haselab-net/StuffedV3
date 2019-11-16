@@ -59,7 +59,11 @@
             this.tpCurrent = new System.Windows.Forms.TabPage();
             this.flCurrent = new System.Windows.Forms.FlowLayoutPanel();
             this.tpParam = new System.Windows.Forms.TabPage();
+            this.btSendPd = new System.Windows.Forms.Button();
             this.flParam = new System.Windows.Forms.FlowLayoutPanel();
+            this.tpHeat = new System.Windows.Forms.TabPage();
+            this.btSendHeat = new System.Windows.Forms.Button();
+            this.flHeat = new System.Windows.Forms.FlowLayoutPanel();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.panel1 = new System.Windows.Forms.Panel();
             this.cmbPortBin = new System.Windows.Forms.ComboBox();
@@ -68,7 +72,6 @@
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
             this.trBoards = new System.Windows.Forms.TreeView();
             this.txMsg = new System.Windows.Forms.TextBox();
-            this.btSend = new System.Windows.Forms.Button();
             this.splitContainer3.Panel1.SuspendLayout();
             this.splitContainer3.Panel2.SuspendLayout();
             this.splitContainer3.SuspendLayout();
@@ -82,6 +85,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.track)).BeginInit();
             this.tpCurrent.SuspendLayout();
             this.tpParam.SuspendLayout();
+            this.tpHeat.SuspendLayout();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
@@ -126,8 +130,8 @@
             // splitContainer3.Panel2
             // 
             this.splitContainer3.Panel2.Controls.Add(this.splitContainer1);
-            this.splitContainer3.Size = new System.Drawing.Size(590, 464);
-            this.splitContainer3.SplitterDistance = 451;
+            this.splitContainer3.Size = new System.Drawing.Size(732, 495);
+            this.splitContainer3.SplitterDistance = 559;
             this.splitContainer3.TabIndex = 4;
             // 
             // tbControl
@@ -135,11 +139,12 @@
             this.tbControl.Controls.Add(this.tpPos);
             this.tbControl.Controls.Add(this.tpCurrent);
             this.tbControl.Controls.Add(this.tpParam);
+            this.tbControl.Controls.Add(this.tpHeat);
             this.tbControl.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tbControl.Location = new System.Drawing.Point(0, 0);
             this.tbControl.Name = "tbControl";
             this.tbControl.SelectedIndex = 0;
-            this.tbControl.Size = new System.Drawing.Size(451, 464);
+            this.tbControl.Size = new System.Drawing.Size(559, 495);
             this.tbControl.TabIndex = 5;
             // 
             // tpPos
@@ -151,7 +156,7 @@
             this.tpPos.Location = new System.Drawing.Point(4, 25);
             this.tpPos.Name = "tpPos";
             this.tpPos.Padding = new System.Windows.Forms.Padding(3);
-            this.tpPos.Size = new System.Drawing.Size(443, 435);
+            this.tpPos.Size = new System.Drawing.Size(551, 466);
             this.tpPos.TabIndex = 3;
             this.tpPos.Text = "Pos";
             this.tpPos.UseVisualStyleBackColor = true;
@@ -161,7 +166,7 @@
             this.flPos.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flPos.Location = new System.Drawing.Point(3, 98);
             this.flPos.Name = "flPos";
-            this.flPos.Size = new System.Drawing.Size(437, 334);
+            this.flPos.Size = new System.Drawing.Size(545, 365);
             this.flPos.TabIndex = 98;
             // 
             // panel2
@@ -185,7 +190,7 @@
             this.panel2.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel2.Location = new System.Drawing.Point(3, 42);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(437, 56);
+            this.panel2.Size = new System.Drawing.Size(545, 56);
             this.panel2.TabIndex = 99;
             // 
             // btCopy
@@ -403,7 +408,7 @@
             this.track.Margin = new System.Windows.Forms.Padding(0);
             this.track.Maximum = 10000;
             this.track.Name = "track";
-            this.track.Size = new System.Drawing.Size(437, 39);
+            this.track.Size = new System.Drawing.Size(545, 39);
             this.track.TabIndex = 1;
             this.track.TickStyle = System.Windows.Forms.TickStyle.None;
             this.track.ValueChanged += new System.EventHandler(this.track_ValueChanged);
@@ -414,7 +419,7 @@
             this.tpCurrent.Location = new System.Drawing.Point(4, 25);
             this.tpCurrent.Name = "tpCurrent";
             this.tpCurrent.Padding = new System.Windows.Forms.Padding(3);
-            this.tpCurrent.Size = new System.Drawing.Size(443, 435);
+            this.tpCurrent.Size = new System.Drawing.Size(551, 466);
             this.tpCurrent.TabIndex = 1;
             this.tpCurrent.Text = "Current";
             this.tpCurrent.UseVisualStyleBackColor = true;
@@ -424,28 +429,68 @@
             this.flCurrent.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flCurrent.Location = new System.Drawing.Point(3, 3);
             this.flCurrent.Name = "flCurrent";
-            this.flCurrent.Size = new System.Drawing.Size(437, 429);
+            this.flCurrent.Size = new System.Drawing.Size(545, 460);
             this.flCurrent.TabIndex = 0;
             // 
             // tpParam
             // 
-            this.tpParam.Controls.Add(this.btSend);
+            this.tpParam.Controls.Add(this.btSendPd);
             this.tpParam.Controls.Add(this.flParam);
             this.tpParam.Location = new System.Drawing.Point(4, 25);
             this.tpParam.Name = "tpParam";
             this.tpParam.Padding = new System.Windows.Forms.Padding(3);
-            this.tpParam.Size = new System.Drawing.Size(443, 435);
+            this.tpParam.Size = new System.Drawing.Size(551, 466);
             this.tpParam.TabIndex = 2;
             this.tpParam.Text = "Param";
             this.tpParam.UseVisualStyleBackColor = true;
             // 
+            // btSendPd
+            // 
+            this.btSendPd.Location = new System.Drawing.Point(1, 0);
+            this.btSendPd.Name = "btSendPd";
+            this.btSendPd.Size = new System.Drawing.Size(75, 23);
+            this.btSendPd.TabIndex = 1;
+            this.btSendPd.Text = "Send";
+            this.btSendPd.UseVisualStyleBackColor = true;
+            this.btSendPd.Click += new System.EventHandler(this.btSendPd_Click);
+            // 
             // flParam
             // 
             this.flParam.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.flParam.Location = new System.Drawing.Point(3, 30);
+            this.flParam.Location = new System.Drawing.Point(3, 54);
             this.flParam.Name = "flParam";
-            this.flParam.Size = new System.Drawing.Size(437, 402);
+            this.flParam.Size = new System.Drawing.Size(545, 409);
             this.flParam.TabIndex = 0;
+            // 
+            // tpHeat
+            // 
+            this.tpHeat.Controls.Add(this.btSendHeat);
+            this.tpHeat.Controls.Add(this.flHeat);
+            this.tpHeat.Location = new System.Drawing.Point(4, 25);
+            this.tpHeat.Name = "tpHeat";
+            this.tpHeat.Padding = new System.Windows.Forms.Padding(3);
+            this.tpHeat.Size = new System.Drawing.Size(551, 466);
+            this.tpHeat.TabIndex = 4;
+            this.tpHeat.Text = "Heat";
+            this.tpHeat.UseVisualStyleBackColor = true;
+            // 
+            // btSendHeat
+            // 
+            this.btSendHeat.Location = new System.Drawing.Point(1, 0);
+            this.btSendHeat.Name = "btSendHeat";
+            this.btSendHeat.Size = new System.Drawing.Size(75, 23);
+            this.btSendHeat.TabIndex = 2;
+            this.btSendHeat.Text = "Send";
+            this.btSendHeat.UseVisualStyleBackColor = true;
+            this.btSendHeat.Click += new System.EventHandler(this.btSendHeat_Click);
+            // 
+            // flHeat
+            // 
+            this.flHeat.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.flHeat.Location = new System.Drawing.Point(3, 54);
+            this.flHeat.Name = "flHeat";
+            this.flHeat.Size = new System.Drawing.Size(545, 409);
+            this.flHeat.TabIndex = 3;
             // 
             // splitContainer1
             // 
@@ -461,8 +506,8 @@
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.splitContainer2);
-            this.splitContainer1.Size = new System.Drawing.Size(135, 464);
-            this.splitContainer1.SplitterDistance = 232;
+            this.splitContainer1.Size = new System.Drawing.Size(169, 495);
+            this.splitContainer1.SplitterDistance = 80;
             this.splitContainer1.TabIndex = 4;
             // 
             // panel1
@@ -473,13 +518,14 @@
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(135, 232);
+            this.panel1.Size = new System.Drawing.Size(169, 80);
             this.panel1.TabIndex = 6;
             // 
             // cmbPortBin
             // 
+            this.cmbPortBin.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.cmbPortBin.FormattingEnabled = true;
-            this.cmbPortBin.Location = new System.Drawing.Point(3, 25);
+            this.cmbPortBin.Location = new System.Drawing.Point(47, 24);
             this.cmbPortBin.Name = "cmbPortBin";
             this.cmbPortBin.Size = new System.Drawing.Size(121, 23);
             this.cmbPortBin.TabIndex = 0;
@@ -487,8 +533,9 @@
             // 
             // label1
             // 
+            this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(3, 7);
+            this.label1.Location = new System.Drawing.Point(47, 7);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(82, 15);
             this.label1.TabIndex = 1;
@@ -496,7 +543,8 @@
             // 
             // btListBoards
             // 
-            this.btListBoards.Location = new System.Drawing.Point(3, 55);
+            this.btListBoards.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btListBoards.Location = new System.Drawing.Point(47, 53);
             this.btListBoards.Name = "btListBoards";
             this.btListBoards.Size = new System.Drawing.Size(121, 23);
             this.btListBoards.TabIndex = 2;
@@ -518,8 +566,8 @@
             // splitContainer2.Panel2
             // 
             this.splitContainer2.Panel2.Controls.Add(this.txMsg);
-            this.splitContainer2.Size = new System.Drawing.Size(135, 228);
-            this.splitContainer2.SplitterDistance = 124;
+            this.splitContainer2.Size = new System.Drawing.Size(169, 411);
+            this.splitContainer2.SplitterDistance = 229;
             this.splitContainer2.TabIndex = 5;
             // 
             // trBoards
@@ -528,7 +576,7 @@
             this.trBoards.LabelEdit = true;
             this.trBoards.Location = new System.Drawing.Point(0, 0);
             this.trBoards.Name = "trBoards";
-            this.trBoards.Size = new System.Drawing.Size(135, 124);
+            this.trBoards.Size = new System.Drawing.Size(169, 229);
             this.trBoards.TabIndex = 4;
             this.trBoards.BeforeLabelEdit += new System.Windows.Forms.NodeLabelEditEventHandler(this.trBoards_BeforeLabelEdit);
             this.trBoards.AfterLabelEdit += new System.Windows.Forms.NodeLabelEditEventHandler(this.trBoards_AfterLabelEdit);
@@ -540,24 +588,14 @@
             this.txMsg.Multiline = true;
             this.txMsg.Name = "txMsg";
             this.txMsg.ReadOnly = true;
-            this.txMsg.Size = new System.Drawing.Size(135, 100);
+            this.txMsg.Size = new System.Drawing.Size(169, 178);
             this.txMsg.TabIndex = 0;
-            // 
-            // btSend
-            // 
-            this.btSend.Location = new System.Drawing.Point(6, 3);
-            this.btSend.Name = "btSend";
-            this.btSend.Size = new System.Drawing.Size(75, 23);
-            this.btSend.TabIndex = 1;
-            this.btSend.Text = "Send";
-            this.btSend.UseVisualStyleBackColor = true;
-            this.btSend.Click += new System.EventHandler(this.btSend_Click);
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(590, 464);
+            this.ClientSize = new System.Drawing.Size(732, 495);
             this.Controls.Add(this.splitContainer3);
             this.Name = "MainForm";
             this.Text = "PCController";
@@ -575,6 +613,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.track)).EndInit();
             this.tpCurrent.ResumeLayout(false);
             this.tpParam.ResumeLayout(false);
+            this.tpHeat.ResumeLayout(false);
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel2.ResumeLayout(false);
             this.splitContainer1.ResumeLayout(false);
@@ -628,7 +667,10 @@
         private System.Windows.Forms.SplitContainer splitContainer2;
         private System.Windows.Forms.TreeView trBoards;
         private System.Windows.Forms.TextBox txMsg;
-        private System.Windows.Forms.Button btSend;
+        private System.Windows.Forms.Button btSendPd;
+        private System.Windows.Forms.TabPage tpHeat;
+        private System.Windows.Forms.FlowLayoutPanel flHeat;
+        private System.Windows.Forms.Button btSendHeat;
     }
 }
 

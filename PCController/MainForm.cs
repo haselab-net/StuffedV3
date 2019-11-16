@@ -60,8 +60,9 @@ namespace PCController
             for (int i = 0; i < boards.NMotor; ++i) {
                 Motor m = new Motor();
                 motors.Add(m);
-                flParam.Controls.Add(m.pd.panel);
                 flPos.Controls.Add(m.position.panel);
+                flParam.Controls.Add(m.pd.panel);
+                flHeat.Controls.Add(m.heat.panel);
                 m.position.ValueChanged += GetEditedValue;
             }
         }
@@ -184,7 +185,7 @@ namespace PCController
             timer.Interval = tick;
         }
 
-        private void btSend_Click(object sender, EventArgs e)
+        private void btSendPd_Click(object sender, EventArgs e)
         {
             short[] k = new short[boards.NMotor];
             short[] b = new short[boards.NMotor];
@@ -198,6 +199,19 @@ namespace PCController
             boards.SendParamPd(k, b);
             System.Threading.Thread.Sleep(100);
             boards.SendParamCurrent(a);
+        }
+
+        private void btSendHeat_Click(object sender, EventArgs e)
+        {
+            ushort[] heatLimit = new ushort[boards.NMotor];
+            short[] heatRelease = new short[boards.NMotor];
+            for (int i = 0; i < motors.Count; ++i)
+            {
+                heatLimit[i] = (ushort)(motors[i].heat.HeatLimit / 0x10000);
+                heatRelease[i] = (short)motors[i].heat.HeatRelease;
+            }
+            boards.SendParamHeat(heatLimit, heatRelease);
+            System.Threading.Thread.Sleep(100);
         }
     }
     public class CurrentControl

@@ -32,7 +32,7 @@ union CommandHeader{
 
 #define DEFINE_CommandPacket(BOARD)									\
 struct MotorHeatLimit##BOARD{                                       \
-    SDEC limit[BOARD##_NMOTOR];                                     \
+    unsigned short limit[BOARD##_NMOTOR];                           \
     SDEC release[BOARD##_NMOTOR];                                   \
 } __attribute__((__packed__));                                      \
 union CommandPacket##BOARD {										\
