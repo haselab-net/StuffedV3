@@ -105,7 +105,7 @@ void updateMotorState(){
 			torqueLimitHeat.max[i] = torqueLimit.max[i];
 			torqueLimitHeat.min[i] = torqueLimit.min[i];
 			if (motorHeat[i] > (motorHeatLimit[i] >> 2)){
-				SDEC ratio = (motorHeatLimit[i] - motorHeat[i]) * (SDEC_ONE*4/3) / motorHeatLimit[i];
+				SDEC ratio = (motorHeatLimit[i] - motorHeat[i]) / 3 * 4 / (motorHeatLimit[i] / SDEC_ONE);
 				if (ratio < 0) ratio = 0;
 				if (ratio > SDEC_ONE) ratio = SDEC_ONE; 
 				SDEC limit =  (SDEC)((long)(SDEC_ONE - motorHeatRelease[i]) * ratio / SDEC_ONE) + motorHeatRelease[i];
