@@ -234,7 +234,7 @@ var motor;
         TimeRelationship[TimeRelationship["with"] = 0] = "with";
         TimeRelationship[TimeRelationship["after"] = 1] = "after";
     })(TimeRelationship = motor_1.TimeRelationship || (motor_1.TimeRelationship = {}));
-    function playRelativeToTime(movement, relationship, refMovement, offset) {
+    function playRelativeToTime(movement, refMovement, relationship, offset) {
         switch (relationship) {
             case TimeRelationship.with: {
                 var timeOffset = offset;
