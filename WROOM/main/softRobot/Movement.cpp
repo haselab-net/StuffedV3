@@ -5,6 +5,10 @@ static const char* LOG_TAG = "Movement";
 
 typedef struct PausedMovementHead PausedMovementHead;
 
+////////////////////////////////////////// declaration //////////////////////////////////////////////////////////////
+static uint8_t getMovementId(uint16_t id);
+static uint8_t getKeyframeId(uint16_t id);
+
 ////////////////////////////////////////// data structure for interpolate ///////////////////////////////////////////
 
 static uint16_t movementTime = 0;                // current time in movement tick
@@ -99,7 +103,7 @@ void increaseMovementInfo(uint8_t movementId, uint8_t keyframeId, uint16_t perio
 	}
 }
 // decrease remainKeyframeTime & keyframeCount when a keyframe deleted
-void decreaseMovementInfo(uint8_t movementId, uint8_t keyframeId, uint16_t period, MotorKeyframeNode* node) {
+void decreaseMovementInfo(uint8_t movementId, uint8_t keyframeId, uint16_t period, MotorKeyframeNode* const node) {
 	vector<MovementInfoNode>::iterator it = getMovementInfo(movementId);
 	if (it == movementInfos.end()) return;	// last keyframe have been deleted from one motor
 	if (it->keyframeCount == 1) {	// last keyframe of the movement
@@ -112,11 +116,16 @@ void decreaseMovementInfo(uint8_t movementId, uint8_t keyframeId, uint16_t perio
 			it->keyframeCount -= 1;
 
 			// decrease movement count
-			while (node && getMovementId(node->id) != movementId) {
-				node = node->next;
+			MotorKeyframeNode* nextMovementNode = node->next;
+			while (nextMovementNode && getMovementId(nextMovementNode->id) != movementId) {
+				nextMovementNode = nextMovementNode->next;
 			}
-			if (!node) it->movementCount = 0;
-			else if (getKeyframeId(node->id) <= keyframeId) it->movementCount -= 1;
+			if (!nextMovementNode) {
+				it->movementCount = 0;
+			}
+			else if (getKeyframeId(nextMovementNode->id) <= keyframeId) {
+				it->movementCount -= 1;
+			}
 		}
 	}
 }
