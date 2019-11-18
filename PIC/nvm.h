@@ -21,11 +21,13 @@ typedef struct {
     MotorHeatLimit heat;
 } __attribute__((__packed__)) NvData;
 
+#ifdef PIC
 #define NVPAGE      0x9D00F800
 #define NVPAGESIZE  0x800
 #define NVROWSIZE   0x100
 #define PNVDATA     ((NvData*)(void*)NVPAGE)
 unsigned int NVMWrite(NvData* p);
 void NVMRead(NvData* p);
+#endif
 
 #endif

@@ -22,7 +22,7 @@ const struct NvPageData __attribute__((address(NVPAGE))) theNvPage = {
             {(SDEC)(SDEC_ONE * 0.5), (SDEC)(SDEC_ONE * 0.5), (SDEC)(SDEC_ONE * 0.5), (SDEC)(SDEC_ONE * 0.5)}    //a
         },
         {//  MotorHeatLimit       
-            {MOTOR_HEAT_LIMIT, MOTOR_HEAT_LIMIT, MOTOR_HEAT_LIMIT, MOTOR_HEAT_LIMIT},   //  long limit
+            {L2SDEC(MOTOR_HEAT_LIMIT), L2SDEC(MOTOR_HEAT_LIMIT), L2SDEC(MOTOR_HEAT_LIMIT), L2SDEC(MOTOR_HEAT_LIMIT)},   //  SDEC limit
             {MOTOR_HEAT_RELEASE, MOTOR_HEAT_RELEASE, MOTOR_HEAT_RELEASE, MOTOR_HEAT_RELEASE}    // SDEC release
         }
     }

@@ -25,9 +25,9 @@ SDEC currentSense[NMOTOR];
 //	motor heat limit
 #define USE_HEAT_LIMIT
 #ifdef USE_HEAT_LIMIT
-long motorHeat[NMOTOR];
+LDEC motorHeat[NMOTOR];
 SDEC motorHeatRelease[NMOTOR];
-long motorHeatLimit[NMOTOR];
+LDEC motorHeatLimit[NMOTOR];
 #define MOTOR_VEL_MAX		(5 * LDEC_ONE / 3000)			//	(300PRM/60s = 5rps) / 3000Hz
 LDEC motorVelMax[NMOTOR];
 struct TorqueLimit torqueLimitHeat;
@@ -99,8 +99,8 @@ void updateMotorState(){
 			if (velRatio > SDEC_ONE) velRatio = SDEC_ONE;
 			SDEC deltaH = (long)velRatio * ratio / SDEC_ONE;
 			assert(deltaH >= 0);
-			motorHeat[i] += deltaH;				//	heating by motor
-			motorHeat[i] -= motorHeatRelease[i];	//	heat release to out air
+			motorHeat[i] += S2LDEC(deltaH);                 //	heating by motor
+			motorHeat[i] -= S2LDEC(motorHeatRelease[i]);	//	heat release to out air
 			if (motorHeat[i] < 0) motorHeat[i] = 0;
 			torqueLimitHeat.max[i] = torqueLimit.max[i];
 			torqueLimitHeat.min[i] = torqueLimit.min[i];
@@ -395,8 +395,13 @@ void controlInit(){
 	for(i=0; i<NMOTOR; ++i){
 #ifdef USE_HEAT_LIMIT
 		motorVelMax[i] = MOTOR_VEL_MAX;
-		motorHeatLimit[i] = PNVDATA->heat.limit[i] * 0x10000;
+#	ifdef PIC
+		motorHeatLimit[i] = S2LDEC(PNVDATA->heat.limit[i]);
 		motorHeatRelease[i] = PNVDATA->heat.release[i];
+#	else
+		motorHeatLimit[i] = MOTOR_HEAT_LIMIT;
+		motorHeatRelease[i] = MOTOR_HEAT_RELEASE;
+#	endif
 #endif
 #ifdef PIC
 		pdParam.k[i] = PNVDATA->param.k[i];

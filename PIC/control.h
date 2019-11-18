@@ -11,11 +11,11 @@
 #include <assert.h>
 
 ///	heat limit for motor
-#define MOTOR_HEAT_RELEASE	(SDEC)(0.5 * SDEC_ONE)  
-#define MOTOR_HEAT_LIMIT	(long)(20 * 10 * MOTOR_HEAT_RELEASE)	//	20sec * 10Hz
+#define MOTOR_HEAT_RELEASE	(SDEC)(0.5 * SDEC_ONE)                  //  0.5
+#define MOTOR_HEAT_LIMIT	(20 * 10 * S2LDEC(MOTOR_HEAT_RELEASE))	//	20sec * 10Hz
 extern SDEC motorHeatRelease[NMOTOR];		//	heat release from motor / loop (10Hz)
-extern long motorHeatLimit[NMOTOR];			//	limit for heat amount of the motor
-extern long motorHeat[NMOTOR];				//	current heat amount
+extern LDEC motorHeatLimit[NMOTOR];			//	limit for heat amount of the motor
+extern LDEC motorHeat[NMOTOR];				//	current heat amount
 extern SDEC lastRatio[NMOTOR];				//	pwm ratio actually applied to motor
 
 //	device depended functions

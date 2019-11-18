@@ -122,10 +122,13 @@ void AllBoards::EnumerateBoard() {
 	}
 	if (motorPos) free((void*)motorPos);
 	if (motorOffset) free(motorOffset);
+	if (motorKba) free(motorKba);
 	motorPos = (volatile int *) malloc(sizeof(volatile int) * motorMap.size());
 	memset((void*)motorPos, 0, sizeof(int) * motorMap.size());
 	motorOffset = (short*) malloc(sizeof(short) * motorMap.size());
 	memset(motorOffset, 0, sizeof(short) * motorMap.size());
+	motorKba = (SDEC*) malloc(sizeof(SDEC) * 3 * motorMap.size());
+	memset(motorKba, 0, sizeof(SDEC) * 3 * motorMap.size());	
 	motorMap.shrink_to_fit();	
 	currentMap.shrink_to_fit();
 	forceMap.shrink_to_fit();
@@ -215,6 +218,72 @@ BoardBase& AllBoards::Board(char uid, char bid){
 	}
 	return *boardDirect;
 }
+
+//	save and load control paramter for motors.
+void AllBoards::LoadMotorParam(){
+	NVS nvs("motor");
+	for(int i=0; i<motorMap.size(); ++i){
+		char key[]="paramK012";
+		itoa(i, key+6, 10);
+		int v;
+		if (nvs.get(key, v) == ESP_OK) motorKba[3*i] = v;
+		key[5] = 'B';
+		if (nvs.get(key, v) == ESP_OK) motorKba[3*i+1] = v;
+		key[5] = 'A';
+		if (nvs.get(key, v) == ESP_OK) motorKba[3*2] = v;
+	}
+	UdpCmdPacket* recv = new UdpCmdPacket;
+	recv->command = CI_SETPARAM;
+	recv->SetParamType(PT_PD);
+	for(int i=0; i<motorMap.size(); ++i){
+		recv->SetControlK(motorKba[3*i], i);
+		recv->SetControlB(motorKba[3*i+1], i);
+	}
+	WriteCmd(recv->command, *recv);
+	vTaskDelay(100);
+	recv->SetParamType(PT_CURRENT);
+	for(int i=0; i<motorMap.size(); ++i){
+		recv->SetControlA(motorKba[3*i+2], i);
+	}
+	WriteCmd(recv->command, *recv);
+	delete recv;
+}
+void AllBoards::SaveMotorParam(){
+	NVS nvs("motor");
+	for(int i=0; i<motorMap.size(); ++i){
+		char key[]="paramK012";
+		itoa(i, key+6, 10);
+		int v;
+		v = motorKba[3*i]; nvs.set(key, v);
+		key[5] = 'B';
+		v = motorKba[3*i+1]; nvs.set(key, v);
+		key[5] = 'A';
+		v = motorKba[3*i+2]; nvs.set(key, v);
+	}
+	nvs.commit();
+}
+
+
+//	save and load motor's position. Motor position is always saved to NVS.
+void AllBoards::LoadMotorPos(){
+	UdpCmdPacket* recv = new UdpCmdPacket;
+	recv->command = CI_SENSOR;
+	WriteCmd(recv->command, *recv);
+	udpCom.PrepareRetPacket(*recv);
+	ReadRet(recv->command, udpCom.send);
+	delete recv;
+
+	NVS nvs("motor");
+	for(int i=0; i<motorMap.size(); ++i){
+		char key[]="pos012";
+		itoa(i, key+3, 10);
+		int m = motorPos[i];
+		nvs.get(key, m);
+		motorOffset[i] = (short)motorPos[i] - (short)m;	//	motorPos[i]: in board, m: WROOM side
+		motorPos[i] = m;
+	}
+	ESP_LOGI(Tag(), "LoadMotorPos:%d %d %d offset: %d %d %d", motorPos[0], motorPos[1], motorPos[2], (int)motorOffset[0], (int)motorOffset[1], (int)motorOffset[2]);
+}
 void AllBoards::SaveMotorPos(){
 	//	prepare previous motor angles.
 	static int* prevMotorPos = NULL;
@@ -244,59 +313,4 @@ void AllBoards::SaveMotorPos(){
 		delete nvs;
 		ESP_LOGD(Tag(), "SaveMotorPos Saved:%d %d %d off: %d %d %d", prevMotorPos[0], prevMotorPos[1], prevMotorPos[2], (int)motorOffset[0], (int)motorOffset[1], (int)motorOffset[2]);
 	}
-}
-void AllBoards::LoadMotorParam(){
-	NVS nvs("motor");
-	for(int i=0; i<NMOTOR; ++i){
-		char key[8]="paramK0";
-		key[6] = '0' + i;
-		int v;
-		if (nvs.get(key, v) == ESP_OK) pdParam.k[i] = v;
-		key[5] = 'B';
-		if (nvs.get(key, v) == ESP_OK) pdParam.b[i] = v;
-		key[5] = 'A';
-		if (nvs.get(key, v) == ESP_OK) pdParam.a[i] = v;
-	}
-	ESP_LOGI(Tag(), "LoadMotorParam:K B A: %d %d %d, %d %d %d, %d %d %d", 
-		(int)pdParam.k[0], (int)pdParam.b[0], (int)pdParam.a[0], 
-		(int)pdParam.k[1], (int)pdParam.b[1], (int)pdParam.a[1], 
-		(int)pdParam.k[2], (int)pdParam.b[2], (int)pdParam.a[2]);
-}
-void AllBoards::SaveMotorParam(){
-	NVS nvs("motor");
-	for(int i=0; i<NMOTOR; ++i){
-		char key[8]="paramK0";
-		key[6] = '0' + i;
-		int v;
-		v = pdParam.k[i]; nvs.set(key, v);
-		key[5] = 'B';
-		v = pdParam.b[i]; nvs.set(key, v);
-		key[5] = 'A';
-		v = pdParam.a[i]; nvs.set(key, v);
-	}
-	nvs.commit();
-	ESP_LOGD(Tag(), "SaveMotorParam:K B A: %d %d %d, %d %d %d, %d %d %d", 
-		(int)pdParam.k[0], (int)pdParam.b[0], (int)pdParam.a[0], 
-		(int)pdParam.k[1], (int)pdParam.b[1], (int)pdParam.a[1], 
-		(int)pdParam.k[2], (int)pdParam.b[2], (int)pdParam.a[2]);
-}
-
-void AllBoards::LoadMotorPos(){
-	UdpCmdPacket* recv = new UdpCmdPacket;
-	recv->command = CI_SENSOR;
-	WriteCmd(recv->command, *recv);
-	udpCom.PrepareRetPacket(*recv);
-	ReadRet(recv->command, udpCom.send);
-	delete recv;
-
-	NVS nvs("motor");
-	for(int i=0; i<motorMap.size(); ++i){
-		char key[]="pos012";
-		itoa(i, key+3, 10);
-		int m = motorPos[i];
-		nvs.get(key, m);
-		motorOffset[i] = (short)motorPos[i] - (short)m;	//	motorPos[i]: in board, m: WROOM side
-		motorPos[i] = m;
-	}
-	ESP_LOGI(Tag(), "LoadMotorPos:%d %d %d offset: %d %d %d", motorPos[0], motorPos[1], motorPos[2], (int)motorOffset[0], (int)motorOffset[1], (int)motorOffset[2]);
 }

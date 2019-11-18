@@ -35,6 +35,8 @@ public:
 	std::vector<DeviceMap> touchMap;
 	volatile int* motorPos;
 	short* motorOffset;
+	short* motorKba;
+
 	UartForBoards* uart[NUART];
 	BoardDirect* boardDirect;
 	xTaskHandle taskExec;
