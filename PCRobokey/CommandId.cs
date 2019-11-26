@@ -11,14 +11,16 @@ enum CommandId {
 	CI_FORCE_CONTROL,		//8	Position and force control with interpolation.
 	CI_SETPARAM,            //9 Set parameter.
     CI_RESET_SENSOR,        //10 Reset sensor.
+    CI_GETPARAM,            //11 Get parameter.
     CI_NCOMMAND,
-    CIU_TEXT = CI_NCOMMAND,	//11 return text message: cmd, type, length, bytes
-	CIU_SET_IPADDRESS,		//12 Set ip address to return the packet
-    CIU_GET_IPADDRESS,      //13 Get ip address to return the packet
-    CIU_GET_SUBBOARD_INFO,  //14 Get sub board info
-	CIU_MOVEMENT,			//15 movement command
-
-	CIU_NCOMMAND,           //15 number of commands
+    CI_NCOMMAND_MAX=32,     //0 to 31 can be used for UART command, because command ID has 5 bits.
+    CIU_TEXT = CI_NCOMMAND_MAX,	
+                            //32 return text message: cmd, type, length, bytes
+	CIU_SET_IPADDRESS,		//33 Set ip address to return the packet
+    CIU_GET_IPADDRESS,      //34 Get ip address to return the packet
+    CIU_GET_SUBBOARD_INFO,  //35 Get sub board info
+	CIU_MOVEMENT,			//36 movement command
+	CIU_NCOMMAND,           //37 number of commands
 	CIU_NONE = -1           //  no command is in receiving state.
 };
 enum SetParamType{

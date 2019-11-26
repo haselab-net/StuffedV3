@@ -58,3 +58,4 @@
 #endif
 
 #define setBaudrate(r, b)   ((r) = ((6000000-1) / (b) ))
+#define getBaudrate(b, r)   ((b) = (6000000 / ((r)+1)))

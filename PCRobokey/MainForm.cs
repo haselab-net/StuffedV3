@@ -2,14 +2,8 @@
 
 using System;
 using System.IO;
-using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using System.Runtime.Serialization;
 using System.Xml;
@@ -29,6 +23,7 @@ namespace Robokey
 
         public MainForm()
         {
+            System.Diagnostics.Debug.Assert(CommandId.CI_NCOMMAND <= CommandId.CI_NCOMMAND_MAX);
             instance = this;
             InitializeComponent();
             udpComm = new UdpComm(this);

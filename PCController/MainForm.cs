@@ -1,10 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using System.IO.Ports;
 
@@ -16,6 +11,7 @@ namespace PCController
         Motors motors;
         public MainForm()
         {
+            System.Diagnostics.Debug.Assert(CommandId.CI_NCOMMAND <= CommandId.CI_NCOMMAND_MAX);
             InitializeComponent();
             boards = new Boards();
             boards.Serial = uartBin;
@@ -203,11 +199,11 @@ namespace PCController
 
         private void btSendHeat_Click(object sender, EventArgs e)
         {
-            ushort[] heatLimit = new ushort[boards.NMotor];
+            short[] heatLimit = new short[boards.NMotor];
             short[] heatRelease = new short[boards.NMotor];
             for (int i = 0; i < motors.Count; ++i)
             {
-                heatLimit[i] = (ushort)(motors[i].heat.HeatLimit / 0x10000);
+                heatLimit[i] = LDEC.ToSDEC(motors[i].heat.HeatLimit);
                 heatRelease[i] = (short)motors[i].heat.HeatRelease;
             }
             boards.SendParamHeat(heatLimit, heatRelease);

@@ -17,6 +17,7 @@ namespace PCController
             d /= (1 << NBITS);
             return d;
         }
+        public static int ToLDEC(short s) { return s << (LDEC.NBITS - SDEC.NBITS);  }
     }
     public class LDEC
     {
@@ -29,6 +30,7 @@ namespace PCController
             d /= (1 << NBITS);
             return d;
         }
+        public static short ToSDEC(int l) { return (short)(l >> (LDEC.NBITS - SDEC.NBITS)); }
     }
     public class MotorLimit
     {
@@ -313,13 +315,13 @@ namespace PCController
         [DataMember]
         public int HeatLimit
         {
-            set { udHeatLimit.Value = value; }
-            get { return (int)udHeatLimit.Value; }
+            set { udHeatLimit.Value = value >> (LDEC.NBITS - SDEC.NBITS); }
+            get { return (int)((int)udHeatLimit.Value << (LDEC.NBITS - SDEC.NBITS)); }
         }
-        public int HeatRelease
+        public short HeatRelease
         {
             set { udHeatRelease.Value = value; }
-            get { return (int)udHeatRelease.Value; }
+            get { return (short)udHeatRelease.Value; }
         }
         [OnDeserializing]
         private void OnDeserializing(StreamingContext context) { Init(); }
@@ -333,11 +335,11 @@ namespace PCController
             udHeatLimit.Width = width;
             panel = new Panel();
             udHeatLimit.Minimum = 0;
-            udHeatLimit.Maximum = 65000U * 0x10000;
+            udHeatLimit.Maximum = 30000 * LDEC.ONE;
             udHeatRelease.Minimum = 0;
             udHeatRelease.Maximum = 32000;
             HeatRelease = (int)(0.5 * SDEC.ONE);
-            HeatLimit = 20 * 10 * HeatRelease;  //   (20 sec * 10Hz)
+            HeatLimit = 20 * 10 * SDEC.ToLDEC(HeatRelease);  //   (20 sec * 10Hz)
 
             udHeatRelease.Top = udHeatLimit.Top + udHeatLimit.Height;
             Label lHeatRelease = new Label();

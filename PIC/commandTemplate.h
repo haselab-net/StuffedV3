@@ -35,6 +35,23 @@ struct MotorHeatLimit##BOARD{                                       \
     unsigned short limit[BOARD##_NMOTOR];                           \
     SDEC release[BOARD##_NMOTOR];                                   \
 } __attribute__((__packed__));                                      \
+struct SetGetParam##BOARD{    /* CI_SETPARAM / CI_GETPARAM */       \
+    unsigned char type;                                             \
+    union {                                                         \
+        struct {                                                    \
+            SDEC k[BOARD##_NMOTOR];	/* P */                         \
+            SDEC b[BOARD##_NMOTOR];	/* D */                         \
+        }__attribute__((__packed__)) pd;                            \
+        struct {                                                    \
+            SDEC min[BOARD##_NMOTOR];	/* Tq min */                \
+            SDEC max[BOARD##_NMOTOR];	/* Tq max */                \
+        }__attribute__((__packed__)) torque;                        \
+        SDEC a[BOARD##_NMOTOR];	/* Current */                       \
+        unsigned char boardId;	/* boardId */                       \
+        unsigned long baudrate[2];	/* baudrate */                  \
+        struct MotorHeatLimit##BOARD heat;                          \
+    } __attribute__((__packed__));                                  \
+} __attribute__((__packed__));                                      \
 union CommandPacket##BOARD {										\
 	BOARDINFOFUNCS(BOARD)											\
 	struct {														\
@@ -87,23 +104,7 @@ union CommandPacket##BOARD {										\
 				short period;		/*	period to interpolate */	\
 				unsigned char targetCountWrite;						\
 			} __attribute__((__packed__)) forceControl;				\
-			struct {    /*	 CI_SETPARAM */                         \
-				unsigned char type;                                 \
-                union {                                             \
-                    struct {                                        \
-                        SDEC k[BOARD##_NMOTOR];	/* P */             \
-                        SDEC b[BOARD##_NMOTOR];	/* D */     		\
-                    }__attribute__((__packed__)) pd;                \
-                    struct {                                        \
-                        SDEC min[BOARD##_NMOTOR];	/* Tq min */    \
-                        SDEC max[BOARD##_NMOTOR];	/* Tq max */    \
-                    }__attribute__((__packed__)) torque;            \
-                    SDEC a[BOARD##_NMOTOR];	/* Current */           \
-                    unsigned char boardId;	/* boardId */           \
-                    unsigned long baudrate[2];	/* baudrate */      \
-                    struct MotorHeatLimit##BOARD heat;              \
-                } __attribute__((__packed__));                      \
-			} __attribute__((__packed__)) param;					\
+			struct SetGetParam##BOARD param; /* CI_SETPARAM  */     \
 			struct {				 /*	 CI_RESET_SENSOR	 */		\
                 short flags;                                        \
 			} __attribute__((__packed__)) resetSensor;				\
@@ -122,6 +123,7 @@ enum BOARD##CommandLenEnum{																	\
     BOARD##_CLEN_FORCE_CONTROL = 1+sizeof_field(union CommandPacket##BOARD, forceControl),	\
     BOARD##_CLEN_SET_PARAM = 1+sizeof_field(union CommandPacket##BOARD, param),             \
 	BOARD##_CLEN_RESET_SENSOR = 1+sizeof_field(union CommandPacket##BOARD, resetSensor),	\
+    BOARD##_CLEN_GETPARAM = 1,																\
 };																	\
 const unsigned char cmdPacketLen##BOARD[CI_NCOMMAND] = {			\
     BOARD##_CLEN_NONE,												\
@@ -135,6 +137,7 @@ const unsigned char cmdPacketLen##BOARD[CI_NCOMMAND] = {			\
     BOARD##_CLEN_FORCE_CONTROL,										\
     BOARD##_CLEN_SET_PARAM,											\
 	BOARD##_CLEN_RESET_SENSOR,  									\
+    BOARD##_CLEN_GETPARAM,                                          \
 };																	\
 
 #define DEFINE_ReturnPacket(BOARD) \
@@ -192,6 +195,7 @@ union ReturnPacket##BOARD {										\
 				unsigned short tick;							\
 				unsigned char targetCountRead;					\
 			}__attribute__((__packed__)) interpolate;			\
+			struct SetGetParam##BOARD param; /* CI_GETPARAM  */ \
 		};														\
 	};															\
 };																\
@@ -204,6 +208,7 @@ enum BOARD##ReturnLenEnum{										\
 	BOARD##_RLEN_CURRENT = 1+sizeof_field(union ReturnPacket##BOARD, current),			\
     BOARD##_RLEN_INTERPOLATE = 1+sizeof_field(union ReturnPacket##BOARD, interpolate),	\
     BOARD##_RLEN_FORCE_CONTROL = 1+sizeof_field(union ReturnPacket##BOARD, interpolate),\
+    BOARD##_RLEN_GETPARAM = 1+sizeof_field(union ReturnPacket##BOARD, param),           \
     BOARD##_RLEN_NORETURN = 0,															\
 };																						\
 const unsigned char retPacketLen##BOARD[CI_NCOMMAND]={									\
@@ -218,6 +223,7 @@ const unsigned char retPacketLen##BOARD[CI_NCOMMAND]={									\
     BOARD##_RLEN_FORCE_CONTROL,															\
     BOARD##_RLEN_NORETURN,																\
     BOARD##_RLEN_NORETURN,																\
+    BOARD##_RLEN_GETPARAM,                                                              \
 };
 
 

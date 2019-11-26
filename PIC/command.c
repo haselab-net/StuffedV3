@@ -260,32 +260,67 @@ void rcForceControl(){
     controlSetMode(CM_FORCE_CONTROL);
 	returnInterpolateParam();
 }
+void rcGetParam(){
+    int i;
+    retPacket.param.type = command.param.type;
+    switch(retPacket.param.type){
+    case PT_PD:
+        for(i=0; i<NMOTOR; ++i){
+            retPacket.param.pd.k[i] = pdParam.k[i];
+            retPacket.param.pd.b[i] = pdParam.b[i];
+        }
+        break;
+    case PT_CURRENT:
+        for(i=0; i<NMOTOR; ++i){
+            retPacket.param.a[i] = pdParam.a[i];
+        }
+        break;
+    case PT_TORQUE_LIMIT:
+        for(i=0; i<NMOTOR; ++i){
+            retPacket.param.torque.min[i] = torqueLimit.min[i];
+            retPacket.param.torque.max[i] = torqueLimit.max[i];
+        }
+        break;
+    case PT_BOARD_ID:{
+        retPacket.param.boardId = PNVDATA->boardId;
+        } break;
+    case PT_BAUDRATE:{
+        getBaudrate(retPacket.param.baudrate[0], UCBRG);
+        getBaudrate(retPacket.param.baudrate[1], UMBRG);
+        } break;
+    case PT_MOTOR_HEAT:{
+        retPacket.param.heat = PNVDATA->heat;
+        } break;
+    }
+}
 
 ExecCommand* execCommand[CI_NCOMMAND] = {
 	ecNop,
-	ecNop,		//	board info
+	ecNop,          //	board info
 	ecSetCmdLen,
 	ecAll,
-    ecNop,
+    ecNop,          //  sensor
 	ecDirect,
 	ecCurrent,
-    ecInterpolate,	//	interpolate
-	ecForceControl,	//	force control
+    ecInterpolate,
+	ecForceControl,
     ecSetParam,
     ecResetSensor,
+    ecNop,          //  get param
 };
 ExecCommand* returnCommand[CI_NCOMMAND] = {
     rcNop,
 	rcBoardInfo,
-    rcNop,
+    rcNop,          //  set cmdlen
     rcAll,
 	rcSensor,
     rcDirect,
     rcCurrent,
     rcInterpolate,
     rcForceControl,
-	rcNop,	//	setParam
-    rcNop,	//	resetSensor
+	rcNop,          //	set param
+    rcNop,          //	reset sensor
+    rcGetParam, 
 };
 
 #ifdef WROOM

@@ -256,7 +256,7 @@ namespace PCController
                 Serial.Write(sendBuf, 0, bufLen);
             }
         }
-        public void SendParamHeat(ushort[] limit, short[] release)
+        public void SendParamHeat(short[] limit, short[] release)
         {
             int ki = 0;
             int bi = 0;
@@ -273,7 +273,7 @@ namespace PCController
                 int cur = 2;
                 for (int i = 0; i < board.nMotor; ++i)
                 {
-                    WriteUShort(sendBuf, ref cur, limit[ki++]);
+                    WriteShort(sendBuf, ref cur, limit[ki++]);
                 }
                 for (int i = 0; i < board.nMotor; ++i)
                 {
