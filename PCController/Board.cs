@@ -82,6 +82,11 @@ namespace PCController
                     return 1 + 1 + nMotor * 2 * 2;
                 case CommandId.CI_RESET_SENSOR:
                     return 1 + 2;
+                case CommandId.CI_GETPARAM:
+                    return 1;
+                default:
+                    System.Diagnostics.Debug.Assert(false);
+                    break;
             }
             Debug.Assert(false);
             return 0;
@@ -94,6 +99,7 @@ namespace PCController
                 case CommandId.CI_DIRECT: return 1 + nMotor * 2 * 2;
                 case CommandId.CI_INTERPOLATE: return 1 + nMotor * 2 + 2 + 1;
                 case CommandId.CI_CURRENT: return 1 + nMotor * 3 * 2;
+                case CommandId.CI_GETPARAM: return 1 + 1 + nMotor * 2 * 2;
             }
             return 0;
         }
