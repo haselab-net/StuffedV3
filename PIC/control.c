@@ -395,28 +395,13 @@ void controlInit(){
 	for(i=0; i<NMOTOR; ++i){
 #ifdef USE_HEAT_LIMIT
 		motorVelMax[i] = MOTOR_VEL_MAX;
-#	ifdef PIC
-		motorHeatLimit[i] = S2LDEC(PNVDATA->heat.limit[i]);
-		motorHeatRelease[i] = PNVDATA->heat.release[i];
-#	else
-		motorHeatLimit[i] = MOTOR_HEAT_LIMIT;
-		motorHeatRelease[i] = MOTOR_HEAT_RELEASE;
-#	endif
-#endif
-#ifdef PIC
-		pdParam.k[i] = PNVDATA->param.k[i];
-		pdParam.b[i] = PNVDATA->param.b[i];
-		pdParam.a[i] = PNVDATA->param.a[i];
-#else
-		pdParam.k[i] = SDEC_ONE;
-		pdParam.b[i] = (SDEC)(SDEC_ONE * 1.5);
-		pdParam.a[i] = (SDEC)(SDEC_ONE * 0.5);
 #endif
 		torqueLimit.max[i] = SDEC_ONE;
 		torqueLimit.min[i] = -SDEC_ONE;
         currentTarget[i] = 0;
         targetTorque[i] = 0;
 	}
+	loadMotorParam();
 #ifdef PIC
 	controlInitPic();
 #endif

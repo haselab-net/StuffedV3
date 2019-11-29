@@ -111,34 +111,9 @@ void MotorDriver::Init(){
     mcpwm_init(MCPWM_UNIT_0, MCPWM_TIMER_2, &pwm_config);    //Configure PWM0A & PWM0B with above settings
 #endif
     //  Init control/command and set initial values to motors. 
-    controlInit();
+    controlInit();  //  initialize, call loadMotorParam()
     commandInit();
-    //  load from nvs (overwrite constants)
-    NVS nvs("motor");
     bControl = true;
-    for(int i=0; i<NMOTOR; ++i){
-        //  heatLimit
-        char keyLimit[11]   = "heatLimit0";
-        char keyRelease[13] = "heatRelease0";
-        keyLimit[9] = '0' + i;
-        keyRelease[11] = '0' + i;
-        int v;
-        if (nvs.get(keyLimit, v) == ESP_OK) motorHeatLimit[i] = v;
-        else nvs.set(keyLimit, (int)motorHeatLimit[i]);
-        if (nvs.get(keyRelease, v) == ESP_OK) motorHeatRelease[i] = v;
-        else nvs.set(keyRelease, (int)motorHeatRelease[i]);
-
-        char keyControlK[10]   = "controlK0";
-        char keyControlB[10]   = "controlB0";
-        char keyControlA[10]   = "controlA0";
-        if (nvs.get(keyControlK, v) == ESP_OK) pdParam.k[i] = v;
-        else nvs.set(keyControlK, pdParam.k[i]);
-        if (nvs.get(keyControlB, v) == ESP_OK) pdParam.b[i] = v;
-        else nvs.set(keyControlB, pdParam.b[i]);
-        if (nvs.get(keyControlA, v) == ESP_OK) pdParam.a[i] = v;
-        else nvs.set(keyControlA, pdParam.a[i]);
-    }
-    nvs.commit();
     //  ADC with DMA and I2S mode init. This also start periodic interrupt for control.
     //  i2s settings
     for(int i=0; i < sizeof(adcChsRev) / sizeof(adcChsRev[0]);++i){
@@ -246,4 +221,56 @@ extern "C"{
     void setPwm(int ch, SDEC ratio){
         motorDriver.Pwm(ch, ratio);
     }	
+}
+
+extern "C" void saveMotorParam(){
+    NVS nvs("motor");
+    for(int i=0; i<NMOTOR; ++i){
+        //  heatLimit
+        char keyLimit[11]   = "heatLimit0";
+        char keyRelease[13] = "heatRelease0";
+        keyLimit[9] = '0' + i;
+        keyRelease[11] = '0' + i;
+        nvs.set(keyLimit, (int)motorHeatLimit[i]);
+        nvs.set(keyRelease, (int)motorHeatRelease[i]);
+        char keyControlK[10]   = "controlK0";
+        char keyControlB[10]   = "controlB0";
+        char keyControlA[10]   = "controlA0";
+        keyControlK[9] = '0' + i;
+        keyControlB[9] = '0' + i;
+        keyControlA[9] = '0' + i;
+        nvs.set(keyControlK, pdParam.k[i]);
+        nvs.set(keyControlB, pdParam.b[i]);
+        nvs.set(keyControlA, pdParam.a[i]);
+    }
+    nvs.commit();
+}
+extern "C" void loadMotorParam(){
+    NVS nvs("motor");
+    for(int i=0; i<NMOTOR; ++i){
+        //  heatLimit
+        char keyLimit[11]   = "heatLimit0";
+        char keyRelease[13] = "heatRelease0";
+        keyLimit[9] = '0' + i;
+        keyRelease[11] = '0' + i;
+        int v;
+        if (nvs.get(keyLimit, v) == ESP_OK) motorHeatLimit[i] = v;
+        else nvs.set(keyLimit, (int)motorHeatLimit[i]);
+        if (nvs.get(keyRelease, v) == ESP_OK) motorHeatRelease[i] = v;
+        else nvs.set(keyRelease, (int)motorHeatRelease[i]);
+
+        char keyControlK[10]   = "controlK0";
+        char keyControlB[10]   = "controlB0";
+        char keyControlA[10]   = "controlA0";
+        keyControlK[9] = '0' + i;
+        keyControlB[9] = '0' + i;
+        keyControlA[9] = '0' + i;
+        if (nvs.get(keyControlK, v) == ESP_OK) pdParam.k[i] = v;
+        else nvs.set(keyControlK, pdParam.k[i]);
+        if (nvs.get(keyControlB, v) == ESP_OK) pdParam.b[i] = v;
+        else nvs.set(keyControlB, pdParam.b[i]);
+        if (nvs.get(keyControlA, v) == ESP_OK) pdParam.a[i] = v;
+        else nvs.set(keyControlA, pdParam.a[i]);
+    }
+    nvs.commit();
 }

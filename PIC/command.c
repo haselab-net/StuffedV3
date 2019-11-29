@@ -90,38 +90,20 @@ void ecForceControl(){
 }
 void ecSetParam(){
     int i;
+    bool bSaveParam = false;
     switch(command.param.type){
     case PT_PD:
         for(i=0; i<NMOTOR; ++i){
             pdParam.k[i] = command.param.pd.k[i];
             pdParam.b[i] = command.param.pd.b[i];
         }
-        #ifdef PIC
-        {
-            NvData nvData;
-            NVMRead(&nvData);
-            for(i=0; i<NMOTOR; ++i){
-                nvData.param.k[i] = pdParam.k[i];
-                nvData.param.b[i] = pdParam.b[i];
-            }
-            NVMWrite(&nvData);
-        }
-        #endif
+        bSaveParam = true;
         break;
     case PT_CURRENT:
         for(i=0; i<NMOTOR; ++i){
             pdParam.a[i] = command.param.a[i];
         }
-        #ifdef PIC
-        {
-            NvData nvData;
-            NVMRead(&nvData);
-            for(i=0; i<NMOTOR; ++i){
-                nvData.param.a[i] = pdParam.a[i];
-            }
-            NVMWrite(&nvData);
-        }
-        #endif
+        bSaveParam = true;
         break;
     case PT_TORQUE_LIMIT:
         for(i=0; i<NMOTOR; ++i){
@@ -150,14 +132,14 @@ void ecSetParam(){
 #endif
         } break;
     case PT_MOTOR_HEAT:{
-#ifdef PIC
-        NvData nvData;
-        NVMRead(&nvData);
-        nvData.heat = command.param.heat;
-        NVMWrite(&nvData);
-#endif        
+        for(i=0; i<NMOTOR; ++i){
+            motorHeatLimit[i] = S2LDEC(command.param.heat.limit[i]);
+            motorHeatRelease[i] = command.param.heat.release[i];
+        }
+        bSaveParam = true;
         } break;
     }
+    if (bSaveParam) saveMotorParam();
 }
 void ecResetSensor(){
     int i;
@@ -281,16 +263,28 @@ void rcGetParam(){
             retPacket.param.torque.max[i] = torqueLimit.max[i];
         }
         break;
-    case PT_BOARD_ID:{
+    case PT_BOARD_ID:
+#ifdef PIC
         retPacket.param.boardId = PNVDATA->boardId;
-        } break;
-    case PT_BAUDRATE:{
+#else
+        retPacket.param.boardId = -1;
+#endif
+        break;
+    case PT_BAUDRATE:
+#ifdef PIC
         getBaudrate(retPacket.param.baudrate[0], UCBRG);
         getBaudrate(retPacket.param.baudrate[1], UMBRG);
-        } break;
-    case PT_MOTOR_HEAT:{
-        retPacket.param.heat = PNVDATA->heat;
-        } break;
+#else
+        retPacket.param.baudrate[0] = 0;
+        retPacket.param.baudrate[1] = 0;
+#endif
+        break;
+    case PT_MOTOR_HEAT:
+        for(i=0; i<NMOTOR; ++i){
+            retPacket.param.heat.limit[i] = L2SDEC(motorHeatLimit[i]);
+            retPacket.param.heat.release[i] = motorHeatRelease[i];
+        }
+        break;
     }
 }
 

@@ -3,6 +3,7 @@
 #include "fixed.h"
 #include "control.h"
 #include "mcc_generated_files/mcc.h"
+#include "nvm.h"
 #include <assert.h>
 
 const SDEC mcosOffset[NAXIS] ={
@@ -326,4 +327,30 @@ void onControlTimer(){
 	LATCbits.LATC2 = 1;	//	LED ON
 	controlLoop();
 	LATCbits.LATC2 = 0;	//	LED OFF
+}
+
+
+///	motor paramters
+void saveMotorParam(){
+	NvData nvData;
+    int i;
+	NVMRead(&nvData);
+    for(i=0; i<NMOTOR; ++i){
+        PNVDATA->param.k[i] = pdParam.k[i];
+        PNVDATA->param.b[i] = pdParam.b[i];
+        PNVDATA->param.a[i] = pdParam.a[i];
+        PNVDATA->heat.limit[i] = L2SDEC(motorHeatLimit[i]);
+        PNVDATA->heat.release[i] = 	motorHeatRelease[i];
+    }
+    NVMWrite(&nvData);
+}
+void loadMotorParam(){
+    int i;
+    for(i=0; i<NMOTOR; ++i){
+        pdParam.k[i] = PNVDATA->param.k[i];
+        pdParam.b[i] = PNVDATA->param.b[i];
+        pdParam.a[i] = PNVDATA->param.a[i];
+        motorHeatLimit[i] = S2LDEC(PNVDATA->heat.limit[i]);
+        motorHeatRelease[i] = PNVDATA->heat.release[i];	
+    }
 }
