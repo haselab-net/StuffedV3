@@ -247,30 +247,37 @@ extern "C" void saveMotorParam(){
 }
 extern "C" void loadMotorParam(){
     NVS nvs("motor");
+    int v;
     for(int i=0; i<NMOTOR; ++i){
-        //  heatLimit
-        char keyLimit[11]   = "heatLimit0";
-        char keyRelease[13] = "heatRelease0";
-        keyLimit[9] = '0' + i;
-        keyRelease[11] = '0' + i;
-        int v;
-        if (nvs.get(keyLimit, v) == ESP_OK) motorHeatLimit[i] = v;
-        else nvs.set(keyLimit, (int)motorHeatLimit[i]);
-        if (nvs.get(keyRelease, v) == ESP_OK) motorHeatRelease[i] = v;
-        else nvs.set(keyRelease, (int)motorHeatRelease[i]);
-
+        //  kba
         char keyControlK[10]   = "controlK0";
         char keyControlB[10]   = "controlB0";
         char keyControlA[10]   = "controlA0";
         keyControlK[9] = '0' + i;
         keyControlB[9] = '0' + i;
         keyControlA[9] = '0' + i;
+        pdParam.k[i] = PDPARAM_K;
+        pdParam.b[i] = PDPARAM_B;
+        pdParam.a[i] = PDPARAM_A;
         if (nvs.get(keyControlK, v) == ESP_OK) pdParam.k[i] = v;
         else nvs.set(keyControlK, pdParam.k[i]);
         if (nvs.get(keyControlB, v) == ESP_OK) pdParam.b[i] = v;
         else nvs.set(keyControlB, pdParam.b[i]);
         if (nvs.get(keyControlA, v) == ESP_OK) pdParam.a[i] = v;
         else nvs.set(keyControlA, pdParam.a[i]);
+
+        //  heatLimit
+        char keyLimit[11]   = "heatLimit0";
+        char keyRelease[13] = "heatRelease0";
+        keyLimit[9] = '0' + i;
+        keyRelease[11] = '0' + i;
+        motorHeatLimit[i] = MOTOR_HEAT_LIMIT;
+        motorHeatRelease[i] = MOTOR_HEAT_RELEASE;
+        int v;
+        if (nvs.get(keyLimit, v) == ESP_OK) motorHeatLimit[i] = v;
+        else nvs.set(keyLimit, (int)motorHeatLimit[i]);
+        if (nvs.get(keyRelease, v) == ESP_OK) motorHeatRelease[i] = v;
+        else nvs.set(keyRelease, (int)motorHeatRelease[i]);
     }
     nvs.commit();
 }

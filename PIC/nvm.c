@@ -17,9 +17,9 @@ const struct NvPageData __attribute__((address(NVPAGE))) theNvPage = {
         {0,0,0},    //  pad
         2000000, 3000000,    //  2MBPS for command, 3MBPS for monitor
         {   //  PDParam
-            {SDEC_ONE, SDEC_ONE, SDEC_ONE, SDEC_ONE},   //k
-            {(SDEC)(SDEC_ONE * 1.5), (SDEC)(SDEC_ONE * 1.5), (SDEC)(SDEC_ONE * 1.5), (SDEC)(SDEC_ONE * 1.5)},   //b
-            {(SDEC)(SDEC_ONE * 0.5), (SDEC)(SDEC_ONE * 0.5), (SDEC)(SDEC_ONE * 0.5), (SDEC)(SDEC_ONE * 0.5)}    //a
+            {PDPARAM_K, PDPARAM_K, PDPARAM_K, PDPARAM_K},   //k
+            {PDPARAM_B, PDPARAM_B, PDPARAM_B, PDPARAM_B},   //b
+            {PDPARAM_A, PDPARAM_A, PDPARAM_A, PDPARAM_A},   //a
         },
         {//  MotorHeatLimit       
             {L2SDEC(MOTOR_HEAT_LIMIT), L2SDEC(MOTOR_HEAT_LIMIT), L2SDEC(MOTOR_HEAT_LIMIT), L2SDEC(MOTOR_HEAT_LIMIT)},   //  SDEC limit

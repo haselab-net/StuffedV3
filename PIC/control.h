@@ -22,12 +22,19 @@ extern LDEC motorHeat[NMOTOR];				//	current heat amount
 extern SDEC lastRatio[NMOTOR];				//	pwm ratio actually applied to motor
 
 ///	PD control and current control
+#define PDPARAM_K   SDEC_ONE
+#define PDPARAM_B   ((SDEC)(1.5*SDEC_ONE))
+#define PDPARAM_A   ((SDEC)(0.5*SDEC_ONE))
 struct PdParam{
     SDEC k[NMOTOR];
     SDEC b[NMOTOR];
     SDEC a[NMOTOR];
 };
 extern struct PdParam pdParam;
+
+void saveMotorParam();
+void loadMotorParam();
+//@}
 
 ///	Torque limit
 struct TorqueLimit{
@@ -36,9 +43,6 @@ struct TorqueLimit{
 };
 extern struct TorqueLimit torqueLimit;
 
-void saveMotorParam();
-void loadMotorParam();
-//@}
 
 //	device depended functions
 void readADC();								//	read adc and set it to mcos and msin
