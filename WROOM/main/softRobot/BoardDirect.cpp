@@ -9,7 +9,7 @@ BoardDirect::BoardDirect():Board(-1, cmdPacketLenBD0, retPacketLenBD0){
 void BoardDirect::WriteCmd(unsigned short commandId, BoardCmdBase& packet){
     base::WriteCmd(commandId, packet);
     ExecCmd(&cmd, sizeof(cmd));
-#if 0
+#ifdef SAVE_ALLMOTORPARAM_ON_WROOM
     if (cmd.commandId == CI_SETPARAM && (cmd.param.type == PT_PD || cmd.param.type == PT_CURRENT)){
         allBoards.SaveMotorParam();
     }

@@ -218,7 +218,7 @@ extern "C"{
     }
     void setPwm(int ch, SDEC ratio){
         motorDriver.Pwm(ch, ratio);
-    }	
+    }
 }
 
 extern "C" void saveMotorParam(){
