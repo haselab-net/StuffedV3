@@ -224,7 +224,7 @@ BoardBase& AllBoards::Board(char uid, char bid){
 	return *boardDirect;
 }
 
-#if 0
+#ifdef SAVE_ALLMOTORPARAM_ON_WROOM
 //	save and load control paramter for motors.
 void AllBoards::LoadMotorParam(){
 	NVS nvs("motor");
