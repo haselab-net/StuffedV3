@@ -19,6 +19,7 @@ extern "C"{
 #include <string.h>
 #include "MotorDriver.h"
 #include "TouchSensing.h"
+#include "AllBoards.h"
 extern "C" {
 #include "../../../PIC/control.h"
 }
@@ -220,7 +221,7 @@ extern "C"{
         motorDriver.Pwm(ch, ratio);
     }
 }
-
+#ifndef SAVE_ALLMOTORPARAM_ON_WROOM
 extern "C" void saveMotorParam(){
     NVS nvs("motor");
     for(int i=0; i<NMOTOR; ++i){
@@ -302,3 +303,7 @@ extern "C" void loadMotorParam(){
     }
     nvs.commit();
 }
+#else
+extern "C" void loadMotorParam(){}
+extern "C" void saveMotorParam(){}
+#endif

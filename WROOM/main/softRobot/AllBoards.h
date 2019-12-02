@@ -21,7 +21,7 @@ class BoardDirect;
 class UdpCmdPacket;
 class UdpRetPacket;
 
-//	#define SAVE_ALLMOTORPARAM_ON_WROOM	//	save on each board will be better and this option is obsolute.
+//#define SAVE_ALLMOTORPARAM_ON_WROOM	//	save on each board will be better and this option is obsolute.
 
 //
 class AllBoards{
