@@ -243,6 +243,7 @@ void rcForceControl(){
 	returnInterpolateParam();
 }
 void rcGetParam(){
+    ESP_LOGD("AllB", "rcGetParam %d", command.param.type);
     int i;
     retPacket.param.type = command.param.type;
     switch(retPacket.param.type){
@@ -250,6 +251,7 @@ void rcGetParam(){
         for(i=0; i<NMOTOR; ++i){
             retPacket.param.pd.k[i] = pdParam.k[i];
             retPacket.param.pd.b[i] = pdParam.b[i];
+            ESP_LOGD("AllB", "rcGetParam k=%d b=%d", pdParam.k[i], pdParam.b[i]);
         }
         break;
     case PT_CURRENT:

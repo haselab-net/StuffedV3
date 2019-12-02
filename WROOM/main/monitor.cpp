@@ -168,6 +168,27 @@ class MCEraseNvs: public MonitorCommandBase{
     }
 } mcEraseNvs;
 
+class MCReset: public MonitorCommandBase{
+    const char* Desc(){ return "R Reset by software"; }
+    void Func(){
+        conPrintf("This command reset this program. Are you sure ? (Y/N)\n");
+        while(1){
+            int ch = getchNoWait();
+            if (ch == 'y' || ch == 'Y'){
+#ifdef WROOM
+                esp_restart();
+#endif
+				conPrintf("erased.\n");
+                break;
+            }else if(ch > 0){
+                conPrintf("canceled.\n");
+                break;
+            }
+        }
+    }
+} mcReset;
+
+
 inline void resumeControl(){
     motorDriver.bControl = true;
     resumeInterpolate();
@@ -292,6 +313,15 @@ class MCMotorAngleTest: public MonitorCommandBase{
 class MCShowMotorPos: public MonitorCommandBase{
     const char* Desc(){ return "P Show motor positions"; }
     void Func(){
+        conPrintf("K:\t");
+        for(int i=0; i<NMOTOR; ++i){ conPrintf("%d \t", pdParam.k[i]); } conPrintf("\n");
+        conPrintf("B:\t");
+        for(int i=0; i<NMOTOR; ++i){ conPrintf("%d \t", pdParam.b[i]); } conPrintf("\n");
+        conPrintf("A:\t");
+        for(int i=0; i<NMOTOR; ++i){ conPrintf("%d \t", pdParam.a[i]); } conPrintf("\n");
+        conPrintf("Torque:\t");
+        for(int i=0; i<NMOTOR; ++i){ conPrintf("%d~%d \t", torqueLimit.min[i], torqueLimit.max[i]); } conPrintf("\n");
+
         conPrintf("Off:\t");
         for(int i=0; i<allBoards.motorMap.size(); ++i){
             conPrintf("%d\t", (int) allBoards.motorOffset[i]);

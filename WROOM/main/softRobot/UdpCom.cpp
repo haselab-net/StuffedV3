@@ -50,6 +50,8 @@ int UdpCmdPacket::CommandLen() {
 		return (NHEADER + allBoards.GetNTotalMotor() + allBoards.GetNTotalForce()*3 + 2) * 2;
 	case CI_SETPARAM: 		//	KB, torque min/max, a, boardId ...
 		return (NHEADER + 1 + allBoards.GetNTotalMotor() * 2) * 2;
+	case CI_GETPARAM: 		//	KB, torque min/max, a, boardId ...
+		return (NHEADER + 1) * 2;
 	case CI_RESET_SENSOR:
 		return (NHEADER + 1) * 2;	//	flags
 	case CIU_SET_IPADDRESS:	//  Set ip address to return the packet: command only
@@ -83,6 +85,8 @@ int UdpCmdPacket::CommandLen() {
 			break;
 		}
 	}
+	ESP_LOGE(Tag(), "CommandLen() given invalid command %d", command);
+	assert(0);
 	return 0;
 }
 void UdpRetPacket::SetLength() {
@@ -105,6 +109,8 @@ void UdpRetPacket::SetLength() {
 	case CI_SETPARAM:
 	case CI_RESET_SENSOR:
 		length = NHEADER*2; break;
+	case CI_GETPARAM:
+		length = (NHEADER + 1 + allBoards.GetNTotalMotor() * 2) * 2;  break;
 	case CIU_TEXT:			//	return text message: type, len, str.
 		length = (NHEADER + 1 + 1) * 2 + data[1]; break;
 	case CIU_SET_IPADDRESS:	//  Set ip address to return the packet
@@ -135,7 +141,8 @@ void UdpRetPacket::SetLength() {
 		}
 		break;
 	default:				//	error
-		ESP_LOGE(Tag(), "Undefined command %d set lentgh to 0", command);
+		ESP_LOGE(Tag(), "SetLength() called with undefined command %d.", command);
+		assert(0);
 		length = 0;
 		break;
 	}
@@ -260,8 +267,7 @@ void UdpCom::ReceiveCommandFromUdp(struct udp_pcb * upcb, struct pbuf * top, con
 				if (recv->length != cmdLen) {
 					ESP_LOGE(Tag(), "cmdLen %d != recvLen %d in cmd:%d \n", cmdLen, recv->length, recv->command);
 				}
-				if (recv->command == CIU_GET_IPADDRESS
-					|| (recv->command == CI_INTERPOLATE && recv->GetPeriod() == 0)
+				if ( (recv->command == CI_INTERPOLATE && recv->GetPeriod() == 0)
 					|| (recv->command == CI_FORCE_CONTROL && recv->GetPeriod() == 0) ){
 					/*if (recv->command == CI_INTERPOLATE){
 						ESP_LOGI(Tag(), "CI_INT tcw:%d, peri=%d, ct=%d", recv->GetTargetCountWrite(), recv->GetPeriod(), recv->count);
@@ -278,6 +284,11 @@ void UdpCom::ReceiveCommandFromUdp(struct udp_pcb * upcb, struct pbuf * top, con
 						ESP_LOGI(Tag(), "ignored %d packets Ct:%d Cm:%d", countDiffMax, commandCount, recv->command);
 						countDiffMax = 0;
 					}
+				}
+				else if (recv->command == CIU_GET_IPADDRESS){
+					commandCount ++;
+					recv->count = commandCount;
+					recvs.Write();
 				}
 				else {
 					int diff = (short)((short)commandCount - (short)recv->count);

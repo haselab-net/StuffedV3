@@ -76,6 +76,7 @@ void setLogLevel(){
 //  esp_log_level_set("Uart", ESP_LOG_DEBUG);
 //  esp_log_level_set("UdpCom", ESP_LOG_DEBUG);
 //  esp_log_level_set("AllB", ESP_LOG_DEBUG);
+//  esp_log_level_set("Board", ESP_LOG_DEBUG);
 //  esp_log_level_set("MotorDriver", ESP_LOG_DEBUG);
 //    esp_log_level_set("Movement", ESP_LOG_DEBUG);
     esp_log_level_set("FileTransferWebSocketHandler", ESP_LOG_DEBUG);

@@ -25,6 +25,10 @@ const struct NvPageData __attribute__((address(NVPAGE))) theNvPage = {
             {L2SDEC(MOTOR_HEAT_LIMIT), L2SDEC(MOTOR_HEAT_LIMIT), L2SDEC(MOTOR_HEAT_LIMIT), L2SDEC(MOTOR_HEAT_LIMIT)},   //  SDEC limit
             {MOTOR_HEAT_RELEASE, MOTOR_HEAT_RELEASE, MOTOR_HEAT_RELEASE, MOTOR_HEAT_RELEASE}    // SDEC release
         }
+        {//  TorqueLimit
+            {-SDEC_ONE, -SDEC_ONE, -SDEC_ONE, -SDEC_ONE},   //  min
+            {SDEC_ONE, SDEC_ONE, SDEC_ONE, SDEC_ONE},       //  max   
+        }
     }
 };
 

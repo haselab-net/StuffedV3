@@ -14,11 +14,12 @@ void NVMUnprotectPFM(unsigned int address);
 //  Virtual memory addrsss starts from 0x9D00:E800.
 //  Non volatile memory data structre. Add variable here to add nv variables.
 typedef struct {
-    unsigned char boardId;
-    unsigned char pad[3];
-    unsigned long baudrate[2];
-    struct PdParam param;
-    MotorHeatLimit heat;
+    unsigned char boardId;                  //  1
+    unsigned char pad[3];                   //  4
+    unsigned long baudrate[2];              // 12
+    struct PdParam param;                   // 36       2x3x4 = 24 
+    struct TorqueLimit torque;              // 52       2x2x4 = 16
+    MotorHeatLimit heat;                    // 68       2x2x4 = 16
 } __attribute__((__packed__)) NvData;
 
 #ifdef PIC

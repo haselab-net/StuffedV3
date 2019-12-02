@@ -30,6 +30,7 @@ namespace Robokey
             udpComm.OnRobotFound += OnRobotFound;
             udpComm.OnUpdateRobotInfo += OnUpdateRobotInfo;
             udpComm.OnUpdateRobotState += OnUpdateRobotState;
+            udpComm.OnUpdateRobotParam += OnUpdateRobotParam;
             udpComm.OnMessageReceive += SetMessage;
             UpdateMotorPanel();
             udLoopTime_ValueChanged(udLoopTime, null);
@@ -564,7 +565,7 @@ namespace Robokey
         {
             if (btFindRobot.Text.CompareTo("Close") == 0)
             {
-                SaveSetting(udpComm.RobotInfo.macAddress);
+                //SaveSetting(udpComm.RobotInfo.macAddress);
                 udpComm.Close();
                 btFindRobot.Text = "Find Robot";
                 laPort.Text = "Closed";
@@ -587,10 +588,19 @@ namespace Robokey
 
             udpComm.Open();
             udpComm.SendSetIp();
+            udpComm.SendPackets();
             udpComm.SendGetBoardInfo();
             udpComm.SendPackets();
+            System.Threading.Thread.Sleep(100);
+            udpComm.SendGetParam(SetParamType.PT_PD);
+            udpComm.SendPackets();
+            System.Threading.Thread.Sleep(100);
+            udpComm.SendGetParam(SetParamType.PT_CURRENT);
+            udpComm.SendPackets();
+            System.Threading.Thread.Sleep(100);
+            udpComm.SendGetParam(SetParamType.PT_TORQUE_LIMIT);
+            udpComm.SendPackets();
         }
-
         internal void OnRobotFound(System.Net.IPAddress adr)
         {
             string astr = adr.ToString();
@@ -619,9 +629,9 @@ namespace Robokey
             //            if (!prevMacAddress.SequenceEqual(zeroMacAddress))
             if (motors.Count > 0)
             {
-                SaveSetting(prevMacAddress);
+                //SaveSetting(prevMacAddress);
             }
-            LoadSetting(udpComm.RobotInfo.macAddress);
+            //LoadSetting(udpComm.RobotInfo.macAddress);
             UpdateMotorPanel();
             SendTorqueLimit();
             SendPd();
@@ -662,6 +672,18 @@ namespace Robokey
             udpComm.SendPackets();
         }
 
+        void OnUpdateRobotParam()
+        {
+            for (int i = 0; i < udpComm.RobotInfo.nMotor; ++i)
+            {
+                motors[i].torque.Minimum = udpComm.torqueMin[i];
+                motors[i].torque.Maximum = udpComm.torqueMax[i];
+                motors[i].pd.K = udpComm.paramK[i];
+                motors[i].pd.B = udpComm.paramB[i];
+                motors[i].pd.A = udpComm.paramA[i];
+            }
+
+        }
         void OnUpdateRobotState()
         {
             tbState.Text = "Motor:";
@@ -695,6 +717,7 @@ namespace Robokey
             }
         }
 
+        //  obsolute
         void SaveSetting(byte[] adr)
         {
             var serializer = new DataContractSerializer(motors.GetType());
@@ -721,7 +744,7 @@ namespace Robokey
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            SaveSetting(udpComm.RobotInfo.macAddress);
+            //SaveSetting(udpComm.RobotInfo.macAddress);
             udpComm.Close();
         }
 
@@ -761,6 +784,7 @@ namespace Robokey
             }
         }
 
+        //  obsolute
         void LoadSetting(byte[] adr)
         {
             string str = System.AppDomain.CurrentDomain.BaseDirectory;

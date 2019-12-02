@@ -1,6 +1,10 @@
 #include "Board.h"
 #include <string.h>
 
+BoardRetBase::~BoardRetBase(){}
+
+
+
 BoardFactoryBase* BoardFactories::Find(const char* name) {
 	for(iterator it = begin(); it != end(); ++it){
 		if (strcmp((*it)->GetName(), name) == 0) return &**it;

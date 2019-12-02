@@ -14,7 +14,7 @@
 //@{
 
 ///	Heat limit
-#define MOTOR_HEAT_RELEASE	(SDEC)(0.5 * SDEC_ONE)                  //  0.5
+#define MOTOR_HEAT_RELEASE	((SDEC)(0.5 * SDEC_ONE))                  //  0.5
 #define MOTOR_HEAT_LIMIT	(20 * 10 * S2LDEC(MOTOR_HEAT_RELEASE))	//	20sec * 10Hz
 extern SDEC motorHeatRelease[NMOTOR];		//	heat release from motor / loop (10Hz)
 extern LDEC motorHeatLimit[NMOTOR];			//	limit for heat amount of the motor
@@ -31,17 +31,16 @@ struct PdParam{
     SDEC a[NMOTOR];
 };
 extern struct PdParam pdParam;
-
-void saveMotorParam();
-void loadMotorParam();
-//@}
-
 ///	Torque limit
 struct TorqueLimit{
     SDEC min[NMOTOR];
     SDEC max[NMOTOR];
 };
 extern struct TorqueLimit torqueLimit;
+
+void saveMotorParam();
+void loadMotorParam();
+//@}
 
 
 //	device depended functions

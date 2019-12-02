@@ -170,8 +170,6 @@ void MotorDriver::Init(){
 #endif
 
     for(int ch=0; ch<NMOTOR_DIRECT; ++ch){
-        torqueLimit.max[ch] = (SDEC)(1.0*SDEC_ONE);
-        torqueLimit.min[ch] = (SDEC)(-1.0*SDEC_ONE);
         Pwm(ch, 0);
     }
     LOGD("nPads %d", touchPads.NPad());
@@ -233,15 +231,23 @@ extern "C" void saveMotorParam(){
         keyRelease[11] = '0' + i;
         nvs.set(keyLimit, (int)motorHeatLimit[i]);
         nvs.set(keyRelease, (int)motorHeatRelease[i]);
+
         char keyControlK[10]   = "controlK0";
         char keyControlB[10]   = "controlB0";
         char keyControlA[10]   = "controlA0";
-        keyControlK[9] = '0' + i;
-        keyControlB[9] = '0' + i;
-        keyControlA[9] = '0' + i;
+        keyControlK[8] = '0' + i;
+        keyControlB[8] = '0' + i;
+        keyControlA[8] = '0' + i;
         nvs.set(keyControlK, pdParam.k[i]);
         nvs.set(keyControlB, pdParam.b[i]);
         nvs.set(keyControlA, pdParam.a[i]);
+
+        char keyTorqueMin[11]   = "torqueMin0";
+        char keyTorqueMax[11]   = "torqueMax0";
+        keyTorqueMin[9] = '0' + i;
+        keyTorqueMax[9] = '0' + i;
+        nvs.set(keyTorqueMin, torqueLimit.min[i]);
+        nvs.set(keyTorqueMax, torqueLimit.max[i]);
     }
     nvs.commit();
 }
@@ -253,9 +259,9 @@ extern "C" void loadMotorParam(){
         char keyControlK[10]   = "controlK0";
         char keyControlB[10]   = "controlB0";
         char keyControlA[10]   = "controlA0";
-        keyControlK[9] = '0' + i;
-        keyControlB[9] = '0' + i;
-        keyControlA[9] = '0' + i;
+        keyControlK[8] = '0' + i;
+        keyControlB[8] = '0' + i;
+        keyControlA[8] = '0' + i;
         pdParam.k[i] = PDPARAM_K;
         pdParam.b[i] = PDPARAM_B;
         pdParam.a[i] = PDPARAM_A;
@@ -265,6 +271,7 @@ extern "C" void loadMotorParam(){
         else nvs.set(keyControlB, pdParam.b[i]);
         if (nvs.get(keyControlA, v) == ESP_OK) pdParam.a[i] = v;
         else nvs.set(keyControlA, pdParam.a[i]);
+        //LOGI("pdParam: %s:%d %s:%d %s:%d", keyControlK, pdParam.k[i], keyControlB, pdParam.b[i], keyControlA, pdParam.a[i]);
 
         //  heatLimit
         char keyLimit[11]   = "heatLimit0";
@@ -278,6 +285,20 @@ extern "C" void loadMotorParam(){
         else nvs.set(keyLimit, (int)motorHeatLimit[i]);
         if (nvs.get(keyRelease, v) == ESP_OK) motorHeatRelease[i] = v;
         else nvs.set(keyRelease, (int)motorHeatRelease[i]);
+        //LOGI("heat: %s:%ld %s:%d", keyLimit, motorHeatLimit[i], keyRelease, motorHeatRelease[i]);
+
+        //  torqueLimit
+        char keyTorqueMin[11]   = "torqueMin0";
+        char keyTorqueMax[11]   = "torqueMax0";
+        keyTorqueMin[9] = '0' + i;
+        keyTorqueMax[9] = '0' + i;
+        torqueLimit.min[i] = -SDEC_ONE;
+        torqueLimit.max[i] = SDEC_ONE;
+        if (nvs.get(keyTorqueMin, v) == ESP_OK) torqueLimit.min[i] = v;
+        else nvs.set(keyTorqueMin, torqueLimit.min[i]);
+        if (nvs.get(keyTorqueMax, v) == ESP_OK) torqueLimit.max[i] = v;
+        else nvs.set(keyTorqueMax, torqueLimit.max[i]);
+        //LOGI("torque: %s:%d %s:%d", keyTorqueMin, torqueLimit.min[i], keyTorqueMax, torqueLimit.max[i]);
     }
     nvs.commit();
 }

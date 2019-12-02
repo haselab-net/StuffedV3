@@ -14,7 +14,7 @@ public:
 	typedef CMD CmdPacket;
 	typedef RET RetPacket;
 	CmdPacket cmd;						//	UART command packet for this board. 
-	volatile RET ret;				//	UART return packet for this board.
+	volatile RetPacket ret;				//	UART return packet for this board.
 	Board(int bid, const unsigned char * c, const unsigned char * r) {
 		cmd.boardId = bid;
 		cmdPacketLen = c;
@@ -119,13 +119,16 @@ public:
 			break;
 		case CI_SENSOR:
 			break;	//	nothing todo
+		case CI_GETPARAM:
+			cmd.param.type = packet.GetParamType();
+			break;
 		default:
 			ESP_LOGE(Tag(), "WriteCmd(): Command Id error %d",  command);
 			assert(0);
 		}
 	}
-	void ReadRet(unsigned short cmd, BoardRetBase& packet) {
-		switch (cmd) {
+	void ReadRet(unsigned short cmdId, BoardRetBase& packet) {
+		switch (cmdId) {
 		case CI_ALL:
 			for (int i = 0; i < GetNMotor(); ++i) {
 				updateMotorPos(ret.all.pos[i] - MOTOROFFSET(i), motorMap[i]);
@@ -182,8 +185,38 @@ public:
 				packet.SetTouch(ret.sensor.touch[i], touchMap[i]);
 			}
 			break;
+		case CI_GETPARAM:
+			packet.SetParamType(cmd.param.type);
+			switch(cmd.param.type){
+				case PT_PD:
+					for (int i = 0; i < GetNMotor(); ++i) {
+						packet.SetParamPD(ret.param.pd.k[i], ret.param.pd.b[i], motorMap[i]);
+						//ESP_LOGI(Tag(), "SetParamPD(%d, %d, at%d)", ret.param.pd.k[i], ret.param.pd.b[i], motorMap[i]);
+					}
+					break;
+				case PT_CURRENT:
+					for (int i = 0; i < GetNMotor(); ++i) {
+						packet.SetParamCurrent(ret.param.a[i], motorMap[i]);
+					}
+					break;
+				case PT_TORQUE_LIMIT:
+					for (int i = 0; i < GetNMotor(); ++i) {
+						packet.SetParamTorque(ret.param.torque.min[i], ret.param.torque.max[i], motorMap[i]);
+					}
+					break;
+				case PT_MOTOR_HEAT:
+					for (int i = 0; i < GetNMotor(); ++i) {
+						packet.SetParamHeat(ret.param.heat.limit[i], ret.param.heat.release[i], motorMap[i]);
+					}
+					break;
+				default:
+					ESP_LOGE(Tag(), "ReadRet(): CI_GETPARAM type error %d", cmd.param.type);
+					assert(0);
+					break;
+			}
+			break;
 		default:
-			ESP_LOGE(Tag(), "ReadRet(): Command Id error %d", cmd);
+			ESP_LOGE(Tag(), "ReadRet(): Command Id error %d", cmdId);
 			assert(0);
 		}
 	}

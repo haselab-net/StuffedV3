@@ -46,7 +46,11 @@ void AllBoards::ExecLoop(){
 			onChangeControlMode((CommandId)recv->command);
 		}
 
-		ESP_LOGV(Tag(), "ExecLoop(): command %d received.", recv->command);
+		if (recv->command != 7){
+			ESP_LOGD(Tag(), "ExecLoop(): command %d received.", recv->command);
+		}else{
+			ESP_LOGV(Tag(), "ExecLoop(): command %d received.", recv->command);
+		}
 		if (CI_BOARD_INFO < recv->command && recv->command < CI_NCOMMAND) {
 			//	send packet to allBoards
 			ESP_LOGV(Tag(), "ExecLoop(): write cmd %d.", recv->command);
@@ -122,13 +126,15 @@ void AllBoards::EnumerateBoard() {
 	}
 	if (motorPos) free((void*)motorPos);
 	if (motorOffset) free(motorOffset);
-	if (motorKba) free(motorKba);
 	motorPos = (volatile int *) malloc(sizeof(volatile int) * motorMap.size());
 	memset((void*)motorPos, 0, sizeof(int) * motorMap.size());
 	motorOffset = (short*) malloc(sizeof(short) * motorMap.size());
 	memset(motorOffset, 0, sizeof(short) * motorMap.size());
+#ifdef SAVE_ALLMOTORPARAM_ON_WROOM
+	if (motorKba) free(motorKba);
 	motorKba = (SDEC*) malloc(sizeof(SDEC) * 3 * motorMap.size());
-	memset(motorKba, 0, sizeof(SDEC) * 3 * motorMap.size());	
+	memset(motorKba, 0, sizeof(SDEC) * 3 * motorMap.size());
+#endif
 	motorMap.shrink_to_fit();	
 	currentMap.shrink_to_fit();
 	forceMap.shrink_to_fit();
@@ -143,7 +149,6 @@ void AllBoards::EnumerateBoard() {
 		}
 	}
 	LoadMotorPos();
-	LoadMotorParam();
 }
 
 bool AllBoards::HasRet(unsigned short id){
@@ -219,6 +224,7 @@ BoardBase& AllBoards::Board(char uid, char bid){
 	return *boardDirect;
 }
 
+#if 0
 //	save and load control paramter for motors.
 void AllBoards::LoadMotorParam(){
 	NVS nvs("motor");
@@ -240,7 +246,6 @@ void AllBoards::LoadMotorParam(){
 		recv->SetControlB(motorKba[3*i+1], i);
 	}
 	WriteCmd(recv->command, *recv);
-	vTaskDelay(100);
 	recv->SetParamType(PT_CURRENT);
 	for(int i=0; i<motorMap.size(); ++i){
 		recv->SetControlA(motorKba[3*i+2], i);
@@ -262,7 +267,7 @@ void AllBoards::SaveMotorParam(){
 	}
 	nvs.commit();
 }
-
+#endif
 
 //	save and load motor's position. Motor position is always saved to NVS.
 void AllBoards::LoadMotorPos(){

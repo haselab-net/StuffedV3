@@ -74,6 +74,14 @@ namespace Robokey
                 robotInfo = info;
                 pose = new Pose(robotInfo.nMotor);
                 velocity = new Pose(robotInfo.nMotor);
+                torqueMin = new short [robotInfo.nMotor];
+                torqueMax = new short[robotInfo.nMotor];
+                heatLimit = new short[robotInfo.nMotor];
+                heatRelease = new short[robotInfo.nMotor];
+                paramK = new short[robotInfo.nMotor];
+                paramB = new short[robotInfo.nMotor];
+                paramA = new short[robotInfo.nMotor];
+
                 current = new short[robotInfo.nCurrent];
                 force = new short[robotInfo.nForce];
                 touch = new short[robotInfo.nTouch];
@@ -110,6 +118,14 @@ namespace Robokey
             CM_CURRENT,
             CM_FORCE
         };
+        //  robot param
+        public short[] torqueMin = null;
+        public short[] torqueMax = null;
+        public short[] heatLimit = null;
+        public short[] heatRelease = null;
+        public short[] paramK = null;
+        public short[] paramB = null;
+        public short[] paramA = null;
 
         private ControlMode _controlMode = ControlMode.CM_DIRECT;
         public ControlMode controlMode {
@@ -328,10 +344,18 @@ namespace Robokey
             interpolateTickMin = ReadShort(ref cur, buf);
             interpolateTickMax = ReadShort(ref cur, buf);
         }
-        void CallUpdateRobotState() {
+        void CallUpdateRobotState()
+        {
             if (OnUpdateRobotState != null)
             {
                 owner.Invoke(new UpdateRobotStateHandlerType(OnUpdateRobotState));
+            }
+        }
+        void CallUpdateRobotParam()
+        {
+            if (OnUpdateRobotParam != null)
+            {
+                owner.Invoke(new UpdateRobotStateHandlerType(OnUpdateRobotParam));
             }
         }
         void ReadPeerIPAddress(ref int cur, byte[] buf)
@@ -426,6 +450,9 @@ namespace Robokey
                                 ReadForce(ref cur, receiveBytes);
                                 ReadTouch(ref cur, receiveBytes);
                                 CallUpdateRobotState();
+                                break;
+                            case CommandId.CI_GETPARAM:
+                                OnReceiveGetParam(ref cur, receiveBytes);
                                 break;
                             case CommandId.CIU_GET_IPADDRESS:
                                 ReadPeerIPAddress(ref cur, receiveBytes);
@@ -597,6 +624,8 @@ namespace Robokey
             PutCommand(packet, p);
             if (period != 0) interpolateTargetCountWrite++;
         }
+
+        /// send/recv paramters
         public void SendParamCurrent(int nMotor, int[] a)
         {
             byte[] packet = new byte[1000];
@@ -613,6 +642,46 @@ namespace Robokey
             }
             PutCommand(packet, p);
         }
+        public void SendGetParam(SetParamType pt)
+        {
+            byte[] packet = new byte[8];
+            int p = 0;
+            WriteHeader((int)CommandId.CI_GETPARAM, ref p, packet);
+            WriteShort((int)pt, ref p, packet);
+            PutCommand(packet, p);
+        }
+        private void OnReceiveGetParam(ref int cur, byte[] receiveBytes){
+            SetParamType pt = (SetParamType)ReadShort(ref cur, receiveBytes);
+            switch (pt)
+            {
+                case SetParamType.PT_CURRENT:
+                    for (int i = 0; i < robotInfo.nMotor; ++i)
+                        paramA[i] = ReadShort(ref cur, receiveBytes);
+                    for (int i = 0; i < robotInfo.nMotor; ++i)
+                        ReadShort(ref cur, receiveBytes);
+                    break;
+                case SetParamType.PT_PD:
+                    for (int i = 0; i < robotInfo.nMotor; ++i)
+                        paramK[i] = ReadShort(ref cur, receiveBytes);
+                    for (int i = 0; i < robotInfo.nMotor; ++i)
+                        paramB[i] = ReadShort(ref cur, receiveBytes);
+                    break;
+                case SetParamType.PT_MOTOR_HEAT:
+                    for (int i = 0; i < robotInfo.nMotor; ++i)
+                        heatLimit[i] = ReadShort(ref cur, receiveBytes);
+                    for (int i = 0; i < robotInfo.nMotor; ++i)
+                        heatRelease[i] = ReadShort(ref cur, receiveBytes);
+                    break;
+                case SetParamType.PT_TORQUE_LIMIT:
+                    for (int i = 0; i < robotInfo.nMotor; ++i)
+                        torqueMin[i] = ReadShort(ref cur, receiveBytes);
+                    for (int i = 0; i < robotInfo.nMotor; ++i)
+                        torqueMax[i] = ReadShort(ref cur, receiveBytes);
+                    break;
+            }
+            CallUpdateRobotParam();
+        }
+
         public void SendParamPd(int nMotor, int[] k, int[] b)
         {
             byte[] packet = new byte[1000];
@@ -735,5 +804,6 @@ namespace Robokey
         public event MessageRecieveHandlerType OnMessageReceive = null;
         public delegate void UpdateRobotStateHandlerType();
         public event UpdateRobotStateHandlerType OnUpdateRobotState = null;
+        public event UpdateRobotStateHandlerType OnUpdateRobotParam = null;
     }
 }
