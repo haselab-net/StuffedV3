@@ -83,7 +83,7 @@ namespace PCController
                 case CommandId.CI_RESET_SENSOR:
                     return 1 + 2;
                 case CommandId.CI_GETPARAM:
-                    return 1;
+                    return 1 + 1;
                 default:
                     System.Diagnostics.Debug.Assert(false);
                     break;

@@ -59,9 +59,11 @@
             this.tpCurrent = new System.Windows.Forms.TabPage();
             this.flCurrent = new System.Windows.Forms.FlowLayoutPanel();
             this.tpParam = new System.Windows.Forms.TabPage();
+            this.btRecvPd = new System.Windows.Forms.Button();
             this.btSendPd = new System.Windows.Forms.Button();
             this.flParam = new System.Windows.Forms.FlowLayoutPanel();
             this.tpHeat = new System.Windows.Forms.TabPage();
+            this.btRecvHeat = new System.Windows.Forms.Button();
             this.btSendHeat = new System.Windows.Forms.Button();
             this.flHeat = new System.Windows.Forms.FlowLayoutPanel();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
@@ -434,6 +436,7 @@
             // 
             // tpParam
             // 
+            this.tpParam.Controls.Add(this.btRecvPd);
             this.tpParam.Controls.Add(this.btSendPd);
             this.tpParam.Controls.Add(this.flParam);
             this.tpParam.Location = new System.Drawing.Point(4, 25);
@@ -443,6 +446,16 @@
             this.tpParam.TabIndex = 2;
             this.tpParam.Text = "Param";
             this.tpParam.UseVisualStyleBackColor = true;
+            // 
+            // btRecvPd
+            // 
+            this.btRecvPd.Location = new System.Drawing.Point(82, 0);
+            this.btRecvPd.Name = "btRecvPd";
+            this.btRecvPd.Size = new System.Drawing.Size(75, 23);
+            this.btRecvPd.TabIndex = 2;
+            this.btRecvPd.Text = "Receive";
+            this.btRecvPd.UseVisualStyleBackColor = true;
+            this.btRecvPd.Click += new System.EventHandler(this.btRecvPd_Click);
             // 
             // btSendPd
             // 
@@ -464,6 +477,7 @@
             // 
             // tpHeat
             // 
+            this.tpHeat.Controls.Add(this.btRecvHeat);
             this.tpHeat.Controls.Add(this.btSendHeat);
             this.tpHeat.Controls.Add(this.flHeat);
             this.tpHeat.Location = new System.Drawing.Point(4, 25);
@@ -473,6 +487,16 @@
             this.tpHeat.TabIndex = 4;
             this.tpHeat.Text = "Heat";
             this.tpHeat.UseVisualStyleBackColor = true;
+            // 
+            // btRecvHeat
+            // 
+            this.btRecvHeat.Location = new System.Drawing.Point(82, 0);
+            this.btRecvHeat.Name = "btRecvHeat";
+            this.btRecvHeat.Size = new System.Drawing.Size(75, 23);
+            this.btRecvHeat.TabIndex = 4;
+            this.btRecvHeat.Text = "Receive";
+            this.btRecvHeat.UseVisualStyleBackColor = true;
+            this.btRecvHeat.Click += new System.EventHandler(this.btRecvHeat_Click);
             // 
             // btSendHeat
             // 
@@ -671,6 +695,8 @@
         private System.Windows.Forms.TabPage tpHeat;
         private System.Windows.Forms.FlowLayoutPanel flHeat;
         private System.Windows.Forms.Button btSendHeat;
+        private System.Windows.Forms.Button btRecvPd;
+        private System.Windows.Forms.Button btRecvHeat;
     }
 }
 

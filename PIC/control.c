@@ -25,9 +25,9 @@ SDEC currentSense[NMOTOR];
 //	motor heat limit
 #define USE_HEAT_LIMIT
 #ifdef USE_HEAT_LIMIT
-LDEC motorHeat[NMOTOR];
+long motorHeat[NMOTOR];
 SDEC motorHeatRelease[NMOTOR];
-LDEC motorHeatLimit[NMOTOR];
+long motorHeatLimit[NMOTOR];
 #define MOTOR_VEL_MAX		(5 * LDEC_ONE / 3000)			//	(300PRM/60s = 5rps) / 3000Hz
 LDEC motorVelMax[NMOTOR];
 struct TorqueLimit torqueLimitHeat;
@@ -99,8 +99,8 @@ void updateMotorState(){
 			if (velRatio > SDEC_ONE) velRatio = SDEC_ONE;
 			SDEC deltaH = (long)velRatio * ratio / SDEC_ONE;
 			assert(deltaH >= 0);
-			motorHeat[i] += S2LDEC(deltaH);                 //	heating by motor
-			motorHeat[i] -= S2LDEC(motorHeatRelease[i]);	//	heat release to out air
+			motorHeat[i] += deltaH;                     //	heating by motor
+			motorHeat[i] -= motorHeatRelease[i];        //	heat release to out air
 			if (motorHeat[i] < 0) motorHeat[i] = 0;
 			torqueLimitHeat.max[i] = torqueLimit.max[i];
 			torqueLimitHeat.min[i] = torqueLimit.min[i];

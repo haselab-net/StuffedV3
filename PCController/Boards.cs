@@ -106,30 +106,37 @@ namespace PCController
             v = (short)(v | (short)(buf[cur++] << 8));
             return v;
         }
+        public static void PrepareBuffers(ref byte[] send, ref byte[] recv, CommandId id, Board board) {
+            int wait = board.GetWaitLen(id);
+            int bufLen = wait + board.CommandLen(id);
+            int retLen = board.ReturnLen(id);
+            send = Enumerable.Repeat((byte)0, bufLen).ToArray();
+            recv = new byte[retLen];
+            send[0] = Board.MakeHeader(id, board.boardId);
+        }
+        public void ReadSerial(ref byte[] recvBuf) {
+            int nRead = 0;
+            while (nRead < recvBuf.Length)
+            {
+                nRead += Serial.Read(recvBuf, nRead, recvBuf.Length - nRead);
+            }
+        }
+
         public void SendPosDirect(short[] targets)
         {
             SetControlMode(ControlMode.CM_DIRECT);
             int mi = 0;
             foreach (Board board in this)
             {
-                //  compute length
-                int wait = board.GetWaitLen(CommandId.CI_DIRECT);
-                int bufLen = wait + board.CommandLen(CommandId.CI_DIRECT);
-                int retLen = board.ReturnLen(CommandId.CI_DIRECT);
-                byte[] sendBuf = Enumerable.Repeat((byte)0, bufLen).ToArray();
-                byte[] recvBuf = new byte[retLen];
-                sendBuf[0] = Board.MakeHeader(CommandId.CI_DIRECT, board.boardId);
+                byte[] sendBuf=null, recvBuf=null;
+                PrepareBuffers(ref sendBuf, ref recvBuf, CommandId.CI_DIRECT, board);
                 int cur = 1;
                 for (int i = 0; i < board.nMotor; ++i)
                 {
                     WriteShort(sendBuf, ref cur, targets[mi++]);
                 }
-                Serial.Write(sendBuf, 0, bufLen);
-                int nRead = 0;
-                while (nRead < retLen)
-                {
-                    nRead += Serial.Read(recvBuf, nRead, retLen - nRead);
-                }
+                Serial.Write(sendBuf, 0, sendBuf.Length);
+                ReadSerial(ref recvBuf);
                 cur = 1;
                 for (int i = 0; i < board.nMotor; ++i)
                 {
@@ -162,13 +169,8 @@ namespace PCController
             SetControlMode(ControlMode.CM_INTERPOLATE);
             foreach (Board board in this)
             {
-                //  compute length
-                int wait = board.GetWaitLen(CommandId.CI_INTERPOLATE);
-                int bufLen = wait + board.CommandLen(CommandId.CI_INTERPOLATE);
-                int retLen = board.ReturnLen(CommandId.CI_INTERPOLATE);
-                byte[] sendBuf = Enumerable.Repeat((byte)0, bufLen).ToArray();
-                byte[] recvBuf = new byte[retLen];
-                sendBuf[0] = Board.MakeHeader(CommandId.CI_INTERPOLATE, board.boardId);
+                byte[] sendBuf = null, recvBuf = null;
+                PrepareBuffers(ref sendBuf, ref recvBuf, CommandId.CI_INTERPOLATE, board);
                 int cur = 1;
                 for (int i = 0; i < board.nMotor; ++i)
                 {
@@ -180,12 +182,8 @@ namespace PCController
                 {
                     interpolateTargetCountWrite++;
                 }
-                Serial.Write(sendBuf, 0, bufLen);
-                int nRead = 0;
-                while (nRead < retLen)
-                {
-                    nRead += Serial.Read(recvBuf, nRead, retLen - nRead);
-                }
+                Serial.Write(sendBuf, 0, sendBuf.Length);
+                ReadSerial(ref recvBuf);
                 cur = 1;
                 for (int i = 0; i < board.nMotor; ++i)
                 {
@@ -204,24 +202,15 @@ namespace PCController
             short[] rv = new short[currents.Length];
             foreach (Board board in this)
             {
-                //  compute length
-                int wait = board.GetWaitLen(CommandId.CI_CURRENT);
-                int bufLen = wait + board.CommandLen(CommandId.CI_CURRENT);
-                int retLen = board.ReturnLen(CommandId.CI_CURRENT);
-                byte[] sendBuf = Enumerable.Repeat((byte)0, bufLen).ToArray();
-                byte[] recvBuf = new byte[retLen];
-                sendBuf[0] = Board.MakeHeader(CommandId.CI_CURRENT, board.boardId);
+                byte[] sendBuf = null, recvBuf = null;
+                PrepareBuffers(ref sendBuf, ref recvBuf, CommandId.CI_CURRENT, board);
                 int cur = 1;
                 for (int i = 0; i < board.nMotor; ++i)
                 {
                     WriteShort(sendBuf, ref cur, currents[mi++]);
                 }
-                Serial.Write(sendBuf, 0, bufLen);
-                int nRead = 0;
-                while (nRead < retLen)
-                {
-                    nRead += Serial.Read(recvBuf, nRead, retLen - nRead);
-                }
+                Serial.Write(sendBuf, 0, sendBuf.Length);
+                ReadSerial(ref recvBuf);
                 cur = 1;
                 for (int i = 0; i < board.nMotor; ++i)
                 {
@@ -244,13 +233,8 @@ namespace PCController
             int bi = 0;
             foreach (Board board in this)
             {
-                //  compute length
-                int wait = board.GetWaitLen(CommandId.CI_SETPARAM);
-                int bufLen = wait + board.CommandLen(CommandId.CI_SETPARAM);
-                int retLen = board.ReturnLen(CommandId.CI_SETPARAM);
-                byte[] sendBuf = Enumerable.Repeat((byte)0, bufLen).ToArray();
-                byte[] recvBuf = new byte[retLen];
-                sendBuf[0] = Board.MakeHeader(CommandId.CI_SETPARAM, board.boardId);
+                byte[] sendBuf = null, recvBuf = null;
+                PrepareBuffers(ref sendBuf, ref recvBuf, CommandId.CI_SETPARAM, board);
                 sendBuf[1] = (byte)SetParamType.PT_PD;
                 int cur = 2;
                 for (int i = 0; i < board.nMotor; ++i)
@@ -261,8 +245,9 @@ namespace PCController
                 {
                     WriteShort(sendBuf, ref cur, b[bi++]);
                 }
-                Serial.Write(sendBuf, 0, bufLen);
+                Serial.Write(sendBuf, 0, sendBuf.Length);
             }
+            Thread.Sleep(100);
         }
         public void SendParamHeat(short[] limit, short[] release)
         {
@@ -270,13 +255,8 @@ namespace PCController
             int bi = 0;
             foreach (Board board in this)
             {
-                //  compute length
-                int wait = board.GetWaitLen(CommandId.CI_SETPARAM);
-                int bufLen = wait + board.CommandLen(CommandId.CI_SETPARAM);
-                int retLen = board.ReturnLen(CommandId.CI_SETPARAM);
-                byte[] sendBuf = Enumerable.Repeat((byte)0, bufLen).ToArray();
-                byte[] recvBuf = new byte[retLen];
-                sendBuf[0] = Board.MakeHeader(CommandId.CI_SETPARAM, board.boardId);
+                byte[] sendBuf = null, recvBuf = null;
+                PrepareBuffers(ref sendBuf, ref recvBuf, CommandId.CI_SETPARAM, board);
                 sendBuf[1] = (byte)SetParamType.PT_MOTOR_HEAT;
                 int cur = 2;
                 for (int i = 0; i < board.nMotor; ++i)
@@ -287,29 +267,26 @@ namespace PCController
                 {
                     WriteShort(sendBuf, ref cur, release[bi++]);
                 }
-                Serial.Write(sendBuf, 0, bufLen);
+                Serial.Write(sendBuf, 0, sendBuf.Length);
             }
+            Thread.Sleep(100);
         }
         public void SendParamCurrent(short[] a)
         {
             int ai = 0;
             foreach (Board board in this)
             {
-                //  compute length
-                int wait = board.GetWaitLen(CommandId.CI_SETPARAM);
-                int bufLen = wait + board.CommandLen(CommandId.CI_SETPARAM);
-                int retLen = board.ReturnLen(CommandId.CI_SETPARAM);
-                byte[] sendBuf = Enumerable.Repeat((byte)0, bufLen).ToArray();
-                byte[] recvBuf = new byte[retLen];
-                sendBuf[0] = Board.MakeHeader(CommandId.CI_SETPARAM, board.boardId);
+                byte[] sendBuf = null, recvBuf = null;
+                PrepareBuffers(ref sendBuf, ref recvBuf, CommandId.CI_SETPARAM, board);
                 sendBuf[1] = (byte)SetParamType.PT_CURRENT;
                 int cur = 2;
                 for (int i = 0; i < board.nMotor; ++i)
                 {
                     WriteShort(sendBuf, ref cur, a[ai++]);
                 }
-                Serial.Write(sendBuf, 0, bufLen);
+                Serial.Write(sendBuf, 0, sendBuf.Length);
             }
+            Thread.Sleep(100);
         }
         public void SendParamTorqueLimit(short[] tmin, short[] tmax)
         {
@@ -317,13 +294,8 @@ namespace PCController
             int i2 = 0;
             foreach (Board board in this)
             {
-                //  compute length
-                int wait = board.GetWaitLen(CommandId.CI_SETPARAM);
-                int bufLen = wait + board.CommandLen(CommandId.CI_SETPARAM);
-                int retLen = board.ReturnLen(CommandId.CI_SETPARAM);
-                byte[] sendBuf = Enumerable.Repeat((byte)0, bufLen).ToArray();
-                byte[] recvBuf = new byte[retLen];
-                sendBuf[0] = Board.MakeHeader(CommandId.CI_SETPARAM, board.boardId);
+                byte[] sendBuf = null, recvBuf = null;
+                PrepareBuffers(ref sendBuf, ref recvBuf, CommandId.CI_SETPARAM, board);
                 sendBuf[1] = (byte)SetParamType.PT_TORQUE_LIMIT;
                 int cur = 2;
                 for (int i = 0; i < board.nMotor; ++i)
@@ -334,27 +306,24 @@ namespace PCController
                 {
                     WriteShort(sendBuf, ref cur, tmax[i2++]);
                 }
-                Serial.Write(sendBuf, 0, bufLen);
+                Serial.Write(sendBuf, 0, sendBuf.Length);
             }
+            Thread.Sleep(100);
         }
         public void SendParamBoardId(byte[] ids)
         {
             int i = 0;
             foreach (Board board in this)
             {
-                //  compute length
-                int wait = board.GetWaitLen(CommandId.CI_SETPARAM);
-                int bufLen = wait + board.CommandLen(CommandId.CI_SETPARAM);
-                int retLen = board.ReturnLen(CommandId.CI_SETPARAM);
-                byte[] sendBuf = Enumerable.Repeat((byte)0, bufLen).ToArray();
-                byte[] recvBuf = new byte[retLen];
-                sendBuf[0] = Board.MakeHeader(CommandId.CI_SETPARAM, board.boardId);
+                byte[] sendBuf = null, recvBuf = null;
+                PrepareBuffers(ref sendBuf, ref recvBuf, CommandId.CI_SETPARAM, board);
                 sendBuf[1] = (byte)SetParamType.PT_BOARD_ID;
                 int cur = 2;
                 board.boardId = ids[i];
                 sendBuf[cur++] = ids[i++];
-                Serial.Write(sendBuf, 0, bufLen);
+                Serial.Write(sendBuf, 0, sendBuf.Length);
             }
+            Thread.Sleep(100);
         }
         public void EnumerateBoard()
         {
@@ -412,23 +381,19 @@ namespace PCController
             force = Enumerable.Repeat((short)0, NForce).ToArray();
         }
 
-        public void RecvParamPd(short[] k, short[] b)
+        public void RecvParamPd(ref short[] k, ref short[] b)
         {
             int ki = 0;
             int bi = 0;
             foreach (Board board in this)
             {
-                //  compute length
-                int wait = board.GetWaitLen(CommandId.CI_GETPARAM);
-                int bufLen = wait + board.CommandLen(CommandId.CI_GETPARAM);
-                int retLen = board.ReturnLen(CommandId.CI_GETPARAM);
-                byte[] sendBuf = Enumerable.Repeat((byte)0, bufLen).ToArray();
-                byte[] recvBuf = new byte[retLen];
-                sendBuf[0] = Board.MakeHeader(CommandId.CI_GETPARAM, board.boardId);
+                byte[] sendBuf = null, recvBuf = null;
+                PrepareBuffers(ref sendBuf, ref recvBuf, CommandId.CI_GETPARAM, board);
                 sendBuf[1] = (byte)SetParamType.PT_PD;
-                Serial.Write(sendBuf, 0, bufLen);
-
-                Serial.Read(recvBuf, 0, retLen);
+                Serial.Write(sendBuf, 0, sendBuf.Length);
+                ReadSerial(ref recvBuf);
+                Serial.Write(sendBuf, 0, sendBuf.Length);
+                ReadSerial(ref recvBuf);
                 int cur = 2;
                 for (int i = 0; i < board.nMotor; ++i)
                 {
@@ -440,24 +405,19 @@ namespace PCController
                 }
             }
         }
-        public void RecvParamHeat(short[] limit, short[] release)
+        public void RecvParamHeat(ref short[] limit, ref short[] release)
         {
             int ki = 0;
             int bi = 0;
             foreach (Board board in this)
             {
-                //  compute length
-                //  compute length
-                int wait = board.GetWaitLen(CommandId.CI_GETPARAM);
-                int bufLen = wait + board.CommandLen(CommandId.CI_GETPARAM);
-                int retLen = board.ReturnLen(CommandId.CI_GETPARAM);
-                byte[] sendBuf = Enumerable.Repeat((byte)0, bufLen).ToArray();
-                byte[] recvBuf = new byte[retLen];
-                sendBuf[0] = Board.MakeHeader(CommandId.CI_GETPARAM, board.boardId);
+                byte[] sendBuf = null, recvBuf = null;
+                PrepareBuffers(ref sendBuf, ref recvBuf, CommandId.CI_GETPARAM, board);
                 sendBuf[1] = (byte)SetParamType.PT_MOTOR_HEAT;
-                Serial.Write(sendBuf, 0, bufLen);
-
-                Serial.Read(recvBuf, 0, retLen);
+                Serial.Write(sendBuf, 0, sendBuf.Length);
+                ReadSerial(ref recvBuf);
+                Serial.Write(sendBuf, 0, sendBuf.Length);
+                ReadSerial(ref recvBuf);
                 int cur = 2;
                 for (int i = 0; i < board.nMotor; ++i)
                 {
@@ -469,22 +429,42 @@ namespace PCController
                 }
             }
         }
-        public void RecvParamCurrent(short[] a)
+        public void RecvParamTorque(ref short[] min, ref short[] max)
+        {
+            int ki = 0;
+            int bi = 0;
+            foreach (Board board in this)
+            {
+                byte[] sendBuf = null, recvBuf = null;
+                PrepareBuffers(ref sendBuf, ref recvBuf, CommandId.CI_GETPARAM, board);
+                sendBuf[1] = (byte)SetParamType.PT_TORQUE_LIMIT;
+                Serial.Write(sendBuf, 0, sendBuf.Length);
+                ReadSerial(ref recvBuf);
+                Serial.Write(sendBuf, 0, sendBuf.Length);
+                ReadSerial(ref recvBuf);
+                int cur = 2;
+                for (int i = 0; i < board.nMotor; ++i)
+                {
+                    min[ki++] = ReadShort(recvBuf, ref cur);
+                }
+                for (int i = 0; i < board.nMotor; ++i)
+                {
+                    max[bi++] = ReadShort(recvBuf, ref cur);
+                }
+            }
+        }
+        public void RecvParamCurrent(ref short[] a)
         {
             int ai = 0;
             foreach (Board board in this)
             {
-                //  compute length
-                int wait = board.GetWaitLen(CommandId.CI_GETPARAM);
-                int bufLen = wait + board.CommandLen(CommandId.CI_GETPARAM);
-                int retLen = board.ReturnLen(CommandId.CI_GETPARAM);
-                byte[] sendBuf = Enumerable.Repeat((byte)0, bufLen).ToArray();
-                byte[] recvBuf = new byte[retLen];
-                sendBuf[0] = Board.MakeHeader(CommandId.CI_GETPARAM, board.boardId);
+                byte[] sendBuf = null, recvBuf = null;
+                PrepareBuffers(ref sendBuf, ref recvBuf, CommandId.CI_GETPARAM, board);
                 sendBuf[1] = (byte)SetParamType.PT_CURRENT;
-                Serial.Write(sendBuf, 0, bufLen);
-
-                Serial.Read(recvBuf, 0, retLen);
+                Serial.Write(sendBuf, 0, sendBuf.Length);
+                ReadSerial(ref recvBuf);
+                Serial.Write(sendBuf, 0, sendBuf.Length);
+                ReadSerial(ref recvBuf);
                 int cur = 2;
                 for (int i = 0; i < board.nMotor; ++i)
                 {

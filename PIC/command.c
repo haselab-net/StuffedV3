@@ -133,11 +133,14 @@ void ecSetParam(){
         } break;
     case PT_MOTOR_HEAT:{
         for(i=0; i<NMOTOR; ++i){
-            motorHeatLimit[i] = S2LDEC(command.param.heat.limit[i]);
             motorHeatRelease[i] = command.param.heat.release[i];
+            motorHeatLimit[i] = command.param.heat.limit[i] * command.param.heat.release[i];
         }
         bSaveParam = true;
         } break;
+    default:
+        assert(0);
+        break;
     }
     if (bSaveParam) saveMotorParam();
 }
@@ -242,16 +245,24 @@ void rcForceControl(){
     controlSetMode(CM_FORCE_CONTROL);
 	returnInterpolateParam();
 }
+enum SetParamType getParamType = PT_PD;
+void ecGetParam(){
+    getParamType = command.param.type;
+}
 void rcGetParam(){
-    ESP_LOGD("AllB", "rcGetParam %d", command.param.type);
+#ifdef WROOM
+    PIC_LOGD("rcGetParam %d", command.param.type);
+#endif
     int i;
-    retPacket.param.type = command.param.type;
+    retPacket.param.type = getParamType;
     switch(retPacket.param.type){
     case PT_PD:
         for(i=0; i<NMOTOR; ++i){
             retPacket.param.pd.k[i] = pdParam.k[i];
             retPacket.param.pd.b[i] = pdParam.b[i];
-            ESP_LOGD("AllB", "rcGetParam k=%d b=%d", pdParam.k[i], pdParam.b[i]);
+#ifdef WROOM
+            PIC_LOGD("rcGetParam k=%d b=%d", pdParam.k[i], pdParam.b[i]);
+#endif
         }
         break;
     case PT_CURRENT:
@@ -283,9 +294,13 @@ void rcGetParam(){
         break;
     case PT_MOTOR_HEAT:
         for(i=0; i<NMOTOR; ++i){
-            retPacket.param.heat.limit[i] = L2SDEC(motorHeatLimit[i]);
+            if (motorHeatRelease[i] < 1) motorHeatRelease[i] = 1;
             retPacket.param.heat.release[i] = motorHeatRelease[i];
+            retPacket.param.heat.limit[i] = motorHeatLimit[i] / motorHeatRelease[i];
         }
+        break;
+    default:
+        assert(0);
         break;
     }
 }
@@ -302,7 +317,7 @@ ExecCommand* execCommand[CI_NCOMMAND] = {
 	ecForceControl,
     ecSetParam,
     ecResetSensor,
-    ecNop,          //  get param
+    ecGetParam,
 };
 ExecCommand* returnCommand[CI_NCOMMAND] = {
     rcNop,

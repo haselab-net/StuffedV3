@@ -336,11 +336,12 @@ void saveMotorParam(){
     int i;
 	NVMRead(&nvData);
     for(i=0; i<NMOTOR; ++i){
-        PNVDATA->param.k[i] = pdParam.k[i];
-        PNVDATA->param.b[i] = pdParam.b[i];
-        PNVDATA->param.a[i] = pdParam.a[i];
-        PNVDATA->heat.limit[i] = L2SDEC(motorHeatLimit[i]);
-        PNVDATA->heat.release[i] = 	motorHeatRelease[i];
+        nvData.param.k[i] = pdParam.k[i];
+        nvData.param.b[i] = pdParam.b[i];
+        nvData.param.a[i] = pdParam.a[i];
+        if (motorHeatRelease[i] < 1) motorHeatRelease[i] = 1;
+        nvData.heat.release[i] = 	motorHeatRelease[i];
+        nvData.heat.limit[i] = motorHeatLimit[i] / motorHeatRelease[i];
     }
     NVMWrite(&nvData);
 }
@@ -350,7 +351,7 @@ void loadMotorParam(){
         pdParam.k[i] = PNVDATA->param.k[i];
         pdParam.b[i] = PNVDATA->param.b[i];
         pdParam.a[i] = PNVDATA->param.a[i];
-        motorHeatLimit[i] = S2LDEC(PNVDATA->heat.limit[i]);
         motorHeatRelease[i] = PNVDATA->heat.release[i];	
+        motorHeatLimit[i] = PNVDATA->heat.limit[i] * PNVDATA->heat.release[i];
     }
 }

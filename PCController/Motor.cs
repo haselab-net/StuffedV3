@@ -313,10 +313,10 @@ namespace PCController
         public NumericUpDown udHeatLimit;
         public NumericUpDown udHeatRelease;
         [DataMember]
-        public int HeatLimit
+        public long HeatLimit
         {
-            set { udHeatLimit.Value = value >> (LDEC.NBITS - SDEC.NBITS); }
-            get { return (int)((int)udHeatLimit.Value << (LDEC.NBITS - SDEC.NBITS)); }
+            set { udHeatLimit.Value = value; }
+            get { return (long)udHeatLimit.Value; }
         }
         public short HeatRelease
         {

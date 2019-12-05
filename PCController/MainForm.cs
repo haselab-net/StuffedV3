@@ -66,16 +66,23 @@ namespace PCController
             short[] a = new short[boards.NMotor];
             short[] limit = new short[boards.NMotor];
             short[] release = new short[boards.NMotor];
-            boards.RecvParamPd(k, b);
-            boards.RecvParamCurrent(a);
-            boards.RecvParamHeat(limit, release);
-            for(int i=0; i<boards.NMotor; ++i)
+            short[] torqueMin = new short[boards.NMotor];
+            short[] torqueMax = new short[boards.NMotor];
+            boards.RecvParamPd(ref k, ref b);
+            boards.RecvParamCurrent(ref a);
+            boards.RecvParamTorque(ref torqueMin, ref torqueMax);
+            boards.RecvParamHeat(ref limit, ref release);
+            for (int i=0; i<boards.NMotor; ++i)
             {
                 motors[i].pd.K = k[i];
                 motors[i].pd.B = b[i];
                 motors[i].pd.A = a[i];
-                motors[i].heat.HeatLimit = SDEC.ToLDEC(limit[i]);
+                if (limit[i] > 32000) limit[i] = 32000;
+                if (limit[i] < 0) limit[i] = 0;
+                motors[i].heat.HeatLimit = limit[i] * release[i];
                 motors[i].heat.HeatRelease = release[i];
+                motors[i].torque.Minimum = torqueMin[i];
+                motors[i].torque.Maximum = torqueMax[i];
             }
         }
         private void btListBoards_Click(object sender, EventArgs e)
@@ -211,8 +218,21 @@ namespace PCController
                 a[i] = (short)motors[i].pd.A;
             }
             boards.SendParamPd(k, b);
-            System.Threading.Thread.Sleep(100);
             boards.SendParamCurrent(a);
+        }
+        private void btRecvPd_Click(object sender, EventArgs e)
+        {
+            short[] k = new short[boards.NMotor];
+            short[] b = new short[boards.NMotor];
+            short[] a = new short[boards.NMotor];
+            boards.RecvParamPd(ref k, ref b);
+            boards.RecvParamCurrent(ref a);
+            for (int i = 0; i < motors.Count; ++i)
+            {
+                motors[i].pd.K = k[i];
+                motors[i].pd.B = b[i];
+                motors[i].pd.A = a[i];
+            }
         }
 
         private void btSendHeat_Click(object sender, EventArgs e)
@@ -221,12 +241,24 @@ namespace PCController
             short[] heatRelease = new short[boards.NMotor];
             for (int i = 0; i < motors.Count; ++i)
             {
-                heatLimit[i] = LDEC.ToSDEC(motors[i].heat.HeatLimit);
-                heatRelease[i] = (short)motors[i].heat.HeatRelease;
+                heatRelease[i] = motors[i].heat.HeatRelease;
+                heatLimit[i] = (short)(motors[i].heat.HeatLimit / heatRelease[i]);
             }
             boards.SendParamHeat(heatLimit, heatRelease);
-            System.Threading.Thread.Sleep(100);
         }
+
+        private void btRecvHeat_Click(object sender, EventArgs e)
+        {
+            short[] heatLimit = new short[boards.NMotor];
+            short[] heatRelease = new short[boards.NMotor];
+            boards.RecvParamHeat(ref heatLimit, ref heatRelease);
+            for (int i = 0; i < motors.Count; ++i)
+            {
+                motors[i].heat.HeatRelease = heatRelease[i];
+                motors[i].heat.HeatLimit = heatLimit[i] * heatRelease[i];
+            }
+        }
+
     }
     public class CurrentControl
     {
