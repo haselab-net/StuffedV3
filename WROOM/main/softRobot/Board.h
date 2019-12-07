@@ -186,8 +186,8 @@ public:
 			}
 			break;
 		case CI_GET_PARAM:
-			packet.SetParamType(cmd.param.type);
-			switch(cmd.param.type){
+			packet.SetParamType(ret.param.type);
+			switch(ret.param.type){
 				case PT_PD:
 					for (int i = 0; i < GetNMotor(); ++i) {
 						packet.SetParamPD(ret.param.pd.k[i], ret.param.pd.b[i], motorMap[i]);
@@ -210,7 +210,7 @@ public:
 					}
 					break;
 				default:
-					ESP_LOGE(Tag(), "ReadRet(): CI_GET_PARAM type error %d", cmd.param.type);
+					ESP_LOGE(Tag(), "ReadRet(): CI_GET_PARAM type error %d", ret.param.type);
 					assert(0);
 					break;
 			}

@@ -228,7 +228,6 @@ static void onReceiveUdp(void *arg, struct udp_pcb *pcb, struct pbuf *p, const i
 void UdpCom::Init() {
 	udp = NULL;
 	commandCount = 0;
-	bSendNow = false;
 }
 void UdpCom::Start(){
 	udp_init();
@@ -292,7 +291,6 @@ void UdpCom::ReceiveCommandFromUdp(struct udp_pcb * upcb, struct pbuf * top, con
 					recvs.Write();
 				}
 				else {
-					bSendNow = true;
 					int diff = (short)((short)commandCount - (short)recv->count);
 					if (countDiffMax < diff) countDiffMax = diff;
 					//	Command count is not matched. There was some packet losses or delay.
@@ -366,7 +364,6 @@ extern "C" void UdpCom_ReceiveCommand(void* payload, int len, short from) {
 	udpCom.ReceiveCommand(payload, len, from);
 }
 
-
 void UdpCom::SendText(char* text, short errorlevel) {
 	send.command = CIU_TEXT;
 	send.count = commandCount;
@@ -392,7 +389,11 @@ void UdpCom::SendText(char* text, short errorlevel) {
 #else
 #error
 #endif
-		udp_sendto(udp, pb, &ownerIp, port);
+		err_t e = udp_sendto(udp, pb, &ownerIp, port);
+		if (e != ERR_OK){
+			ESP_LOGE(Tag(), "udp_sendto() Error %d", e);
+			//	  ERR_OK = 0, ERR_MEM = -1, ERR_BUF = -2, ERR_TIMEOUT = -3, ERR_RTE = -4, ERR_INPROGRESS = -5, ERR_VAL = -6, ERR_WOULDBLOCK = -7, ERR_USE = -8, ERR_ALREADY = -9, ERR_ISCONN = -10, ERR_CONN = -11,  ERR_IF = -12, ERR_ABRT = -13, ERR_RST = -14, ERR_CLSD = -15,ERR_ARG = -16
+		}
 	}
     pbuf_free(pb); //De-allocate packet buffer
 //	ESP_LOGI(Tag(), "Ret%d C%d L%d to %s\n", send.command, send.count, send.length, ipaddr_ntoa(&ownerIp));
@@ -433,7 +434,11 @@ void UdpCom::SendReturnUdp(UdpCmdPacket& recv) {
 	static struct pbuf* pbStart = NULL;
 	//	Send packet if buffer is full
 	if (sendLen + send.length + 2 > 1400){	// udp packet length should be smaller than 1400.
-		udp_sendto(udp, pbStart, &recv.returnIp, port);
+		err_t e = udp_sendto(udp, pbStart, &recv.returnIp, port);
+		if (e != ERR_OK){
+			ESP_LOGE(Tag(), "udp_sendto() Error %d", e);
+			//	  ERR_OK = 0, ERR_MEM = -1, ERR_BUF = -2, ERR_TIMEOUT = -3, ERR_RTE = -4, ERR_INPROGRESS = -5, ERR_VAL = -6, ERR_WOULDBLOCK = -7, ERR_USE = -8, ERR_ALREADY = -9, ERR_ISCONN = -10, ERR_CONN = -11,  ERR_IF = -12, ERR_ABRT = -13, ERR_RST = -14, ERR_CLSD = -15,ERR_ARG = -16
+		}
     	pbuf_free(pbStart); //De-allocate packet buffer
 		pbStart = NULL;
 		sendLen = 0;
@@ -448,14 +453,20 @@ void UdpCom::SendReturnUdp(UdpCmdPacket& recv) {
 	}
 	sendLen += send.length + 2;
 	//	Send buffer if there is no resting command to process.
-	if (bSendNow || recvs.ReadAvail() <= 1){	//	Read() will call after sent. So 1 means no command remaining.
-		bSendNow = false;
-		udp_sendto(udp, pbStart, &recv.returnIp, port);
+	if (recvs.ReadAvail() <= 1){	//	Read() will call after sent. So 1 means no command remaining.
+		err_t e = udp_sendto(udp, pbStart, &recv.returnIp, port);
+		if (e != ERR_OK){
+			ESP_LOGE(Tag(), "udp_sendto() Error %d", e);
+			//	  ERR_OK = 0, ERR_MEM = -1, ERR_BUF = -2, ERR_TIMEOUT = -3, ERR_RTE = -4, ERR_INPROGRESS = -5, ERR_VAL = -6, ERR_WOULDBLOCK = -7, ERR_USE = -8, ERR_ALREADY = -9, ERR_ISCONN = -10, ERR_CONN = -11,  ERR_IF = -12, ERR_ABRT = -13, ERR_RST = -14, ERR_CLSD = -15,ERR_ARG = -16
+		}
     	pbuf_free(pbStart); //De-allocate packet buffer
 		pbStart = NULL;
 		sendLen = 0;
+		ESP_LOGD(Tag(), "Ret Sent to %s", ipaddr_ntoa(&recv.returnIp));
+	}else{
+		ESP_LOGD(Tag(), "Ret not sent %d", recvs.ReadAvail());
 	}
-	//	ESP_LOGI(Tag(), "Ret%d C%d L%d to %s\n", send.command, send.count, send.length, ipaddr_ntoa(&returnIp));
+	ESP_LOGD(Tag(), "Ret%d C%d L%d to %s", send.command, send.count, send.length, ipaddr_ntoa(&recv.returnIp));
 }
 void UdpCom::ExecUdpCommand(UdpCmdPacket& recv) {
 	switch (recv.command)

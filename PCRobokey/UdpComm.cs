@@ -1,4 +1,7 @@
-﻿using System;
+﻿//#define SHOW_UDP_PACKET
+//#define UDP_NORETRY
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
@@ -6,7 +9,6 @@ using System.Text;
 using System.Windows.Forms;
 using System.IO;
 
-//  #define UDP_NORETRY
 
 namespace Robokey
 {
@@ -58,29 +60,6 @@ namespace Robokey
         public StreamWriter log;
         public ushort recvCount;
 
-        public class ReceivedInfo {
-            public CommandId id;
-            public SetParamType pt;
-            public ReceivedInfo(CommandId i, SetParamType p = SetParamType.PT_PD)
-            {
-                id = i;
-                pt = p;
-            }
-        }
-        public class ReceivedInfos: List<ReceivedInfo>{
-            public bool Has(CommandId id, SetParamType pt = SetParamType.PT_PD) {
-                foreach(ReceivedInfo r in this)
-                {
-                    if (r.id == CommandId.CI_GET_PARAM)
-                    {
-                        if (r.pt == pt) return true;
-                    }
-                    else if (r.id == id) return true;
-                }
-                return false;
-            }
-        }
-        public ReceivedInfos receivedInfos = new ReceivedInfos();
         //  board info
         RobotInfo robotInfo = new RobotInfo();
         public RobotInfo RobotInfo
@@ -419,105 +398,96 @@ namespace Robokey
             {
             UdpComm uc = (UdpComm)(ar.AsyncState);
             byte[] receiveBytes;
-            try
+            if (uc.udp == null) return;
+            receiveBytes = uc.udp.EndReceive(ar, ref uc.recvPoint);
+            if (uc.recvPoint.Port != localBcPort)   //  In broad cast case, sent packet can be received. Must skip.
             {
-                if (uc.udp == null) return;
-                receiveBytes = uc.udp.EndReceive(ar, ref uc.recvPoint);
-                if (uc.recvPoint.Port != localBcPort)   //  In broad cast case, sent packet can be received. Must skip.
+                int cur = 0;
+                ushort length = 0;
+                ushort commandId = 0;
+                while (cur < receiveBytes.Length)
                 {
-                    int cur = 0;
-                    ushort length = 0;
-                    ushort commandId = 0;
-                    while (cur < receiveBytes.Length)
-                    {
-                        int start = cur;
-                        ReadHeader(ref length, ref recvCount, ref commandId, ref cur, receiveBytes);
-                        if (length+2 != receiveBytes.Length) {
-                            if (receiveBytes.Length < (length + 2) + 6) {   //  current packet(length+2) + next header(6)
-                                System.Diagnostics.Debug.WriteLine("Ct:" + recvCount + " Cmd:" + commandId + " received length:" + receiveBytes.Length + "  not match to the length in packet:" + (length+2));
-                            }
-                        }
-
-                        //System.Diagnostics.Debug.WriteLine("Receive cmd=" + commandId + "  count=" + recvCount + "  len="+length);
-                        if (log != null)
-                        {
-                            log.Write("L" + length + " C" + commandId);
-                            for (int i = cur; i < receiveBytes.Length; i += 2)
-                            {
-                                short s = (short)(receiveBytes[i] | (receiveBytes[i + 1] << 8));
-                                log.Write(" " + string.Format("{0,0:X4}", s));
-                            }
-                            log.Write("\r\n");
-                        }
-                        sendQueue.FreeTo(recvCount);
-                        switch ((CommandId)commandId)
-                        {
-                            case CommandId.CI_BOARD_INFO:
-                                ReadBoard(ref cur, receiveBytes);
-                                receivedInfos.Add(new ReceivedInfo(CommandId.CI_BOARD_INFO));
-                                break;
-                            case CommandId.CI_DIRECT:
-                                ReadPose(ref cur, receiveBytes);
-                                cur += pose.values.Length * 2;
-                                CallUpdateRobotState();
-                                break;
-                            case CommandId.CI_INTERPOLATE:
-                            case CommandId.CI_FORCE_CONTROL:
-                                ReadPose(ref cur, receiveBytes);
-                                ReadTick(ref cur, receiveBytes);
-                                //System.Diagnostics.Debug.WriteLine("Receive CorMax:" + (int)interpolateTargetCountReadMax);
-                                CallUpdateRobotState();
-                                break;
-                            case CommandId.CI_SENSOR:
-                                ReadPose(ref cur, receiveBytes);
-                                ReadCurrent(ref cur, receiveBytes);
-                                ReadForce(ref cur, receiveBytes);
-                                ReadTouch(ref cur, receiveBytes);
-                                CallUpdateRobotState();
-                                break;
-                            case CommandId.CI_GET_PARAM:
-                                OnReceiveGetParam(ref cur, receiveBytes);
-                                break;
-                            case CommandId.CIU_GET_IPADDRESS:
-                                ReadPeerIPAddress(ref cur, receiveBytes);
-                                if (bFindRobot)
-                                {
-                                    lock (sendQueue)
-                                    {
-                                        sendQueue.Clear();
-                                        sendQueue.commandCount = recvCount;
-                                    }
-                                    if (OnRobotFound != null)
-                                    {
-                                        owner.Invoke(new RobotFindHandlerType(OnRobotFound), recvPoint.Address);
-                                    }
-                                }
-                                break;
-                            case CommandId.CIU_TEXT:
-                                ReadText(ref cur, receiveBytes);
-                                break;
-                            default:
-                                if (commandId >= (int)CommandId.CIU_NCOMMAND)
-                                {
-                                    string msg = "Invalid command " + commandId + " received";
-                                    SetMessage(-1, msg);
-                                }
-                                break;
-                        }
-                        if (cur != start + length + 2) {
-                            System.Diagnostics.Debug.WriteLine("Recv lengths not match !");
-                        }
-                        cur = start + length + 2;
+                    int start = cur;
+                    ReadHeader(ref length, ref recvCount, ref commandId, ref cur, receiveBytes);
+                    if (receiveBytes.Length < start + (length + 2)) {   //  current packet(length+2)
+                        System.Diagnostics.Debug.WriteLine("Ct:" + recvCount + " Cmd:" + commandId + " received length:" + receiveBytes.Length + "  not match to the length in packet:" + (length+2));
                     }
-                }
-                if (uc.udp != null)
-                {
-                    uc.udp.BeginReceive(OnReceive, ar.AsyncState);
+#if SHOW_UDP_PACKET
+                    System.Diagnostics.Debug.WriteLine("Receive cmd=" + commandId + "  count=" + recvCount + "  len="+length);
+#endif
+                    if (log != null)
+                    {
+                        log.Write("L" + length + " C" + commandId);
+                        for (int i = cur; i < receiveBytes.Length; i += 2)
+                        {
+                            short s = (short)(receiveBytes[i] | (receiveBytes[i + 1] << 8));
+                            log.Write(" " + string.Format("{0,0:X4}", s));
+                        }
+                        log.Write("\r\n");
+                    }
+                    sendQueue.FreeTo(recvCount);
+                    switch ((CommandId)commandId)
+                    {
+                        case CommandId.CI_BOARD_INFO:
+                            ReadBoard(ref cur, receiveBytes);
+                            break;
+                        case CommandId.CI_DIRECT:
+                            ReadPose(ref cur, receiveBytes);
+                            cur += pose.values.Length * 2;
+                            CallUpdateRobotState();
+                            break;
+                        case CommandId.CI_INTERPOLATE:
+                        case CommandId.CI_FORCE_CONTROL:
+                            ReadPose(ref cur, receiveBytes);
+                            ReadTick(ref cur, receiveBytes);
+                            //System.Diagnostics.Debug.WriteLine("Receive CorMax:" + (int)interpolateTargetCountReadMax);
+                            CallUpdateRobotState();
+                            break;
+                        case CommandId.CI_SENSOR:
+                            ReadPose(ref cur, receiveBytes);
+                            ReadCurrent(ref cur, receiveBytes);
+                            ReadForce(ref cur, receiveBytes);
+                            ReadTouch(ref cur, receiveBytes);
+                            CallUpdateRobotState();
+                            break;
+                        case CommandId.CI_GET_PARAM:
+                            OnReceiveGetParam(ref cur, receiveBytes);
+                            break;
+                        case CommandId.CIU_GET_IPADDRESS:
+                            ReadPeerIPAddress(ref cur, receiveBytes);
+                            if (bFindRobot)
+                            {
+                                lock (sendQueue)
+                                {
+                                    sendQueue.Clear();
+                                    sendQueue.commandCount = recvCount;
+                                }
+                                if (OnRobotFound != null)
+                                {
+                                    owner.Invoke(new RobotFindHandlerType(OnRobotFound), recvPoint.Address);
+                                }
+                            }
+                            break;
+                        case CommandId.CIU_TEXT:
+                            ReadText(ref cur, receiveBytes);
+                            break;
+                        default:
+                            if (commandId >= (int)CommandId.CIU_NCOMMAND)
+                            {
+                                string msg = "Invalid command " + commandId + " received";
+                                SetMessage(-1, msg);
+                            }
+                            break;
+                    }
+                    if (cur != start + length + 2) {
+                        System.Diagnostics.Debug.WriteLine("Recv lengths not match !");
+                    }
+                    cur = start + length + 2;
                 }
             }
-            catch (Exception)
+            if (uc.udp != null)
             {
-                return;
+                uc.udp.BeginReceive(OnReceive, ar.AsyncState);
             }
         }
         public void Close()
@@ -552,17 +522,14 @@ namespace Robokey
             sendQueue.UpdateRead();
             if (sendQueue.readAvail <= 0) return;
             //            byte[] buf = new byte[1400];    //  MTU is less than 1500.
-            byte[] buf = new byte[100];    //  MTU is less than 1500.
+            byte[] buf = new byte[1400];    //  MTU is less than 1500.
             int pos = 0;
-            bool bFirst = true;
             for (int i = 0; i < sendQueue.readAvail; ++i)
             {
                 byte[] cmd = sendQueue.Peek(i);
                 int len = ReadLength(0, cmd) + 2;
                 if (pos + len > buf.Length)
                 {
-                    if (!bFirst) System.Threading.Thread.Sleep(100); //  wait 100ms
-                    bFirst = false;
                     udp.Send(buf, pos, sendPoint);
                     pos = 0;
                 }
@@ -683,7 +650,6 @@ namespace Robokey
         }
         private void OnReceiveGetParam(ref int cur, byte[] receiveBytes){
             SetParamType pt = (SetParamType)ReadShort(ref cur, receiveBytes);
-            receivedInfos.Add(new ReceivedInfo(CommandId.CI_GET_PARAM, pt));
             switch (pt)
             {
                 case SetParamType.PT_CURRENT:

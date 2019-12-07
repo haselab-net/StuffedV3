@@ -1,4 +1,4 @@
-﻿#define RUNTICK_DEBUG
+﻿//#define RUNTICK_DEBUG
 
 using System;
 using System.IO;
@@ -36,6 +36,12 @@ namespace Robokey
             udLoopTime_ValueChanged(udLoopTime, null);
             openPose.InitialDirectory = System.IO.Directory.GetCurrentDirectory();
             savePose.InitialDirectory = System.IO.Directory.GetCurrentDirectory();
+        }
+        protected override void OnClosed(EventArgs e) {
+            udpComm.OnUpdateRobotInfo -= OnUpdateRobotInfo;
+            udpComm.OnUpdateRobotState -= OnUpdateRobotState;
+            udpComm.OnUpdateRobotParam -= OnUpdateRobotParam;
+            System.Threading.Thread.Sleep(100);
         }
 
         ~MainForm()
@@ -379,7 +385,7 @@ namespace Robokey
             lbRecvCount.Text = udpComm.recvCount.ToString();
             lbSendCount.Text = udpComm.sendQueue.commandCount.ToString();
             Timer tmRun = (Timer)sender;
-            if (ckRun.Checked)
+            if (ckRun.Checked && poses.Count >= 2)
             {
                 if (ckForce.Checked)
                 {
@@ -580,15 +586,12 @@ namespace Robokey
         private void OnBtRobotClick(object sender, EventArgs e)
         {
             Button bt = (Button)sender;
-            if (btFindRobot.Text != "Close")
-            {
-                udpComm.StopFindRobot();
-                udpComm.SetAddress(bt.Text);
-                laPort.Text = "IP " + udpComm.sendPoint.Address;
-                btFindRobot.Text = "Close";
-                Refresh();
-                udpComm.receivedInfos.Clear();
-            }
+            udpComm.StopFindRobot();
+            udpComm.SetAddress(bt.Text);
+            laPort.Text = "IP " + udpComm.sendPoint.Address;
+            btFindRobot.Text = "Close";
+            fpFoundRobot.Controls.Clear();
+            Refresh();
             udpComm.Open();
             udpComm.SendSetIp();
             udpComm.SendGetBoardInfo();
@@ -596,14 +599,6 @@ namespace Robokey
             udpComm.SendGetParam(SetParamType.PT_CURRENT);
             udpComm.SendGetParam(SetParamType.PT_TORQUE_LIMIT);
             udpComm.SendPackets();
-
-            if (udpComm.receivedInfos.Has(CommandId.CI_BOARD_INFO)
-                && udpComm.receivedInfos.Has(CommandId.CI_GET_PARAM, SetParamType.PT_PD)
-                && udpComm.receivedInfos.Has(CommandId.CI_GET_PARAM, SetParamType.PT_CURRENT)
-                && udpComm.receivedInfos.Has(CommandId.CI_GET_PARAM, SetParamType.PT_TORQUE_LIMIT)
-                ) {
-                fpFoundRobot.Controls.Clear();
-            }
         }
         internal void OnRobotFound(System.Net.IPAddress adr)
         {

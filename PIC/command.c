@@ -250,7 +250,7 @@ void ecGetParam(){
 }
 void rcGetParam(){
 #ifdef WROOM
-    PIC_LOGD("rcGetParam %d", command.param.type);
+    PIC_LOGD("rcGetParam %d", getParamType);
 #endif
     int i;
     retPacket.param.type = getParamType;
@@ -334,17 +334,13 @@ ExecCommand* returnCommand[CI_NCOMMAND] = {
 };
 
 #ifdef WROOM
-void ExecCmd(void* cmd, int len){
-	assert(sizeof(command) == len);
-	memcpy(&command, cmd, len);
+void ExecCmd(){
 	execCommand[command.commandId]();
     //logPrintf("MCID:%d\r\n", command.commandId);
 }
 void ExecRet(void* ret, int len){
 	retPacket.header = command.header;
 	returnCommand[retPacket.commandId]();
-	assert(sizeof(retPacket) == len);
-	memcpy(ret, &retPacket, len);
     //logPrintf("MRID:%d\r\n", command.commandId);
 }
 #endif
