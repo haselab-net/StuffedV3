@@ -234,7 +234,7 @@ namespace PCController
             foreach (Board board in this)
             {
                 byte[] sendBuf = null, recvBuf = null;
-                PrepareBuffers(ref sendBuf, ref recvBuf, CommandId.CI_SETPARAM, board);
+                PrepareBuffers(ref sendBuf, ref recvBuf, CommandId.CI_SET_PARAM, board);
                 sendBuf[1] = (byte)SetParamType.PT_PD;
                 int cur = 2;
                 for (int i = 0; i < board.nMotor; ++i)
@@ -256,7 +256,7 @@ namespace PCController
             foreach (Board board in this)
             {
                 byte[] sendBuf = null, recvBuf = null;
-                PrepareBuffers(ref sendBuf, ref recvBuf, CommandId.CI_SETPARAM, board);
+                PrepareBuffers(ref sendBuf, ref recvBuf, CommandId.CI_SET_PARAM, board);
                 sendBuf[1] = (byte)SetParamType.PT_MOTOR_HEAT;
                 int cur = 2;
                 for (int i = 0; i < board.nMotor; ++i)
@@ -277,7 +277,7 @@ namespace PCController
             foreach (Board board in this)
             {
                 byte[] sendBuf = null, recvBuf = null;
-                PrepareBuffers(ref sendBuf, ref recvBuf, CommandId.CI_SETPARAM, board);
+                PrepareBuffers(ref sendBuf, ref recvBuf, CommandId.CI_SET_PARAM, board);
                 sendBuf[1] = (byte)SetParamType.PT_CURRENT;
                 int cur = 2;
                 for (int i = 0; i < board.nMotor; ++i)
@@ -295,7 +295,7 @@ namespace PCController
             foreach (Board board in this)
             {
                 byte[] sendBuf = null, recvBuf = null;
-                PrepareBuffers(ref sendBuf, ref recvBuf, CommandId.CI_SETPARAM, board);
+                PrepareBuffers(ref sendBuf, ref recvBuf, CommandId.CI_SET_PARAM, board);
                 sendBuf[1] = (byte)SetParamType.PT_TORQUE_LIMIT;
                 int cur = 2;
                 for (int i = 0; i < board.nMotor; ++i)
@@ -316,7 +316,7 @@ namespace PCController
             foreach (Board board in this)
             {
                 byte[] sendBuf = null, recvBuf = null;
-                PrepareBuffers(ref sendBuf, ref recvBuf, CommandId.CI_SETPARAM, board);
+                PrepareBuffers(ref sendBuf, ref recvBuf, CommandId.CI_SET_PARAM, board);
                 sendBuf[1] = (byte)SetParamType.PT_BOARD_ID;
                 int cur = 2;
                 board.boardId = ids[i];
@@ -388,7 +388,7 @@ namespace PCController
             foreach (Board board in this)
             {
                 byte[] sendBuf = null, recvBuf = null;
-                PrepareBuffers(ref sendBuf, ref recvBuf, CommandId.CI_GETPARAM, board);
+                PrepareBuffers(ref sendBuf, ref recvBuf, CommandId.CI_GET_PARAM, board);
                 sendBuf[1] = (byte)SetParamType.PT_PD;
                 Serial.Write(sendBuf, 0, sendBuf.Length);
                 ReadSerial(ref recvBuf);
@@ -412,7 +412,7 @@ namespace PCController
             foreach (Board board in this)
             {
                 byte[] sendBuf = null, recvBuf = null;
-                PrepareBuffers(ref sendBuf, ref recvBuf, CommandId.CI_GETPARAM, board);
+                PrepareBuffers(ref sendBuf, ref recvBuf, CommandId.CI_GET_PARAM, board);
                 sendBuf[1] = (byte)SetParamType.PT_MOTOR_HEAT;
                 Serial.Write(sendBuf, 0, sendBuf.Length);
                 ReadSerial(ref recvBuf);
@@ -436,7 +436,7 @@ namespace PCController
             foreach (Board board in this)
             {
                 byte[] sendBuf = null, recvBuf = null;
-                PrepareBuffers(ref sendBuf, ref recvBuf, CommandId.CI_GETPARAM, board);
+                PrepareBuffers(ref sendBuf, ref recvBuf, CommandId.CI_GET_PARAM, board);
                 sendBuf[1] = (byte)SetParamType.PT_TORQUE_LIMIT;
                 Serial.Write(sendBuf, 0, sendBuf.Length);
                 ReadSerial(ref recvBuf);
@@ -459,7 +459,7 @@ namespace PCController
             foreach (Board board in this)
             {
                 byte[] sendBuf = null, recvBuf = null;
-                PrepareBuffers(ref sendBuf, ref recvBuf, CommandId.CI_GETPARAM, board);
+                PrepareBuffers(ref sendBuf, ref recvBuf, CommandId.CI_GET_PARAM, board);
                 sendBuf[1] = (byte)SetParamType.PT_CURRENT;
                 Serial.Write(sendBuf, 0, sendBuf.Length);
                 ReadSerial(ref recvBuf);

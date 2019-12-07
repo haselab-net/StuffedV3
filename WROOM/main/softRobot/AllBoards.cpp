@@ -100,11 +100,14 @@ void AllBoards::Init() {
 	EnumerateBoard();
 	xTaskCreate(execLoop, "SR_Exec", 1024*6, this, tskIDLE_PRIORITY+5, &taskExec);
 }
+
 void AllBoards::EnumerateBoard() {
+	//	clear
 	motorMap.clear();	
 	currentMap.clear();
 	forceMap.clear();
 	touchMap.clear();
+	//	Enumerate: Start from boardDirect
 	for(int m=0; m<boardDirect->GetNMotor(); ++m){
 		boardDirect->motorMap.push_back((int)allBoards.motorMap.size());
 		allBoards.motorMap.push_back(DeviceMap(m));
@@ -121,24 +124,30 @@ void AllBoards::EnumerateBoard() {
 		boardDirect->touchMap.push_back((int)allBoards.touchMap.size());
 		allBoards.touchMap.push_back(DeviceMap(m));
 	}
+	//	Enumerate: UARTs
 	for (int i = 0; i < NUART; ++i) {
 		uart[i]->EnumerateBoard(i);
 	}
+	motorMap.shrink_to_fit();	
+	currentMap.shrink_to_fit();
+	forceMap.shrink_to_fit();
+	touchMap.shrink_to_fit();
+
+	//	re-allocate motor position and offset.
 	if (motorPos) free((void*)motorPos);
 	if (motorOffset) free(motorOffset);
 	motorPos = (volatile int *) malloc(sizeof(volatile int) * motorMap.size());
 	memset((void*)motorPos, 0, sizeof(int) * motorMap.size());
 	motorOffset = (short*) malloc(sizeof(short) * motorMap.size());
 	memset(motorOffset, 0, sizeof(short) * motorMap.size());
-#ifdef SAVE_ALLMOTORPARAM_ON_WROOM
+
+#ifdef SAVE_ALL_MOTOR_PARAM_ON_WROOM
 	if (motorKba) free(motorKba);
 	motorKba = (SDEC*) malloc(sizeof(SDEC) * 3 * motorMap.size());
 	memset(motorKba, 0, sizeof(SDEC) * 3 * motorMap.size());
 #endif
-	motorMap.shrink_to_fit();	
-	currentMap.shrink_to_fit();
-	forceMap.shrink_to_fit();
-	touchMap.shrink_to_fit();
+
+	//	compute nTargetMin;
 	nTargetMin = boardDirect->GetNTarget();
 	nBoard = 1;
 	for (int i = 0; i < NUART; ++i) {
@@ -148,6 +157,7 @@ void AllBoards::EnumerateBoard() {
 			nTargetMin = nt < nTargetMin ? nt : nTargetMin;
 		}
 	}
+	//	Load motor position from NVS
 	LoadMotorPos();
 }
 
@@ -227,7 +237,7 @@ BoardBase& AllBoards::Board(char uid, char bid){
 	return *boardDirect;
 }
 
-#ifdef SAVE_ALLMOTORPARAM_ON_WROOM
+#ifdef SAVE_ALL_MOTOR_PARAM_ON_WROOM
 //	save and load control paramter for motors.
 void AllBoards::LoadMotorParam(){
 	NVS nvs("motor");

@@ -595,9 +595,10 @@ namespace Robokey
             udpComm.Open();
             udpComm.SendSetIp();
             udpComm.SendGetBoardInfo();
-            udpComm.SendGetParam(SetParamType.PT_PD);
-            udpComm.SendGetParam(SetParamType.PT_CURRENT);
-            udpComm.SendGetParam(SetParamType.PT_TORQUE_LIMIT);
+            udpComm.SendGetParam(SetParamType.PT_PD);           //  Request to set next type as PT_PD.
+            udpComm.SendGetParam(SetParamType.PT_CURRENT);      //  next = PT_CURRENT and get PT_PD.
+            udpComm.SendGetParam(SetParamType.PT_TORQUE_LIMIT); //  next = PT_TORQUE_LIMIT and get PT_CURRENT.
+            udpComm.SendGetParam(SetParamType.PT_PD);           //  PT_TORQUE_LIMIT will return on this request.
             udpComm.SendPackets();
         }
         internal void OnRobotFound(System.Net.IPAddress adr)

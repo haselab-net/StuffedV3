@@ -221,7 +221,7 @@ extern "C"{
         motorDriver.Pwm(ch, ratio);
     }
 }
-#ifndef SAVE_ALLMOTORPARAM_ON_WROOM
+#ifndef SAVE_ALL_MOTOR_PARAM_ON_WROOM
 extern "C" void saveMotorParam(){
     NVS nvs("motor");
     for(int i=0; i<NMOTOR; ++i){

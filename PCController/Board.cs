@@ -78,11 +78,11 @@ namespace PCController
                     return 1 + nMotor*2 + 2 + 1;
                 case CommandId.CI_FORCE_CONTROL:
                     return 1 + nMotor*(2 + 2 * nForce) + 2 + 1;    //  nMotor * pos jacob
-                case CommandId.CI_SETPARAM:
+                case CommandId.CI_SET_PARAM:
                     return 1 + 1 + nMotor * 2 * 2;
                 case CommandId.CI_RESET_SENSOR:
                     return 1 + 2;
-                case CommandId.CI_GETPARAM:
+                case CommandId.CI_GET_PARAM:
                     return 1 + 1;
                 default:
                     System.Diagnostics.Debug.Assert(false);
@@ -99,7 +99,7 @@ namespace PCController
                 case CommandId.CI_DIRECT: return 1 + nMotor * 2 * 2;
                 case CommandId.CI_INTERPOLATE: return 1 + nMotor * 2 + 2 + 1;
                 case CommandId.CI_CURRENT: return 1 + nMotor * 3 * 2;
-                case CommandId.CI_GETPARAM: return 1 + 1 + nMotor * 2 * 2;
+                case CommandId.CI_GET_PARAM: return 1 + 1 + nMotor * 2 * 2;
             }
             return 0;
         }

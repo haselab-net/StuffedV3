@@ -639,14 +639,11 @@ namespace Robokey
         }
         public void SendGetParam(SetParamType pt)
         {
-            for (int i = 0; i < 2; ++i)
-            {
-                byte[] packet = new byte[8];
-                int p = 0;
-                WriteHeader((int)CommandId.CI_GET_PARAM, ref p, packet);
-                WriteShort((int)pt, ref p, packet);
-                PutCommand(packet, p);
-            }
+            byte[] packet = new byte[8];
+            int p = 0;
+            WriteHeader((int)CommandId.CI_GET_PARAM, ref p, packet);
+            WriteShort((int)pt, ref p, packet);
+            PutCommand(packet, p);
         }
         private void OnReceiveGetParam(ref int cur, byte[] receiveBytes){
             SetParamType pt = (SetParamType)ReadShort(ref cur, receiveBytes);

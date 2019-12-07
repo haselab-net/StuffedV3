@@ -16,7 +16,7 @@ void BoardDirect::WriteCmd(unsigned short commandId, BoardCmdBase& packet){
     ExecRet();
     ExecCmd();  //  exec command
 
-#ifdef SAVE_ALLMOTORPARAM_ON_WROOM
+#ifdef SAVE_ALL_MOTOR_PARAM_ON_WROOM
     //  To save all motor paramters in WROOM. 
     if (cmd.commandId == CI_SET_PARAM && (cmd.param.type == PT_PD || cmd.param.type == PT_CURRENT)){
         allBoards.SaveMotorParam();
