@@ -375,6 +375,7 @@ namespace Robokey
         bool bCheckCorInQueue = false;
         private void runTimer_Tick(object sender, EventArgs e)
         {
+            //udpComm.SendPackets();
             lbRecvCount.Text = udpComm.recvCount.ToString();
             lbSendCount.Text = udpComm.sendQueue.commandCount.ToString();
             Timer tmRun = (Timer)sender;
@@ -579,27 +580,30 @@ namespace Robokey
         private void OnBtRobotClick(object sender, EventArgs e)
         {
             Button bt = (Button)sender;
-            udpComm.StopFindRobot();
-            udpComm.SetAddress(bt.Text);
-            laPort.Text = "IP " + udpComm.sendPoint.Address;
-            fpFoundRobot.Controls.Clear();
-            btFindRobot.Text = "Close";
-            Refresh();
-
+            if (btFindRobot.Text != "Close")
+            {
+                udpComm.StopFindRobot();
+                udpComm.SetAddress(bt.Text);
+                laPort.Text = "IP " + udpComm.sendPoint.Address;
+                btFindRobot.Text = "Close";
+                Refresh();
+                udpComm.receivedInfos.Clear();
+            }
             udpComm.Open();
             udpComm.SendSetIp();
-            udpComm.SendPackets();
             udpComm.SendGetBoardInfo();
-            udpComm.SendPackets();
-            System.Threading.Thread.Sleep(100);
             udpComm.SendGetParam(SetParamType.PT_PD);
-            udpComm.SendPackets();
-            System.Threading.Thread.Sleep(100);
             udpComm.SendGetParam(SetParamType.PT_CURRENT);
-            udpComm.SendPackets();
-            System.Threading.Thread.Sleep(100);
             udpComm.SendGetParam(SetParamType.PT_TORQUE_LIMIT);
             udpComm.SendPackets();
+
+            if (udpComm.receivedInfos.Has(CommandId.CI_BOARD_INFO)
+                && udpComm.receivedInfos.Has(CommandId.CI_GET_PARAM, SetParamType.PT_PD)
+                && udpComm.receivedInfos.Has(CommandId.CI_GET_PARAM, SetParamType.PT_CURRENT)
+                && udpComm.receivedInfos.Has(CommandId.CI_GET_PARAM, SetParamType.PT_TORQUE_LIMIT)
+                ) {
+                fpFoundRobot.Controls.Clear();
+            }
         }
         internal void OnRobotFound(System.Net.IPAddress adr)
         {
@@ -633,8 +637,8 @@ namespace Robokey
             }
             //LoadSetting(udpComm.RobotInfo.macAddress);
             UpdateMotorPanel();
-            SendTorqueLimit();
-            SendPd();
+            //SendTorqueLimit();
+            //SendPd();
             udpComm.SendPoseDirect(Interpolate(curTime));
             udpComm.SendPackets();
         }

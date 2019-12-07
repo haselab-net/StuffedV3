@@ -96,7 +96,7 @@ public:
 				cmd.forceControl.targetCountWrite = packet.GetTargetCountWrite();
 			}
 			break;
-		case CI_SETPARAM:
+		case CI_SET_PARAM:
 			cmd.param.type = packet.GetParamType();
 			if (cmd.param.type == PT_PD){
 				for (int i = 0; i < GetNMotor(); ++i) {
@@ -119,7 +119,7 @@ public:
 			break;
 		case CI_SENSOR:
 			break;	//	nothing todo
-		case CI_GETPARAM:
+		case CI_GET_PARAM:
 			cmd.param.type = packet.GetParamType();
 			break;
 		default:
@@ -185,7 +185,7 @@ public:
 				packet.SetTouch(ret.sensor.touch[i], touchMap[i]);
 			}
 			break;
-		case CI_GETPARAM:
+		case CI_GET_PARAM:
 			packet.SetParamType(cmd.param.type);
 			switch(cmd.param.type){
 				case PT_PD:
@@ -210,7 +210,7 @@ public:
 					}
 					break;
 				default:
-					ESP_LOGE(Tag(), "ReadRet(): CI_GETPARAM type error %d", cmd.param.type);
+					ESP_LOGE(Tag(), "ReadRet(): CI_GET_PARAM type error %d", cmd.param.type);
 					assert(0);
 					break;
 			}

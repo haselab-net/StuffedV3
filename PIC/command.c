@@ -20,8 +20,7 @@ int retLen;
 extern SDEC getTouch(int i);
 #else
 static inline SDEC getTouch(int i){
-    assert(0);
-    exit(0);
+    PIC_LOGE("getTouch called");
 }
 #endif
 
@@ -139,7 +138,7 @@ void ecSetParam(){
         bSaveParam = true;
         } break;
     default:
-        assert(0);
+        PIC_LOGE("ecSetParam got wrong type %d", (int)command.param.type);
         break;
     }
     if (bSaveParam) saveMotorParam();
@@ -300,7 +299,7 @@ void rcGetParam(){
         }
         break;
     default:
-        assert(0);
+        PIC_LOGE("rcGetParam got wrong type %d, set = %d", (int)getParamType, (int)command.param.type);
         break;
     }
 }

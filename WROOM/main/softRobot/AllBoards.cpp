@@ -177,6 +177,9 @@ void AllBoards::WriteCmd(unsigned short commandId, BoardCmdBase& packet) {
 	for (int i = 0; i < NUART; ++i) {
 		uart[i]->RecvUart();
 	}
+	if (commandId == CI_SET_PARAM){
+		vTaskDelay(100 / portTICK_PERIOD_MS);
+	}
 }
 inline void readAndGetMinMax(bool bFirst, BoardBase* board, unsigned short commandId, 
 	BoardRetBase& packet, unsigned char& tcrMin, unsigned char& tcrMax, unsigned short& tickMin, unsigned short& tickMax){
@@ -239,7 +242,7 @@ void AllBoards::LoadMotorParam(){
 		if (nvs.get(key, v) == ESP_OK) motorKba[3*2] = v;
 	}
 	UdpCmdPacket* recv = new UdpCmdPacket;
-	recv->command = CI_SETPARAM;
+	recv->command = CI_SET_PARAM;
 	recv->SetParamType(PT_PD);
 	for(int i=0; i<motorMap.size(); ++i){
 		recv->SetControlK(motorKba[3*i], i);

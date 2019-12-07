@@ -48,9 +48,9 @@ int UdpCmdPacket::CommandLen() {
 		return (NHEADER + allBoards.GetNTotalMotor() + 2) * 2;
 	case CI_FORCE_CONTROL: 	//	pos JK period targetCount
 		return (NHEADER + allBoards.GetNTotalMotor() + allBoards.GetNTotalForce()*3 + 2) * 2;
-	case CI_SETPARAM: 		//	KB, torque min/max, a, boardId ...
+	case CI_SET_PARAM: 		//	KB, torque min/max, a, boardId ...
 		return (NHEADER + 1 + allBoards.GetNTotalMotor() * 2) * 2;
-	case CI_GETPARAM: 		//	KB, torque min/max, a, boardId ...
+	case CI_GET_PARAM: 		//	KB, torque min/max, a, boardId ...
 		return (NHEADER + 1) * 2;
 	case CI_RESET_SENSOR:
 		return (NHEADER + 1) * 2;	//	flags
@@ -106,10 +106,10 @@ void UdpRetPacket::SetLength() {
 	case CI_INTERPOLATE:	//	pos targetCountReadMin targetCountReadMax tickMin tickMax
 	case CI_FORCE_CONTROL:
 		length = (NHEADER + allBoards.GetNTotalMotor() + 4) * 2; break;
-	case CI_SETPARAM:
+	case CI_SET_PARAM:
 	case CI_RESET_SENSOR:
 		length = NHEADER*2; break;
-	case CI_GETPARAM:
+	case CI_GET_PARAM:
 		length = (NHEADER + 1 + allBoards.GetNTotalMotor() * 2) * 2;  break;
 	case CIU_TEXT:			//	return text message: type, len, str.
 		length = (NHEADER + 1 + 1) * 2 + data[1]; break;
@@ -228,6 +228,7 @@ static void onReceiveUdp(void *arg, struct udp_pcb *pcb, struct pbuf *p, const i
 void UdpCom::Init() {
 	udp = NULL;
 	commandCount = 0;
+	bSendNow = false;
 }
 void UdpCom::Start(){
 	udp_init();
@@ -291,6 +292,7 @@ void UdpCom::ReceiveCommandFromUdp(struct udp_pcb * upcb, struct pbuf * top, con
 					recvs.Write();
 				}
 				else {
+					bSendNow = true;
 					int diff = (short)((short)commandCount - (short)recv->count);
 					if (countDiffMax < diff) countDiffMax = diff;
 					//	Command count is not matched. There was some packet losses or delay.
@@ -430,7 +432,7 @@ void UdpCom::SendReturnUdp(UdpCmdPacket& recv) {
 	static int sendLen = 0;
 	static struct pbuf* pbStart = NULL;
 	//	Send packet if buffer is full
-	if (sendLen + send.length + 2 > 1000){	// udp packet length should be smaller than 1000.
+	if (sendLen + send.length + 2 > 1400){	// udp packet length should be smaller than 1400.
 		udp_sendto(udp, pbStart, &recv.returnIp, port);
     	pbuf_free(pbStart); //De-allocate packet buffer
 		pbStart = NULL;
@@ -446,7 +448,8 @@ void UdpCom::SendReturnUdp(UdpCmdPacket& recv) {
 	}
 	sendLen += send.length + 2;
 	//	Send buffer if there is no resting command to process.
-	if (recvs.ReadAvail() <= 1){	//	Read() will call after sent. So 1 means no command remaining.
+	if (bSendNow || recvs.ReadAvail() <= 1){	//	Read() will call after sent. So 1 means no command remaining.
+		bSendNow = false;
 		udp_sendto(udp, pbStart, &recv.returnIp, port);
     	pbuf_free(pbStart); //De-allocate packet buffer
 		pbStart = NULL;

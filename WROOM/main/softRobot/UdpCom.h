@@ -184,6 +184,7 @@ public:
 	UdpCmdPackets recvs;
 	unsigned short commandCount;
 	UdpRetPacket send;
+	volatile bool bSendNow;
 	void Init();
 	void Start();
 

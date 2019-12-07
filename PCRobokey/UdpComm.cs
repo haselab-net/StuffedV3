@@ -58,6 +58,29 @@ namespace Robokey
         public StreamWriter log;
         public ushort recvCount;
 
+        public class ReceivedInfo {
+            public CommandId id;
+            public SetParamType pt;
+            public ReceivedInfo(CommandId i, SetParamType p = SetParamType.PT_PD)
+            {
+                id = i;
+                pt = p;
+            }
+        }
+        public class ReceivedInfos: List<ReceivedInfo>{
+            public bool Has(CommandId id, SetParamType pt = SetParamType.PT_PD) {
+                foreach(ReceivedInfo r in this)
+                {
+                    if (r.id == CommandId.CI_GET_PARAM)
+                    {
+                        if (r.pt == pt) return true;
+                    }
+                    else if (r.id == id) return true;
+                }
+                return false;
+            }
+        }
+        public ReceivedInfos receivedInfos = new ReceivedInfos();
         //  board info
         RobotInfo robotInfo = new RobotInfo();
         public RobotInfo RobotInfo
@@ -431,6 +454,7 @@ namespace Robokey
                         {
                             case CommandId.CI_BOARD_INFO:
                                 ReadBoard(ref cur, receiveBytes);
+                                receivedInfos.Add(new ReceivedInfo(CommandId.CI_BOARD_INFO));
                                 break;
                             case CommandId.CI_DIRECT:
                                 ReadPose(ref cur, receiveBytes);
@@ -451,7 +475,7 @@ namespace Robokey
                                 ReadTouch(ref cur, receiveBytes);
                                 CallUpdateRobotState();
                                 break;
-                            case CommandId.CI_GETPARAM:
+                            case CommandId.CI_GET_PARAM:
                                 OnReceiveGetParam(ref cur, receiveBytes);
                                 break;
                             case CommandId.CIU_GET_IPADDRESS:
@@ -527,14 +551,18 @@ namespace Robokey
             if (udp == null || sendPoint == null) return;
             sendQueue.UpdateRead();
             if (sendQueue.readAvail <= 0) return;
-            byte[] buf = new byte[1400];    //  MTU is less than 1500.
+            //            byte[] buf = new byte[1400];    //  MTU is less than 1500.
+            byte[] buf = new byte[100];    //  MTU is less than 1500.
             int pos = 0;
+            bool bFirst = true;
             for (int i = 0; i < sendQueue.readAvail; ++i)
             {
                 byte[] cmd = sendQueue.Peek(i);
                 int len = ReadLength(0, cmd) + 2;
                 if (pos + len > buf.Length)
                 {
+                    if (!bFirst) System.Threading.Thread.Sleep(100); //  wait 100ms
+                    bFirst = false;
                     udp.Send(buf, pos, sendPoint);
                     pos = 0;
                 }
@@ -630,7 +658,7 @@ namespace Robokey
         {
             byte[] packet = new byte[1000];
             int p = 0;
-            WriteHeader((int)CommandId.CI_SETPARAM, ref p, packet);
+            WriteHeader((int)CommandId.CI_SET_PARAM, ref p, packet);
             WriteShort((int)SetParamType.PT_CURRENT, ref p, packet);
             for (int i = 0; i < nMotor; ++i)
             {
@@ -644,14 +672,18 @@ namespace Robokey
         }
         public void SendGetParam(SetParamType pt)
         {
-            byte[] packet = new byte[8];
-            int p = 0;
-            WriteHeader((int)CommandId.CI_GETPARAM, ref p, packet);
-            WriteShort((int)pt, ref p, packet);
-            PutCommand(packet, p);
+            for (int i = 0; i < 2; ++i)
+            {
+                byte[] packet = new byte[8];
+                int p = 0;
+                WriteHeader((int)CommandId.CI_GET_PARAM, ref p, packet);
+                WriteShort((int)pt, ref p, packet);
+                PutCommand(packet, p);
+            }
         }
         private void OnReceiveGetParam(ref int cur, byte[] receiveBytes){
             SetParamType pt = (SetParamType)ReadShort(ref cur, receiveBytes);
+            receivedInfos.Add(new ReceivedInfo(CommandId.CI_GET_PARAM, pt));
             switch (pt)
             {
                 case SetParamType.PT_CURRENT:
@@ -686,7 +718,7 @@ namespace Robokey
         {
             byte[] packet = new byte[1000];
             int p = 0;
-            WriteHeader((int)CommandId.CI_SETPARAM, ref p, packet);
+            WriteHeader((int)CommandId.CI_SET_PARAM, ref p, packet);
             WriteShort((int)SetParamType.PT_PD, ref p, packet);
             for (int i = 0; i < nMotor; ++i)
             {
@@ -702,7 +734,7 @@ namespace Robokey
         {
             byte[] packet = new byte[1000];
             int p = 0;
-            WriteHeader((int)CommandId.CI_SETPARAM, ref p, packet);
+            WriteHeader((int)CommandId.CI_SET_PARAM, ref p, packet);
             WriteShort((int)SetParamType.PT_TORQUE_LIMIT, ref p, packet);
             for (int i = 0; i < nMotor; ++i)
             {
@@ -718,7 +750,7 @@ namespace Robokey
         {
             byte[] packet = new byte[1000];
             int p = 0;
-            WriteHeader((int)CommandId.CI_SETPARAM, ref p, packet);
+            WriteHeader((int)CommandId.CI_SET_PARAM, ref p, packet);
             WriteShort((int)SetParamType.PT_TORQUE_LIMIT, ref p, packet);
             //  padding
             int tmp = p;

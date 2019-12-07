@@ -9,9 +9,9 @@ enum CommandId {
 	CI_CURRENT,             //6 Set currents as servo targets.
 	CI_INTERPOLATE,         //7 Send new frame for interpolation.
 	CI_FORCE_CONTROL,		//8	Position and force control with interpolation.
-	CI_SETPARAM,            //9 Set parameter.
+	CI_SET_PARAM,           //9 Set parameter.
     CI_RESET_SENSOR,        //10 Reset sensor.
-    CI_GETPARAM,            //11 Get parameter.
+    CI_GET_PARAM,           //11 Get parameter.
     CI_NCOMMAND,
     CI_NCOMMAND_MAX=32,     //0 to 31 can be used for UART command, because command ID has 5 bits.
     CIU_TEXT = CI_NCOMMAND_MAX,	
