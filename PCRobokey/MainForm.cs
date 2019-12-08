@@ -38,15 +38,11 @@ namespace Robokey
             savePose.InitialDirectory = System.IO.Directory.GetCurrentDirectory();
         }
         protected override void OnClosed(EventArgs e) {
+            udpComm.owner = null;
             udpComm.OnUpdateRobotInfo -= OnUpdateRobotInfo;
             udpComm.OnUpdateRobotState -= OnUpdateRobotState;
             udpComm.OnUpdateRobotParam -= OnUpdateRobotParam;
             System.Threading.Thread.Sleep(100);
-        }
-
-        ~MainForm()
-        {
-            udpComm.Close();
         }
         public void SetErrorMessage(string s)
         {
@@ -381,10 +377,18 @@ namespace Robokey
         bool bCheckCorInQueue = false;
         private void runTimer_Tick(object sender, EventArgs e)
         {
-            //udpComm.SendPackets();
             lbRecvCount.Text = udpComm.recvCount.ToString();
             lbSendCount.Text = udpComm.sendQueue.commandCount.ToString();
             Timer tmRun = (Timer)sender;
+            
+            // check the length of sendQueue
+            if (udpComm.sendQueue.readAvail > 20)   //  if too much packets wait
+            {
+                //  Clear the send queue
+                udpComm.sendQueue.Clear();
+                System.Diagnostics.Debug.WriteLine("Too much commands (" + udpComm.sendQueue.readAvail + ") to send, clear them.");
+            }
+            //  Interpolate
             if (ckRun.Checked && poses.Count >= 2)
             {
                 if (ckForce.Checked)
@@ -458,7 +462,7 @@ namespace Robokey
                      *  It always executed on the robot side and the robot send return packet for every requrest.
                      */  
                     if (bCheckCorInQueue) {
-                        if (udpComm.sendQueue.readAvail == 0)
+                        if (udpComm.sendQueue.nWait == 0)
                         {
                             bCheckCorInQueue = false;
                         }
@@ -482,19 +486,18 @@ namespace Robokey
                 UpdateCurTime(curTime += tmRun.Interval * (int)udStep.Value);
                 udpComm.SendPoseDirect(Interpolate(curTime) + motors.Offset());
 #endif
-                udpComm.SendPackets();
             }
             else if (ckForce.Checked) // !ckRun.Checked && ckForce.Checked
-            {
+            {   //  Force control without motion; Send jacobian.
                 short[][] jacob = GetForceControlJacob();
                 udpComm.SendPoseForceControl(Interpolate(curTime) + motors.Offset(), (ushort)runTimer.Interval, jacob);
-                udpComm.SendPackets();
             }
+            //  Read sensor
             if (ckSense.Checked)
             {
                 udpComm.SendSensor();
-                udpComm.SendPackets();
             }
+            udpComm.SendPackets();
         }
         short[][] GetForceControlJacob() {
             double[] mpos = new double[motors.Count];
@@ -573,6 +576,8 @@ namespace Robokey
             if (btFindRobot.Text.CompareTo("Close") == 0)
             {
                 //SaveSetting(udpComm.RobotInfo.macAddress);
+                udpComm.SendPoseDirect(Interpolate(curTime));
+                udpComm.SendPackets();
                 udpComm.Close();
                 btFindRobot.Text = "Find Robot";
                 laPort.Text = "Closed";

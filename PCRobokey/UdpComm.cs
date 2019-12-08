@@ -88,10 +88,7 @@ namespace Robokey
                 force = new short[robotInfo.nForce];
                 touch = new short[robotInfo.nTouch];
                 nInterpolateTotal = robotInfo.nTarget;
-                if (OnUpdateRobotInfo != null)
-                {
-                    owner.Invoke(new UpdateRobotInfoHandlerType(OnUpdateRobotInfo), prevMacAddress);
-                }
+                if (owner != null) owner.Invoke(new UpdateRobotInfoHandlerType(OnUpdateRobotInfo), prevMacAddress);
             }
         }
         //  network
@@ -162,6 +159,7 @@ namespace Robokey
             volatile int sent = 0;
             public int writeAvail { get { return (read-1 + bufferLen - write) % bufferLen; } }
             public int readAvail { get { return (write + bufferLen - read) % bufferLen; } }
+            public int nWait { get { return (write + bufferLen - sent) % bufferLen; } }
             public int UpdateRead() {
                 int rv = (sent - read + bufferLen) % bufferLen;
                 read = sent;
@@ -348,17 +346,11 @@ namespace Robokey
         }
         void CallUpdateRobotState()
         {
-            if (OnUpdateRobotState != null)
-            {
-                owner.Invoke(new UpdateRobotStateHandlerType(OnUpdateRobotState));
-            }
+            if (owner != null) owner.Invoke(new UpdateRobotStateHandlerType(OnUpdateRobotState));
         }
         void CallUpdateRobotParam()
         {
-            if (OnUpdateRobotParam != null)
-            {
-                owner.Invoke(new UpdateRobotStateHandlerType(OnUpdateRobotParam));
-            }
+            if (owner != null) owner.Invoke(new UpdateRobotStateHandlerType(OnUpdateRobotParam));
         }
         void ReadPeerIPAddress(ref int cur, byte[] buf)
         {
@@ -374,7 +366,7 @@ namespace Robokey
             {
                 try
                 {
-                    owner.Invoke(new MessageRecieveHandlerType(OnMessageReceive), type, msg);
+                    if (owner != null) owner.Invoke(new MessageRecieveHandlerType(OnMessageReceive), type, msg);
                 }catch (Exception ex){
                     System.Diagnostics.Debug.WriteLine("Exception:" + ex.ToString() + " in SetMessage()");
                 }
@@ -464,7 +456,7 @@ namespace Robokey
                                 }
                                 if (OnRobotFound != null)
                                 {
-                                    owner.Invoke(new RobotFindHandlerType(OnRobotFound), recvPoint.Address);
+                                    if (owner != null) owner.Invoke(new RobotFindHandlerType(OnRobotFound), recvPoint.Address);
                                 }
                             }
                             break;
