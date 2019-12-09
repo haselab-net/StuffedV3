@@ -80,6 +80,7 @@ int UdpCmdPacket::CommandLen() {
 		case CI_M_QUERY:
 			return NHEADER*2 + 1;
 		default:
+			ESP_LOGE(Tag(), "CommandLen() given invalid CIU_MOVEMENT command %d", *(uint8_t*)data);
 			break;
 		}
 	}
@@ -344,7 +345,13 @@ void UdpCom::WriteCommand() {
 }
 
 void UdpCom::ReceiveCommand(void* payload, int len, short from) {
-	UdpCmdPacket* recv = PrepareCommand((CommandId)((short*)payload)[1], from);	//	[0] is length, [1] is command id
+	UdpCmdPacket* recv;
+	CommandId cid = (CommandId)(((short*)payload)[1]);
+	if (cid == CIU_MOVEMENT) {
+		CommandIdMovement mid = (CommandIdMovement)(((short*)payload)[2]);
+		recv = PrepareMovementCommand(cid, mid, from);
+	}
+	else recv = PrepareCommand(cid, from);	//	[0] is length, [1] is command id
 	if (!recv) return;
 	memcpy(recv->bytes + 2, payload, len);
 	WriteCommand();
