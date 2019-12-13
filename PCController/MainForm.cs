@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Windows.Forms;
 using System.IO.Ports;
+using System.Threading;
 
 namespace PCController
 {
@@ -9,8 +10,59 @@ namespace PCController
     {
         Boards boards;
         Motors motors;
+        Haptics haptics;
+        private MMTimer mmTimer;
+
+        bool bHaptic = false;
+        int [] time = { 0, 0, 0, 0 };
+        int count;
+        void mmTimer_Tick(Object sender)   //  Haptic制御
+        {
+            count ++;
+            if (count >= 1000) {
+                count = 0;
+                System.Diagnostics.Debug.WriteLine("1000");
+            }
+            short vib=0;
+            short [] wave = { 1, 0, -1, 0 };
+            if (bHaptic) {
+                for (int i = 0; i < boards.NCurrent; ++i) {
+                    int diff = haptics[i].T - boards.GetPos(i);
+                    if (diff > SDEC.ONE) diff = SDEC.ONE;
+                    if (diff < 0)
+                    {
+                        diff = 0;
+                        time[i] = 0;
+                    }
+                    else {
+                        time[i] ++;
+                        vib = (short)((short)udAmp.Value * wave[time[i] % 4]);
+                        vib = (short)(vib * Math.Exp(-time[i] * (double)udDamp.Value));
+                    }
+                    short c = (short)(diff * haptics[i].K / SDEC.ONE);
+                    if (c < haptics[i].M) c = haptics[i].M;
+                    c += vib;
+                    haptics.currents[i] = c;
+                }
+                boards.SendCurrent(haptics.currents);
+#if false
+                count++;
+                if (count > 100)
+                {
+                    count = 0;
+                    System.Diagnostics.Debug.WriteLine("C:" + currents[0]);
+                }
+#endif
+            }   
+        }
         public MainForm()
         {
+            mmTimer = new MMTimer();
+            mmTimer.Interval = 1;
+            mmTimer.Resolution = 1;
+            mmTimer.Enabled = false;
+            mmTimer.OnTimer += mmTimer_Tick;
+
             System.Diagnostics.Debug.Assert(CommandId.CI_NCOMMAND <= CommandId.CI_NCOMMAND_MAX);
             InitializeComponent();
             boards = new Boards();
@@ -23,6 +75,7 @@ namespace PCController
                 cmbPortBin.Text = cmbPortBin.Items[0].ToString();
             }
             motors = new Motors();
+            haptics = new Haptics();
             udLoopTime_ValueChanged(udLoopTime, null);
         }
         void SetTextMessage(string msg)
@@ -34,8 +87,19 @@ namespace PCController
 
         }
         private void ResetPanels() {
+            ResetHapticTab();
             ResetCurrentTab();
             ResetMotor();
+        }
+        private void ResetHapticTab() {
+            flHaptic.Controls.Clear();
+            haptics.Clear();
+            for (int i = 0; i < boards.NCurrent; ++i)
+            {
+                Haptic h = new Haptic();
+                flHaptic.Controls.Add(h.panel);
+                haptics.Add(h);
+            }
         }
         List<CurrentControl> currentControls = new List<CurrentControl>();
         private void ResetCurrentTab()
@@ -72,7 +136,7 @@ namespace PCController
             boards.RecvParamCurrent(ref a);
             boards.RecvParamTorque(ref torqueMin, ref torqueMax);
             boards.RecvParamHeat(ref limit, ref release);
-            for (int i=0; i<boards.NMotor; ++i)
+            for (int i = 0; i < boards.NMotor; ++i)
             {
                 motors[i].pd.K = k[i];
                 motors[i].pd.B = b[i];
@@ -83,6 +147,10 @@ namespace PCController
                 motors[i].heat.HeatRelease = release[i];
                 motors[i].torque.Minimum = torqueMin[i];
                 motors[i].torque.Maximum = torqueMax[i];
+            }
+
+            for (int i = 0; i < boards.NCurrent; ++i)
+            {
             }
         }
         private void btListBoards_Click(object sender, EventArgs e)
@@ -135,13 +203,18 @@ namespace PCController
 
         private void timer_Tick(object sender, EventArgs e)
         {
-            if (tbControl.SelectedTab == tpPos)
-            {
-                UpdatePos();
+            if (bHaptic) {
+                haptics.Update();
             }
-            if (tbControl.SelectedTab == tpCurrent)
-            {
-                UpdateCurrent();
+            else{
+                if (tbControl.SelectedTab == tpPos)
+                {
+                    UpdatePos();
+                }
+                if (tbControl.SelectedTab == tpCurrent)
+                {
+                    UpdateCurrent();
+                }
             }
             txMsg.Text = "";
             for (int i=0; i< boards.NMotor; ++i)
@@ -259,6 +332,42 @@ namespace PCController
             }
         }
 
+        private void HapticControl() {
+            short[] c0 = { 0, 0, 0, 0 };
+            short[] c1 = { 50, 50, 50, 50 };
+            while (bHaptic)
+            {
+                mmTimer_Tick(this);
+            }
+        }
+        Thread hapticThread;
+        private void btHapticStart_Click(object sender, EventArgs e)
+        {
+            if (!bHaptic)
+            {
+                btHapticStart.Text = "Stop";
+                bHaptic = true;
+#if true
+                mmTimer.Enabled = true;
+                short [] currents = { 0, 0, 0, 0 };
+#else
+                mmTimer.Enabled = false;
+                hapticThread = new Thread(new ThreadStart(HapticControl));
+                hapticThread.Priority = ThreadPriority.Highest;
+                hapticThread.Start();
+#endif
+            }
+            else {
+                btHapticStart.Text = "Start";
+                bHaptic = false;
+                mmTimer.Enabled = false;
+            }
+        }
+
+        private void btReset_Click(object sender, EventArgs e)
+        {
+            boards.SendResetMotor();
+        }
     }
     public class CurrentControl
     {

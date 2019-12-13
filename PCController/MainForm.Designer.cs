@@ -35,6 +35,13 @@
             this.savePose = new System.Windows.Forms.SaveFileDialog();
             this.splitContainer3 = new System.Windows.Forms.SplitContainer();
             this.tbControl = new System.Windows.Forms.TabControl();
+            this.tpHaptic = new System.Windows.Forms.TabPage();
+            this.label6 = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
+            this.udDamp = new System.Windows.Forms.NumericUpDown();
+            this.udAmp = new System.Windows.Forms.NumericUpDown();
+            this.btHapticStart = new System.Windows.Forms.Button();
+            this.flHaptic = new System.Windows.Forms.FlowLayoutPanel();
             this.tpPos = new System.Windows.Forms.TabPage();
             this.flPos = new System.Windows.Forms.FlowLayoutPanel();
             this.panel2 = new System.Windows.Forms.Panel();
@@ -68,6 +75,7 @@
             this.flHeat = new System.Windows.Forms.FlowLayoutPanel();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.btReset = new System.Windows.Forms.Button();
             this.cmbPortBin = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
             this.btListBoards = new System.Windows.Forms.Button();
@@ -78,6 +86,9 @@
             this.splitContainer3.Panel2.SuspendLayout();
             this.splitContainer3.SuspendLayout();
             this.tbControl.SuspendLayout();
+            this.tpHaptic.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.udDamp)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.udAmp)).BeginInit();
             this.tpPos.SuspendLayout();
             this.panel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.udkeyTime)).BeginInit();
@@ -138,6 +149,7 @@
             // 
             // tbControl
             // 
+            this.tbControl.Controls.Add(this.tpHaptic);
             this.tbControl.Controls.Add(this.tpPos);
             this.tbControl.Controls.Add(this.tpCurrent);
             this.tbControl.Controls.Add(this.tpParam);
@@ -148,6 +160,100 @@
             this.tbControl.SelectedIndex = 0;
             this.tbControl.Size = new System.Drawing.Size(559, 495);
             this.tbControl.TabIndex = 5;
+            // 
+            // tpHaptic
+            // 
+            this.tpHaptic.Controls.Add(this.label6);
+            this.tpHaptic.Controls.Add(this.label5);
+            this.tpHaptic.Controls.Add(this.udDamp);
+            this.tpHaptic.Controls.Add(this.udAmp);
+            this.tpHaptic.Controls.Add(this.btHapticStart);
+            this.tpHaptic.Controls.Add(this.flHaptic);
+            this.tpHaptic.Location = new System.Drawing.Point(4, 25);
+            this.tpHaptic.Name = "tpHaptic";
+            this.tpHaptic.Padding = new System.Windows.Forms.Padding(3);
+            this.tpHaptic.Size = new System.Drawing.Size(551, 466);
+            this.tpHaptic.TabIndex = 5;
+            this.tpHaptic.Text = "Haptic";
+            this.tpHaptic.UseVisualStyleBackColor = true;
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(195, 11);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(45, 15);
+            this.label6.TabIndex = 6;
+            this.label6.Text = "Damp:";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(4, 11);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(97, 15);
+            this.label5.TabIndex = 5;
+            this.label5.Text = "Vibration Amp:";
+            // 
+            // udDamp
+            // 
+            this.udDamp.DecimalPlaces = 3;
+            this.udDamp.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            196608});
+            this.udDamp.Location = new System.Drawing.Point(248, 9);
+            this.udDamp.Maximum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.udDamp.Name = "udDamp";
+            this.udDamp.Size = new System.Drawing.Size(74, 22);
+            this.udDamp.TabIndex = 4;
+            this.udDamp.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            131072});
+            // 
+            // udAmp
+            // 
+            this.udAmp.Location = new System.Drawing.Point(108, 9);
+            this.udAmp.Maximum = new decimal(new int[] {
+            150,
+            0,
+            0,
+            0});
+            this.udAmp.Name = "udAmp";
+            this.udAmp.Size = new System.Drawing.Size(78, 22);
+            this.udAmp.TabIndex = 3;
+            this.udAmp.Value = new decimal(new int[] {
+            30,
+            0,
+            0,
+            0});
+            // 
+            // btHapticStart
+            // 
+            this.btHapticStart.Location = new System.Drawing.Point(445, 3);
+            this.btHapticStart.Name = "btHapticStart";
+            this.btHapticStart.Size = new System.Drawing.Size(100, 34);
+            this.btHapticStart.TabIndex = 2;
+            this.btHapticStart.Text = "Start";
+            this.btHapticStart.UseVisualStyleBackColor = true;
+            this.btHapticStart.Click += new System.EventHandler(this.btHapticStart_Click);
+            // 
+            // flHaptic
+            // 
+            this.flHaptic.AutoScroll = true;
+            this.flHaptic.BackColor = System.Drawing.SystemColors.Window;
+            this.flHaptic.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.flHaptic.Location = new System.Drawing.Point(3, 43);
+            this.flHaptic.Name = "flHaptic";
+            this.flHaptic.Size = new System.Drawing.Size(545, 420);
+            this.flHaptic.TabIndex = 1;
             // 
             // tpPos
             // 
@@ -531,19 +637,31 @@
             // 
             this.splitContainer1.Panel2.Controls.Add(this.splitContainer2);
             this.splitContainer1.Size = new System.Drawing.Size(169, 495);
-            this.splitContainer1.SplitterDistance = 80;
+            this.splitContainer1.SplitterDistance = 110;
             this.splitContainer1.TabIndex = 4;
             // 
             // panel1
             // 
+            this.panel1.Controls.Add(this.btReset);
             this.panel1.Controls.Add(this.cmbPortBin);
             this.panel1.Controls.Add(this.label1);
             this.panel1.Controls.Add(this.btListBoards);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(169, 80);
+            this.panel1.Size = new System.Drawing.Size(169, 110);
             this.panel1.TabIndex = 6;
+            // 
+            // btReset
+            // 
+            this.btReset.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btReset.Location = new System.Drawing.Point(47, 82);
+            this.btReset.Name = "btReset";
+            this.btReset.Size = new System.Drawing.Size(121, 23);
+            this.btReset.TabIndex = 3;
+            this.btReset.Text = "Reset Motor";
+            this.btReset.UseVisualStyleBackColor = true;
+            this.btReset.Click += new System.EventHandler(this.btReset_Click);
             // 
             // cmbPortBin
             // 
@@ -590,8 +708,8 @@
             // splitContainer2.Panel2
             // 
             this.splitContainer2.Panel2.Controls.Add(this.txMsg);
-            this.splitContainer2.Size = new System.Drawing.Size(169, 411);
-            this.splitContainer2.SplitterDistance = 229;
+            this.splitContainer2.Size = new System.Drawing.Size(169, 381);
+            this.splitContainer2.SplitterDistance = 212;
             this.splitContainer2.TabIndex = 5;
             // 
             // trBoards
@@ -600,7 +718,7 @@
             this.trBoards.LabelEdit = true;
             this.trBoards.Location = new System.Drawing.Point(0, 0);
             this.trBoards.Name = "trBoards";
-            this.trBoards.Size = new System.Drawing.Size(169, 229);
+            this.trBoards.Size = new System.Drawing.Size(169, 212);
             this.trBoards.TabIndex = 4;
             this.trBoards.BeforeLabelEdit += new System.Windows.Forms.NodeLabelEditEventHandler(this.trBoards_BeforeLabelEdit);
             this.trBoards.AfterLabelEdit += new System.Windows.Forms.NodeLabelEditEventHandler(this.trBoards_AfterLabelEdit);
@@ -612,7 +730,7 @@
             this.txMsg.Multiline = true;
             this.txMsg.Name = "txMsg";
             this.txMsg.ReadOnly = true;
-            this.txMsg.Size = new System.Drawing.Size(169, 178);
+            this.txMsg.Size = new System.Drawing.Size(169, 165);
             this.txMsg.TabIndex = 0;
             // 
             // MainForm
@@ -627,6 +745,10 @@
             this.splitContainer3.Panel2.ResumeLayout(false);
             this.splitContainer3.ResumeLayout(false);
             this.tbControl.ResumeLayout(false);
+            this.tpHaptic.ResumeLayout(false);
+            this.tpHaptic.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.udDamp)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.udAmp)).EndInit();
             this.tpPos.ResumeLayout(false);
             this.panel2.ResumeLayout(false);
             this.panel2.PerformLayout();
@@ -697,6 +819,14 @@
         private System.Windows.Forms.Button btSendHeat;
         private System.Windows.Forms.Button btRecvPd;
         private System.Windows.Forms.Button btRecvHeat;
+        private System.Windows.Forms.TabPage tpHaptic;
+        private System.Windows.Forms.FlowLayoutPanel flHaptic;
+        private System.Windows.Forms.Button btHapticStart;
+        private System.Windows.Forms.Button btReset;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.NumericUpDown udDamp;
+        private System.Windows.Forms.NumericUpDown udAmp;
     }
 }
 

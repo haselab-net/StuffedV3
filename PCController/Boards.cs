@@ -195,7 +195,7 @@ namespace PCController
         }
 
         //  return received currents;
-        public short[] SendCurrent(short[] currents)
+        public short[] SendCurrent(short[] currents, bool bWriteOnly=false)
         {
             SetControlMode(ControlMode.CM_CURRENT);
             int mi = 0;
@@ -210,7 +210,10 @@ namespace PCController
                     WriteShort(sendBuf, ref cur, currents[mi++]);
                 }
                 Serial.Write(sendBuf, 0, sendBuf.Length);
-                ReadSerial(ref recvBuf);
+                if (!bWriteOnly)
+                {
+                    ReadSerial(ref recvBuf);
+                }
                 cur = 1;
                 for (int i = 0; i < board.nMotor; ++i)
                 {
@@ -227,6 +230,17 @@ namespace PCController
             }
             return rv;
         }
+        public void SendResetMotor() {
+            foreach (Board board in this)
+            {
+                byte[] sendBuf = null, recvBuf = null;
+                PrepareBuffers(ref sendBuf, ref recvBuf, CommandId.CI_RESET_SENSOR, board);
+                int cur = 1;
+                WriteShort(sendBuf, ref cur, (short)ResetSensorFlags.RSF_MOTOR);
+                Serial.Write(sendBuf, 0, sendBuf.Length);
+            }
+        }
+
         public void SendParamPd(short[] k, short[] b)
         {
             int ki = 0;
