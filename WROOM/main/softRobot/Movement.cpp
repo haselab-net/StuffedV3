@@ -856,8 +856,8 @@ void onChangeControlMode(CommandId newCommand, const short* data) {
 		}
 		else {												// quit movementControlMode
 			pauseInterpolate();
-			movementControlMode = newMovementControlMode;
 		}
+		movementControlMode = newMovementControlMode;
 	}
 }
 
