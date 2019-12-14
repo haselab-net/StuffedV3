@@ -852,9 +852,11 @@ void onChangeControlMode(CommandId newCommand, const short* data) {
 	}
 	if (newMovementControlMode != movementControlMode) {
 		if (newMovementControlMode) {						// goto movementControlMode
+			ESP_LOGD(LOG_TAG, ">>> enter movement control mode");
 			resumeInterpolate();
 		}
 		else {												// quit movementControlMode
+			ESP_LOGD(LOG_TAG, "<<< quit movement control mode");
 			pauseInterpolate();
 		}
 		movementControlMode = newMovementControlMode;
