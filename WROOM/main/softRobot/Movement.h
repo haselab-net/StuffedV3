@@ -107,7 +107,7 @@ void printMovementInfo();
 
 void initMovementDS();
 
-void onChangeControlMode(CommandId newCommand);
+void onChangeControlMode(CommandId newCommand, const short* data);
 
 /////////////////////////////////////////// api for command packet ///////////////////////////////////////////////
 

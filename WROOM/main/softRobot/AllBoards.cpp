@@ -13,15 +13,15 @@
 #define U2RXPIN	18
 #elif defined BOARD2_COMBINATION
 #define U1TXPIN	16
-#define U1RXPIN	17	
+#define U1RXPIN	17
 #define U2TXPIN	5
 #define U2RXPIN	18
 #elif defined BOARD1_MOTORDRIVER
-#define U1TXPIN	33	
+#define U1TXPIN	33
 #define U1RXPIN	32
 #define U2TXPIN	17
 #define U2RXPIN	16
-#else 
+#else
 #error
 #endif
 
@@ -43,7 +43,7 @@ void AllBoards::ExecLoop(){
 
 		// change resume/pause movement manager
 		if (recv->count == CS_DUKTAPE || recv->count == CS_WEBSOCKET || recv->returnIp.u_addr.ip4.addr) {
-			onChangeControlMode((CommandId)recv->command);
+			onChangeControlMode((CommandId)recv->command, recv->data);
 		}
 
 		ESP_LOGV(Tag(), "ExecLoop(): command %d received.", recv->command);
@@ -57,7 +57,7 @@ void AllBoards::ExecLoop(){
 					for(int i=0; i<motorMap.size(); ++i){
 						motorPos[i] = motorPos[i] + motorOffset[i];		//	motorPos comes to board's value
 						motorOffset[i] = motorPos[i] % SDEC_ONE;		//	resting offset in board
-						motorPos[i] = 0;								//	set motorPos to 0. 
+						motorPos[i] = 0;								//	set motorPos to 0.
 					}
 					ESP_LOGD(Tag(), "ExecLoop(): motorPos reset.");
 				}
@@ -90,14 +90,14 @@ void AllBoards::Init() {
     uconf.flow_ctrl = UART_HW_FLOWCTRL_DISABLE;
     uconf.rx_flow_ctrl_thresh = 0;
     uconf.use_ref_tick = false;
-	
+
 	uart[0]->Init(uconf, U1TXPIN, U1RXPIN); // pin must be changed. IO6-11 are reserved. (RX=32 Yellow, TX=33 Green)
 	uart[1]->Init(uconf, U2TXPIN, U2RXPIN);
 	EnumerateBoard();
 	xTaskCreate(execLoop, "SR_Exec", 1024*6, this, tskIDLE_PRIORITY+5, &taskExec);
 }
 void AllBoards::EnumerateBoard() {
-	motorMap.clear();	
+	motorMap.clear();
 	currentMap.clear();
 	forceMap.clear();
 	touchMap.clear();
@@ -126,7 +126,7 @@ void AllBoards::EnumerateBoard() {
 	memset((void*)motorPos, 0, sizeof(int) * motorMap.size());
 	motorOffset = (short*) malloc(sizeof(short) * motorMap.size());
 	memset(motorOffset, 0, sizeof(short) * motorMap.size());
-	motorMap.shrink_to_fit();	
+	motorMap.shrink_to_fit();
 	currentMap.shrink_to_fit();
 	forceMap.shrink_to_fit();
 	touchMap.shrink_to_fit();
@@ -170,7 +170,7 @@ void AllBoards::WriteCmd(unsigned short commandId, BoardCmdBase& packet) {
 		uart[i]->RecvUart();
 	}
 }
-inline void readAndGetMinMax(bool bFirst, BoardBase* board, unsigned short commandId, 
+inline void readAndGetMinMax(bool bFirst, BoardBase* board, unsigned short commandId,
 	BoardRetBase& packet, unsigned char& tcrMin, unsigned char& tcrMax, unsigned short& tickMin, unsigned short& tickMax){
 	board->ReadRet(commandId, packet);
 	if (bFirst){
@@ -206,7 +206,7 @@ void AllBoards::ReadRet(unsigned short commandId, BoardRetBase& packet){
 			for (int j = 0; j < (int)uart[i]->boards.size(); ++j) {
 				uart[i]->boards[j]->ReadRet(commandId, packet);
 			}
-		}		
+		}
 	}
 }
 BoardBase& AllBoards::Board(char uid, char bid){
@@ -257,9 +257,9 @@ void AllBoards::LoadMotorParam(){
 		key[5] = 'A';
 		if (nvs.get(key, v) == ESP_OK) pdParam.a[i] = v;
 	}
-	ESP_LOGI(Tag(), "LoadMotorParam:K B A: %d %d %d, %d %d %d, %d %d %d", 
-		(int)pdParam.k[0], (int)pdParam.b[0], (int)pdParam.a[0], 
-		(int)pdParam.k[1], (int)pdParam.b[1], (int)pdParam.a[1], 
+	ESP_LOGI(Tag(), "LoadMotorParam:K B A: %d %d %d, %d %d %d, %d %d %d",
+		(int)pdParam.k[0], (int)pdParam.b[0], (int)pdParam.a[0],
+		(int)pdParam.k[1], (int)pdParam.b[1], (int)pdParam.a[1],
 		(int)pdParam.k[2], (int)pdParam.b[2], (int)pdParam.a[2]);
 }
 void AllBoards::SaveMotorParam(){
@@ -275,9 +275,9 @@ void AllBoards::SaveMotorParam(){
 		v = pdParam.a[i]; nvs.set(key, v);
 	}
 	nvs.commit();
-	ESP_LOGD(Tag(), "SaveMotorParam:K B A: %d %d %d, %d %d %d, %d %d %d", 
-		(int)pdParam.k[0], (int)pdParam.b[0], (int)pdParam.a[0], 
-		(int)pdParam.k[1], (int)pdParam.b[1], (int)pdParam.a[1], 
+	ESP_LOGD(Tag(), "SaveMotorParam:K B A: %d %d %d, %d %d %d, %d %d %d",
+		(int)pdParam.k[0], (int)pdParam.b[0], (int)pdParam.a[0],
+		(int)pdParam.k[1], (int)pdParam.b[1], (int)pdParam.a[1],
 		(int)pdParam.k[2], (int)pdParam.b[2], (int)pdParam.a[2]);
 }
 

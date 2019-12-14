@@ -836,7 +836,7 @@ void initMovementDS() {
 	initMovementManager();
 }
 
-void onChangeControlMode(CommandId newCommand) {
+void onChangeControlMode(CommandId newCommand, const short* data) {
 	switch (newCommand) {
 		case CI_DIRECT:
 		case CI_CURRENT:
@@ -845,7 +845,7 @@ void onChangeControlMode(CommandId newCommand) {
 			newMovementControlMode = false;
 			break;
 		case CIU_MOVEMENT:
-			newMovementControlMode = true;
+			if((CommandIdMovement)(*(uint8_t*)data) != CI_M_QUERY) newMovementControlMode = true;		// only read data do not change control mode
 			break;
 		default:
 			return;
