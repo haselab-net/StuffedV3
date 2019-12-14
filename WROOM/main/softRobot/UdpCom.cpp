@@ -348,6 +348,7 @@ void UdpCom::ReceiveCommand(void* payload, int len, short from) {
 	UdpCmdPacket* recv;
 	CommandId cid = (CommandId)(((short*)payload)[1]);
 	if (cid == CIU_MOVEMENT) {
+		CommandIdMovement mid = (CommandIdMovement)(((uint8_t*)payload)[4]);
 		recv = PrepareMovementCommand(cid, mid, from);
 	}
 	else recv = PrepareCommand(cid, from);	//	[0] is length, [1] is command id
