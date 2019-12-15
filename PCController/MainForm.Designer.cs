@@ -180,7 +180,7 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(195, 11);
+            this.label6.Location = new System.Drawing.Point(202, 11);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(45, 15);
             this.label6.TabIndex = 6;
@@ -203,7 +203,7 @@
             0,
             0,
             196608});
-            this.udDamp.Location = new System.Drawing.Point(248, 9);
+            this.udDamp.Location = new System.Drawing.Point(255, 9);
             this.udDamp.Maximum = new decimal(new int[] {
             1,
             0,
@@ -220,7 +220,7 @@
             // 
             // udAmp
             // 
-            this.udAmp.Location = new System.Drawing.Point(108, 9);
+            this.udAmp.Location = new System.Drawing.Point(113, 9);
             this.udAmp.Maximum = new decimal(new int[] {
             150,
             0,
@@ -741,6 +741,7 @@
             this.Controls.Add(this.splitContainer3);
             this.Name = "MainForm";
             this.Text = "PCController";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.splitContainer3.Panel1.ResumeLayout(false);
             this.splitContainer3.Panel2.ResumeLayout(false);
             this.splitContainer3.ResumeLayout(false);
