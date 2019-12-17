@@ -22,6 +22,7 @@
 #include "nvs_flash.h"
 
 #include "include/wifi.h"
+#include "include/ota_flash.h"
 #include <string.h>
 
 static const char *TAG = "ota_updater";
@@ -63,19 +64,46 @@ void ota_task(void * pvParameter)
     wait_wifi_connection();
     ESP_LOGI(TAG, "Connect to Wifi !");
 
-    esp_http_client_config_t config;
-    memset(&config, 0, sizeof(config));
-    config.url = CONFIG_FIRMWARE_UPGRADE_URL;
-    config.cert_pem = (char *)server_cert_pem_start;
-    config.event_handler = _http_event_handler;
+    // 1. update firmware
+    esp_http_client_config_t firmware_http_config;
+    memset(&firmware_http_config, 0, sizeof(firmware_http_config));
+    firmware_http_config.url = CONFIG_FIRMWARE_UPGRADE_URL;
+    firmware_http_config.cert_pem = (char *)server_cert_pem_start;
+    firmware_http_config.event_handler = _http_event_handler;
 
-    ESP_LOGI(TAG, "Start to Connect to Server: %s ....", config.url);
+    ESP_LOGI(TAG, "Start to Connect to Server: %s ....", firmware_http_config.url);
 
-    esp_err_t ret = esp_https_ota(&config);
+    esp_err_t ret = esp_https_ota(&firmware_http_config);
+
     if (ret == ESP_OK) {
-        esp_restart();
+        ESP_LOGI(TAG, "Firmware Upgrades Succeed");
     } else {
         ESP_LOGE(TAG, "Firmware Upgrades Failed");
+    }
+
+    // 2. update spiffs
+    esp_http_client_config_t spiffs_http_config;
+    memset(&spiffs_http_config, 0, sizeof(spiffs_http_config));
+    spiffs_http_config.url = CONFIG_SPIFFS_UPGRADE_URL;
+    spiffs_http_config.cert_pem = (char *)server_cert_pem_start;
+    spiffs_http_config.event_handler = _http_event_handler;
+    partition_locator_t spiffs_partition_locator;
+    char label[7] = "spiffs";
+    memset(&spiffs_partition_locator, 0, sizeof(spiffs_partition_locator));
+    spiffs_partition_locator.type = ESP_PARTITION_TYPE_DATA;
+    spiffs_partition_locator.subtype = ESP_PARTITION_SUBTYPE_DATA_SPIFFS;
+    spiffs_partition_locator.label = label;
+
+    ESP_LOGI(TAG, "Start to Connect to Server: %s ....", spiffs_http_config.url);
+
+    ret = esp_https_ota_partition(&spiffs_http_config, &spiffs_partition_locator);
+
+
+    if (ret == ESP_OK) {
+        ESP_LOGI(TAG, "Spiffs Upgrades Succeed");
+        esp_restart();
+    } else {
+        ESP_LOGE(TAG, "Spiffs Upgrades Failed");
     }
     while (1) {
         vTaskDelay(1000 / portTICK_PERIOD_MS);
