@@ -21,7 +21,7 @@ static void http_cleanup(esp_http_client_handle_t client)
     esp_http_client_cleanup(client);
 }
 
-esp_err_t esp_https_ota_partition(const esp_http_client_config_t *config, const partition_locator_t *partition_info)
+esp_err_t esp_https_ota_partition(const esp_http_client_config_t *config, const size_t dest_addr)
 {
     if (!config) {
         ESP_LOGE(TAG, "esp_http_client config not found");
@@ -57,22 +57,7 @@ esp_err_t esp_https_ota_partition(const esp_http_client_config_t *config, const 
     esp_http_client_fetch_headers(client);
 
     const esp_partition_t *update_partition = NULL;
-    ESP_LOGI(TAG, "Starting OTA on partition: %s...", partition_info->label);
-    update_partition = esp_partition_find_first(partition_info->type, partition_info->subtype, partition_info->label);
-    if (update_partition == NULL) {
-        ESP_LOGE(TAG, "Partition %s not found", partition_info->label);
-        http_cleanup(client);
-        return ESP_FAIL;
-    }
-    err = esp_partition_erase_range(update_partition, 0, update_partition->size);
-    ESP_LOGI(TAG, "Erase partition: %s, %d...", update_partition->label, update_partition->size);
-    if (err != ESP_OK) {
-        http_cleanup(client);
-        ESP_LOGE(TAG, "Failed to erase partition %s. %s", partition_info->label, esp_err_to_name(err));
-        return err;
-    }
-    ESP_LOGI(TAG, "Writing to partition subtype %d at offset 0x%x",
-             update_partition->subtype, update_partition->address);
+    ESP_LOGI(TAG, "Starting OTA on addr: %08x...", dest_addr);
 
     esp_err_t ota_write_err = ESP_OK;
     char *upgrade_data_buf = (char *)malloc(OTA_BUF_SIZE);
@@ -80,7 +65,7 @@ esp_err_t esp_https_ota_partition(const esp_http_client_config_t *config, const 
         ESP_LOGE(TAG, "Couldn't allocate memory to upgrade data buffer");
         return ESP_ERR_NO_MEM;
     }
-    int binary_file_len = 0;
+    size_t binary_file_len = 0;
     while (1) {
         int data_read = esp_http_client_read(client, upgrade_data_buf, OTA_BUF_SIZE);
         if (data_read == 0) {
@@ -92,16 +77,12 @@ esp_err_t esp_https_ota_partition(const esp_http_client_config_t *config, const 
             break;
         }
         if (data_read > 0) {
-            // if (binary_file_len == 0 && upgrade_data_buf[0] != ESP_IMAGE_HEADER_MAGIC) {
-            //     ESP_LOGE(TAG, "Downloaded image has invalid magic byte (expected 0xE9, saw 0x%02x", upgrade_data_buf[0]);
-            //     return ESP_ERR_OTA_VALIDATE_FAILED;
-            // }
             if (esp_flash_encryption_enabled()) {
                 ESP_LOGE(TAG, "Error: not able to handle encryped flash");
             }
-            ota_write_err = esp_partition_write(update_partition, binary_file_len, (const void*)upgrade_data_buf, data_read);
+            ota_write_err = spi_flash_write(dest_addr + binary_file_len, (const void*)upgrade_data_buf, data_read);
             if (ota_write_err != ESP_OK) {
-                ESP_LOGE(TAG, "Error: esp_partition_write failed");
+                ESP_LOGE(TAG, "Error: spi_flash_write failed");
                 break;
             }
             binary_file_len += data_read;

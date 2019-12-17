@@ -87,16 +87,21 @@ void ota_task(void * pvParameter)
     spiffs_http_config.url = CONFIG_SPIFFS_UPGRADE_URL;
     spiffs_http_config.cert_pem = (char *)server_cert_pem_start;
     spiffs_http_config.event_handler = _http_event_handler;
-    partition_locator_t spiffs_partition_locator;
-    char label[7] = "spiffs";
-    memset(&spiffs_partition_locator, 0, sizeof(spiffs_partition_locator));
-    spiffs_partition_locator.type = ESP_PARTITION_TYPE_DATA;
-    spiffs_partition_locator.subtype = ESP_PARTITION_SUBTYPE_DATA_SPIFFS;
-    spiffs_partition_locator.label = label;
 
-    ESP_LOGI(TAG, "Start to Connect to Server: %s ....", spiffs_http_config.url);
+    ESP_LOGI(TAG, "Start to Connect to spiffs.img Server: %s ....", spiffs_http_config.url);
 
-    ret = esp_https_ota_partition(&spiffs_http_config, &spiffs_partition_locator);
+    ret = esp_https_ota_partition(&spiffs_http_config, 0x200000);
+
+    // 2. update spiffs
+    esp_http_client_config_t espfs_http_config;
+    memset(&espfs_http_config, 0, sizeof(spiffs_http_config));
+    espfs_http_config.url = CONFIG_ESPFS_UPGRADE_URL;
+    espfs_http_config.cert_pem = (char *)server_cert_pem_start;
+    espfs_http_config.event_handler = _http_event_handler;
+
+    ESP_LOGI(TAG, "Start to Connect to espfs.img Server: %s ....", espfs_http_config.url);
+
+    ret = esp_https_ota_partition(&espfs_http_config, 0x3d0000);
 
 
     if (ret == ESP_OK) {

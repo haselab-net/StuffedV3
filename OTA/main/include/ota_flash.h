@@ -11,6 +11,6 @@ struct partition_locator_t {
     char* label;
 };
 
-esp_err_t esp_https_ota_partition(const esp_http_client_config_t *config, const partition_locator_t *parititon_info);
+esp_err_t esp_https_ota_partition(const esp_http_client_config_t *config, const size_t dest_addr);
 
 #endif
