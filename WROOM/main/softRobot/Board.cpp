@@ -38,7 +38,6 @@ BoardBase* Boards::Create(int modelNum, int boardId) {
 }
 
 BoardFactories::BoardFactories() {
-#ifndef _WIN32
 	reserve(6);
 	push_back(new BOARD_FACTORY(B1M));
 	push_back(new BOARD_FACTORY(B1F));
@@ -46,5 +45,4 @@ BoardFactories::BoardFactories() {
 	push_back(new BOARD_FACTORY(B2F));
 	push_back(new BOARD_FACTORY(B3M));
 	push_back(new BOARD_FACTORY(B3F));
-#endif
 }

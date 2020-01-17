@@ -1,13 +1,29 @@
 #pragma once
 #include "BoardBase.h"
-#include "UdpCom.h"
 #include "esp_log.h"
+#ifndef SPRINGHEAD
+#include "UdpCom.h"
+#endif
+
+#ifdef SPRINGHEAD
+
+namespace Spr {
+	void DRUARTMotorDriverImplUpdateMotorPos(DRUARTMotorDriverImpl* owner, short mpos, int index);
+}
+#define updateMotorPos(mpos, index)		Spr::DRUARTMotorDriverImplUpdateMotorPos(owner, mpos, index)
+#define MOTOROFFSET(i)	0
+
+#else
 
 inline void updateMotorPos(SDEC mpos, char index){
 	SDEC diff = mpos - (SDEC)(allBoards.motorPos[(int)index]);
 	allBoards.motorPos[(int)index] += diff;
 }
 #define MOTOROFFSET(i)	allBoards.motorOffset[(int)motorMap[i]]
+
+#endif
+
+
 template <class CMD, class RET>
 class Board: public BoardBase{
 public:

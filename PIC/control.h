@@ -4,7 +4,10 @@
 
 #include "env.h"
 #include "fixed.h"
+#ifndef SPRINGHEAD
 #include "command.h"
+#endif
+
 #ifdef __XC32
 #include "mcc_generated_files/mcc.h"
 #endif

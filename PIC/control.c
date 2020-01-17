@@ -220,7 +220,7 @@ void targetsAddOrUpdate(SDEC* pos, short period, unsigned char tcw){
 	targetsForceControlAddOrUpdate(pos, NULL, period, tcw);
 }
 //	Update or add interpolate target with force control
-void targetsForceControlAddOrUpdate(SDEC* pos, SDEC JK[NFORCE][NMOTOR] ,short period, unsigned char tcw){
+void targetsForceControlAddOrUpdate(SDEC* pos, SDEC JK[NFORCE][NMOTOR], short period, unsigned char tcw){
 	char delta;					//	tcw - tcr	
 	unsigned char avail, tcr, read;
 	if (period == 0) return;	//	for vacancy check
