@@ -103,7 +103,9 @@
         "rope": "cpp",
         "slist": "cpp",
         "*.ipp": "cpp",
-        "ota.h": "c"
+        "ota.h": "c",
+        "string_view": "cpp",
+        "valarray": "cpp"
     },
     "terminal.integrated.shell.windows": "c:\\msys32\\usr\\bin\\bash.exe",
     "terminal.integrated.env.windows": {
