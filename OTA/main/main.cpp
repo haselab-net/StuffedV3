@@ -90,7 +90,15 @@ void ota_task(void * pvParameter)
 
     ESP_LOGI(TAG, "Start to Connect to spiffs.img Server: %s ....", spiffs_http_config.url);
 
+    ret = spi_flash_erase_range(0x200000, 0x80000);
     ret = esp_https_ota_partition(&spiffs_http_config, 0x200000);
+
+    if (ret == ESP_OK) {
+        ESP_LOGI(TAG, "spiffs.img Upgrades Succeed");
+        esp_restart();
+    } else {
+        ESP_LOGE(TAG, "spiffs.img Upgrades Failed");
+    }
 
     // 2. update spiffs
     esp_http_client_config_t espfs_http_config;
@@ -101,15 +109,18 @@ void ota_task(void * pvParameter)
 
     ESP_LOGI(TAG, "Start to Connect to espfs.img Server: %s ....", espfs_http_config.url);
 
-    ret = esp_https_ota_partition(&espfs_http_config, 0x3d0000);
+    ret = spi_flash_erase_range(0x3d0000, 0x20000);
+    ret = ret || esp_https_ota_partition(&espfs_http_config, 0x3d0000);
 
 
     if (ret == ESP_OK) {
-        ESP_LOGI(TAG, "Spiffs Upgrades Succeed");
+        ESP_LOGI(TAG, "espfs.img Upgrades Succeed");
         esp_restart();
     } else {
-        ESP_LOGE(TAG, "Spiffs Upgrades Failed");
+        ESP_LOGE(TAG, "espfs.img Upgrades Failed");
     }
+
+
     while (1) {
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }

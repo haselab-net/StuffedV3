@@ -57,7 +57,7 @@ esp_err_t esp_https_ota_partition(const esp_http_client_config_t *config, const 
     esp_http_client_fetch_headers(client);
 
     const esp_partition_t *update_partition = NULL;
-    ESP_LOGI(TAG, "Starting OTA on addr: %08x...", dest_addr);
+    ESP_LOGI(TAG, "Starting OTA on addr: %#08x...", dest_addr);
 
     esp_err_t ota_write_err = ESP_OK;
     char *upgrade_data_buf = (char *)malloc(OTA_BUF_SIZE);
