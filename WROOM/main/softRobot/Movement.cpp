@@ -917,8 +917,10 @@ MotorKeyframeNode* addKeyframe(MovementKeyframe& keyframe) {
 
 		// add default if ref failed in non strict mode
 		bool useFallback = !keyframe.strictMode;
+		bool tmpStrictMode = keyframe.strictMode;
 		keyframe.strictMode = true;
 		useFallback = useFallback && !canAddKeyframe(keyframe);
+		keyframe.strictMode = tmpStrictMode;
 
 		// add node
 		if (keyframe.refId == 0 || useFallback) addNodeDefault(keyframe.motorId[i], node, true);	// add after last node with same movement id
