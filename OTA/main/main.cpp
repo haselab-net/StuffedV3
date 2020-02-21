@@ -22,6 +22,7 @@
 #include "nvs_flash.h"
 
 #include "include/wifi.h"
+#include "include/ota_flash.h"
 #include <string.h>
 
 static const char *TAG = "ota_updater";
@@ -63,20 +64,63 @@ void ota_task(void * pvParameter)
     wait_wifi_connection();
     ESP_LOGI(TAG, "Connect to Wifi !");
 
-    esp_http_client_config_t config;
-    memset(&config, 0, sizeof(config));
-    config.url = CONFIG_FIRMWARE_UPGRADE_URL;
-    config.cert_pem = (char *)server_cert_pem_start;
-    config.event_handler = _http_event_handler;
+    // 1. update firmware
+    esp_http_client_config_t firmware_http_config;
+    memset(&firmware_http_config, 0, sizeof(firmware_http_config));
+    firmware_http_config.url = CONFIG_FIRMWARE_UPGRADE_URL;
+    firmware_http_config.cert_pem = (char *)server_cert_pem_start;
+    firmware_http_config.event_handler = _http_event_handler;
 
-    ESP_LOGI(TAG, "Start to Connect to Server: %s ....", config.url);
+    ESP_LOGI(TAG, "Start to Connect to Server: %s ....", firmware_http_config.url);
 
-    esp_err_t ret = esp_https_ota(&config);
+    esp_err_t ret = esp_https_ota(&firmware_http_config);
+
     if (ret == ESP_OK) {
-        esp_restart();
+        ESP_LOGI(TAG, "Firmware Upgrades Succeed");
     } else {
         ESP_LOGE(TAG, "Firmware Upgrades Failed");
     }
+
+    // 2. update spiffs
+    esp_http_client_config_t spiffs_http_config;
+    memset(&spiffs_http_config, 0, sizeof(spiffs_http_config));
+    spiffs_http_config.url = CONFIG_SPIFFS_UPGRADE_URL;
+    spiffs_http_config.cert_pem = (char *)server_cert_pem_start;
+    spiffs_http_config.event_handler = _http_event_handler;
+
+    ESP_LOGI(TAG, "Start to Connect to spiffs.img Server: %s ....", spiffs_http_config.url);
+
+    ret = spi_flash_erase_range(0x200000, 0x80000);
+    ret = esp_https_ota_partition(&spiffs_http_config, 0x200000);
+
+    if (ret == ESP_OK) {
+        ESP_LOGI(TAG, "spiffs.img Upgrades Succeed");
+        esp_restart();
+    } else {
+        ESP_LOGE(TAG, "spiffs.img Upgrades Failed");
+    }
+
+    // 2. update spiffs
+    esp_http_client_config_t espfs_http_config;
+    memset(&espfs_http_config, 0, sizeof(spiffs_http_config));
+    espfs_http_config.url = CONFIG_ESPFS_UPGRADE_URL;
+    espfs_http_config.cert_pem = (char *)server_cert_pem_start;
+    espfs_http_config.event_handler = _http_event_handler;
+
+    ESP_LOGI(TAG, "Start to Connect to espfs.img Server: %s ....", espfs_http_config.url);
+
+    ret = spi_flash_erase_range(0x3d0000, 0x20000);
+    ret = ret || esp_https_ota_partition(&espfs_http_config, 0x3d0000);
+
+
+    if (ret == ESP_OK) {
+        ESP_LOGI(TAG, "espfs.img Upgrades Succeed");
+        esp_restart();
+    } else {
+        ESP_LOGE(TAG, "espfs.img Upgrades Failed");
+    }
+
+
     while (1) {
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }

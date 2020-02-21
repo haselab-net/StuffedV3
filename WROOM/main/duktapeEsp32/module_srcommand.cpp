@@ -854,7 +854,7 @@ void onReceiveCISensor(UdpRetPacket& ret) {
     for (int i=0; i<allBoards.GetNTotalTouch(); i++) {
         newTouch.push_back(ret.GetTouch(i));
     }
-    onRcvTouchMessage(jsRobotState.touch, newTouch);
+    if(jsRobotState.touch.size() > 0 && jsRobotState.touch[0] >= 0) onRcvTouchMessage(jsRobotState.touch, newTouch);
 
     jsRobotState.write_lock();
 

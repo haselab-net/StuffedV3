@@ -120,7 +120,9 @@
         "thread": "cpp",
         "typeindex": "cpp",
         "valarray": "cpp",
-        "commandtemplate.h": "c"
+        "commandtemplate.h": "c",
+        "string_view": "cpp",
+        "valarray": "cpp"
     },
     "terminal.integrated.shell.windows": "c:\\msys32\\usr\\bin\\bash.exe",
     "terminal.integrated.env.windows": {

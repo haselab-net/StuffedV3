@@ -7,7 +7,7 @@
 #define BOARD2_COMBINATION		//	2nd board with WROOM
 #elif 0
 #define BOARD3_SEPARATE         //	3nd board WROOM only / pic only New
-#elif 0
+#elif 1
 #define BOARD4                  //	4th board WROOM Updated (new pin assing) and current read fast RX PIC board
 #elif 1
 # ifdef PIC
