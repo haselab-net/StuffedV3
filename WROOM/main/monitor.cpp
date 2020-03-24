@@ -169,16 +169,20 @@ class MCEraseNvs: public MonitorCommandBase{
 } mcEraseNvs;
 
 class MCReset: public MonitorCommandBase{
-    const char* Desc(){ return "R Reset by software"; }
+    const char* Desc(){ return "R Reset by software or Deep sleep"; }
     void Func(){
-        conPrintf("This command reset this program. Are you sure ? (Y/N)\n");
+        conPrintf("This command deep sleep or reset this program. Are you sure ? (D/Y/N)\n");
         while(1){
             int ch = getchNoWait();
-            if (ch == 'y' || ch == 'Y'){
+            if (ch == 'd' || ch == 'D'){
+				conPrintf("deep sleep.\n");
+                esp_deep_sleep(1000*1000);  //  sleep time in us.
+                break;
+            }else if (ch == 'y' || ch == 'Y'){
+				conPrintf("reset.\n");
 #ifdef WROOM
                 esp_restart();
 #endif
-				conPrintf("erased.\n");
                 break;
             }else if(ch > 0){
                 conPrintf("canceled.\n");
