@@ -36,6 +36,7 @@ extern "C" {
 #include "websocketServer/ws_fs.h"
 #include "espfs.h"
 #include "espfsStream.h"
+#include "esp32/ulp.h"
 
 #include "../duktapeEsp32/include/logging.h"
 LOG_TAG("Monitor");
@@ -174,7 +175,10 @@ class MCReset: public MonitorCommandBase{
         conPrintf("This command deep sleep or reset this program. Are you sure ? (D/Y/N)\n");
         while(1){
             int ch = getchNoWait();
-            if (ch == 'd' || ch == 'D'){
+            if (ch == 'u' || ch == 'U'){
+				conPrintf("call 'ulp_run(0)'.\n");
+                ulp_run(0);
+            }else if (ch == 'd' || ch == 'D'){
 				conPrintf("deep sleep.\n");
                 esp_deep_sleep(1000*1000);  //  sleep time in us.
                 break;
