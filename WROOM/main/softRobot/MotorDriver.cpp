@@ -43,7 +43,7 @@ void MotorDriver::AdcReadTask(){
 #if defined BOARD4  
     const gpio_num_t GPIO_LED = GPIO_NUM_0; // for BOARD4
 #else
-    const gpio_num_t GPIO_LED = GPIO_NUM_26;  // for all BOARD
+    const gpio_num_t GPIO_LED = GPIO_NUM_26;  // for older BOARD
 #endif
     const size_t bufLen = ADC_DMA_LEN * 2;
 #ifndef _WIN32
@@ -90,9 +90,15 @@ void MotorDriver::AdcReadTask(){
 #endif
 }
 
-
 void MotorDriver::Init(){
 #ifndef _WIN32
+    //  Set ADC input as GPIO output to charge cap
+    const gpio_num_t GPIO_ADC[] = {GPIO_NUM_32, GPIO_NUM_33}; 
+    for(int i=0; i < sizeof(GPIO_ADC) / sizeof(GPIO_ADC[0]); ++i){
+        gpio_reset_pin(GPIO_ADC[i]);
+        gpio_set_direction(GPIO_ADC[i], GPIO_MODE_OUTPUT);
+        gpio_set_level(GPIO_ADC[i], 1);
+    }
 	//  PWM Init
     mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM0A, pwmPins[0]);
     mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM0B, pwmPins[1]);
@@ -133,16 +139,15 @@ void MotorDriver::Init(){
     i2s_config.dma_buf_len = ADC_DMA_LEN;
     //  Install and start I2S driver
     i2s_driver_install(ADCI2SNUM, &i2s_config, 1, &queue);
-    vTaskDelay(1);
+    ////    vTaskDelay(1);  //  not needed
     //  Start ADC task
 	xTaskCreate(AdcReadTaskStatic, "ADC", 512+256, this, configMAX_PRIORITIES-1, &task);
-    vTaskDelay(1);
+    vTaskDelay(1);  //  This delay is needed (hasevr).
     //  Start ADC
     ESP_ERROR_CHECK(i2s_set_adc_mode(ADC_UNIT_1, ADC1_CHANNEL_0));
-    vTaskDelay(1);
+    ////    vTaskDelay(1);  //  not needed
     ESP_ERROR_CHECK(i2s_adc_enable(ADCI2SNUM));
-    vTaskDelay(1);
-
+    ////    vTaskDelay(1);  //  not needed
 #if defined BOARD3_SEPARATE || defined BOARD4
     SYSCON.saradc_ctrl.sar1_patt_len = NMOTOR_DIRECT*2-1;   // table length - 1
 #else
@@ -169,12 +174,26 @@ void MotorDriver::Init(){
     SYSCON.saradc_sar1_patt_tab[0] = patTab.tab[0];
     SYSCON.saradc_sar1_patt_tab[1] = patTab.tab[1];
     SYSCON.saradc_ctrl2.sar1_inv = 1;
+
+    for(int i=0; i < sizeof(GPIO_ADC) / sizeof(GPIO_ADC[0]); ++i){
+        gpio_set_direction(GPIO_ADC[i], GPIO_MODE_INPUT);
+        gpio_set_pull_mode(GPIO_ADC[i], GPIO_FLOATING);
+    }
 #endif
 
     for(int ch=0; ch<NMOTOR_DIRECT; ++ch){
         Pwm(ch, 0);
     }
     LOGD("nPads %d", touchPads.NPad());
+
+    //  Check ADC
+    vTaskDelay(1);
+    for (int ch = 0; ch < NMOTOR_DIRECT*2; ++ch) {
+        if(adcRaws[ch] != 0) goto ADC_OK;
+    }
+    LOGE("Failed to initialize ADC. Move to deep sleep and restart.");
+    esp_deep_sleep(1000*1000);  //  sleep time in us.
+    ADC_OK: ;
 }
 
 void MotorDriver::Pwm(int ch, SDEC duty){  //   SDEC -1 to 1 (-1024 - 1024)

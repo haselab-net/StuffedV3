@@ -170,9 +170,9 @@ class MCEraseNvs: public MonitorCommandBase{
 } mcEraseNvs;
 
 class MCReset: public MonitorCommandBase{
-    const char* Desc(){ return "R Reset by software or Deep sleep"; }
+    const char* Desc(){ return "R Reset by software / Deep sleep / call ulp_run(0)"; }
     void Func(){
-        conPrintf("This command deep sleep or reset this program. Are you sure ? (D/Y/N)\n");
+        conPrintf("This command deep sleep or reset this program. Are you sure ? (U/D/Y/N)\n");
         while(1){
             int ch = getchNoWait();
             if (ch == 'u' || ch == 'U'){
