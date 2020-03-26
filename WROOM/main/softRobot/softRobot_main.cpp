@@ -32,6 +32,7 @@ extern "C" void softRobot_main()    //  called from app_main in main.cpp
     touchPads.Init();
     LOGD("nPads %d", touchPads.NPad());
 #endif
+#if 1
     //  Search sub boards.
     LOGI("Soft Robot Starts. Search sub boards.");
     allBoards.Init();
@@ -40,4 +41,5 @@ extern "C" void softRobot_main()    //  called from app_main in main.cpp
         allBoards.GetNTotalMotor(), allBoards.GetNTotalCurrent(), allBoards.GetNTotalForce(), allBoards.GetNTotalTouch());
     udpCom.Init();    //  init command processing for udp.
     //for(int i=0; i<3; ++i){ LOGI("udpCom.Init() pdParam: k=%d b=%d", pdParam.k[i], pdParam.b[i]); }
+#endif
 }

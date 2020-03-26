@@ -149,6 +149,7 @@ void MotorDriver::Init(){
     SYSCON.saradc_ctrl.sar1_patt_len = 0;
 #endif
     SYSCON.saradc_ctrl.data_sar_sel = true;
+    LOGD("Init ADC");
     //  Making ADC scanning table pattern (WIDTH=11, DB=11) = 7
     //  ADC_WIDTH_BIT_9 = 0, ADC_WIDTH_BIT_12 = 3;
     //  ADC_ATTEN_DB_0 = 0, ADC_ATTEN_DB_2_5=1, ADC_ATTEN_DB_6=2, ADC_ATTEN_DB_11=3
@@ -163,8 +164,8 @@ void MotorDriver::Init(){
     for(int i=0; i<8; ++i){
         patTab.pat[i] = patterns[(i-i%4) + (3-i%4)];
     }
-    //logPrintf("%08x ", patTab.tab[0]);
-    //logPrintf("%08x ", patTab.tab[1]);
+    LOGD("%08x ", patTab.tab[0]);
+    LOGD("%08x ", patTab.tab[1]);
     SYSCON.saradc_sar1_patt_tab[0] = patTab.tab[0];
     SYSCON.saradc_sar1_patt_tab[1] = patTab.tab[1];
     SYSCON.saradc_ctrl2.sar1_inv = 1;
