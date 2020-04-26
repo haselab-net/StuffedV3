@@ -310,7 +310,8 @@ void controlInitPic(){
     SPI2CON = 0;
     SPI2CON2 = 0;
 	SPI2STAT = 0;
-    SPI2BRG = 0x00000010;
+    //SPI2BRG = 0x00000010;
+    SPI2BRG = 0x00000004;
 	SPI2CONbits.MODE32 = 1;
 	SPI2CONbits.ENHBUF = 1;
 	SPI2CONbits.MSTEN = 1;
