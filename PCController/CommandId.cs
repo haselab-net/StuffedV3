@@ -1,3 +1,4 @@
+
 enum CommandId {
 	CI_NONE,				//0	As reset makes 0 and 0xFF, must avoid use of them in header. 
 	CI_BOARD_INFO,          //1 Board information.
@@ -10,7 +11,7 @@ enum CommandId {
 	CI_FORCE_CONTROL,		//8	Position and force control with interpolation.
 	CI_SET_PARAM,           //9 Set parameter.
     CI_RESET_SENSOR,        //10 Reset sensor.
-    CI_GET_PARAM,           //11 Get parameter. Note: There is one call delay on parameter type. 
+    CI_GET_PARAM,           //11 Get parameter.
     CI_NCOMMAND,
     CI_NCOMMAND_MAX=32,     //0 to 31 can be used for UART command, because command ID has 5 bits.
     CIU_TEXT = CI_NCOMMAND_MAX,	
@@ -29,6 +30,7 @@ enum SetParamType{
 	PT_BOARD_ID,
 	PT_BAUDRATE,
     PT_MOTOR_HEAT,
+    PT_MAGNET,      //  ADC values for magnetic field sensor
 };
 enum ResetSensorFlags {
 	RSF_NONE=0,

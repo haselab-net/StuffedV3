@@ -73,19 +73,17 @@ namespace PCController
             motors = new Motors();
             haptics = new Haptics();
             udLoopTime_ValueChanged(udLoopTime, null);
+            ResetMagnet();
         }
         void SetTextMessage(string msg)
         {
             txMsg.Text = msg;
         }
-        private void cmbPortBin_TextChanged(object sender, EventArgs e)
-        {
-
-        }
         private void ResetPanels() {
             ResetHapticTab();
             ResetCurrentTab();
             ResetMotor();
+            ResetMagnet();
         }
         private void ResetHapticTab() {
             flHaptic.Controls.Clear();
@@ -197,18 +195,19 @@ namespace PCController
 
         private void timer_Tick(object sender, EventArgs e)
         {
-            if (bHaptic) {
-                haptics.Update();
+	        if (bHaptic) {
+	            haptics.Update();
             }
-            else{
-                if (tbControl.SelectedTab == tpPos)
-                {
-                    UpdatePos();
-                }
-                if (tbControl.SelectedTab == tpCurrent)
-                {
-                    UpdateCurrent();
-                }
+            else if (tbControl.SelectedTab == tpPos)
+			{
+                UpdatePos();
+            }
+			else if (tbControl.SelectedTab == tpCurrent)
+            {
+                UpdateCurrent();
+            }
+			else if (tbControl.SelectedTab == tpMagnet) {
+                UpdateMagnet();
             }
             txMsg.Text = "";
             for (int i=0; i< boards.NMotor; ++i)
@@ -301,6 +300,20 @@ namespace PCController
                 motors[i].pd.K = k[i];
                 motors[i].pd.B = b[i];
                 motors[i].pd.A = a[i];
+            }
+        }
+        private void btLoadNuibot_Click(object sender, EventArgs e)
+        {
+            for (int i = 0; i < motors.Count; ++i)
+            {
+                motors[i].pd.SetNuibotDefault();
+            }
+        }
+        private void btLoadSpidar_Click(object sender, EventArgs e)
+        {
+            for (int i = 0; i < motors.Count; ++i)
+            {
+                motors[i].pd.SetSpidarDefault();
             }
         }
 

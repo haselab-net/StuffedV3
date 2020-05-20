@@ -64,6 +64,10 @@ struct SetGetParam##BOARD{    /* CI_SETPARAM / CI_GETPARAM */       \
             SDEC min[BOARD##_NMOTOR];	/* Tq min */                \
             SDEC max[BOARD##_NMOTOR];	/* Tq max */                \
         }PACKED torque;												\
+        struct {                                                    \
+            SDEC cos[BOARD##_NMOTOR];	/* magnet sensors */        \
+            SDEC sin[BOARD##_NMOTOR];	/* magnet sensors */        \
+        }PACKED magnet;												\
         SDEC a[BOARD##_NMOTOR];	/* Current */                       \
         unsigned char boardId;	/* boardId */                       \
         unsigned long baudrate[2];	/* baudrate */                  \

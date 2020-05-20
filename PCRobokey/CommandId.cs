@@ -30,6 +30,7 @@ enum SetParamType{
 	PT_BOARD_ID,
 	PT_BAUDRATE,
     PT_MOTOR_HEAT,
+    PT_MAGNET,      //  ADC values for magnetic field sensor
 };
 enum ResetSensorFlags {
 	RSF_NONE=0,
