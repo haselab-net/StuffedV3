@@ -253,6 +253,18 @@ namespace PCController
         [OnDeserializing]
         private void OnDeserializing(StreamingContext context) { Init(); }
         public MotorPd() { Init();  }
+        public void SetNuibotDefault()
+        {
+            K = 1024;
+            B = 1024 * 3 / 2;
+            A = 1024 / 2;
+        }
+        public void SetSpidarDefault()
+        {
+            K = 10;
+            B = 30;
+            A = 1024 / 2;
+        }
         private void Init(){
             int width = 100;
             udK = new NumericUpDown();
@@ -266,9 +278,7 @@ namespace PCController
             udK.Maximum = udB.Maximum = 32000;
             udA.Minimum = -1024 * 8;
             udA.Maximum = 1024 * 8;
-            K = 1024*4;
-            B = 1024 * 2;
-            A = 1024/2;
+            SetNuibotDefault();
             udK.Top = 0;
             Label lK = new Label();
             lK.Margin = new Padding(0, 0, 0, 0);

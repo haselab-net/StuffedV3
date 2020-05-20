@@ -85,6 +85,7 @@ namespace PCController
         short[] vel;
         short[] current;
         short[] force;
+        short[] touch;
         public static void WriteUShort(byte[] buf, ref int cur, ushort v)
         {
             buf[cur++] = (byte)(v & 0xFF);
@@ -106,7 +107,8 @@ namespace PCController
             v = (short)(v | (short)(buf[cur++] << 8));
             return v;
         }
-        public static void PrepareBuffers(ref byte[] send, ref byte[] recv, CommandId id, Board board) {
+        public static void PrepareBuffers(ref byte[] send, ref byte[] recv, CommandId id, Board board)
+        {
             int wait = board.GetWaitLen(id);
             int bufLen = wait + board.CommandLen(id);
             int retLen = board.ReturnLen(id);
@@ -114,7 +116,8 @@ namespace PCController
             recv = new byte[retLen];
             send[0] = Board.MakeHeader(id, board.boardId);
         }
-        public void ReadSerial(ref byte[] recvBuf) {
+        public void ReadSerial(ref byte[] recvBuf)
+        {
             int nRead = 0;
             while (nRead < recvBuf.Length)
             {
@@ -128,7 +131,7 @@ namespace PCController
             int mi = 0;
             foreach (Board board in this)
             {
-                byte[] sendBuf=null, recvBuf=null;
+                byte[] sendBuf = null, recvBuf = null;
                 PrepareBuffers(ref sendBuf, ref recvBuf, CommandId.CI_DIRECT, board);
                 int cur = 1;
                 for (int i = 0; i < board.nMotor; ++i)
@@ -226,6 +229,33 @@ namespace PCController
                 }
             }
             return rv;
+        }
+        public void SendSense()
+        {
+            foreach (Board board in this)
+            {
+                byte[] sendBuf = null, recvBuf = null;
+                PrepareBuffers(ref sendBuf, ref recvBuf, CommandId.CI_SENSOR, board);
+                Serial.Write(sendBuf, 0, sendBuf.Length);
+                ReadSerial(ref recvBuf);
+                int cur = 1;
+                for (int i = 0; i < board.nMotor; ++i)
+                {
+                    pos[board.motorMap[i]] = ReadShort(recvBuf, ref cur);
+                }
+                for (int i = 0; i < board.nCurrent; ++i)
+                {
+                    current[board.currentMap[i]] = ReadShort(recvBuf, ref cur);
+                }
+                for (int i = 0; i < board.nForce; ++i)
+                {
+                    force[board.forceMap[i]] = ReadShort(recvBuf, ref cur);
+                }
+                for (int i = 0; i < board.nTouch; ++i)
+                {
+                    touch[board.touchMap[i]] = ReadShort(recvBuf, ref cur);
+                }
+            }
         }
         public void SendParamPd(short[] k, short[] b)
         {
@@ -379,6 +409,7 @@ namespace PCController
             vel = Enumerable.Repeat((short)0, NMotor).ToArray();
             current = Enumerable.Repeat((short)0, NCurrent).ToArray();
             force = Enumerable.Repeat((short)0, NForce).ToArray();
+            touch = Enumerable.Repeat((short)0, NTouch).ToArray();
         }
 
         public void RecvParamPd(ref short[] k, ref short[] b)
@@ -470,6 +501,28 @@ namespace PCController
                 {
                     a[ai++] = ReadShort(recvBuf, ref cur);
                 }
+            }
+        }
+        public void RecvParamMagnetSensor(ref short[] m)
+        {
+            int mi = 0;
+            foreach (Board board in this)
+            {
+                byte[] sendBuf = null, recvBuf = null;
+                PrepareBuffers(ref sendBuf, ref recvBuf, CommandId.CI_GET_PARAM, board);
+                sendBuf[1] = (byte)SetParamType.PT_MAGNET;
+                Serial.Write(sendBuf, 0, sendBuf.Length);
+                ReadSerial(ref recvBuf);
+                int cur = 2;
+                for (int i = 0; i < board.nMotor; ++i)
+                {
+                    m[mi + i*2] = ReadShort(recvBuf, ref cur);
+                }
+                for (int i = 0; i < board.nMotor; ++i)
+                {
+                    m[mi + i*2+1] = ReadShort(recvBuf, ref cur);
+                }
+                mi += board.nMotor * 2;
             }
         }
     }

@@ -100,6 +100,7 @@ namespace PCController
                 case CommandId.CI_INTERPOLATE: return 1 + nMotor * 2 + 2 + 1;
                 case CommandId.CI_CURRENT: return 1 + nMotor * 3 * 2;
                 case CommandId.CI_GET_PARAM: return 1 + 1 + nMotor * 2 * 2;
+                case CommandId.CI_SENSOR: return 1 + (nMotor + nCurrent + nForce + nTouch) * 2;
             }
             return 0;
         }

@@ -24,18 +24,16 @@ namespace PCController
             }
             motors = new Motors();
             udLoopTime_ValueChanged(udLoopTime, null);
+            ResetMagnet();
         }
         void SetTextMessage(string msg)
         {
             txMsg.Text = msg;
         }
-        private void cmbPortBin_TextChanged(object sender, EventArgs e)
-        {
-
-        }
         private void ResetPanels() {
             ResetCurrentTab();
             ResetMotor();
+            ResetMagnet();
         }
         List<CurrentControl> currentControls = new List<CurrentControl>();
         private void ResetCurrentTab()
@@ -138,10 +136,11 @@ namespace PCController
             if (tbControl.SelectedTab == tpPos)
             {
                 UpdatePos();
-            }
-            if (tbControl.SelectedTab == tpCurrent)
+            } else if (tbControl.SelectedTab == tpCurrent)
             {
                 UpdateCurrent();
+            } else if (tbControl.SelectedTab == tpMagnet) {
+                UpdateMagnet();
             }
             txMsg.Text = "";
             for (int i=0; i< boards.NMotor; ++i)
@@ -232,6 +231,20 @@ namespace PCController
                 motors[i].pd.K = k[i];
                 motors[i].pd.B = b[i];
                 motors[i].pd.A = a[i];
+            }
+        }
+        private void btLoadNuibot_Click(object sender, EventArgs e)
+        {
+            for (int i = 0; i < motors.Count; ++i)
+            {
+                motors[i].pd.SetNuibotDefault();
+            }
+        }
+        private void btLoadSpidar_Click(object sender, EventArgs e)
+        {
+            for (int i = 0; i < motors.Count; ++i)
+            {
+                motors[i].pd.SetSpidarDefault();
             }
         }
 

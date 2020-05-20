@@ -298,6 +298,12 @@ void rcGetParam(){
             retPacket.param.heat.limit[i] = motorHeatLimit[i] / motorHeatRelease[i];
         }
         break;
+    case PT_MAGNET:
+        for(i=0; i<NMOTOR; ++i){
+            retPacket.param.magnet.cos[i] = mcos[i];
+            retPacket.param.magnet.sin[i] = msin[i];
+        }
+        break;
     default:
         PIC_LOGE("rcGetParam got wrong type %d, set = %d", (int)getParamType, (int)command.param.type);
         break;
