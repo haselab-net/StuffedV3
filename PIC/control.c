@@ -193,6 +193,14 @@ void currentControl(){
             targetPwm[i] = 0;
             diff = DIFF_ZERO_LIMIT;
         }
+        {
+            short gap = (currentSense[i]>>4) + 1;
+            if (i==3){  //  For SPIPWM dead zoon is needed to avoid vibration.
+                if (diff >= gap) diff -= gap;
+                else if (diff <= -gap) diff += gap;
+                else diff = 0;
+            }
+        }
         targetPwm[i] += sign*diff;
         if (sign > 0){
             if (targetPwm[i] < 0) targetPwm[i] = 0;
@@ -397,7 +405,7 @@ void controlLoop(){
 }
 void controlInit(){
 	int i;
-	controlMode = CM_CURRENT;
+	controlMode = nextControlMode = CM_CURRENT;
 	for(i=0; i<NMOTOR; ++i){
 #ifdef USE_HEAT_LIMIT
 		motorVelMax[i] = MOTOR_VEL_MAX;

@@ -288,8 +288,8 @@ namespace PCController
                     WriteShort(sendBuf, ref cur, b[bi++]);
                 }
                 Serial.Write(sendBuf, 0, sendBuf.Length);
+                Thread.Sleep(100);
             }
-            Thread.Sleep(100);
         }
         public void SendParamHeat(short[] limit, short[] release)
         {
@@ -310,8 +310,8 @@ namespace PCController
                     WriteShort(sendBuf, ref cur, release[bi++]);
                 }
                 Serial.Write(sendBuf, 0, sendBuf.Length);
+                Thread.Sleep(100);
             }
-            Thread.Sleep(100);
         }
         public void SendParamCurrent(short[] a)
         {
@@ -327,8 +327,8 @@ namespace PCController
                     WriteShort(sendBuf, ref cur, a[ai++]);
                 }
                 Serial.Write(sendBuf, 0, sendBuf.Length);
+                Thread.Sleep(100);
             }
-            Thread.Sleep(100);
         }
         public void SendParamTorqueLimit(short[] tmin, short[] tmax)
         {
@@ -349,8 +349,8 @@ namespace PCController
                     WriteShort(sendBuf, ref cur, tmax[i2++]);
                 }
                 Serial.Write(sendBuf, 0, sendBuf.Length);
+                Thread.Sleep(100);
             }
-            Thread.Sleep(100);
         }
         public void SendParamBoardId(byte[] ids)
         {
@@ -364,8 +364,8 @@ namespace PCController
                 board.boardId = ids[i];
                 sendBuf[cur++] = ids[i++];
                 Serial.Write(sendBuf, 0, sendBuf.Length);
+                Thread.Sleep(100);
             }
-            Thread.Sleep(100);
         }
         public void EnumerateBoard()
         {

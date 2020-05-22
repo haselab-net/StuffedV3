@@ -68,6 +68,7 @@
       <itemPath>commandUart.c</itemPath>
       <itemPath>nvm.c</itemPath>
       <itemPath>spiPwm.s</itemPath>
+      <itemPath>spiPwmDefs.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

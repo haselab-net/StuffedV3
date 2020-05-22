@@ -6,6 +6,9 @@
 #include "nvm.h"
 #include <assert.h>
 
+#include "spiPwmDefs.h"
+
+
 const SDEC mcosOffset[NAXIS] ={
     2048, 2048, 2048, 2048
 };
@@ -112,8 +115,12 @@ AN      2 3    5     10
 //  PWM by SPI
 extern unsigned long spiPwmWord1;
 extern unsigned long spiPwmWord2;
+#ifdef SPIPWM128
+extern unsigned long spiPwmWord3;
+extern unsigned long spiPwmWord4;
+#endif
 
-inline void setSpiPwm(SDEC ratio){
+inline void setSpiPwm64(SDEC ratio){
 	int pwm, pwm0;
 	//	64bit = 0x40bit
 	pwm = ratio * 0x40 >> SDEC_BITS;
@@ -129,6 +136,18 @@ inline void setSpiPwm(SDEC ratio){
 		spiPwmWord1 = 0xFFFFFFFF << pwm0;
 		spiPwmWord2 = 0xFFFFFFFF << pwm;
 	}
+}
+inline void setSpiPwm128(SDEC ratio){
+	short zeroLen;
+	//	128 = 7bit
+	zeroLen = 128 - (ratio >> (SDEC_BITS - 7));
+//    if (pwm < 0) pwm = 0;
+    short zeroLen1 = zeroLen >> 2;
+    short zeroLen24 = zeroLen1 + ((zeroLen >> 1) & 0x1);
+    short zeroLen3 = zeroLen1 + (zeroLen & 0x1);
+    spiPwmWord1 = zeroLen1==32 ? 0 : (0xFFFFFFFF << zeroLen1);
+    spiPwmWord2 = spiPwmWord4 = zeroLen24==32 ? 0 : (0xFFFFFFFF << zeroLen24);
+    spiPwmWord3 = zeroLen3==32 ? 0 : (0xFFFFFFFF << zeroLen3);
 }
 
 #if defined BOARD1_MOTORDRIVER
@@ -269,8 +288,12 @@ void setPwm(int ch, SDEC ratio){
 		}else{
 			RPOR4bits.RP19R = 0;	//	NC(PIO))
 			RPOR0bits.RP4R = 3;		//=RA3:	SDO2
-		}		
-		setSpiPwm(ratio);
+		}
+#ifdef SPIPWM128
+		setSpiPwm128(ratio);
+#elif defined SPIPWM64
+		setSpiPwm64(ratio);
+#endif
     }
 }
 #else
@@ -307,11 +330,13 @@ void controlInitPic(){
 	IPC9bits.SPI2TXIS = 0;
 	//	set spi2 control register
 	SPI2CON = 0;
-    SPI2CON = 0;
     SPI2CON2 = 0;
 	SPI2STAT = 0;
-    //SPI2BRG = 0x00000010;
-    SPI2BRG = 0x00000004;
+//    SPI2BRG = 0x00000010; //  squeal sound caused by PWM is a bit noisy
+//    SPI2BRG = 0x0000000C;   //  Small squeal sound can be heard.
+    SPI2BRG = 0x0000000A;   //  Very small squeal sound can be heard. Noise occurs but small.
+//    SPI2BRG = 0x00000008; //  noise caused by unstable pulse width occur around 64.
+//    SPI2BRG = 0x00000004; //  noise caused by unstable pulse width occur around 64.
 	SPI2CONbits.MODE32 = 1;
 	SPI2CONbits.ENHBUF = 1;
 	SPI2CONbits.MSTEN = 1;

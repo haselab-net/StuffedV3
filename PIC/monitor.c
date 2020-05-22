@@ -150,14 +150,18 @@ void selectMotor(){
 	printf("Select motor %d. pww is %d\r\n", motorCh, pwm[motorCh]);
 }
 void pwmUp(){
-	if (pwm[motorCh] < 10) pwm[motorCh] ++;
+//	if (pwm[motorCh] < 10) pwm[motorCh] ++;
+	if (pwm[motorCh] < SDEC_ONE) pwm[motorCh] ++;
 	printf("Set pwm %d to motor %d \r\n", pwm[motorCh], motorCh);
-	setPwm(motorCh, pwm[motorCh] * (SDEC_ONE/10));
+//	setPwm(motorCh, pwm[motorCh] * (SDEC_ONE/10));
+	setPwm(motorCh, pwm[motorCh]);
 }
 void pwmDown(){
-	if (pwm[motorCh] > -10) pwm[motorCh] --;
+//	if (pwm[motorCh] > -10) pwm[motorCh] --;
+	if (pwm[motorCh] > -SDEC_ONE) pwm[motorCh] --;
 	printf("Set pwm %d to motor %d \r\n", pwm[motorCh], motorCh);
-	setPwm(motorCh, pwm[motorCh] * (SDEC_ONE/10));
+//	setPwm(motorCh, pwm[motorCh] * (SDEC_ONE/10));
+	setPwm(motorCh, pwm[motorCh]);
 }
 static unsigned short useRx = 0;
 void enableRx(){
