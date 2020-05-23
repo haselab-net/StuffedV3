@@ -35,13 +35,18 @@
             this.savePose = new System.Windows.Forms.SaveFileDialog();
             this.splitContainerHoriz = new System.Windows.Forms.SplitContainer();
             this.tbControl = new System.Windows.Forms.TabControl();
+            this.tpMagnet = new System.Windows.Forms.TabPage();
+            this.pnMagnet = new System.Windows.Forms.Panel();
+            this.panel3 = new System.Windows.Forms.Panel();
+            this.btMeasure = new System.Windows.Forms.Button();
             this.tpHaptic = new System.Windows.Forms.TabPage();
-            this.label6 = new System.Windows.Forms.Label();
-            this.label5 = new System.Windows.Forms.Label();
-            this.udDamp = new System.Windows.Forms.NumericUpDown();
-            this.udAmp = new System.Windows.Forms.NumericUpDown();
-            this.btHapticStart = new System.Windows.Forms.Button();
             this.flHaptic = new System.Windows.Forms.FlowLayoutPanel();
+            this.panel6 = new System.Windows.Forms.Panel();
+            this.label5 = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
+            this.btHapticStart = new System.Windows.Forms.Button();
+            this.udAmp = new System.Windows.Forms.NumericUpDown();
+            this.udDamp = new System.Windows.Forms.NumericUpDown();
             this.tpPos = new System.Windows.Forms.TabPage();
             this.flPos = new System.Windows.Forms.FlowLayoutPanel();
             this.panel2 = new System.Windows.Forms.Panel();
@@ -65,11 +70,6 @@
             this.track = new System.Windows.Forms.TrackBar();
             this.tpCurrent = new System.Windows.Forms.TabPage();
             this.flCurrent = new System.Windows.Forms.FlowLayoutPanel();
-            this.tpHeat = new System.Windows.Forms.TabPage();
-            this.flHeat = new System.Windows.Forms.FlowLayoutPanel();
-            this.panel5 = new System.Windows.Forms.Panel();
-            this.btRecvHeat = new System.Windows.Forms.Button();
-            this.btSendHeat = new System.Windows.Forms.Button();
             this.tpParam = new System.Windows.Forms.TabPage();
             this.flParam = new System.Windows.Forms.FlowLayoutPanel();
             this.panel4 = new System.Windows.Forms.Panel();
@@ -77,10 +77,13 @@
             this.btLoadNuibot = new System.Windows.Forms.Button();
             this.btRecvPd = new System.Windows.Forms.Button();
             this.btSendPd = new System.Windows.Forms.Button();
-            this.tpMagnet = new System.Windows.Forms.TabPage();
-            this.pnMagnet = new System.Windows.Forms.Panel();
-            this.panel3 = new System.Windows.Forms.Panel();
-            this.btMeasure = new System.Windows.Forms.Button();
+            this.tpHeat = new System.Windows.Forms.TabPage();
+            this.flHeat = new System.Windows.Forms.FlowLayoutPanel();
+            this.panel5 = new System.Windows.Forms.Panel();
+            this.btLoadSpidarHeat = new System.Windows.Forms.Button();
+            this.btLoadNubotiHeat = new System.Windows.Forms.Button();
+            this.btRecvHeat = new System.Windows.Forms.Button();
+            this.btSendHeat = new System.Windows.Forms.Button();
             this.splitContainerTop = new System.Windows.Forms.SplitContainer();
             this.panel1 = new System.Windows.Forms.Panel();
             this.btReset = new System.Windows.Forms.Button();
@@ -90,15 +93,17 @@
             this.splitContainerBottom = new System.Windows.Forms.SplitContainer();
             this.trBoards = new System.Windows.Forms.TreeView();
             this.txMsg = new System.Windows.Forms.TextBox();
-            this.panel6 = new System.Windows.Forms.Panel();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerHoriz)).BeginInit();
             this.splitContainerHoriz.Panel1.SuspendLayout();
             this.splitContainerHoriz.Panel2.SuspendLayout();
             this.splitContainerHoriz.SuspendLayout();
             this.tbControl.SuspendLayout();
+            this.tpMagnet.SuspendLayout();
+            this.panel3.SuspendLayout();
             this.tpHaptic.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.udDamp)).BeginInit();
+            this.panel6.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.udAmp)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.udDamp)).BeginInit();
             this.tpPos.SuspendLayout();
             this.panel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.udkeyTime)).BeginInit();
@@ -107,12 +112,10 @@
             ((System.ComponentModel.ISupportInitialize)(this.udStep)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.track)).BeginInit();
             this.tpCurrent.SuspendLayout();
-            this.tpHeat.SuspendLayout();
-            this.panel5.SuspendLayout();
             this.tpParam.SuspendLayout();
             this.panel4.SuspendLayout();
-            this.tpMagnet.SuspendLayout();
-            this.panel3.SuspendLayout();
+            this.tpHeat.SuspendLayout();
+            this.panel5.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerTop)).BeginInit();
             this.splitContainerTop.Panel1.SuspendLayout();
             this.splitContainerTop.Panel2.SuspendLayout();
@@ -122,7 +125,6 @@
             this.splitContainerBottom.Panel1.SuspendLayout();
             this.splitContainerBottom.Panel2.SuspendLayout();
             this.splitContainerBottom.SuspendLayout();
-            this.panel6.SuspendLayout();
             this.SuspendLayout();
             // 
             // uartBin
@@ -179,6 +181,48 @@
             this.tbControl.Size = new System.Drawing.Size(751, 593);
             this.tbControl.TabIndex = 5;
             // 
+            // tpMagnet
+            // 
+            this.tpMagnet.BackColor = System.Drawing.SystemColors.Control;
+            this.tpMagnet.Controls.Add(this.pnMagnet);
+            this.tpMagnet.Controls.Add(this.panel3);
+            this.tpMagnet.Location = new System.Drawing.Point(4, 25);
+            this.tpMagnet.Name = "tpMagnet";
+            this.tpMagnet.Padding = new System.Windows.Forms.Padding(3);
+            this.tpMagnet.Size = new System.Drawing.Size(743, 564);
+            this.tpMagnet.TabIndex = 5;
+            this.tpMagnet.Text = "Magnet";
+            // 
+            // pnMagnet
+            // 
+            this.pnMagnet.AutoScroll = true;
+            this.pnMagnet.AutoSize = true;
+            this.pnMagnet.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pnMagnet.Location = new System.Drawing.Point(3, 35);
+            this.pnMagnet.Name = "pnMagnet";
+            this.pnMagnet.Size = new System.Drawing.Size(737, 526);
+            this.pnMagnet.TabIndex = 3;
+            this.pnMagnet.Resize += new System.EventHandler(this.pnMagnet_Resize);
+            // 
+            // panel3
+            // 
+            this.panel3.Controls.Add(this.btMeasure);
+            this.panel3.Dock = System.Windows.Forms.DockStyle.Top;
+            this.panel3.Location = new System.Drawing.Point(3, 3);
+            this.panel3.Name = "panel3";
+            this.panel3.Size = new System.Drawing.Size(737, 32);
+            this.panel3.TabIndex = 2;
+            // 
+            // btMeasure
+            // 
+            this.btMeasure.Location = new System.Drawing.Point(3, 3);
+            this.btMeasure.Name = "btMeasure";
+            this.btMeasure.Size = new System.Drawing.Size(75, 23);
+            this.btMeasure.TabIndex = 0;
+            this.btMeasure.Text = "Measure";
+            this.btMeasure.UseVisualStyleBackColor = true;
+            this.btMeasure.Click += new System.EventHandler(this.btMeasure_Click);
+            // 
             // tpHaptic
             // 
             this.tpHaptic.Controls.Add(this.flHaptic);
@@ -191,14 +235,28 @@
             this.tpHaptic.Text = "Haptic";
             this.tpHaptic.UseVisualStyleBackColor = true;
             // 
-            // label6
+            // flHaptic
             // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(201, 10);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(45, 15);
-            this.label6.TabIndex = 6;
-            this.label6.Text = "Damp:";
+            this.flHaptic.AutoScroll = true;
+            this.flHaptic.BackColor = System.Drawing.SystemColors.Window;
+            this.flHaptic.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.flHaptic.Location = new System.Drawing.Point(3, 41);
+            this.flHaptic.Name = "flHaptic";
+            this.flHaptic.Size = new System.Drawing.Size(737, 520);
+            this.flHaptic.TabIndex = 1;
+            // 
+            // panel6
+            // 
+            this.panel6.Controls.Add(this.label5);
+            this.panel6.Controls.Add(this.label6);
+            this.panel6.Controls.Add(this.btHapticStart);
+            this.panel6.Controls.Add(this.udAmp);
+            this.panel6.Controls.Add(this.udDamp);
+            this.panel6.Dock = System.Windows.Forms.DockStyle.Top;
+            this.panel6.Location = new System.Drawing.Point(3, 3);
+            this.panel6.Name = "panel6";
+            this.panel6.Size = new System.Drawing.Size(737, 38);
+            this.panel6.TabIndex = 7;
             // 
             // label5
             // 
@@ -208,6 +266,42 @@
             this.label5.Size = new System.Drawing.Size(97, 15);
             this.label5.TabIndex = 5;
             this.label5.Text = "Vibration Amp:";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(201, 10);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(45, 15);
+            this.label6.TabIndex = 6;
+            this.label6.Text = "Damp:";
+            // 
+            // btHapticStart
+            // 
+            this.btHapticStart.Location = new System.Drawing.Point(444, 2);
+            this.btHapticStart.Name = "btHapticStart";
+            this.btHapticStart.Size = new System.Drawing.Size(100, 34);
+            this.btHapticStart.TabIndex = 2;
+            this.btHapticStart.Text = "Start";
+            this.btHapticStart.UseVisualStyleBackColor = true;
+            this.btHapticStart.Click += new System.EventHandler(this.btHapticStart_Click);
+            // 
+            // udAmp
+            // 
+            this.udAmp.Location = new System.Drawing.Point(112, 8);
+            this.udAmp.Maximum = new decimal(new int[] {
+            150,
+            0,
+            0,
+            0});
+            this.udAmp.Name = "udAmp";
+            this.udAmp.Size = new System.Drawing.Size(78, 22);
+            this.udAmp.TabIndex = 3;
+            this.udAmp.Value = new decimal(new int[] {
+            30,
+            0,
+            0,
+            0});
             // 
             // udDamp
             // 
@@ -231,43 +325,6 @@
             0,
             0,
             131072});
-            // 
-            // udAmp
-            // 
-            this.udAmp.Location = new System.Drawing.Point(112, 8);
-            this.udAmp.Maximum = new decimal(new int[] {
-            150,
-            0,
-            0,
-            0});
-            this.udAmp.Name = "udAmp";
-            this.udAmp.Size = new System.Drawing.Size(78, 22);
-            this.udAmp.TabIndex = 3;
-            this.udAmp.Value = new decimal(new int[] {
-            30,
-            0,
-            0,
-            0});
-            // 
-            // btHapticStart
-            // 
-            this.btHapticStart.Location = new System.Drawing.Point(444, 2);
-            this.btHapticStart.Name = "btHapticStart";
-            this.btHapticStart.Size = new System.Drawing.Size(100, 34);
-            this.btHapticStart.TabIndex = 2;
-            this.btHapticStart.Text = "Start";
-            this.btHapticStart.UseVisualStyleBackColor = true;
-            this.btHapticStart.Click += new System.EventHandler(this.btHapticStart_Click);
-            // 
-            // flHaptic
-            // 
-            this.flHaptic.AutoScroll = true;
-            this.flHaptic.BackColor = System.Drawing.SystemColors.Window;
-            this.flHaptic.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.flHaptic.Location = new System.Drawing.Point(3, 41);
-            this.flHaptic.Name = "flHaptic";
-            this.flHaptic.Size = new System.Drawing.Size(737, 520);
-            this.flHaptic.TabIndex = 1;
             // 
             // tpPos
             // 
@@ -554,56 +611,6 @@
             this.flCurrent.Size = new System.Drawing.Size(737, 558);
             this.flCurrent.TabIndex = 0;
             // 
-            // tpHeat
-            // 
-            this.tpHeat.Controls.Add(this.flHeat);
-            this.tpHeat.Controls.Add(this.panel5);
-            this.tpHeat.Location = new System.Drawing.Point(4, 25);
-            this.tpHeat.Name = "tpHeat";
-            this.tpHeat.Padding = new System.Windows.Forms.Padding(3);
-            this.tpHeat.Size = new System.Drawing.Size(743, 564);
-            this.tpHeat.TabIndex = 4;
-            this.tpHeat.Text = "Heat";
-            this.tpHeat.UseVisualStyleBackColor = true;
-            // 
-            // flHeat
-            // 
-            this.flHeat.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.flHeat.Location = new System.Drawing.Point(3, 35);
-            this.flHeat.Name = "flHeat";
-            this.flHeat.Size = new System.Drawing.Size(737, 526);
-            this.flHeat.TabIndex = 3;
-            // 
-            // panel5
-            // 
-            this.panel5.Controls.Add(this.btRecvHeat);
-            this.panel5.Controls.Add(this.btSendHeat);
-            this.panel5.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panel5.Location = new System.Drawing.Point(3, 3);
-            this.panel5.Name = "panel5";
-            this.panel5.Size = new System.Drawing.Size(737, 32);
-            this.panel5.TabIndex = 5;
-            // 
-            // btRecvHeat
-            // 
-            this.btRecvHeat.Location = new System.Drawing.Point(87, 3);
-            this.btRecvHeat.Name = "btRecvHeat";
-            this.btRecvHeat.Size = new System.Drawing.Size(75, 23);
-            this.btRecvHeat.TabIndex = 4;
-            this.btRecvHeat.Text = "Receive";
-            this.btRecvHeat.UseVisualStyleBackColor = true;
-            this.btRecvHeat.Click += new System.EventHandler(this.btRecvHeat_Click);
-            // 
-            // btSendHeat
-            // 
-            this.btSendHeat.Location = new System.Drawing.Point(6, 3);
-            this.btSendHeat.Name = "btSendHeat";
-            this.btSendHeat.Size = new System.Drawing.Size(75, 23);
-            this.btSendHeat.TabIndex = 2;
-            this.btSendHeat.Text = "Send";
-            this.btSendHeat.UseVisualStyleBackColor = true;
-            this.btSendHeat.Click += new System.EventHandler(this.btSendHeat_Click);
-            // 
             // tpParam
             // 
             this.tpParam.Controls.Add(this.flParam);
@@ -678,47 +685,77 @@
             this.btSendPd.UseVisualStyleBackColor = true;
             this.btSendPd.Click += new System.EventHandler(this.btSendPd_Click);
             // 
-            // tpMagnet
+            // tpHeat
             // 
-            this.tpMagnet.BackColor = System.Drawing.SystemColors.Control;
-            this.tpMagnet.Controls.Add(this.pnMagnet);
-            this.tpMagnet.Controls.Add(this.panel3);
-            this.tpMagnet.Location = new System.Drawing.Point(4, 25);
-            this.tpMagnet.Name = "tpMagnet";
-            this.tpMagnet.Padding = new System.Windows.Forms.Padding(3);
-            this.tpMagnet.Size = new System.Drawing.Size(743, 564);
-            this.tpMagnet.TabIndex = 5;
-            this.tpMagnet.Text = "Magnet";
+            this.tpHeat.Controls.Add(this.flHeat);
+            this.tpHeat.Controls.Add(this.panel5);
+            this.tpHeat.Location = new System.Drawing.Point(4, 25);
+            this.tpHeat.Name = "tpHeat";
+            this.tpHeat.Padding = new System.Windows.Forms.Padding(3);
+            this.tpHeat.Size = new System.Drawing.Size(743, 564);
+            this.tpHeat.TabIndex = 4;
+            this.tpHeat.Text = "Heat";
+            this.tpHeat.UseVisualStyleBackColor = true;
             // 
-            // pnMagnet
+            // flHeat
             // 
-            this.pnMagnet.AutoScroll = true;
-            this.pnMagnet.AutoSize = true;
-            this.pnMagnet.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnMagnet.Location = new System.Drawing.Point(3, 35);
-            this.pnMagnet.Name = "pnMagnet";
-            this.pnMagnet.Size = new System.Drawing.Size(737, 526);
-            this.pnMagnet.TabIndex = 3;
-            this.pnMagnet.Resize += new System.EventHandler(this.pnMagnet_Resize);
+            this.flHeat.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.flHeat.Location = new System.Drawing.Point(3, 35);
+            this.flHeat.Name = "flHeat";
+            this.flHeat.Size = new System.Drawing.Size(737, 526);
+            this.flHeat.TabIndex = 3;
             // 
-            // panel3
+            // panel5
             // 
-            this.panel3.Controls.Add(this.btMeasure);
-            this.panel3.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panel3.Location = new System.Drawing.Point(3, 3);
-            this.panel3.Name = "panel3";
-            this.panel3.Size = new System.Drawing.Size(737, 32);
-            this.panel3.TabIndex = 2;
+            this.panel5.Controls.Add(this.btLoadSpidarHeat);
+            this.panel5.Controls.Add(this.btLoadNubotiHeat);
+            this.panel5.Controls.Add(this.btRecvHeat);
+            this.panel5.Controls.Add(this.btSendHeat);
+            this.panel5.Dock = System.Windows.Forms.DockStyle.Top;
+            this.panel5.Location = new System.Drawing.Point(3, 3);
+            this.panel5.Name = "panel5";
+            this.panel5.Size = new System.Drawing.Size(737, 32);
+            this.panel5.TabIndex = 5;
             // 
-            // btMeasure
+            // btLoadSpidarHeat
             // 
-            this.btMeasure.Location = new System.Drawing.Point(3, 3);
-            this.btMeasure.Name = "btMeasure";
-            this.btMeasure.Size = new System.Drawing.Size(75, 23);
-            this.btMeasure.TabIndex = 0;
-            this.btMeasure.Text = "Measure";
-            this.btMeasure.UseVisualStyleBackColor = true;
-            this.btMeasure.Click += new System.EventHandler(this.btMeasure_Click);
+            this.btLoadSpidarHeat.Location = new System.Drawing.Point(615, 6);
+            this.btLoadSpidarHeat.Name = "btLoadSpidarHeat";
+            this.btLoadSpidarHeat.Size = new System.Drawing.Size(119, 23);
+            this.btLoadSpidarHeat.TabIndex = 6;
+            this.btLoadSpidarHeat.Text = "Load SPIDAR";
+            this.btLoadSpidarHeat.UseVisualStyleBackColor = true;
+            this.btLoadSpidarHeat.Click += new System.EventHandler(this.btLoadSpidarHeat_Click);
+            // 
+            // btLoadNubotiHeat
+            // 
+            this.btLoadNubotiHeat.Location = new System.Drawing.Point(497, 6);
+            this.btLoadNubotiHeat.Name = "btLoadNubotiHeat";
+            this.btLoadNubotiHeat.Size = new System.Drawing.Size(112, 23);
+            this.btLoadNubotiHeat.TabIndex = 5;
+            this.btLoadNubotiHeat.Text = "Load Nuibot";
+            this.btLoadNubotiHeat.UseVisualStyleBackColor = true;
+            this.btLoadNubotiHeat.Click += new System.EventHandler(this.btLoadNubotiHeat_Click);
+            // 
+            // btRecvHeat
+            // 
+            this.btRecvHeat.Location = new System.Drawing.Point(87, 3);
+            this.btRecvHeat.Name = "btRecvHeat";
+            this.btRecvHeat.Size = new System.Drawing.Size(75, 23);
+            this.btRecvHeat.TabIndex = 4;
+            this.btRecvHeat.Text = "Receive";
+            this.btRecvHeat.UseVisualStyleBackColor = true;
+            this.btRecvHeat.Click += new System.EventHandler(this.btRecvHeat_Click);
+            // 
+            // btSendHeat
+            // 
+            this.btSendHeat.Location = new System.Drawing.Point(6, 3);
+            this.btSendHeat.Name = "btSendHeat";
+            this.btSendHeat.Size = new System.Drawing.Size(75, 23);
+            this.btSendHeat.TabIndex = 2;
+            this.btSendHeat.Text = "Send";
+            this.btSendHeat.UseVisualStyleBackColor = true;
+            this.btSendHeat.Click += new System.EventHandler(this.btSendHeat_Click);
             // 
             // splitContainerTop
             // 
@@ -826,19 +863,6 @@
             this.txMsg.Size = new System.Drawing.Size(229, 197);
             this.txMsg.TabIndex = 0;
             // 
-            // panel6
-            // 
-            this.panel6.Controls.Add(this.label5);
-            this.panel6.Controls.Add(this.label6);
-            this.panel6.Controls.Add(this.btHapticStart);
-            this.panel6.Controls.Add(this.udAmp);
-            this.panel6.Controls.Add(this.udDamp);
-            this.panel6.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panel6.Location = new System.Drawing.Point(3, 3);
-            this.panel6.Name = "panel6";
-            this.panel6.Size = new System.Drawing.Size(737, 38);
-            this.panel6.TabIndex = 7;
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
@@ -853,9 +877,14 @@
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerHoriz)).EndInit();
             this.splitContainerHoriz.ResumeLayout(false);
             this.tbControl.ResumeLayout(false);
+            this.tpMagnet.ResumeLayout(false);
+            this.tpMagnet.PerformLayout();
+            this.panel3.ResumeLayout(false);
             this.tpHaptic.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.udDamp)).EndInit();
+            this.panel6.ResumeLayout(false);
+            this.panel6.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.udAmp)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.udDamp)).EndInit();
             this.tpPos.ResumeLayout(false);
             this.panel2.ResumeLayout(false);
             this.panel2.PerformLayout();
@@ -865,13 +894,10 @@
             ((System.ComponentModel.ISupportInitialize)(this.udStep)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.track)).EndInit();
             this.tpCurrent.ResumeLayout(false);
-            this.tpHeat.ResumeLayout(false);
-            this.panel5.ResumeLayout(false);
             this.tpParam.ResumeLayout(false);
             this.panel4.ResumeLayout(false);
-            this.tpMagnet.ResumeLayout(false);
-            this.tpMagnet.PerformLayout();
-            this.panel3.ResumeLayout(false);
+            this.tpHeat.ResumeLayout(false);
+            this.panel5.ResumeLayout(false);
             this.splitContainerTop.Panel1.ResumeLayout(false);
             this.splitContainerTop.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerTop)).EndInit();
@@ -883,8 +909,6 @@
             this.splitContainerBottom.Panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerBottom)).EndInit();
             this.splitContainerBottom.ResumeLayout(false);
-            this.panel6.ResumeLayout(false);
-            this.panel6.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -952,6 +976,8 @@
         private System.Windows.Forms.NumericUpDown udDamp;
         private System.Windows.Forms.NumericUpDown udAmp;
         private System.Windows.Forms.Panel panel6;
+        private System.Windows.Forms.Button btLoadSpidarHeat;
+        private System.Windows.Forms.Button btLoadNubotiHeat;
     }
 }
 

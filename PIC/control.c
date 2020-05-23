@@ -194,13 +194,11 @@ void currentControl(){
             diff = DIFF_ZERO_LIMIT;
         }
         {
+            //  to avoid vibration, give some gap
             short gap = (currentSense[i]>>4) + 1;
-//            if (i==3){  //  For SPIPWM dead zoon is needed to avoid vibration.
-            //  to avoid vibration
-                if (diff >= gap) diff -= gap;
-                else if (diff <= -gap) diff += gap;
-                else diff = 0;
-//           }
+            if (diff >= gap) diff -= gap;
+            else if (diff <= -gap) diff += gap;
+            else diff = 0;
         }
         targetPwm[i] += sign*diff;
         if (sign > 0){

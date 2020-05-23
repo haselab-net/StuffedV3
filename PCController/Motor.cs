@@ -375,6 +375,16 @@ namespace PCController
             panel.Height = udHeatLimit.Height + udHeatRelease.Height;
             panel.Width = udHeatRelease.Width + lHeatRelease.Width;
         }
+        public void SetNuibotDefault()
+        {
+            HeatLimit = 102400;
+            HeatRelease = 512;
+        }
+        public void SetSpidarDefault()
+        {
+            HeatLimit = 102400;
+            HeatRelease = 4096;
+        }
     }
 
     [DataContract]

@@ -316,6 +316,20 @@ namespace PCController
                 motors[i].pd.SetSpidarDefault();
             }
         }
+        private void btLoadNubotiHeat_Click(object sender, EventArgs e)
+        {
+            for (int i = 0; i < motors.Count; ++i)
+            {
+                motors[i].heat.SetNuibotDefault();
+            }
+        }
+        private void btLoadSpidarHeat_Click(object sender, EventArgs e)
+        {
+            for (int i = 0; i < motors.Count; ++i)
+            {
+                motors[i].heat.SetSpidarDefault();
+            }
+        }
 
         private void btSendHeat_Click(object sender, EventArgs e)
         {
@@ -387,6 +401,7 @@ namespace PCController
         {
             if (bHaptic) btHapticStart_Click(sender, e);
         }
+
     }
     public class CurrentControl
     {
