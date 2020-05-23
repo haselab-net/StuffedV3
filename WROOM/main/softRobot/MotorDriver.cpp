@@ -309,16 +309,21 @@ extern "C" void loadMotorParam(){
         //LOGI("heat: %s:%ld %s:%d", keyLimit, motorHeatLimit[i], keyRelease, motorHeatRelease[i]);
 
         //  torqueLimit
-        char keyTorqueMin[11]   = "torqueMin0";
-        char keyTorqueMax[11]   = "torqueMax0";
-        keyTorqueMin[9] = '0' + i;
-        keyTorqueMax[9] = '0' + i;
-        torqueLimit.min[i] = -SDEC_ONE;
-        torqueLimit.max[i] = SDEC_ONE;
-        if (nvs.get(keyTorqueMin, v) == ESP_OK) torqueLimit.min[i] = v;
-        else nvs.set(keyTorqueMin, torqueLimit.min[i]);
-        if (nvs.get(keyTorqueMax, v) == ESP_OK) torqueLimit.max[i] = v;
-        else nvs.set(keyTorqueMax, torqueLimit.max[i]);
+        if (esp_reset_reason() == ESP_RST_BROWNOUT){    //  in case brownout, motors must be turned off. 
+            torqueLimit.min[i] = 0;
+            torqueLimit.max[i] = 0;
+        }else{
+            char keyTorqueMin[11]   = "torqueMin0";
+            char keyTorqueMax[11]   = "torqueMax0";
+            keyTorqueMin[9] = '0' + i;
+            keyTorqueMax[9] = '0' + i;
+            torqueLimit.min[i] = -SDEC_ONE;
+            torqueLimit.max[i] = SDEC_ONE;
+            if (nvs.get(keyTorqueMin, v) == ESP_OK) torqueLimit.min[i] = v;
+            else nvs.set(keyTorqueMin, torqueLimit.min[i]);
+            if (nvs.get(keyTorqueMax, v) == ESP_OK) torqueLimit.max[i] = v;
+            else nvs.set(keyTorqueMax, torqueLimit.max[i]);
+        }
         //LOGI("torque: %s:%d %s:%d", keyTorqueMin, torqueLimit.min[i], keyTorqueMax, torqueLimit.max[i]);
     }
     nvs.commit();
