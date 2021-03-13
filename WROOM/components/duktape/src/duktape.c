@@ -17094,7 +17094,7 @@ struct duk__pcall_args {
 };
 typedef struct duk__pcall_args duk__pcall_args;
 
-#include "../../../main/duktapeEsp32/include/duktape_task.h"
+#include "../../duktapeEsp32/include/duktape_task.h"
 #include <logging.h>
 
 /* Compute and validate idx_func for a certain 'nargs' and 'other'

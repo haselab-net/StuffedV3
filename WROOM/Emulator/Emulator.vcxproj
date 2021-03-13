@@ -277,7 +277,7 @@
     <ClInclude Include="..\main\softRobot\UdpCom.h" />
     <ClInclude Include="..\main\softRobot\UTRef.h" />
     <ClInclude Include="..\main\softRobot\WroomEnv.h" />
-    <ClInclude Include="esp_event_loop.h" />
+    <ClInclude Include="esp_event.h" />
     <ClInclude Include="esp_log.h" />
     <ClInclude Include="FreeRTOSConfig.h" />
     <ClInclude Include="lwipcfg_msvc.h" />

@@ -1,11 +1,7 @@
 # Edit following two lines to set component requirements (see docs)
 set(COMPONENT_REQUIRES
-  "console"
-  "fatfs"
-  "json"
-  "mdns"
-  "nvs_flash"
-  "pthread"
+	"spi_flash"
+	"duktape"
 )
 set(COMPONENT_PRIV_REQUIRES )
 

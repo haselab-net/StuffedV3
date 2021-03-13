@@ -11,19 +11,19 @@
 #include "esp_task_wdt.h"
 #include "esp_log.h"
 #include "nvs_flash.h"
-#include "rom/uart.h"
+#include "esp32/rom/uart.h"
 #include "ws_task.h"
 #include "espfs.h"
 #endif
 #include "monitor.h"
 #include "ws_fs.h"
 #include "ws_ws.h"
-#include "softRobot/UdpCom.h"
-#include "softRobot/Movement.h"
-#include "duktapeEsp32/include/logging.h"
+#include "UdpCom.h"
+#include "Movement.h"
+#include "logging.h"
 
 extern "C" {
-    #include "websocketServer/CoreDumpReader.h"
+    #include "CoreDumpReader.h"
 }
 
 LOG_TAG("main");

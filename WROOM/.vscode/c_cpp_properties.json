@@ -1,76 +1,7 @@
 {
     "configurations": [
         {
-            "name": "ESP32-Win",
-            "includePath": [
-                ".",
-                "${workspaceRoot}/main",
-                "${workspaceRoot}/components",
-                "${workspaceRoot}/components/esp32snippets",
-                "${workspaceRoot}/../PIC",
-                "${workspaceRoot}/../PCRobokey",
-                "${workspaceRoot}/components/duktape/src",
-                "${workspaceRoot}/build/include",
-                "C:/msys32/opt/xtensa-esp32-elf/lib/gcc/xtensa-esp32-elf/5.2.0/include",
-                "C:/msys32/opt/xtensa-esp32-elf/lib/gcc/xtensa-esp32-elf/5.2.0/include-fixed",
-                "C:/msys32/opt/xtensa-esp32-elf/xtensa-esp32-elf/include",
-                "C:/msys32/opt/xtensa-esp32-elf/xtensa-esp32-elf/sysroot/usr/include",
-                "C:/msys32/home/espressif/esp/esp-idf/components",
-                "C:/msys32/home/espressif/esp/esp-idf/components/esp32/include",
-                "C:/msys32/home/espressif/esp/esp-idf/components/driver/include",
-                "C:/msys32/home/espressif/esp/esp-idf/components/soc/include",
-                "C:/msys32/home/espressif/esp/esp-idf/components/soc/esp32/include",
-                "C:/msys32/home/espressif/esp/esp-idf/components/freertos/include",
-                "C:/msys32/home/espressif/esp/esp-idf/components/heap/include",
-                "C:/msys32/home/espressif/esp/esp-idf/components/tcpip_adapter/include",
-                "C:/msys32/home/espressif/esp/esp-idf/components/log/include",
-                "C:/msys32/home/espressif/esp/esp-idf/components/esp_adc_cal/include",
-                "C:/msys32/home/espressif/esp/esp-idf/components/mbedtls/port/include/mbedtls",
-                "C:/msys32/opt/xtensa-esp32-elf/xtensa-esp32-elf/include/c++/5.2.0",
-                "C:/msys32/opt/xtensa-esp32-elf/xtensa-esp32-elf/include/c++/5.2.0/xtensa-esp32-elf",
-                "C:/msys32/usr/include",
-                "${workspaceFolder}/main/duktapeEsp32/include",
-                "C:/msys32/home/espressif/esp/esp-idf/components/mbedtls/mbedtls/include",
-                "C:/msys32/home/espressif/esp/esp-idf/components/lwip/lwip/src/include",
-                "C:/msys32/home/espressif/esp/esp-idf/components/lwip/port/esp32/include",
-                "C:/msys32/home/espressif/esp/esp-idf/components/esp_ringbuf/include",
-                "C:/msys32/home/espressif/esp/esp-idf/components/esp_http_client/include",
-                "C:/msys32/home/espressif/esp/esp-idf/components/mqtt/esp-mqtt/include",
-                "C:/msys32/home/espressif/esp/esp-idf/components/spi_flash/include",
-                "C:/msys32/home/espressif/esp/esp-idf/components/app_update/include",
-                "C:/msys32/home/espressif/esp/esp-idf/components/nghttp/nghttp2/third-party/http-parser",
-                "C:/msys32/home/espressif/esp/esp-idf/components/esp_https_ota/include",
-                "C:/msys32/home/espressif/esp/esp-idf/components/esp_event/include",
-                "C:/msys32/home/espressif/esp/esp-idf/components/nvs_flash/include",
-                "C:/msys32/home/espressif/esp/esp-idf/components/lwip/include/apps",
-                "${workspaceFolder}/main/websocketServer",
-                "${workspaceFolder}/components/espfs"
-            ],
-            "intelliSenseMode": "gcc-x64",
-            "defines": [
-                "__xtensa__"
-            ],
-            "browse": {
-                "path": [
-                    "${workspaceRoot}/main",
-                    "${workspaceRoot}/../PIC",
-                    "${workspaceRoot}/../PCRobokey",
-                    "C:/msys32/opt/xtensa-esp32-elf/lib/gcc/xtensa-esp32-elf/5.2.0/include",
-                    "C:/msys32/opt/xtensa-esp32-elf/lib/gcc/xtensa-esp32-elf/5.2.0/include-fixed",
-                    "C:/msys32/opt/xtensa-esp32-elf/xtensa-esp32-elf/include",
-                    "C:/msys32/opt/xtensa-esp32-elf/xtensa-esp32-elf/sysroot/usr/include",
-                    "C:/msys32/home/espressif/esp/esp-idf/components",
-                    "${workspaceRoot}/components"
-                ],
-                "limitSymbolsToIncludedHeaders": false,
-                "databaseFilename": "${workspaceRoot}/.vscode/browse.vc.db"
-            },
-            "cStandard": "c11",
-            "cppStandard": "c++17",
-            "compilerPath": "C:\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\msys32\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\opt\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\xtensa-esp32-elf\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\bin\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\xtensa-esp32-elf-gcc.exe"
-        },
-        {
-            "name": "WROOM",
+            "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/**"
             ],
@@ -79,11 +10,28 @@
                 "UNICODE",
                 "_UNICODE"
             ],
-            "windowsSdkVersion": "10.0.17763.0",
-            "compilerPath": "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.20.27508/bin/Hostx64/x64/cl.exe",
-            "cStandard": "c11",
+            "windowsSdkVersion": "10.0.19041.0",
+            "compilerPath": "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.28.29910/bin/Hostx64/x64/cl.exe",
+            "cStandard": "c17",
             "cppStandard": "c++17",
-            "intelliSenseMode": "msvc-x64"
+            "intelliSenseMode": "windows-msvc-x64",
+            "compileCommands": "${workspaceFolder}/build/compile_commands.json"
+        },
+        {
+            "name": "esp-idf v4.2",
+            "includePath": [
+                "${workspaceFolder}/**"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "windowsSdkVersion": "10.0.19041.0",
+            "compilerPath": "C:\\Home\\espressif\\esp\\.espressif\\tools\\xtensa-esp32-elf\\esp-2020r3-8.4.0\\xtensa-esp32-elf\\bin\\xtensa-esp32-elf-gcc.exe",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "gcc-arm"
         }
     ],
     "version": 4

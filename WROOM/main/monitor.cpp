@@ -11,34 +11,35 @@
 #include "esp_spi_flash.h"
 #include "esp_task_wdt.h"
 #include "esp_heap_trace.h"
+#include "esp_sleep.h"
 #include "nvs_flash.h"
-#include "rom/uart.h"
+#include "esp32/rom/uart.h"
 #endif
 #include "esp_log.h"
 #include "driver/uart.h"
 
-#include "../WroomEnv.h"
-#include "SoftRobot/UdpCom.h"
-#include "SoftRobot/AllBoards.h"
-#include "SoftRobot/TouchSensing.h"
-#include "SoftRobot/MotorDriver.h"
+#include "WroomEnv.h"
+#include "UdpCom.h"
+#include "AllBoards.h"
+#include "TouchSensing.h"
+#include "MotorDriver.h"
 #include "monitor.h"
-#include "SoftRobot/UartForBoards.h"
+#include "UartForBoards.h"
 extern "C" {
-    #include "duktapeEsp32/include/module_jslib.h"
-    #include "duktapeEsp32/include/duktape_task.h"
-    #include "duktapeEsp32/include/duktape_utils.h"
+    #include "module_jslib.h"
+    #include "duktape_task.h"
+    #include "duktape_utils.h"
 }
-#include "duktapeEsp32/include/module_srcommand.h"
+#include "module_srcommand.h"
 
-#include "websocketServer/ws_command.h"
-#include "websocketServer/ws_task.h"
-#include "websocketServer/ws_fs.h"
+#include "ws_command.h"
+#include "ws_task.h"
+#include "ws_fs.h"
 #include "espfs.h"
 #include "espfsStream.h"
 #include "esp32/ulp.h"
 
-#include "../duktapeEsp32/include/logging.h"
+#include "logging.h"
 LOG_TAG("Monitor");
 
 
@@ -365,7 +366,7 @@ class MCShowTouch: public MonitorCommandBase{
 #ifndef _WIN32
 extern "C" void* duk_alloc_hybrid_udata;
 extern "C"{
-#include "../duktapeEsp32/duk_alloc_hybrid.h"
+#include "duk_alloc_hybrid.h"
 }
 class MCShowHeap: public MonitorCommandBase{
     const char* Desc(){ return "h Show heap memory"; }
@@ -630,8 +631,8 @@ public:
 } mcEspFs;
 
 #include "../../PIC/control.h"
-#include "./softRobot/Movement.h"
-#include "./softRobot/CommandWROOM.h"
+#include "Movement.h"
+#include "CommandWROOM.h"
 
 struct MonitorMovementKeyframe {
 	uint16_t id;				// 8-bit movement id + 8-bit keyframe id
@@ -805,9 +806,9 @@ public:
 } mcMovement;
 
 extern "C" {
-    #include "websocketServer/CoreDumpReader.h"
+    #include "CoreDumpReader.h"
 }
-#include "websocketServer/OTA.h"
+#include "OTA.h"
 class MCTest: public MonitorCommandBase {
     public:
     const char * Desc(){ return "H error handle";}

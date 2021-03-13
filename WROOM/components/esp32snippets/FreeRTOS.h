@@ -9,7 +9,7 @@
 #define MAIN_FREERTOS_H_
 #include <stdint.h>
 #include <string>
-#include <pthread.h>
+#include <esp_pthread.h>
 
 #include <freertos/FreeRTOS.h>   // Include the base FreeRTOS definitions.
 #include <freertos/task.h>       // Include the task definitions.
@@ -58,7 +58,7 @@ public:
  */
 class Ringbuffer {
 public:
-	Ringbuffer(size_t length, ringbuf_type_t type = RINGBUF_TYPE_NOSPLIT);
+	Ringbuffer(size_t length, RingbufferType_t type = RINGBUF_TYPE_NOSPLIT);
 	~Ringbuffer();
 
 	void*    receive(size_t* size, TickType_t wait = portMAX_DELAY);

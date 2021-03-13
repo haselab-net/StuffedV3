@@ -1,11 +1,9 @@
 # Edit following two lines to set component requirements (see docs)
-set(COMPONENT_REQUIRES
-  "console"
-  "fatfs"
-  "json"
-  "mdns"
+set(COMPONENT_REQUIRES 
+  "esp_adc_cal"
+  "duktapeEsp32"
   "nvs_flash"
-  "pthread"
+  "esp32snippets"
 )
 set(COMPONENT_PRIV_REQUIRES )
 

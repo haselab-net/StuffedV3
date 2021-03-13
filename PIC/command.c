@@ -6,7 +6,7 @@
 #include "uart.h"
 #include <string.h>
 #ifdef WROOM
-#include "../WROOM/main/SoftRobot/commandWROOM.h"
+#include "../WROOM/components/SoftRobot/commandWROOM.h"
 #endif
 
 unsigned char boardId;

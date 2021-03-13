@@ -1,44 +1,52 @@
-# ESP32-Duktape
-The ESP32 is a WiFi and Bluetooth enabled MCU from Espressif.  It is a dual core
-processor with 512K of RAM and commonly 4M of flash.  Each processor runs at
-240MHz.  It has built in WiFi and Bluetooth as well as a rich assortment of
-sensor inputs and outputs.
+# Hello World Example
 
-Duktape is an open source implementation of a JavaScript environment including
-a runtime, compiler, debugger and a wealth of well written documentation.
+Starts a FreeRTOS task to print "Hello World".
 
-This project provides an environment for running JavaScript on the ESP32 using the
-Duktape engine.  In addition to providing all the necessary components to run
-a simple JavaScript program, a framework is also provided that provides premade
-modules for many of the common ESP32 functions including networking, web servers,
-web sockets, GPIO and much more.
+(See the README.md file in the upper level 'examples' directory for more information about examples.)
 
-An integrated browser based JavaScript editor and file system are also present
-meaning that once installed, one needs no specialized tools in order to build and
-run JavaScript.
+## How to use example
 
-All components in this project are open source.  Collaborators welcomed.
+Follow detailed instructions provided specifically for this example. 
+
+Select the instructions depending on Espressif chip installed on your development board:
+
+- [ESP32 Getting Started Guide](https://docs.espressif.com/projects/esp-idf/en/stable/get-started/index.html)
+- [ESP32-S2 Getting Started Guide](https://docs.espressif.com/projects/esp-idf/en/latest/esp32s2/get-started/index.html)
 
 
+## Example folder contents
 
-# Stuffed Robot V3 Firmware
+The project **hello_world** contains one source file in C language [hello_world_main.c](main/hello_world_main.c). The file is located in folder [main](main).
 
-## DONE
-- Continuously update RobotState via UART communication by using CI_ALL command.
--ADCを自動スキャン、I2Sから受け取る
-	https://gist.github.com/phonec/42d685580b4c5b93c8b38d5fa68e0e58 が参考になる。
+ESP-IDF projects are build using CMake. The project build configuration is contained in `CMakeLists.txt` files that provide set of directives and instructions describing the project's source files and targets (executable, library, or both). 
 
-- ロボットの状態を保持し、Wifiからの問い合わせにはすぐに答える。
-　・制御モードなども。
+Below is short explanation of remaining files in the project folder.
 
-## TODO
+```
+├── CMakeLists.txt
+├── example_test.py            Python script used for automated example testing
+├── main
+│   ├── CMakeLists.txt
+│   ├── component.mk           Component make file
+│   └── hello_world_main.c
+├── Makefile                   Makefile used by legacy GNU Make
+└── README.md                  This is the file you are currently reading
+```
 
-- UDP通信の更新方法(送信＝PC→Robot)?
-再送方式の場合
--- 返信の番号までが、送信できたと考えて、番号がそれ以上のコマンドをすべて再送する。
--- 送信が遅れてバッファが空になったら、停止
+For more information on structure and contents of ESP-IDF projects, please refer to Section [Build System](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-guides/build-system.html) of the ESP-IDF Programming Guide.
 
-再送しない場合
--- ターゲットの時刻とCOWを見て補間する。
--- COWが飛んだときは、あいだのターゲットを補間して作る。
--- COWがまだ読み出しされていなければ、更新する。
+## Troubleshooting
+
+* Program upload failure
+
+    * Hardware connection is not correct: run `idf.py -p PORT monitor`, and reboot your board to see if there are any output logs.
+    * The baud rate for downloading is too high: lower your baud rate in the `menuconfig` menu, and try again.
+
+## Technical support and feedback
+
+Please use the following feedback channels:
+
+* For technical queries, go to the [esp32.com](https://esp32.com/) forum
+* For a feature request or bug report, create a [GitHub issue](https://github.com/espressif/esp-idf/issues)
+
+We will get back to you as soon as possible.
