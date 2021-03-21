@@ -34,7 +34,7 @@ It's written for use with httpd, but doesn't need to be used as such.
 static char tag[] = "espfs";
 
 
-static spi_flash_mmap_handle_t handle = NULL;
+static spi_flash_mmap_handle_t handle;
 static void *espFlashPtr = NULL;
 size_t espFsFlashAddress;
 size_t espFsFlashSize;

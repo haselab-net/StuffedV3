@@ -3,6 +3,45 @@
     "idf.flashType": "UART",
     "files.associations": {
         "duk_alloc_hybrid.h": "c",
-        "module_iot.h": "c"
-    }
+        "module_iot.h": "c",
+        "*.ipp": "c",
+        "charconv": "c",
+        "exception": "c",
+        "memory": "c",
+        "regex": "c",
+        "shared_mutex": "c",
+        "type_traits": "c",
+        "utility": "c",
+        "vector": "c",
+        "xhash": "c",
+        "xstring": "c",
+        "xtr1common": "c",
+        "xtree": "c",
+        "xutility": "c"
+    },
+    "idf.portWin": "COM8",
+    "shellLauncher.shells.windows": [
+
+        {
+            "shell": "C:\\Windows\\System32\\cmd.exe",
+            "label": "cmd"
+        },
+        {
+            "shell": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+            "label": "PowerShell"
+        },
+        {
+            "shell": "C:\\Program Files\\Git\\bin\\bash.exe",
+            "label": "Git bash"
+        },
+        {
+            "shell": "C:\\msys32\\usr\\bin\\bash.exe",
+            "args": ["-login"],
+            "label": "msys32 bash"
+        },
+        {
+            "shell": "C:\\Windows\\System32\\bash.exe",
+            "label": "WSL Bash"
+        }
+    ]
 }
