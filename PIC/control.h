@@ -99,28 +99,8 @@ void targetsInit();
 void targetsAddOrUpdate(short* pos, short period, unsigned char count);
 void targetsForceControlAddOrUpdate(SDEC* pos, SDEC JK[NFORCE][NMOTOR],short period, unsigned char count);
 void targetsWrite();
-inline unsigned char targetsWriteAvail(){
-	signed char len = targets.read - targets.write;
-	if (len < 0) len += NTARGET;
-#if 0
-	if (len > NTARGET){
-		PIC_LOGE("targetsWriteAvail() w:%d r:%d len:%d", targets.write, targets.read, len);
-		assert(len <= NTARGET);
-	}
-#endif
-	return len;
-}
-inline unsigned char targetsReadAvail(){
-	signed char len = targets.write - targets.read;
-	if (len <= 0) len += NTARGET;
-#if 0
-	if (len > NTARGET){
-		PIC_LOGE("targetsReadAvail w:%d r:%d len:%d", targets.write, targets.read, len);
-		assert(len <= NTARGET);
-	}
-#endif
-	return len;
-}
+unsigned char targetsWriteAvail();
+unsigned char targetsReadAvail();
 int targetsCountMin();
 int targetsCountMax();
 

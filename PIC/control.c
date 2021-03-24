@@ -56,6 +56,30 @@ static xSemaphoreHandle mutexForControl;
 //----------------------------------------------------------------------------
 //	Control
 //
+unsigned char targetsWriteAvail(){
+	signed char len = targets.read - targets.write;
+	if (len < 0) len += NTARGET;
+#if 0
+	if (len > NTARGET){
+		PIC_LOGE("targetsWriteAvail() w:%d r:%d len:%d", targets.write, targets.read, len);
+		assert(len <= NTARGET);
+	}
+#endif
+	return len;
+}
+inline unsigned char targetsReadAvail(){
+	signed char len = targets.write - targets.read;
+	if (len <= 0) len += NTARGET;
+#if 0
+	if (len > NTARGET){
+		PIC_LOGE("targetsReadAvail w:%d r:%d len:%d", targets.write, targets.read, len);
+		assert(len <= NTARGET);
+	}
+#endif
+	return len;
+}
+
+
 void updateMotorState(){
     static u_short count;
 	int i;

@@ -121,9 +121,9 @@ void UdpRetPacket::SetLength() {
 	case CIU_GET_SUBBOARD_INFO:	//	uart id model nTarget nMotor nCurrent nForce
 		length = (NHEADER + 7) * 2 ; break;
 	case CIU_MOVEMENT:
+		length = 0;
 		switch (*(uint8_t*)data)
 		{
-		length = 0;
 		case CI_M_PAUSE_INTERPOLATE:
 		case CI_M_RESUME_INTERPOLATE:
 		case CI_M_PAUSE_MOV:

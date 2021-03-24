@@ -6,12 +6,7 @@
  */
 
 //#define _GLIBCXX_USE_C99
-#include <string>
-#include <sstream>
-#include <iomanip>
-#include <algorithm>
 #include "sdkconfig.h"
-
 
 #include "WiFi.h"
 #include <esp_event.h>
@@ -25,7 +20,10 @@
 #include <lwip/netdb.h>
 #include <lwip/sockets.h>
 
-#include <string.h>
+#include <string>
+#include <sstream>
+#include <iomanip>
+#include <algorithm>
 
 
 static const char* LOG_TAG = "WiFi";

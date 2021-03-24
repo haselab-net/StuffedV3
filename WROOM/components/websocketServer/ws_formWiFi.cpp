@@ -11,7 +11,7 @@
 
 static char tag[] = "ws_form";
 inline std::string str(int i){
-    char buf[10];
+    char buf[11];
     sprintf(buf, "%d", i);
     return std::string(buf);
 }

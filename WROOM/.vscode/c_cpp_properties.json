@@ -11,7 +11,7 @@
                 "_UNICODE"
             ],
             "windowsSdkVersion": "10.0.19041.0",
-            "compilerPath": "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.28.29910/bin/Hostx64/x64/cl.exe",
+            "compilerPath": "C:\\Home\\espressif\\esp\\.espressif\\tools\\xtensa-esp32-elf\\esp-2020r3-8.4.0\\xtensa-esp32-elf\\bin\\xtensa-esp32-elf-gcc.exe",
             "cStandard": "c17",
             "cppStandard": "c++17",
             "intelliSenseMode": "windows-msvc-x64",
@@ -20,7 +20,9 @@
         {
             "name": "esp-idf v4.2",
             "includePath": [
-                "${workspaceFolder}/**"
+                "C:/msys32/home/espressif/esp/v4.2/esp-idf/components/**",
+                "${workspaceFolder}/components/**",
+                "${workspaceFolder}/main/**"
             ],
             "defines": [
                 "_DEBUG",
@@ -31,7 +33,7 @@
             "compilerPath": "C:\\Home\\espressif\\esp\\.espressif\\tools\\xtensa-esp32-elf\\esp-2020r3-8.4.0\\xtensa-esp32-elf\\bin\\xtensa-esp32-elf-gcc.exe",
             "cStandard": "c17",
             "cppStandard": "c++17",
-            "intelliSenseMode": "gcc-arm"
+            "intelliSenseMode": "linux-gcc-arm"
         }
     ],
     "version": 4

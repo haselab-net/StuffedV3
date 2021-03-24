@@ -1,4 +1,6 @@
 #pragma once
+#pragma GCC diagnostic ignored "-Warray-bounds"
+
 #include "BoardBase.h"
 #include "esp_log.h"
 #ifndef SPRINGHEAD

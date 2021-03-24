@@ -5,6 +5,7 @@
  *      Author: kolban
  */
 
+#include <esp_heap_caps.h>
 #include "System.h"
 #include <esp_system.h>
 #include <soc/gpio_struct.h>
@@ -123,6 +124,8 @@ static const io_mux_reg_t* io_mux_translate[] = {
 		&IO_MUX->pad_gpio38,     // 38
 		&IO_MUX->pad_gpio39     // 39
 };
+
+#pragma GCC diagnostic ignored "-Waggressive-loop-optimizations"
 
 static const io_mux_reg_t* gpioToIoMux(int gpio) {
 	return io_mux_translate[gpio];

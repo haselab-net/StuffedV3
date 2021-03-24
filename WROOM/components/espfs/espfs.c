@@ -39,14 +39,6 @@ static void *espFlashPtr = NULL;
 size_t espFsFlashAddress;
 size_t espFsFlashSize;
 
-struct EspFsFile {
-	EspFsHeader *header;
-	char decompressor;
-	int32_t posDecomp;
-	char *posStart;
-	char *posComp;
-	void *decompData;
-};
 
 
 EspFsInitResult espFsInit(void *flashAddress, size_t size) {

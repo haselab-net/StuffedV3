@@ -60,8 +60,12 @@ private:
  * until after a successful connect nor should we send or receive after closing the socket.
  */
 class Socket {
+	char* recvBuf;
+	static const int recvBufLen = 1024;
+	int start, end;
 public:
 	Socket();
+	Socket(const Socket& s);
 	virtual ~Socket();
 
 	Socket accept();

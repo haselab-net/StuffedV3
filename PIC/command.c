@@ -228,7 +228,7 @@ void rcCurrent(){
 		}
 	}
 }
-inline void returnInterpolateParam(){
+void returnInterpolateParam(){
     int i;	
     for(i=0; i<NMOTOR; ++i){
         retPacket.interpolate.pos[i] = L2SDEC(motorState.pos[i]);

@@ -4,7 +4,7 @@
 #define COREDUMP_FLASH_MAGIC_START 0xE32C04EDUL
 #endif
 
-static esp_partition_t *core_part;
+static const esp_partition_t *core_part;
 
 static void getCoreDumpPartition() {
     if (core_part) {    // partition already cached

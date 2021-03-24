@@ -5,6 +5,8 @@
 // to be able to use Heatshrink-compressed espfs images.
 //#define ESPFS_HEATSHRINK
 
+#include "espfsformat.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -14,6 +16,14 @@ typedef enum {
 	ESPFS_INIT_RESULT_NO_IMAGE,
 	ESPFS_INIT_RESULT_BAD_ALIGN
 } EspFsInitResult;
+struct EspFsFile {
+	EspFsHeader *header;
+	char decompressor;
+	int32_t posDecomp;
+	char *posStart;
+	char *posComp;
+	void *decompData;
+};
 typedef struct EspFsFile EspFsFile;
 
 

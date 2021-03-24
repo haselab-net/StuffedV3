@@ -265,6 +265,9 @@ void HttpParser::parseRequestLine(std::string& line) {
 
 	// Get the version
 	m_version = toCharToken(it, line, ' ');
+	if (m_version.length() == 0){
+		m_version = "HTTP/1.1";
+	}
 	ESP_LOGD(LOG_TAG, "<< parseRequestLine: method: %s, url: %s, version: %s", m_method.c_str(), m_url.c_str(), m_version.c_str());
 } // parseRequestLine
 

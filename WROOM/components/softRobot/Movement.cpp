@@ -198,9 +198,11 @@ static uint8_t getMovementId(uint16_t id) {
 static uint8_t getKeyframeId(uint16_t id) {
 	return (id & 0x00ff);
 }
+/*
 static bool getStrictMode(uint8_t flags) {
 	return (flags & 0b10000000) == 0b10000000;
 }
+*/
 
 static MotorKeyframeNode* getNode(uint8_t motorId, uint16_t id) {
 	MotorHead& head = motorHeads[motorId];

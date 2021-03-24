@@ -17,7 +17,15 @@
         "xstring": "c",
         "xtr1common": "c",
         "xtree": "c",
-        "xutility": "c"
+        "xutility": "c",
+        "esp_log.h": "c",
+        "iosfwd": "cpp",
+        "fstream": "cpp",
+        "*.tcc": "cpp",
+        "istream": "cpp",
+        "unordered_map": "cpp",
+        "ostream": "cpp",
+        "sstream": "cpp"
     },
     "idf.portWin": "COM8",
     "shellLauncher.shells.windows": [

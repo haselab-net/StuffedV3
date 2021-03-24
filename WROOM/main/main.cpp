@@ -88,7 +88,7 @@ void setLogLevel(){
     esp_log_level_set("HttpServerTask", ESP_LOG_INFO);
     esp_log_level_set("HttpRequest", ESP_LOG_INFO);
     esp_log_level_set("HttpParser", ESP_LOG_INFO);
-    esp_log_level_set("HttpResponse", ESP_LOG_INFO);
+    esp_log_level_set("HttpResponse", ESP_LOG_DEBUG);
     esp_log_level_set("PathHandler", ESP_LOG_INFO);
     esp_log_level_set("WiFi", ESP_LOG_INFO);
     esp_log_level_set("WiFiEventHandler", ESP_LOG_INFO);
@@ -97,7 +97,9 @@ void setLogLevel(){
     esp_log_level_set("ws_task", ESP_LOG_INFO);
     esp_log_level_set("ws_main", ESP_LOG_INFO);
     esp_log_level_set("ws_form", ESP_LOG_INFO);
-    //esp_log_level_set("ws_ws", ESP_LOG_DEBUG);
+    esp_log_level_set("ws_ws", ESP_LOG_DEBUG);
+    esp_log_level_set("WebSocket", ESP_LOG_DEBUG);
+    esp_log_level_set("WebSocketReader", ESP_LOG_DEBUG);
 
     //  Duktape
     esp_log_level_set("duktape_task", ESP_LOG_INFO);

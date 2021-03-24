@@ -4,15 +4,6 @@
  *  Created on: Mar 5, 2017
  *      Author: kolban
  */
-#include <iostream>
-#include <streambuf>
-#include <cstdio>
-#include <cstring>
-#include <cctype>
-#include <string>
-
-#include <sstream>
-
 #include <errno.h>
 #include <esp_log.h>
 #include <lwip/sockets.h>
@@ -24,6 +15,16 @@
 #include "SSLUtils.h"
 #include "sdkconfig.h"
 #include "Socket.h"
+
+#include <iostream>
+#include <streambuf>
+#include <cstdio>
+#include <cstring>
+#include <cctype>
+#include <string>
+
+#include <sstream>
+
 
 static const char* LOG_TAG = "Socket";
 
@@ -44,10 +45,23 @@ static void my_debug(
 Socket::Socket() {
 	m_sock   = -1;
 	m_useSSL = false;
+	start = end = 0;
+	recvBuf = NULL;
 }
-
+Socket::Socket(const Socket& s){
+	memcpy((void*)this, (void*)&s, sizeof(s));
+	end = s.end - s.start;
+	start = 0;
+	if (end - start){
+		recvBuf = new char [end];
+		memcpy(recvBuf, s.recvBuf + s.start, end);
+	}else{
+		recvBuf = NULL;
+	}
+}
 Socket::~Socket() {
-	//close_cpp(); // When the class instance has ended, delete the socket.
+	delete recvBuf;
+	//	socket must be closed explicitly.
 }
 
 
@@ -359,7 +373,7 @@ std::string Socket::readToDelim(std::string delim) {
  * @return The length of the data received or -1 on an error.
  */
 size_t Socket::receive(uint8_t* data, size_t length, bool exact) {
-	//ESP_LOGD(LOG_TAG, ">> receive: sockFd: %d, length: %d, exact: %d", m_sock, length, exact);
+	ESP_LOGD(LOG_TAG, ">> receive: sockFd: %d, length: %d, exact: %d", m_sock, length, exact);
 	if (!exact) {
 		int rc;
 		if (getSSL()) {
@@ -368,11 +382,26 @@ size_t Socket::receive(uint8_t* data, size_t length, bool exact) {
 				ESP_LOGD(LOG_TAG, "rc=%d, MBEDTLS_ERR_SSL_WANT_READ=%d", rc, MBEDTLS_ERR_SSL_WANT_READ);
 			} while (rc == MBEDTLS_ERR_SSL_WANT_WRITE || rc == MBEDTLS_ERR_SSL_WANT_READ);
 		} else {
-			//	v4.2
-			rc = ::lwip_recv(m_sock, data, length, 0);
-			//	rc = ::lwip_recv_r(m_sock, data, length, 0);
-			if (rc == -1) {
-				ESP_LOGE(LOG_TAG, "receive: %s", strerror(errno));
+			if (end == start){
+				start = 0;
+				if (!recvBuf) recvBuf = new char [recvBufLen];
+				end = lwip_recv(m_sock, recvBuf, recvBufLen, 0);
+				if (end < 0){
+					end = 0;
+					ESP_LOGE(LOG_TAG, "lwip_recv: %s", strerror(errno));
+					return 0;
+				}
+			}
+			if (length > end-start){
+				rc = end-start;
+			}else{
+				rc = length;
+			}
+			memcpy(data, recvBuf + start, rc);
+			start += rc;
+			if (start == end){
+				delete [] recvBuf;
+				recvBuf = NULL;
 			}
 		}
 		//GeneralUtils::hexDump(data, rc);
@@ -389,12 +418,27 @@ size_t Socket::receive(uint8_t* data, size_t length, bool exact) {
 			} while (rc == MBEDTLS_ERR_SSL_WANT_WRITE || rc == MBEDTLS_ERR_SSL_WANT_READ);
 		} else {
 			//	v4.2
-			rc = ::lwip_recv(m_sock, data, amountToRead, 0);
-			//	rc = ::lwip_recv_r(m_sock, data, amountToRead, 0);
-		}
-		if (rc == -1) {
-			ESP_LOGE(LOG_TAG, "receive: %s", strerror(errno));
-			return 0;
+			if (end == start){
+				start = 0;
+				if (!recvBuf) recvBuf = new char [recvBufLen];
+				end = lwip_recv(m_sock, recvBuf, recvBufLen, 0);
+				if (end < 0){
+					end = 0;
+					ESP_LOGE(LOG_TAG, "lwip_recv: %s", strerror(errno));
+					return 0;
+				}
+			}
+			if (amountToRead > end-start){
+				rc = end-start;
+			}else{
+				rc = amountToRead;
+			}
+			memcpy(data, recvBuf + start, rc);
+			start += rc;
+			if (start == end){
+				delete [] recvBuf;
+				recvBuf = NULL;
+			}
 		}
 		if (rc == 0) break;
 		amountToRead -= rc;

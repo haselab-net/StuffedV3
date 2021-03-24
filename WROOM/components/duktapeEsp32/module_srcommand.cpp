@@ -1,16 +1,15 @@
+extern "C" {
+#include "logging.h"
+#include <duktape.h>
+#include "duktape_event.h"
+#include "duktape_utils.h"
+#include "duktape_task.h"
+}
 #include <iostream>
 #include <cstring>
 #include <unordered_map>
 #include <string>
 
-extern "C" {
-
-#include <duktape.h>
-#include "duktape_event.h"
-#include "duktape_utils.h"
-#include "duktape_task.h"
-#include "logging.h"
-}
 #include "module_srcommand.h"
 #include "module_srmovement.h"
 #include "module_device.h"
@@ -92,6 +91,7 @@ static void popPayload2CtxNumArray(duk_context* ctx, const void* &payload, const
 ////////////////////////////////////////////////////////
 //////////////////////// send functions ////////////////
 ////////////////////////////////////////////////////////
+/*
 static int getPropPos(duk_context* ctx, UdpCmdPacket* cmd) {        // return prop length, or error with -1
     duk_get_prop_string(ctx, -1, "pose");
     // ... obj pose
@@ -227,6 +227,7 @@ static int getPropConA(duk_context* ctx, UdpCmdPacket* cmd) {        // return p
 
     return n;
 }
+*/
 
 // function requireBoardInfo();
 static duk_ret_t requireBoardInfo(duk_context* ctx) {
@@ -773,6 +774,7 @@ static void putPropPos(duk_context* ctx, UdpRetPacket& ret) {
     }
     duk_put_prop_string(ctx, -2, "pose");
 }
+/*
 static void putPropVel(duk_context* ctx, UdpRetPacket& ret) {
     duk_push_array(ctx);
     for(size_t i=0; i<allBoards.GetNTotalMotor(); i++){
@@ -805,6 +807,8 @@ static void putPropTou(duk_context* ctx, UdpRetPacket& ret) {
     }
     duk_put_prop_string(ctx, -2, "touch");
 }
+*/
+
 // function onReceiveCIBoardinfo(data: {systemId: number, nTarget: number, nMotor:number, nCurrent: number, nForces:number, nTouch: number, macAddress: ArrayBuffer});
 int pushDataCIBoardinfo(duk_context* ctx, void* data) {
     UdpRetPacket& ret = *new UdpRetPacket;

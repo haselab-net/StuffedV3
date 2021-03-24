@@ -6,6 +6,7 @@ set(COMPONENT_REQUIRES
   "mdns"
   "nvs_flash"
   "pthread"
+  "espfs"
 )
 set(COMPONENT_PRIV_REQUIRES )
 

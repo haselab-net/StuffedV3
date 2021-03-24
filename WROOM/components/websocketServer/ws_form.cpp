@@ -5,6 +5,7 @@
 #include <string>
 #include <logging.h>
 #include <GeneralUtils.h>
+#include <espfsStream.h>
 
 static char tag[] = "ws_form";
 
@@ -90,7 +91,7 @@ void SRReplace::handle(HttpRequest& request, HttpResponse& response, std::vector
 		ppos = fileName.length();
 	}
 	std::string fileNameLang;
-	std::ifstream ifStream;
+	std::istream* iStream = NULL;
 	int start = 0;
 	for(int i=0; i<lang.length(); ++i){
 		if (lang[i] == ';'){
@@ -103,18 +104,18 @@ void SRReplace::handle(HttpRequest& request, HttpResponse& response, std::vector
 			fileNameLang.insert(ppos, ".");
 			fileNameLang.insert(ppos+1, lang, start, i);
 			ESP_LOGD(tag, "Try to open file name with language %s", fileNameLang.c_str());
-			ifStream.open(fileNameLang, std::ifstream::in | std::ifstream::binary);      // Attempt to open the file for reading.
+			iStream = espfsIstream(fileNameLang.c_str());
 			break;
 		}
 	}
-	if (!ifStream.is_open()){
+	if (!iStream){
 		fileNameLang = fileName;
-		ifStream.open(fileNameLang, std::ifstream::in | std::ifstream::binary);      // Attempt to open the file for reading.
+		iStream = espfsIstream(fileNameLang.c_str());
 	}
 	ESP_LOGD(tag, "hanlder(): Opening file: %s", fileNameLang.c_str());
 
 	// If we failed to open the requested file, then it probably didn't exist so return a not found.
-	if (!ifStream.is_open()) {
+	if (!iStream) {
 		ESP_LOGE(tag, "Unable to open file %s for reading", fileNameLang.c_str());
 		response.setStatus(HttpResponse::HTTP_STATUS_NOT_FOUND, "Not Found");
 		response.addHeader(HttpRequest::HTTP_HEADER_CONTENT_TYPE, "text/plain");
@@ -139,9 +140,9 @@ void SRReplace::handle(HttpRequest& request, HttpResponse& response, std::vector
 		$key $(key) are replaced based on replaces.
 		$num[text$] will repeat $num times. $num must be replaced into number.
 	*/
-	while (!ifStream.eof()) {
-		ifStream.read((char*) pData, pHttpServer->getFileBufferSize());
-		int dataLen = ifStream.gcount();
+	while (!iStream->eof()) {
+		iStream->read((char*) pData, pHttpServer->getFileBufferSize());
+		int dataLen = iStream->gcount();
 		int sentPos = 0;
 		for(int pos=0; pos != dataLen; pos++){
 			if (keyLen >= 0){
@@ -186,9 +187,9 @@ void SRReplace::handle(HttpRequest& request, HttpResponse& response, std::vector
 					}
 					pos = 0;
 					sentPos = 0;
-					if (!ifStream.eof()){
-						ifStream.read((char*) pData + dataLen, pHttpServer->getFileBufferSize() - dataLen);
-						dataLen += ifStream.gcount();
+					if (!iStream->eof()){
+						iStream->read((char*) pData + dataLen, pHttpServer->getFileBufferSize() - dataLen);
+						dataLen += iStream->gcount();
 					}
 					keyLen = -1;
 					if (nRepeat == 0){	//	skip to $]
@@ -261,6 +262,6 @@ void SRReplace::handle(HttpRequest& request, HttpResponse& response, std::vector
 		}
 	}
 	delete[] pData;
-	ifStream.close();
+	delete iStream;
 	response.close();
 }

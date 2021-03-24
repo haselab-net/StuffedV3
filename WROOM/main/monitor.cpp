@@ -608,7 +608,7 @@ public:
                 "7ABCDEFGHIJKLMNOPQRSTUVWXYZ" "8ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                 "9ABCDEFGHIJKLMNOPQRSTUVWXYZ" "AABCDEFGHIJKLMNOPQRSTUVWXYZ"
                 "BABCDEFGHIJKLMNOPQRSTUVWXYZ" "CABCDEFGHIJKLMNOPQRSTUVWXYZ";
-                m_ostream = espFsAddFileByStream("/main/main.js", content.length());
+                m_ostream = espfsAddFileByStream("/main/main.js", content.length());
                 m_ostream->write(content.c_str(), content.length());
                 m_ostream->flush();
                 delete m_ostream;
