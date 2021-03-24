@@ -121,9 +121,9 @@ void UdpRetPacket::SetLength() {
 	case CIU_GET_SUBBOARD_INFO:	//	uart id model nTarget nMotor nCurrent nForce
 		length = (NHEADER + 7) * 2 ; break;
 	case CIU_MOVEMENT:
-		length = 0;
 		switch (*(uint8_t*)data)
 		{
+		case CI_M_NONE:
 		case CI_M_PAUSE_INTERPOLATE:
 		case CI_M_RESUME_INTERPOLATE:
 		case CI_M_PAUSE_MOV:
@@ -131,13 +131,17 @@ void UdpRetPacket::SetLength() {
 		case CI_M_CLEAR_MOV:
 		case CI_M_CLEAR_PAUSED:
 		case CI_M_CLEAR_ALL:
-			length = NHEADER*2 + 1; break;
+			length = NHEADER*2 + 1;
+			break;
 		case CI_M_ADD_KEYFRAME:
 			length = NHEADER*2 + 1 + (2 + 1 + 2 * 2);
+			length += 1 + (allBoards.GetNTotalMotor() + 1 + movementInfos.size() * 2 + 2);
+			break;
 		case CI_M_QUERY:
-			length += NHEADER*2 + 1 + (allBoards.GetNTotalMotor() + 1 + movementInfos.size() * 2 + 2);
+			length = NHEADER*2 + 1 + (allBoards.GetNTotalMotor() + 1 + movementInfos.size() * 2 + 2);
 			break;
 		default:
+			ESP_LOGI(Tag(), "SetLength() got wrong CIU_MOVEMENT id:%d", *(uint8_t*)data);
 			break;
 		}
 		break;

@@ -60,9 +60,6 @@ private:
  * until after a successful connect nor should we send or receive after closing the socket.
  */
 class Socket {
-	char* recvBuf;
-	static const int recvBufLen = 1024;
-	int start, end;
 public:
 	Socket();
 	Socket(const Socket& s);
@@ -107,6 +104,9 @@ private:
 	mbedtls_pk_context       m_pkey;
 	void sslHandshake();
 
+	mutable SemaphoreHandle_t mutex;
+	void lock() const;
+	void unlock() const;
 };
 
 class SocketInputRecordStreambuf : public std::streambuf {

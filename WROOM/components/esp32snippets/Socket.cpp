@@ -45,25 +45,22 @@ static void my_debug(
 Socket::Socket() {
 	m_sock   = -1;
 	m_useSSL = false;
-	start = end = 0;
-	recvBuf = NULL;
+	mutex = NULL;
 }
-Socket::Socket(const Socket& s){
+Socket::Socket(const Socket& s) {
 	memcpy((void*)this, (void*)&s, sizeof(s));
-	end = s.end - s.start;
-	start = 0;
-	if (end - start){
-		recvBuf = new char [end];
-		memcpy(recvBuf, s.recvBuf + s.start, end);
-	}else{
-		recvBuf = NULL;
-	}
 }
 Socket::~Socket() {
-	delete recvBuf;
-	//	socket must be closed explicitly.
+	//close_cpp(); // When the class instance has ended, delete the socket.
 }
 
+void Socket::lock() const {
+	if (!mutex) mutex = xSemaphoreCreateMutex();
+	xSemaphoreTake(mutex, portMAX_DELAY);
+}
+void Socket::unlock() const {
+	xSemaphoreGive(mutex);
+}
 
 /**
  * @brief Accept a new socket.
@@ -77,7 +74,9 @@ Socket Socket::accept() {
 	
 	//	v4.2 does not have lwip_accept_r
 	//	int clientSockFD = ::lwip_accept_r(m_sock,  (struct sockaddr*) &client_addr, &sin_size);
+	lock();
 	int clientSockFD = ::lwip_accept(m_sock,  (struct sockaddr*) &client_addr, &sin_size);
+	unlock();
 	
 	//printf("------> new connection client %s:%d\n", inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
 	if (clientSockFD == -1) {
@@ -137,7 +136,9 @@ int Socket::bind(uint16_t port, uint32_t address) {
 	serverAddress.sin_port        = htons(port);
 //	v4.2
 //	int rc = ::lwip_bind_r(m_sock, (struct sockaddr*) &serverAddress, sizeof(serverAddress));
+	lock();
 	int rc = ::lwip_bind(m_sock, (struct sockaddr*) &serverAddress, sizeof(serverAddress));
+	unlock();
 	if (rc != 0) {
 		ESP_LOGE(LOG_TAG, "<< bind: bind[socket=%d]: %d: %s", m_sock, errno, strerror(errno));
 		return rc;
@@ -165,11 +166,15 @@ int Socket::close() {
 	if (m_sock != -1) {
 		ESP_LOGD(LOG_TAG, "Calling lwip_close on %d", m_sock);
 		//	v4.2
+		lock();
 		rc = ::lwip_close(m_sock);
+		unlock();
+
 		//	rc = ::lwip_close_r(m_sock);
 		if (rc != 0) {
 			ESP_LOGE(LOG_TAG, "Error with lwip_close: %d", rc);
 		}
+		vSemaphoreDelete(mutex);
 	}
 	m_sock = -1;
 	return rc;
@@ -193,7 +198,9 @@ int Socket::connect(struct in_addr address, uint16_t port) {
 	ESP_LOGD(LOG_TAG, "Connecting to %s:[%d]", msg, port);
 	createSocket();
 	//	v4.2
+	lock();
 	int rc = ::lwip_connect(m_sock, (struct sockaddr*) &serverAddress, sizeof(struct sockaddr_in));
+	unlock();
 	//	int rc = ::lwip_connect_r(m_sock, (struct sockaddr*) &serverAddress, sizeof(struct sockaddr_in));
 	if (rc == -1) {
 		ESP_LOGE(LOG_TAG, "connect_cpp: Error: %s", strerror(errno));
@@ -293,7 +300,9 @@ int Socket::listen(uint16_t port, bool isDatagram, bool reuseAddress) {
 	// sockets.
 	if (!isDatagram) {
 		//	v4.2
+		lock();
 		rc = ::lwip_listen(m_sock, 5);
+		unlock();
 		//	rc = ::lwip_listen_r(m_sock, 5);
 		if (rc == -1) {
 			ESP_LOGE(LOG_TAG, "<< listen: %s", strerror(errno));
@@ -382,26 +391,13 @@ size_t Socket::receive(uint8_t* data, size_t length, bool exact) {
 				ESP_LOGD(LOG_TAG, "rc=%d, MBEDTLS_ERR_SSL_WANT_READ=%d", rc, MBEDTLS_ERR_SSL_WANT_READ);
 			} while (rc == MBEDTLS_ERR_SSL_WANT_WRITE || rc == MBEDTLS_ERR_SSL_WANT_READ);
 		} else {
-			if (end == start){
-				start = 0;
-				if (!recvBuf) recvBuf = new char [recvBufLen];
-				end = lwip_recv(m_sock, recvBuf, recvBufLen, 0);
-				if (end < 0){
-					end = 0;
-					ESP_LOGE(LOG_TAG, "lwip_recv: %s", strerror(errno));
-					return 0;
-				}
-			}
-			if (length > end-start){
-				rc = end-start;
-			}else{
-				rc = length;
-			}
-			memcpy(data, recvBuf + start, rc);
-			start += rc;
-			if (start == end){
-				delete [] recvBuf;
-				recvBuf = NULL;
+			//	v4.2
+			lock();
+			rc = ::lwip_recv(m_sock, data, length, 0);
+			unlock();
+			//	rc = ::lwip_recv_r(m_sock, data, length, 0);
+			if (rc == -1) {
+				ESP_LOGE(LOG_TAG, "receive: %s", strerror(errno));
 			}
 		}
 		//GeneralUtils::hexDump(data, rc);
@@ -418,27 +414,14 @@ size_t Socket::receive(uint8_t* data, size_t length, bool exact) {
 			} while (rc == MBEDTLS_ERR_SSL_WANT_WRITE || rc == MBEDTLS_ERR_SSL_WANT_READ);
 		} else {
 			//	v4.2
-			if (end == start){
-				start = 0;
-				if (!recvBuf) recvBuf = new char [recvBufLen];
-				end = lwip_recv(m_sock, recvBuf, recvBufLen, 0);
-				if (end < 0){
-					end = 0;
-					ESP_LOGE(LOG_TAG, "lwip_recv: %s", strerror(errno));
-					return 0;
-				}
-			}
-			if (amountToRead > end-start){
-				rc = end-start;
-			}else{
-				rc = amountToRead;
-			}
-			memcpy(data, recvBuf + start, rc);
-			start += rc;
-			if (start == end){
-				delete [] recvBuf;
-				recvBuf = NULL;
-			}
+			lock();
+			rc = ::lwip_recv(m_sock, data, amountToRead, 0);
+			unlock();
+			//	rc = ::lwip_recv_r(m_sock, data, amountToRead, 0);
+		}
+		if (rc == -1) {
+			ESP_LOGE(LOG_TAG, "receive: %s", strerror(errno));
+			return 0;
 		}
 		if (rc == 0) break;
 		amountToRead -= rc;
@@ -493,7 +476,9 @@ int Socket::send(const uint8_t* data, size_t length) const {
 			}
 		} else {
 			//	v4.2
+			lock();
 			rc = ::lwip_send(m_sock, data, length, 0);
+			unlock();
 			//	rc = ::lwip_send_r(m_sock, data, length, 0);
 			if ((rc < 0) && (errno != EAGAIN)) {
 				// no cure for errors other than EAGAIN - log and exit

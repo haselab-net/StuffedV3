@@ -42,25 +42,28 @@ static heap_trace_record_t trace_record[NUM_RECORDS]; // This buffer must be in 
 
 void setLogLevel(){
 #ifndef _WIN32
-    //  Set all log level to DEBUG
+    //  Set all log level to INFO
 	esp_log_level_set("*", ESP_LOG_INFO);
 
-	//  Components set to info
-    esp_log_level_set("clk", ESP_LOG_INFO);
-    esp_log_level_set("CPPNVS", ESP_LOG_INFO);
-    esp_log_level_set("cpu_start", ESP_LOG_INFO);
-    esp_log_level_set("esp_dbg_stubs", ESP_LOG_INFO);
-    esp_log_level_set("espfs", ESP_LOG_VERBOSE);
-    esp_log_level_set("event", ESP_LOG_INFO);
-    esp_log_level_set("system_event", ESP_LOG_INFO);
-    esp_log_level_set("heap_init", ESP_LOG_INFO);
-    esp_log_level_set("nvs", ESP_LOG_INFO);
-    esp_log_level_set("phy_init", ESP_LOG_INFO);
-    esp_log_level_set("pthread", ESP_LOG_INFO);
-    esp_log_level_set("efuse", ESP_LOG_INFO);
-    esp_log_level_set("Task", ESP_LOG_INFO);
-    esp_log_level_set("tcpip_adapter", ESP_LOG_INFO);
-    esp_log_level_set("RTC_MODULE", ESP_LOG_INFO);
+    // Components set to info
+    //  esp_log_level_set("efuse", ESP_LOG_INFO);
+    //  esp_log_level_set("intr_alloc", ESP_LOG_INFO);
+    //  esp_log_level_set("spi_flash", ESP_LOG_INFO);
+    // esp_log_level_set("clk", ESP_LOG_INFO);
+    // esp_log_level_set("CPPNVS", ESP_LOG_INFO);
+    // esp_log_level_set("cpu_start", ESP_LOG_INFO);
+    // esp_log_level_set("esp_dbg_stubs", ESP_LOG_INFO);
+    // esp_log_level_set("espfs", ESP_LOG_VERBOSE);
+    // esp_log_level_set("event", ESP_LOG_INFO);
+    // esp_log_level_set("heap_init", ESP_LOG_INFO);
+    // esp_log_level_set("nvs", ESP_LOG_INFO);
+    // esp_log_level_set("phy_init", ESP_LOG_INFO);
+    //  esp_log_level_set("partition", ESP_LOG_INFO);
+    // esp_log_level_set("pthread", ESP_LOG_INFO);
+    // esp_log_level_set("RTC_MODULE", ESP_LOG_INFO);
+    // esp_log_level_set("system_event", ESP_LOG_INFO);
+    // esp_log_level_set("Task", ESP_LOG_INFO);
+    // esp_log_level_set("tcpip_adapter", ESP_LOG_INFO);
 
     // Components set to warn
     esp_log_level_set("phy", ESP_LOG_WARN);
@@ -72,34 +75,34 @@ void setLogLevel(){
     //  Application
     esp_log_level_set("main", ESP_LOG_INFO);
     //  SoftRobot
-//    esp_log_level_set("sr_main", ESP_LOG_DEBUG);
-//  esp_log_level_set("Uart", ESP_LOG_DEBUG);
-//  esp_log_level_set("UdpCom", ESP_LOG_DEBUG);
-//  esp_log_level_set("AllB", ESP_LOG_DEBUG);
-//  esp_log_level_set("Board", ESP_LOG_DEBUG);
-//    esp_log_level_set("MotorDriver", ESP_LOG_DEBUG);
-//    esp_log_level_set("Movement", ESP_LOG_DEBUG);
+    //  esp_log_level_set("sr_main", ESP_LOG_DEBUG);
+    //  esp_log_level_set("Uart", ESP_LOG_DEBUG);
+    //  esp_log_level_set("UdpCom", ESP_LOG_DEBUG);
+    //  esp_log_level_set("AllB", ESP_LOG_DEBUG);
+    //  esp_log_level_set("Board", ESP_LOG_DEBUG);
+    //  esp_log_level_set("MotorDriver", ESP_LOG_DEBUG);
+    //  esp_log_level_set("Movement", ESP_LOG_DEBUG);
     esp_log_level_set("FileTransferWebSocketHandler", ESP_LOG_DEBUG);
     esp_log_level_set("espfs", ESP_LOG_DEBUG);
 
     //  Web Server
-    esp_log_level_set("Socket", ESP_LOG_INFO);
-    esp_log_level_set("HttpServer", ESP_LOG_INFO);
-    esp_log_level_set("HttpServerTask", ESP_LOG_INFO);
-    esp_log_level_set("HttpRequest", ESP_LOG_INFO);
-    esp_log_level_set("HttpParser", ESP_LOG_INFO);
-    esp_log_level_set("HttpResponse", ESP_LOG_DEBUG);
-    esp_log_level_set("PathHandler", ESP_LOG_INFO);
-    esp_log_level_set("WiFi", ESP_LOG_INFO);
-    esp_log_level_set("WiFiEventHandler", ESP_LOG_INFO);
-    esp_log_level_set("ws_fs", ESP_LOG_INFO);
-    //esp_log_level_set("ws_wifi", ESP_LOG_DEBUG);
-    esp_log_level_set("ws_task", ESP_LOG_INFO);
-    esp_log_level_set("ws_main", ESP_LOG_INFO);
-    esp_log_level_set("ws_form", ESP_LOG_INFO);
-    esp_log_level_set("ws_ws", ESP_LOG_DEBUG);
-    esp_log_level_set("WebSocket", ESP_LOG_DEBUG);
-    esp_log_level_set("WebSocketReader", ESP_LOG_DEBUG);
+    // esp_log_level_set("Socket", ESP_LOG_INFO);
+    // esp_log_level_set("HttpServer", ESP_LOG_INFO);
+    // esp_log_level_set("HttpServerTask", ESP_LOG_INFO);
+    // esp_log_level_set("HttpRequest", ESP_LOG_INFO);
+    // esp_log_level_set("HttpParser", ESP_LOG_INFO);
+    // esp_log_level_set("HttpResponse", ESP_LOG_DEBUG);
+    // esp_log_level_set("PathHandler", ESP_LOG_INFO);
+    // esp_log_level_set("WiFi", ESP_LOG_INFO);
+    // esp_log_level_set("WiFiEventHandler", ESP_LOG_INFO);
+    // esp_log_level_set("ws_fs", ESP_LOG_INFO);
+    //  esp_log_level_set("ws_wifi", ESP_LOG_DEBUG);
+    //  esp_log_level_set("ws_task", ESP_LOG_DEBUG);
+    //  esp_log_level_set("ws_main", ESP_LOG_DEBUG);
+    //  esp_log_level_set("ws_form", ESP_LOG_DEBUG);
+    //  esp_log_level_set("ws_ws", ESP_LOG_DEBUG);
+    //  esp_log_level_set("WebSocket", ESP_LOG_DEBUG);
+    //  esp_log_level_set("WebSocketReader", ESP_LOG_DEBUG);
 
     //  Duktape
     esp_log_level_set("duktape_task", ESP_LOG_INFO);

@@ -143,7 +143,7 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
         case PacketId::PI_SETTINGS: {
             uint16_t* pBufferI16 = (uint16_t*)pBuffer;
             uint16_t id = pBufferI16[1];
-            printf("---- rcv PI_SETTINGS with id: %i\n", id);
+            //  printf("---- rcv PI_SETTINGS with id: %i\n", id);
             switch (id)
             {
                 case PacketSettingsId::PSI_OFFLINE_MODE: {
