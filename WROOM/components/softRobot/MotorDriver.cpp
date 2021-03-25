@@ -77,6 +77,9 @@ void MotorDriver::AdcReadTask(){
                     }else{
                         updateMotorState();
                     }
+                    if (count % (1200) == 0){   //  12kHz / 1200 = 10Hz
+                        BrownoutRecover();      //  recover at 10Hz, Recover in less than 1 sec.
+                    }
                 }
             }
         }
@@ -90,8 +93,9 @@ void MotorDriver::AdcReadTask(){
 #error
 #endif
 }
-
 void MotorDriver::Init(){
+    pwmRatioLimit = SDEC_ONE;
+    recoverCount = 0;
 #ifndef _WIN32
     //  Set ADC input as GPIO output to charge cap
     const gpio_num_t GPIO_ADC[] = {GPIO_NUM_32, GPIO_NUM_33}; 
@@ -201,11 +205,13 @@ void MotorDriver::Init(){
 void MotorDriver::Pwm(int ch, SDEC duty){  //   SDEC -1 to 1 (-1024 - 1024)
 #ifndef _WIN32
 	if (duty > 0){
+        if (duty > pwmRatioLimit) duty = pwmRatioLimit;
         uint32_t set_duty = (MCPWM0.timer[(mcpwm_timer_t)ch].period.period) * duty / SDEC_ONE;
         mcpwm_set_signal_low(MCPWM_UNIT_0, (mcpwm_timer_t)ch, MCPWM_OPR_B);
         mcpwm_set_duty_in_us(MCPWM_UNIT_0, (mcpwm_timer_t)ch, MCPWM_OPR_A, set_duty);
         mcpwm_set_duty_type(MCPWM_UNIT_0, (mcpwm_timer_t)ch, MCPWM_OPR_A, MCPWM_DUTY_MODE_0); //call this each time, if operator was previously in low/high state
     }else{
+        if (duty < -pwmRatioLimit) duty = -pwmRatioLimit;
         uint32_t set_duty = (MCPWM0.timer[(mcpwm_timer_t)ch].period.period) * -duty / SDEC_ONE;
         mcpwm_set_signal_low(MCPWM_UNIT_0, (mcpwm_timer_t)ch, MCPWM_OPR_A);
         mcpwm_set_duty_in_us(MCPWM_UNIT_0, (mcpwm_timer_t)ch, MCPWM_OPR_B, set_duty);
@@ -329,6 +335,23 @@ extern "C" void loadMotorParam(){
         //LOGI("torque: %s:%d %s:%d", keyTorqueMin, torqueLimit.min[i], keyTorqueMax, torqueLimit.max[i]);
     }
     nvs.commit();
+}
+void MotorDriver::Brownout(){
+    for(int ch=0; ch<NMOTOR; ++ch){
+        mcpwm_set_signal_low(MCPWM_UNIT_0, (mcpwm_timer_t)ch, MCPWM_OPR_A);
+        mcpwm_set_signal_low(MCPWM_UNIT_0, (mcpwm_timer_t)ch, MCPWM_OPR_B);
+    }
+
+    pwmRatioLimit = pwmRatioLimit >> 1;
+    ets_printf("\r\nBrownout: pwm limit is set to %d. \r\n\r\n", pwmRatioLimit);
+}
+void MotorDriver::BrownoutRecover(){
+    if (pwmRatioLimit < SDEC_ONE){
+        pwmRatioLimit += 100;
+        if (pwmRatioLimit > SDEC_ONE){
+            pwmRatioLimit = SDEC_ONE;
+        }
+    } 
 }
 #else
 extern "C" void loadMotorParam(){}

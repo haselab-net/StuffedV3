@@ -23,6 +23,8 @@ class MotorDriver{
     };
     public:
     bool bControl;
+    volatile SDEC pwmRatioLimit;
+    short recoverCount;
 #if defined BOARD3_SEPARATE || defined BOARD4
     enum {
         NTARGET_DIRECT = 12,
@@ -54,6 +56,8 @@ public:
     void Init();
     void Pwm(int ch, SDEC duty);
     int GetAdcRaw(int ch);
+    void Brownout();            //  Call this function When brownout occurs.
+    void BrownoutRecover();     //  Call this function periodically.
 private:
 };
 extern MotorDriver motorDriver;

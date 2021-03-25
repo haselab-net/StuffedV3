@@ -33,6 +33,7 @@ extern "C" void softRobot_main();
 extern "C" void duktape_main();
 extern "C" void ws_main();
 #endif
+extern void brownout_init();
 
 #if CONFIG_HEAP_TRACING
 #include "esp_heap_trace.h"
@@ -159,6 +160,8 @@ extern "C" void app_main(){
 
     //  set log level
     setLogLevel();
+
+    brownout_init();
 
     //  Start soft robot controller
     LOGI("Initialize soft robot...");

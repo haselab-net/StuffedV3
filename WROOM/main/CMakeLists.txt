@@ -1,4 +1,4 @@
-idf_component_register(SRCS "main.cpp" "monitor.cpp"
+idf_component_register(SRCS "brownout.cpp" "main.cpp" "monitor.cpp"
                     INCLUDE_DIRS "")
 set(COMPONENT_REQUIRES
   "esp32"
@@ -6,4 +6,5 @@ set(COMPONENT_REQUIRES
   "duktape"
   "espfs"
   "websocketServer"
+  "softRobot"
 )
