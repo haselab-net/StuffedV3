@@ -101,7 +101,7 @@ public:
 			// We are NOT creating a directory but are instead creating a file.
 			else {
 				if (bEspFs && m_fileLength){
-					m_ostream = espFsAddFileByStream(fileName.c_str(), m_fileLength);
+					m_ostream = espfsAddFileByStream(fileName.c_str(), m_fileLength);
 				}else{
 					if(bEspFs){
 						ESP_LOGE("FileTransferWebSocketHandler", "Need exact file length to write espFs: %s", fileName.c_str());

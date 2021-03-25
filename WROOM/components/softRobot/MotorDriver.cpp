@@ -125,7 +125,6 @@ void MotorDriver::Init(){
     //  Init control/command and set initial values to motors. 
     controlInit();  //  initialize, call loadMotorParam()
     commandInit();
-    bControl = true;
     //  ADC with DMA and I2S mode init. This also start periodic interrupt for control.
     //  i2s settings
     for(int i=0; i < sizeof(adcChsRev) / sizeof(adcChsRev[0]);++i){
@@ -200,6 +199,7 @@ void MotorDriver::Init(){
     LOGE("Failed to initialize ADC. Move to deep sleep and restart.");
     esp_deep_sleep(1000*1000);  //  sleep time in us.
     ADC_OK: ;
+    bControl = true;
 }
 
 void MotorDriver::Pwm(int ch, SDEC duty){  //   SDEC -1 to 1 (-1024 - 1024)

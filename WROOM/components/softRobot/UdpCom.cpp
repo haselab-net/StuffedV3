@@ -141,7 +141,8 @@ void UdpRetPacket::SetLength() {
 			length = NHEADER*2 + 1 + (allBoards.GetNTotalMotor() + 1 + movementInfos.size() * 2 + 2);
 			break;
 		default:
-			ESP_LOGI(Tag(), "SetLength() got wrong CIU_MOVEMENT id:%d", *(uint8_t*)data);
+			length = NHEADER*2 + 1;
+			ESP_LOGI(Tag(), "SetLength called with invalid CIU_MOVEMENT id: %d.", *(uint8_t*)data);
 			break;
 		}
 		break;
@@ -409,9 +410,12 @@ void UdpCom::SendText(char* text, short errorlevel) {
     pbuf_free(pb); //De-allocate packet buffer
 //	ESP_LOGI(Tag(), "Ret%d C%d L%d to %s\n", send.command, send.count, send.length, ipaddr_ntoa(&ownerIp));
 }
-void UdpCom::PrepareRetPacket(UdpCmdPacket& recv) {
+void UdpCom::PrepareRetPacketExceptLength(UdpCmdPacket& recv) {
 	send.command = recv.command;
 	send.count = recv.count;
+}
+void UdpCom::PrepareRetPacket(UdpCmdPacket& recv) {
+	PrepareRetPacketExceptLength(recv);
 	send.ClearData();
 }
 void UdpCom::SendReturn(UdpCmdPacket& recv) {
@@ -555,7 +559,7 @@ void UdpCom::ExecUdpCommand(UdpCmdPacket& recv) {
 		uint8_t movement_command_id = *(uint8_t*)recv.data;
 
 		// prepare return packet header
-		PrepareRetPacket(recv);
+		PrepareRetPacketExceptLength(recv);
 		*(uint8_t*)send.data = movement_command_id;
 		send.SetLength();
 		void* movement_command_data = (void*)((uint8_t*)send.data+1);
@@ -610,6 +614,8 @@ void UdpCom::ExecUdpCommand(UdpCmdPacket& recv) {
 				break;
 			}
 			default:
+				ESP_LOGI(Tag(), "Invalid CIU_MOVEMENT id: %d count %d received from %s.",
+					movement_command_id, (int)recv.count, ipaddr_ntoa(&recv.returnIp));
 				break;
 		}
 	} break;

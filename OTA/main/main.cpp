@@ -57,6 +57,8 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
     return ESP_OK;
 }
 
+#define URLBASE "https://nuibot.haselab.net:5003/firmware/"
+
 void ota_task(void * pvParameter)
 {
     ESP_LOGI(TAG, "Starting OTA example...");
@@ -67,7 +69,7 @@ void ota_task(void * pvParameter)
     // 1. update firmware
     esp_http_client_config_t firmware_http_config;
     memset(&firmware_http_config, 0, sizeof(firmware_http_config));
-    firmware_http_config.url = CONFIG_FIRMWARE_UPGRADE_URL;
+    firmware_http_config.url = URLBASE "Nuibot.bin";
     firmware_http_config.cert_pem = (char *)server_cert_pem_start;
     firmware_http_config.event_handler = _http_event_handler;
 
@@ -82,9 +84,10 @@ void ota_task(void * pvParameter)
     }
 
     // 2. update spiffs
+    /*
     esp_http_client_config_t spiffs_http_config;
     memset(&spiffs_http_config, 0, sizeof(spiffs_http_config));
-    spiffs_http_config.url = CONFIG_SPIFFS_UPGRADE_URL;
+    spiffs_http_config.url = URLBASE "spiffs.img";
     spiffs_http_config.cert_pem = (char *)server_cert_pem_start;
     spiffs_http_config.event_handler = _http_event_handler;
 
@@ -99,11 +102,12 @@ void ota_task(void * pvParameter)
     } else {
         ESP_LOGE(TAG, "spiffs.img Upgrades Failed");
     }
+    */
 
-    // 2. update spiffs
+    // 3. update espfs
     esp_http_client_config_t espfs_http_config;
-    memset(&espfs_http_config, 0, sizeof(spiffs_http_config));
-    espfs_http_config.url = CONFIG_ESPFS_UPGRADE_URL;
+    memset(&espfs_http_config, 0, sizeof(espfs_http_config));
+    espfs_http_config.url = URLBASE "espfs.img";
     espfs_http_config.cert_pem = (char *)server_cert_pem_start;
     espfs_http_config.event_handler = _http_event_handler;
 
@@ -137,6 +141,7 @@ extern "C" void app_main()
         // partition table. This size mismatch may cause NVS initialization to fail.
         // 2.NVS partition contains data in new format and cannot be recognized by this version of code.
         // If this happens, we erase NVS partition and initialize NVS again.
+        printf("Erase nvs (failed to init nvs) \n");
         ESP_ERROR_CHECK(nvs_flash_erase());
         err = nvs_flash_init();
     }

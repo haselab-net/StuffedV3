@@ -6,16 +6,10 @@
  */
 
 //#define _GLIBCXX_USE_C99
-#include <string>
-#include <sstream>
-#include <iomanip>
-#include <algorithm>
 #include "sdkconfig.h"
-
 
 #include "WiFi.h"
 #include <esp_event.h>
-#include <esp_event_loop.h>
 #include <esp_log.h>
 #include <esp_system.h>
 #include <esp_wifi.h>
@@ -26,7 +20,10 @@
 #include <lwip/netdb.h>
 #include <lwip/sockets.h>
 
-#include <string.h>
+#include <string>
+#include <sstream>
+#include <iomanip>
+#include <algorithm>
 
 
 static const char* LOG_TAG = "WiFi";
@@ -218,8 +215,8 @@ void WiFi::dump() {
 	ESP_LOGD(LOG_TAG, "WiFi Dump");
 	ESP_LOGD(LOG_TAG, "---------");
 	char ipAddrStr[30];
-	ip_addr_t ip = ::dns_getserver(0);
-	inet_ntop(AF_INET, &ip, ipAddrStr, sizeof(ipAddrStr));
+	const ip_addr_t* ip = ::dns_getserver(0);
+	inet_ntop(AF_INET, ip, ipAddrStr, sizeof(ipAddrStr));
 	ESP_LOGD(LOG_TAG, "DNS Server[0]: %s", ipAddrStr);
 } // dump
 

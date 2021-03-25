@@ -62,6 +62,7 @@ private:
 class Socket {
 public:
 	Socket();
+	Socket(const Socket& s);
 	virtual ~Socket();
 
 	Socket accept();
@@ -103,6 +104,9 @@ private:
 	mbedtls_pk_context       m_pkey;
 	void sslHandshake();
 
+	mutable SemaphoreHandle_t mutex;
+	void lock() const;
+	void unlock() const;
 };
 
 class SocketInputRecordStreambuf : public std::streambuf {

@@ -5,6 +5,8 @@ set(COMPONENT_REQUIRES
   "json"
   "mdns"
   "nvs_flash"
+  "pthread"
+  "espfs"
 )
 set(COMPONENT_PRIV_REQUIRES )
 

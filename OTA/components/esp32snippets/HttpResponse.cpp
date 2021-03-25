@@ -9,6 +9,7 @@
 #include "HttpRequest.h"
 #include "HttpResponse.h"
 #include <esp_log.h>
+#include <espfsStream.h>
 
 static const char* LOG_TAG = "HttpResponse";
 
@@ -123,11 +124,9 @@ void HttpResponse::sendData(uint8_t* pData, size_t size) {
 
 void HttpResponse::sendFile(std::string fileName, size_t bufSize) {
 	ESP_LOGI(LOG_TAG, "Opening file: %s", fileName.c_str());
-	std::ifstream ifStream;
-	ifStream.open(fileName, std::ifstream::in | std::ifstream::binary);      // Attempt to open the file for reading.
-
+	std::istream* iStream = espfsIstream(fileName.c_str());
 	// If we failed to open the requested file, then it probably didn't exist so return a not found.
-	if (!ifStream.is_open()) {
+	if (!iStream) {
 		ESP_LOGE(LOG_TAG, "Unable to open file %s for reading", fileName.c_str());
 		setStatus(HttpResponse::HTTP_STATUS_NOT_FOUND, "Not Found");
 		addHeader(HttpRequest::HTTP_HEADER_CONTENT_TYPE, "text/plain");
@@ -142,12 +141,12 @@ void HttpResponse::sendFile(std::string fileName, size_t bufSize) {
 
 	setStatus(HttpResponse::HTTP_STATUS_OK, "OK");
 	uint8_t *pData = new uint8_t[bufSize];
-	while (!ifStream.eof()) {
-		ifStream.read((char*) pData, bufSize);
-		sendData(pData, ifStream.gcount());
+	while (!iStream->eof()) {
+		iStream->read((char*) pData, bufSize);
+		sendData(pData, iStream->gcount());
 	}
 	delete[] pData;
-	ifStream.close();
+	delete iStream;
 	close();
 } // sendFile
 

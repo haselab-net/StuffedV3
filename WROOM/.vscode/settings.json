@@ -26,7 +26,8 @@
         "unordered_map": "cpp",
         "ostream": "cpp",
         "sstream": "cpp",
-        "*.cs": "cpp"
+        "*.cs": "cpp",
+        "iostream": "cpp"
     },
     "idf.portWin": "COM8",
     "shellLauncher.shells.windows": [

@@ -195,7 +195,9 @@ public:
 	void SendReturnMovement(UdpRetPacket& ret);
 	///	send return packet to udp
 	void SendReturnUdp(UdpCmdPacket& recv);
-	///	prepare return packet for command cmd
+	///	prepare return packet for command cmd.
+	void PrepareRetPacketExceptLength(UdpCmdPacket& recv);
+	///	prepare return packet for command cmd and set length of the command.
 	void PrepareRetPacket(UdpCmdPacket& recv);
 
 	///	prepare command to receive "from" is passed to UdpRetPacket::count, which can be used to identify caller.
