@@ -263,7 +263,7 @@ namespace PCController
         {
             K = 100;
             B = 50;
-            A = 1024 / 2;
+            A = 1024 * 3 / 2;
         }
         private void Init(){
             int width = 100;

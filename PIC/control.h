@@ -27,7 +27,7 @@ extern SDEC lastRatio[NMOTOR];				//	pwm ratio actually applied to motor
 ///	PD control and current control
 #define PDPARAM_K   SDEC_ONE
 #define PDPARAM_B   ((SDEC)(1.5*SDEC_ONE))
-#define PDPARAM_A   ((SDEC)(0.5*SDEC_ONE))
+#define PDPARAM_A   ((SDEC)(1.5*SDEC_ONE))
 struct PdParam{
     SDEC k[NMOTOR];
     SDEC b[NMOTOR];
