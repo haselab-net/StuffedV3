@@ -113,12 +113,12 @@ void setPwmWithLimit(int ch, SDEC ratio);
 
 extern SDEC forceOffset[NFORCE];
 
-inline SDEC getForceRaw(int ch){
+static inline SDEC getForceRaw(int ch){
 	if (ch == 0) return mcos[3];
 	if (ch == 1) return msin[3];
 	return 0;
 }
-inline SDEC getForce(int ch){
+static inline SDEC getForce(int ch){
 	if (ch == 0) return mcos[3] - forceOffset[ch];
 	if (ch == 1) return msin[3] - forceOffset[ch];
 	return 0;

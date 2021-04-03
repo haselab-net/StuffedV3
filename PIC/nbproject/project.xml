@@ -12,6 +12,28 @@
             <asminc-extensions/>
             <sourceEncoding>ISO-8859-1</sourceEncoding>
             <make-dep-projects/>
+            <sourceRootList>
+                <sourceRootElem>.</sourceRootElem>
+                <sourceRootElem>../Robokey</sourceRootElem>
+                <sourceRootElem>../PCRobokey</sourceRootElem>
+            </sourceRootList>
+            <confList>
+                <confElem>
+                    <name>Simulation</name>
+                    <type>2</type>
+                </confElem>
+                <confElem>
+                    <name>DIP</name>
+                    <type>2</type>
+                </confElem>
+                <confElem>
+                    <name>UQFN</name>
+                    <type>2</type>
+                </confElem>
+            </confList>
+            <formatting>
+                <project-formatting-style>false</project-formatting-style>
+            </formatting>
         </data>
     </configuration>
 </project>

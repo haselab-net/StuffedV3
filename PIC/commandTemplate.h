@@ -150,22 +150,8 @@ enum BOARD##CommandLenEnum{																	\
     BOARD##_CLEN_SET_PARAM = 1+sizeof_field(union CommandPacket##BOARD, param),             \
 	BOARD##_CLEN_RESET_SENSOR = 1+sizeof_field(union CommandPacket##BOARD, resetSensor),	\
     BOARD##_CLEN_GET_PARAM = 1 + 1,															\
-};																	\
-const unsigned char cmdPacketLen##BOARD[CI_NCOMMAND] = {			\
-    BOARD##_CLEN_NONE,												\
-    BOARD##_CLEN_BOARD_INFO,										\
-	BOARD##_CLEN_SET_CMDLEN,										\
-	BOARD##_CLEN_ALL,												\
-	BOARD##_CLEN_SENSOR,											\
-    BOARD##_CLEN_DIRECT,											\
-    BOARD##_CLEN_CURRENT,											\
-    BOARD##_CLEN_INTERPOLATE,										\
-    BOARD##_CLEN_FORCE_CONTROL,										\
-    BOARD##_CLEN_SET_PARAM,											\
-	BOARD##_CLEN_RESET_SENSOR,  									\
-    BOARD##_CLEN_GET_PARAM,                                         \
-};																	\
-
+};                          																\
+extern const unsigned char cmdPacketLen##BOARD[CI_NCOMMAND];                                \
 
 #define DEFINE_ReturnPacket(BOARD, CURRENT, FORCE, TOUCH)		\
 START_PACKED													\
@@ -253,7 +239,31 @@ enum BOARD##ReturnLenEnum{										\
     BOARD##_RLEN_GET_PARAM = 1+sizeof_field(union ReturnPacket##BOARD, param),          \
     BOARD##_RLEN_NO_RETURN = 0,															\
 };																						\
-const unsigned char retPacketLen##BOARD[CI_NCOMMAND]={									\
+extern const unsigned char retPacketLen##BOARD[CI_NCOMMAND];                            \
+        
+#define DEFINE_Packets(BOARD, CURRENT, FORCE, TOUCH)			\
+DEFINE_CommandPacket(BOARD, CURRENT, FORCE, TOUCH)				\
+DEFINE_ReturnPacket(BOARD, CURRENT, FORCE, TOUCH)				\
+
+        
+#define DEFINE_CommandPacketLen(BOARD)                              \
+    const unsigned char cmdPacketLen##BOARD[CI_NCOMMAND] = {		\
+    BOARD##_CLEN_NONE,												\
+    BOARD##_CLEN_BOARD_INFO,										\
+	BOARD##_CLEN_SET_CMDLEN,										\
+	BOARD##_CLEN_ALL,												\
+	BOARD##_CLEN_SENSOR,											\
+    BOARD##_CLEN_DIRECT,											\
+    BOARD##_CLEN_CURRENT,											\
+    BOARD##_CLEN_INTERPOLATE,										\
+    BOARD##_CLEN_FORCE_CONTROL,										\
+    BOARD##_CLEN_SET_PARAM,											\
+	BOARD##_CLEN_RESET_SENSOR,  									\
+    BOARD##_CLEN_GET_PARAM,                                         \
+};																	\
+        
+#define DEFINE_ReturnPacketLen(BOARD)                                                   \
+    const unsigned char retPacketLen##BOARD[CI_NCOMMAND]={  							\
     BOARD##_RLEN_NONE,																	\
     BOARD##_RLEN_BOARD_INFO,															\
     BOARD##_RLEN_NONE,	/* CI_SET_CMDLEN */												\
@@ -268,11 +278,10 @@ const unsigned char retPacketLen##BOARD[CI_NCOMMAND]={									\
     BOARD##_RLEN_GET_PARAM,                                                             \
 };
 
-
-#define DEFINE_Packets(BOARD, CURRENT, FORCE, TOUCH)			\
-DEFINE_CommandPacket(BOARD, CURRENT, FORCE, TOUCH)				\
-DEFINE_ReturnPacket(BOARD, CURRENT, FORCE, TOUCH)				\
-
+#define DEFINE_PacketLens(BOARD)		\
+DEFINE_CommandPacketLen(BOARD)			\
+DEFINE_ReturnPacketLen(BOARD)			\
+        
 
 #define CHOOSE_BoardInfo(BOARD)     							\
 enum BoardInfo{                     							\
@@ -285,8 +294,13 @@ enum BoardInfo{                     							\
 };																\
 typedef union CommandPacket##BOARD CommandPacket;				\
 typedef union ReturnPacket##BOARD ReturnPacket;					\
-const unsigned char* const cmdPacketLen = cmdPacketLen##BOARD;	\
-const unsigned char* const retPacketLen = retPacketLen##BOARD;	\
+extern const unsigned char* const cmdPacketLen;                 \
+extern const unsigned char* const retPacketLen;                 \
 typedef struct MotorHeatLimit##BOARD MotorHeatLimit;            \
 
+#define CHOOSE_BoardInfoImpl(BOARD)     						\
+DEFINE_PacketLens(BOARD);                                       \
+const unsigned char* const cmdPacketLen = cmdPacketLen##BOARD;	\
+const unsigned char* const retPacketLen = retPacketLen##BOARD;	\
+        
 #endif
