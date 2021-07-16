@@ -67,8 +67,8 @@ extern SDEC forceControlJK[NFORCE][NMOTOR];
 #define NAXIS	(NMOTOR+NFORCE/2)	//	NAXIS=NMOTOR+NFORCE/2
 extern SDEC mcos[NAXIS], msin[NAXIS];
 extern SDEC currentSense[NMOTOR];
-extern const SDEC mcosOffset[NAXIS];
-extern const SDEC msinOffset[NAXIS];
+extern SDEC mcosOffset[NAXIS];
+extern SDEC msinOffset[NAXIS];
 
 
 struct Target{
