@@ -16,18 +16,24 @@ SDEC msinOffset[NAXIS] ={
     2048, 2048, 2048, 2048
 };
 
+SDEC mcosRaw[NAXIS];
+SDEC msinRaw[NAXIS];
+
 //  for auto calibration
-SDEC mcosScale[NAXIS] = { SDEC_ONE, SDEC_ONE, SDEC_ONE, SDEC_ONE };
-SDEC msinScale[NAXIS] = { SDEC_ONE, SDEC_ONE, SDEC_ONE, SDEC_ONE };
 SDEC mcosMin[NAXIS] = {0,0,0,0};
 SDEC mcosMax[NAXIS] = {0,0,0,0};
 SDEC msinMin[NAXIS] = {0,0,0,0};
 SDEC msinMax[NAXIS] = {0,0,0,0};
-#define AMPLITUDE   (2048*0.9)
-SDEC mcosMinAve[NAXIS] = {-AMPLITUDE,-AMPLITUDE,-AMPLITUDE,-AMPLITUDE};
-SDEC mcosMaxAve[NAXIS] = {AMPLITUDE,AMPLITUDE,AMPLITUDE,AMPLITUDE};
-SDEC msinMinAve[NAXIS] = {-AMPLITUDE,-AMPLITUDE,-AMPLITUDE,-AMPLITUDE};
-SDEC msinMaxAve[NAXIS] = {AMPLITUDE,AMPLITUDE,AMPLITUDE,AMPLITUDE};
+#define OFFSET  2048
+#define AMPLITUDE   (OFFSET*0.9)
+SDEC mcosMinAve[NAXIS] = {OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE};
+SDEC mcosMaxAve[NAXIS] = {OFFSET+AMPLITUDE, OFFSET+AMPLITUDE, OFFSET+AMPLITUDE, OFFSET+AMPLITUDE};
+SDEC msinMinAve[NAXIS] = {OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE};
+SDEC msinMaxAve[NAXIS] = {OFFSET+AMPLITUDE, OFFSET+AMPLITUDE, OFFSET+AMPLITUDE, OFFSET+AMPLITUDE};
+
+#define SCALE   (4096*4096) / (AMPLITUDE*2)
+SDEC mcosScale[NAXIS] = {SCALE, SCALE, SCALE, SCALE};
+SDEC msinScale[NAXIS] = {SCALE, SCALE, SCALE, SCALE};
 
 /*  Rotation State
  *  State will change with hysteresis. 1->2: cos=+ > -E, 1->4: sin=+>-E
@@ -59,10 +65,12 @@ inline short FilterForMinMax(short prev, short cur){
 }
 
 inline void updateAverageAndScale(int idx){
-    mcosScale[idx] = mcosMaxAve[idx] - mcosMinAve[idx];
-    msinScale[idx] = msinMaxAve[idx] - msinMinAve[idx];
-    mcosOffset[idx] = mcosMinAve[idx] + mcosScale[idx]/2;
-    msinOffset[idx] = msinMinAve[idx] + msinScale[idx]/2;
+    SDEC mcosDiff = mcosMaxAve[idx] - mcosMinAve[idx];
+    SDEC msinDiff = msinMaxAve[idx] - msinMinAve[idx];
+    mcosScale[idx] = 4096*4096 / mcosDiff;
+    msinScale[idx] = 4096*4096 / msinDiff;
+    mcosOffset[idx] = mcosMinAve[idx] + mcosDiff/2;
+    msinOffset[idx] = msinMinAve[idx] + msinDiff/2;
 }
 
 inline void updateRotationState(int idx){
@@ -161,14 +169,14 @@ void readADC(){
     /*  ADC connection
      M1:  AN11, AN4 (cos, sin)
      M2:  AN13, AN12,    M3:  AN8, AN7,    M4:  AN1, AN0    */
-    mcos[0] = FilterForAngle(mcos[0], (ADC1BUF5 - mcosOffset[0]) * mcosScale[0] / SDEC_ONE);
-    msin[0] = FilterForAngle(msin[0], (ADC1BUF2 - msinOffset[0]) * msinScale[0] / SDEC_ONE);
-    mcos[1] = FilterForAngle(mcos[1], (ADC1BUF7 - mcosOffset[1]) * mcosScale[1] / SDEC_ONE);
-    msin[1] = FilterForAngle(msin[1], (ADC1BUF6 - msinOffset[1]) * msinScale[1] / SDEC_ONE);
-	mcos[2] = FilterForAngle(mcos[2], (ADC1BUF1 - mcosOffset[2]) * mcosScale[2] / SDEC_ONE);
-	msin[2] = FilterForAngle(msin[2], (ADC1BUF0 - msinOffset[2]) * msinScale[2] / SDEC_ONE);
-	mcos[3] = FilterForAngle(mcos[3], (ADC1BUF4 - mcosOffset[3]) * mcosScale[3] / SDEC_ONE);
-	msin[3] = FilterForAngle(msin[3], (ADC1BUF3 - msinOffset[3]) * msinScale[3] / SDEC_ONE);
+    mcosRaw[0] = FilterForAngle(mcosRaw[0], ADC1BUF5);
+    msinRaw[0] = FilterForAngle(msinRaw[0], ADC1BUF2);
+    mcosRaw[1] = FilterForAngle(mcosRaw[1], ADC1BUF7);
+    msinRaw[1] = FilterForAngle(msinRaw[1], ADC1BUF6);
+	mcosRaw[2] = FilterForAngle(mcosRaw[2], ADC1BUF1);
+	msinRaw[2] = FilterForAngle(msinRaw[2], ADC1BUF0);
+	mcosRaw[3] = FilterForAngle(mcosRaw[3], ADC1BUF4);
+	msinRaw[3] = FilterForAngle(msinRaw[3], ADC1BUF3);
 #elif defined BOARD2_COMBINATION
     /*  ADC connection
      M1:  AN11, AN4 (cos, sin)
@@ -183,26 +191,26 @@ BUF 0 1 2 3  4 5 6 7  8   9 10 11
 AN  0 1 2 3  4 5 7 8 10  11 12 13 
 AN      2 3    5     10         
 */
-    mcos[0] = FilterForAngle(mcos[0], (ADC1BUF6 -  mcosOffset[0]) * mcosScale[0] / SDEC_ONE);
-    msin[0] = FilterForAngle(msin[0], (ADC1BUF7 -  msinOffset[0]) * msinScale[0] / SDEC_ONE);
-    mcos[1] = FilterForAngle(mcos[1], (ADC1BUF0 -  mcosOffset[1]) * mcosScale[1] / SDEC_ONE);
-    msin[1] = FilterForAngle(msin[1], (ADC1BUF1 -  msinOffset[1]) * msinScale[1] / SDEC_ONE);
-	mcos[2] = FilterForAngle(mcos[2], (ADC1BUF4 -  mcosOffset[2]) * mcosScale[2] / SDEC_ONE);
-	msin[2] = FilterForAngle(msin[2], (ADC1BUF9 -  msinOffset[2]) * msinScale[2] / SDEC_ONE);
-	mcos[3] = FilterForAngle(mcos[3], (ADC1BUF10 - mcosOffset[3]) * mcosScale[3] / SDEC_ONE);
-	msin[3] = FilterForAngle(msin[3], (ADC1BUF11 - msinOffset[3]) * msinScale[3] / SDEC_ONE);
+    mcosRaw[0] = FilterForAngle(mcosRaw[0], ADC1BUF6 );
+    msinRaw[0] = FilterForAngle(msinRaw[0], ADC1BUF7 );
+    mcosRaw[1] = FilterForAngle(mcosRaw[1], ADC1BUF0 );
+    msinRaw[1] = FilterForAngle(msinRaw[1], ADC1BUF1 );
+	mcosRaw[2] = FilterForAngle(mcosRaw[2], ADC1BUF4 );
+	msinRaw[2] = FilterForAngle(msinRaw[2], ADC1BUF9 );
+	mcosRaw[3] = FilterForAngle(mcosRaw[3], ADC1BUF10);
+	msinRaw[3] = FilterForAngle(msinRaw[3], ADC1BUF11);
 #elif defined BOARD3_SEPARATE || defined BOARD4
 /*  BUF 0 1 2 3  4 5 6 7  8   9 10 11
     AN  0 1 2 3  4 5 7 8 10  11 12 13 
     MT      2 3    5     10             */
-	mcos[0] = FilterForAngle(mcos[0], (ADC1BUF11 - mcosOffset[0]) * mcosScale[0] / SDEC_ONE);
-	msin[0] = FilterForAngle(msin[0], (ADC1BUF10 - msinOffset[0]) * msinScale[0] / SDEC_ONE);
-	mcos[1] = FilterForAngle(mcos[1], (ADC1BUF4 -  mcosOffset[1]) * mcosScale[1] / SDEC_ONE);
-	msin[1] = FilterForAngle(msin[1], (ADC1BUF9 -  msinOffset[1]) * msinScale[1] / SDEC_ONE);
-    mcos[2] = FilterForAngle(mcos[2], (ADC1BUF6 -  mcosOffset[2]) * mcosScale[2] / SDEC_ONE);
-    msin[2] = FilterForAngle(msin[2], (ADC1BUF7 -  msinOffset[2]) * msinScale[2] / SDEC_ONE);
-    mcos[3] = FilterForAngle(mcos[3], (ADC1BUF0 -  mcosOffset[3]) * mcosScale[3] / SDEC_ONE);
-    msin[3] = FilterForAngle(msin[3], (ADC1BUF1 -  msinOffset[3]) * msinScale[3] / SDEC_ONE);
+	mcosRaw[0] = FilterForAngle(mcosRaw[0], ADC1BUF11);
+	msinRaw[0] = FilterForAngle(msinRaw[0], ADC1BUF10);
+	mcosRaw[1] = FilterForAngle(mcosRaw[1], ADC1BUF4 );
+	msinRaw[1] = FilterForAngle(msinRaw[1], ADC1BUF9 );
+    mcosRaw[2] = FilterForAngle(mcosRaw[2], ADC1BUF6 );
+    msinRaw[2] = FilterForAngle(msinRaw[2], ADC1BUF7 );
+    mcosRaw[3] = FilterForAngle(mcosRaw[3], ADC1BUF0 );
+    msinRaw[3] = FilterForAngle(msinRaw[3], ADC1BUF1 );
     currentSense[0] = FilterForCurrent(currentSense[0], ADC1BUF5); //5
     currentSense[1] = FilterForCurrent(currentSense[1], ADC1BUF8); //10
     currentSense[2] = FilterForCurrent(currentSense[2], ADC1BUF2); //2
@@ -210,14 +218,18 @@ AN      2 3    5     10
 #else
 #error Board type not defined
 #endif
-
-    //  update min max rotation state
+	//	update mcos msin
     int i;
     for(i=0; i<NAXIS; ++i){
-        if (mcos[i] > mcosMax[i]) mcosMax[i] = mcos[i];
-        else if (mcos[i] < mcosMin[i]) mcosMin[i] = mcos[i];
-        if (msin[i] > msinMax[i]) msinMax[i] = msin[i];
-        else if (msin[i] < msinMin[i]) msinMin[i] = msin[i];
+    	mcos[i] = (int)(mcosRaw[i] - mcosOffset[i]) * mcosScale[i] / SDEC_ONE;
+    	msin[i] = (int)(msinRaw[i] - msinOffset[i]) * msinScale[i] / SDEC_ONE;
+    }
+    //  update min max rotation state
+    for(i=0; i<NAXIS; ++i){
+        if (mcosRaw[i] > mcosMax[i]) mcosMax[i] = mcosRaw[i];
+        else if (mcosRaw[i] < mcosMin[i]) mcosMin[i] = mcosRaw[i];
+        if (msinRaw[i] > msinMax[i]) msinMax[i] = msinRaw[i];
+        else if (msinRaw[i] < msinMin[i]) msinMin[i] = msinRaw[i];
         updateRotationState(i);
     }
 }

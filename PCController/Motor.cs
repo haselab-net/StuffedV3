@@ -256,7 +256,7 @@ namespace PCController
         public void SetNuibotDefault()
         {
             K = 1024;
-            B = 1024 * 3 / 2;
+            B = 1024 * 1;
             A = 1024 / 2;
         }
         public void SetSpidarDefault()
