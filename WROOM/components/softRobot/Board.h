@@ -1,5 +1,7 @@
 #pragma once
+#ifndef _MSC_VER
 #pragma GCC diagnostic ignored "-Warray-bounds"
+#endif
 
 #include "BoardBase.h"
 #include "esp_log.h"
@@ -17,7 +19,7 @@ namespace Spr {
 
 #else
 
-inline void updateMotorPos(SDEC mpos, char index){
+inline void updateMotorPos(SDEC mpos, char index) {
 	SDEC diff = mpos - (SDEC)(allBoards.motorPos[(int)index]);
 	allBoards.motorPos[(int)index] += diff;
 }

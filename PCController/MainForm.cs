@@ -186,10 +186,15 @@ namespace PCController
             {
                 currents[i] = (short)currentControls[i].udTargetCurrent.Value;
             }
-            short[] curCurrents = boards.SendCurrent(currents);
+            boards.SendCurrent(currents);
+            boards.SendSense();
             for (int i = 0; i < currentControls.Count; ++i)
             {
-                currentControls[i].lbCurrent.Text = "" + curCurrents[i];
+                currentControls[i].lbCurrent.Text = "" + boards.GetCurrent(i);
+            }
+            for(int i=0; i < boards.NForce; ++i)
+            {
+                txMsg.Text += " F"+i+"="+boards.GetForce(i);
             }
         }
 
@@ -209,11 +214,20 @@ namespace PCController
 			else if (tbControl.SelectedTab == tpMagnet) {
                 UpdateMagnet();
             }
-            txMsg.Text = "";
-            for (int i=0; i< boards.NMotor; ++i)
+            txMsg.Text = "Pos:";
+            for (int i = 0; i < boards.NMotor; ++i)
             {
-                txMsg.Text += boards.GetPos(i);
                 txMsg.Text += " ";
+                txMsg.Text += boards.GetPos(i);
+            }
+            if (boards.NForce != 0)
+            {
+                txMsg.Text += "\r\nForce:";
+                for (int i = 0; i < boards.NForce; ++i)
+                {
+                    txMsg.Text += " ";
+                    txMsg.Text += boards.GetForce(i);
+                }
             }
         }
 

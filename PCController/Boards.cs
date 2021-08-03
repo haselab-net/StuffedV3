@@ -198,11 +198,10 @@ namespace PCController
         }
 
         //  return received currents;
-        public short[] SendCurrent(short[] currents, bool bWriteOnly=false)
+        public void SendCurrent(short[] currents, bool bWriteOnly=false)
         {
             SetControlMode(ControlMode.CM_CURRENT);
             int mi = 0;
-            short[] rv = new short[currents.Length];
             foreach (Board board in this)
             {
                 byte[] sendBuf = null, recvBuf = null;
@@ -226,12 +225,11 @@ namespace PCController
                 {
                     vel[board.motorMap[i]] = ReadShort(recvBuf, ref cur);
                 }
-                for (int i = 0; i < board.nMotor; ++i)
+                for (int i = 0; i < board.nForce; ++i)
                 {
-                    rv[board.motorMap[i]] = ReadShort(recvBuf, ref cur);
+                    force[board.forceMap[i]] = ReadShort(recvBuf, ref cur);
                 }
             }
-            return rv;
         }
         public void SendResetMotor() {
             foreach (Board board in this)

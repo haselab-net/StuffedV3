@@ -57,18 +57,18 @@ struct SetGetParam##BOARD{    /* CI_SETPARAM / CI_GETPARAM */       \
     unsigned char type;                                             \
     union {                                                         \
         struct {                                                    \
-            SDEC k[BOARD##_NMOTOR];	/* P */                         \
-            SDEC b[BOARD##_NMOTOR];	/* D */                         \
+            SDEC PACKED k[BOARD##_NMOTOR];	/* P */                 \
+            SDEC PACKED b[BOARD##_NMOTOR];	/* D */                 \
         }PACKED pd;													\
         struct {                                                    \
-            SDEC min[BOARD##_NMOTOR];	/* Tq min */                \
-            SDEC max[BOARD##_NMOTOR];	/* Tq max */                \
+            SDEC PACKED min[BOARD##_NMOTOR];	/* Tq min */        \
+            SDEC PACKED max[BOARD##_NMOTOR];	/* Tq max */        \
         }PACKED torque;												\
         struct {                                                    \
-            SDEC cos[BOARD##_NMOTOR];	/* magnet sensors */        \
-            SDEC sin[BOARD##_NMOTOR];	/* magnet sensors */        \
+            SDEC PACKED cos[BOARD##_NMOTOR];	/* magnet sensors */\
+            SDEC PACKED sin[BOARD##_NMOTOR];	/* magnet sensors */\
         }PACKED magnet;												\
-        SDEC a[BOARD##_NMOTOR];	/* Current */                       \
+        SDEC PACKED a[BOARD##_NMOTOR];	/* Current */               \
         unsigned char boardId;	/* boardId */                       \
         unsigned long baudrate[2];	/* baudrate */                  \
         struct MotorHeatLimit##BOARD heat;                          \
@@ -213,9 +213,9 @@ union ReturnPacket##BOARD {										\
 				SDEC pos[BOARD##_NMOTOR];						\
 				union {											\
 					SDEC vel[BOARD##_NMOTOR];					\
-					NOT##CURRENT(SDEC current[1];)				\
+					NOT##FORCE(SDEC force[1];)					\
 				} PACKED;										\
-				CURRENT(SDEC current[BOARD##_NCURRENT];)		\
+				FORCE(SDEC force[BOARD##_NFORCE];)				\
 			}PACKED current;									\
 			struct {    /* CI_INTERPOLATE, CI_FORCE_CONTROL */	\
 				SDEC pos[BOARD##_NMOTOR];						\

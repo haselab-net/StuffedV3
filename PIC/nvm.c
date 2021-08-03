@@ -11,23 +11,31 @@ struct NvPageData{
     char nvFill[2048-sizeof(NvData)];
 }__attribute__((__packed__));
 
+#if BOARD_TYPE==BT_B3F || BOARD_TYPE==BT_B2F || BOARD_TYPE==BT_B1F
+ #define EL4(x)  
+#elif BOARD_TYPE==BT_B3M || BOARD_TYPE==BT_B2M || BOARD_TYPE==BT_B1M
+ #define EL4(x) x
+#else
+ #error BORAD_TYPE must be specified.
+#endif
+
 const struct NvPageData __attribute__((address(NVPAGE))) theNvPage = {
     {
         BOARD_ID,   //  boardID
         {0,0,0},    //  pad
         2000000, 3000000,    //  2MBPS for command, 3MBPS for monitor
         {   //  PDParam
-            {PDPARAM_K, PDPARAM_K, PDPARAM_K, PDPARAM_K},   //k
-            {PDPARAM_B, PDPARAM_B, PDPARAM_B, PDPARAM_B},   //b
-            {PDPARAM_A, PDPARAM_A, PDPARAM_A, PDPARAM_A},   //a
+            {PDPARAM_K, PDPARAM_K, PDPARAM_K, EL4(PDPARAM_K)},   //k
+            {PDPARAM_B, PDPARAM_B, PDPARAM_B, EL4(PDPARAM_B)},   //b
+            {PDPARAM_A, PDPARAM_A, PDPARAM_A, EL4(PDPARAM_A)},   //a
         },
         {//  TorqueLimit
-            {-SDEC_ONE, -SDEC_ONE, -SDEC_ONE, -SDEC_ONE},   //  min
-            {SDEC_ONE, SDEC_ONE, SDEC_ONE, SDEC_ONE},       //  max   
+            {-SDEC_ONE, -SDEC_ONE, -SDEC_ONE, EL4(-SDEC_ONE)},   //  min
+            {SDEC_ONE, SDEC_ONE, SDEC_ONE, EL4(SDEC_ONE)},       //  max   
         },
         {//  MotorHeatLimit       
-            {MOTOR_HEAT_LIMIT/MOTOR_HEAT_RELEASE, MOTOR_HEAT_LIMIT/MOTOR_HEAT_RELEASE, MOTOR_HEAT_LIMIT/MOTOR_HEAT_RELEASE, MOTOR_HEAT_LIMIT/MOTOR_HEAT_RELEASE},   //  SDEC limit
-            {MOTOR_HEAT_RELEASE, MOTOR_HEAT_RELEASE, MOTOR_HEAT_RELEASE, MOTOR_HEAT_RELEASE}    // SDEC release
+            {MOTOR_HEAT_LIMIT/MOTOR_HEAT_RELEASE, MOTOR_HEAT_LIMIT/MOTOR_HEAT_RELEASE, MOTOR_HEAT_LIMIT/MOTOR_HEAT_RELEASE, EL4(MOTOR_HEAT_LIMIT/MOTOR_HEAT_RELEASE)},   //  SDEC limit
+            {MOTOR_HEAT_RELEASE, MOTOR_HEAT_RELEASE, MOTOR_HEAT_RELEASE, EL4(MOTOR_HEAT_RELEASE)}    // SDEC release
         },
     }
 };

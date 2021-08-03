@@ -220,13 +220,18 @@ void rcCurrent(){
 	for(i=0; i<NMOTOR; ++i){
         retPacket.current.pos[i] = L2SDEC(motorState.pos[i]);
 		retPacket.current.vel[i] = L2SDEC(motorState.vel[i]);
+/*
 		if (i < NCURRENT) {
 			retPacket.current.current[i] = currentSense[i];
 		}
 		else {
 			retPacket.current.current[i] = currentTarget[i];
 		}
+ */
 	}
+	for(i=0; i<NFORCE; ++i){
+		retPacket.current.force[i] = getForce(i);
+    }
 }
 void returnInterpolateParam(){
     int i;	

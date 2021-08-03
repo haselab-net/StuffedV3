@@ -1,15 +1,23 @@
 #include "boardType.h"
+#include "command.h"
 
 #ifndef WROOM
 
-#if defined BOARD1_MOTORDRIVER
- CHOOSE_BoardInfoImpl(B1F);	//	B1M or B1F
-#elif defined BOARD2_COMBINATION
- CHOOSE_BoardInfoImpl(B2M);	//	B2M or B2F
-#elif defined BOARD3_SEPARATE
- CHOOSE_BoardInfoImpl(B3M);	//	B3M or B3F
-#elif defined BOARD4
- CHOOSE_BoardInfoImpl(B3M);	//	B3M or B3F
+
+#if BOARD_TYPE==BT_B1M
+ CHOOSE_BoardInfoImpl(B1M)
+#elif BOARD_TYPE == BT_B1F
+ CHOOSE_BoardInfoImpl(B1F)
+#elif BOARD_TYPE == BT_B2M
+ CHOOSE_BoardInfoImpl(B2M)
+#elif BOARD_TYPE == BT_B2F
+ CHOOSE_BoardInfoImpl(B2F)
+#elif BOARD_TYPE == BT_B3M
+ CHOOSE_BoardInfoImpl(B3M)
+#elif BOARD_TYPE == BT_B3F
+ CHOOSE_BoardInfoImpl(B3F)
+#else
+#error BORAD_TYPE is wrong.
 #endif
 
 #endif

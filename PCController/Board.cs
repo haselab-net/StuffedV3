@@ -73,7 +73,7 @@ namespace PCController
                 case CommandId.CI_DIRECT:
                     return 1 + nMotor*2*2;
                 case CommandId.CI_CURRENT:
-                    return 1 + nMotor*2;
+                    return 1 + nMotor * 2;
                 case CommandId.CI_INTERPOLATE:
                     return 1 + nMotor*2 + 2 + 1;
                 case CommandId.CI_FORCE_CONTROL:
@@ -98,7 +98,7 @@ namespace PCController
                 case CommandId.CI_BOARD_INFO: return 1 + 6;
                 case CommandId.CI_DIRECT: return 1 + nMotor * 2 * 2;
                 case CommandId.CI_INTERPOLATE: return 1 + nMotor * 2 + 2 + 1;
-                case CommandId.CI_CURRENT: return 1 + nMotor * 3 * 2;
+                case CommandId.CI_CURRENT: return 1 + nMotor * 2 * 2 + nForce * 2;
                 case CommandId.CI_GET_PARAM: return 1 + 1 + nMotor * 2 * 2;
                 case CommandId.CI_SENSOR: return 1 + (nMotor + nCurrent + nForce + nTouch) * 2;
             }
