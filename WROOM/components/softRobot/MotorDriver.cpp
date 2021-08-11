@@ -230,10 +230,10 @@ int MotorDriver::GetAdcRaw(int ch){
 }
 
 #define ADC_CENTER  (16353/2)
-const SDEC mcosOffset[NAXIS] ={
+SDEC mcosOffset[NAXIS] ={
     ADC_CENTER, ADC_CENTER, ADC_CENTER
 };
-const SDEC msinOffset[NAXIS] ={
+SDEC msinOffset[NAXIS] ={
     ADC_CENTER, ADC_CENTER, ADC_CENTER
 };
 

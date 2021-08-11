@@ -5,6 +5,8 @@
 #include "boardType.h"
 #include <stdbool.h>
 
+#ifdef PIC
+
 #if BOARD_TYPE == BT_B1M
  CHOOSE_BoardInfo(B1M)
 #elif BOARD_TYPE == BT_B1F
@@ -21,6 +23,7 @@
 #error BORAD_TYPE is wrong.
 #endif
 
+#endif
 
 void commandInit();
 bool uartExecCommand();

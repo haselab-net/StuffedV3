@@ -34,7 +34,7 @@
 #elif defined BOARD3_SEPARATE
  #define BOARD_TYPE BT_B3M	//	B3M or B3F
 #elif defined BOARD4
- #define BOARD_TYPE BT_B3F	//	B3M or B3F
+ #define BOARD_TYPE BT_B3M	//	B3M or B3F
 #endif
  
 #define BOARD_ID	1

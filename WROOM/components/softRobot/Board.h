@@ -176,8 +176,11 @@ public:
 		case CI_CURRENT:
 			for (int i = 0; i < GetNMotor(); ++i) {
 				updateMotorPos(ret.direct.pos[i] - MOTOROFFSET(i), motorMap[i]);
-				packet.SetMotorPos(ret.direct.pos[i] - MOTOROFFSET(i), motorMap[i]);
-				packet.SetMotorVel(ret.direct.vel[i], motorMap[i]);
+				packet.SetMotorPos(ret.current.pos[i] - MOTOROFFSET(i), motorMap[i]);
+				packet.SetMotorVel(ret.current.vel[i], motorMap[i]);
+			}
+			for (int i = 0; i < GetNForce(); ++i) {
+				packet.SetForce(ret.current.force[i], forceMap[i]);
 			}
 			//ESP_LOGI(Tag(), "Direct Motor Pos: %d %d %d %d\n", packet.MotorPos(0),  packet.MotorPos(1), packet.MotorPos(2),  packet.MotorPos(3));
 			break;
@@ -239,7 +242,7 @@ public:
 			break;
 		default:
 			ESP_LOGE(Tag(), "ReadRet(): Command Id error %d", cmdId);
-			assert(0);
+			//assert(0);
 		}
 	}
 };
