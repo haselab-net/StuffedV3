@@ -8,11 +8,13 @@
 #include <sstream>
 #include <string>
 
+extern "C" {
 #include <dirent.h>
 #include <errno.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
+}
 
 #include <esp_log.h>
 

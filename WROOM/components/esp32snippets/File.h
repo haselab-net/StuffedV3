@@ -8,7 +8,9 @@
 #ifndef COMPONENTS_CPP_UTILS_FILE_H_
 #define COMPONENTS_CPP_UTILS_FILE_H_
 #include <string>
+extern "C" {
 #include <dirent.h>
+}
 
 /**
  * @brief A logical representation of a file.
