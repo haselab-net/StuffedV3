@@ -187,7 +187,7 @@ void movementOnGetPICInfo(UdpRetPacket& pkt) {
 	xSemaphoreGive(picQuerySemaphore);
 }
 void initPICPacketHandler() {
-	picQuerySemaphore = xSemaphoreCreateMutex();
+	picQuerySemaphore = xSemaphoreCreateBinary();
 }
 
 /////////////////////////////////////////// basic api ////////////////////////////////////////////////
