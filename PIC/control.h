@@ -66,6 +66,8 @@ extern SDEC currentTarget[NMOTOR];
 extern SDEC forceControlJK[NFORCE][NMOTOR];
 #define NAXIS	(NMOTOR+NFORCE/2)	//	NAXIS=NMOTOR+NFORCE/2
 extern SDEC mcos[NAXIS], msin[NAXIS];
+extern SDEC mcosRaw[NAXIS], msinRaw[NAXIS];
+
 extern SDEC currentSense[NMOTOR];
 extern SDEC mcosOffset[NAXIS];
 extern SDEC msinOffset[NAXIS];
@@ -114,13 +116,13 @@ void setPwmWithLimit(int ch, SDEC ratio);
 extern SDEC forceOffset[NFORCE];
 
 static inline SDEC getForceRaw(int ch){
-	if (ch == 0) return mcos[3];
-	if (ch == 1) return msin[3];
+	if (ch == 0) return mcosRaw[3];
+	if (ch == 1) return msinRaw[3];
 	return 0;
 }
 static inline SDEC getForce(int ch){
-	if (ch == 0) return mcos[3] - forceOffset[ch];
-	if (ch == 1) return msin[3] - forceOffset[ch];
+	if (ch == 0) return mcosRaw[3] - forceOffset[ch];
+	if (ch == 1) return msinRaw[3] - forceOffset[ch];
 	return 0;
 }
 
