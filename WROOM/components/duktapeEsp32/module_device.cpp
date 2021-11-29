@@ -11,8 +11,10 @@ JSRobotState::JSRobotState(AllBoards& allBoards)  {
     force.resize(allBoards.GetNTotalForce(), 0);
     touch.resize(allBoards.GetNTotalTouch(), -1);
 
-    readSemaphore = xSemaphoreCreateMutex();
-    writeSemaphore = xSemaphoreCreateMutex();
+    readSemaphore = xSemaphoreCreateBinary();
+    writeSemaphore = xSemaphoreCreateBinary();
+    xSemaphoreGive(readSemaphore);
+    xSemaphoreGive(writeSemaphore);
 }
 
 JSRobotState::~JSRobotState() {

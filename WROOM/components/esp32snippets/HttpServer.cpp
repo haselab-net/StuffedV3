@@ -21,6 +21,7 @@
 #include "WebSocket.h"
 #include "GeneralUtils.h"
 #include "Memory.h"
+#include "FreeRTOS.h"
 static const char* LOG_TAG = "HttpServer";
 
 #undef close
@@ -29,7 +30,7 @@ static const char* LOG_TAG = "HttpServer";
 /**
  * Constructor for HTTP Server
  */
-HttpServer::HttpServer() {
+HttpServer::HttpServer(): m_semaphoreServerStarted("ServerStarted", false) {
 	m_portNumber = 80;            // The default port number.
 	m_clientTimeout = 5;            // The default timeout 5 seconds.
 	m_rootPath   = "";            // The default path.

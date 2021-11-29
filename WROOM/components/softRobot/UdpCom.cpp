@@ -193,8 +193,10 @@ UdpCmdPackets::UdpCmdPackets() {
 	smAvail = xSemaphoreCreateCounting(sizeof(buf) / sizeof(buf[0]), 0);
 	smFree = xSemaphoreCreateCounting(sizeof(buf) / sizeof(buf[0]), sizeof(buf) / sizeof(buf[0]));
 
-	isReading = xSemaphoreCreateMutex();
-	isWriting = xSemaphoreCreateMutex();
+	isReading = xSemaphoreCreateBinary();
+	isWriting = xSemaphoreCreateBinary();
+    xSemaphoreGive(isReading);
+    xSemaphoreGive(isWriting);
 }
 UdpCmdPacket& UdpCmdPackets::Peek() {
 	xSemaphoreTake(isReading, portMAX_DELAY);

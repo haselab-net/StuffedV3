@@ -149,12 +149,16 @@ void duktape_start() {
 	//	Initialize heap and threads
     dukf_init_nvs_values(); // Initialize any defaults for NVS data
     esp32_duktape_initEvents();
-	if(!heap_mutex) heap_mutex = xSemaphoreCreateMutex();	// only create once
+	if(!heap_mutex){
+		heap_mutex = xSemaphoreCreateBinary();	// only create once
+		xSemaphoreGive(heap_mutex);
+	}
 	//	init timer task
 	memset(timerCallbacks, 0, sizeof(timerCallbacks));
 	if (!taskJsTimer){
 		if (!smTimerCallbacks){
-			smTimerCallbacks = xSemaphoreCreateMutex();
+			smTimerCallbacks = xSemaphoreCreateBinary();
+			xSemaphoreGive(smTimerCallbacks);
 		}
 		xTaskCreate(dukTimerTask, "jsTimer", 1024, NULL, tskIDLE_PRIORITY, &taskJsTimer);
 	}

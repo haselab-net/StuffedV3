@@ -188,6 +188,7 @@ void movementOnGetPICInfo(UdpRetPacket& pkt) {
 }
 void initPICPacketHandler() {
 	picQuerySemaphore = xSemaphoreCreateBinary();
+	xSemaphoreGive(picQuerySemaphore);
 }
 
 /////////////////////////////////////////// basic api ////////////////////////////////////////////////
@@ -820,7 +821,7 @@ static void initTimer() {
 }
 
 static void initMovementManager() {
-	tickSemaphore = xSemaphoreCreateMutex();
+	tickSemaphore = xSemaphoreCreateBinary();
 	vSemaphoreCreateBinary(intervalSemaphore);
 
 	xTaskCreate(movementManager, "movement", 1024*3, NULL, tskIDLE_PRIORITY+4, &movementManagerTask);

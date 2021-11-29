@@ -45,6 +45,7 @@ extern "C" void ws_main() {
     LOGD("Free heap after spiffs mount: %d", esp_get_free_heap_size());
 
     // start server
+    LOGI("before http server start");
     createHttpServer();
     LOGD("Free heap after create server: %d", esp_get_free_heap_size());
 }

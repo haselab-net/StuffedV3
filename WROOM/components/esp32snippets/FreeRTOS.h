@@ -30,7 +30,7 @@ public:
 
 	class Semaphore {
 	public:
-		Semaphore(std::string owner = "<Unknown>");
+		Semaphore(std::string owner, bool bMutex);
 		~Semaphore();
 		void        give();
 		void        give(uint32_t value);

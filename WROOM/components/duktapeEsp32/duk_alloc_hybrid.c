@@ -45,7 +45,7 @@ typedef struct {
 } pool_size_spec;
 
 static pool_size_spec pool_sizes[] = {
-	{16, 64 },
+	{16, 128 },
 	{32, 128 },
 	{48, 256 },
 	{64, 128 },

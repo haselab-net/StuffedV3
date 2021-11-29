@@ -389,7 +389,9 @@ class MCShowHeap: public MonitorCommandBase{
                 break;
             }
             case 't':
+                heap_trace_stop();
                 heap_trace_dump();
+                heap_trace_start(HEAP_TRACE_LEAKS);
                 break;
             case 'h':
                 duk_alloc_hybrid_dump(duk_alloc_hybrid_udata);

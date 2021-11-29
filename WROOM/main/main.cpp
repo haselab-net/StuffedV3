@@ -42,11 +42,11 @@ static heap_trace_record_t trace_record[NUM_RECORDS]; // This buffer must be in 
 #endif
 
 void setLogLevel(){
-#ifndef _WIN32
     //  Set all log level to INFO
 	esp_log_level_set("*", ESP_LOG_INFO);
 
     // Components set to info
+    //  esp_log_level_set("cpu_start", ESP_LOG_INFO);
     //  esp_log_level_set("efuse", ESP_LOG_INFO);
     //  esp_log_level_set("intr_alloc", ESP_LOG_INFO);
     //  esp_log_level_set("spi_flash", ESP_LOG_INFO);
@@ -74,7 +74,7 @@ void setLogLevel(){
     esp_log_level_set("I2S", ESP_LOG_WARN);
 
     //  Application
-    esp_log_level_set("main", ESP_LOG_INFO);
+    //  esp_log_level_set("main", ESP_LOG_INFO);
     //  SoftRobot
     //  esp_log_level_set("sr_main", ESP_LOG_DEBUG);
     //  esp_log_level_set("Uart", ESP_LOG_DEBUG);
@@ -88,7 +88,7 @@ void setLogLevel(){
 
     //  Web Server
     // esp_log_level_set("Socket", ESP_LOG_INFO);
-    // esp_log_level_set("HttpServer", ESP_LOG_INFO);
+    esp_log_level_set("HttpServer", ESP_LOG_DEBUG);
     // esp_log_level_set("HttpServerTask", ESP_LOG_INFO);
     // esp_log_level_set("HttpRequest", ESP_LOG_INFO);
     // esp_log_level_set("HttpParser", ESP_LOG_INFO);
@@ -97,25 +97,24 @@ void setLogLevel(){
     // esp_log_level_set("WiFi", ESP_LOG_INFO);
     // esp_log_level_set("WiFiEventHandler", ESP_LOG_INFO);
     // esp_log_level_set("ws_fs", ESP_LOG_INFO);
-    //  esp_log_level_set("ws_wifi", ESP_LOG_DEBUG);
+     esp_log_level_set("ws_wifi", ESP_LOG_DEBUG);
     //  esp_log_level_set("ws_task", ESP_LOG_DEBUG);
     //  esp_log_level_set("ws_main", ESP_LOG_DEBUG);
     //  esp_log_level_set("ws_form", ESP_LOG_DEBUG);
-    //  esp_log_level_set("ws_ws", ESP_LOG_DEBUG);
+    esp_log_level_set("ws_ws", ESP_LOG_DEBUG);
     //  esp_log_level_set("WebSocket", ESP_LOG_DEBUG);
     //  esp_log_level_set("WebSocketReader", ESP_LOG_DEBUG);
 
     //  Duktape
-    esp_log_level_set("duktape_task", ESP_LOG_INFO);
-    esp_log_level_set("duktape_event", ESP_LOG_INFO);
-    esp_log_level_set("duk_utils", ESP_LOG_INFO);
-    esp_log_level_set("dukf_utils", ESP_LOG_INFO);
-    esp_log_level_set("module_dukf", ESP_LOG_INFO);
-    esp_log_level_set("modules", ESP_LOG_INFO);
-    esp_log_level_set("module_os", ESP_LOG_INFO);
-    esp_log_level_set("module_iot", ESP_LOG_DEBUG);
-    esp_log_level_set("log", ESP_LOG_INFO);
-#endif
+    // esp_log_level_set("duktape_task", ESP_LOG_INFO);
+    // esp_log_level_set("duktape_event", ESP_LOG_INFO);
+    // esp_log_level_set("duk_utils", ESP_LOG_INFO);
+    // esp_log_level_set("dukf_utils", ESP_LOG_INFO);
+    // esp_log_level_set("module_dukf", ESP_LOG_INFO);
+    // esp_log_level_set("modules", ESP_LOG_INFO);
+    // esp_log_level_set("module_os", ESP_LOG_INFO);
+    // esp_log_level_set("module_iot", ESP_LOG_DEBUG);
+    // esp_log_level_set("log", ESP_LOG_INFO);
 }
 
 extern "C" void readAutoStart() {
@@ -139,25 +138,21 @@ extern "C" void readAutoStart() {
 }
 
 extern "C" void app_main(){
-    #ifndef _WIN32
-    {
-    	esp_log_level_set("*", ESP_LOG_INFO);
-        esp_chip_info_t chip_info;
-        esp_chip_info(&chip_info);
-        printf("\n\n\n\n\n\nThis is ESP32 chip with %d CPU cores, WiFi%s%s, ",
-            chip_info.cores,
-            (chip_info.features & CHIP_FEATURE_BT) ? "/BT" : "",
-            (chip_info.features & CHIP_FEATURE_BLE) ? "/BLE" : "");
-        printf("silicon revision %d, ", chip_info.revision);
-        printf("%dMB %s flash\n", spi_flash_get_chip_size() / (1024 * 1024),
-                (chip_info.features & CHIP_FEATURE_EMB_FLASH) ? "embedded" : "external");
-        LOGI("Initial heap size: %d", esp_get_free_heap_size());
-    }
+    esp_log_level_set("*", ESP_LOG_INFO);
+    esp_chip_info_t chip_info;
+    esp_chip_info(&chip_info);
+    printf("\n\n\n\n\n\nThis is ESP32 chip with %d CPU cores, WiFi%s%s, ",
+        chip_info.cores,
+        (chip_info.features & CHIP_FEATURE_BT) ? "/BT" : "",
+        (chip_info.features & CHIP_FEATURE_BLE) ? "/BLE" : "");
+    printf("silicon revision %d, ", chip_info.revision);
+    printf("%dMB %s flash\n", spi_flash_get_chip_size() / (1024 * 1024),
+            (chip_info.features & CHIP_FEATURE_EMB_FLASH) ? "embedded" : "external");
+    LOGI("Initial heap size: %d", esp_get_free_heap_size());
     #if CONFIG_HEAP_TRACING
     ESP_ERROR_CHECK( heap_trace_init_standalone(trace_record, NUM_RECORDS) );
     #endif
-    #endif
-
+    
     //  set log level
     setLogLevel();
 

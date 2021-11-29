@@ -271,7 +271,7 @@ void SRWiFi::startScan(){
     }
 }
 void SRWiFi::stopScan(){
-    uint16_t apCount;  // Number of access points available.
+    uint16_t apCount = 0;  // Number of access points available.
 	esp_err_t rc = ::esp_wifi_scan_get_ap_num(&apCount);
 	if (rc != ESP_OK) {
 		LOGE("esp_wifi_scan_get_ap_num: %d", rc);
@@ -279,30 +279,32 @@ void SRWiFi::stopScan(){
 	} else {
 		LOGD("Count of found access points: %d", apCount);
 	}
-	wifi_ap_record_t* list = (wifi_ap_record_t*) malloc(sizeof(wifi_ap_record_t) * apCount);
-	if (list == nullptr) {
-		LOGE("Failed to allocate memory");
-		return;
-	}
-	esp_err_t errRc = ::esp_wifi_scan_get_ap_records(&apCount, list);
-	if (errRc != ESP_OK) {
-		LOGE("esp_wifi_scan_get_ap_records: rc=%d %s", errRc, GeneralUtils::errorToString(errRc));
-		abort();
-	}
     scannedAPs.clear();
-    scannedAPs.reserve(apCount);
-	for (uint16_t i = 0; i < apCount; i++) {
-		WiFiAPRecord wifiAPRecord;
-		memcpy(wifiAPRecord.m_bssid, list[i].bssid, 6);
-		wifiAPRecord.m_ssid	 = std::string((char*) list[i].ssid);
-		wifiAPRecord.m_authMode = list[i].authmode;
-		wifiAPRecord.m_rssi	 = list[i].rssi;
-        scannedAPs.push_back(wifiAPRecord);
-	}
-	free(list);   // Release the storage allocated to hold the records.
-	std::sort(scannedAPs.begin(),
-		scannedAPs.end(),
-		[](const WiFiAPRecord& lhs, const WiFiAPRecord& rhs){ return lhs.m_rssi > rhs.m_rssi; });
+    if (apCount){
+        wifi_ap_record_t* list = (wifi_ap_record_t*) malloc(sizeof(wifi_ap_record_t) * apCount);
+        if (list == nullptr) {
+            LOGE("Failed to allocate memory");
+            return;
+        }
+        esp_err_t errRc = ::esp_wifi_scan_get_ap_records(&apCount, list);
+        if (errRc != ESP_OK) {
+            LOGE("esp_wifi_scan_get_ap_records: rc=%d %s", errRc, GeneralUtils::errorToString(errRc));
+            abort();
+        }
+        scannedAPs.reserve(apCount);
+        for (uint16_t i = 0; i < apCount; i++) {
+            WiFiAPRecord wifiAPRecord;
+            memcpy(wifiAPRecord.m_bssid, list[i].bssid, 6);
+            wifiAPRecord.m_ssid	 = std::string((char*) list[i].ssid);
+            wifiAPRecord.m_authMode = list[i].authmode;
+            wifiAPRecord.m_rssi	 = list[i].rssi;
+            scannedAPs.push_back(wifiAPRecord);
+        }
+        free(list);   // Release the storage allocated to hold the records.
+        std::sort(scannedAPs.begin(),
+            scannedAPs.end(),
+            [](const WiFiAPRecord& lhs, const WiFiAPRecord& rhs){ return lhs.m_rssi > rhs.m_rssi; });
+    }
 }
 
 std::string SRWiFi::getStaPassword() {

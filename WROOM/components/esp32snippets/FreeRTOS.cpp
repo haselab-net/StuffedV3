@@ -88,12 +88,17 @@ uint32_t FreeRTOS::Semaphore::wait(std::string owner) {
 } // wait
 
 
-FreeRTOS::Semaphore::Semaphore(std::string name) {
+FreeRTOS::Semaphore::Semaphore(std::string name, bool bMutex) {
 	m_usePthreads = false;   	// Are we using pThreads or FreeRTOS?
 	if (m_usePthreads) {
 		pthread_mutex_init(&m_pthread_mutex, nullptr);
 	} else {
-		m_semaphore = xSemaphoreCreateMutex();
+		if (bMutex){
+			m_semaphore = xSemaphoreCreateMutex();
+		}else{
+			m_semaphore = xSemaphoreCreateBinary();
+			xSemaphoreGive(m_semaphore);
+		}
 	}
 
 	m_name      = name;

@@ -98,7 +98,7 @@ private:
 	Socket                   m_socket;
 	bool                     m_useSSL;             // Is this server listening on an HTTPS port?
 	uint32_t                 m_clientTimeout;      // Default Timeout
-	FreeRTOS::Semaphore      m_semaphoreServerStarted = FreeRTOS::Semaphore("ServerStarted");
+	FreeRTOS::Semaphore      m_semaphoreServerStarted;
 }; // HttpServer
 
 #endif /* COMPONENTS_CPP_UTILS_HTTPSERVER_H_ */

@@ -35,7 +35,7 @@ private:
 	static void acceptTask(void*);
 	uint16_t            m_port;
 	Socket              m_serverSocket;
-	FreeRTOS::Semaphore m_clientSemaphore = FreeRTOS::Semaphore("clientSemaphore");
+	FreeRTOS::Semaphore m_clientSemaphore = FreeRTOS::Semaphore("clientSemaphore", false);
 	std::set<Socket>    m_clientSet;
 	QueueHandle_t       m_acceptQueue;
 	bool                m_useSSL;
