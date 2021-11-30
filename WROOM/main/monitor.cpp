@@ -13,7 +13,7 @@
 #include "esp_heap_trace.h"
 #include "esp_sleep.h"
 #include "nvs_flash.h"
-#include "esp32/rom/uart.h"
+#include "driver/uart.h"
 #endif
 #include "esp_log.h"
 #include "driver/uart.h"

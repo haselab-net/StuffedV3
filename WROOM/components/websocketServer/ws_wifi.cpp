@@ -2,6 +2,7 @@
 #include <logging.h>
 #include <esp_system.h>
 #include <esp_wifi.h>
+#include <esp_event_loop.h>
 #include <GeneralUtils.h>
 #include <string.h>
 

@@ -18,13 +18,17 @@
 #include <stdbool.h>
 #include "sdkconfig.h"
 #include "esp_log.h"
+#include "freertos/FreeRTOS.h"
 #include "soc/soc.h"
 #include "soc/cpu.h"
 #include "soc/rtc_periph.h"
-#include "hal/brownout_hal.h"
-#include "esp_private/system_internal.h"
-#include "driver/rtc_cntl.h"
-#include "freertos/FreeRTOS.h"
+//#include "esp32/brownout.h"
+#include "esp_brownout.h"
+//#include "esp_private/system_internal.h"
+extern "C"{
+    #include "../esp_system_internal.h"
+    #include "driver/rtc_cntl.h"
+}
 #include "MotorDriver.h"
 
 #define BROWNOUT_DET_LVL 7  //  7 = 2.80V
@@ -42,7 +46,7 @@ static void rtc_brownout_isr_handler(void *arg)
      * handler returns. Since restart is called here, the flag needs to be
      * cleared manually.
      */
-    brownout_hal_intr_clear();
+    //TODO  brownout_hal_intr_clear();
     motorDriver.Brownout();
 
     /* Stall the other CPU to make sure the code running there doesn't use UART
@@ -56,6 +60,7 @@ static void rtc_brownout_isr_handler(void *arg)
 
 void brownout_init(void)
 {
+    /*TODO
     brownout_hal_config_t cfg = {
         .threshold = BROWNOUT_DET_LVL,
         .enabled = true,
@@ -65,8 +70,8 @@ void brownout_init(void)
     };
 
     brownout_hal_config(&cfg);
-
+*/
     ESP_ERROR_CHECK( rtc_isr_register(rtc_brownout_isr_handler, NULL, RTC_CNTL_BROWN_OUT_INT_ENA_M) );
 
-    brownout_hal_intr_enable(true);
+    //TODO brownout_hal_intr_enable(true);
 }

@@ -13,6 +13,7 @@
 #include <esp_log.h>
 #include <esp_system.h>
 #include <esp_wifi.h>
+#include <esp_event_loop.h>
 #include "GeneralUtils.h"
 #include <freertos/FreeRTOS.h>
 #include <nvs_flash.h>
@@ -24,8 +25,9 @@
 #include <sstream>
 #include <iomanip>
 #include <algorithm>
-
-
+extern "C" {
+	#include <string.h>
+}
 static const char* LOG_TAG = "WiFi";
 
 
@@ -176,9 +178,9 @@ uint8_t WiFi::connectAP(const std::string& ssid, const std::string& password, bo
 		abort();
 	}
 	wifi_config_t sta_config;
-	::memset(&sta_config, 0, sizeof(sta_config));
-	::memcpy(sta_config.sta.ssid, ssid.data(), ssid.size());
-	::memcpy(sta_config.sta.password, password.data(), password.size());
+	memset(&sta_config, 0, sizeof(sta_config));
+	memcpy(sta_config.sta.ssid, ssid.data(), ssid.size());
+	memcpy(sta_config.sta.password, password.data(), password.size());
 	sta_config.sta.bssid_set = 0;
 	errRc = ::esp_wifi_set_config(WIFI_IF_STA, &sta_config);
 	if (errRc != ESP_OK) {
@@ -621,10 +623,13 @@ void WiFi::startAP(const std::string& ssid, const std::string& password, wifi_au
 
 	// Build the apConfig structure.
 	wifi_config_t apConfig;
-	::memset(&apConfig, 0, sizeof(apConfig));
-	::memcpy(apConfig.ap.ssid, ssid.data(), ssid.size());
+//	::memset(&apConfig, 0, sizeof(apConfig));
+	memset(&apConfig, 0, sizeof(apConfig));
+//	::memcpy(apConfig.ap.ssid, ssid.data(), ssid.size());
+	memcpy(apConfig.ap.ssid, ssid.data(), ssid.size());
 	apConfig.ap.ssid_len = ssid.size();
-	::memcpy(apConfig.ap.password, password.data(), password.size());
+//	::memcpy(apConfig.ap.password, password.data(), password.size());
+	memcpy(apConfig.ap.password, password.data(), password.size());
 	apConfig.ap.channel         = channel;
 	apConfig.ap.authmode        = auth;
 	apConfig.ap.ssid_hidden     = (uint8_t) ssid_hidden;
