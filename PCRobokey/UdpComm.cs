@@ -8,7 +8,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Windows.Forms;
 using System.IO;
-
+using System.Diagnostics;
 
 namespace Robokey
 {
@@ -773,8 +773,16 @@ namespace Robokey
             PokeCounter(0, 0, packet);         //  count
             PokeLengthAtHeader(4, 0, packet);  //  len
             udpBc.EnableBroadcast = true;
-            System.Net.IPEndPoint ep = new System.Net.IPEndPoint(System.Net.IPAddress.Broadcast, remotePort);
-            udpBc.Send(packet, p, ep);
+
+            var addresses = FindBroadcastAddreses.Find();
+            foreach(var address in addresses)
+            {
+                //  System.Net.IPEndPoint ep = new System.Net.IPEndPoint(System.Net.IPAddress.Broadcast, remotePort);
+                System.Net.IPAddress ip = System.Net.IPAddress.Parse(address);
+                System.Net.IPEndPoint ep = new System.Net.IPEndPoint(ip, remotePort);
+                int rv = udpBc.Send(packet, p, ep);
+                Debug.WriteLine("Udp send to" + ep + "rv=" + rv);
+            }
             bFindRobot = true;
         }
         public void StopFindRobot()

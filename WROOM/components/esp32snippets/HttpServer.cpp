@@ -166,7 +166,9 @@ private:
 			request.dump();                      // debug.
 			processRequest(request);             // Process the request.
 			if (!request.isWebsocket()) {        // If this is NOT a WebSocket, then close it as the request
-				request.close();                   //   has been completed.
+				request.close();                 //   has been completed.
+				vTaskDelay(3);
+				clientSocket.close();
 			}
 		} // while
 	} // run

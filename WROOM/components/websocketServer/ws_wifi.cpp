@@ -247,7 +247,7 @@ void SRWiFi::connect(std::string ssid, std::string pass){
     }
     errRc = ::esp_wifi_connect();
     if (errRc != ESP_OK) {
-        LOGE("esp_wifi_connect: rc=%d %s", errRc, GeneralUtils::errorToString(errRc));
+        LOGE("esp_wifi_connect: to %s rc=%d %s", sta_config.sta.ssid, errRc, GeneralUtils::errorToString(errRc));
         abort();
     }
 }

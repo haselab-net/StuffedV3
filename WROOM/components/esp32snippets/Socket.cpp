@@ -51,7 +51,7 @@ Socket::Socket(const Socket& s) {
 	memcpy((void*)this, (void*)&s, sizeof(s));
 }
 Socket::~Socket() {
-	//close_cpp(); // When the class instance has ended, delete the socket.
+	//	close_cpp(); // When the class instance has ended, delete the socket.
 }
 
 void Socket::lock() const {
