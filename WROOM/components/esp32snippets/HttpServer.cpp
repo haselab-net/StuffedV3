@@ -141,35 +141,42 @@ private:
 	 */
 	void run(void* data) {
 		m_pHttpServer = (HttpServer*) data;			 // The passed in data is an instance of an HttpServer.
-		m_pHttpServer->m_socket.setSSL(m_pHttpServer->m_useSSL);
-		m_pHttpServer->m_socket.listen(m_pHttpServer->m_portNumber, false /* is datagram */, true /* Allow address reuse */);
-		ESP_LOGD("HttpServerTask", "Listening on port %d", m_pHttpServer->getPort());
-		Socket clientSocket;
-		while (true) {   // Loop forever.
-			ESP_LOGD("HttpServerTask", "Waiting for new peer client");
+		while(true){
+			m_pHttpServer->m_socket.setSSL(m_pHttpServer->m_useSSL);
+			m_pHttpServer->m_socket.listen(m_pHttpServer->m_portNumber, false /* is datagram */, true /* Allow address reuse */);
+			ESP_LOGD("HttpServerTask", "Listening on port %d", m_pHttpServer->getPort());
+			Socket clientSocket;
+			while (true) {   // Loop forever.
+				ESP_LOGD("HttpServerTask", "Waiting for new peer client");
 
-			try {
-				clientSocket = m_pHttpServer->m_socket.accept();   // Block waiting for a new external client connection.
-				clientSocket.setTimeout(m_pHttpServer->getClientTimeout());
-			} catch (std::exception& e) {
-				ESP_LOGE("HttpServerTask", "Caught an exception waiting for new client!");
-				m_pHttpServer->m_semaphoreServerStarted.give();  // Release the semaphore .. we are now no longer running.
-				return;
-			}
+				try {
+					clientSocket = m_pHttpServer->m_socket.accept();   // Block waiting for a new external client connection.
+					clientSocket.setTimeout(m_pHttpServer->getClientTimeout());
+				} catch (std::exception& e) {
+					ESP_LOGE("HttpServerTask", "Caught an exception waiting for new client!");
+					m_pHttpServer->m_semaphoreServerStarted.give();  // Release the semaphore .. we are now no longer running.
+					break;
+				}
+				ESP_LOGD("HttpServerTask", "HttpServer that was listening on port %d has received a new client connection; sockFd=%d", m_pHttpServer->getPort(), clientSocket.getFD());
 
-			ESP_LOGD("HttpServerTask", "HttpServer that was listening on port %d has received a new client connection; sockFd=%d", m_pHttpServer->getPort(), clientSocket.getFD());
-
-			HttpRequest request(clientSocket);   // Build the HTTP Request from the socket.
-			if (request.isWebsocket()) {        // If this is a WebSocket
-				clientSocket.setTimeout(0);     //   Clear the timeout.
-			}
-			request.dump();                      // debug.
-			processRequest(request);             // Process the request.
-			if (!request.isWebsocket()) {        // If this is NOT a WebSocket, then close it as the request
-				request.close();                 //   has been completed.
-				vTaskDelay(3);
-				clientSocket.close();
-			}
+				try {
+					HttpRequest request(clientSocket);   // Build the HTTP Request from the socket.
+					if (request.isWebsocket()) {        // If this is a WebSocket
+						clientSocket.setTimeout(0);     //   Clear the timeout.
+					}
+					request.dump();                      // debug.
+					processRequest(request);             // Process the request.
+					if (!request.isWebsocket()) {        // If this is NOT a WebSocket, then close it as the request
+						request.close();                   //   has been completed.
+					}
+				} catch (std::exception& e) {
+					ESP_LOGE("HttpServerTask", "Caught an exception in request! %s", e.what());
+					clientSocket.close();
+					m_pHttpServer->m_semaphoreServerStarted.give();  // Release the semaphore .. we are now no longer running.
+					break;
+				}
+			} // while
+			m_pHttpServer->m_socket.close();	// Close the socket that is being used to watch for incoming requests.
 		} // while
 	} // run
 }; // HttpServerTask

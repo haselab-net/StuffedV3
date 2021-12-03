@@ -13,7 +13,6 @@
 #include <esp_log.h>
 #include <esp_system.h>
 #include <esp_wifi.h>
-#include <esp_event_loop.h>
 #include "GeneralUtils.h"
 #include <freertos/FreeRTOS.h>
 #include <nvs_flash.h>
@@ -25,9 +24,8 @@
 #include <sstream>
 #include <iomanip>
 #include <algorithm>
-extern "C" {
-	#include <string.h>
-}
+
+
 static const char* LOG_TAG = "WiFi";
 
 
@@ -160,16 +158,19 @@ uint8_t WiFi::connectAP(const std::string& ssid, const std::string& password, bo
 
 	m_apConnectionStatus = UINT8_MAX;
 	init();
+    if (!m_staIf){
+		m_staIf = esp_netif_create_default_wifi_sta();
+	}
 
 	if (ip != 0 && gw != 0 && netmask != 0) {
-		::tcpip_adapter_dhcpc_stop(TCPIP_ADAPTER_IF_STA); // Don't run a DHCP client
+		::esp_netif_dhcpc_stop(m_staIf); // Don't run a DHCP client
 
-		tcpip_adapter_ip_info_t ipInfo;
+		esp_netif_ip_info_t ipInfo;
 		ipInfo.ip.addr = ip;
 		ipInfo.gw.addr = gw;
 		ipInfo.netmask.addr = netmask;
 
-		::tcpip_adapter_set_ip_info(TCPIP_ADAPTER_IF_STA, &ipInfo);
+		::esp_netif_set_ip_info(m_staIf, &ipInfo);
 	}
 
 	esp_err_t errRc = ::esp_wifi_set_mode(mode);
@@ -178,9 +179,9 @@ uint8_t WiFi::connectAP(const std::string& ssid, const std::string& password, bo
 		abort();
 	}
 	wifi_config_t sta_config;
-	memset(&sta_config, 0, sizeof(sta_config));
-	memcpy(sta_config.sta.ssid, ssid.data(), ssid.size());
-	memcpy(sta_config.sta.password, password.data(), password.size());
+	::memset(&sta_config, 0, sizeof(sta_config));
+	::memcpy(sta_config.sta.ssid, ssid.data(), ssid.size());
+	::memcpy(sta_config.sta.password, password.data(), password.size());
 	sta_config.sta.bssid_set = 0;
 	errRc = ::esp_wifi_set_config(WIFI_IF_STA, &sta_config);
 	if (errRc != ESP_OK) {
@@ -269,10 +270,10 @@ bool WiFi::isConnectedToAP() {
  * @brief Get the AP IP Info.
  * @return The AP IP Info.
  */
-tcpip_adapter_ip_info_t WiFi::getApIpInfo() {
+esp_netif_ip_info_t WiFi::getApIpInfo() {
 	//init();
-	tcpip_adapter_ip_info_t ipInfo;
-	::tcpip_adapter_get_ip_info(TCPIP_ADAPTER_IF_AP, &ipInfo);
+	esp_netif_ip_info_t ipInfo;
+	::esp_netif_get_ip_info(m_apIf, &ipInfo);
 	return ipInfo;
 } // getApIpInfo
 
@@ -308,7 +309,7 @@ std::string WiFi::getApSSID() {
  * @return The ESP32 IP.
  */
 std::string WiFi::getApIp() {
-	tcpip_adapter_ip_info_t ipInfo = getApIpInfo();
+	esp_netif_ip_info_t ipInfo = getApIpInfo();
 	char ipAddrStr[30];
 	inet_ntop(AF_INET, &ipInfo.ip.addr, ipAddrStr, sizeof(ipAddrStr));
 	return std::string(ipAddrStr);
@@ -319,7 +320,7 @@ std::string WiFi::getApIp() {
  * @return The Netmask IP.
  */
 std::string WiFi::getApNetmask() {
-	tcpip_adapter_ip_info_t ipInfo = getApIpInfo();
+	esp_netif_ip_info_t ipInfo = getApIpInfo();
 	char ipAddrStr[30];
 	inet_ntop(AF_INET, &ipInfo.netmask.addr, ipAddrStr, sizeof(ipAddrStr));
 	return std::string(ipAddrStr);
@@ -330,7 +331,7 @@ std::string WiFi::getApNetmask() {
  * @return The Gateway IP.
  */
 std::string WiFi::getApGateway() {
-	tcpip_adapter_ip_info_t ipInfo = getApIpInfo();
+	esp_netif_ip_info_t ipInfo = getApIpInfo();
 	char ipAddrStr[30];
 	inet_ntop(AF_INET, &ipInfo.gw.addr, ipAddrStr, sizeof(ipAddrStr));
 	return std::string(ipAddrStr);
@@ -388,9 +389,9 @@ std::string WiFi::getMode() {
  * @brief Get the STA IP Info.
  * @return The STA IP Info.
  */
-tcpip_adapter_ip_info_t WiFi::getStaIpInfo() {
-	tcpip_adapter_ip_info_t ipInfo;
-	tcpip_adapter_get_ip_info(TCPIP_ADAPTER_IF_STA, &ipInfo);
+esp_netif_ip_info_t WiFi::getStaIpInfo() {
+	esp_netif_ip_info_t ipInfo;
+	esp_netif_get_ip_info(m_staIf, &ipInfo);
 	return ipInfo;
 } // getStaIpInfo
 
@@ -400,7 +401,7 @@ tcpip_adapter_ip_info_t WiFi::getStaIpInfo() {
  * @return The ESP32 IP.
  */
 std::string WiFi::getStaIp() {
-	tcpip_adapter_ip_info_t ipInfo = getStaIpInfo();
+	esp_netif_ip_info_t ipInfo = getStaIpInfo();
 	char ipAddrStr[30];
 	inet_ntop(AF_INET, &ipInfo.ip.addr, ipAddrStr, sizeof(ipAddrStr));
 	return std::string(ipAddrStr);
@@ -412,7 +413,7 @@ std::string WiFi::getStaIp() {
  * @return The Netmask IP.
  */
 std::string WiFi::getStaNetmask() {
-	tcpip_adapter_ip_info_t ipInfo = getStaIpInfo();
+	esp_netif_ip_info_t ipInfo = getStaIpInfo();
 	char ipAddrStr[30];
 	inet_ntop(AF_INET, &ipInfo.netmask.addr, ipAddrStr, sizeof(ipAddrStr));
 	return std::string(ipAddrStr);
@@ -424,7 +425,7 @@ std::string WiFi::getStaNetmask() {
  * @return The Gateway IP.
  */
 std::string WiFi::getStaGateway() {
-	tcpip_adapter_ip_info_t ipInfo = getStaIpInfo();
+	esp_netif_ip_info_t ipInfo = getStaIpInfo();
 	char ipAddrStr[30];
 	inet_ntop(AF_INET, &ipInfo.gw.addr, ipAddrStr, sizeof(ipAddrStr));
 	return std::string(ipAddrStr);
@@ -474,8 +475,9 @@ std::string WiFi::getStaSSID() {
 	// Now, one way or another, the event handler is WiFi::eventHandler.
 
 	if (!m_initCalled) {
-		::nvs_flash_init();
-		::tcpip_adapter_init();
+		ESP_ERROR_CHECK(::nvs_flash_init());
+		ESP_ERROR_CHECK(::esp_netif_init());
+    	ESP_ERROR_CHECK(esp_event_loop_create_default());
 
 		wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
 		esp_err_t errRc = ::esp_wifi_init(&cfg);
@@ -614,29 +616,25 @@ void WiFi::startAP(const std::string& ssid, const std::string& password, wifi_au
 	ESP_LOGD(LOG_TAG, ">> startAP: ssid: %s", ssid.c_str());
 
 	init();
-
-	esp_err_t errRc = ::esp_wifi_set_mode(WIFI_MODE_AP);
-	if (errRc != ESP_OK) {
-		ESP_LOGE(LOG_TAG, "esp_wifi_set_mode: rc=%d %s", errRc, GeneralUtils::errorToString(errRc));
-		abort();
+    if (!m_apIf){
+		m_apIf = esp_netif_create_default_wifi_ap();
 	}
+
+	ESP_ERROR_CHECK(::esp_wifi_set_mode(WIFI_MODE_AP));
 
 	// Build the apConfig structure.
 	wifi_config_t apConfig;
-//	::memset(&apConfig, 0, sizeof(apConfig));
-	memset(&apConfig, 0, sizeof(apConfig));
-//	::memcpy(apConfig.ap.ssid, ssid.data(), ssid.size());
-	memcpy(apConfig.ap.ssid, ssid.data(), ssid.size());
+	::memset(&apConfig, 0, sizeof(apConfig));
+	::memcpy(apConfig.ap.ssid, ssid.data(), ssid.size());
 	apConfig.ap.ssid_len = ssid.size();
-//	::memcpy(apConfig.ap.password, password.data(), password.size());
-	memcpy(apConfig.ap.password, password.data(), password.size());
+	::memcpy(apConfig.ap.password, password.data(), password.size());
 	apConfig.ap.channel         = channel;
 	apConfig.ap.authmode        = auth;
 	apConfig.ap.ssid_hidden     = (uint8_t) ssid_hidden;
 	apConfig.ap.max_connection  = max_connection;
 	apConfig.ap.beacon_interval = 100;
 
-	errRc = ::esp_wifi_set_config(WIFI_IF_AP, &apConfig);
+	esp_err_t errRc = ::esp_wifi_set_config(WIFI_IF_AP, &apConfig);
 	if (errRc != ESP_OK) {
 		ESP_LOGE(LOG_TAG, "esp_wifi_set_config: rc=%d %s", errRc, GeneralUtils::errorToString(errRc));
 		abort();
@@ -648,9 +646,9 @@ void WiFi::startAP(const std::string& ssid, const std::string& password, wifi_au
 		abort();
 	}
 
-	errRc = tcpip_adapter_dhcps_start(TCPIP_ADAPTER_IF_AP);
+	errRc = esp_netif_dhcps_start(m_apIf);
 	if (errRc != ESP_OK) {
-		ESP_LOGE(LOG_TAG, "tcpip_adapter_dhcps_start: rc=%d %s", errRc, GeneralUtils::errorToString(errRc));
+		ESP_LOGE(LOG_TAG, "esp_netif_dhcps_start: rc=%d %s", errRc, GeneralUtils::errorToString(errRc));
 	}
 
 	ESP_LOGD(LOG_TAG, "<< startAP");
@@ -718,15 +716,15 @@ void WiFi::setIPInfo(uint32_t ip, uint32_t gw, uint32_t netmask) {
 	this->netmask = netmask;
 
 	if (ip != 0 && gw != 0 && netmask != 0) {
-		tcpip_adapter_ip_info_t ipInfo;
+		esp_netif_ip_info_t ipInfo;
 		ipInfo.ip.addr      = ip;
 		ipInfo.gw.addr      = gw;
 		ipInfo.netmask.addr = netmask;
-		::tcpip_adapter_dhcpc_stop(TCPIP_ADAPTER_IF_STA);
-		::tcpip_adapter_set_ip_info(TCPIP_ADAPTER_IF_STA, &ipInfo);
+		::esp_netif_dhcpc_stop(m_staIf);
+		::esp_netif_set_ip_info(m_staIf, &ipInfo);
 	} else {
 		ip = 0;
-		::tcpip_adapter_dhcpc_start(TCPIP_ADAPTER_IF_STA);
+		::esp_netif_dhcpc_start(m_staIf);
 	}
 } // setIPInfo
 

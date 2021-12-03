@@ -119,7 +119,7 @@ WiFiEventHandler::WiFiEventHandler() {
  * Retrieve the event handler function to be passed to the ESP-IDF event handler system.
  * @return The event handler function.
  */
-WiFiEventHandler::wifi_event_handler_t* WiFiEventHandler::getEventHandler() {
+system_event_cb_t WiFiEventHandler::getEventHandler() {
 	ESP_LOGD(LOG_TAG, ">> getEventHandler()");
 	ESP_LOGD(LOG_TAG, "<< getEventHandler: 0x%x", (uint32_t)eventHandler);
   return eventHandler;

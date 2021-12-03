@@ -15,7 +15,7 @@ inline std::string str(int i){
     sprintf(buf, "%d", i);
     return std::string(buf);
 }
-inline std::string str(ip4_addr_t ip){
+inline std::string str(esp_ip4_addr_t ip){
     char buf[12+3+1];
     sprintf(buf, "%d.%d.%d.%d", 0xFF&(ip.addr), 0xFF&(ip.addr>>8), 0xFF&(ip.addr>>16), 0xFF&(ip.addr>>24));
     return std::string(buf);

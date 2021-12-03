@@ -32,7 +32,7 @@ extern "C" void ws_main() {
     }
     ESP_ERROR_CHECK( err );
 
-	tcpip_adapter_init();
+	esp_netif_init();
     LOGD("Free heap after tcp_ip: %d", esp_get_free_heap_size());
     SRWiFi::wifi.init();
     LOGD("Free heap after wifi: %d", esp_get_free_heap_size());

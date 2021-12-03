@@ -97,13 +97,12 @@
 class WiFiEventHandler {
 public:
 	WiFiEventHandler();
-	typedef esp_err_t wifi_event_handler_t(void* ctx, system_event_t* event); 
 	virtual ~WiFiEventHandler();
 	virtual esp_err_t apStaConnected(system_event_ap_staconnected_t info);
 	virtual esp_err_t apStaDisconnected(system_event_ap_stadisconnected_t info);
 	virtual esp_err_t apStart();
 	virtual esp_err_t apStop();
-	wifi_event_handler_t* getEventHandler();
+	system_event_cb_t getEventHandler();
 	virtual esp_err_t staConnected(system_event_sta_connected_t info);
 	virtual esp_err_t staDisconnected(system_event_sta_disconnected_t info);
 	virtual esp_err_t staGotIp(system_event_sta_got_ip_t info);

@@ -31,7 +31,7 @@ public:
         WIFI_STA_CONNECTED,
         WIFI_STA_GOT_IP,
     } state;
-    tcpip_adapter_ip_info_t ipInfo;
+    esp_netif_ip_info_t ipInfo;
     static SRWiFi wifi;
     static NVS* wifiNvs;
     enum {N_AP_RECORD_MAX = 10};

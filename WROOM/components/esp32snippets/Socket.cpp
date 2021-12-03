@@ -51,7 +51,7 @@ Socket::Socket(const Socket& s) {
 	memcpy((void*)this, (void*)&s, sizeof(s));
 }
 Socket::~Socket() {
-	//	close_cpp(); // When the class instance has ended, delete the socket.
+	//close_cpp(); // When the class instance has ended, delete the socket.
 }
 
 void Socket::lock() const {
@@ -398,6 +398,7 @@ size_t Socket::receive(uint8_t* data, size_t length, bool exact) {
 			//	rc = ::lwip_recv_r(m_sock, data, length, 0);
 			if (rc == -1) {
 				ESP_LOGE(LOG_TAG, "receive: %s", strerror(errno));
+				throw std::runtime_error(std::string("Socket::receive(): ") + strerror(errno)); 
 			}
 		}
 		//GeneralUtils::hexDump(data, rc);
@@ -421,6 +422,7 @@ size_t Socket::receive(uint8_t* data, size_t length, bool exact) {
 		}
 		if (rc == -1) {
 			ESP_LOGE(LOG_TAG, "receive: %s", strerror(errno));
+			throw std::runtime_error(std::string("Socket::receive(): ") + strerror(errno)); 			
 			return 0;
 		}
 		if (rc == 0) break;

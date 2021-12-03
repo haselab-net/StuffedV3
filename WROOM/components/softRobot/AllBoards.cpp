@@ -93,8 +93,8 @@ void AllBoards::Init() {
     uconf.stop_bits = UART_STOP_BITS_1;
     uconf.flow_ctrl = UART_HW_FLOWCTRL_DISABLE;
     uconf.rx_flow_ctrl_thresh = 0;
-    //uconf.source_clk = UART_SCLK_APB;
-	uconf.use_ref_tick = false;
+    uconf.source_clk = UART_SCLK_APB;
+	//	uconf.use_ref_tick = false;
 
 	uart[0]->Init(uconf, U1TXPIN, U1RXPIN); // pin must be changed. IO6-11 are reserved. (RX=32 Yellow, TX=33 Green)
 	uart[1]->Init(uconf, U2TXPIN, U2RXPIN);

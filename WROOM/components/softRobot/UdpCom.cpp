@@ -246,7 +246,6 @@ void UdpCom::Start(){
 }
 
 void UdpCom::ReceiveCommandFromUdp(struct udp_pcb * upcb, struct pbuf * top, const ip_addr_t* addr, u16_t port) {
-	ESP_LOGI(Tag(), "ReceiveCommandFromUdp called.");
 	if (!recvs.WriteAvail()) {
 		ESP_LOGE(Tag(), "Udp command receive buffer is full.");
 		pbuf_free(top);

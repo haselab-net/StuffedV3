@@ -119,6 +119,8 @@ protected:
 	bool                m_initCalled;
 	uint8_t             m_apConnectionStatus;   // ESP_OK = we are connected to an access point.  Otherwise receives wifi_err_reason_t.
   	FreeRTOS::Semaphore m_connectFinished = FreeRTOS::Semaphore("ConnectFinished", false);
+	esp_netif_t*		m_apIf = NULL;
+	esp_netif_t*		m_staIf = NULL;
 
 public:
 	WiFi();
@@ -134,19 +136,19 @@ public:
 	uint8_t                   connectAP(const std::string& ssid, const std::string& password, bool waitForConnection = true, wifi_mode_t mode = WIFI_MODE_STA);
 	void                      dump();
 	bool                      isConnectedToAP();
-	static std::string        getApMac();
-	static tcpip_adapter_ip_info_t getApIpInfo();
-	static std::string        getApSSID();
-	static std::string        getApIp();
-	static std::string        getApNetmask();
-	static std::string        getApGateway();
-	static std::string        getMode();
-	static tcpip_adapter_ip_info_t getStaIpInfo();
-	static std::string        getStaMac();
-	static std::string        getStaSSID();
-	static std::string        getStaIp();
-	static std::string        getStaNetmask();
-	static std::string        getStaGateway();
+	std::string        getApMac();
+	esp_netif_ip_info_t getApIpInfo();
+	std::string        getApSSID();
+	std::string        getApIp();
+	std::string        getApNetmask();
+	std::string        getApGateway();
+	std::string        getMode();
+	esp_netif_ip_info_t getStaIpInfo();
+	std::string        getStaMac();
+	std::string        getStaSSID();
+	std::string        getStaIp();
+	std::string        getStaNetmask();
+	std::string        getStaGateway();
 	std::vector<WiFiAPRecord> scan();
 	void                      startAP(const std::string& ssid, const std::string& passwd, wifi_auth_mode_t auth = WIFI_AUTH_OPEN);
 	void                      startAP(const std::string& ssid, const std::string& passwd, wifi_auth_mode_t auth, uint8_t channel, bool ssid_hidden, uint8_t max_connection);

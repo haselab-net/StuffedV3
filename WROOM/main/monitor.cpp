@@ -13,7 +13,7 @@
 #include "esp_heap_trace.h"
 #include "esp_sleep.h"
 #include "nvs_flash.h"
-#include "driver/uart.h"
+#include "esp32/rom/uart.h"
 #endif
 #include "esp_log.h"
 #include "driver/uart.h"
@@ -372,7 +372,7 @@ class MCShowHeap: public MonitorCommandBase{
     const char* Desc(){ return "h Show heap memory"; }
     void Func(){
 		conPrintf("Heap free size: %d bytes", esp_get_free_heap_size());
-        conPrintf(" a:dump all  c:check  m:max free block  t:trace heap  h:hybrid heap\n");
+        conPrintf(" a:dump all  c:check  m:max free block  s/t/d:trace start/stop/dump  h:hybrid heap\n");
         switch(getchWait()){
             case 'a':
                 heap_caps_dump_all();
@@ -388,15 +388,18 @@ class MCShowHeap: public MonitorCommandBase{
                 conPrintf("Maximum free heap block size with MALLOC_CAP_32BIT is %d = 0x%x.\n", fs, fs);
                 break;
             }
+            case 's':
+                heap_trace_start(HEAP_TRACE_LEAKS);
+                break;
             case 't':
                 heap_trace_stop();
+                break;
+            case 'd':
                 heap_trace_dump();
-                heap_trace_start(HEAP_TRACE_LEAKS);
                 break;
             case 'h':
                 duk_alloc_hybrid_dump(duk_alloc_hybrid_udata);
                 break;
-
         }
 	}
 } mcShowHeap;

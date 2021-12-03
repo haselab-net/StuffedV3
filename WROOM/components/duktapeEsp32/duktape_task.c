@@ -97,15 +97,17 @@ static void dumpCallbacks(const char* msg){
 //-------------------------------------------------------------------------------
 //	Initializers for duktape
 //
-
+void dukInitAllocHybrid(){
+	if (!duk_alloc_hybrid_udata){
+		duk_alloc_hybrid_udata = duk_alloc_hybrid_init();
+	}
+}
 static void createDuktapeHeap() {
 	//	Heap selection
 	#if 0
 		heap_context = duk_create_heap_default();
 	#else
-		if (!duk_alloc_hybrid_udata){
-			duk_alloc_hybrid_udata = duk_alloc_hybrid_init();
-		}
+		dukInitAllocHybrid();
 		heap_context = duk_create_heap(duk_alloc_hybrid, duk_realloc_hybrid, duk_free_hybrid, duk_alloc_hybrid_udata, NULL);
 	#endif
 

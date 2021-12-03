@@ -2,11 +2,14 @@
 #include <logging.h>
 #include <esp_system.h>
 #include <esp_wifi.h>
-#include <esp_event_loop.h>
 #include <GeneralUtils.h>
 #include <string.h>
 
 LOG_TAG("ws_wifi");
+
+inline uint32_t ipv4addr(uint8_t a, uint8_t b, uint8_t c, uint8_t d){
+    return a << 24 | b << 16 | c << 8 | d;
+}
 
 SRWifiEventHandler::SRWifiEventHandler(SRWiFi* w):wifi(w){
 
@@ -212,12 +215,22 @@ void SRWiFi::startAP(const std::string& ssid, const std::string& password, wifi_
 		LOGE("esp_wifi_set_config: rc=%d %s", errRc, GeneralUtils::errorToString(errRc));
 		abort();
 	}
-	errRc = tcpip_adapter_dhcps_start(TCPIP_ADAPTER_IF_AP);
+
+    ipInfo.ip.addr = ipv4addr(192,168,4,1);
+    ipInfo.netmask.addr = ipv4addr(255,255,255,0);
+    ipInfo.gw.addr = ipv4addr(192,168,4,1);
+    errRc = esp_netif_set_ip_info(m_apIf, &ipInfo);
 	if (errRc != ESP_OK) {
-		LOGE("tcpip_adapter_dhcps_start: rc=%d %s", errRc, GeneralUtils::errorToString(errRc));
+		LOGE("esp_netif_set_ip_info: rc=%d %s", errRc, GeneralUtils::errorToString(errRc));
 	}
 
 	errRc = ::esp_wifi_start();
+
+	errRc = esp_netif_dhcps_start(m_apIf);
+	if (errRc != ESP_OK) {
+		LOGE("esp_netif_dhcps_start: rc=%d %s", errRc, GeneralUtils::errorToString(errRc));
+	}
+
 	if (errRc != ESP_OK) {
 		LOGE("esp_wifi_start: rc=%d %s", errRc, GeneralUtils::errorToString(errRc));
 		abort();
@@ -226,7 +239,7 @@ void SRWiFi::startAP(const std::string& ssid, const std::string& password, wifi_
 	LOGD("<< startAP");
 }
 void SRWiFi::stopAP(){
-	esp_err_t errRc = tcpip_adapter_dhcps_stop(TCPIP_ADAPTER_IF_AP);
+	esp_err_t errRc = esp_netif_dhcps_stop(m_apIf);
 	if (errRc != ESP_OK) {
 		LOGE("tcpip_adapter_dhcps_stop: rc=%d %s", errRc, GeneralUtils::errorToString(errRc));
 	}
@@ -247,7 +260,7 @@ void SRWiFi::connect(std::string ssid, std::string pass){
     }
     errRc = ::esp_wifi_connect();
     if (errRc != ESP_OK) {
-        LOGE("esp_wifi_connect: to %s rc=%d %s", sta_config.sta.ssid, errRc, GeneralUtils::errorToString(errRc));
+        LOGE("esp_wifi_connect: rc=%d %s", errRc, GeneralUtils::errorToString(errRc));
         abort();
     }
 }

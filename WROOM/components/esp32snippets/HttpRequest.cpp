@@ -39,7 +39,7 @@
 #include "GeneralUtils.h"
 
 #include <esp_log.h>
-#include <hwcrypto/sha.h>
+#include <sha/sha_parallel_engine.h>
 
 #define STATE_NAME  0
 #define STATE_VALUE 1
