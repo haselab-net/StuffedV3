@@ -106,13 +106,13 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
 
     size_t bufferSize = 4096;
     char* pBuffer = (char*)malloc(bufferSize);
-    static int mallocCount = 0;
-    ESP_LOGI(LOG_TAG, "malloc pBuffer %d", ++mallocCount);
+    //  static int mallocCount = 0;
+    //  ESP_LOGI(LOG_TAG, "malloc pBuffer %d", ++mallocCount);
     std::streamsize ssize = pWebSocketInputStreambuf->sgetn(pBuffer, bufferSize);
     if(ssize>=bufferSize) {
         ESP_LOGI(LOG_TAG ,"WS command to long (longer than 4096)!!!!!!!!!");
         free(pBuffer);
-        ESP_LOGI(LOG_TAG, "free pBuffer %d", --mallocCount);
+        //  ESP_LOGI(LOG_TAG, "free pBuffer %d", --mallocCount);
         return;
     }
 
@@ -415,7 +415,7 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
 
     if(pBuffer){
         free(pBuffer);
-        ESP_LOGI(LOG_TAG, "free pBuffer %d", --mallocCount);
+        //  ESP_LOGI(LOG_TAG, "free pBuffer %d", --mallocCount);
     }
 }
 

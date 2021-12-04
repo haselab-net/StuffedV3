@@ -1,6 +1,6 @@
 #include "ws_form.h"
 #include "ws_http.h"
-#include "ws_wifi.h"
+#include "SRWifi.h"
 #include "ws_urlParser.h"
 #include <ctype.h>
 #include <fstream>

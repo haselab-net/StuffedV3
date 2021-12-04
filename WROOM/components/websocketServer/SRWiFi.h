@@ -1,5 +1,5 @@
-#ifndef WEBSOCKETSERVER_WS_WIFI_H_
-#define WEBSOCKETSERVER_WS_WIFI_H_
+#ifndef WEBSOCKETSERVER_SRWIFI_H_
+#define WEBSOCKETSERVER_SRWIFI_H_
 
 #include <esp_netif.h>
 #include <vector>

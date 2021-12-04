@@ -21,7 +21,7 @@
 
 #include "ws_ws.h"
 #include "ws_fs.h"
-#include "ws_wifi.h"
+#include "SRWifi.h"
 #include "ws_urlParser.h"
 
 static const char tag[] = "ws_form";
