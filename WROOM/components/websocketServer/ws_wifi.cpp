@@ -11,24 +11,123 @@ inline uint32_t ipv4addr(uint8_t a, uint8_t b, uint8_t c, uint8_t d){
     return a << 24 | b << 16 | c << 8 | d;
 }
 
-SRWifiEventHandler::SRWifiEventHandler(SRWiFi* w):wifi(w){
+const char* ipEventString[] = {
+    "IP_EVENT_STA_GOT_IP",               /*!< station got IP from connected AP */
+    "IP_EVENT_STA_LOST_IP",              /*!< station lost IP and the IP is reset to 0 */
+    "IP_EVENT_AP_STAIPASSIGNED",         /*!< soft-AP assign an IP to a connected station */
+    "IP_EVENT_GOT_IP6",                  /*!< station or ap or ethernet interface v6IP addr is preferred */
+    "IP_EVENT_ETH_GOT_IP",               /*!< ethernet got IP from connected AP */
+    "IP_EVENT_PPP_GOT_IP",               /*!< PPP interface got IP */
+    "IP_EVENT_PPP_LOST_IP",              /*!< PPP interface lost IP */
+};
 
+const char* wifiEventString[] = {
+    "WIFI_EVENT_WIFI_READY",               /**< ESP32 WiFi ready */
+    "WIFI_EVENT_SCAN_DONE",                /**< ESP32 finish scanning AP */
+    "WIFI_EVENT_STA_START",                /**< ESP32 station start */
+    "WIFI_EVENT_STA_STOP",                 /**< ESP32 station stop */
+    "WIFI_EVENT_STA_CONNECTED",            /**< ESP32 station connected to AP */
+    "WIFI_EVENT_STA_DISCONNECTED",         /**< ESP32 station disconnected from AP */
+    "WIFI_EVENT_STA_AUTHMODE_CHANGE",      /**< the auth mode of AP connected by ESP32 station changed */
+
+    "WIFI_EVENT_STA_WPS_ER_SUCCESS",       /**< ESP32 station wps succeeds in enrollee mode */
+    "WIFI_EVENT_STA_WPS_ER_FAILED",        /**< ESP32 station wps fails in enrollee mode */
+    "WIFI_EVENT_STA_WPS_ER_TIMEOUT",       /**< ESP32 station wps timeout in enrollee mode */
+    "WIFI_EVENT_STA_WPS_ER_PIN",           /**< ESP32 station wps pin code in enrollee mode */
+    "WIFI_EVENT_STA_WPS_ER_PBC_OVERLAP",   /**< ESP32 station wps overlap in enrollee mode */
+
+    "WIFI_EVENT_AP_START",                 /**< ESP32 soft-AP start */
+    "WIFI_EVENT_AP_STOP",                  /**< ESP32 soft-AP stop */
+    "WIFI_EVENT_AP_STACONNECTED",          /**< a station connected to ESP32 soft-AP */
+    "WIFI_EVENT_AP_STADISCONNECTED",       /**< a station disconnected from ESP32 soft-AP */
+    "WIFI_EVENT_AP_PROBEREQRECVED",        /**< Receive probe request packet in soft-AP interface */
+
+    "WIFI_EVENT_FTM_REPORT",               /**< Receive report of FTM procedure */
+
+    /* Add next events after this only */
+    "WIFI_EVENT_STA_BSS_RSSI_LOW",         /**< AP's RSSI crossed configured threshold */
+    "WIFI_EVENT_ACTION_TX_STATUS",         /**< Status indication of Action Tx operation */
+    "WIFI_EVENT_ROC_DONE",                 /**< Remain-on-Channel operation complete */
+
+    "WIFI_EVENT_STA_BEACON_TIMEOUT",       /**< ESP32 station beacon timeout */
+};
+
+void SRWiFi::ip_event_handler(void* ctx, esp_event_base_t event_base, int32_t event_id, void* event_data){
+    SRWiFi* wifi = (SRWiFi*)ctx;
+    LOGI("IP event %s", ipEventString[event_id]);
+    switch(event_id){
+        case IP_EVENT_STA_GOT_IP: {
+            wifi->handleStaGotIp((ip_event_got_ip_t*) event_data);
+            break;
+        }
+    }
 }
 
-esp_err_t SRWifiEventHandler::apStaConnected(system_event_ap_staconnected_t info){
-    LOGD("SoftAP got connection");
-    return ESP_OK;
+void SRWiFi::wifi_event_handler(void* ctx, esp_event_base_t event_base, int32_t event_id, void* event_data){
+    LOGI("Wifi event %s", wifiEventString[event_id]);
+    SRWiFi* wifi = (SRWiFi*)ctx;
+    switch(event_id){
+        case WIFI_EVENT_AP_START: {
+            //wifi->handleApStart();
+            break;
+        }
+
+        case WIFI_EVENT_AP_STOP: {
+            //wifi->handleApStop();
+            break;
+        }
+
+        case WIFI_EVENT_AP_STACONNECTED: {
+            //wifi->handleApStaConnected((wifi_event_ap_staconnected_t*) event_data);
+            break;
+        }
+
+        case WIFI_EVENT_AP_STADISCONNECTED: {
+            //wifi->handleApStaDisconnected((wifi_event_sta_disconnected_t*)event_data);
+            break;
+        }
+
+        case WIFI_EVENT_SCAN_DONE: {
+            wifi->handleStaScanDone((wifi_event_sta_scan_done_t*)event_data);
+            break;
+        }
+
+        case WIFI_EVENT_STA_AUTHMODE_CHANGE: {
+            //wifi->handleStaAuthChange((wifi_event_sta_authmode_change_t)*event_data);
+            break;
+        }
+
+        case WIFI_EVENT_STA_CONNECTED: {
+            //wifi->handleStaConnected((wifi_event_sta_connected_t)* event_data);
+            break;
+        }
+
+        case WIFI_EVENT_STA_DISCONNECTED: {
+            wifi->handleStaDisconnected((wifi_event_sta_disconnected_t*) event_data);
+            break;
+        }
+
+        case WIFI_EVENT_STA_START: {
+            //wifi->handleStaStart();
+            break;
+        }
+
+        case WIFI_EVENT_STA_STOP: {
+            //wifi->handleStaStop();
+            break;
+        }
+
+        case WIFI_EVENT_WIFI_READY: {
+            //wifi->handleWifiReady();
+            break;
+        }
+    }
 }
 
-esp_err_t SRWifiEventHandler::staConnected(system_event_sta_connected_t info) {
-    LOGD("Now serve as a station");
-    wifi->state = SRWiFi::WIFI_STA_CONNECTED;
-    return ESP_OK;
-}
-esp_err_t SRWifiEventHandler::staGotIp(system_event_sta_got_ip_t info) {
-    LOGI("WiFi got IP as a station: %s", ip4addr_ntoa((ip4_addr_t*)&info.ip_info.ip));
-    wifi->state = SRWiFi::WIFI_STA_GOT_IP;
-    memcpy(&wifi->ipInfo, &info.ip_info, sizeof(wifi->ipInfo));
+esp_err_t SRWiFi::handleStaGotIp(ip_event_got_ip_t* info) {
+    LOGI("WiFi got IP as a station: %s", ip4addr_ntoa((ip4_addr_t*)&info->ip_info.ip));
+    this->state = SRWiFi::WIFI_STA_GOT_IP;
+    memcpy(&this->ipInfo, &info->ip_info, sizeof(this->ipInfo));
 
     wifi_config_t wc;
 	esp_wifi_get_config(WIFI_IF_STA, &wc);
@@ -72,26 +171,26 @@ esp_err_t SRWifiEventHandler::staGotIp(system_event_sta_got_ip_t info) {
     SRWiFi::wifi.scannedAPs.shrink_to_fit();
     return ESP_OK;
 }
-esp_err_t SRWifiEventHandler::staDisconnected(system_event_sta_disconnected_t info) {
-    wifi->state = SRWiFi::WIFI_STA_DISCONNECTED;
-    switch (info.reason)
+esp_err_t SRWiFi::handleStaDisconnected(wifi_event_sta_disconnected_t* info) {
+    this->state = SRWiFi::WIFI_STA_DISCONNECTED;
+    switch (info->reason)
     {
         case WIFI_REASON_NO_AP_FOUND:
-            LOGD("Unable to find AP %s, work as AP now", info.ssid);
+            LOGD("Unable to find AP %s, work as AP now", info->ssid);
             break;
         case WIFI_REASON_AUTH_FAIL:
-            LOGD("Unable to connect to AP %s, work as AP now", info.ssid);
+            LOGD("Unable to connect to AP %s, work as AP now", info->ssid);
             break;
 
         default:
-            LOGD("Unknown sta disconnected event: %i, work as AP now", info.reason);
+            LOGD("Unknown sta disconnected event: %i, work as AP now", info->reason);
             break;
     }
     return ESP_OK;
 }
-esp_err_t SRWifiEventHandler::staScanDone(system_event_sta_scan_done_t info){
+esp_err_t SRWiFi::handleStaScanDone(wifi_event_sta_scan_done_t* info){
     //  check nvs and try to connect
-    wifi->stopScan();
+    this->stopScan();
     vTaskDelay(100);
     int lastAP;
     if (SRWiFi::wifiNvs->get("lastAP", lastAP) == ESP_OK){
@@ -102,13 +201,13 @@ esp_err_t SRWifiEventHandler::staScanDone(system_event_sta_scan_done_t info){
         do{
             char ssidKey[] = "ssid0"; ssidKey[4] = '0'+i;
             if (SRWiFi::wifiNvs->get(ssidKey, ssid) == ESP_OK){
-                for(WiFiAPRecord& ap : wifi->scannedAPs){
+                for(WiFiAPRecord& ap : this->scannedAPs){
                     //LOGI("SRWifiEventHandler::staScanDone found=%s try=%s", ap.m_ssid.c_str(), ssid.c_str());
-                    if (ap.m_ssid == ssid){
+                    if (ap.ssid == ssid){
                         char passKey[] = "pass0"; passKey[4] = '0'+i;
                         SRWiFi::wifiNvs->get(passKey, pass);
                         //LOGI("SRWifiEventHandler::staScanDone connect ssid=%s pass=%s", ssid.c_str(), pass.c_str());
-                        wifi->connect(ssid, pass);
+                        this->connect(ssid, pass);
                         break;
                     }
                 }
@@ -121,16 +220,13 @@ esp_err_t SRWifiEventHandler::staScanDone(system_event_sta_scan_done_t info){
 }
 
 SRWiFi SRWiFi::wifi;
-NVS* SRWiFi::wifiNvs;
-SRWiFi::SRWiFi():srWifiEventHandler(this){
+NVS* SRWiFi::wifiNvs = NULL;
+SRWiFi::SRWiFi(){
     memset(&ipInfo, 0, sizeof(ipInfo));
-    state = WIFI_STA_DISCONNECTED;
-    wifiNvs = NULL;
 }
 void SRWiFi::init() {
-    if (!wifiNvs) wifiNvs = new NVS("wifinvs");
+    initInternal();
     //  set SREventHandler
-    setWifiEventHandler(&srWifiEventHandler);
     LOGD("Free heap after setEventHandler: %d", esp_get_free_heap_size());
     startAP();
     LOGD("Free heap after startAP: %d", esp_get_free_heap_size());
@@ -139,33 +235,35 @@ void SRWiFi::init() {
 }
 
 void SRWiFi::initInternal(){
-	if (m_eventLoopStarted) {
-		esp_event_loop_set_cb(WiFi::eventHandler, this);   // Returns the old handler.
-	} else {
-		esp_err_t errRc = ::esp_event_loop_init(WiFi::eventHandler, this);  // Initialze the event handler.
-		if (errRc != ESP_OK) {
-			LOGE("esp_event_loop_init: rc=%d %s", errRc, GeneralUtils::errorToString(errRc));
-			abort();
-		}
-		m_eventLoopStarted = true;
-	}
-	if (!m_initCalled) {
-		//::nvs_flash_init();
+    if (wifiNvs) return;
 
-		wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-		esp_err_t errRc = ::esp_wifi_init(&cfg);
-		if (errRc != ESP_OK) {
-			LOGE("esp_wifi_init: rc=%d %s", errRc, GeneralUtils::errorToString(errRc));
-			abort();
-		}
+    wifiNvs = new NVS("wifinvs");
+    ESP_ERROR_CHECK(esp_event_loop_create_default());
 
-		errRc = ::esp_wifi_set_storage(WIFI_STORAGE_RAM);
-		if (errRc != ESP_OK) {
-			LOGE("esp_wifi_set_storage: rc=%d %s", errRc, GeneralUtils::errorToString(errRc));
-			abort();
-		}
+    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+    esp_err_t errRc = ::esp_wifi_init(&cfg);
+    if (errRc != ESP_OK) {
+        LOGE("esp_wifi_init: rc=%d %s", errRc, GeneralUtils::errorToString(errRc));
+        abort();
+    }
+
+    ESP_ERROR_CHECK(esp_event_handler_instance_register(
+        WIFI_EVENT, ESP_EVENT_ANY_ID, &wifi_event_handler, this, NULL));
+    ESP_ERROR_CHECK(esp_event_handler_instance_register(
+        IP_EVENT, ESP_EVENT_ANY_ID, &ip_event_handler, this, NULL));
+
+    errRc = ::esp_wifi_set_storage(WIFI_STORAGE_RAM);
+    if (errRc != ESP_OK) {
+        LOGE("esp_wifi_set_storage: rc=%d %s", errRc, GeneralUtils::errorToString(errRc));
+        abort();
+    }
+
+    if (!netifAp){
+		this->netifAp = esp_netif_create_default_wifi_ap();
 	}
-	m_initCalled = true;
+    if (!netifSta){
+		this->netifSta = esp_netif_create_default_wifi_sta();
+	}
 }
 
 bool SRWiFi::isAP(){
@@ -185,11 +283,8 @@ void SRWiFi::startAP(){
     for(int i=3; i<6; ++i){ //  0-2 is the same 30AEA4
         sprintf(ssid+strlen(ssid), "%02X", mac[i]);
     }
-    startAP(ssid, "");
+    startAP(ssid, "", WIFI_AUTH_OPEN, 0, false, 4);
 }
-void SRWiFi::startAP(const std::string& ssid, const std::string& password, wifi_auth_mode_t auth) {
-	startAP(ssid, password, auth, 0, false, 4);
-} // startAP
 void SRWiFi::startAP(const std::string& ssid, const std::string& password, wifi_auth_mode_t auth, uint8_t channel, bool ssid_hidden, uint8_t max_connection) {
 	initInternal();
     esp_wifi_set_mode(WIFI_MODE_APSTA);
@@ -219,14 +314,14 @@ void SRWiFi::startAP(const std::string& ssid, const std::string& password, wifi_
     ipInfo.ip.addr = ipv4addr(192,168,4,1);
     ipInfo.netmask.addr = ipv4addr(255,255,255,0);
     ipInfo.gw.addr = ipv4addr(192,168,4,1);
-    errRc = esp_netif_set_ip_info(m_apIf, &ipInfo);
+    errRc = esp_netif_set_ip_info(netifAp, &ipInfo);
 	if (errRc != ESP_OK) {
 		LOGE("esp_netif_set_ip_info: rc=%d %s", errRc, GeneralUtils::errorToString(errRc));
 	}
 
 	errRc = ::esp_wifi_start();
 
-	errRc = esp_netif_dhcps_start(m_apIf);
+	errRc = esp_netif_dhcps_start(this->netifAp);
 	if (errRc != ESP_OK) {
 		LOGE("esp_netif_dhcps_start: rc=%d %s", errRc, GeneralUtils::errorToString(errRc));
 	}
@@ -239,7 +334,7 @@ void SRWiFi::startAP(const std::string& ssid, const std::string& password, wifi_
 	LOGD("<< startAP");
 }
 void SRWiFi::stopAP(){
-	esp_err_t errRc = esp_netif_dhcps_stop(m_apIf);
+	esp_err_t errRc = esp_netif_dhcps_stop(this->netifAp);
 	if (errRc != ESP_OK) {
 		LOGE("tcpip_adapter_dhcps_stop: rc=%d %s", errRc, GeneralUtils::errorToString(errRc));
 	}
@@ -247,7 +342,6 @@ void SRWiFi::stopAP(){
 }
 void SRWiFi::connect(std::string ssid, std::string pass){
     state = WIFI_STA_CONNECTING;
-	m_apConnectionStatus = UINT8_MAX;
     wifi_config_t sta_config;
     ::memset(&sta_config, 0, sizeof(sta_config));
     ::memcpy(sta_config.sta.ssid, ssid.data(), ssid.size());
@@ -308,16 +402,16 @@ void SRWiFi::stopScan(){
         scannedAPs.reserve(apCount);
         for (uint16_t i = 0; i < apCount; i++) {
             WiFiAPRecord wifiAPRecord;
-            memcpy(wifiAPRecord.m_bssid, list[i].bssid, 6);
-            wifiAPRecord.m_ssid	 = std::string((char*) list[i].ssid);
-            wifiAPRecord.m_authMode = list[i].authmode;
-            wifiAPRecord.m_rssi	 = list[i].rssi;
+            memcpy(wifiAPRecord.bssid, list[i].bssid, 6);
+            wifiAPRecord.ssid	 = std::string((char*) list[i].ssid);
+            wifiAPRecord.authMode = list[i].authmode;
+            wifiAPRecord.rssi	 = list[i].rssi;
             scannedAPs.push_back(wifiAPRecord);
         }
         free(list);   // Release the storage allocated to hold the records.
         std::sort(scannedAPs.begin(),
             scannedAPs.end(),
-            [](const WiFiAPRecord& lhs, const WiFiAPRecord& rhs){ return lhs.m_rssi > rhs.m_rssi; });
+            [](const WiFiAPRecord& lhs, const WiFiAPRecord& rhs){ return lhs.rssi > rhs.rssi; });
     }
 }
 
@@ -326,3 +420,8 @@ std::string SRWiFi::getStaPassword() {
     esp_wifi_get_config(WIFI_IF_STA, &conf);
     return std::string((char*) conf.ap.password);
 }
+std::string SRWiFi::getStaSSID() {
+	wifi_config_t conf;
+	esp_wifi_get_config(WIFI_IF_STA, &conf);
+	return std::string((char*) conf.ap.ssid);
+} // getStaSSID

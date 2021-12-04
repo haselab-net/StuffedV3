@@ -1,5 +1,9 @@
 #include "Utils.h"
-
+SemaphoreHandle_t createNonPriorityMutex(){
+	SemaphoreHandle_t rv = xSemaphoreCreateBinary();
+    xSemaphoreGive(rv);
+    return rv;
+}
 void* shiftPointer(const void* p, int8_t offsetBytes) {
     return (void*)((char*)p + offsetBytes);
 }

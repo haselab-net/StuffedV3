@@ -8,7 +8,7 @@
 #include <esp_err.h>
 #include <iostream>
 #include <fstream>
-#include "logging.h"
+#include "../duktapeEsp32/include/logging.h"
 
 LOG_TAG("espfs");
 

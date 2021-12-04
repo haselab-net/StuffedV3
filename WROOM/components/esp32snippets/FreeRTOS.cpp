@@ -12,6 +12,8 @@
 #include <iomanip>
 #include "FreeRTOS.h"
 #include "sdkconfig.h"
+#include "../softRobot/Utils.h"
+
 #if defined(ARDUINO_ARCH_ESP32) && defined(CONFIG_ARDUHAL_ESP_LOG)
 #include "esp32-hal-log.h"
 #define LOG_TAG ""
@@ -96,8 +98,7 @@ FreeRTOS::Semaphore::Semaphore(std::string name, bool bMutex) {
 		if (bMutex){
 			m_semaphore = xSemaphoreCreateMutex();
 		}else{
-			m_semaphore = xSemaphoreCreateBinary();
-			xSemaphoreGive(m_semaphore);
+			m_semaphore = createNonPriorityMutex();
 		}
 	}
 

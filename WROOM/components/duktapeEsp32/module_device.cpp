@@ -1,4 +1,5 @@
 #include "module_device.h"
+#include "../softRobot/Utils.h"
 
 JSRobotState jsRobotState(allBoards);
 
@@ -11,10 +12,8 @@ JSRobotState::JSRobotState(AllBoards& allBoards)  {
     force.resize(allBoards.GetNTotalForce(), 0);
     touch.resize(allBoards.GetNTotalTouch(), -1);
 
-    readSemaphore = xSemaphoreCreateBinary();
-    writeSemaphore = xSemaphoreCreateBinary();
-    xSemaphoreGive(readSemaphore);
-    xSemaphoreGive(writeSemaphore);
+    readSemaphore = createNonPriorityMutex();
+    writeSemaphore = createNonPriorityMutex();
 }
 
 JSRobotState::~JSRobotState() {

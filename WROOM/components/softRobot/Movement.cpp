@@ -187,8 +187,7 @@ void movementOnGetPICInfo(UdpRetPacket& pkt) {
 	xSemaphoreGive(picQuerySemaphore);
 }
 void initPICPacketHandler() {
-	picQuerySemaphore = xSemaphoreCreateBinary();
-	xSemaphoreGive(picQuerySemaphore);
+	picQuerySemaphore = createNonPriorityMutex();
 }
 
 /////////////////////////////////////////// basic api ////////////////////////////////////////////////
@@ -821,8 +820,8 @@ static void initTimer() {
 }
 
 static void initMovementManager() {
-	tickSemaphore = xSemaphoreCreateBinary();
-	vSemaphoreCreateBinary(intervalSemaphore);
+	tickSemaphore = createNonPriorityMutex();
+	intervalSemaphore = createNonPriorityMutex();
 
 	xTaskCreate(movementManager, "movement", 1024*3, NULL, tskIDLE_PRIORITY+4, &movementManagerTask);
 
@@ -1116,6 +1115,7 @@ void clearPausedMovements() {
 
 // clear interpolate list & paused list
 void clearInterpolateBuffer() {
+	ESP_LOGI(LOG_TAG, "clearInterpolateBuffer");
 	clearPausedMovements();
 
 	#ifdef WROOM

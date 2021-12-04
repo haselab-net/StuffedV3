@@ -51,15 +51,17 @@ Socket::Socket(const Socket& s) {
 	memcpy((void*)this, (void*)&s, sizeof(s));
 }
 Socket::~Socket() {
+	if (mutex) vSemaphoreDelete(mutex);
+	mutex = NULL;
 	//close_cpp(); // When the class instance has ended, delete the socket.
 }
 
 void Socket::lock() const {
-	if (!mutex) mutex = xSemaphoreCreateMutex();
-	xSemaphoreTake(mutex, portMAX_DELAY);
+	//if (!mutex) mutex = xSemaphoreCreateMutex();
+	//xSemaphoreTake(mutex, portMAX_DELAY);
 }
 void Socket::unlock() const {
-	xSemaphoreGive(mutex);
+	//xSemaphoreGive(mutex);
 }
 
 /**
@@ -174,7 +176,8 @@ int Socket::close() {
 		if (rc != 0) {
 			ESP_LOGE(LOG_TAG, "Error with lwip_close: %d", rc);
 		}
-		vSemaphoreDelete(mutex);
+		if (mutex) vSemaphoreDelete(mutex);
+		mutex = NULL;
 	}
 	m_sock = -1;
 	return rc;

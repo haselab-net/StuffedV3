@@ -9,11 +9,9 @@
 #include "lwip/mem.h"
 #include "lwip/udp.h"
 #include "lwip/ip_addr.h"
-#ifndef _WIN32
 #include "esp_system.h"
 #include "esp_wifi.h"
 #include "nvs_flash.h"
-#endif
 
 #include <algorithm>
 #include <string.h>
@@ -23,9 +21,10 @@
 #include "UartForBoards.h"
 #include "CommandWROOM.h"
 #include "Movement.h"
-#ifndef _WIN32
 #include "../websocketServer/ws_ws.h"
-#endif
+
+#include "../duktapeEsp32/include/logging.h"
+LOG_TAG("UdpCom");
 
 UdpCom udpCom;
 
@@ -82,11 +81,11 @@ int UdpCmdPacket::CommandLen() {
 		case CI_M_QUERY:
 			return NHEADER*2 + 1;
 		default:
-			ESP_LOGE(Tag(), "CommandLen() given invalid CIU_MOVEMENT command %d", *(uint8_t*)data);
+			LOGE("CommandLen() given invalid CIU_MOVEMENT command %d", *(uint8_t*)data);
 			break;
 		}
 	}
-	ESP_LOGE(Tag(), "CommandLen() given invalid command %d", command);
+	LOGE("CommandLen() given invalid command %d", command);
 	assert(0);
 	return 0;
 }
@@ -142,12 +141,12 @@ void UdpRetPacket::SetLength() {
 			break;
 		default:
 			length = NHEADER*2 + 1;
-			ESP_LOGI(Tag(), "SetLength called with invalid CIU_MOVEMENT id: %d.", *(uint8_t*)data);
+			LOGI("SetLength called with invalid CIU_MOVEMENT id: %d.", *(uint8_t*)data);
 			break;
 		}
 		break;
 	default:				//	error
-		ESP_LOGE(Tag(), "SetLength() called with undefined command %d.", command);
+		LOGE("SetLength() called with undefined command %d.", command);
 		assert(0);
 		length = 0;
 		break;
@@ -193,10 +192,8 @@ UdpCmdPackets::UdpCmdPackets() {
 	smAvail = xSemaphoreCreateCounting(sizeof(buf) / sizeof(buf[0]), 0);
 	smFree = xSemaphoreCreateCounting(sizeof(buf) / sizeof(buf[0]), sizeof(buf) / sizeof(buf[0]));
 
-	isReading = xSemaphoreCreateBinary();
-	isWriting = xSemaphoreCreateBinary();
-    xSemaphoreGive(isReading);
-    xSemaphoreGive(isWriting);
+	isReading = createNonPriorityMutex();
+	isWriting = createNonPriorityMutex();
 }
 UdpCmdPacket& UdpCmdPackets::Peek() {
 	xSemaphoreTake(isReading, portMAX_DELAY);
@@ -247,7 +244,7 @@ void UdpCom::Start(){
 
 void UdpCom::ReceiveCommandFromUdp(struct udp_pcb * upcb, struct pbuf * top, const ip_addr_t* addr, u16_t port) {
 	if (!recvs.WriteAvail()) {
-		ESP_LOGE(Tag(), "Udp command receive buffer is full.");
+		LOGE("Udp command receive buffer is full.");
 		pbuf_free(top);
 		return;
 	}
@@ -268,28 +265,28 @@ void UdpCom::ReceiveCommandFromUdp(struct udp_pcb * upcb, struct pbuf * top, con
 		if (readLen == cmdLen+2) {
 			if (cmdLen == UdpPacket::HEADERLEN) {
 				cmdLen = recv->CommandLen();
-				ESP_LOGD(Tag(), "L=%d Cm=%d Ct=%d received from %s.", recv->length, recv->command, recv->count, ipaddr_ntoa(addr));
+				LOGD("L=%d Cm=%d Ct=%d received from %s.", recv->length, recv->command, recv->count, ipaddr_ntoa(addr));
 			}
 			if (readLen == cmdLen+2) {
 				recv->returnIp = *addr;
 				if (recv->length != cmdLen) {
-					ESP_LOGE(Tag(), "cmdLen %d != recvLen %d in cmd:%d \n", cmdLen, recv->length, recv->command);
+					LOGE("cmdLen %d != recvLen %d in cmd:%d \n", cmdLen, recv->length, recv->command);
 				}
 				if ( (recv->command == CI_INTERPOLATE && recv->GetPeriod() == 0)
 					|| (recv->command == CI_FORCE_CONTROL && recv->GetPeriod() == 0) ){
 					/*if (recv->command == CI_INTERPOLATE){
-						ESP_LOGI(Tag(), "CI_INT tcw:%d, peri=%d, ct=%d", recv->GetTargetCountWrite(), recv->GetPeriod(), recv->count);
+						LOGI("CI_INT tcw:%d, peri=%d, ct=%d", recv->GetTargetCountWrite(), recv->GetPeriod(), recv->count);
 					}*/
 					recvs.Write();
 				}
 				else if (recv->count == (unsigned short)(commandCount + 1) ){		// check and update counter
 					commandCount++;
 					/*if (recv->command == CI_INTERPOLATE){
-						ESP_LOGI(Tag(), "CI_INT tcw:%d, peri=%d, ct=%d", recv->GetTargetCountWrite(), recv->GetPeriod(), recv->count);
+						LOGI("CI_INT tcw:%d, peri=%d, ct=%d", recv->GetTargetCountWrite(), recv->GetPeriod(), recv->count);
 					}*/
 					recvs.Write();
 					if (countDiffMax > 0) {
-						ESP_LOGI(Tag(), "ignored %d packets Ct:%d Cm:%d", countDiffMax, commandCount, recv->command);
+						LOGI("ignored %d packets Ct:%d Cm:%d", countDiffMax, commandCount, recv->command);
 						countDiffMax = 0;
 					}
 				}
@@ -302,10 +299,10 @@ void UdpCom::ReceiveCommandFromUdp(struct udp_pcb * upcb, struct pbuf * top, con
 					int diff = (short)((short)commandCount - (short)recv->count);
 					if (countDiffMax < diff) countDiffMax = diff;
 					//	Command count is not matched. There was some packet losses or delay.
-					ESP_LOGD(Tag(), "ignore packet with Count:%d!=%d, Cmd:%d", recv->count, commandCount+1, recv->command);
+					LOGD("ignore packet with Count:%d!=%d, Cmd:%d", recv->count, commandCount+1, recv->command);
 				}
 				if (!recvs.WriteAvail()) {
-					ESP_LOGE(Tag(), "Udp recv buffer full.\n");
+					LOGE("Udp recv buffer full.\n");
 					pbuf_free(top);
 					recvs.Unlock();
 					return;
@@ -331,7 +328,7 @@ void UdpCom::ReceiveCommandFromUdp(struct udp_pcb * upcb, struct pbuf * top, con
 }
 UdpCmdPacket* UdpCom::PrepareCommand(CommandId cid, short from) {
 	if (!recvs.WriteAvail()) {
-		ESP_LOGE(Tag(), "PrepareCommand(): Udp command receive buffer is full.");
+		LOGE("PrepareCommand(): Udp command receive buffer is full.");
 		return NULL;
 	}
 	recvs.Lock();
@@ -345,7 +342,7 @@ UdpCmdPacket* UdpCom::PrepareCommand(CommandId cid, short from) {
 }
 UdpCmdPacket* UdpCom::PrepareMovementCommand(CommandId cid, CommandIdMovement mid, short from) {
 	if (!recvs.WriteAvail()) {
-		ESP_LOGE(Tag(), "PrepareCommand(): Udp command receive buffer is full.");
+		LOGE("PrepareMovementCommand(): Udp command receive buffer is full.");
 		return NULL;
 	}
 	recvs.Lock();
@@ -363,6 +360,7 @@ void UdpCom::WriteCommand() {
 }
 
 void UdpCom::ReceiveCommand(void* payload, int len, short from) {
+	//	LOGI("ReceiveCommand from:%d  WriteAvail:%d", from, recvs.WriteAvail());
 	UdpCmdPacket* recv;
 	CommandId cid = (CommandId)(((short*)payload)[1]);
 	if (cid == CIU_MOVEMENT) {
@@ -405,12 +403,12 @@ void UdpCom::SendText(char* text, short errorlevel) {
 #endif
 		err_t e = udp_sendto(udp, pb, &ownerIp, port);
 		if (e != ERR_OK){
-			ESP_LOGE(Tag(), "udp_sendto() Error %d", e);
+			LOGE("udp_sendto() Error %d", e);
 			//	  ERR_OK = 0, ERR_MEM = -1, ERR_BUF = -2, ERR_TIMEOUT = -3, ERR_RTE = -4, ERR_INPROGRESS = -5, ERR_VAL = -6, ERR_WOULDBLOCK = -7, ERR_USE = -8, ERR_ALREADY = -9, ERR_ISCONN = -10, ERR_CONN = -11,  ERR_IF = -12, ERR_ABRT = -13, ERR_RST = -14, ERR_CLSD = -15,ERR_ARG = -16
 		}
 	}
     pbuf_free(pb); //De-allocate packet buffer
-//	ESP_LOGI(Tag(), "Ret%d C%d L%d to %s\n", send.command, send.count, send.length, ipaddr_ntoa(&ownerIp));
+//	LOGI("Ret%d C%d L%d to %s\n", send.command, send.count, send.length, ipaddr_ntoa(&ownerIp));
 }
 void UdpCom::PrepareRetPacketExceptLength(UdpCmdPacket& recv) {
 	send.command = recv.command;
@@ -453,7 +451,7 @@ void UdpCom::SendReturnUdp(UdpCmdPacket& recv) {
 	if (sendLen + send.length + 2 > 1400){	// udp packet length should be smaller than 1400.
 		err_t e = udp_sendto(udp, pbStart, &recv.returnIp, port);
 		if (e != ERR_OK){
-			ESP_LOGE(Tag(), "udp_sendto() Error %d", e);
+			LOGE("udp_sendto() Error %d", e);
 			//	  ERR_OK = 0, ERR_MEM = -1, ERR_BUF = -2, ERR_TIMEOUT = -3, ERR_RTE = -4, ERR_INPROGRESS = -5, ERR_VAL = -6, ERR_WOULDBLOCK = -7, ERR_USE = -8, ERR_ALREADY = -9, ERR_ISCONN = -10, ERR_CONN = -11,  ERR_IF = -12, ERR_ABRT = -13, ERR_RST = -14, ERR_CLSD = -15,ERR_ARG = -16
 		}
     	pbuf_free(pbStart); //De-allocate packet buffer
@@ -473,17 +471,17 @@ void UdpCom::SendReturnUdp(UdpCmdPacket& recv) {
 	if (recvs.ReadAvail() <= 1){	//	Read() will call after sent. So 1 means no command remaining.
 		err_t e = udp_sendto(udp, pbStart, &recv.returnIp, port);
 		if (e != ERR_OK){
-			ESP_LOGE(Tag(), "udp_sendto() Error %d", e);
+			LOGE("udp_sendto() Error %d", e);
 			//	  ERR_OK = 0, ERR_MEM = -1, ERR_BUF = -2, ERR_TIMEOUT = -3, ERR_RTE = -4, ERR_INPROGRESS = -5, ERR_VAL = -6, ERR_WOULDBLOCK = -7, ERR_USE = -8, ERR_ALREADY = -9, ERR_ISCONN = -10, ERR_CONN = -11,  ERR_IF = -12, ERR_ABRT = -13, ERR_RST = -14, ERR_CLSD = -15,ERR_ARG = -16
 		}
     	pbuf_free(pbStart); //De-allocate packet buffer
 		pbStart = NULL;
 		sendLen = 0;
-		ESP_LOGD(Tag(), "Ret Sent to %s", ipaddr_ntoa(&recv.returnIp));
+		LOGD("Ret Sent to %s", ipaddr_ntoa(&recv.returnIp));
 	}else{
-		ESP_LOGD(Tag(), "Ret not sent %d", recvs.ReadAvail());
+		LOGD("Ret not sent %d", recvs.ReadAvail());
 	}
-	ESP_LOGD(Tag(), "Ret%d C%d L%d to %s", send.command, send.count, send.length, ipaddr_ntoa(&recv.returnIp));
+	LOGD("Ret%d C%d L%d to %s", send.command, send.count, send.length, ipaddr_ntoa(&recv.returnIp));
 }
 void UdpCom::ExecUdpCommand(UdpCmdPacket& recv) {
 	switch (recv.command)
@@ -566,6 +564,8 @@ void UdpCom::ExecUdpCommand(UdpCmdPacket& recv) {
 		send.SetLength();
 		void* movement_command_data = (void*)((uint8_t*)send.data+1);
 
+		//	LOGI("Movement: cid:%d", movement_command_id);
+
 		switch (movement_command_id)
 		{
 			case CI_M_ADD_KEYFRAME: {
@@ -616,13 +616,13 @@ void UdpCom::ExecUdpCommand(UdpCmdPacket& recv) {
 				break;
 			}
 			default:
-				ESP_LOGI(Tag(), "Invalid CIU_MOVEMENT id: %d count %d received from %s.",
+				LOGE("Invalid CIU_MOVEMENT id: %d count %d received from %s.",
 					movement_command_id, (int)recv.count, ipaddr_ntoa(&recv.returnIp));
 				break;
 		}
 	} break;
 	default:
-		ESP_LOGE(Tag(), "Invalid command %d count %d received from %s at %x.\n",
+		LOGE("Invalid command %d count %d received from %s at %x.\n",
 			(int)recv.command, (int)recv.count, ipaddr_ntoa(&recv.returnIp), (unsigned)&recv);
 		break;
 	}

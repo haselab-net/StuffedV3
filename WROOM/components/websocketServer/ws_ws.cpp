@@ -106,10 +106,13 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
 
     size_t bufferSize = 4096;
     char* pBuffer = (char*)malloc(bufferSize);
+    static int mallocCount = 0;
+    ESP_LOGI(LOG_TAG, "malloc pBuffer %d", ++mallocCount);
     std::streamsize ssize = pWebSocketInputStreambuf->sgetn(pBuffer, bufferSize);
     if(ssize>=bufferSize) {
         ESP_LOGI(LOG_TAG ,"WS command to long (longer than 4096)!!!!!!!!!");
         free(pBuffer);
+        ESP_LOGI(LOG_TAG, "free pBuffer %d", --mallocCount);
         return;
     }
 
@@ -136,7 +139,9 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
         }
 
         case PacketId::PI_COMMAND: {
+            ESP_LOGI(LOG_TAG, "Before UdpCom_ReceiveCommand");
             UdpCom_ReceiveCommand((void*)(pBuffer+2), *(int16_t*)(&pBuffer[2]), CS_WEBSOCKET);
+            ESP_LOGI(LOG_TAG, "After UdpCom_ReceiveCommand");
             break;
         }
 
@@ -408,7 +413,10 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
             break;
     }
 
-    if(pBuffer) free(pBuffer);
+    if(pBuffer){
+        free(pBuffer);
+        ESP_LOGI(LOG_TAG, "free pBuffer %d", --mallocCount);
+    }
 }
 
 /**

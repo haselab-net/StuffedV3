@@ -20,6 +20,7 @@
 #include "include/module_srmovement.h"
 
 #include "../softRobot/Movement.h"
+#include "../softRobot/CUtils.h"
 
 LOG_TAG("duktape_task");
 
@@ -152,15 +153,13 @@ void duktape_start() {
     dukf_init_nvs_values(); // Initialize any defaults for NVS data
     esp32_duktape_initEvents();
 	if(!heap_mutex){
-		heap_mutex = xSemaphoreCreateBinary();	// only create once
-		xSemaphoreGive(heap_mutex);
+		heap_mutex = createNonPriorityMutex();	// only create once
 	}
 	//	init timer task
 	memset(timerCallbacks, 0, sizeof(timerCallbacks));
 	if (!taskJsTimer){
 		if (!smTimerCallbacks){
-			smTimerCallbacks = xSemaphoreCreateBinary();
-			xSemaphoreGive(smTimerCallbacks);
+			smTimerCallbacks = createNonPriorityMutex();
 		}
 		xTaskCreate(dukTimerTask, "jsTimer", 1024, NULL, tskIDLE_PRIORITY, &taskJsTimer);
 	}

@@ -26,8 +26,12 @@ public:
 		write = (write+1) % N;
 	}
 	int WriteAvail() {
+		/*	old code 2021.12.3
 		int rv = read - write;
 		if (rv <= 0) rv += N;
+		return rv;	*/
+		int rv = read - write - 1;
+		if (rv < 0) rv += N;
 		return rv;
 	}
 	int ReadAvail() {

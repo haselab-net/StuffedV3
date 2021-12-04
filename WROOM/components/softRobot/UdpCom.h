@@ -21,7 +21,6 @@ extern "C" void UdpCom_ReceiveCommand(void* payload, int len, short from);
 */
 class UdpPacket {
 public:
-	static const char* Tag(){ return "UdpCom"; }
 	enum {
 		HEADERLEN = 4,		//	does not include count. 
 		MAXLEN = 512		//	hole packet size include count must equal or smaller than MAXLEN.
@@ -176,7 +175,6 @@ public:
 
 class UdpCom {
 public:
-	static const char* Tag() { return UdpPacket::Tag(); }
 	const int port = 9090;
 	struct udp_pcb* udp;
 	ip_addr_t ownerIp;

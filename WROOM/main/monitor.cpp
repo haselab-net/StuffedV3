@@ -390,11 +390,14 @@ class MCShowHeap: public MonitorCommandBase{
             }
             case 's':
                 heap_trace_start(HEAP_TRACE_LEAKS);
+                conPrintf("Heap trace started.\n");
                 break;
             case 't':
                 heap_trace_stop();
+                conPrintf("Heap trace stopped.\n");
                 break;
             case 'd':
+                conPrintf("Heap trace dump:\n");
                 heap_trace_dump();
                 break;
             case 'h':

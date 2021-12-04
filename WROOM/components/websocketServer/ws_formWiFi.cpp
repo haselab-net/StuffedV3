@@ -231,11 +231,11 @@ public:
             replaces.push_back(Replace("nAP", str(SRWiFi::wifi.scannedAPs.size())));
             for(int i=0; i!=SRWiFi::wifi.scannedAPs.size(); ++i){
                 WiFiAPRecord& ap = SRWiFi::wifi.scannedAPs[i];
-                int power = 100+ap.m_rssi;
+                int power = 100+ap.rssi;
                 if (power < 0) power = 0;
-                replaces.push_back(Replace("ssid" + str(i), ap.m_ssid));
+                replaces.push_back(Replace("ssid" + str(i), ap.ssid));
                 replaces.push_back(Replace("rssi" + str(i), str(power)));
-                replaces.push_back(Replace("auth" + str(i), ap.m_authMode==WIFI_AUTH_OPEN? "🔘" : "🔐"));
+                replaces.push_back(Replace("auth" + str(i), ap.authMode==WIFI_AUTH_OPEN? "🔘" : "🔐"));
             }
             handle(request, response, replaces);
             SRWiFi::wifi.startScan();

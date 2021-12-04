@@ -1,14 +1,21 @@
 #ifndef _SOFTROBOT_UTILS_H
 #define _SOFTROBOT_UTILS_H
-
+extern "C" {
+    #include "CUtils.h"
+}
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include <vector>
+#include <freertos/semphr.h>
+
 
 ////////////////////////////////////////////////////////
 //////////////////////// tool functions ////////////////
 ////////////////////////////////////////////////////////
+
+//	non priority inherit mutex
+SemaphoreHandle_t createNonPriorityMutex();
 
 /////////////////////////////////// functions for pointers ////////////////////////////////
 void* shiftPointer(const void* p, int8_t offsetBytes);

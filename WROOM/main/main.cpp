@@ -181,9 +181,9 @@ extern "C" void app_main(){
     initMovementDS();
 
     //  start DukTape, javascript engine and run /main/main*.js
-    dukInitAllocHybrid();
     readAutoStart();
 
+    dukInitAllocHybrid();
 	if(offline_mode && !wsIsJsfileTaskRunning()) {
         wsCreateJsfileTask();
         LOGI("Start running default jsfile task");
