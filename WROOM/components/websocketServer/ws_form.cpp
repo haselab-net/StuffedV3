@@ -7,7 +7,7 @@
 #include <GeneralUtils.h>
 #include <espfsStream.h>
 
-static char tag[] = "ws_form";
+LOG_TAG("SRForm");
 
 //-------------------------------------------------------------------
 //	SRFormHandeler
@@ -50,12 +50,12 @@ void SRReplace::handle(HttpRequest& request, HttpResponse& response, std::vector
 	handle(request, response, replaces, filenameReplaces);
 }
 void SRReplace::handle(HttpRequest& request, HttpResponse& response, std::vector<Replace>& replaces, std::vector<Replace>& filenameReplaces){
-	printf("receive one request on wifi: %i \n", esp_get_free_heap_size());
+	LOGI("Receive a request on wifi. Free heap: %i\n", esp_get_free_heap_size());
 
 	// do not respond when heap is not enough
 	uint32_t remainingHeapSize = esp_get_free_heap_size();
 	if (remainingHeapSize < 25000) {
-		ESP_LOGE(tag, "Free heap size is lower than 25000");
+		LOGE("Free heap size is lower than 25000");
 		response.setStatus(429, "Too many requests");
 		response.addHeader(HttpRequest::HTTP_HEADER_CONTENT_TYPE, "text/plain");
 		response.sendData("	\
@@ -116,7 +116,7 @@ void SRReplace::handle(HttpRequest& request, HttpResponse& response, std::vector
 
 	// If we failed to open the requested file, then it probably didn't exist so return a not found.
 	if (!iStream) {
-		ESP_LOGE(tag, "Unable to open file %s for reading", fileNameLang.c_str());
+		LOGE("Unable to open file %s for reading", fileNameLang.c_str());
 		response.setStatus(HttpResponse::HTTP_STATUS_NOT_FOUND, "Not Found");
 		response.addHeader(HttpRequest::HTTP_HEADER_CONTENT_TYPE, "text/plain");
 		response.sendData("Not Found");
@@ -177,7 +177,7 @@ void SRReplace::handle(HttpRequest& request, HttpResponse& response, std::vector
 						nRepeat = 0;
 						goto foundNum;
 					}
-					ESP_LOGE(tag, "Repeat count must be set.");
+					LOGE("Repeat count must be set.");
 					foundNum:
 					//ESP_LOGD(tag, "SRReplace: Repeat %d.", nRepeat);
 					//	Shift buffer and read from file;
@@ -202,7 +202,7 @@ void SRReplace::handle(HttpRequest& request, HttpResponse& response, std::vector
 							}
 						}
 						if (nRepeat == 0){
-							ESP_LOGE(tag, "Can not find corresponding '$]'");
+							LOGE("Can not find corresponding '$]'");
 							nRepeat = -1;
 						}
 					}
@@ -225,7 +225,7 @@ void SRReplace::handle(HttpRequest& request, HttpResponse& response, std::vector
 						inParen--;
 						if (inParen < 0){
 							inParen = 0;
-							ESP_LOGE(tag, "SRReplace: parentheses error in %s.", key);
+							LOGE("SRReplace: parentheses error in %s.", key);
 						}
 						pos ++;						//skip and stop;
 					}else if (nRepeat > 0 && pData[pos] == '*'){	//	add repeatCount to key
@@ -242,7 +242,7 @@ void SRReplace::handle(HttpRequest& request, HttpResponse& response, std::vector
 						}
 					}
 					//	not found
-					ESP_LOGE(tag, "SRReplace: Undefined key='%s' is used in %s.", key, fileNameLang.c_str());
+					LOGE("SRReplace: Undefined key='%s' is used in %s.", key, fileNameLang.c_str());
 				foundKey:
 					keyLen = -1;
 					sentPos = pos;
@@ -255,7 +255,7 @@ void SRReplace::handle(HttpRequest& request, HttpResponse& response, std::vector
 			}
 		}	//	for dataLen
 		if (nRepeat != -1){
-			ESP_LOGE(tag, "Corresponding '$]' is needed.");
+			LOGE("Corresponding '$]' is needed.");
 		}
 		if (keyLen == -1){
 			response.sendData(pData + sentPos, dataLen-sentPos);

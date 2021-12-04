@@ -171,6 +171,9 @@ private:
 					}
 				} catch (std::exception& e) {
 					ESP_LOGE("HttpServerTask", "Caught an exception in request! %s", e.what());
+					clientSocket.send(std::string("HTTP/1.1 200 OK\r\n\r\n")
+						+ "<html><head><meta http-equiv=\"refresh\" content=\"2; URL=\"></head>"
+						+ "<body><H1>Wait a moment</H1><br>" + e.what() + "</body></html>");
 					clientSocket.close();
 					m_pHttpServer->m_semaphoreServerStarted.give();  // Release the semaphore .. we are now no longer running.
 					break;

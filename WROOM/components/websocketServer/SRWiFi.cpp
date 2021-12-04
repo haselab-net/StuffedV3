@@ -8,7 +8,7 @@
 LOG_TAG("SRWiFi");
 
 inline uint32_t ipv4addr(uint8_t a, uint8_t b, uint8_t c, uint8_t d){
-    return a << 24 | b << 16 | c << 8 | d;
+    return d << 24 | c << 16 | b << 8 | a;
 }
 
 const char* ipEventString[] = {
@@ -311,25 +311,22 @@ void SRWiFi::startAP(const std::string& ssid, const std::string& password, wifi_
 		abort();
 	}
 
-    ipInfo.ip.addr = ipv4addr(192,168,4,1);
-    ipInfo.netmask.addr = ipv4addr(255,255,255,0);
-    ipInfo.gw.addr = ipv4addr(192,168,4,1);
-    errRc = esp_netif_set_ip_info(netifAp, &ipInfo);
-	if (errRc != ESP_OK) {
-		LOGE("esp_netif_set_ip_info: rc=%d %s", errRc, GeneralUtils::errorToString(errRc));
-	}
-
 	errRc = ::esp_wifi_start();
-
-	errRc = esp_netif_dhcps_start(this->netifAp);
-	if (errRc != ESP_OK) {
-		LOGE("esp_netif_dhcps_start: rc=%d %s", errRc, GeneralUtils::errorToString(errRc));
-	}
-
 	if (errRc != ESP_OK) {
 		LOGE("esp_wifi_start: rc=%d %s", errRc, GeneralUtils::errorToString(errRc));
 		abort();
 	}
+
+    ESP_ERROR_CHECK(esp_netif_dhcps_stop(netifAp));
+    esp_netif_ip_info_t ipInfoAp;
+    ipInfoAp.ip.addr = ipv4addr(192,168,4,1);
+    ipInfoAp.netmask.addr = ipv4addr(255,255,255,0);
+    ipInfoAp.gw.addr = ipInfoAp.ip.addr;
+    errRc = esp_netif_set_ip_info(this->netifAp, &ipInfoAp);
+	if (errRc != ESP_OK) {
+		LOGE("esp_netif_set_ip_info: rc=0x%x %s", errRc, GeneralUtils::errorToString(errRc));
+	}
+    ESP_ERROR_CHECK(esp_netif_dhcps_start(netifAp));
 
 	LOGD("<< startAP");
 }
