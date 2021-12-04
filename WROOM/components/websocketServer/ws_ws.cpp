@@ -139,9 +139,7 @@ void wsOnMessageWs(WebSocketInputStreambuf* pWebSocketInputStreambuf, WebSocket*
         }
 
         case PacketId::PI_COMMAND: {
-            ESP_LOGI(LOG_TAG, "Before UdpCom_ReceiveCommand");
             UdpCom_ReceiveCommand((void*)(pBuffer+2), *(int16_t*)(&pBuffer[2]), CS_WEBSOCKET);
-            ESP_LOGI(LOG_TAG, "After UdpCom_ReceiveCommand");
             break;
         }
 

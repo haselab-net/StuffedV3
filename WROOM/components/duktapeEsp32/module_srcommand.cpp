@@ -936,7 +936,7 @@ int pushDataCIUMovement(duk_context* ctx, void* data) {
     duk_put_prop_string(ctx, -2, "movementCommandId");
 
     switch (movementCommandId) {
-        case CI_M_ADD_KEYFRAME: {
+        case CI_M_ADD_KEYFRAME:
             // little endian
             popPayload2CtxNum<uint8_t>(ctx, payload, "keyframeId");
             popPayload2CtxNum<uint8_t>(ctx, payload, "movementId");
@@ -945,7 +945,7 @@ int pushDataCIUMovement(duk_context* ctx, void* data) {
             popPayload2CtxNum<uint16_t>(ctx, payload, "endTime");
 
             printf("=== duktape add keyframe receive === \n");
-        }
+            break;
         case CI_M_QUERY:
             popPayload2CtxNumArray<uint8_t>(ctx, payload, "nOccupied", boardInfo.nMotor);
             // FIXME not full implemented

@@ -7,7 +7,7 @@
 #include <esp_wifi.h>
 #include <nvs_flash.h>
 #include "logging.h"
-#include "ws_wifi.h"
+#include "SRWifi.h"
 #include "ws_fs.h"
 #include "ws_http.h"
 

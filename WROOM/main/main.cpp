@@ -83,21 +83,20 @@ void setLogLevel(){
     //  esp_log_level_set("Board", ESP_LOG_DEBUG);
     //  esp_log_level_set("MotorDriver", ESP_LOG_DEBUG);
     //  esp_log_level_set("Movement", ESP_LOG_DEBUG);
-    esp_log_level_set("FileTransferWebSocketHandler", ESP_LOG_DEBUG);
-    esp_log_level_set("espfs", ESP_LOG_DEBUG);
+    //  esp_log_level_set("FileTransferWebSocketHandler", ESP_LOG_DEBUG);
+    //  esp_log_level_set("espfs", ESP_LOG_DEBUG);
 
     //  Web Server
     // esp_log_level_set("Socket", ESP_LOG_INFO);
-    esp_log_level_set("HttpServer", ESP_LOG_DEBUG);
-    esp_log_level_set("HttpServerTask", ESP_LOG_INFO);
+    //  esp_log_level_set("HttpServer", ESP_LOG_DEBUG);
+    //  esp_log_level_set("HttpServerTask", ESP_LOG_INFO);
     // esp_log_level_set("HttpRequest", ESP_LOG_INFO);
     // esp_log_level_set("HttpParser", ESP_LOG_INFO);
     // esp_log_level_set("HttpResponse", ESP_LOG_DEBUG);
     // esp_log_level_set("PathHandler", ESP_LOG_INFO);
-    esp_log_level_set("WiFi", ESP_LOG_DEBUG);
     // esp_log_level_set("WiFiEventHandler", ESP_LOG_INFO);
     // esp_log_level_set("ws_fs", ESP_LOG_INFO);
-     esp_log_level_set("ws_wifi", ESP_LOG_DEBUG);
+    //  esp_log_level_set("SRWiFi", ESP_LOG_DEBUG);
     //  esp_log_level_set("ws_task", ESP_LOG_DEBUG);
     //  esp_log_level_set("ws_main", ESP_LOG_DEBUG);
     //  esp_log_level_set("ws_form", ESP_LOG_DEBUG);
@@ -160,7 +159,6 @@ extern "C" void app_main(){
     brownout_init();
 
     //  Start soft robot controller
-    LOGI("Initialize soft robot...");
     softRobot_main();
 
 #if 1

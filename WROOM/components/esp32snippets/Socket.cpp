@@ -45,14 +45,14 @@ static void my_debug(
 Socket::Socket() {
 	m_sock   = -1;
 	m_useSSL = false;
-	mutex = NULL;
+//	mutex = NULL;
 }
 Socket::Socket(const Socket& s) {
 	memcpy((void*)this, (void*)&s, sizeof(s));
 }
 Socket::~Socket() {
-	if (mutex) vSemaphoreDelete(mutex);
-	mutex = NULL;
+	//if (mutex) vSemaphoreDelete(mutex);
+	//	mutex = NULL;
 	//close_cpp(); // When the class instance has ended, delete the socket.
 }
 
@@ -176,8 +176,8 @@ int Socket::close() {
 		if (rc != 0) {
 			ESP_LOGE(LOG_TAG, "Error with lwip_close: %d", rc);
 		}
-		if (mutex) vSemaphoreDelete(mutex);
-		mutex = NULL;
+		//if (mutex) vSemaphoreDelete(mutex);
+		//mutex = NULL;
 	}
 	m_sock = -1;
 	return rc;

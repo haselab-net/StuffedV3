@@ -104,7 +104,7 @@ private:
 	mbedtls_pk_context       m_pkey;
 	void sslHandshake();
 
-	mutable SemaphoreHandle_t mutex;
+	//mutable SemaphoreHandle_t mutex;
 	void lock() const;
 	void unlock() const;
 };

@@ -5,7 +5,7 @@
 #include <GeneralUtils.h>
 #include <string.h>
 
-LOG_TAG("ws_wifi");
+LOG_TAG("SRWiFi");
 
 inline uint32_t ipv4addr(uint8_t a, uint8_t b, uint8_t c, uint8_t d){
     return a << 24 | b << 16 | c << 8 | d;
@@ -64,7 +64,7 @@ void SRWiFi::ip_event_handler(void* ctx, esp_event_base_t event_base, int32_t ev
 }
 
 void SRWiFi::wifi_event_handler(void* ctx, esp_event_base_t event_base, int32_t event_id, void* event_data){
-    LOGI("Wifi event %s", wifiEventString[event_id]);
+    //  LOGI("Wifi event %s", wifiEventString[event_id]);
     SRWiFi* wifi = (SRWiFi*)ctx;
     switch(event_id){
         case WIFI_EVENT_AP_START: {
