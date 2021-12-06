@@ -347,12 +347,10 @@ void SRWiFi::connect(std::string ssid, std::string pass){
     esp_err_t errRc = ::esp_wifi_set_config(WIFI_IF_STA, &sta_config);
     if (errRc != ESP_OK) {
         LOGE("esp_wifi_set_config: rc=%d %s", errRc, GeneralUtils::errorToString(errRc));
-        abort();
     }
     errRc = ::esp_wifi_connect();
     if (errRc != ESP_OK) {
         LOGE("esp_wifi_connect: rc=%d %s", errRc, GeneralUtils::errorToString(errRc));
-        abort();
     }
 }
 void SRWiFi::disconnect(){
