@@ -69,18 +69,22 @@ static duk_ret_t httpGet(duk_context* ctx) {
     config.url = url;
     config.event_handler = _http_event_handle;
     esp_http_client_handle_t client = esp_http_client_init(&config);
-    esp_http_client_set_method(client, HTTP_METHOD_GET);
+    if (client){
+        esp_http_client_set_method(client, HTTP_METHOD_GET);
 
-    esp_err_t err = esp_http_client_perform(client);
+        esp_err_t err = esp_http_client_perform(client);
 
-    if (err == ESP_OK) {
-        ESP_LOGI(LOG_TAG, "Status = %d, content_length = %d",
-        esp_http_client_get_status_code(client),
-        esp_http_client_get_content_length(client));
-    } else {
-        ESP_LOGE(LOG_TAG, "Error perform http request %s", esp_err_to_name(err));
+        if (err == ESP_OK) {
+            ESP_LOGI(LOG_TAG, "Status = %d, content_length = %d",
+            esp_http_client_get_status_code(client),
+            esp_http_client_get_content_length(client));
+        } else {
+            ESP_LOGE(LOG_TAG, "Error perform http request %s", esp_err_to_name(err));
+        }
+        esp_http_client_cleanup(client);
+    }else{
+        ESP_LOGE(LOG_TAG, "Error perform http post %s. esp_http_client_init() failed.", url);        
     }
-    esp_http_client_cleanup(client);
 
     duk_pop(ctx);
 
@@ -96,17 +100,21 @@ static duk_ret_t httpPost(duk_context* ctx) {
     config.url = url;
     config.event_handler = _http_event_handle;
     esp_http_client_handle_t client = esp_http_client_init(&config);
-    esp_http_client_set_method(client, HTTP_METHOD_POST);
-    esp_http_client_set_post_field(client, data, strlen(data));
+    if (client){
+        esp_http_client_set_method(client, HTTP_METHOD_POST);
+        esp_http_client_set_post_field(client, data, strlen(data));
 
-    esp_err_t err = esp_http_client_perform(client);
+        esp_err_t err = esp_http_client_perform(client);
 
-    if (err == ESP_OK) {
-        ESP_LOGI(LOG_TAG, "Status = %d, content_length = %d",
-        esp_http_client_get_status_code(client),
-        esp_http_client_get_content_length(client));
-    } else {
-        ESP_LOGE(LOG_TAG, "Error perform http request %s", esp_err_to_name(err));
+        if (err == ESP_OK) {
+            ESP_LOGI(LOG_TAG, "Status = %d, content_length = %d",
+            esp_http_client_get_status_code(client),
+            esp_http_client_get_content_length(client));
+        } else {
+            ESP_LOGE(LOG_TAG, "Error perform http request %s", esp_err_to_name(err));
+        }
+    }else{
+        ESP_LOGE(LOG_TAG, "Error perform http post %s. esp_http_client_init() failed.", url);
     }
     esp_http_client_cleanup(client);
 

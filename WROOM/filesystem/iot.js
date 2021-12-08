@@ -25,7 +25,7 @@ var iot = {
     triggerNuibotEvent: function (nuibotId, event) {
         internalIoT.httpGet("http://haselab.net:5001/trigger/" + event + "/with/key/" + nuibotId);
     },
-    triggerWebhook: function (url, params) {
+    triggerWebhook: function (params, url) {
         internalIoT.httpGet(url + "?" + params);
     },
 
