@@ -1,4 +1,3 @@
-
 WROOM/.vscode
 WROOM/build
 WROOM/sdkconfig
@@ -7,6 +6,9 @@ PIC/GPATH
 PIC/GRTAGS
 PIC/GTAGS
 PIC/.vscode
+PIC/.generated_files
+PIC/build
+PIC/dist/*/production
 WROOM/GPATH
 WROOM/GRTAGS
 WROOM/GTAGS
