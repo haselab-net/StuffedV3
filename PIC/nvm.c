@@ -1,5 +1,4 @@
 #include "env.h"
-#include "mcc_generated_files/mcc.h"
 #include "nvm.h"
 #include "boardType.h"
 #include <assert.h>
@@ -15,6 +14,8 @@ struct NvPageData{
  #define EL4(x)  
 #elif BOARD_TYPE==BT_B3M || BOARD_TYPE==BT_B2M || BOARD_TYPE==BT_B1M
  #define EL4(x) x
+#elif BOARD_TYPE==BT_B5M
+ #define EL4(x) x
 #else
  #error BORAD_TYPE must be specified.
 #endif
@@ -23,7 +24,7 @@ const struct NvPageData __attribute__((address(NVPAGE))) theNvPage = {
     {
         BOARD_ID,   //  boardID
         {0,0,0},    //  pad
-        2000000, 3000000,    //  2MBPS for command, 3MBPS for monitor
+        {2000000, 3000000},    //  2MBPS for command, 3MBPS for monitor
         {   //  PDParam
             {PDPARAM_K, PDPARAM_K, PDPARAM_K, EL4(PDPARAM_K)},   //k
             {PDPARAM_B, PDPARAM_B, PDPARAM_B, EL4(PDPARAM_B)},   //b

@@ -2,7 +2,11 @@
 
 #include "fixed.h"
 #include "control.h"
+#ifdef PIC32MM
 #include "mcc_generated_files/mcc.h"
+#else
+#include "definitions.h"
+#endif
 #include "nvm.h"
 #include <assert.h>
 
@@ -165,6 +169,7 @@ void readADC(){
 //	device access
 //
 void readADC(){
+#if defined PIC32MM
 #if defined BOARD1_MOTORDRIVER
     /*  ADC connection
      M1:  AN11, AN4 (cos, sin)
@@ -218,6 +223,36 @@ AN      2 3    5     10
 #else
 #error Board type not defined
 #endif
+#elif defined PIC32MK_MCJ
+//Force	AN16-10, AN27-25
+
+//Angle1-4:	AN41-24, AN47-46, AN48-49, AN6-5, 
+	mcosRaw[0] = FilterForAngle(mcosRaw[0], ADCDATA41);
+	msinRaw[0] = FilterForAngle(msinRaw[0], ADCDATA24);
+	mcosRaw[1] = FilterForAngle(mcosRaw[1], ADCDATA47);
+	msinRaw[1] = FilterForAngle(msinRaw[1], ADCDATA46);
+    mcosRaw[2] = FilterForAngle(mcosRaw[2], ADCDATA48);
+    msinRaw[2] = FilterForAngle(msinRaw[2], ADCDATA49);
+    mcosRaw[3] = FilterForAngle(mcosRaw[3], ADCDATA6);
+    msinRaw[3] = FilterForAngle(msinRaw[3], ADCDATA5);
+
+//Angle5-8: AN7-8, AN13-11, AN14-12, AN15-26
+	mcosRaw[4] = FilterForAngle(mcosRaw[4], ADCDATA7);
+	msinRaw[4] = FilterForAngle(msinRaw[4], ADCDATA8);
+	mcosRaw[5] = FilterForAngle(mcosRaw[5], ADCDATA13);
+	msinRaw[5] = FilterForAngle(msinRaw[5], ADCDATA11);
+    mcosRaw[6] = FilterForAngle(mcosRaw[6], ADCDATA14);
+    msinRaw[6] = FilterForAngle(msinRaw[6], ADCDATA12);
+    mcosRaw[7] = FilterForAngle(mcosRaw[7], ADCDATA15);
+    msinRaw[7] = FilterForAngle(msinRaw[7], ADCDATA26);
+
+//Force	AN16-10, AN27-25
+    mcosRaw[8] = FilterForCurrent(currentSense[0], ADCDATA16);
+    msinRaw[8] = FilterForCurrent(currentSense[1], ADCDATA10);
+    mcosRaw[9] = FilterForCurrent(currentSense[2], ADCDATA27); //2
+    msinRaw[9] = FilterForCurrent(currentSense[3], ADCDATA25); //3
+#endif
+
 	//	update mcos msin
     int i;
     for(i=0; i<NAXIS; ++i){
@@ -421,6 +456,10 @@ void setPwm(int ch, SDEC ratio){
 #endif
     }
 }
+#elif defined BOARD5
+void setPwm(int ch, SDEC ratio){
+    
+}
 #else
 #error
 #endif
@@ -444,7 +483,7 @@ void __attribute__ ((vector(_SPI2_TX_VECTOR), interrupt(IPL6AUTO))) spiEmpty(voi
 extern unsigned int addrSPI2BUF;
 
 void controlInitPic(){
-    int i;
+#ifdef PIC32MM
     addrSPI2BUF = (unsigned int)&SPI2BUF;
 	//	disable interrupt
 	IEC1bits.SPI2EIE = IEC1bits.SPI2RXIE = IEC1bits.SPI2TXIE = 0;
@@ -473,11 +512,19 @@ void controlInitPic(){
 	SPI2CONbits.ON = 1;	//	SPI2 start	
 	
 	SPI2BUF = 0;
+#endif
 }
 void onControlTimer(){
+#ifdef PIC32MM
 	LATCbits.LATC2 = 1;	//	LED ON
 	controlLoop();
 	LATCbits.LATC2 = 0;	//	LED OFF
+#elif PIC32MK_MCJ
+    //  TODO: switch on LED
+	controlLoop();
+#else
+#error
+#endif
 }
 
 

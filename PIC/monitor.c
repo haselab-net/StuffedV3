@@ -1,17 +1,20 @@
 #include "env.h"
 #include "fixed.h"
-#include "mcc_generated_files/mcc.h"
+#include "embeddedFramework.h"
 #include "control.h"
 #include "command.h"
 #include "uart.h"
 #include "nvm.h"
 #include <stdio.h>
+bool monOut();
 
 void outTest(int dir){
     static int pos;
 	TRISAbits.TRISA0 = 0;
     TRISAbits.TRISA1 = 0;
+#ifdef PIC32MM
     TRISAbits.TRISA2 = 0;
+#endif
     TRISB = 0x0000;
     TRISC = 0x0000;
 	if (dir) pos ++;
@@ -42,6 +45,7 @@ void pwmTest(int dir){
 	setPwm(3, pwmRatio);
 }
 void pwmTest2(){
+#ifdef PIC32MM
 	CCP1RA = 0;
 	CCP1RB = 0x100;
 	CCP2RA = 0;
@@ -56,6 +60,8 @@ void pwmTest2(){
 	LATCbits.LATC8 = 0;	//	AIN2R
 	LATBbits.LATB10 = 1; // BIN1R
 	LATBbits.LATB11 = 1; // BIN2R
+#else
+#endif
 }
 struct MonitorFunc{
 	char ch;
@@ -66,7 +72,13 @@ struct MonitorFunc{
 void showAD(){
 	int i;
 	printf("ad");
+#ifdef PIC32MM
 	for(i=0; i<16; ++i) printf(" %x", *(&ADC1BUF0 + 4*i));
+#elif defined PIC32MK_MCJ
+	for(i=0; i<64; ++i) printf(" %x", *(&ADCDATA0 + 4*i));    
+#else
+#error
+#endif
 	printf("\r\n");
 }
 void showADInMotorOrder(){
@@ -89,6 +101,18 @@ void showADInMotorOrder(){
 	printf(" %d %d ", ADC1BUF11, ADC1BUF10);
     //  current
 	printf(" Current: %d %d %d %d\r\n", ADC1BUF5, ADC1BUF8, ADC1BUF2, ADC1BUF3);    
+#elif defined BOARD5
+	//  motor angle
+    printf(" Angle: %d %d ", ADCDATA41, ADCDATA24);
+	printf(" %d %d ", ADCDATA47, ADCDATA46);
+	printf(" %d %d ", ADCDATA48, ADCDATA49);
+	printf(" %d %d ", ADCDATA6, ADCDATA5);
+	printf(" %d %d ", ADCDATA7, ADCDATA8);
+	printf(" %d %d ", ADCDATA13, ADCDATA11);
+	printf(" %d %d ", ADCDATA14, ADCDATA12);
+	printf(" %d %d ", ADCDATA15, ADCDATA26);
+    //  current
+	printf(" Force: %d %d %d %d\r\n", ADCDATA16, ADCDATA10, ADCDATA27, ADCDATA25);
 #else
 #error
 #endif
@@ -99,8 +123,8 @@ void showControlStatus(){
 	if (ct != controlCount){
 		ct = controlCount;
 		printf("ctrl\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\r\n", 
-				motorState.pos[0], motorTarget.pos[0], motorState.vel[0], motorTarget.vel[0], 
-				targets.write, targets.read, targets.tick, targets.buf[(targets.read+1)%NTARGET].period, ct);
+				(int)motorState.pos[0], (int)motorTarget.pos[0], (int)motorState.vel[0], (int)motorTarget.vel[0], 
+				(int)targets.write, (int)targets.read, (int)targets.tick, (int)targets.buf[(targets.read+1)%NTARGET].period, ct);
 	}
 }
 void showCoreTimer(){
@@ -116,6 +140,7 @@ void logLevelDown(){
 	printf("Log level = %d", logLevel);
 }
 void toggleControlTimer(){
+#if defined PIC32MM
 	if (IEC0bits.CTIE){
 		CORETIMER_DisableInterrupt();
 		printf("stop timer interrupt.\r\n");
@@ -123,6 +148,17 @@ void toggleControlTimer(){
 		CORETIMER_Initialize();
 		printf("Start timer interrupt.\r\n");
 	}
+#elif defined PIC32MK_MCJ
+	if (IEC0bits.CTIE){
+		CORETIMER_Stop();
+		printf("stop timer.\r\n");
+	}else{
+		CORETIMER_Start();
+		printf("Start timer.\r\n");
+	}
+#else
+ #error
+#endif
 }
 void showUartState(){
 	printf("uCSTA %8x", UCSTA);
@@ -197,7 +233,9 @@ void disableRx(){
 }
 extern unsigned long spiPwmGpBackup;
 void printGp(){
-    printf("spiPwmGpBackup = %x.\r\n", spiPwmGpBackup);
+#ifdef PIC32MM
+    printf("spiPwmGpBackup = %x.\r\n", (int)spiPwmGpBackup);
+#endif
 }
 void nvmWriteTest(){
     NvData data;

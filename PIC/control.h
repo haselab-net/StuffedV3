@@ -9,7 +9,11 @@
 #endif
 
 #ifdef __XC32
+#ifdef PIC32MM
 #include "mcc_generated_files/mcc.h"
+#else
+#include "definitions.h"
+#endif
 #endif
 #include <assert.h>
 

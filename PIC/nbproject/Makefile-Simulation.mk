@@ -57,17 +57,17 @@ OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
 # Source Files Quoted if spaced
-SOURCEFILES_QUOTED_IF_SPACED=mcc_generated_files/pin_manager.c mcc_generated_files/mcc.c mcc_generated_files/uart1.c mcc_generated_files/adc1.c mcc_generated_files/interrupt_manager.c mcc_generated_files/exceptions.c mcc_generated_files/mccp1_compare.c mcc_generated_files/coretimer.c mcc_generated_files/uart2.c mcc_generated_files/sccp3_compare.c mcc_generated_files/sccp2_compare.c mcc_generated_files/spi2_driver.c mcc_generated_files/tmr1.c main.c atan2Fixed.c command.c control.c monitor.c env.c controlPic.c commandUart.c nvm.c boardType.c
+SOURCEFILES_QUOTED_IF_SPACED=atan2Fixed.c boardType.c command.c commandUart.c control.c controlPic.c env.c main.c monitor.c nvm.c mcc_generated_files/pin_manager.c mcc_generated_files/mcc.c mcc_generated_files/uart1.c mcc_generated_files/adc1.c mcc_generated_files/interrupt_manager.c mcc_generated_files/exceptions.c mcc_generated_files/mccp1_compare.c mcc_generated_files/coretimer.c mcc_generated_files/uart2.c mcc_generated_files/sccp3_compare.c mcc_generated_files/sccp2_compare.c mcc_generated_files/spi2_driver.c mcc_generated_files/tmr1.c
 
 # Object Files Quoted if spaced
-OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/mcc_generated_files/pin_manager.o ${OBJECTDIR}/mcc_generated_files/mcc.o ${OBJECTDIR}/mcc_generated_files/uart1.o ${OBJECTDIR}/mcc_generated_files/adc1.o ${OBJECTDIR}/mcc_generated_files/interrupt_manager.o ${OBJECTDIR}/mcc_generated_files/exceptions.o ${OBJECTDIR}/mcc_generated_files/mccp1_compare.o ${OBJECTDIR}/mcc_generated_files/coretimer.o ${OBJECTDIR}/mcc_generated_files/uart2.o ${OBJECTDIR}/mcc_generated_files/sccp3_compare.o ${OBJECTDIR}/mcc_generated_files/sccp2_compare.o ${OBJECTDIR}/mcc_generated_files/spi2_driver.o ${OBJECTDIR}/mcc_generated_files/tmr1.o ${OBJECTDIR}/main.o ${OBJECTDIR}/atan2Fixed.o ${OBJECTDIR}/command.o ${OBJECTDIR}/control.o ${OBJECTDIR}/monitor.o ${OBJECTDIR}/env.o ${OBJECTDIR}/controlPic.o ${OBJECTDIR}/commandUart.o ${OBJECTDIR}/nvm.o ${OBJECTDIR}/boardType.o
-POSSIBLE_DEPFILES=${OBJECTDIR}/mcc_generated_files/pin_manager.o.d ${OBJECTDIR}/mcc_generated_files/mcc.o.d ${OBJECTDIR}/mcc_generated_files/uart1.o.d ${OBJECTDIR}/mcc_generated_files/adc1.o.d ${OBJECTDIR}/mcc_generated_files/interrupt_manager.o.d ${OBJECTDIR}/mcc_generated_files/exceptions.o.d ${OBJECTDIR}/mcc_generated_files/mccp1_compare.o.d ${OBJECTDIR}/mcc_generated_files/coretimer.o.d ${OBJECTDIR}/mcc_generated_files/uart2.o.d ${OBJECTDIR}/mcc_generated_files/sccp3_compare.o.d ${OBJECTDIR}/mcc_generated_files/sccp2_compare.o.d ${OBJECTDIR}/mcc_generated_files/spi2_driver.o.d ${OBJECTDIR}/mcc_generated_files/tmr1.o.d ${OBJECTDIR}/main.o.d ${OBJECTDIR}/atan2Fixed.o.d ${OBJECTDIR}/command.o.d ${OBJECTDIR}/control.o.d ${OBJECTDIR}/monitor.o.d ${OBJECTDIR}/env.o.d ${OBJECTDIR}/controlPic.o.d ${OBJECTDIR}/commandUart.o.d ${OBJECTDIR}/nvm.o.d ${OBJECTDIR}/boardType.o.d
+OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/atan2Fixed.o ${OBJECTDIR}/boardType.o ${OBJECTDIR}/command.o ${OBJECTDIR}/commandUart.o ${OBJECTDIR}/control.o ${OBJECTDIR}/controlPic.o ${OBJECTDIR}/env.o ${OBJECTDIR}/main.o ${OBJECTDIR}/monitor.o ${OBJECTDIR}/nvm.o ${OBJECTDIR}/mcc_generated_files/pin_manager.o ${OBJECTDIR}/mcc_generated_files/mcc.o ${OBJECTDIR}/mcc_generated_files/uart1.o ${OBJECTDIR}/mcc_generated_files/adc1.o ${OBJECTDIR}/mcc_generated_files/interrupt_manager.o ${OBJECTDIR}/mcc_generated_files/exceptions.o ${OBJECTDIR}/mcc_generated_files/mccp1_compare.o ${OBJECTDIR}/mcc_generated_files/coretimer.o ${OBJECTDIR}/mcc_generated_files/uart2.o ${OBJECTDIR}/mcc_generated_files/sccp3_compare.o ${OBJECTDIR}/mcc_generated_files/sccp2_compare.o ${OBJECTDIR}/mcc_generated_files/spi2_driver.o ${OBJECTDIR}/mcc_generated_files/tmr1.o
+POSSIBLE_DEPFILES=${OBJECTDIR}/atan2Fixed.o.d ${OBJECTDIR}/boardType.o.d ${OBJECTDIR}/command.o.d ${OBJECTDIR}/commandUart.o.d ${OBJECTDIR}/control.o.d ${OBJECTDIR}/controlPic.o.d ${OBJECTDIR}/env.o.d ${OBJECTDIR}/main.o.d ${OBJECTDIR}/monitor.o.d ${OBJECTDIR}/nvm.o.d ${OBJECTDIR}/mcc_generated_files/pin_manager.o.d ${OBJECTDIR}/mcc_generated_files/mcc.o.d ${OBJECTDIR}/mcc_generated_files/uart1.o.d ${OBJECTDIR}/mcc_generated_files/adc1.o.d ${OBJECTDIR}/mcc_generated_files/interrupt_manager.o.d ${OBJECTDIR}/mcc_generated_files/exceptions.o.d ${OBJECTDIR}/mcc_generated_files/mccp1_compare.o.d ${OBJECTDIR}/mcc_generated_files/coretimer.o.d ${OBJECTDIR}/mcc_generated_files/uart2.o.d ${OBJECTDIR}/mcc_generated_files/sccp3_compare.o.d ${OBJECTDIR}/mcc_generated_files/sccp2_compare.o.d ${OBJECTDIR}/mcc_generated_files/spi2_driver.o.d ${OBJECTDIR}/mcc_generated_files/tmr1.o.d
 
 # Object Files
-OBJECTFILES=${OBJECTDIR}/mcc_generated_files/pin_manager.o ${OBJECTDIR}/mcc_generated_files/mcc.o ${OBJECTDIR}/mcc_generated_files/uart1.o ${OBJECTDIR}/mcc_generated_files/adc1.o ${OBJECTDIR}/mcc_generated_files/interrupt_manager.o ${OBJECTDIR}/mcc_generated_files/exceptions.o ${OBJECTDIR}/mcc_generated_files/mccp1_compare.o ${OBJECTDIR}/mcc_generated_files/coretimer.o ${OBJECTDIR}/mcc_generated_files/uart2.o ${OBJECTDIR}/mcc_generated_files/sccp3_compare.o ${OBJECTDIR}/mcc_generated_files/sccp2_compare.o ${OBJECTDIR}/mcc_generated_files/spi2_driver.o ${OBJECTDIR}/mcc_generated_files/tmr1.o ${OBJECTDIR}/main.o ${OBJECTDIR}/atan2Fixed.o ${OBJECTDIR}/command.o ${OBJECTDIR}/control.o ${OBJECTDIR}/monitor.o ${OBJECTDIR}/env.o ${OBJECTDIR}/controlPic.o ${OBJECTDIR}/commandUart.o ${OBJECTDIR}/nvm.o ${OBJECTDIR}/boardType.o
+OBJECTFILES=${OBJECTDIR}/atan2Fixed.o ${OBJECTDIR}/boardType.o ${OBJECTDIR}/command.o ${OBJECTDIR}/commandUart.o ${OBJECTDIR}/control.o ${OBJECTDIR}/controlPic.o ${OBJECTDIR}/env.o ${OBJECTDIR}/main.o ${OBJECTDIR}/monitor.o ${OBJECTDIR}/nvm.o ${OBJECTDIR}/mcc_generated_files/pin_manager.o ${OBJECTDIR}/mcc_generated_files/mcc.o ${OBJECTDIR}/mcc_generated_files/uart1.o ${OBJECTDIR}/mcc_generated_files/adc1.o ${OBJECTDIR}/mcc_generated_files/interrupt_manager.o ${OBJECTDIR}/mcc_generated_files/exceptions.o ${OBJECTDIR}/mcc_generated_files/mccp1_compare.o ${OBJECTDIR}/mcc_generated_files/coretimer.o ${OBJECTDIR}/mcc_generated_files/uart2.o ${OBJECTDIR}/mcc_generated_files/sccp3_compare.o ${OBJECTDIR}/mcc_generated_files/sccp2_compare.o ${OBJECTDIR}/mcc_generated_files/spi2_driver.o ${OBJECTDIR}/mcc_generated_files/tmr1.o
 
 # Source Files
-SOURCEFILES=mcc_generated_files/pin_manager.c mcc_generated_files/mcc.c mcc_generated_files/uart1.c mcc_generated_files/adc1.c mcc_generated_files/interrupt_manager.c mcc_generated_files/exceptions.c mcc_generated_files/mccp1_compare.c mcc_generated_files/coretimer.c mcc_generated_files/uart2.c mcc_generated_files/sccp3_compare.c mcc_generated_files/sccp2_compare.c mcc_generated_files/spi2_driver.c mcc_generated_files/tmr1.c main.c atan2Fixed.c command.c control.c monitor.c env.c controlPic.c commandUart.c nvm.c boardType.c
+SOURCEFILES=atan2Fixed.c boardType.c command.c commandUart.c control.c controlPic.c env.c main.c monitor.c nvm.c mcc_generated_files/pin_manager.c mcc_generated_files/mcc.c mcc_generated_files/uart1.c mcc_generated_files/adc1.c mcc_generated_files/interrupt_manager.c mcc_generated_files/exceptions.c mcc_generated_files/mccp1_compare.c mcc_generated_files/coretimer.c mcc_generated_files/uart2.c mcc_generated_files/sccp3_compare.c mcc_generated_files/sccp2_compare.c mcc_generated_files/spi2_driver.c mcc_generated_files/tmr1.c
 
 
 
@@ -107,6 +107,66 @@ endif
 # ------------------------------------------------------------------------------------
 # Rules for buildStep: compile
 ifeq ($(TYPE_IMAGE), DEBUG_RUN)
+${OBJECTDIR}/atan2Fixed.o: atan2Fixed.c  .generated_files/eab9b5bb1160cfa2740adf9d56b685e4f81a91a7.flag .generated_files/cd268ce93258a529b0fb3dab2d9c2872c1e094b8.flag
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/atan2Fixed.o.d 
+	@${RM} ${OBJECTDIR}/atan2Fixed.o 
+	${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_SIMULATOR=1  -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -fno-toplevel-reorder -D__MPLAB_DEBUGGER_SIMULATOR -Werror -MP -MMD -MF "${OBJECTDIR}/atan2Fixed.o.d" -o ${OBJECTDIR}/atan2Fixed.o atan2Fixed.c    -DXPRJ_Simulation=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
+	
+${OBJECTDIR}/boardType.o: boardType.c  .generated_files/1f2b29d455ce8953873790b86262ce342b137e0f.flag .generated_files/cd268ce93258a529b0fb3dab2d9c2872c1e094b8.flag
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/boardType.o.d 
+	@${RM} ${OBJECTDIR}/boardType.o 
+	${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_SIMULATOR=1  -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -fno-toplevel-reorder -D__MPLAB_DEBUGGER_SIMULATOR -Werror -MP -MMD -MF "${OBJECTDIR}/boardType.o.d" -o ${OBJECTDIR}/boardType.o boardType.c    -DXPRJ_Simulation=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
+	
+${OBJECTDIR}/command.o: command.c  .generated_files/94ee27c12ff4c49dab2b6f8ddf654e4dc7db3af1.flag .generated_files/cd268ce93258a529b0fb3dab2d9c2872c1e094b8.flag
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/command.o.d 
+	@${RM} ${OBJECTDIR}/command.o 
+	${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_SIMULATOR=1  -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -fno-toplevel-reorder -D__MPLAB_DEBUGGER_SIMULATOR -Werror -MP -MMD -MF "${OBJECTDIR}/command.o.d" -o ${OBJECTDIR}/command.o command.c    -DXPRJ_Simulation=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
+	
+${OBJECTDIR}/commandUart.o: commandUart.c  .generated_files/e77e27b7bc9e28d87c97a9886f05d1399e86e102.flag .generated_files/cd268ce93258a529b0fb3dab2d9c2872c1e094b8.flag
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/commandUart.o.d 
+	@${RM} ${OBJECTDIR}/commandUart.o 
+	${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_SIMULATOR=1  -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -fno-toplevel-reorder -D__MPLAB_DEBUGGER_SIMULATOR -Werror -MP -MMD -MF "${OBJECTDIR}/commandUart.o.d" -o ${OBJECTDIR}/commandUart.o commandUart.c    -DXPRJ_Simulation=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
+	
+${OBJECTDIR}/control.o: control.c  .generated_files/a643c5d5081eeff18e057b5a620a4e5f3b24d0ba.flag .generated_files/cd268ce93258a529b0fb3dab2d9c2872c1e094b8.flag
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/control.o.d 
+	@${RM} ${OBJECTDIR}/control.o 
+	${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_SIMULATOR=1  -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -fno-toplevel-reorder -D__MPLAB_DEBUGGER_SIMULATOR -Werror -MP -MMD -MF "${OBJECTDIR}/control.o.d" -o ${OBJECTDIR}/control.o control.c    -DXPRJ_Simulation=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
+	
+${OBJECTDIR}/controlPic.o: controlPic.c  .generated_files/50d7e1e136ba941fce24a93a4f52a132d6d9bdf5.flag .generated_files/cd268ce93258a529b0fb3dab2d9c2872c1e094b8.flag
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/controlPic.o.d 
+	@${RM} ${OBJECTDIR}/controlPic.o 
+	${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_SIMULATOR=1  -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -fno-toplevel-reorder -D__MPLAB_DEBUGGER_SIMULATOR -Werror -MP -MMD -MF "${OBJECTDIR}/controlPic.o.d" -o ${OBJECTDIR}/controlPic.o controlPic.c    -DXPRJ_Simulation=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
+	
+${OBJECTDIR}/env.o: env.c  .generated_files/ff9528544f6eb99ec505fec9bfac13b3ae65c5d.flag .generated_files/cd268ce93258a529b0fb3dab2d9c2872c1e094b8.flag
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/env.o.d 
+	@${RM} ${OBJECTDIR}/env.o 
+	${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_SIMULATOR=1  -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -fno-toplevel-reorder -D__MPLAB_DEBUGGER_SIMULATOR -Werror -MP -MMD -MF "${OBJECTDIR}/env.o.d" -o ${OBJECTDIR}/env.o env.c    -DXPRJ_Simulation=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
+	
+${OBJECTDIR}/main.o: main.c  .generated_files/eab0a7301292da4718c58a69a4317eb6deab8b3a.flag .generated_files/cd268ce93258a529b0fb3dab2d9c2872c1e094b8.flag
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/main.o.d 
+	@${RM} ${OBJECTDIR}/main.o 
+	${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_SIMULATOR=1  -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -fno-toplevel-reorder -D__MPLAB_DEBUGGER_SIMULATOR -Werror -MP -MMD -MF "${OBJECTDIR}/main.o.d" -o ${OBJECTDIR}/main.o main.c    -DXPRJ_Simulation=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
+	
+${OBJECTDIR}/monitor.o: monitor.c  .generated_files/580b683b78b66c7b72022d71856a4deb2c46cc76.flag .generated_files/cd268ce93258a529b0fb3dab2d9c2872c1e094b8.flag
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/monitor.o.d 
+	@${RM} ${OBJECTDIR}/monitor.o 
+	${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_SIMULATOR=1  -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -fno-toplevel-reorder -D__MPLAB_DEBUGGER_SIMULATOR -Werror -MP -MMD -MF "${OBJECTDIR}/monitor.o.d" -o ${OBJECTDIR}/monitor.o monitor.c    -DXPRJ_Simulation=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
+	
+${OBJECTDIR}/nvm.o: nvm.c  .generated_files/9101dd32c21055f0f3cbbd7ff5cf6f2488a50c12.flag .generated_files/cd268ce93258a529b0fb3dab2d9c2872c1e094b8.flag
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/nvm.o.d 
+	@${RM} ${OBJECTDIR}/nvm.o 
+	${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_SIMULATOR=1  -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -fno-toplevel-reorder -D__MPLAB_DEBUGGER_SIMULATOR -Werror -MP -MMD -MF "${OBJECTDIR}/nvm.o.d" -o ${OBJECTDIR}/nvm.o nvm.c    -DXPRJ_Simulation=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
+	
 ${OBJECTDIR}/mcc_generated_files/pin_manager.o: mcc_generated_files/pin_manager.c  .generated_files/f6d4297c0321a7db50a9b640f576439581698412.flag .generated_files/cd268ce93258a529b0fb3dab2d9c2872c1e094b8.flag
 	@${MKDIR} "${OBJECTDIR}/mcc_generated_files" 
 	@${RM} ${OBJECTDIR}/mcc_generated_files/pin_manager.o.d 
@@ -185,67 +245,67 @@ ${OBJECTDIR}/mcc_generated_files/tmr1.o: mcc_generated_files/tmr1.c  .generated_
 	@${RM} ${OBJECTDIR}/mcc_generated_files/tmr1.o 
 	${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_SIMULATOR=1  -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -fno-toplevel-reorder -D__MPLAB_DEBUGGER_SIMULATOR -Werror -MP -MMD -MF "${OBJECTDIR}/mcc_generated_files/tmr1.o.d" -o ${OBJECTDIR}/mcc_generated_files/tmr1.o mcc_generated_files/tmr1.c    -DXPRJ_Simulation=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
 	
-${OBJECTDIR}/main.o: main.c  .generated_files/eab0a7301292da4718c58a69a4317eb6deab8b3a.flag .generated_files/cd268ce93258a529b0fb3dab2d9c2872c1e094b8.flag
-	@${MKDIR} "${OBJECTDIR}" 
-	@${RM} ${OBJECTDIR}/main.o.d 
-	@${RM} ${OBJECTDIR}/main.o 
-	${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_SIMULATOR=1  -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -fno-toplevel-reorder -D__MPLAB_DEBUGGER_SIMULATOR -Werror -MP -MMD -MF "${OBJECTDIR}/main.o.d" -o ${OBJECTDIR}/main.o main.c    -DXPRJ_Simulation=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
-	
-${OBJECTDIR}/atan2Fixed.o: atan2Fixed.c  .generated_files/eab9b5bb1160cfa2740adf9d56b685e4f81a91a7.flag .generated_files/cd268ce93258a529b0fb3dab2d9c2872c1e094b8.flag
+else
+${OBJECTDIR}/atan2Fixed.o: atan2Fixed.c  .generated_files/180a0c08aea7a645d5f3f66617700b44549af1a5.flag .generated_files/cd268ce93258a529b0fb3dab2d9c2872c1e094b8.flag
 	@${MKDIR} "${OBJECTDIR}" 
 	@${RM} ${OBJECTDIR}/atan2Fixed.o.d 
 	@${RM} ${OBJECTDIR}/atan2Fixed.o 
-	${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_SIMULATOR=1  -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -fno-toplevel-reorder -D__MPLAB_DEBUGGER_SIMULATOR -Werror -MP -MMD -MF "${OBJECTDIR}/atan2Fixed.o.d" -o ${OBJECTDIR}/atan2Fixed.o atan2Fixed.c    -DXPRJ_Simulation=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
+	${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -fno-toplevel-reorder -D__MPLAB_DEBUGGER_SIMULATOR -Werror -MP -MMD -MF "${OBJECTDIR}/atan2Fixed.o.d" -o ${OBJECTDIR}/atan2Fixed.o atan2Fixed.c    -DXPRJ_Simulation=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
 	
-${OBJECTDIR}/command.o: command.c  .generated_files/94ee27c12ff4c49dab2b6f8ddf654e4dc7db3af1.flag .generated_files/cd268ce93258a529b0fb3dab2d9c2872c1e094b8.flag
-	@${MKDIR} "${OBJECTDIR}" 
-	@${RM} ${OBJECTDIR}/command.o.d 
-	@${RM} ${OBJECTDIR}/command.o 
-	${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_SIMULATOR=1  -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -fno-toplevel-reorder -D__MPLAB_DEBUGGER_SIMULATOR -Werror -MP -MMD -MF "${OBJECTDIR}/command.o.d" -o ${OBJECTDIR}/command.o command.c    -DXPRJ_Simulation=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
-	
-${OBJECTDIR}/control.o: control.c  .generated_files/a643c5d5081eeff18e057b5a620a4e5f3b24d0ba.flag .generated_files/cd268ce93258a529b0fb3dab2d9c2872c1e094b8.flag
-	@${MKDIR} "${OBJECTDIR}" 
-	@${RM} ${OBJECTDIR}/control.o.d 
-	@${RM} ${OBJECTDIR}/control.o 
-	${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_SIMULATOR=1  -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -fno-toplevel-reorder -D__MPLAB_DEBUGGER_SIMULATOR -Werror -MP -MMD -MF "${OBJECTDIR}/control.o.d" -o ${OBJECTDIR}/control.o control.c    -DXPRJ_Simulation=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
-	
-${OBJECTDIR}/monitor.o: monitor.c  .generated_files/580b683b78b66c7b72022d71856a4deb2c46cc76.flag .generated_files/cd268ce93258a529b0fb3dab2d9c2872c1e094b8.flag
-	@${MKDIR} "${OBJECTDIR}" 
-	@${RM} ${OBJECTDIR}/monitor.o.d 
-	@${RM} ${OBJECTDIR}/monitor.o 
-	${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_SIMULATOR=1  -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -fno-toplevel-reorder -D__MPLAB_DEBUGGER_SIMULATOR -Werror -MP -MMD -MF "${OBJECTDIR}/monitor.o.d" -o ${OBJECTDIR}/monitor.o monitor.c    -DXPRJ_Simulation=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
-	
-${OBJECTDIR}/env.o: env.c  .generated_files/ff9528544f6eb99ec505fec9bfac13b3ae65c5d.flag .generated_files/cd268ce93258a529b0fb3dab2d9c2872c1e094b8.flag
-	@${MKDIR} "${OBJECTDIR}" 
-	@${RM} ${OBJECTDIR}/env.o.d 
-	@${RM} ${OBJECTDIR}/env.o 
-	${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_SIMULATOR=1  -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -fno-toplevel-reorder -D__MPLAB_DEBUGGER_SIMULATOR -Werror -MP -MMD -MF "${OBJECTDIR}/env.o.d" -o ${OBJECTDIR}/env.o env.c    -DXPRJ_Simulation=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
-	
-${OBJECTDIR}/controlPic.o: controlPic.c  .generated_files/50d7e1e136ba941fce24a93a4f52a132d6d9bdf5.flag .generated_files/cd268ce93258a529b0fb3dab2d9c2872c1e094b8.flag
-	@${MKDIR} "${OBJECTDIR}" 
-	@${RM} ${OBJECTDIR}/controlPic.o.d 
-	@${RM} ${OBJECTDIR}/controlPic.o 
-	${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_SIMULATOR=1  -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -fno-toplevel-reorder -D__MPLAB_DEBUGGER_SIMULATOR -Werror -MP -MMD -MF "${OBJECTDIR}/controlPic.o.d" -o ${OBJECTDIR}/controlPic.o controlPic.c    -DXPRJ_Simulation=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
-	
-${OBJECTDIR}/commandUart.o: commandUart.c  .generated_files/e77e27b7bc9e28d87c97a9886f05d1399e86e102.flag .generated_files/cd268ce93258a529b0fb3dab2d9c2872c1e094b8.flag
-	@${MKDIR} "${OBJECTDIR}" 
-	@${RM} ${OBJECTDIR}/commandUart.o.d 
-	@${RM} ${OBJECTDIR}/commandUart.o 
-	${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_SIMULATOR=1  -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -fno-toplevel-reorder -D__MPLAB_DEBUGGER_SIMULATOR -Werror -MP -MMD -MF "${OBJECTDIR}/commandUart.o.d" -o ${OBJECTDIR}/commandUart.o commandUart.c    -DXPRJ_Simulation=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
-	
-${OBJECTDIR}/nvm.o: nvm.c  .generated_files/9101dd32c21055f0f3cbbd7ff5cf6f2488a50c12.flag .generated_files/cd268ce93258a529b0fb3dab2d9c2872c1e094b8.flag
-	@${MKDIR} "${OBJECTDIR}" 
-	@${RM} ${OBJECTDIR}/nvm.o.d 
-	@${RM} ${OBJECTDIR}/nvm.o 
-	${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_SIMULATOR=1  -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -fno-toplevel-reorder -D__MPLAB_DEBUGGER_SIMULATOR -Werror -MP -MMD -MF "${OBJECTDIR}/nvm.o.d" -o ${OBJECTDIR}/nvm.o nvm.c    -DXPRJ_Simulation=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
-	
-${OBJECTDIR}/boardType.o: boardType.c  .generated_files/1f2b29d455ce8953873790b86262ce342b137e0f.flag .generated_files/cd268ce93258a529b0fb3dab2d9c2872c1e094b8.flag
+${OBJECTDIR}/boardType.o: boardType.c  .generated_files/af92f5bcd7670040d1dfa6a285c6c023d8c339e9.flag .generated_files/cd268ce93258a529b0fb3dab2d9c2872c1e094b8.flag
 	@${MKDIR} "${OBJECTDIR}" 
 	@${RM} ${OBJECTDIR}/boardType.o.d 
 	@${RM} ${OBJECTDIR}/boardType.o 
-	${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_SIMULATOR=1  -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -fno-toplevel-reorder -D__MPLAB_DEBUGGER_SIMULATOR -Werror -MP -MMD -MF "${OBJECTDIR}/boardType.o.d" -o ${OBJECTDIR}/boardType.o boardType.c    -DXPRJ_Simulation=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
+	${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -fno-toplevel-reorder -D__MPLAB_DEBUGGER_SIMULATOR -Werror -MP -MMD -MF "${OBJECTDIR}/boardType.o.d" -o ${OBJECTDIR}/boardType.o boardType.c    -DXPRJ_Simulation=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
 	
-else
+${OBJECTDIR}/command.o: command.c  .generated_files/9e18a854f0a760a6c012037371dbc0f85b64f5df.flag .generated_files/cd268ce93258a529b0fb3dab2d9c2872c1e094b8.flag
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/command.o.d 
+	@${RM} ${OBJECTDIR}/command.o 
+	${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -fno-toplevel-reorder -D__MPLAB_DEBUGGER_SIMULATOR -Werror -MP -MMD -MF "${OBJECTDIR}/command.o.d" -o ${OBJECTDIR}/command.o command.c    -DXPRJ_Simulation=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
+	
+${OBJECTDIR}/commandUart.o: commandUart.c  .generated_files/556da5f25405a1df4f6652fb12c0cd0a687cc218.flag .generated_files/cd268ce93258a529b0fb3dab2d9c2872c1e094b8.flag
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/commandUart.o.d 
+	@${RM} ${OBJECTDIR}/commandUart.o 
+	${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -fno-toplevel-reorder -D__MPLAB_DEBUGGER_SIMULATOR -Werror -MP -MMD -MF "${OBJECTDIR}/commandUart.o.d" -o ${OBJECTDIR}/commandUart.o commandUart.c    -DXPRJ_Simulation=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
+	
+${OBJECTDIR}/control.o: control.c  .generated_files/adcbf44278c0e1471fa3bf83c0503c32bd063d58.flag .generated_files/cd268ce93258a529b0fb3dab2d9c2872c1e094b8.flag
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/control.o.d 
+	@${RM} ${OBJECTDIR}/control.o 
+	${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -fno-toplevel-reorder -D__MPLAB_DEBUGGER_SIMULATOR -Werror -MP -MMD -MF "${OBJECTDIR}/control.o.d" -o ${OBJECTDIR}/control.o control.c    -DXPRJ_Simulation=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
+	
+${OBJECTDIR}/controlPic.o: controlPic.c  .generated_files/4098f6e7ac9fd7caa157ab6651f1e660af3ef40f.flag .generated_files/cd268ce93258a529b0fb3dab2d9c2872c1e094b8.flag
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/controlPic.o.d 
+	@${RM} ${OBJECTDIR}/controlPic.o 
+	${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -fno-toplevel-reorder -D__MPLAB_DEBUGGER_SIMULATOR -Werror -MP -MMD -MF "${OBJECTDIR}/controlPic.o.d" -o ${OBJECTDIR}/controlPic.o controlPic.c    -DXPRJ_Simulation=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
+	
+${OBJECTDIR}/env.o: env.c  .generated_files/cabacd41f101dcfe69e94ad87b70aea451529003.flag .generated_files/cd268ce93258a529b0fb3dab2d9c2872c1e094b8.flag
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/env.o.d 
+	@${RM} ${OBJECTDIR}/env.o 
+	${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -fno-toplevel-reorder -D__MPLAB_DEBUGGER_SIMULATOR -Werror -MP -MMD -MF "${OBJECTDIR}/env.o.d" -o ${OBJECTDIR}/env.o env.c    -DXPRJ_Simulation=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
+	
+${OBJECTDIR}/main.o: main.c  .generated_files/e5e363b6b52435524c142cdfc0b1e35a78495f2a.flag .generated_files/cd268ce93258a529b0fb3dab2d9c2872c1e094b8.flag
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/main.o.d 
+	@${RM} ${OBJECTDIR}/main.o 
+	${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -fno-toplevel-reorder -D__MPLAB_DEBUGGER_SIMULATOR -Werror -MP -MMD -MF "${OBJECTDIR}/main.o.d" -o ${OBJECTDIR}/main.o main.c    -DXPRJ_Simulation=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
+	
+${OBJECTDIR}/monitor.o: monitor.c  .generated_files/b7c7d06100605d8dc979645d7039f78867d9b838.flag .generated_files/cd268ce93258a529b0fb3dab2d9c2872c1e094b8.flag
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/monitor.o.d 
+	@${RM} ${OBJECTDIR}/monitor.o 
+	${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -fno-toplevel-reorder -D__MPLAB_DEBUGGER_SIMULATOR -Werror -MP -MMD -MF "${OBJECTDIR}/monitor.o.d" -o ${OBJECTDIR}/monitor.o monitor.c    -DXPRJ_Simulation=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
+	
+${OBJECTDIR}/nvm.o: nvm.c  .generated_files/a160a39bab4d0a87be956741489a69b06f2b4aa5.flag .generated_files/cd268ce93258a529b0fb3dab2d9c2872c1e094b8.flag
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/nvm.o.d 
+	@${RM} ${OBJECTDIR}/nvm.o 
+	${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -fno-toplevel-reorder -D__MPLAB_DEBUGGER_SIMULATOR -Werror -MP -MMD -MF "${OBJECTDIR}/nvm.o.d" -o ${OBJECTDIR}/nvm.o nvm.c    -DXPRJ_Simulation=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
+	
 ${OBJECTDIR}/mcc_generated_files/pin_manager.o: mcc_generated_files/pin_manager.c  .generated_files/28d9fbe5cbb3950eae81b2959804f5b9b49f5e02.flag .generated_files/cd268ce93258a529b0fb3dab2d9c2872c1e094b8.flag
 	@${MKDIR} "${OBJECTDIR}/mcc_generated_files" 
 	@${RM} ${OBJECTDIR}/mcc_generated_files/pin_manager.o.d 
@@ -323,66 +383,6 @@ ${OBJECTDIR}/mcc_generated_files/tmr1.o: mcc_generated_files/tmr1.c  .generated_
 	@${RM} ${OBJECTDIR}/mcc_generated_files/tmr1.o.d 
 	@${RM} ${OBJECTDIR}/mcc_generated_files/tmr1.o 
 	${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -fno-toplevel-reorder -D__MPLAB_DEBUGGER_SIMULATOR -Werror -MP -MMD -MF "${OBJECTDIR}/mcc_generated_files/tmr1.o.d" -o ${OBJECTDIR}/mcc_generated_files/tmr1.o mcc_generated_files/tmr1.c    -DXPRJ_Simulation=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
-	
-${OBJECTDIR}/main.o: main.c  .generated_files/e5e363b6b52435524c142cdfc0b1e35a78495f2a.flag .generated_files/cd268ce93258a529b0fb3dab2d9c2872c1e094b8.flag
-	@${MKDIR} "${OBJECTDIR}" 
-	@${RM} ${OBJECTDIR}/main.o.d 
-	@${RM} ${OBJECTDIR}/main.o 
-	${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -fno-toplevel-reorder -D__MPLAB_DEBUGGER_SIMULATOR -Werror -MP -MMD -MF "${OBJECTDIR}/main.o.d" -o ${OBJECTDIR}/main.o main.c    -DXPRJ_Simulation=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
-	
-${OBJECTDIR}/atan2Fixed.o: atan2Fixed.c  .generated_files/180a0c08aea7a645d5f3f66617700b44549af1a5.flag .generated_files/cd268ce93258a529b0fb3dab2d9c2872c1e094b8.flag
-	@${MKDIR} "${OBJECTDIR}" 
-	@${RM} ${OBJECTDIR}/atan2Fixed.o.d 
-	@${RM} ${OBJECTDIR}/atan2Fixed.o 
-	${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -fno-toplevel-reorder -D__MPLAB_DEBUGGER_SIMULATOR -Werror -MP -MMD -MF "${OBJECTDIR}/atan2Fixed.o.d" -o ${OBJECTDIR}/atan2Fixed.o atan2Fixed.c    -DXPRJ_Simulation=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
-	
-${OBJECTDIR}/command.o: command.c  .generated_files/9e18a854f0a760a6c012037371dbc0f85b64f5df.flag .generated_files/cd268ce93258a529b0fb3dab2d9c2872c1e094b8.flag
-	@${MKDIR} "${OBJECTDIR}" 
-	@${RM} ${OBJECTDIR}/command.o.d 
-	@${RM} ${OBJECTDIR}/command.o 
-	${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -fno-toplevel-reorder -D__MPLAB_DEBUGGER_SIMULATOR -Werror -MP -MMD -MF "${OBJECTDIR}/command.o.d" -o ${OBJECTDIR}/command.o command.c    -DXPRJ_Simulation=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
-	
-${OBJECTDIR}/control.o: control.c  .generated_files/adcbf44278c0e1471fa3bf83c0503c32bd063d58.flag .generated_files/cd268ce93258a529b0fb3dab2d9c2872c1e094b8.flag
-	@${MKDIR} "${OBJECTDIR}" 
-	@${RM} ${OBJECTDIR}/control.o.d 
-	@${RM} ${OBJECTDIR}/control.o 
-	${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -fno-toplevel-reorder -D__MPLAB_DEBUGGER_SIMULATOR -Werror -MP -MMD -MF "${OBJECTDIR}/control.o.d" -o ${OBJECTDIR}/control.o control.c    -DXPRJ_Simulation=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
-	
-${OBJECTDIR}/monitor.o: monitor.c  .generated_files/b7c7d06100605d8dc979645d7039f78867d9b838.flag .generated_files/cd268ce93258a529b0fb3dab2d9c2872c1e094b8.flag
-	@${MKDIR} "${OBJECTDIR}" 
-	@${RM} ${OBJECTDIR}/monitor.o.d 
-	@${RM} ${OBJECTDIR}/monitor.o 
-	${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -fno-toplevel-reorder -D__MPLAB_DEBUGGER_SIMULATOR -Werror -MP -MMD -MF "${OBJECTDIR}/monitor.o.d" -o ${OBJECTDIR}/monitor.o monitor.c    -DXPRJ_Simulation=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
-	
-${OBJECTDIR}/env.o: env.c  .generated_files/cabacd41f101dcfe69e94ad87b70aea451529003.flag .generated_files/cd268ce93258a529b0fb3dab2d9c2872c1e094b8.flag
-	@${MKDIR} "${OBJECTDIR}" 
-	@${RM} ${OBJECTDIR}/env.o.d 
-	@${RM} ${OBJECTDIR}/env.o 
-	${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -fno-toplevel-reorder -D__MPLAB_DEBUGGER_SIMULATOR -Werror -MP -MMD -MF "${OBJECTDIR}/env.o.d" -o ${OBJECTDIR}/env.o env.c    -DXPRJ_Simulation=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
-	
-${OBJECTDIR}/controlPic.o: controlPic.c  .generated_files/4098f6e7ac9fd7caa157ab6651f1e660af3ef40f.flag .generated_files/cd268ce93258a529b0fb3dab2d9c2872c1e094b8.flag
-	@${MKDIR} "${OBJECTDIR}" 
-	@${RM} ${OBJECTDIR}/controlPic.o.d 
-	@${RM} ${OBJECTDIR}/controlPic.o 
-	${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -fno-toplevel-reorder -D__MPLAB_DEBUGGER_SIMULATOR -Werror -MP -MMD -MF "${OBJECTDIR}/controlPic.o.d" -o ${OBJECTDIR}/controlPic.o controlPic.c    -DXPRJ_Simulation=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
-	
-${OBJECTDIR}/commandUart.o: commandUart.c  .generated_files/556da5f25405a1df4f6652fb12c0cd0a687cc218.flag .generated_files/cd268ce93258a529b0fb3dab2d9c2872c1e094b8.flag
-	@${MKDIR} "${OBJECTDIR}" 
-	@${RM} ${OBJECTDIR}/commandUart.o.d 
-	@${RM} ${OBJECTDIR}/commandUart.o 
-	${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -fno-toplevel-reorder -D__MPLAB_DEBUGGER_SIMULATOR -Werror -MP -MMD -MF "${OBJECTDIR}/commandUart.o.d" -o ${OBJECTDIR}/commandUart.o commandUart.c    -DXPRJ_Simulation=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
-	
-${OBJECTDIR}/nvm.o: nvm.c  .generated_files/a160a39bab4d0a87be956741489a69b06f2b4aa5.flag .generated_files/cd268ce93258a529b0fb3dab2d9c2872c1e094b8.flag
-	@${MKDIR} "${OBJECTDIR}" 
-	@${RM} ${OBJECTDIR}/nvm.o.d 
-	@${RM} ${OBJECTDIR}/nvm.o 
-	${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -fno-toplevel-reorder -D__MPLAB_DEBUGGER_SIMULATOR -Werror -MP -MMD -MF "${OBJECTDIR}/nvm.o.d" -o ${OBJECTDIR}/nvm.o nvm.c    -DXPRJ_Simulation=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
-	
-${OBJECTDIR}/boardType.o: boardType.c  .generated_files/af92f5bcd7670040d1dfa6a285c6c023d8c339e9.flag .generated_files/cd268ce93258a529b0fb3dab2d9c2872c1e094b8.flag
-	@${MKDIR} "${OBJECTDIR}" 
-	@${RM} ${OBJECTDIR}/boardType.o.d 
-	@${RM} ${OBJECTDIR}/boardType.o 
-	${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -fno-toplevel-reorder -D__MPLAB_DEBUGGER_SIMULATOR -Werror -MP -MMD -MF "${OBJECTDIR}/boardType.o.d" -o ${OBJECTDIR}/boardType.o boardType.c    -DXPRJ_Simulation=$(CND_CONF)  -legacy-libc  $(COMPARISON_BUILD)  -mdfp="${DFP_DIR}"  
 	
 endif
 

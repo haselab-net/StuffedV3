@@ -43,6 +43,7 @@ int underflowCount;
 #ifdef PIC
 #define DISABLE_INTERRUPT 	asm volatile("di"); // Disable all interrupts  
 #define ENABLE_INTERRUPT	asm volatile("ei"); // Enable all interrupt	
+void controlInitPic();
 #endif
 
 
@@ -81,7 +82,7 @@ inline unsigned char targetsReadAvail(){
 
 
 void updateMotorState(){
-    static u_short count;
+    static unsigned short count;
 	int i;
 	readADC();
     for(i=0; i<NMOTOR; ++i){
@@ -200,7 +201,7 @@ inline int truncate(int min, int val, int max){
 void currentControl(){
     const SDEC DIFF_ZERO_LIMIT = SDEC_ONE / 16;
 	int i;
-    SDEC diff;
+    SDEC diff=0;
     int sign;
 	for(i=0; i<NCURRENT && i<NMOTOR; ++i){
         if (currentTarget[i] > 0){

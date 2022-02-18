@@ -1,5 +1,4 @@
-#ifndef ENV_H
-#define ENV_H
+#pragma once
 
 /**	env.h
  * This file defines build enviroment and purpose related thigns.
@@ -13,6 +12,15 @@
 
 #ifdef __XC32
  #define PIC	1
+ #if 1
+  #define PIC32MK_MCJ 1
+ #elif defined __32MK0512MCJ064__
+  #define PIC32MK_MCJ 1
+ #elif defined __32MM0064GPL036__
+  #define PIC32MM 1
+ #else
+  #error
+ #endif
 #elif defined __xtensa__
  #define WROOM	1
 #elif defined _WIN32
@@ -75,6 +83,4 @@ extern "C"{
 #else
 #define  logPrintf	printf
 #define  conPrintf	printf
-#endif
-
 #endif

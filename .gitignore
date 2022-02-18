@@ -15,6 +15,9 @@ WROOM/GTAGS
 PCRobokey/bin
 PCRobokey/obj
 PCRobokey/.vs
+PCController/.vs
+PCController/bin
+PCController/obj
 OTA/.vscode
 OTA/build
 OTA/sdkconfig

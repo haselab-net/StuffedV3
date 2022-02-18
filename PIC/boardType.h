@@ -1,21 +1,18 @@
 #pragma once
-#include "commandCommon.h"
+#include "env.h"
 
-#if 0
-#define BOARD1_MOTORDRIVER		//	1st board without WROOM
-#elif 0
-#define BOARD2_COMBINATION		//	2nd board with WROOM
-#elif 0
-#define BOARD3_SEPARATE         //	3nd board WROOM only / pic only New
-#elif 1
-#define BOARD4                  //	4th board WROOM Updated (new pin assing) and current read fast RX PIC board
-#elif 1
-# ifdef PIC
-# define BOARD4
-# else
-# define BOARD3_SEPARATE
-#endif
-
+#ifdef PIC32MK_MCJ
+    #define BOARD5
+#else
+    #if 0
+     #define BOARD1_MOTORDRIVER		//	1st board without WROOM
+    #elif 0
+     #define BOARD2_COMBINATION		//	2nd board with WROOM
+    #elif 0
+     #define BOARD3_SEPARATE         //	3nd board WROOM only / pic only New
+    #elif 1
+     #define BOARD4                  //	4th board WROOM Updated (new pin assing) and current read fast RX PIC board
+    #endif
 #endif
 
 #ifndef WROOM
@@ -35,6 +32,8 @@
  #define BOARD_TYPE BT_B3M	//	B3M or B3F
 #elif defined BOARD4
  #define BOARD_TYPE BT_B3M	//	B3M or B3F
+#elif defined BOARD5
+ #define BOARD_TYPE BT_B5M  
 #endif
  
 #define BOARD_ID	1

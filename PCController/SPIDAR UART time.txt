@@ -1,0 +1,24 @@
+CMD
+current:	1+ 2*4 = 9
+pad		20
+
+RET
+current:	1+ 4*4 = 17
+
+			wait = retLen - board->CmdLen() + 20;
+
+
+wait = 17 - 9 + 20 = 28
+
+
+len = 28 + 9 = 37
+
+
+37 characters for 1 board
+
+
+2MBPS = 200k Byte /sec
+
+200 bytes are maximum 
+
+37 * 3 = 111.

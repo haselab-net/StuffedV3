@@ -21,6 +21,7 @@ extern SDEC getTouch(int i);
 #else
 static inline SDEC getTouch(int i){
     PIC_LOGE("getTouch called");
+    return (SDEC)-1;
 }
 #endif
 
