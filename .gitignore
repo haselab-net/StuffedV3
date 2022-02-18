@@ -9,6 +9,8 @@ PIC/.vscode
 PIC/.generated_files
 PIC/build
 PIC/dist/*/production
+PIC32MK/PIC_Harmony
+PIC32MK/firmware/PIC_MK_MotorDriver.X
 WROOM/GPATH
 WROOM/GRTAGS
 WROOM/GTAGS
