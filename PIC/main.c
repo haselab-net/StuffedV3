@@ -32,6 +32,7 @@
 #include "mcc_generated_files/mcc.h"
 #elif defined PIC32MK_MCJ
 #include "definitions.h"
+#include "initMk.h"
 #else
  #error
 #endif
@@ -55,7 +56,7 @@ int main(void)
 #ifdef PIC32MM    
     SYSTEM_Initialize();
 #elif defined PIC32MK_MCJ
-    SYS_Initialize(NULL);
+    initMk();
 #else
 #error
 #endif
@@ -66,7 +67,7 @@ int main(void)
     printf("Borad ID:%d Model:%d nTargets:%d nMotor:%d nCurrent:%d nForce:%d\r\n", boardId, MODEL_NUMBER, NTARGET, NMOTOR, NCURRENT, NFORCE);
     controlInit();
 	commandInit();
-	commandUartInit();
+//	commandUartInit();
 	setPwm(0, SDEC_ONE*0.1);
 #if 0
     printf("UMRXREG=%x ", UMRXREG);

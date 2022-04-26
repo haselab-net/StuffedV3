@@ -1,4 +1,6 @@
-#pragma once
+#ifndef PIC_UART_H
+#define PIC_UART_H
+
 #include "boardType.h"
 #include "nvm.h"
 
@@ -50,11 +52,11 @@
     #define _UARTC_RX_VECTOR	_UART2_RX_VECTOR
     #define UARTC_Initialize	UART2_Initialize
 #elif defined BOARD5
-    #define UMSTA	U1STA
-    #define UMSTAbits	U1STAbits
-    #define UMTXREG	U1TXREG
-    #define UMRXREG	U1RXREG
+    #define UMSTA U1STA
+    #define UMTXREG U1TXREG
+    #define UMRXREG U1RXREG
     #define UMBRG U1BRG
+    #define UMSTAbits U1STAbits
 
     #define UCSTA	U2STA
     #define UCSTAbits	U2STAbits
@@ -78,3 +80,6 @@
 
 #define setBaudrate(r, b)   ((r) = ((6000000-1) / (b) ))
 #define getBaudrate(b, r)   ((b) = (6000000 / ((r)+1)))
+
+#endif
+        

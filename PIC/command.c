@@ -3,8 +3,8 @@
 #include "control.h"
 #include "boardType.h"
 #include "nvm.h"
-#include "uart.h"
 #include <string.h>
+#include "uart.h"
 #ifdef WROOM
 #include "../WROOM/components/SoftRobot/commandWROOM.h"
 #endif

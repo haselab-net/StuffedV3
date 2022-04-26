@@ -11,6 +11,7 @@
 #include <assert.h>
 
 #include "spiPwmDefs.h"
+#include "controlPic.h"
 
 
 SDEC mcosOffset[NAXIS] ={
@@ -311,7 +312,9 @@ inline void setSpiPwm128(SDEC ratio){
 }
 
 #if defined BOARD1_MOTORDRIVER
-void setPwm(int ch, SDEC ratio){
+void 
+
+(int ch, SDEC ratio){
 	//	Connector at the left most.
     if (ch == 0){
 		if (ratio < 0){
@@ -457,8 +460,36 @@ void setPwm(int ch, SDEC ratio){
     }
 }
 #elif defined BOARD5
+void setPHLevel(int ch, int val){
+    printf("setPHLevel(%d, %d)", ch, val);
+    GPIO_RC7_OutputEnable();
+    switch(ch){
+        case 0:
+            val ? GPIO_RC7_Set() : GPIO_RC7_Clear();    //  
+            break;    
+        case 1:
+            val ? GPIO_RC9_Set() : GPIO_RC9_Clear();    //  BPH
+            break;    
+        case 2:
+            val ? GPIO_RG7_Set() : GPIO_RG7_Clear();
+            break;    
+        case 3:
+            val ? GPIO_RF1_Set() : GPIO_RF1_Clear();
+            break;    
+    }
+}
 void setPwm(int ch, SDEC ratio){
-    
+    GPIO_RC8_Set();  //  BEN
+
+    #define PWM_PERIOD  50
+    int reverse = 0;
+    if (ratio < 0){
+        ratio = -ratio;
+        reverse = 1;
+    }
+    int pwm = (((int)ratio) * PWM_PERIOD) >> SDEC_BITS;
+    MCPWM_ChannelPrimaryDutySet(ch, pwm);
+    setPHLevel(ch, reverse);
 }
 #else
 #error
@@ -487,7 +518,7 @@ void controlInitPic(){
     addrSPI2BUF = (unsigned int)&SPI2BUF;
 	//	disable interrupt
 	IEC1bits.SPI2EIE = IEC1bits.SPI2RXIE = IEC1bits.SPI2TXIE = 0;
-	i = SPI2BUF;	//	clear receive buf;
+	int i = SPI2BUF;	//	clear receive buf;
 	IFS1bits.SPI2EIF = IFS1bits.SPI2RXIF = IFS1bits.SPI2TXIF = 0;
 	IPC9bits.SPI2EIP = IPC9bits.SPI2EIS = IPC9bits.SPI2RXIP = IPC9bits.SPI2RXIS = 0;
 	IPC9bits.SPI2TXIP = 5;
@@ -520,7 +551,6 @@ void onControlTimer(){
 	controlLoop();
 	LATCbits.LATC2 = 0;	//	LED OFF
 #elif PIC32MK_MCJ
-    //  TODO: switch on LED
 	controlLoop();
 #else
 #error

@@ -1,12 +1,16 @@
 #include "env.h"
 #include "fixed.h"
-#include "embeddedFramework.h"
 #include "control.h"
 #include "command.h"
 #include "uart.h"
 #include "nvm.h"
 #include <stdio.h>
-bool monOut();
+#ifdef PIC32MK_MCJ
+#include "embeddedFramework.h"
+#include "mkCoreTimer.h"
+#endif
+
+extern bool monOut();
 
 void outTest(int dir){
     static int pos;
@@ -189,16 +193,22 @@ void pwmUp(){
 //	if (pwm[motorCh] < 10) pwm[motorCh] ++;
 	if (pwm[motorCh] < SDEC_ONE) pwm[motorCh] ++;
 	printf("Set pwm %d to motor %d \r\n", pwm[motorCh], motorCh);
-//	setPwm(motorCh, pwm[motorCh] * (SDEC_ONE/10));
-	setPwm(motorCh, pwm[motorCh]);
+	setPwm(motorCh, pwm[motorCh] * (SDEC_ONE/50));
+//	setPwm(motorCh, pwm[motorCh]);
 }
 void pwmDown(){
 //	if (pwm[motorCh] > -10) pwm[motorCh] --;
 	if (pwm[motorCh] > -SDEC_ONE) pwm[motorCh] --;
 	printf("Set pwm %d to motor %d \r\n", pwm[motorCh], motorCh);
-//	setPwm(motorCh, pwm[motorCh] * (SDEC_ONE/10));
-	setPwm(motorCh, pwm[motorCh]);
+	setPwm(motorCh, pwm[motorCh] * (SDEC_ONE/50));
+//	setPwm(motorCh, pwm[motorCh]);
 }
+void showPwm(){
+#ifdef PIC32MK_MCJ    
+	printf("Pwm ct:%d \r\n", PMTMR);
+#endif
+}
+
 static unsigned short useRx = 0;
 void enableRx(){
     useRx = 0xFFFF;
@@ -278,8 +288,9 @@ struct MonitorFunc monitors[] = {
 	{'m', "Select motor", selectMotor, false},
 	{'P', "Pwm up", pwmUp, false},
 	{'p', "Pwm down", pwmDown, false},
+	{'w', "Pwm status", showPwm, true},
 	{'g', "Print GP", printGp, true},
-	{'w', "Write NVM", nvmWriteTest, false},
+	{'W', "Write NVM", nvmWriteTest, false},
 	{'n', "Read NVM", nvmReadTest, false},
 	{'E', "End monitor", disableRx, false},
 };

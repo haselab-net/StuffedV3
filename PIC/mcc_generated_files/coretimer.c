@@ -50,6 +50,7 @@
 
 #include <xc.h>
 #include "coretimer.h"
+#include "../controlPic.h"
 
 /**
   Section: Core Timer Module APIs
