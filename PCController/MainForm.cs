@@ -287,7 +287,7 @@ namespace PCController
             }
 			else if (tbControl.SelectedTab == tpCurrent)
             {
-                UpdateCurrent();
+                //UpdateCurrent();
             }
 			else if (tbControl.SelectedTab == tpMagnet) {
                 UpdateMagnet();
@@ -494,6 +494,113 @@ namespace PCController
             if (bHaptic) btHapticStart_Click(sender, e);
         }
 
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+            //var text = ((TextBox)sender).Text;
+
+            //var values = text.Split(',');
+
+            //if (values.Length == 2)
+            //{
+            //    var curr0 = Convert.ToInt32(values[0]);
+            //    var curr1 = Convert.ToInt32(values[1]);
+
+            //    // do
+            //}
+
+        }
+
+        private short[] currentBuffer = new short[4] { 0, 0, 0, 0 };
+        private System.Windows.Forms.Timer _timer = new System.Windows.Forms.Timer();
+        private void button1_Click(object sender, EventArgs e)
+        {
+            var text = tbCurrents1.Text;
+
+            _timer.Enabled = true;
+            _timer.Interval = 1000;
+            _timer.Tick += (s, arg) =>
+            {
+                currentBuffer[0] = 0;
+                currentBuffer[1] = 0;
+
+                boards.SendCurrent(currentBuffer);
+
+
+                ((System.Windows.Forms.Timer)s).Stop();
+            };
+
+            var values = text.Split(',');
+
+            if (values.Length == 2)
+            {
+                var curr0 = Convert.ToInt16(values[0]);
+                var curr1 = Convert.ToInt16(values[1]);
+
+                // do
+
+                //var array = new short[]
+                //{
+                //    curr0, curr1, 0, 0
+                //};
+
+                currentBuffer[0] = curr0;
+                currentBuffer[1] = curr1;
+
+                boards.SendCurrent(currentBuffer);
+                timer.Start();
+
+            }
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            var text = tbCurrents.Text;
+
+            var values = text.Split(',');
+
+            if (values.Length == 2)
+            {
+                var curr0 = Convert.ToInt16(values[0]);
+                var curr1 = Convert.ToInt16(values[1]);
+
+                // do
+                currentBuffer[0] = curr0;
+                currentBuffer[1] = curr1;
+
+                boards.SendCurrent(currentBuffer);
+
+                //boards.SendCurrent(array);
+            }
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            var text = tbCurrent.Text;
+
+            var value = Convert.ToInt16(text);
+            currentBuffer[2] = value;
+            //currentBuffer[1] = curr1;
+
+
+            //if (values.Length == 2)
+            //{
+            //    var curr0 = Convert.ToInt16(values[0]);
+            //    var curr1 = Convert.ToInt16(values[1]);
+
+            //    // do
+            //    var array = new short[]
+            //    {
+            //        curr0, curr1, 0, 0
+            //    };
+
+                boards.SendCurrent(currentBuffer);
+            //}
+        }
+
+        private void label7_Click(object sender, EventArgs e)
+        {
+
+        }
     }
     public class CurrentControl
     {
