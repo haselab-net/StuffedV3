@@ -84,6 +84,7 @@ namespace PCController
             udLoopTime_ValueChanged(udLoopTime, null);
             ResetMagnet();
 
+            // OSCのデータ受信のための設定
             m_OscReceiver = new OscReceiver(System.Net.IPAddress.Parse("127.0.0.1"), 8000);
 
             // OSCのレシーバーを接続
@@ -95,15 +96,19 @@ namespace PCController
             // タスクをスタート
         }
 
+        // 実行を止めるときに走る関数
         protected override void OnClosed(EventArgs e)
         {
+            // OSCでの通信を止める（新しく値が来てモータードライバーへ渡すのを防ぐ）
             m_OscReceiver.Close();
 
+            // モーターを全て止める
             if(boards.NMotor != 0)
             {
                 short[] currents = new short[boards.NMotor];
                 boards.SendCurrent(currents);
             }
+
             base.OnClosed(e);
 
         }
@@ -115,26 +120,21 @@ namespace PCController
                 while (m_OscReceiver.State != OscSocketState.Closed)
                 {
                     // 受信待ち(メッセージを受信したら処理が帰ってくる)
+                    // packet = "address", num1, num2, num3
                     OscPacket packet = m_OscReceiver.Receive();
 
                     // 受信したメッセージをコンソールに出力
                     Console.WriteLine(packet.ToString());
 
+                    // packetが,区切りなのを利用してモーターに送る値をresultsに入れる
                     var results = packet.ToString().Split(',').Skip(1).Select(e => Convert.ToInt16(e)).ToArray();
-
                     if (boards.NMotor != 0)
                     {
                         short[] currents = new short[boards.NMotor];
                         currents[0] = results[0];
                         currents[1] = results[1];
                         currents[2] = results[2];
-
-                        //for (int i = 0; i < currentControls.Count; ++i)
-                        //{
-                        //    currents[i] = (short)currentControls[i].udTargetCurrent.Value;
-                        //}
                         boards.SendCurrent(currents);
-               
                     }
                 }
             }
