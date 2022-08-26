@@ -59,6 +59,9 @@ namespace PCController
 
         // OSC受信待ちをするタスク
         private Task m_OscReceiveTask = null;
+        private Task m_OscServerTask = null;
+
+        private short m_Pos3;
 
         public MainForm()
         {
@@ -112,6 +115,21 @@ namespace PCController
             base.OnClosed(e);
 
         }
+
+        private void OscClient()
+        {
+            using (OscSender oscSender = new OscSender(System.Net.IPAddress.Parse("127.0.0.1"), 8001))
+            {
+                oscSender.Connect();
+
+                if (boards.NMotor > 2)
+                {
+                    OscMessage msg = new OscMessage("/uOSC/test", m_Pos3.ToString());
+                    oscSender.Send(msg);
+                }
+            }
+        }
+
         private void OscListenProcess()
         {
             try
@@ -135,6 +153,7 @@ namespace PCController
                         currents[1] = results[1];
                         currents[2] = results[2];
                         boards.SendCurrent(currents);
+                        OscClient();
                     }
                 }
             }
@@ -297,6 +316,11 @@ namespace PCController
             {
                 txMsg.Text += " ";
                 txMsg.Text += boards.GetPos(i);
+                if (i == 2)
+                {
+                    OscClient();
+                    m_Pos3 = boards.GetPos(i);
+                }
             }
             if (boards.NForce != 0)
             {
@@ -598,6 +622,11 @@ namespace PCController
         }
 
         private void label7_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void MainForm_Load(object sender, EventArgs e)
         {
 
         }
