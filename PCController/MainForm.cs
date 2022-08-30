@@ -97,6 +97,7 @@ namespace PCController
             m_OscReceiveTask = new Task(() => OscListenProcess());
 
             // タスクをスタート
+            m_OscReceiveTask.Start();
         }
 
         // 実行を止めるときに走る関数
@@ -116,9 +117,9 @@ namespace PCController
 
         }
 
-        private void OscClient()
+        /*private void OscClient()
         {
-            using (OscSender oscSender = new OscSender(System.Net.IPAddress.Parse("127.0.0.1"), 8001))
+            using (OscSender oscSender = new OscSender(System.Net.IPAddress.Parse("127.0.0.1"), 7001))
             {
                 oscSender.Connect();
 
@@ -128,7 +129,7 @@ namespace PCController
                     oscSender.Send(msg);
                 }
             }
-        }
+        }*/
 
         private void OscListenProcess()
         {
@@ -149,7 +150,7 @@ namespace PCController
                     if (boards.NMotor != 0)
                     {
                         short[] currents = new short[boards.NMotor];
-                        currents[0] = results[0];
+                        currents[3] = results[0];
                         currents[1] = results[1];
                         currents[2] = results[2];
                         boards.SendCurrent(currents);
@@ -271,9 +272,6 @@ namespace PCController
                 }
                 times = Enumerable.Repeat(0, boards.NMotor).ToArray();
                 ResetPanels();
-
-                m_OscReceiveTask.Start();
-
             }
         }
         private void UpdateCurrent()
@@ -306,20 +304,35 @@ namespace PCController
             }
 			else if (tbControl.SelectedTab == tpCurrent)
             {
-                //UpdateCurrent();
+                UpdateCurrent();
             }
 			else if (tbControl.SelectedTab == tpMagnet) {
                 UpdateMagnet();
             }
             txMsg.Text = "Pos:";
+            if (boards.NMotor > 0)
+            {
+                boards.SendSense();
+                for (int i = 0; i < currentControls.Count; ++i)
+                {
+                    currentControls[i].lbCurrent.Text = "" + boards.GetCurrent(i);
+                }
+                for (int i = 0; i < boards.NForce; ++i)
+                {
+                    txMsg.Text += " F" + i + "=" + boards.GetForce(i);
+                }
+            }
             for (int i = 0; i < boards.NMotor; ++i)
             {
                 txMsg.Text += " ";
                 txMsg.Text += boards.GetPos(i);
                 if (i == 2)
                 {
-                    OscClient();
-                    m_Pos3 = boards.GetPos(i);
+                    if (m_Pos3 != boards.GetPos(i))
+                    {
+                        m_Pos3 = boards.GetPos(i);
+                        OscClient();
+                    }
                 }
             }
             if (boards.NForce != 0)
