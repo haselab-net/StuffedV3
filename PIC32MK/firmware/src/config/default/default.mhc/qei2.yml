@@ -47,4 +47,4 @@ children:
       - type: Dynamic
         attributes: {id: qei2, value: QEI2_Stop}
 - type: ElementPosition
-  attributes: {x: '75', y: '310', id: qei2}
+  attributes: {x: '102', y: '392', id: qei2}

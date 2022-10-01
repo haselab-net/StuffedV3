@@ -4,6 +4,20 @@ attributes: {id: mcpwm}
 children:
 - type: Symbols
   children:
+  - type: Integer
+    attributes: {id: ALTDTR1__ALTDTR}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: '0'}
+  - type: Integer
+    attributes: {id: DTR1__DTR}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: '0'}
   - type: String
     attributes: {id: INTR_PWM_FAULT}
     children:
@@ -11,6 +25,27 @@ children:
       children:
       - type: Dynamic
         attributes: {id: mcpwm, value: INT_SOURCE_PWM1}
+  - type: KeyValueSet
+    attributes: {id: IOCON1__PMOD}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: '1'}
+  - type: KeyValueSet
+    attributes: {id: IOCON2__PMOD}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: '1'}
+  - type: Integer
+    attributes: {id: LEBDLY1__LEB}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: '0'}
   - type: Boolean
     attributes: {id: MCPWM_CHANNEL1}
     children:
@@ -45,28 +80,64 @@ children:
     - type: Values
       children:
       - type: User
-        attributes: {value: 'true'}
+        attributes: {value: 'false'}
   - type: Boolean
     attributes: {id: MCPWM_CHANNEL6}
     children:
     - type: Values
       children:
       - type: User
-        attributes: {value: 'true'}
+        attributes: {value: 'false'}
   - type: Boolean
     attributes: {id: MCPWM_CHANNEL7}
     children:
     - type: Values
       children:
       - type: User
-        attributes: {value: 'true'}
+        attributes: {value: 'false'}
   - type: Boolean
     attributes: {id: MCPWM_CHANNEL8}
     children:
     - type: Values
       children:
       - type: User
-        attributes: {value: 'true'}
+        attributes: {value: 'false'}
+  - type: Comment
+    attributes: {id: MCPWM_CLOCK_ENABLE_COMMENT5}
+    children:
+    - type: Attributes
+      children:
+      - type: Boolean
+        attributes: {id: visible}
+        children:
+        - {type: Value, value: 'true'}
+  - type: Comment
+    attributes: {id: MCPWM_CLOCK_ENABLE_COMMENT6}
+    children:
+    - type: Attributes
+      children:
+      - type: Boolean
+        attributes: {id: visible}
+        children:
+        - {type: Value, value: 'true'}
+  - type: Comment
+    attributes: {id: MCPWM_CLOCK_ENABLE_COMMENT7}
+    children:
+    - type: Attributes
+      children:
+      - type: Boolean
+        attributes: {id: visible}
+        children:
+        - {type: Value, value: 'true'}
+  - type: Comment
+    attributes: {id: MCPWM_CLOCK_ENABLE_COMMENT8}
+    children:
+    - type: Attributes
+      children:
+      - type: Boolean
+        attributes: {id: visible}
+        children:
+        - {type: Value, value: 'true'}
   - type: Comment
     attributes: {id: MCPWM_FREQ_CH1}
     children:
@@ -75,7 +146,7 @@ children:
       - type: String
         attributes: {id: text}
         children:
-        - {type: Value, value: '**** PWM Frequency is 60000.0 Hz ****'}
+        - {type: Value, value: '**** PWM Frequency is 2400000.0 Hz ****'}
   - type: Comment
     attributes: {id: MCPWM_FREQ_CH2}
     children:
@@ -84,7 +155,7 @@ children:
       - type: String
         attributes: {id: text}
         children:
-        - {type: Value, value: '**** PWM Frequency is 60000.0 Hz ****'}
+        - {type: Value, value: '**** PWM Frequency is 2400000.0 Hz ****'}
   - type: Comment
     attributes: {id: MCPWM_FREQ_CH3}
     children:
@@ -93,7 +164,7 @@ children:
       - type: String
         attributes: {id: text}
         children:
-        - {type: Value, value: '**** PWM Frequency is 60000.0 Hz ****'}
+        - {type: Value, value: '**** PWM Frequency is 2400000.0 Hz ****'}
   - type: Comment
     attributes: {id: MCPWM_FREQ_CH4}
     children:
@@ -102,7 +173,7 @@ children:
       - type: String
         attributes: {id: text}
         children:
-        - {type: Value, value: '**** PWM Frequency is 60000.0 Hz ****'}
+        - {type: Value, value: '**** PWM Frequency is 2400000.0 Hz ****'}
   - type: Comment
     attributes: {id: MCPWM_FREQ_CH5}
     children:
@@ -111,7 +182,7 @@ children:
       - type: String
         attributes: {id: text}
         children:
-        - {type: Value, value: '**** PWM Frequency is 60000.0 Hz ****'}
+        - {type: Value, value: '**** PWM Frequency is 2400000.0 Hz ****'}
   - type: Comment
     attributes: {id: MCPWM_FREQ_CH6}
     children:
@@ -120,7 +191,7 @@ children:
       - type: String
         attributes: {id: text}
         children:
-        - {type: Value, value: '**** PWM Frequency is 60000.0 Hz ****'}
+        - {type: Value, value: '**** PWM Frequency is 2400000.0 Hz ****'}
   - type: Comment
     attributes: {id: MCPWM_FREQ_CH7}
     children:
@@ -129,7 +200,7 @@ children:
       - type: String
         attributes: {id: text}
         children:
-        - {type: Value, value: '**** PWM Frequency is 60000.0 Hz ****'}
+        - {type: Value, value: '**** PWM Frequency is 2400000.0 Hz ****'}
   - type: Comment
     attributes: {id: MCPWM_FREQ_CH8}
     children:
@@ -138,7 +209,7 @@ children:
       - type: String
         attributes: {id: text}
         children:
-        - {type: Value, value: '**** PWM Frequency is 60000.0 Hz ****'}
+        - {type: Value, value: '**** PWM Frequency is 2400000.0 Hz ****'}
   - type: Comment
     attributes: {id: MCPWM_FREQ_CH9}
     children:
@@ -147,21 +218,21 @@ children:
       - type: String
         attributes: {id: text}
         children:
-        - {type: Value, value: '**** PWM Frequency is 60000.0 Hz ****'}
+        - {type: Value, value: '**** PWM Frequency is 2400000.0 Hz ****'}
   - type: Hex
     attributes: {id: MCPWM_IOCON1}
     children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: mcpwm, value: '49152'}
+        attributes: {id: mcpwm, value: '246784'}
   - type: Hex
     attributes: {id: MCPWM_IOCON2}
     children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: mcpwm, value: '49152'}
+        attributes: {id: mcpwm, value: '246784'}
   - type: Hex
     attributes: {id: MCPWM_IOCON3}
     children:
@@ -211,76 +282,92 @@ children:
       children:
       - type: Dynamic
         attributes: {id: mcpwm, value: '49152'}
+  - type: Comment
+    attributes: {id: MCPWM_LEADING_DEADTIME1}
+    children:
+    - type: Attributes
+      children:
+      - type: String
+        attributes: {id: text}
+        children:
+        - {type: Value, value: '**** Leading edge dead time is 0.0 uS ****'}
   - type: Integer
     attributes: {id: MCPWM_PERIOD_CH1}
     children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: mcpwm, value: '2000'}
+        attributes: {id: mcpwm, value: '50'}
   - type: Integer
     attributes: {id: MCPWM_PERIOD_CH2}
     children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: mcpwm, value: '2000'}
+        attributes: {id: mcpwm, value: '50'}
   - type: Integer
     attributes: {id: MCPWM_PERIOD_CH3}
     children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: mcpwm, value: '2000'}
+        attributes: {id: mcpwm, value: '50'}
   - type: Integer
     attributes: {id: MCPWM_PERIOD_CH4}
     children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: mcpwm, value: '2000'}
+        attributes: {id: mcpwm, value: '50'}
   - type: Integer
     attributes: {id: MCPWM_PERIOD_CH5}
     children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: mcpwm, value: '2000'}
+        attributes: {id: mcpwm, value: '50'}
   - type: Integer
     attributes: {id: MCPWM_PERIOD_CH6}
     children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: mcpwm, value: '2000'}
+        attributes: {id: mcpwm, value: '50'}
   - type: Integer
     attributes: {id: MCPWM_PERIOD_CH7}
     children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: mcpwm, value: '2000'}
+        attributes: {id: mcpwm, value: '50'}
   - type: Integer
     attributes: {id: MCPWM_PERIOD_CH8}
     children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: mcpwm, value: '2000'}
+        attributes: {id: mcpwm, value: '50'}
   - type: Integer
     attributes: {id: MCPWM_PERIOD_CH9}
     children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: mcpwm, value: '2000'}
+        attributes: {id: mcpwm, value: '50'}
   - type: Float
     attributes: {id: MCPWM_PRI_FREQ}
     children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: mcpwm, value: '60000.0'}
+        attributes: {id: mcpwm, value: '2400000.0'}
+  - type: Hex
+    attributes: {id: MCPWM_PTCON}
+    children:
+    - type: Values
+      children:
+      - type: Dynamic
+        attributes: {id: mcpwm, value: '0'}
   - type: Hex
     attributes: {id: MCPWM_PWMCON1}
     children:
@@ -309,6 +396,15 @@ children:
       children:
       - type: Dynamic
         attributes: {id: mcpwm, value: '60000.0'}
+  - type: Comment
+    attributes: {id: MCPWM_TRAILING_DEADTIME1}
+    children:
+    - type: Attributes
+      children:
+      - type: String
+        attributes: {id: text}
+        children:
+        - {type: Value, value: '**** Trailing edge dead time is 0.0 uS ****'}
   - type: Integer
     attributes: {id: PDC1__PDC}
     children:
@@ -390,13 +486,27 @@ children:
         attributes: {id: max}
         children:
         - {type: Value, value: '2000'}
+  - type: KeyValueSet
+    attributes: {id: PTCON__PCLKDIV}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: '0'}
+  - type: KeyValueSet
+    attributes: {id: PTCON__SEVTPS}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: '0'}
   - type: Integer
     attributes: {id: PTPER__PTPER}
     children:
     - type: Values
       children:
       - type: User
-        attributes: {value: '2000'}
+        attributes: {value: '50'}
   - type: KeyValueSet
     attributes: {id: PWMCON1__DTC}
     children:
@@ -576,5 +686,12 @@ children:
         attributes: {id: max}
         children:
         - {type: Value, value: '2000'}
+  - type: Integer
+    attributes: {id: SEVTCMP_SEVTCMP}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: '0'}
 - type: ElementPosition
-  attributes: {x: '108', y: '86', id: mcpwm}
+  attributes: {x: '66', y: '83', id: mcpwm}

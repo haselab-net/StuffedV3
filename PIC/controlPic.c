@@ -461,26 +461,35 @@ void setPwm(int ch, SDEC ratio){
 }
 #elif defined BOARD5
 void setPHLevel(int ch, int val){
-    printf("setPHLevel(%d, %d)", ch, val);
-    GPIO_RC7_OutputEnable();
+    //printf("setPHLevel(%d, %d)", ch, val);
     switch(ch){
         case 0:
-            val ? GPIO_RC7_Set() : GPIO_RC7_Clear();    //  
+            val ? GPIO_RB4_Set() : GPIO_RB4_Clear();     //  APH0
             break;    
         case 1:
-            val ? GPIO_RC9_Set() : GPIO_RC9_Clear();    //  BPH
+            val ? GPIO_RA15_Set() : GPIO_RA15_Clear();   //  BPH0
             break;    
         case 2:
-            val ? GPIO_RG7_Set() : GPIO_RG7_Clear();
+            val ? GPIO_RD8_Set() : GPIO_RD8_Clear();
             break;    
         case 3:
-            val ? GPIO_RF1_Set() : GPIO_RF1_Clear();
+            val ? GPIO_RC12_Set() : GPIO_RC12_Clear();
+            break;
+        case 4:
+            val ? GPIO_RC10_Set() : GPIO_RC10_Clear();
+            break;    
+        case 5:
+            val ? GPIO_RB7_Set() : GPIO_RB7_Clear();
+            break;    
+        case 6:
+            val ? GPIO_RF0_Set() : GPIO_RF0_Clear();
+            break;    
+        case 7:
+            val ? GPIO_RD6_Set() : GPIO_RD6_Clear();
             break;    
     }
 }
 void setPwm(int ch, SDEC ratio){
-    GPIO_RC8_Set();  //  BEN
-
     #define PWM_PERIOD  50
     int reverse = 0;
     if (ratio < 0){

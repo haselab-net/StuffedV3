@@ -107,16 +107,27 @@ void showADInMotorOrder(){
 	printf(" Current: %d %d %d %d\r\n", ADC1BUF5, ADC1BUF8, ADC1BUF2, ADC1BUF3);    
 #elif defined BOARD5
 	//  motor angle
-    printf(" Angle: %d %d ", ADCDATA41, ADCDATA24);
-	printf(" %d %d ", ADCDATA47, ADCDATA46);
-	printf(" %d %d ", ADCDATA48, ADCDATA49);
-	printf(" %d %d ", ADCDATA6, ADCDATA5);
-	printf(" %d %d ", ADCDATA7, ADCDATA8);
-	printf(" %d %d ", ADCDATA13, ADCDATA11);
-	printf(" %d %d ", ADCDATA14, ADCDATA12);
-	printf(" %d %d ", ADCDATA15, ADCDATA26);
-    //  current
-	printf(" Force: %d %d %d %d\r\n", ADCDATA16, ADCDATA10, ADCDATA27, ADCDATA25);
+    printf(" Angle: %d %d ", ADCDATA9, ADCDATA10);
+	printf(" %d %d ", ADCDATA1, ADCDATA0);
+	printf(" %d %d ", ADCDATA3, ADCDATA2);
+	printf(" %d %d ", ADCDATA4, ADCDATA5);
+	printf(" %d %d ", ADCDATA6, ADCDATA7);
+	printf(" %d %d ", ADCDATA11, ADCDATA8);
+	printf(" %d %d ", ADCDATA12, ADCDATA13);
+	printf(" %d %d ", ADCDATA14, ADCDATA15);
+/*
+AN9,10: M0,1
+AN1,0: M2,3
+AN3,2: M4,5
+AN4,5: M6,7
+AN6,7: M8,9
+AN11,8: M10,11
+AN12,13: M12,13
+AN14,15: M14,15
+ */
+
+    //  force
+	printf(" Force: %d %d %d %d\r\n", ADCDATA24, ADCDATA26, ADCDATA46, ADCDATA41);
 #else
 #error
 #endif
@@ -275,6 +286,51 @@ void nvmReadTest(){
     }
     printf("\r\n");
 }
+void readLine(char* buf, int len){
+	int cur = 0;
+    while(cur+1 < len){
+        monOut();
+		if (UMSTAbits.URXDA){
+            buf[cur] = UMRXREG;
+            if (buf[cur] == '\r' || buf[cur] == '\n'){
+                break;
+            }else{
+                printf("%c", buf[cur]);
+            }
+            cur ++;
+        }
+	}
+    buf[cur] = 0;
+}
+void readAddress(){
+    printf("Input offset:");
+    char adr[80];
+    readLine(adr, sizeof(adr));
+    int delta = strtol(adr, NULL, 0)*4;
+    volatile unsigned int* ptr = &ADCCON1 + delta;
+    unsigned int val1 = ptr[0];
+    unsigned int val2 = ptr[4];
+    unsigned int val3 = ptr[8];
+    unsigned int val4 = ptr[12];
+    int adrLow = (unsigned int)ptr & 0xFFFF;
+    printf("\r\nAdr:%x  Value = 0x%x 0x%x 0x%x 0x%x\r\n", adrLow, val1, val2, val3, val4);
+}
+void writeAddress(){
+    printf("Input offset:");
+    char buf[80];
+    readLine(buf, sizeof(buf));
+    int delta = strtol(buf, NULL, 0)*4;
+    volatile unsigned int* ptr = &ADCCON1 + delta;
+    int adrLow = (unsigned int)ptr & 0xFFFF;
+    unsigned int val1 = ptr[0];
+    printf("\r\nAdr:%x  Value = 0x%x\r\n", adrLow, val1);
+    
+    printf("Input value:");
+    readLine(buf, sizeof(buf));
+    unsigned int value = strtol(buf, NULL, 0);
+    ptr[0] = value;
+    printf("\r\nAdr:%x  Value: 0x%x -> 0x%x\r\n", adrLow, val1, value);
+}
 struct MonitorFunc monitors[] = {
 	{'a', "Show all A/D value", showAD, true},
 	{'A', "Show A/D value in motor order", showADInMotorOrder, true},
@@ -282,6 +338,8 @@ struct MonitorFunc monitors[] = {
 	{'c', "Show control status", showControlStatus, true},
 	{'C', "Show core timer", showCoreTimer, true},
 	{'u', "show uart status", showUartState, true},
+    {'R', "read register", readAddress, false},
+    {'W', "write register", writeAddress, false},
 	{'L', "Log level up", logLevelUp, false},
 	{'l', "Log level down", logLevelDown, false},
 	{'s', "toggle control timer", toggleControlTimer, false},
@@ -290,7 +348,7 @@ struct MonitorFunc monitors[] = {
 	{'p', "Pwm down", pwmDown, false},
 	{'w', "Pwm status", showPwm, true},
 	{'g', "Print GP", printGp, true},
-	{'W', "Write NVM", nvmWriteTest, false},
+	{'N', "Write NVM", nvmWriteTest, false},
 	{'n', "Read NVM", nvmReadTest, false},
 	{'E', "End monitor", disableRx, false},
 };

@@ -99,4 +99,4 @@ children:
         children:
         - {type: Value, value: UART}
 - type: ElementPosition
-  attributes: {x: '21', y: '230', id: uart1}
+  attributes: {x: '18', y: '176', id: uart1}

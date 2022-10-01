@@ -176,16 +176,11 @@ void SYS_Initialize ( void* data )
 
 	GPIO_Initialize();
 
-    CORETIMER_Initialize();
     ADCHS_Initialize();
-
-    QEI1_Initialize();
 
     QEI2_Initialize();
 
 	UART1_Initialize();
-
-    QEI3_Initialize();
 
 	UART2_Initialize();
 

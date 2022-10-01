@@ -78,7 +78,7 @@ ADC5TIME = 0x3010001;
 
     ADCTRG1 = 0x3030303; 
     ADCTRG2 = 0x3030003; 
-    ADCTRG3 = 0x3030003; 
+    ADCTRG3 = 0x3030303; 
     ADCTRG4 = 0x3030303; 
     ADCTRG5 = 0x3; 
     
@@ -86,14 +86,14 @@ ADC5TIME = 0x3010001;
 
     ADCTRGSNS = 0x0;
 
-    ADCIMCON1 = 0x145;
+    ADCIMCON1 = 0x0;
     ADCIMCON2 = 0x0; 
     ADCIMCON3 = 0x0; 
     ADCIMCON4 = 0x0; 
 
     /* Input scan */
-    ADCCSS1 = 0xf01fde1;
-    ADCCSS2 = 0x3c200; 
+    ADCCSS1 = 0x500ffff;
+    ADCCSS2 = 0x4200; 
 
 
 
