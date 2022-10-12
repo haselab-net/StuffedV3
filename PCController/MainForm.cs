@@ -154,7 +154,7 @@ namespace PCController
                         currents[1] = results[1];
                         currents[2] = results[2];
                         boards.SendCurrent(currents);
-                        OscClient();
+                        //OscClient();
                     }
                 }
             }
@@ -331,7 +331,7 @@ namespace PCController
                     if (m_Pos3 != boards.GetPos(i))
                     {
                         m_Pos3 = boards.GetPos(i);
-                        OscClient();
+                        //OscClient();
                     }
                 }
             }
@@ -580,8 +580,8 @@ namespace PCController
                 //    curr0, curr1, 0, 0
                 //};
 
-                currentBuffer[0] = curr0;
-                currentBuffer[1] = curr1;
+                currentBuffer[2] = curr0;
+                currentBuffer[3] = curr1;
 
                 boards.SendCurrent(currentBuffer);
                 timer.Start();

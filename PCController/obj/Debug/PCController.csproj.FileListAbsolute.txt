@@ -11,3 +11,16 @@ C:\Users\rtani\StuffedV3\PCController\obj\Debug\PCController.pdb
 C:\Users\rtani\StuffedV3\PCController\bin\Debug\Rug.Osc.dll
 C:\Users\rtani\StuffedV3\PCController\bin\Debug\Rug.Osc.xml
 C:\Users\rtani\StuffedV3\PCController\obj\Debug\PCController.csproj.CopyComplete
+C:\Users\ayaka\Documents\project\IVRC\controller\PCController\bin\Debug\PCController.exe.config
+C:\Users\ayaka\Documents\project\IVRC\controller\PCController\bin\Debug\PCController.exe
+C:\Users\ayaka\Documents\project\IVRC\controller\PCController\bin\Debug\PCController.pdb
+C:\Users\ayaka\Documents\project\IVRC\controller\PCController\bin\Debug\Rug.Osc.dll
+C:\Users\ayaka\Documents\project\IVRC\controller\PCController\bin\Debug\Rug.Osc.xml
+C:\Users\ayaka\Documents\project\IVRC\controller\PCController\obj\Debug\PCController.csproj.AssemblyReference.cache
+C:\Users\ayaka\Documents\project\IVRC\controller\PCController\obj\Debug\PCController.MainForm.resources
+C:\Users\ayaka\Documents\project\IVRC\controller\PCController\obj\Debug\PCController.Properties.Resources.resources
+C:\Users\ayaka\Documents\project\IVRC\controller\PCController\obj\Debug\PCController.csproj.GenerateResource.cache
+C:\Users\ayaka\Documents\project\IVRC\controller\PCController\obj\Debug\PCController.csproj.CoreCompileInputs.cache
+C:\Users\ayaka\Documents\project\IVRC\controller\PCController\obj\Debug\PCController.csproj.CopyComplete
+C:\Users\ayaka\Documents\project\IVRC\controller\PCController\obj\Debug\PCController.exe
+C:\Users\ayaka\Documents\project\IVRC\controller\PCController\obj\Debug\PCController.pdb
