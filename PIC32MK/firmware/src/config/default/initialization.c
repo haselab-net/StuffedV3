@@ -186,6 +186,10 @@ void SYS_Initialize ( void* data )
 
     MCPWM_Initialize();
 
+    TMR1_Initialize();
+
+    NVM_Initialize();
+
 
 
 

@@ -60,6 +60,7 @@
 // *****************************************************************************
 
 
+void TIMER_1_InterruptHandler( void );
 
 
 void CORE_TIMER_InterruptHandler (void);
@@ -69,6 +70,11 @@ void __ISR(_CORE_TIMER_VECTOR, ipl1SRS) CORE_TIMER_Handler (void)
 {
     CORE_TIMER_InterruptHandler();
 }
+
+//void __ISR(_TIMER_1_VECTOR, ipl1SRS) TIMER_1_Handler (void)
+//{
+//    TIMER_1_InterruptHandler();
+//}
 
 
 

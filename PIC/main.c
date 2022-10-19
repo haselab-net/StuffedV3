@@ -67,8 +67,7 @@ int main(void)
     printf("Borad ID:%d Model:%d nTargets:%d nMotor:%d nCurrent:%d nForce:%d\r\n", boardId, MODEL_NUMBER, NTARGET, NMOTOR, NCURRENT, NFORCE);
     controlInit();
 	commandInit();
-//	commandUartInit();
-	setPwm(0, SDEC_ONE*0.1);
+	commandUartInit();
 #if 0
     printf("UMRXREG=%x ", UMRXREG);
     printf("UMSTA=%x\r\n", UMSTA);

@@ -52,6 +52,9 @@
     #define _UARTC_RX_VECTOR	_UART2_RX_VECTOR
     #define UARTC_Initialize	UART2_Initialize
 #elif defined BOARD5
+#ifndef PIC32MK_MCJ
+#error
+#endif
     #define UMSTA U1STA
     #define UMTXREG U1TXREG
     #define UMRXREG U1RXREG
@@ -65,10 +68,10 @@
     #define UCBRG U2BRG
     #define IEC_UCRXIE	IEC1bits.U2RXIE
     #define IEC_UCTXIE	IEC1bits.U2TXIE
-    #define IPC_UCTXIP	IPC10bits.U2TXIP
-    #define IPC_UCTXIS	IPC10bits.U2TXIS
-    #define IPC_UCRXIP	IPC10bits.U2RXIP
-    #define IPC_UCRXIS	IPC10bits.U2RXIS
+    #define IPC_UCTXIP	IPC14bits.U2TXIP
+    #define IPC_UCTXIS	IPC14bits.U2TXIS
+    #define IPC_UCRXIP	IPC14bits.U2RXIP
+    #define IPC_UCRXIS	IPC14bits.U2RXIS
     #define CLEAR_IFS_UCTXIF		IFS1CLR = 1 << _IFS1_U2TXIF_POSITION
     #define CLEAR_IFS_UCRXIF		IFS1CLR = 1 << _IFS1_U2RXIF_POSITION
     #define _UARTC_TX_VECTOR	_UART2_TX_VECTOR

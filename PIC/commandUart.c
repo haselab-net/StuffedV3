@@ -8,7 +8,6 @@
 #ifdef WROOM
 #error This is a source file for PIC only. 
 #endif
-
 void commandUartInit(){
 	UARTC_Initialize();
 	/*	10 = Interrupt flag bit is asserted while receive buffer is 3/4 or more full (i.e., has 6 or more data characters)
@@ -18,10 +17,21 @@ void commandUartInit(){
 	IEC_UCRXIE = 1;	// Enable UARTC receive interrupt.
 	CLEAR_IFS_UCRXIF;
 
+#ifdef PIC32MM
 	//	timer to start TXC after receive command header
 	//	2M baud/10bit = 200kBps= 5us/byte. Wait 5 bytes = 25us = 600/24MHz
     //  PR1 = (24MHz / baudrate) * 5 bytes 
     PR1 = (24*1000*1000 / PNVDATA->baudrate[0]) * 5;    	//PR1 = 600; //	for 2MBPS, 25us
+#elif defined PIC32MK_MCJ
+    //  sysclk = 120MHz, BRGH=1
+    //  UxBRG = ((CLKSEL Frequency / (4 * Desired Baud Rate)) ? 1)
+    //U2BRG = (120 / (4 * 3)) - 1;
+    U2BRG = (120*1000*1000 / (4*PNVDATA->baudrate[0])) - 1;
+    PR1 = (60*1000*1000 / PNVDATA->baudrate[0]) * 5; 
+#else
+#error
+#endif
+
 }
 
 uint32_t timeRetCmd, timeTx;
@@ -29,7 +39,11 @@ uint32_t timeRetCmd, timeTx;
 static volatile bool bRunExecCommand=false;
 //	handler for TMR1 timer for TX
 volatile bool bRunReturnCommand = false;
+#ifdef PIC32MM
 void __attribute__ ((vector(_TIMER_1_VECTOR), interrupt(IPL3AUTO))) TMR1_ISR()
+#elif defined PIC32MK_MCJ
+void __ISR(_TIMER_1_VECTOR, ipl3SRS) TIMER_1_Handler (void)
+#endif
 {
 	if (bRunReturnCommand){	//	call from recv
 		bRunReturnCommand = false;
@@ -41,6 +55,9 @@ void __attribute__ ((vector(_TIMER_1_VECTOR), interrupt(IPL3AUTO))) TMR1_ISR()
 		//	stop timer interrupt
 		IEC0bits.T1IE = 0;
 		//	start TX
+#ifdef PC32MK_MCJ
+        ODCGSET = 0x000; /* Open Drain Disable for TX*/
+#endif
 		UCSTAbits.UTXEN = 1;	//	enable TX
 		UCSTAbits.UTXISEL = 2;	//	10 = Interrupt is generated and asserted while the transmit buffer is empty
 		IEC_UCTXIE = 1;	//	enable interrupt
@@ -62,6 +79,9 @@ void __attribute__ ((vector(_UARTC_TX_VECTOR), interrupt(IPL2AUTO))) _UARTC_TX_H
 		UCSTAbits.UTXISEL = 1;		//	01 = Interrupt is generated and asserted when all characters have been transmitted
 		if (UCSTAbits.TRMT){		//	TX completed
 			IEC_UCTXIE = 0;	//	disable interrupt
+#ifdef PC32MK_MCJ
+            ODCGSET = 0x200; /* Open Drain Enable for TX*/
+#endif
 			UCSTAbits.UTXEN = 0;	//	disable UCTX
 		}
 	}
@@ -70,9 +90,9 @@ void __attribute__ ((vector(_UARTC_TX_VECTOR), interrupt(IPL2AUTO))) _UARTC_TX_H
 //	handler for rx interrupt
 //	Note: "IPL4" below must fit to "IPC5bits.UCRXIP = 4" in interrupt_manager.c;
 void __attribute__ ((vector(_UARTC_RX_VECTOR), interrupt(IPL4AUTO))) _UARTC_RX_HANDLER(void){
-	int i;
 	union CommandHeader head;
 	static bool bRead;
+	int i;
 	for(i=0; i<6; ++i){
         if (cmdCur == 0){
 	        head.header = UCRXREG;
@@ -92,14 +112,15 @@ void __attribute__ ((vector(_UARTC_RX_VECTOR), interrupt(IPL4AUTO))) _UARTC_RX_H
 					retCur = 0;
 					//	Start TMR1 to enable TX after some delay.
 					bRunReturnCommand = true;
-					IEC0bits.T1IE = true;
 					IFS0bits.T1IF = false;
+					IEC0bits.T1IE = true;
 					TMR1 = PR1-1;	//	call timer as soon as this task is ended.
 				}
             }
 			if (head.commandId == CI_SET_CMDLEN){
 				bRead = true;
 				command.header = head.header;
+                //printf("SCL%d len=%d\n", head.boardId, cmdLen);
 			}
         }else if (bRead){
 			command.bytes[cmdCur] = UCRXREG;

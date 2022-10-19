@@ -53,6 +53,9 @@ void loadMotorParam();
 //	device depended functions
 void readADC();								//	read adc and set it to mcos and msin
 void setPwm(int ch, SDEC torque);			//	set pwm of motor
+#ifdef BOARD5
+void setPwm2(int ch, SDEC torque, bool currrentContorl);			//	set pwm of motor
+#endif
 void setPwmWithLimit(int ch, SDEC torque);	//	limit the torque to torqueLimit then call setPwm 
 
 

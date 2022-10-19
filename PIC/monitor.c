@@ -264,6 +264,7 @@ void nvmWriteTest(){
     int i;
     data.boardId ++;
     if (data.boardId > 7) data.boardId = 1;
+    /*
     printf("Before Write:\r\n");
     for(i=0; i<sizeof(data); ++i){
         printf("%02x ", ((unsigned char*)&data)[i]);
@@ -271,6 +272,7 @@ void nvmWriteTest(){
         else if (i%8 == 7) printf(" ");
     }
     printf("\r\n");
+    */
     i = NVMWrite(&data);
     printf("NVMWrite() returns %d\r\n", i);
 }

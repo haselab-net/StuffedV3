@@ -199,6 +199,12 @@ inline int truncate(int min, int val, int max){
     return val;
 }
 void currentControl(){
+#ifdef BOARD5
+    int i;
+    for(i=0; i<NMOTOR; ++i){
+        setPwm2(i, currentTarget[i], true);
+    }
+#else
     const SDEC DIFF_ZERO_LIMIT = SDEC_ONE / 16;
 	int i;
     SDEC diff=0;
@@ -241,6 +247,7 @@ void currentControl(){
         targetPwm[i] = currentTarget[i];
 		setPwmWithLimit(i, targetPwm[i]);        
     }
+#endif
 }
 
 //----------------------------------------------------------------------------

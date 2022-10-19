@@ -489,7 +489,47 @@ void setPHLevel(int ch, int val){
             break;    
     }
 }
-void setPwm(int ch, SDEC ratio){
+void setPwmPin(int ch, bool cc){
+    switch(ch){
+        case 0:
+            IOCON1bits.PENH = cc;
+            IOCON1bits.PENL = !cc;
+            break;
+        case 1:
+            IOCON2bits.PENH = cc;
+            IOCON2bits.PENL = !cc;
+            break;
+        case 2:
+            IOCON3bits.PENH = cc;
+            IOCON3bits.PENL = !cc;
+            break;
+        case 3:
+            IOCON4bits.PENH = cc;
+            IOCON4bits.PENL = !cc;
+            break;
+        case 4:
+            IOCON5bits.PENH = cc;
+            IOCON5bits.PENL = !cc;
+            break;
+        case 5:
+            IOCON6bits.PENH = cc;
+            IOCON6bits.PENL = !cc;
+            break;
+        case 6:
+            IOCON7bits.PENH = cc;
+            IOCON7bits.PENL = !cc;
+            break;
+        case 7:
+            IOCON8bits.PENH = cc;
+            IOCON8bits.PENL = !cc;
+            break;
+        case 8:
+            IOCON9bits.PENH = cc;
+            IOCON9bits.PENL = !cc;
+            break;
+    }
+}
+void setPwm2(int ch, SDEC ratio, bool currentControl){
     #define PWM_PERIOD  50
     int reverse = 0;
     if (ratio < 0){
@@ -498,7 +538,11 @@ void setPwm(int ch, SDEC ratio){
     }
     int pwm = (((int)ratio) * PWM_PERIOD) >> SDEC_BITS;
     MCPWM_ChannelPrimaryDutySet(ch, pwm);
+    setPwmPin(ch, currentControl);
     setPHLevel(ch, reverse);
+}
+void setPwm(int ch, SDEC ratio){
+    setPwm2(ch, ratio, false);
 }
 #else
 #error

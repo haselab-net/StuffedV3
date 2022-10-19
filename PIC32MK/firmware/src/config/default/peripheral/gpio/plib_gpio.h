@@ -134,6 +134,15 @@
 #define GPIO_RC13_Get()               ((PORTC >> 13) & 0x1)
 #define GPIO_RC13_PIN                  GPIO_PIN_RC13
 
+/*** Macros for GPIO_RB9 pin ***/
+#define GPIO_RB9_Set()               (LATBSET = (1<<9))
+#define GPIO_RB9_Clear()             (LATBCLR = (1<<9))
+#define GPIO_RB9_Toggle()            (LATBINV= (1<<9))
+#define GPIO_RB9_OutputEnable()      (TRISBCLR = (1<<9))
+#define GPIO_RB9_InputEnable()       (TRISBSET = (1<<9))
+#define GPIO_RB9_Get()               ((PORTB >> 9) & 0x1)
+#define GPIO_RB9_PIN                  GPIO_PIN_RB9
+
 /*** Macros for GPIO_RD6 pin ***/
 #define GPIO_RD6_Set()               (LATDSET = (1<<6))
 #define GPIO_RD6_Clear()             (LATDCLR = (1<<6))

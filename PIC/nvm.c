@@ -4,10 +4,13 @@
 #include <assert.h>
 #include <string.h>
 
-#define NVFILLSIZE  ((sizeof(theNvData)+7)/8*8)
+#ifdef PIC32MK_MCJ
+#include "definitions.h"                // SYS function prototypes
+#endif
+
 struct NvPageData{
     NvData nvData;
-    char nvFill[2048-sizeof(NvData)];
+    char nvFill[NVPAGESIZE-sizeof(NvData)];
 }__attribute__((__packed__));
 
 #if BOARD_TYPE==BT_B3F || BOARD_TYPE==BT_B2F || BOARD_TYPE==BT_B1F
@@ -20,7 +23,7 @@ struct NvPageData{
  #error BORAD_TYPE must be specified.
 #endif
 
-const struct NvPageData __attribute__((address(NVPAGE))) theNvPage = {
+const struct NvPageData __attribute__((aligned(NVPAGESIZE))) theNvPage = {
     {
         BOARD_ID,   //  boardID
         {0,0,0},    //  pad
@@ -41,6 +44,7 @@ const struct NvPageData __attribute__((address(NVPAGE))) theNvPage = {
     }
 };
 
+#ifdef PIC32MM___
 /*  Page size = 512 x 32 bit words = 2048 bytes = 0x800 bytes
  *  64kB flash = 9d00_0000 - 9d00_FFFF
  *  program 0000-a97d
@@ -114,9 +118,9 @@ void NVMUnprotectPFM(unsigned int address){
 }
 unsigned int NVMWrite(NvData* data){
     unsigned int cur, rv=0;
-    assert(sizeof(NvData) < 0x800);
+    assert(sizeof(NvData) < NVPAGESIZE);
     cur = (unsigned int)data;
-    NVMUnprotectPFM(NVPAGE - 0x800);
+    NVMUnprotectPFM(NVPAGE - NVPAGESIZE);
     NVMErasePage(NVPAGE);
     NVMADDR = ((unsigned int) NVPAGE & 0x0FFFFFFF) | 0x10000000;
     while(cur - ((unsigned int)data) < sizeof(NvData)){
@@ -128,7 +132,27 @@ unsigned int NVMWrite(NvData* data){
     }
     return rv;
 }
+#else
+unsigned int NVMWrite(NvData* data){
+    assert(sizeof(NvData) < NVPAGESIZE);
+    NVM_PageErase(NVPAGE);    
+    while(NVM_IsBusy());
+    int offset = 0;
+    unsigned int rv = 0;
+
+    while(offset < sizeof(NvData)){
+        rv = NVM_RowWrite((unsigned int*)(((char*)data)+offset), NVPAGE+offset);
+        while(NVM_IsBusy());
+        offset += NVM_FLASH_ROWSIZE;
+        //printf("rv: %d offset%x", rv, offset);
+    }
+    return rv;
+}
+
+
+#endif
+
 void NVMRead(NvData* p){
-    assert(sizeof(NvData) < 0x800);
+    assert(sizeof(NvData) < NVPAGESIZE);
     memcpy(p, PNVDATA, sizeof(NvData));
 }
