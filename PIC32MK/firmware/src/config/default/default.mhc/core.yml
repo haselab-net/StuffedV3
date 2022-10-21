@@ -1062,12 +1062,33 @@ children:
       - type: User
         attributes: {value: AN5}
   - type: String
+    attributes: {id: BSP_PIN_1_DIR}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: Out}
+  - type: String
+    attributes: {id: BSP_PIN_1_FUNCTION_NAME}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: GPIO_RA7}
+  - type: String
     attributes: {id: BSP_PIN_1_FUNCTION_TYPE}
     children:
     - type: Values
       children:
       - type: User
-        attributes: {value: PWM4L}
+        attributes: {value: GPIO}
+  - type: String
+    attributes: {id: BSP_PIN_1_LAT}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: High}
   - type: String
     attributes: {id: BSP_PIN_1_MODE}
     children:
@@ -1132,12 +1153,33 @@ children:
       - type: User
         attributes: {value: ''}
   - type: String
+    attributes: {id: BSP_PIN_2_DIR}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: Out}
+  - type: String
+    attributes: {id: BSP_PIN_2_FUNCTION_NAME}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: GPIO_RB14}
+  - type: String
     attributes: {id: BSP_PIN_2_FUNCTION_TYPE}
     children:
     - type: Values
       children:
       - type: User
-        attributes: {value: PWM1H}
+        attributes: {value: GPIO}
+  - type: String
+    attributes: {id: BSP_PIN_2_LAT}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: High}
   - type: String
     attributes: {id: BSP_PIN_2_MODE}
     children:
@@ -1307,12 +1349,33 @@ children:
       - type: User
         attributes: {value: DIGITAL}
   - type: String
+    attributes: {id: BSP_PIN_3_DIR}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: Out}
+  - type: String
+    attributes: {id: BSP_PIN_3_FUNCTION_NAME}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: GPIO_RB15}
+  - type: String
     attributes: {id: BSP_PIN_3_FUNCTION_TYPE}
     children:
     - type: Values
       children:
       - type: User
-        attributes: {value: PWM1L}
+        attributes: {value: GPIO}
+  - type: String
+    attributes: {id: BSP_PIN_3_LAT}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: High}
   - type: String
     attributes: {id: BSP_PIN_3_MODE}
     children:
@@ -1578,14 +1641,14 @@ children:
     - type: Values
       children:
       - type: User
-        attributes: {value: ''}
+        attributes: {value: GPIO_RG6}
   - type: String
     attributes: {id: BSP_PIN_4_FUNCTION_TYPE}
     children:
     - type: Values
       children:
       - type: User
-        attributes: {value: PWM7L}
+        attributes: {value: GPIO}
   - type: String
     attributes: {id: BSP_PIN_4_LAT}
     children:
@@ -1613,14 +1676,14 @@ children:
     - type: Values
       children:
       - type: User
-        attributes: {value: ''}
+        attributes: {value: GPIO_RC6}
   - type: String
     attributes: {id: BSP_PIN_50_FUNCTION_TYPE}
     children:
     - type: Values
       children:
       - type: User
-        attributes: {value: PWM6H}
+        attributes: {value: GPIO}
   - type: String
     attributes: {id: BSP_PIN_50_LAT}
     children:
@@ -1648,21 +1711,21 @@ children:
     - type: Values
       children:
       - type: User
-        attributes: {value: ''}
+        attributes: {value: GPIO_RC7}
   - type: String
     attributes: {id: BSP_PIN_51_FUNCTION_TYPE}
     children:
     - type: Values
       children:
       - type: User
-        attributes: {value: PWM6L}
+        attributes: {value: GPIO}
   - type: String
     attributes: {id: BSP_PIN_51_LAT}
     children:
     - type: Values
       children:
       - type: User
-        attributes: {value: ''}
+        attributes: {value: High}
   - type: String
     attributes: {id: BSP_PIN_51_MODE}
     children:
@@ -1683,14 +1746,14 @@ children:
     - type: Values
       children:
       - type: User
-        attributes: {value: ''}
+        attributes: {value: GPIO_RC8}
   - type: String
     attributes: {id: BSP_PIN_52_FUNCTION_TYPE}
     children:
     - type: Values
       children:
       - type: User
-        attributes: {value: PWM5H}
+        attributes: {value: GPIO}
   - type: String
     attributes: {id: BSP_PIN_52_LAT}
     children:
@@ -1706,12 +1769,33 @@ children:
       - type: User
         attributes: {value: DIGITAL}
   - type: String
+    attributes: {id: BSP_PIN_53_DIR}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: Out}
+  - type: String
+    attributes: {id: BSP_PIN_53_FUNCTION_NAME}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: GPIO_RD5}
+  - type: String
     attributes: {id: BSP_PIN_53_FUNCTION_TYPE}
     children:
     - type: Values
       children:
       - type: User
-        attributes: {value: PWM9H}
+        attributes: {value: GPIO}
+  - type: String
+    attributes: {id: BSP_PIN_53_LAT}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: High}
   - type: String
     attributes: {id: BSP_PIN_53_MODE}
     children:
@@ -1760,14 +1844,21 @@ children:
     - type: Values
       children:
       - type: User
-        attributes: {value: ''}
+        attributes: {value: GPIO_RC9}
   - type: String
     attributes: {id: BSP_PIN_55_FUNCTION_TYPE}
     children:
     - type: Values
       children:
       - type: User
-        attributes: {value: PWM5L}
+        attributes: {value: GPIO}
+  - type: String
+    attributes: {id: BSP_PIN_55_LAT}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: High}
   - type: String
     attributes: {id: BSP_PIN_55_MODE}
     children:
@@ -1823,14 +1914,21 @@ children:
     - type: Values
       children:
       - type: User
-        attributes: {value: ''}
+        attributes: {value: GPIO_RF1}
   - type: String
     attributes: {id: BSP_PIN_59_FUNCTION_TYPE}
     children:
     - type: Values
       children:
       - type: User
-        attributes: {value: PWM8L}
+        attributes: {value: GPIO}
+  - type: String
+    attributes: {id: BSP_PIN_59_LAT}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: High}
   - type: String
     attributes: {id: BSP_PIN_59_MODE}
     children:
@@ -1851,14 +1949,21 @@ children:
     - type: Values
       children:
       - type: User
-        attributes: {value: ''}
+        attributes: {value: GPIO_RG7}
   - type: String
     attributes: {id: BSP_PIN_5_FUNCTION_TYPE}
     children:
     - type: Values
       children:
       - type: User
-        attributes: {value: PWM7H}
+        attributes: {value: GPIO}
+  - type: String
+    attributes: {id: BSP_PIN_5_LAT}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: High}
   - type: String
     attributes: {id: BSP_PIN_5_MODE}
     children:
@@ -1867,12 +1972,33 @@ children:
       - type: User
         attributes: {value: DIGITAL}
   - type: String
+    attributes: {id: BSP_PIN_60_DIR}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: Out}
+  - type: String
+    attributes: {id: BSP_PIN_60_FUNCTION_NAME}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: GPIO_RB10}
+  - type: String
     attributes: {id: BSP_PIN_60_FUNCTION_TYPE}
     children:
     - type: Values
       children:
       - type: User
-        attributes: {value: PWM3H}
+        attributes: {value: GPIO}
+  - type: String
+    attributes: {id: BSP_PIN_60_LAT}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: High}
   - type: String
     attributes: {id: BSP_PIN_60_MODE}
     children:
@@ -1881,12 +2007,33 @@ children:
       - type: User
         attributes: {value: DIGITAL}
   - type: String
+    attributes: {id: BSP_PIN_61_DIR}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: Out}
+  - type: String
+    attributes: {id: BSP_PIN_61_FUNCTION_NAME}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: GPIO_RB11}
+  - type: String
     attributes: {id: BSP_PIN_61_FUNCTION_TYPE}
     children:
     - type: Values
       children:
       - type: User
-        attributes: {value: PWM3L}
+        attributes: {value: GPIO}
+  - type: String
+    attributes: {id: BSP_PIN_61_LAT}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: High}
   - type: String
     attributes: {id: BSP_PIN_61_MODE}
     children:
@@ -1895,12 +2042,33 @@ children:
       - type: User
         attributes: {value: DIGITAL}
   - type: String
+    attributes: {id: BSP_PIN_62_DIR}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: Out}
+  - type: String
+    attributes: {id: BSP_PIN_62_FUNCTION_NAME}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: GPIO_RB12}
+  - type: String
     attributes: {id: BSP_PIN_62_FUNCTION_TYPE}
     children:
     - type: Values
       children:
       - type: User
-        attributes: {value: PWM2H}
+        attributes: {value: GPIO}
+  - type: String
+    attributes: {id: BSP_PIN_62_LAT}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: High}
   - type: String
     attributes: {id: BSP_PIN_62_MODE}
     children:
@@ -1909,12 +2077,33 @@ children:
       - type: User
         attributes: {value: DIGITAL}
   - type: String
+    attributes: {id: BSP_PIN_63_DIR}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: Out}
+  - type: String
+    attributes: {id: BSP_PIN_63_FUNCTION_NAME}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: GPIO_RB13}
+  - type: String
     attributes: {id: BSP_PIN_63_FUNCTION_TYPE}
     children:
     - type: Values
       children:
       - type: User
-        attributes: {value: PWM2L}
+        attributes: {value: GPIO}
+  - type: String
+    attributes: {id: BSP_PIN_63_LAT}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: High}
   - type: String
     attributes: {id: BSP_PIN_63_MODE}
     children:
@@ -1923,12 +2112,33 @@ children:
       - type: User
         attributes: {value: DIGITAL}
   - type: String
+    attributes: {id: BSP_PIN_64_DIR}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: Out}
+  - type: String
+    attributes: {id: BSP_PIN_64_FUNCTION_NAME}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: GPIO_RA10}
+  - type: String
     attributes: {id: BSP_PIN_64_FUNCTION_TYPE}
     children:
     - type: Values
       children:
       - type: User
-        attributes: {value: PWM4H}
+        attributes: {value: GPIO}
+  - type: String
+    attributes: {id: BSP_PIN_64_LAT}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: High}
   - type: String
     attributes: {id: BSP_PIN_64_MODE}
     children:
@@ -3701,14 +3911,14 @@ children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: core, value: '2048'}
+        attributes: {id: core, value: '3200'}
   - type: Hex
     attributes: {id: SYS_PORT_A_TRIS}
     children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: core, value: '32768'}
+        attributes: {id: core, value: '33920'}
   - type: Hex
     attributes: {id: SYS_PORT_B_ANSEL}
     children:
@@ -3736,14 +3946,14 @@ children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: core, value: '514'}
+        attributes: {id: core, value: '65026'}
   - type: Hex
     attributes: {id: SYS_PORT_B_TRIS}
     children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: core, value: '656'}
+        attributes: {id: core, value: '65168'}
   - type: Hex
     attributes: {id: SYS_PORT_C_ANSEL}
     children:
@@ -3764,7 +3974,7 @@ children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: core, value: '33088'}
+        attributes: {id: core, value: '33728'}
   - type: Hex
     attributes: {id: SYS_PORT_C_ODC}
     children:
@@ -3785,14 +3995,14 @@ children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: core, value: '0'}
+        attributes: {id: core, value: '32'}
   - type: Hex
     attributes: {id: SYS_PORT_D_TRIS}
     children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: core, value: '320'}
+        attributes: {id: core, value: '352'}
   - type: Hex
     attributes: {id: SYS_PORT_E_ANSEL}
     children:
@@ -3813,7 +4023,7 @@ children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: core, value: '0'}
+        attributes: {id: core, value: '2'}
   - type: Hex
     attributes: {id: SYS_PORT_F_TRIS}
     children:
@@ -3834,7 +4044,7 @@ children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: core, value: '64'}
+        attributes: {id: core, value: '192'}
   - type: Hex
     attributes: {id: SYS_PORT_G_ODC}
     children:

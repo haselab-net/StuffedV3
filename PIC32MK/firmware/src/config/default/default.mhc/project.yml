@@ -48,13 +48,13 @@ files:
   security: NON_SECURE
   type: SOURCE
   userChecksum: 5905064E4748C92EA00EEE20B5D5E65A
-- generatedChecksum: 8BD89E054662498948C99828C6C0C2F9
+- generatedChecksum: A6C6D1A2E3D7A7330BDD0768898C6251
   logicalPath: config/default/peripheral/gpio
   name: plib_gpio.c
   physicalPath: peripheral/gpio
   security: NON_SECURE
   type: SOURCE
-  userChecksum: 8BD89E054662498948C99828C6C0C2F9
+  userChecksum: A6C6D1A2E3D7A7330BDD0768898C6251
 - generatedChecksum: FCFCEF66B278D4DC1ADE424FDE14B751
   logicalPath: config/default/peripheral/mcpwm
   name: plib_mcpwm.c
@@ -153,13 +153,13 @@ files:
   security: NON_SECURE
   type: HEADER
   userChecksum: 23F86588C83891551C404C1BA77F9655
-- generatedChecksum: 92588B5D83A1216F078AB685CA70C857
+- generatedChecksum: 7CB3AA51D4B76629511F1E96FB5DC301
   logicalPath: config/default/peripheral/gpio
   name: plib_gpio.h
   physicalPath: peripheral/gpio
   security: NON_SECURE
   type: HEADER
-  userChecksum: 92588B5D83A1216F078AB685CA70C857
+  userChecksum: 7CB3AA51D4B76629511F1E96FB5DC301
 - generatedChecksum: 27E3133B231E478BA73BA33157C30342
   logicalPath: config/default/peripheral/mcpwm
   name: plib_mcpwm.h

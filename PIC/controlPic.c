@@ -13,33 +13,49 @@
 #include "spiPwmDefs.h"
 #include "controlPic.h"
 
-
+#if NAXIS==4
+SDEC mcosOffset[NAXIS] ={ 2048, 2048, 2048, 2048 };
+SDEC msinOffset[NAXIS] ={ 2048, 2048, 2048, 2048 };
+#else
 SDEC mcosOffset[NAXIS] ={
-    2048, 2048, 2048, 2048
+    2048, 2048, 2048, 2048, 2048, 2048, 2048, 2048, 2048, 2048
 };
 SDEC msinOffset[NAXIS] ={
-    2048, 2048, 2048, 2048
+    2048, 2048, 2048, 2048, 2048, 2048, 2048, 2048, 2048, 2048
 };
+#endif
 
 SDEC mcosRaw[NAXIS];
 SDEC msinRaw[NAXIS];
 
 //  for auto calibration
+#define OFFSET  2048
+#define AMPLITUDE   (OFFSET*0.9)
+#define SCALE   (4096*4096) / (AMPLITUDE*2)
+#if NAXIS==4
 SDEC mcosMin[NAXIS] = {0,0,0,0};
 SDEC mcosMax[NAXIS] = {0,0,0,0};
 SDEC msinMin[NAXIS] = {0,0,0,0};
 SDEC msinMax[NAXIS] = {0,0,0,0};
-#define OFFSET  2048
-#define AMPLITUDE   (OFFSET*0.9)
 SDEC mcosMinAve[NAXIS] = {OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE};
 SDEC mcosMaxAve[NAXIS] = {OFFSET+AMPLITUDE, OFFSET+AMPLITUDE, OFFSET+AMPLITUDE, OFFSET+AMPLITUDE};
 SDEC msinMinAve[NAXIS] = {OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE};
 SDEC msinMaxAve[NAXIS] = {OFFSET+AMPLITUDE, OFFSET+AMPLITUDE, OFFSET+AMPLITUDE, OFFSET+AMPLITUDE};
-
-#define SCALE   (4096*4096) / (AMPLITUDE*2)
 SDEC mcosScale[NAXIS] = {SCALE, SCALE, SCALE, SCALE};
 SDEC msinScale[NAXIS] = {SCALE, SCALE, SCALE, SCALE};
+#else
+SDEC mcosMin[NAXIS] = {0,0,0,0,0,0,0,0,0,0};
+SDEC mcosMax[NAXIS] = {0,0,0,0,0,0,0,0,0,0};
+SDEC msinMin[NAXIS] = {0,0,0,0,0,0,0,0,0,0};
+SDEC msinMax[NAXIS] = {0,0,0,0,0,0,0,0,0,0};
+SDEC mcosMinAve[NAXIS] = {OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE};
+SDEC mcosMaxAve[NAXIS] = {OFFSET+AMPLITUDE, OFFSET+AMPLITUDE, OFFSET+AMPLITUDE, OFFSET+AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE};
+SDEC msinMinAve[NAXIS] = {OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE};
+SDEC msinMaxAve[NAXIS] = {OFFSET+AMPLITUDE, OFFSET+AMPLITUDE, OFFSET+AMPLITUDE, OFFSET+AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE};
+SDEC mcosScale[NAXIS] = {SCALE, SCALE, SCALE, SCALE, SCALE, SCALE, SCALE, SCALE, SCALE, SCALE};
+SDEC msinScale[NAXIS] = {SCALE, SCALE, SCALE, SCALE, SCALE, SCALE, SCALE, SCALE, SCALE, SCALE};
 
+#endif
 /*  Rotation State
  *  State will change with hysteresis. 1->2: cos=+ > -E, 1->4: sin=+>-E
  *  1<->2: aquire sinMax and rest to 0
@@ -53,7 +69,7 @@ enum RotationState {
     QUADRANT_2, //  cos-, sin+
     QUADRANT_3, //  cos-, sin-
     QUADRANT_4, //  cos+, sin-
-} rotationState[NAXIS] = {UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN};
+} rotationState[NAXIS]; //  start from UNKNOWN
 
 
 inline short FilterForAngle(short prev, short cur){
@@ -140,15 +156,11 @@ inline void updateRotationState(int idx){
 }
 
 
-
-
-
 #ifdef MODULETEST
 #include "math.h"
-double motorAngle[NMOTOR]={0.0,0.0,0.0,0.0};
-double motorVelocity[NMOTOR] = {0,0,0,0}; //{0.1, 0.1, 0.1, 0.1};
+double motorAngle[NMOTOR];
+double motorVelocity[NMOTOR];
 long motorTorques[NMOTOR];
-
 //	device access
 void readADC(){
     int i;
@@ -225,33 +237,31 @@ AN      2 3    5     10
 #error Board type not defined
 #endif
 #elif defined PIC32MK_MCJ
-//Force	AN16-10, AN27-25
-
-//Angle1-4:	AN41-24, AN47-46, AN48-49, AN6-5, 
-	mcosRaw[0] = FilterForAngle(mcosRaw[0], ADCDATA41);
-	msinRaw[0] = FilterForAngle(msinRaw[0], ADCDATA24);
-	mcosRaw[1] = FilterForAngle(mcosRaw[1], ADCDATA47);
-	msinRaw[1] = FilterForAngle(msinRaw[1], ADCDATA46);
-    mcosRaw[2] = FilterForAngle(mcosRaw[2], ADCDATA48);
-    msinRaw[2] = FilterForAngle(msinRaw[2], ADCDATA49);
-    mcosRaw[3] = FilterForAngle(mcosRaw[3], ADCDATA6);
+    //  AN9,10: M0,1      AN1,0: M2,3     AN3,2: M4,5     AN4,5: M6,7
+	mcosRaw[0] = FilterForAngle(mcosRaw[0], ADCDATA9);
+	msinRaw[0] = FilterForAngle(msinRaw[0], ADCDATA10);
+	mcosRaw[1] = FilterForAngle(mcosRaw[1], ADCDATA1);
+	msinRaw[1] = FilterForAngle(msinRaw[1], ADCDATA0);
+    mcosRaw[2] = FilterForAngle(mcosRaw[2], ADCDATA3);
+    msinRaw[2] = FilterForAngle(msinRaw[2], ADCDATA2);
+    mcosRaw[3] = FilterForAngle(mcosRaw[3], ADCDATA4);
     msinRaw[3] = FilterForAngle(msinRaw[3], ADCDATA5);
 
-//Angle5-8: AN7-8, AN13-11, AN14-12, AN15-26
-	mcosRaw[4] = FilterForAngle(mcosRaw[4], ADCDATA7);
-	msinRaw[4] = FilterForAngle(msinRaw[4], ADCDATA8);
-	mcosRaw[5] = FilterForAngle(mcosRaw[5], ADCDATA13);
-	msinRaw[5] = FilterForAngle(msinRaw[5], ADCDATA11);
-    mcosRaw[6] = FilterForAngle(mcosRaw[6], ADCDATA14);
-    msinRaw[6] = FilterForAngle(msinRaw[6], ADCDATA12);
-    mcosRaw[7] = FilterForAngle(mcosRaw[7], ADCDATA15);
-    msinRaw[7] = FilterForAngle(msinRaw[7], ADCDATA26);
+    //  AN6,7: M8,9     AN11,8: M10,11      AN12,13: M12,13     AN14,15: M14,15
+	mcosRaw[4] = FilterForAngle(mcosRaw[4], ADCDATA6);
+	msinRaw[4] = FilterForAngle(msinRaw[4], ADCDATA7);
+	mcosRaw[5] = FilterForAngle(mcosRaw[5], ADCDATA11);
+	msinRaw[5] = FilterForAngle(msinRaw[5], ADCDATA8);
+    mcosRaw[6] = FilterForAngle(mcosRaw[6], ADCDATA12);
+    msinRaw[6] = FilterForAngle(msinRaw[6], ADCDATA13);
+    mcosRaw[7] = FilterForAngle(mcosRaw[7], ADCDATA14);
+    msinRaw[7] = FilterForAngle(msinRaw[7], ADCDATA15);
 
-//Force	AN16-10, AN27-25
-    mcosRaw[8] = FilterForCurrent(currentSense[0], ADCDATA16);
-    msinRaw[8] = FilterForCurrent(currentSense[1], ADCDATA10);
-    mcosRaw[9] = FilterForCurrent(currentSense[2], ADCDATA27); //2
-    msinRaw[9] = FilterForCurrent(currentSense[3], ADCDATA25); //3
+    //  AN24,26,46,41: Force Sensor
+    mcosRaw[8] = FilterForCurrent(mcosRaw[8], ADCDATA24);
+    msinRaw[8] = FilterForCurrent(msinRaw[8], ADCDATA26);
+    mcosRaw[9] = FilterForCurrent(mcosRaw[9], ADCDATA46);
+    msinRaw[9] = FilterForCurrent(msinRaw[9], ADCDATA41);
 #endif
 
 	//	update mcos msin
@@ -520,12 +530,8 @@ void setPwmPin(int ch, bool cc){
             IOCON7bits.PENL = !cc;
             break;
         case 7:
-            IOCON8bits.PENH = cc;
-            IOCON8bits.PENL = !cc;
-            break;
-        case 8:
             IOCON9bits.PENH = cc;
-            IOCON9bits.PENL = !cc;
+            IOCON8bits.PENL = !cc;
             break;
     }
 }
@@ -537,9 +543,9 @@ void setPwm2(int ch, SDEC ratio, bool currentControl){
         reverse = 1;
     }
     int pwm = (((int)ratio) * PWM_PERIOD) >> SDEC_BITS;
-    MCPWM_ChannelPrimaryDutySet(ch, pwm);
     setPwmPin(ch, currentControl);
     setPHLevel(ch, reverse);
+    MCPWM_ChannelPrimaryDutySet(ch, pwm);
 }
 void setPwm(int ch, SDEC ratio){
     setPwm2(ch, ratio, false);

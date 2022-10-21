@@ -59,27 +59,27 @@ void GPIO_Initialize ( void )
 {
 
     /* PORTA Initialization */
-    LATA = 0x800; /* Initial Latch Value */
-    TRISACLR = 0x8000; /* Direction Control */
+    LATA = 0xc80; /* Initial Latch Value */
+    TRISACLR = 0x8480; /* Direction Control */
     ANSELACLR = 0x8000; /* Digital Mode Enable */
     /* PORTB Initialization */
-    LATB = 0x202; /* Initial Latch Value */
-    TRISBCLR = 0x290; /* Direction Control */
+    LATB = 0xfe02; /* Initial Latch Value */
+    TRISBCLR = 0xfe90; /* Direction Control */
     ANSELBCLR = 0x280; /* Digital Mode Enable */
     /* PORTC Initialization */
-    LATC = 0x8140; /* Initial Latch Value */
+    LATC = 0x83c0; /* Initial Latch Value */
     TRISCCLR = 0x87c0; /* Direction Control */
     ANSELCCLR = 0x1400; /* Digital Mode Enable */
     CNPUCSET = 0x2000; /* Pull-Up Enable */
     /* PORTD Initialization */
-    LATD = 0x0; /* Initial Latch Value */
-    TRISDCLR = 0x140; /* Direction Control */
+    LATD = 0x20; /* Initial Latch Value */
+    TRISDCLR = 0x160; /* Direction Control */
     /* PORTE Initialization */
     /* PORTF Initialization */
-    LATF = 0x0; /* Initial Latch Value */
+    LATF = 0x2; /* Initial Latch Value */
     TRISFCLR = 0x3; /* Direction Control */
     /* PORTG Initialization */
-    LATG = 0x40; /* Initial Latch Value */
+    LATG = 0xc0; /* Initial Latch Value */
     TRISGCLR = 0xc0; /* Direction Control */
     ANSELGCLR = 0x3c0; /* Digital Mode Enable */
 
