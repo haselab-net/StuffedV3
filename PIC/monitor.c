@@ -7,7 +7,6 @@
 #include <stdio.h>
 #ifdef PIC32MK_MCJ
 #include "embeddedFramework.h"
-#include "mkCoreTimer.h"
 #endif
 
 extern bool monOut();
@@ -142,9 +141,16 @@ void showControlStatus(){
 				(int)targets.write, (int)targets.read, (int)targets.tick, (int)targets.buf[(targets.read+1)%NTARGET].period, ct);
 	}
 }
-void showCoreTimer(){
+void showControlTimer(){
+#if defined PIC32MM
 	printf("Core timer cur:%8x cmp:%8x remain:%5d\r\n", 
 			_CP0_GET_COUNT(), _CP0_GET_COMPARE(), coretimerRemainTime);
+#elif defined PIC32MK_MCJ
+	printf("Timer2 cur:%8x cmp:%8x remain:%5d\r\n", 
+			TMR2_CounterGet() , TMR2_PeriodGet(), coretimerRemainTime);
+#else
+#errro    
+#endif
 }
 void logLevelUp(){
 	logLevel ++;
@@ -164,11 +170,11 @@ void toggleControlTimer(){
 		printf("Start timer interrupt.\r\n");
 	}
 #elif defined PIC32MK_MCJ
-	if (IEC0bits.CTIE){
-		CORETIMER_Stop();
+	if (T2CON & _T2CON_ON_MASK){
+		TMR2_Stop();
 		printf("stop timer.\r\n");
 	}else{
-		CORETIMER_Start();
+		TMR2_Start();
 		printf("Start timer.\r\n");
 	}
 #else
@@ -338,7 +344,7 @@ struct MonitorFunc monitors[] = {
 	{'A', "Show A/D value in motor order", showADInMotorOrder, true},
 	{'r', "Show motor rotation", showMotorRotation, true},
 	{'c', "Show control status", showControlStatus, true},
-	{'C', "Show core timer", showCoreTimer, true},
+	{'C', "Show control timer", showControlTimer, true},
 	{'u', "show uart status", showUartState, true},
     {'R', "read register", readAddress, false},
     {'W', "write register", writeAddress, false},

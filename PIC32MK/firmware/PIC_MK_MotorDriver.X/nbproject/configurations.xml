@@ -44,6 +44,10 @@
               <itemPath>../src/config/default/peripheral/qei/plib_qei_common.h</itemPath>
               <itemPath>../src/config/default/peripheral/qei/plib_qei2.h</itemPath>
             </logicalFolder>
+            <logicalFolder name="f10" displayName="tmr" projectFiles="true">
+              <itemPath>../src/config/default/peripheral/tmr/plib_tmr_common.h</itemPath>
+              <itemPath>../src/config/default/peripheral/tmr/plib_tmr2.h</itemPath>
+            </logicalFolder>
             <logicalFolder name="f9" displayName="tmr1" projectFiles="true">
               <itemPath>../src/config/default/peripheral/tmr1/plib_tmr1_common.h</itemPath>
               <itemPath>../src/config/default/peripheral/tmr1/plib_tmr1.h</itemPath>
@@ -110,6 +114,9 @@
             <logicalFolder name="f7" displayName="qei" projectFiles="true">
               <itemPath>../src/config/default/peripheral/qei/plib_qei2.c</itemPath>
             </logicalFolder>
+            <logicalFolder name="f10" displayName="tmr" projectFiles="true">
+              <itemPath>../src/config/default/peripheral/tmr/plib_tmr2.c</itemPath>
+            </logicalFolder>
             <logicalFolder name="f9" displayName="tmr1" projectFiles="true">
               <itemPath>../src/config/default/peripheral/tmr1/plib_tmr1.c</itemPath>
             </logicalFolder>
@@ -128,8 +135,6 @@
       </logicalFolder>
       <itemPath>../src/initMk.c</itemPath>
       <itemPath>../src/initMk.h</itemPath>
-      <itemPath>../src/mkCoreTimer.c</itemPath>
-      <itemPath>../src/mkCoreTimer.h</itemPath>
       <itemPath>../src/main.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
@@ -147,6 +152,7 @@
         <itemPath>../src/config/default/default.mhc/settings.yml</itemPath>
         <itemPath>../src/config/default/default.mhc/stdio.yml</itemPath>
         <itemPath>../src/config/default/default.mhc/tmr1.yml</itemPath>
+        <itemPath>../src/config/default/default.mhc/tmr2.yml</itemPath>
         <itemPath>../src/config/default/default.mhc/uart1.yml</itemPath>
         <itemPath>../src/config/default/default.mhc/uart2.yml</itemPath>
       </logicalFolder>

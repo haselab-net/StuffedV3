@@ -50,7 +50,6 @@ void __ISR(_TIMER_1_VECTOR, ipl3SRS) TIMER_1_Handler (void)
 		PIC_LOGI("RC%d len%d ", retPacket.commandId, retLen);
         returnCommand[retPacket.commandId]();
 		timeRetCmd = TMR1;
-		IFS0bits.T1IF = false;
 	}else{
 		//	stop timer interrupt
 		IEC0bits.T1IE = 0;

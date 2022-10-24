@@ -474,28 +474,28 @@ void setPHLevel(int ch, int val){
     //printf("setPHLevel(%d, %d)", ch, val);
     switch(ch){
         case 0:
-            val ? GPIO_RB4_Set() : GPIO_RB4_Clear();     //  APH0
+            !val ? GPIO_RB4_Set() : GPIO_RB4_Clear();     //  APH0
             break;    
         case 1:
-            val ? GPIO_RA15_Set() : GPIO_RA15_Clear();   //  BPH0
+            !val ? GPIO_RA15_Set() : GPIO_RA15_Clear();   //  BPH0
             break;    
         case 2:
-            val ? GPIO_RD8_Set() : GPIO_RD8_Clear();
+            !val ? GPIO_RD8_Set() : GPIO_RD8_Clear();
             break;    
         case 3:
-            val ? GPIO_RC12_Set() : GPIO_RC12_Clear();
+            !val ? GPIO_RC12_Set() : GPIO_RC12_Clear();
             break;
         case 4:
-            val ? GPIO_RC10_Set() : GPIO_RC10_Clear();
+            !val ? GPIO_RC10_Set() : GPIO_RC10_Clear();
             break;    
         case 5:
-            val ? GPIO_RB7_Set() : GPIO_RB7_Clear();
+            !val ? GPIO_RB7_Set() : GPIO_RB7_Clear();
             break;    
         case 6:
-            val ? GPIO_RF0_Set() : GPIO_RF0_Clear();
+            !val ? GPIO_RF0_Set() : GPIO_RF0_Clear();
             break;    
         case 7:
-            val ? GPIO_RD6_Set() : GPIO_RD6_Clear();
+            !val ? GPIO_RD6_Set() : GPIO_RD6_Clear();
             break;    
     }
 }
@@ -548,7 +548,7 @@ void setPwm2(int ch, SDEC ratio, bool currentControl){
     MCPWM_ChannelPrimaryDutySet(ch, pwm);
 }
 void setPwm(int ch, SDEC ratio){
-    setPwm2(ch, ratio, false);
+    setPwm2(ch, ratio, true);
 }
 #else
 #error

@@ -4,17 +4,18 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
             <file>file:/C:/Home/Hase/Project/Nuibot/StuffedV3/PIC/nvm.c</file>
-            <file>file:/C:/Home/Hase/Project/Nuibot/StuffedV3/PIC/commandTemplate.h</file>
-            <file>file:/C:/Home/Hase/Project/Nuibot/StuffedV3/PIC/monitor.c</file>
             <file>file:/C:/Home/Hase/Project/Nuibot/StuffedV3/PIC/commandUart.c</file>
-            <file>file:/C:/Home/Hase/Project/Nuibot/StuffedV3/PIC/main.c</file>
             <file>file:/C:/Home/Hase/Project/Nuibot/StuffedV3/PIC/controlPic.c</file>
-            <file>file:/C:/Home/Hase/Project/Nuibot/StuffedV3/PIC/command.c</file>
+            <file>file:/C:/Home/Hase/Project/Nuibot/StuffedV3/PIC32MK/firmware/src/main.c</file>
+            <file>file:/C:/Home/Hase/Project/Nuibot/StuffedV3/PIC32MK/firmware/PIC_MK_MotorDriver.X/nbproject/Makefile-default.mk</file>
+            <file>file:/C:/Home/Hase/Project/Nuibot/StuffedV3/PIC/commandCommon.h</file>
+            <file>file:/C:/Home/Hase/Project/Nuibot/StuffedV3/PIC/monitor.c</file>
             <file>file:/C:/Home/Hase/Project/Nuibot/StuffedV3/PIC32MK/firmware/src/initMk.c</file>
             <file>file:/C:/Home/Hase/Project/Nuibot/StuffedV3/PIC32MK/firmware/src/config/default/interrupts.c</file>
             <file>file:/C:/Home/Hase/Project/Nuibot/StuffedV3/PIC/uart.h</file>
             <file>file:/C:/Home/Hase/Project/Nuibot/StuffedV3/PIC/env.c</file>
-            <file>file:/C:/Home/Hase/Project/Nuibot/StuffedV3/PIC/commandCommon.h</file>
+            <file>file:/C:/Home/Hase/Project/Nuibot/StuffedV3/PIC/nvm.h</file>
+            <file>file:/C:/Home/Hase/Project/Nuibot/StuffedV3/PIC32MK/firmware/src/initMk.h</file>
         </group>
     </open-files>
 </project-private>

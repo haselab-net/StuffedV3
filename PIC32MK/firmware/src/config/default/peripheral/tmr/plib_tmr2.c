@@ -65,16 +65,16 @@ void TMR2_Initialize(void)
     SYNC = 0
     TGATE = 0
     TCKPS =0
-    T32   = 0
+    T32   = 1
     TCS = 0
     */
-    T2CONSET = 0x0;
+    T2CONSET = 0x8;
 
     /* Clear counter */
     TMR2 = 0x0;
 
     /*Set period */
-    PR2 = 11999U;
+    PR2 = 5399U;
 
     IEC0SET = _IEC0_T2IE_MASK;
 
@@ -92,19 +92,19 @@ void TMR2_Stop (void)
     T2CONCLR = _T2CON_ON_MASK;
 }
 
-void TMR2_PeriodSet(uint16_t period)
+void TMR2_PeriodSet(uint32_t period)
 {
     PR2  = period;
 }
 
-uint16_t TMR2_PeriodGet(void)
+uint32_t TMR2_PeriodGet(void)
 {
-    return (uint16_t)PR2;
+    return PR2;
 }
 
-uint16_t TMR2_CounterGet(void)
+uint32_t TMR2_CounterGet(void)
 {
-    return (uint16_t)(TMR2);
+    return (TMR2);
 }
 
 

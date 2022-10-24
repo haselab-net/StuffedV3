@@ -61,20 +61,24 @@
 
 
 void TIMER_1_InterruptHandler( void );
+void TIMER_2_InterruptHandler( void );
 
 
-void CORE_TIMER_InterruptHandler (void);
 
 /* All the handlers are defined here.  Each will call its PLIB-specific function. */
 void __ISR(_CORE_TIMER_VECTOR, ipl1SRS) CORE_TIMER_Handler (void)
 {
-    CORE_TIMER_InterruptHandler();
 }
 
 //void __ISR(_TIMER_1_VECTOR, ipl1SRS) TIMER_1_Handler (void)
 //{
 //    TIMER_1_InterruptHandler();
 //}
+
+void __ISR(_TIMER_2_VECTOR, ipl1SRS) TIMER_2_Handler (void)
+{
+    TIMER_2_InterruptHandler();
+}
 
 
 

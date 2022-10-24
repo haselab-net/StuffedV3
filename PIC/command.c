@@ -116,6 +116,7 @@ void ecSetParam(){
         NvData nvData;
         NVMRead(&nvData);
         nvData.boardId = command.param.boardId;
+        printf("BoardID:%d\r\n", nvData.boardId);
         NVMWrite(&nvData);
         boardId = PNVDATA->boardId;
         if (boardId > 7) boardId = 7;

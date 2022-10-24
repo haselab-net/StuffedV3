@@ -1,7 +1,6 @@
 #include "definitions.h"
 #include "initMk.h"
 #include "device.h"
-#include "mkCoreTimer.h"
 #include "controlPic.h"
 #include "uart.h"
 
@@ -9,11 +8,12 @@
 #define ADC_VREF                (3.3f)
 #define ADC_MAX_COUNT           (4095)
 
+int coretimerRemainTime;
 
-void coretimerCallback(uint32_t st, uintptr_t arg){
-    CORETIMER_Start();
+void tmr2CallBack(uint32_t st, uintptr_t arg){
     onControlTimer();
     ADCHS_GlobalEdgeConversionStart();
+    coretimerRemainTime = TMR2_PeriodGet() - TMR2_CounterGet();
 }
 
 
@@ -41,7 +41,6 @@ void initInterrupt(){
 void initMk(){
     SYS_Initialize(NULL);
     initInterrupt();
-    CORETIMER_Initialize();
     
     /*
     char msg1[] = "Initial UART2 Write Test.\r\n";
@@ -57,8 +56,8 @@ void initMk(){
     ADCCON1bits.STRGSRC = 1;    //  00010 = Global level software trigger (GLSWTRG) is not self-cleared
                                 //  00001 = Global software trigger (GSWTRG) is self-cleared on the next clock cycle
     
-    CORETIMER_CallbackSet(coretimerCallback, NULL);
-    CORETIMER_Start();
+    TMR2_CallbackRegister(tmr2CallBack, NULL);
+    TMR2_Start();
 
     TMR1_Start();
     

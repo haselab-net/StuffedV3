@@ -15,10 +15,13 @@ struct NvPageData{
 
 #if BOARD_TYPE==BT_B3F || BOARD_TYPE==BT_B2F || BOARD_TYPE==BT_B1F
  #define EL4(x)  
+ #define EL5678(x)
 #elif BOARD_TYPE==BT_B3M || BOARD_TYPE==BT_B2M || BOARD_TYPE==BT_B1M
  #define EL4(x) x
+ #define EL5678(x)
 #elif BOARD_TYPE==BT_B5M
  #define EL4(x) x
+ #define EL5678(a, b, c, d) a,b,c,d
 #else
  #error BORAD_TYPE must be specified.
 #endif
@@ -29,17 +32,20 @@ const struct NvPageData __attribute__((aligned(NVPAGESIZE))) theNvPage = {
         {0,0,0},    //  pad
         {2000000, 3000000},    //  2MBPS for command, 3MBPS for monitor
         {   //  PDParam
-            {PDPARAM_K, PDPARAM_K, PDPARAM_K, EL4(PDPARAM_K)},   //k
-            {PDPARAM_B, PDPARAM_B, PDPARAM_B, EL4(PDPARAM_B)},   //b
-            {PDPARAM_A, PDPARAM_A, PDPARAM_A, EL4(PDPARAM_A)},   //a
+            {PDPARAM_K, PDPARAM_K, PDPARAM_K, EL4(PDPARAM_K), EL5678(PDPARAM_K, PDPARAM_K, PDPARAM_K, PDPARAM_K)},   //k
+            {PDPARAM_B, PDPARAM_B, PDPARAM_B, EL4(PDPARAM_B), EL5678(PDPARAM_B, PDPARAM_B, PDPARAM_B, PDPARAM_B)},   //b
+            {PDPARAM_A, PDPARAM_A, PDPARAM_A, EL4(PDPARAM_A), EL5678(PDPARAM_A, PDPARAM_A, PDPARAM_A, PDPARAM_A)},   //a
         },
         {//  TorqueLimit
-            {-SDEC_ONE, -SDEC_ONE, -SDEC_ONE, EL4(-SDEC_ONE)},   //  min
-            {SDEC_ONE, SDEC_ONE, SDEC_ONE, EL4(SDEC_ONE)},       //  max   
+            {-SDEC_ONE, -SDEC_ONE, -SDEC_ONE, EL4(-SDEC_ONE), EL5678(-SDEC_ONE, -SDEC_ONE, -SDEC_ONE, -SDEC_ONE)},   //  min
+            {SDEC_ONE, SDEC_ONE, SDEC_ONE, EL4(SDEC_ONE), EL5678(SDEC_ONE, SDEC_ONE, SDEC_ONE, SDEC_ONE)},       //  max   
         },
         {//  MotorHeatLimit       
-            {MOTOR_HEAT_LIMIT/MOTOR_HEAT_RELEASE, MOTOR_HEAT_LIMIT/MOTOR_HEAT_RELEASE, MOTOR_HEAT_LIMIT/MOTOR_HEAT_RELEASE, EL4(MOTOR_HEAT_LIMIT/MOTOR_HEAT_RELEASE)},   //  SDEC limit
-            {MOTOR_HEAT_RELEASE, MOTOR_HEAT_RELEASE, MOTOR_HEAT_RELEASE, EL4(MOTOR_HEAT_RELEASE)}    // SDEC release
+            {MOTOR_HEAT_LIMIT/MOTOR_HEAT_RELEASE, MOTOR_HEAT_LIMIT/MOTOR_HEAT_RELEASE, MOTOR_HEAT_LIMIT/MOTOR_HEAT_RELEASE, EL4(MOTOR_HEAT_LIMIT/MOTOR_HEAT_RELEASE),
+                    EL5678(MOTOR_HEAT_LIMIT/MOTOR_HEAT_RELEASE, MOTOR_HEAT_LIMIT/MOTOR_HEAT_RELEASE, MOTOR_HEAT_LIMIT/MOTOR_HEAT_RELEASE, MOTOR_HEAT_LIMIT/MOTOR_HEAT_RELEASE)
+            },   //  SDEC limit
+            {MOTOR_HEAT_RELEASE, MOTOR_HEAT_RELEASE, MOTOR_HEAT_RELEASE, EL4(MOTOR_HEAT_RELEASE),
+                MOTOR_HEAT_RELEASE, MOTOR_HEAT_RELEASE, MOTOR_HEAT_RELEASE, MOTOR_HEAT_RELEASE}    // SDEC release
         },
     }
 };
@@ -141,9 +147,10 @@ unsigned int NVMWrite(NvData* data){
     unsigned int rv = 0;
 
     while(offset < sizeof(NvData)){
-        rv = NVM_RowWrite((unsigned int*)(((char*)data)+offset), NVPAGE+offset);
+        rv = NVM_WordWrite(*(unsigned int*)( ((char*)data)+offset ), NVPAGE+offset);
         while(NVM_IsBusy());
-        offset += NVM_FLASH_ROWSIZE;
+        //offset += NVM_FLASH_ROWSIZE;
+        offset += 4;
         //printf("rv: %d offset%x", rv, offset);
     }
     return rv;
