@@ -543,9 +543,13 @@ void setPwm2(int ch, SDEC ratio, bool currentControl){
         reverse = 1;
     }
     int pwm = (((int)ratio) * PWM_PERIOD) >> SDEC_BITS;
-    setPwmPin(ch, currentControl);
+    if (pwm){
+        setPwmPin(ch, currentControl);
+    }else{
+        setPwmPin(ch, false);
+    }
     setPHLevel(ch, reverse);
-    MCPWM_ChannelPrimaryDutySet(ch, pwm);
+    MCPWM_ChannelPrimaryDutySet(ch, pwm ? pwm-1 : pwm);
 }
 void setPwm(int ch, SDEC ratio){
     setPwm2(ch, ratio, true);
