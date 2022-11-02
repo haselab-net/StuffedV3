@@ -23,16 +23,19 @@ namespace PCController
         int count1000 = 0;
         void mmTimer_Tick(Object sender)   //  Haptic制御
         {
-            count ++;
-            if (count >= 1000) {
+            count++;
+            if (count >= 1000)
+            {
                 count = 0;
                 count1000++;
                 System.Diagnostics.Debug.WriteLine("Tick called " + count1000 * 1000 + " times.");
             }
-            short vib=0;
-            short [] wave = { 1, 0, -1, 0 };
-            if (bHaptic) {
-                for (int i = 0; i < boards.NMotor; ++i) {
+            short vib = 0;
+            short[] wave = { 1, 0, -1, 0 };
+            if (bHaptic)
+            {
+                for (int i = 0; i < boards.NMotor; ++i)
+                {
                     int diff = haptics[i].T - boards.GetPos(i);
                     if (diff > SDEC.ONE) diff = SDEC.ONE;
                     if (diff < 0)
@@ -40,8 +43,9 @@ namespace PCController
                         diff = 0;
                         times[i] = 0;
                     }
-                    else {
-                        times[i] ++;
+                    else
+                    {
+                        times[i]++;
                         vib = (short)((short)udAmp.Value * wave[times[i] % 4]);
                         vib = (short)(vib * Math.Exp(-times[i] * (double)udDamp.Value));
                     }
@@ -51,7 +55,7 @@ namespace PCController
                     haptics.currents[i] = c;
                 }
                 boards.SendCurrent(haptics.currents);
-            }   
+            }
         }
 
         // OSCのレシーバー
@@ -107,7 +111,7 @@ namespace PCController
             m_OscReceiver.Close();
 
             // モーターを全て止める
-            if(boards.NMotor != 0)
+            if (boards.NMotor != 0)
             {
                 short[] currents = new short[boards.NMotor];
                 boards.SendCurrent(currents);
@@ -174,13 +178,15 @@ namespace PCController
         {
             txMsg.Text = msg;
         }
-        private void ResetPanels() {
+        private void ResetPanels()
+        {
             ResetHapticTab();
             ResetCurrentTab();
             ResetMotor();
             ResetMagnet();
         }
-        private void ResetHapticTab() {
+        private void ResetHapticTab()
+        {
             flHaptic.Controls.Clear();
             haptics.Clear();
             for (int i = 0; i < boards.NMotor; ++i)
@@ -195,18 +201,21 @@ namespace PCController
         {
             flCurrent.Controls.Clear();
             currentControls.Clear();
-            for (int i = 0; i < boards.NMotor; ++i) {
+            for (int i = 0; i < boards.NMotor; ++i)
+            {
                 CurrentControl cc = new CurrentControl();
                 cc.Init();
                 flCurrent.Controls.Add(cc.panel);
                 currentControls.Add(cc);
             }
         }
-        void ResetMotor() {
+        void ResetMotor()
+        {
             motors.Clear();
             flParam.Controls.Clear();
             flPos.Controls.Clear();
-            for (int i = 0; i < boards.NMotor; ++i) {
+            for (int i = 0; i < boards.NMotor; ++i)
+            {
                 Motor m = new Motor();
                 motors.Add(m);
                 flPos.Controls.Add(m.position.panel);
@@ -287,26 +296,28 @@ namespace PCController
             {
                 currentControls[i].lbCurrent.Text = "" + boards.GetCurrent(i);
             }
-            for(int i=0; i < boards.NForce; ++i)
+            for (int i = 0; i < boards.NForce; ++i)
             {
-                txMsg.Text += " F"+i+"="+boards.GetForce(i);
+                txMsg.Text += " F" + i + "=" + boards.GetForce(i);
             }
         }
 
         private void timer_Tick(object sender, EventArgs e)
         {
-	        if (bHaptic) {
-	            haptics.Update();
+            if (bHaptic)
+            {
+                haptics.Update();
             }
             else if (tbControl.SelectedTab == tpPos)
-			{
+            {
                 UpdatePos();
             }
-			else if (tbControl.SelectedTab == tpCurrent)
+            else if (tbControl.SelectedTab == tpCurrent)
             {
                 UpdateCurrent();
             }
-			else if (tbControl.SelectedTab == tpMagnet) {
+            else if (tbControl.SelectedTab == tpMagnet)
+            {
                 UpdateMagnet();
             }
             txMsg.Text = "Pos:";
@@ -351,7 +362,8 @@ namespace PCController
             if (e.Label != null)
             {
                 int id;
-                if (!int.TryParse(e.Label, out id)) {
+                if (!int.TryParse(e.Label, out id))
+                {
                     if (!int.TryParse(e.Label.Substring(2), out id))
                     {
                         e.CancelEdit = true;
@@ -367,11 +379,13 @@ namespace PCController
                         }
                     }
                 }
-                if (!e.CancelEdit) {
+                if (!e.CancelEdit)
+                {
                     int oid;
                     int.TryParse(e.Node.Text.Substring(2), out oid);
                     byte[] ids = new byte[boards.Count];
-                    for (int i = 0; i < boards.Count; ++i) {
+                    for (int i = 0; i < boards.Count; ++i)
+                    {
                         ids[i] = (byte)boards[i].boardId;
                         if (ids[i] == oid)
                         {
@@ -486,7 +500,8 @@ namespace PCController
             }
         }
 
-        private void HapticControl() {
+        private void HapticControl()
+        {
             while (bHaptic)
             {
                 mmTimer_Tick(this);
@@ -513,7 +528,8 @@ namespace PCController
                 mmTimer.Enabled = true;
 #endif
             }
-            else {
+            else
+            {
                 btHapticStart.Text = "Start";
                 bHaptic = false;
                 mmTimer.Enabled = false;
@@ -630,7 +646,7 @@ namespace PCController
             //        curr0, curr1, 0, 0
             //    };
 
-                boards.SendCurrent(currentBuffer);
+            boards.SendCurrent(currentBuffer);
             //}
         }
 
