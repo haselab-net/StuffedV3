@@ -19,6 +19,8 @@
  CHOOSE_BoardInfo(B3M)
 #elif BOARD_TYPE == BT_B3F
  CHOOSE_BoardInfo(B3F)
+#elif BOARD_TYPE == BT_B5M
+ CHOOSE_BoardInfo(B5M)
 #else
 #error BORAD_TYPE is wrong.
 #endif

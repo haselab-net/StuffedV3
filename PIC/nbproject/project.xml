@@ -19,15 +19,11 @@
             </sourceRootList>
             <confList>
                 <confElem>
+                    <name>default</name>
+                    <type>2</type>
+                </confElem>
+                <confElem>
                     <name>Simulation</name>
-                    <type>2</type>
-                </confElem>
-                <confElem>
-                    <name>DIP</name>
-                    <type>2</type>
-                </confElem>
-                <confElem>
-                    <name>UQFN</name>
                     <type>2</type>
                 </confElem>
             </confList>

@@ -1,0 +1,14 @@
+configName: default
+folderName: PICMK
+format_version: v1.0
+frameworkPath: ..\..\PIC_Harmony
+processor: PIC32MK0256GPG064
+projectName: PICMK
+settings:
+  PackageFilter: bsp;core;core_apps_pic32mk;core_apps_pic32mm;csp;csp_apps_pic32mk;csp_apps_pic32mm;dev_packs;mc_apps_pic32mk;motor_control;quick_docs;x2c
+  FORCE_OPTIMIZATION: 'false'
+  GENERATE_BACKUP: 'true'
+  TRUSTZONE: 'false'
+  CMSISPath: .\dev_packs\arm\CMSIS\5.8.0
+  MERGE_STRATEGY: USER_ALL
+  DFPPath: .\dev_packs\Microchip\PIC32MK-GP_DFP\1.6.144\atdf\PIC32MK0256GPG064.atdf

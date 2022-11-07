@@ -28,7 +28,14 @@
 
 #include "env.h"
 #include "fixed.h"
+#ifdef PIC32MM
 #include "mcc_generated_files/mcc.h"
+#elif defined PIC32MK_MCJ
+#include "definitions.h"
+#include "initMk.h"
+#else
+ #error
+#endif
 #include "control.h"
 #include "command.h"
 #include "uart.h"
@@ -37,14 +44,22 @@
 #include <string.h>
 
 void monitor();
+bool monOut();
+void commandUartInit();
+
 /*
                          Main application
  */
 extern int timerRestTime;
 int main(void)
-{    
-    int i = 0;
+{
+#ifdef PIC32MM    
     SYSTEM_Initialize();
+#elif defined PIC32MK_MCJ
+    initMk();
+#else
+#error
+#endif
     UMTXREG = 'S';
     printf("tart.\r\n");
     boardId = PNVDATA->boardId;
@@ -53,7 +68,6 @@ int main(void)
     controlInit();
 	commandInit();
 	commandUartInit();
-	setPwm(0, SDEC_ONE*0.1);
 #if 0
     printf("UMRXREG=%x ", UMRXREG);
     printf("UMSTA=%x\r\n", UMSTA);
@@ -65,6 +79,7 @@ int main(void)
 #endif
 	while(1){
 		if (!uartExecCommand()){
+#ifdef PIC32MM
 			uint32_t now = _CP0_GET_COUNT();
 			uint32_t cmp = _CP0_GET_COMPARE();
 			int diff = cmp - now;
@@ -73,6 +88,7 @@ int main(void)
 				_CP0_SET_COMPARE(coretimerCompare);
 				//printf("RO\r\n");
 			}
+#endif
 			if (UMSTAbits.TRMT){
 				monitor();
 			}else{

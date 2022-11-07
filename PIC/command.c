@@ -3,8 +3,8 @@
 #include "control.h"
 #include "boardType.h"
 #include "nvm.h"
-#include "uart.h"
 #include <string.h>
+#include "uart.h"
 #ifdef WROOM
 #include "../WROOM/components/SoftRobot/commandWROOM.h"
 #endif
@@ -21,6 +21,7 @@ extern SDEC getTouch(int i);
 #else
 static inline SDEC getTouch(int i){
     PIC_LOGE("getTouch called");
+    return (SDEC)-1;
 }
 #endif
 
@@ -115,6 +116,7 @@ void ecSetParam(){
         NvData nvData;
         NVMRead(&nvData);
         nvData.boardId = command.param.boardId;
+        printf("BoardID:%d\r\n", nvData.boardId);
         NVMWrite(&nvData);
         boardId = PNVDATA->boardId;
         if (boardId > 7) boardId = 7;

@@ -27,11 +27,11 @@ CLEAN_SUBPROJECTS=${CLEAN_SUBPROJECTS_${SUBPROJECTS}}
 PROJECTNAME=PIC
 
 # Active Configuration
-DEFAULTCONF=UQFN
+DEFAULTCONF=default
 CONF=${DEFAULTCONF}
 
 # All Configurations
-ALLCONFS=Simulation DIP UQFN 
+ALLCONFS=default Simulation 
 
 
 # build
@@ -45,17 +45,15 @@ ALLCONFS=Simulation DIP UQFN
 
 # clobber
 .clobber-impl: .clobber-pre .depcheck-impl
+	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=default clean
 	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=Simulation clean
-	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=DIP clean
-	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=UQFN clean
 
 
 
 # all
 .all-impl: .all-pre .depcheck-impl
+	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=default build
 	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=Simulation build
-	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=DIP build
-	    ${MAKE} SUBPROJECTS=${SUBPROJECTS} CONF=UQFN build
 
 
 

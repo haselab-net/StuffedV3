@@ -23,10 +23,18 @@ typedef struct {
 } __attribute__((__packed__)) NvData;
 
 #ifdef PIC
-#define NVPAGE      0x9D00F800
+#ifdef PIC32MM
 #define NVPAGESIZE  0x800
 #define NVROWSIZE   0x100
-#define PNVDATA     ((NvData*)(void*)NVPAGE)
+#elif defined PIC32MK_MCJ
+#define NVPAGESIZE  0x1000
+#define NVROWSIZE   0x200
+#else
+#error
+#endif
+extern const struct NvPageData theNvPage;
+#define PNVDATA     ((NvData*)(void*)&theNvPage)
+#define NVPAGE  ((unsigned int)PNVDATA)
 unsigned int NVMWrite(NvData* p);
 void NVMRead(NvData* p);
 #endif

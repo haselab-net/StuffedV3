@@ -2,39 +2,60 @@
 
 #include "fixed.h"
 #include "control.h"
+#ifdef PIC32MM
 #include "mcc_generated_files/mcc.h"
+#else
+#include "definitions.h"
+#endif
 #include "nvm.h"
 #include <assert.h>
 
 #include "spiPwmDefs.h"
+#include "controlPic.h"
 
-
+#if NAXIS==4
+SDEC mcosOffset[NAXIS] ={ 2048, 2048, 2048, 2048 };
+SDEC msinOffset[NAXIS] ={ 2048, 2048, 2048, 2048 };
+#else
 SDEC mcosOffset[NAXIS] ={
-    2048, 2048, 2048, 2048
+    2048, 2048, 2048, 2048, 2048, 2048, 2048, 2048, 2048, 2048
 };
 SDEC msinOffset[NAXIS] ={
-    2048, 2048, 2048, 2048
+    2048, 2048, 2048, 2048, 2048, 2048, 2048, 2048, 2048, 2048
 };
+#endif
 
 SDEC mcosRaw[NAXIS];
 SDEC msinRaw[NAXIS];
 
 //  for auto calibration
+#define OFFSET  2048
+#define AMPLITUDE   (OFFSET*0.9)
+#define SCALE   (4096*4096) / (AMPLITUDE*2)
+#if NAXIS==4
 SDEC mcosMin[NAXIS] = {0,0,0,0};
 SDEC mcosMax[NAXIS] = {0,0,0,0};
 SDEC msinMin[NAXIS] = {0,0,0,0};
 SDEC msinMax[NAXIS] = {0,0,0,0};
-#define OFFSET  2048
-#define AMPLITUDE   (OFFSET*0.9)
 SDEC mcosMinAve[NAXIS] = {OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE};
 SDEC mcosMaxAve[NAXIS] = {OFFSET+AMPLITUDE, OFFSET+AMPLITUDE, OFFSET+AMPLITUDE, OFFSET+AMPLITUDE};
 SDEC msinMinAve[NAXIS] = {OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE};
 SDEC msinMaxAve[NAXIS] = {OFFSET+AMPLITUDE, OFFSET+AMPLITUDE, OFFSET+AMPLITUDE, OFFSET+AMPLITUDE};
-
-#define SCALE   (4096*4096) / (AMPLITUDE*2)
 SDEC mcosScale[NAXIS] = {SCALE, SCALE, SCALE, SCALE};
 SDEC msinScale[NAXIS] = {SCALE, SCALE, SCALE, SCALE};
+#else
+SDEC mcosMin[NAXIS] = {0,0,0,0,0,0,0,0,0,0};
+SDEC mcosMax[NAXIS] = {0,0,0,0,0,0,0,0,0,0};
+SDEC msinMin[NAXIS] = {0,0,0,0,0,0,0,0,0,0};
+SDEC msinMax[NAXIS] = {0,0,0,0,0,0,0,0,0,0};
+SDEC mcosMinAve[NAXIS] = {OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE};
+SDEC mcosMaxAve[NAXIS] = {OFFSET+AMPLITUDE, OFFSET+AMPLITUDE, OFFSET+AMPLITUDE, OFFSET+AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE};
+SDEC msinMinAve[NAXIS] = {OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE};
+SDEC msinMaxAve[NAXIS] = {OFFSET+AMPLITUDE, OFFSET+AMPLITUDE, OFFSET+AMPLITUDE, OFFSET+AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE, OFFSET-AMPLITUDE};
+SDEC mcosScale[NAXIS] = {SCALE, SCALE, SCALE, SCALE, SCALE, SCALE, SCALE, SCALE, SCALE, SCALE};
+SDEC msinScale[NAXIS] = {SCALE, SCALE, SCALE, SCALE, SCALE, SCALE, SCALE, SCALE, SCALE, SCALE};
 
+#endif
 /*  Rotation State
  *  State will change with hysteresis. 1->2: cos=+ > -E, 1->4: sin=+>-E
  *  1<->2: aquire sinMax and rest to 0
@@ -48,7 +69,7 @@ enum RotationState {
     QUADRANT_2, //  cos-, sin+
     QUADRANT_3, //  cos-, sin-
     QUADRANT_4, //  cos+, sin-
-} rotationState[NAXIS] = {UNKNOWN, UNKNOWN, UNKNOWN, UNKNOWN};
+} rotationState[NAXIS]; //  start from UNKNOWN
 
 
 inline short FilterForAngle(short prev, short cur){
@@ -135,15 +156,11 @@ inline void updateRotationState(int idx){
 }
 
 
-
-
-
 #ifdef MODULETEST
 #include "math.h"
-double motorAngle[NMOTOR]={0.0,0.0,0.0,0.0};
-double motorVelocity[NMOTOR] = {0,0,0,0}; //{0.1, 0.1, 0.1, 0.1};
+double motorAngle[NMOTOR];
+double motorVelocity[NMOTOR];
 long motorTorques[NMOTOR];
-
 //	device access
 void readADC(){
     int i;
@@ -165,6 +182,7 @@ void readADC(){
 //	device access
 //
 void readADC(){
+#if defined PIC32MM
 #if defined BOARD1_MOTORDRIVER
     /*  ADC connection
      M1:  AN11, AN4 (cos, sin)
@@ -218,6 +236,34 @@ AN      2 3    5     10
 #else
 #error Board type not defined
 #endif
+#elif defined PIC32MK_MCJ
+    //  AN9,10: M0,1      AN1,0: M2,3     AN3,2: M4,5     AN4,5: M6,7
+	mcosRaw[0] = FilterForAngle(mcosRaw[0], ADCDATA9);
+	msinRaw[0] = FilterForAngle(msinRaw[0], ADCDATA10);
+	mcosRaw[1] = FilterForAngle(mcosRaw[1], ADCDATA1);
+	msinRaw[1] = FilterForAngle(msinRaw[1], ADCDATA0);
+    mcosRaw[2] = FilterForAngle(mcosRaw[2], ADCDATA3);
+    msinRaw[2] = FilterForAngle(msinRaw[2], ADCDATA2);
+    mcosRaw[3] = FilterForAngle(mcosRaw[3], ADCDATA4);
+    msinRaw[3] = FilterForAngle(msinRaw[3], ADCDATA5);
+
+    //  AN6,7: M8,9     AN11,8: M10,11      AN12,13: M12,13     AN14,15: M14,15
+	mcosRaw[4] = FilterForAngle(mcosRaw[4], ADCDATA6);
+	msinRaw[4] = FilterForAngle(msinRaw[4], ADCDATA7);
+	mcosRaw[5] = FilterForAngle(mcosRaw[5], ADCDATA11);
+	msinRaw[5] = FilterForAngle(msinRaw[5], ADCDATA8);
+    mcosRaw[6] = FilterForAngle(mcosRaw[6], ADCDATA12);
+    msinRaw[6] = FilterForAngle(msinRaw[6], ADCDATA13);
+    mcosRaw[7] = FilterForAngle(mcosRaw[7], ADCDATA14);
+    msinRaw[7] = FilterForAngle(msinRaw[7], ADCDATA15);
+
+    //  AN24,26,46,41: Force Sensor
+    mcosRaw[8] = FilterForCurrent(mcosRaw[8], ADCDATA24);
+    msinRaw[8] = FilterForCurrent(msinRaw[8], ADCDATA26);
+    mcosRaw[9] = FilterForCurrent(mcosRaw[9], ADCDATA46);
+    msinRaw[9] = FilterForCurrent(msinRaw[9], ADCDATA41);
+#endif
+
 	//	update mcos msin
     int i;
     for(i=0; i<NAXIS; ++i){
@@ -276,7 +322,9 @@ inline void setSpiPwm128(SDEC ratio){
 }
 
 #if defined BOARD1_MOTORDRIVER
-void setPwm(int ch, SDEC ratio){
+void 
+
+(int ch, SDEC ratio){
 	//	Connector at the left most.
     if (ch == 0){
 		if (ratio < 0){
@@ -421,6 +469,91 @@ void setPwm(int ch, SDEC ratio){
 #endif
     }
 }
+#elif defined BOARD5
+void setPHLevel(int ch, int val){
+    //printf("setPHLevel(%d, %d)", ch, val);
+    switch(ch){
+        case 0:
+            !val ? GPIO_RB4_Set() : GPIO_RB4_Clear();     //  APH0
+            break;    
+        case 1:
+            !val ? GPIO_RA15_Set() : GPIO_RA15_Clear();   //  BPH0
+            break;    
+        case 2:
+            !val ? GPIO_RD8_Set() : GPIO_RD8_Clear();
+            break;    
+        case 3:
+            !val ? GPIO_RC12_Set() : GPIO_RC12_Clear();
+            break;
+        case 4:
+            !val ? GPIO_RC10_Set() : GPIO_RC10_Clear();
+            break;    
+        case 5:
+            !val ? GPIO_RB7_Set() : GPIO_RB7_Clear();
+            break;    
+        case 6:
+            !val ? GPIO_RF0_Set() : GPIO_RF0_Clear();
+            break;    
+        case 7:
+            !val ? GPIO_RD6_Set() : GPIO_RD6_Clear();
+            break;    
+    }
+}
+void setPwmPin(int ch, bool cc){
+    switch(ch){
+        case 0:
+            IOCON1bits.PENH = cc;
+            IOCON1bits.PENL = !cc;
+            break;
+        case 1:
+            IOCON2bits.PENH = cc;
+            IOCON2bits.PENL = !cc;
+            break;
+        case 2:
+            IOCON3bits.PENH = cc;
+            IOCON3bits.PENL = !cc;
+            break;
+        case 3:
+            IOCON4bits.PENH = cc;
+            IOCON4bits.PENL = !cc;
+            break;
+        case 4:
+            IOCON5bits.PENH = cc;
+            IOCON5bits.PENL = !cc;
+            break;
+        case 5:
+            IOCON6bits.PENH = cc;
+            IOCON6bits.PENL = !cc;
+            break;
+        case 6:
+            IOCON7bits.PENH = cc;
+            IOCON7bits.PENL = !cc;
+            break;
+        case 7:
+            IOCON9bits.PENH = cc;
+            IOCON8bits.PENL = !cc;
+            break;
+    }
+}
+void setPwm2(int ch, SDEC ratio, bool currentControl){
+    #define PWM_PERIOD  50
+    int reverse = 0;
+    if (ratio < 0){
+        ratio = -ratio;
+        reverse = 1;
+    }
+    int pwm = (((int)ratio) * PWM_PERIOD) >> SDEC_BITS;
+    if (pwm){
+        setPwmPin(ch, currentControl);
+    }else{
+        setPwmPin(ch, false);
+    }
+    setPHLevel(ch, reverse);
+    MCPWM_ChannelPrimaryDutySet(ch, pwm ? pwm-1 : pwm);
+}
+void setPwm(int ch, SDEC ratio){
+    setPwm2(ch, ratio, true);
+}
 #else
 #error
 #endif
@@ -444,11 +577,11 @@ void __attribute__ ((vector(_SPI2_TX_VECTOR), interrupt(IPL6AUTO))) spiEmpty(voi
 extern unsigned int addrSPI2BUF;
 
 void controlInitPic(){
-    int i;
+#ifdef PIC32MM
     addrSPI2BUF = (unsigned int)&SPI2BUF;
 	//	disable interrupt
 	IEC1bits.SPI2EIE = IEC1bits.SPI2RXIE = IEC1bits.SPI2TXIE = 0;
-	i = SPI2BUF;	//	clear receive buf;
+	int i = SPI2BUF;	//	clear receive buf;
 	IFS1bits.SPI2EIF = IFS1bits.SPI2RXIF = IFS1bits.SPI2TXIF = 0;
 	IPC9bits.SPI2EIP = IPC9bits.SPI2EIS = IPC9bits.SPI2RXIP = IPC9bits.SPI2RXIS = 0;
 	IPC9bits.SPI2TXIP = 5;
@@ -473,11 +606,18 @@ void controlInitPic(){
 	SPI2CONbits.ON = 1;	//	SPI2 start	
 	
 	SPI2BUF = 0;
+#endif
 }
 void onControlTimer(){
+#ifdef PIC32MM
 	LATCbits.LATC2 = 1;	//	LED ON
 	controlLoop();
 	LATCbits.LATC2 = 0;	//	LED OFF
+#elif PIC32MK_MCJ
+	controlLoop();
+#else
+#error
+#endif
 }
 
 

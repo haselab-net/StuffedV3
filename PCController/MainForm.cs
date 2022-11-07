@@ -295,7 +295,7 @@ namespace PCController
             }
             boards.SendCurrent(currents);
             boards.SendSense();
-            for (int i = 0; i < currentControls.Count; ++i)
+            for (int i = 0; i < currentControls.Count && i < boards.NCurrent; ++i)
             {
                 // currentControls[i].lbCurrent.Text = "" + boards.GetCurrent(i);
             }
