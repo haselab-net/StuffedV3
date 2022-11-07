@@ -79,6 +79,7 @@ namespace PCController
         public void SetNMotor(int n) { nMotor = n; }
         public short GetPos(int i) { return pos[i]; }
         public short GetVel(int i) { return vel[i]; }
+        //public short GetCurrent(int i) { return current.Length == 0?  (short)-1 : current[i]; }
         public short GetCurrent(int i) { return current[i]; }
         public short GetForce(int i) { return force[i]; }
         short[] pos;

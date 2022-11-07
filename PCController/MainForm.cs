@@ -154,7 +154,7 @@ namespace PCController
                     if (boards.NMotor != 0)
                     {
                         short[] currents = new short[boards.NMotor];
-                        currents[3] = results[0];
+                        currents[0] = results[0];
                         currents[1] = results[1];
                         currents[2] = results[2];
                         boards.SendCurrent(currents);
@@ -207,6 +207,7 @@ namespace PCController
                 cc.Init();
                 flCurrent.Controls.Add(cc.panel);
                 currentControls.Add(cc);
+                cc.lbCurrent.Text = $"Motor{i}";
             }
         }
         void ResetMotor()
@@ -279,6 +280,8 @@ namespace PCController
                     nb.Nodes.Add("nCurrent " + b.nCurrent);
                     nb.Nodes.Add("nForce " + b.nForce);
                 }
+                
+
                 times = Enumerable.Repeat(0, boards.NMotor).ToArray();
                 ResetPanels();
             }
@@ -294,7 +297,7 @@ namespace PCController
             boards.SendSense();
             for (int i = 0; i < currentControls.Count; ++i)
             {
-                currentControls[i].lbCurrent.Text = "" + boards.GetCurrent(i);
+                // currentControls[i].lbCurrent.Text = "" + boards.GetCurrent(i);
             }
             for (int i = 0; i < boards.NForce; ++i)
             {
@@ -326,7 +329,7 @@ namespace PCController
                 boards.SendSense();
                 for (int i = 0; i < currentControls.Count; ++i)
                 {
-                    currentControls[i].lbCurrent.Text = "" + boards.GetCurrent(i);
+                    // currentControls[i].lbCurrent.Text = "" + boards.GetCurrent(i);
                 }
                 for (int i = 0; i < boards.NForce; ++i)
                 {
