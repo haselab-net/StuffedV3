@@ -12,7 +12,105 @@ children:
       - type: User
         attributes: {value: '0'}
   - type: Integer
+    attributes: {id: ALTDTR2__ALTDTR}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: '0'}
+  - type: Integer
+    attributes: {id: ALTDTR3__ALTDTR}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: '0'}
+  - type: Integer
+    attributes: {id: ALTDTR4__ALTDTR}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: '0'}
+  - type: Integer
+    attributes: {id: ALTDTR5__ALTDTR}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: '0'}
+  - type: Integer
+    attributes: {id: ALTDTR6__ALTDTR}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: '0'}
+  - type: Integer
+    attributes: {id: ALTDTR7__ALTDTR}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: '0'}
+  - type: Integer
+    attributes: {id: ALTDTR8__ALTDTR}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: '0'}
+  - type: Integer
     attributes: {id: DTR1__DTR}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: '0'}
+  - type: Integer
+    attributes: {id: DTR2__DTR}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: '0'}
+  - type: Integer
+    attributes: {id: DTR3__DTR}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: '0'}
+  - type: Integer
+    attributes: {id: DTR4__DTR}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: '0'}
+  - type: Integer
+    attributes: {id: DTR5__DTR}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: '0'}
+  - type: Integer
+    attributes: {id: DTR6__DTR}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: '0'}
+  - type: Integer
+    attributes: {id: DTR7__DTR}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: '0'}
+  - type: Integer
+    attributes: {id: DTR8__DTR}
     children:
     - type: Values
       children:
@@ -34,6 +132,48 @@ children:
         attributes: {value: '1'}
   - type: KeyValueSet
     attributes: {id: IOCON2__PMOD}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: '1'}
+  - type: KeyValueSet
+    attributes: {id: IOCON3__PMOD}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: '1'}
+  - type: KeyValueSet
+    attributes: {id: IOCON4__PMOD}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: '1'}
+  - type: KeyValueSet
+    attributes: {id: IOCON5__PMOD}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: '1'}
+  - type: KeyValueSet
+    attributes: {id: IOCON6__PMOD}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: '1'}
+  - type: KeyValueSet
+    attributes: {id: IOCON7__PMOD}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: '1'}
+  - type: KeyValueSet
+    attributes: {id: IOCON8__PMOD}
     children:
     - type: Values
       children:
@@ -80,64 +220,28 @@ children:
     - type: Values
       children:
       - type: User
-        attributes: {value: 'false'}
+        attributes: {value: 'true'}
   - type: Boolean
     attributes: {id: MCPWM_CHANNEL6}
     children:
     - type: Values
       children:
       - type: User
-        attributes: {value: 'false'}
+        attributes: {value: 'true'}
   - type: Boolean
     attributes: {id: MCPWM_CHANNEL7}
     children:
     - type: Values
       children:
       - type: User
-        attributes: {value: 'false'}
+        attributes: {value: 'true'}
   - type: Boolean
     attributes: {id: MCPWM_CHANNEL8}
     children:
     - type: Values
       children:
       - type: User
-        attributes: {value: 'false'}
-  - type: Comment
-    attributes: {id: MCPWM_CLOCK_ENABLE_COMMENT5}
-    children:
-    - type: Attributes
-      children:
-      - type: Boolean
-        attributes: {id: visible}
-        children:
-        - {type: Value, value: 'true'}
-  - type: Comment
-    attributes: {id: MCPWM_CLOCK_ENABLE_COMMENT6}
-    children:
-    - type: Attributes
-      children:
-      - type: Boolean
-        attributes: {id: visible}
-        children:
-        - {type: Value, value: 'true'}
-  - type: Comment
-    attributes: {id: MCPWM_CLOCK_ENABLE_COMMENT7}
-    children:
-    - type: Attributes
-      children:
-      - type: Boolean
-        attributes: {id: visible}
-        children:
-        - {type: Value, value: 'true'}
-  - type: Comment
-    attributes: {id: MCPWM_CLOCK_ENABLE_COMMENT8}
-    children:
-    - type: Attributes
-      children:
-      - type: Boolean
-        attributes: {id: visible}
-        children:
-        - {type: Value, value: 'true'}
+        attributes: {value: 'true'}
   - type: Comment
     attributes: {id: MCPWM_FREQ_CH1}
     children:
@@ -239,42 +343,42 @@ children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: mcpwm, value: '49152'}
+        attributes: {id: mcpwm, value: '246784'}
   - type: Hex
     attributes: {id: MCPWM_IOCON4}
     children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: mcpwm, value: '49152'}
+        attributes: {id: mcpwm, value: '246784'}
   - type: Hex
     attributes: {id: MCPWM_IOCON5}
     children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: mcpwm, value: '49152'}
+        attributes: {id: mcpwm, value: '246784'}
   - type: Hex
     attributes: {id: MCPWM_IOCON6}
     children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: mcpwm, value: '49152'}
+        attributes: {id: mcpwm, value: '246784'}
   - type: Hex
     attributes: {id: MCPWM_IOCON7}
     children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: mcpwm, value: '49152'}
+        attributes: {id: mcpwm, value: '246784'}
   - type: Hex
     attributes: {id: MCPWM_IOCON8}
     children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: mcpwm, value: '49152'}
+        attributes: {id: mcpwm, value: '246784'}
   - type: Hex
     attributes: {id: MCPWM_IOCON9}
     children:
@@ -284,6 +388,69 @@ children:
         attributes: {id: mcpwm, value: '49152'}
   - type: Comment
     attributes: {id: MCPWM_LEADING_DEADTIME1}
+    children:
+    - type: Attributes
+      children:
+      - type: String
+        attributes: {id: text}
+        children:
+        - {type: Value, value: '**** Leading edge dead time is 0.0 uS ****'}
+  - type: Comment
+    attributes: {id: MCPWM_LEADING_DEADTIME2}
+    children:
+    - type: Attributes
+      children:
+      - type: String
+        attributes: {id: text}
+        children:
+        - {type: Value, value: '**** Leading edge dead time is 0.0 uS ****'}
+  - type: Comment
+    attributes: {id: MCPWM_LEADING_DEADTIME3}
+    children:
+    - type: Attributes
+      children:
+      - type: String
+        attributes: {id: text}
+        children:
+        - {type: Value, value: '**** Leading edge dead time is 0.0 uS ****'}
+  - type: Comment
+    attributes: {id: MCPWM_LEADING_DEADTIME4}
+    children:
+    - type: Attributes
+      children:
+      - type: String
+        attributes: {id: text}
+        children:
+        - {type: Value, value: '**** Leading edge dead time is 0.0 uS ****'}
+  - type: Comment
+    attributes: {id: MCPWM_LEADING_DEADTIME5}
+    children:
+    - type: Attributes
+      children:
+      - type: String
+        attributes: {id: text}
+        children:
+        - {type: Value, value: '**** Leading edge dead time is 0.0 uS ****'}
+  - type: Comment
+    attributes: {id: MCPWM_LEADING_DEADTIME6}
+    children:
+    - type: Attributes
+      children:
+      - type: String
+        attributes: {id: text}
+        children:
+        - {type: Value, value: '**** Leading edge dead time is 0.0 uS ****'}
+  - type: Comment
+    attributes: {id: MCPWM_LEADING_DEADTIME7}
+    children:
+    - type: Attributes
+      children:
+      - type: String
+        attributes: {id: text}
+        children:
+        - {type: Value, value: '**** Leading edge dead time is 0.0 uS ****'}
+  - type: Comment
+    attributes: {id: MCPWM_LEADING_DEADTIME8}
     children:
     - type: Attributes
       children:
@@ -383,7 +550,42 @@ children:
       - type: Dynamic
         attributes: {id: mcpwm, value: '128'}
   - type: Hex
+    attributes: {id: MCPWM_PWMCON3}
+    children:
+    - type: Values
+      children:
+      - type: Dynamic
+        attributes: {id: mcpwm, value: '128'}
+  - type: Hex
     attributes: {id: MCPWM_PWMCON4}
+    children:
+    - type: Values
+      children:
+      - type: Dynamic
+        attributes: {id: mcpwm, value: '128'}
+  - type: Hex
+    attributes: {id: MCPWM_PWMCON5}
+    children:
+    - type: Values
+      children:
+      - type: Dynamic
+        attributes: {id: mcpwm, value: '128'}
+  - type: Hex
+    attributes: {id: MCPWM_PWMCON6}
+    children:
+    - type: Values
+      children:
+      - type: Dynamic
+        attributes: {id: mcpwm, value: '128'}
+  - type: Hex
+    attributes: {id: MCPWM_PWMCON7}
+    children:
+    - type: Values
+      children:
+      - type: Dynamic
+        attributes: {id: mcpwm, value: '128'}
+  - type: Hex
+    attributes: {id: MCPWM_PWMCON8}
     children:
     - type: Values
       children:
@@ -398,6 +600,69 @@ children:
         attributes: {id: mcpwm, value: '60000.0'}
   - type: Comment
     attributes: {id: MCPWM_TRAILING_DEADTIME1}
+    children:
+    - type: Attributes
+      children:
+      - type: String
+        attributes: {id: text}
+        children:
+        - {type: Value, value: '**** Trailing edge dead time is 0.0 uS ****'}
+  - type: Comment
+    attributes: {id: MCPWM_TRAILING_DEADTIME2}
+    children:
+    - type: Attributes
+      children:
+      - type: String
+        attributes: {id: text}
+        children:
+        - {type: Value, value: '**** Trailing edge dead time is 0.0 uS ****'}
+  - type: Comment
+    attributes: {id: MCPWM_TRAILING_DEADTIME3}
+    children:
+    - type: Attributes
+      children:
+      - type: String
+        attributes: {id: text}
+        children:
+        - {type: Value, value: '**** Trailing edge dead time is 0.0 uS ****'}
+  - type: Comment
+    attributes: {id: MCPWM_TRAILING_DEADTIME4}
+    children:
+    - type: Attributes
+      children:
+      - type: String
+        attributes: {id: text}
+        children:
+        - {type: Value, value: '**** Trailing edge dead time is 0.0 uS ****'}
+  - type: Comment
+    attributes: {id: MCPWM_TRAILING_DEADTIME5}
+    children:
+    - type: Attributes
+      children:
+      - type: String
+        attributes: {id: text}
+        children:
+        - {type: Value, value: '**** Trailing edge dead time is 0.0 uS ****'}
+  - type: Comment
+    attributes: {id: MCPWM_TRAILING_DEADTIME6}
+    children:
+    - type: Attributes
+      children:
+      - type: String
+        attributes: {id: text}
+        children:
+        - {type: Value, value: '**** Trailing edge dead time is 0.0 uS ****'}
+  - type: Comment
+    attributes: {id: MCPWM_TRAILING_DEADTIME7}
+    children:
+    - type: Attributes
+      children:
+      - type: String
+        attributes: {id: text}
+        children:
+        - {type: Value, value: '**** Trailing edge dead time is 0.0 uS ****'}
+  - type: Comment
+    attributes: {id: MCPWM_TRAILING_DEADTIME8}
     children:
     - type: Attributes
       children:
@@ -522,7 +787,42 @@ children:
       - type: User
         attributes: {value: '2'}
   - type: KeyValueSet
+    attributes: {id: PWMCON3__DTC}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: '2'}
+  - type: KeyValueSet
     attributes: {id: PWMCON4__DTC}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: '2'}
+  - type: KeyValueSet
+    attributes: {id: PWMCON5__DTC}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: '2'}
+  - type: KeyValueSet
+    attributes: {id: PWMCON6__DTC}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: '2'}
+  - type: KeyValueSet
+    attributes: {id: PWMCON7__DTC}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: '2'}
+  - type: KeyValueSet
+    attributes: {id: PWMCON8__DTC}
     children:
     - type: Values
       children:

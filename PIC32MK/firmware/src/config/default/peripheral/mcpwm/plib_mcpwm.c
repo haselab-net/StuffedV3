@@ -156,8 +156,8 @@ void MCPWM_Initialize (void)
     PHASE2 = 0;
 
     /* Dead Time */
-    DTR2 = 75;
-    ALTDTR2 = 75;
+    DTR2 = 0;
+    ALTDTR2 = 0;
 
     /* Trigger Generator */
     TRGCON2 = 0x0;
@@ -182,18 +182,18 @@ void MCPWM_Initialize (void)
     /*  PTDIR  =  0 */
     /*  ECAM   =  0 */
     /*  DTCP   =  0 */
-    /*  DTC    =  0 */
+    /*  DTC    =  2 */
     /*  ITB    = 0 */
     /*  PWMHIEN =  false */
     /*  PWMLIEN = false */
     /*  TRGIEN = false */
     /*  CLIEN = false */
     /*  FLTIEN = false */
-    PWMCON3 = 0x0;
+    PWMCON3 = 0x80;
 
     /* IOCON3 register  */
     /*  SWAP    = 0*/
-    /*  PMOD    = 0*/
+    /*  PMOD    = 1*/
     /*  POLH    = 0*/
     /*  POLL    = 0*/
     /*  FLTDAT  = 0b00 */
@@ -204,15 +204,15 @@ void MCPWM_Initialize (void)
     /*  CLMOD  = 0 */
     /*  CLPOL  = 0  */
     /*  CLSRC  = 0  */
-    IOCON3 = 0xc000;
+    IOCON3 = 0x3c400;
 
     PDC3 = 1000;
     SDC3 = 500;
     PHASE3 = 0;
 
     /* Dead Time */
-    DTR3 = 75;
-    ALTDTR3 = 75;
+    DTR3 = 0;
+    ALTDTR3 = 0;
 
     /* Trigger Generator */
     TRGCON3 = 0x0;
@@ -248,7 +248,7 @@ void MCPWM_Initialize (void)
 
     /* IOCON4 register  */
     /*  SWAP    = 0*/
-    /*  PMOD    = 0*/
+    /*  PMOD    = 1*/
     /*  POLH    = 0*/
     /*  POLL    = 0*/
     /*  FLTDAT  = 0b00 */
@@ -259,15 +259,15 @@ void MCPWM_Initialize (void)
     /*  CLMOD  = 0 */
     /*  CLPOL  = 0  */
     /*  CLSRC  = 0  */
-    IOCON4 = 0xc000;
+    IOCON4 = 0x3c400;
 
     PDC4 = 1000;
     SDC4 = 500;
     PHASE4 = 0;
 
     /* Dead Time */
-    DTR4 = 75;
-    ALTDTR4 = 75;
+    DTR4 = 0;
+    ALTDTR4 = 0;
 
     /* Trigger Generator */
     TRGCON4 = 0x0;
@@ -284,6 +284,226 @@ void MCPWM_Initialize (void)
     /*  PHR        = 0  */
     LEBCON4 = 0x0;
     LEBDLY4 = 10;
+
+
+    /*********** Channel 5 Configurations **********/
+    /* PWMCON5 register  */
+    /*  MTBS   = 0 */
+    /*  PTDIR  =  0 */
+    /*  ECAM   =  0 */
+    /*  DTCP   =  0 */
+    /*  DTC    =  2 */
+    /*  ITB    = 0 */
+    /*  PWMHIEN =  false */
+    /*  PWMLIEN = false */
+    /*  TRGIEN = false */
+    /*  CLIEN = false */
+    /*  FLTIEN = false */
+    PWMCON5 = 0x80;
+
+    /* IOCON5 register  */
+    /*  SWAP    = 0*/
+    /*  PMOD    = 1*/
+    /*  POLH    = 0*/
+    /*  POLL    = 0*/
+    /*  FLTDAT  = 0b00 */
+    /*  FLTMOD  = 3 */
+    /*  FLTPOL  = 0  */
+    /*  FLTSRC  = 0  */
+    /*  CLDAT  = 0b00 */
+    /*  CLMOD  = 0 */
+    /*  CLPOL  = 0  */
+    /*  CLSRC  = 0  */
+    IOCON5 = 0x3c400;
+
+    PDC5 = 1000;
+    SDC5 = 500;
+    PHASE5 = 0;
+
+    /* Dead Time */
+    DTR5 = 0;
+    ALTDTR5 = 0;
+
+    /* Trigger Generator */
+    TRGCON5 = 0x0;
+    TRIG5 = 0;
+    STRIG5 = 0;
+
+    /* leading edge blanking */
+    /* LEBCON5 register  */
+    /*  CLLEBEN    = false  */
+    /*  FLTLEBEN   = false */
+    /*  PLF        = 0  */
+    /*  PLR        = 0  */
+    /*  PHF        = 0  */
+    /*  PHR        = 0  */
+    LEBCON5 = 0x0;
+    LEBDLY5 = 10;
+
+
+    /*********** Channel 6 Configurations **********/
+    /* PWMCON6 register  */
+    /*  MTBS   = 0 */
+    /*  PTDIR  =  0 */
+    /*  ECAM   =  0 */
+    /*  DTCP   =  0 */
+    /*  DTC    =  2 */
+    /*  ITB    = 0 */
+    /*  PWMHIEN =  false */
+    /*  PWMLIEN = false */
+    /*  TRGIEN = false */
+    /*  CLIEN = false */
+    /*  FLTIEN = false */
+    PWMCON6 = 0x80;
+
+    /* IOCON6 register  */
+    /*  SWAP    = 0*/
+    /*  PMOD    = 1*/
+    /*  POLH    = 0*/
+    /*  POLL    = 0*/
+    /*  FLTDAT  = 0b00 */
+    /*  FLTMOD  = 3 */
+    /*  FLTPOL  = 0  */
+    /*  FLTSRC  = 0  */
+    /*  CLDAT  = 0b00 */
+    /*  CLMOD  = 0 */
+    /*  CLPOL  = 0  */
+    /*  CLSRC  = 0  */
+    IOCON6 = 0x3c400;
+
+    PDC6 = 1000;
+    SDC6 = 500;
+    PHASE6 = 0;
+
+    /* Dead Time */
+    DTR6 = 0;
+    ALTDTR6 = 0;
+
+    /* Trigger Generator */
+    TRGCON6 = 0x0;
+    TRIG6 = 0;
+    STRIG6 = 0;
+
+    /* leading edge blanking */
+    /* LEBCON6 register  */
+    /*  CLLEBEN    = false  */
+    /*  FLTLEBEN   = false */
+    /*  PLF        = 0  */
+    /*  PLR        = 0  */
+    /*  PHF        = 0  */
+    /*  PHR        = 0  */
+    LEBCON6 = 0x0;
+    LEBDLY6 = 10;
+
+
+    /*********** Channel 7 Configurations **********/
+    /* PWMCON7 register  */
+    /*  MTBS   = 0 */
+    /*  PTDIR  =  0 */
+    /*  ECAM   =  0 */
+    /*  DTCP   =  0 */
+    /*  DTC    =  2 */
+    /*  ITB    = 0 */
+    /*  PWMHIEN =  false */
+    /*  PWMLIEN = false */
+    /*  TRGIEN = false */
+    /*  CLIEN = false */
+    /*  FLTIEN = false */
+    PWMCON7 = 0x80;
+
+    /* IOCON7 register  */
+    /*  SWAP    = 0*/
+    /*  PMOD    = 1*/
+    /*  POLH    = 0*/
+    /*  POLL    = 0*/
+    /*  FLTDAT  = 0b00 */
+    /*  FLTMOD  = 3 */
+    /*  FLTPOL  = 0  */
+    /*  FLTSRC  = 0  */
+    /*  CLDAT  = 0b00 */
+    /*  CLMOD  = 0 */
+    /*  CLPOL  = 0  */
+    /*  CLSRC  = 0  */
+    IOCON7 = 0x3c400;
+
+    PDC7 = 1000;
+    SDC7 = 500;
+    PHASE7 = 0;
+
+    /* Dead Time */
+    DTR7 = 0;
+    ALTDTR7 = 0;
+
+    /* Trigger Generator */
+    TRGCON7 = 0x0;
+    TRIG7 = 0;
+    STRIG7 = 0;
+
+    /* leading edge blanking */
+    /* LEBCON7 register  */
+    /*  CLLEBEN    = false  */
+    /*  FLTLEBEN   = false */
+    /*  PLF        = 0  */
+    /*  PLR        = 0  */
+    /*  PHF        = 0  */
+    /*  PHR        = 0  */
+    LEBCON7 = 0x0;
+    LEBDLY7 = 10;
+
+
+    /*********** Channel 8 Configurations **********/
+    /* PWMCON8 register  */
+    /*  MTBS   = 0 */
+    /*  PTDIR  =  0 */
+    /*  ECAM   =  0 */
+    /*  DTCP   =  0 */
+    /*  DTC    =  2 */
+    /*  ITB    = 0 */
+    /*  PWMHIEN =  false */
+    /*  PWMLIEN = false */
+    /*  TRGIEN = false */
+    /*  CLIEN = false */
+    /*  FLTIEN = false */
+    PWMCON8 = 0x80;
+
+    /* IOCON8 register  */
+    /*  SWAP    = 0*/
+    /*  PMOD    = 1*/
+    /*  POLH    = 0*/
+    /*  POLL    = 0*/
+    /*  FLTDAT  = 0b00 */
+    /*  FLTMOD  = 3 */
+    /*  FLTPOL  = 0  */
+    /*  FLTSRC  = 0  */
+    /*  CLDAT  = 0b00 */
+    /*  CLMOD  = 0 */
+    /*  CLPOL  = 0  */
+    /*  CLSRC  = 0  */
+    IOCON8 = 0x3c400;
+
+    PDC8 = 1000;
+    SDC8 = 500;
+    PHASE8 = 0;
+
+    /* Dead Time */
+    DTR8 = 0;
+    ALTDTR8 = 0;
+
+    /* Trigger Generator */
+    TRGCON8 = 0x0;
+    TRIG8 = 0;
+    STRIG8 = 0;
+
+    /* leading edge blanking */
+    /* LEBCON8 register  */
+    /*  CLLEBEN    = false  */
+    /*  FLTLEBEN   = false */
+    /*  PLF        = 0  */
+    /*  PLR        = 0  */
+    /*  PHF        = 0  */
+    /*  PHR        = 0  */
+    LEBCON8 = 0x0;
+    LEBDLY8 = 10;
 
 
 }

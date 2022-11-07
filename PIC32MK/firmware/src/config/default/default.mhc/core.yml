@@ -3624,56 +3624,56 @@ children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: mcpwm, value: 'false'}
+        attributes: {id: mcpwm, value: 'true'}
   - type: Integer
     attributes: {id: MCPWM5_CLOCK_FREQUENCY}
     children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: core, value: '0'}
+        attributes: {id: core, value: '120000000'}
   - type: Boolean
     attributes: {id: MCPWM6_CLOCK_ENABLE}
     children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: mcpwm, value: 'false'}
+        attributes: {id: mcpwm, value: 'true'}
   - type: Integer
     attributes: {id: MCPWM6_CLOCK_FREQUENCY}
     children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: core, value: '0'}
+        attributes: {id: core, value: '120000000'}
   - type: Boolean
     attributes: {id: MCPWM7_CLOCK_ENABLE}
     children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: mcpwm, value: 'false'}
+        attributes: {id: mcpwm, value: 'true'}
   - type: Integer
     attributes: {id: MCPWM7_CLOCK_FREQUENCY}
     children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: core, value: '0'}
+        attributes: {id: core, value: '120000000'}
   - type: Boolean
     attributes: {id: MCPWM8_CLOCK_ENABLE}
     children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: mcpwm, value: 'false'}
+        attributes: {id: mcpwm, value: 'true'}
   - type: Integer
     attributes: {id: MCPWM8_CLOCK_FREQUENCY}
     children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: core, value: '0'}
+        attributes: {id: core, value: '120000000'}
   - type: Integer
     attributes: {id: MCPWM9_CLOCK_FREQUENCY}
     children:
@@ -3785,7 +3785,7 @@ children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: core, value: '267387388'}
+        attributes: {id: core, value: '251658748'}
   - type: Hex
     attributes: {id: PMD5_REG_VALUE}
     children:

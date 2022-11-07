@@ -1,27 +1,20 @@
 /*******************************************************************************
-  SYS CLK Static Functions for Clock System Service
+  Data Type definition of Timer PLIB
 
   Company:
     Microchip Technology Inc.
 
   File Name:
-    plib_clk.c
+    plib_tmr1.h
 
   Summary:
-    SYS CLK static function implementations for the Clock System Service.
+    Data Type definition of the Timer Peripheral Interface Plib.
 
   Description:
-    The Clock System Service provides a simple interface to manage the
-    oscillators on Microchip microcontrollers. This file defines the static
-    implementation for the Clock System Service.
+    This file defines the Data Types for the Timer Plib.
 
   Remarks:
-    Static functions incorporate all system clock configuration settings as
-    determined by the user via the Microchip Harmony Configurator GUI.
-    It provides static version of the routines, eliminating the need for an
-    object ID or object handle.
-
-    Static single-open interfaces also eliminate the need for the open handle.
+    None.
 
 *******************************************************************************/
 
@@ -48,63 +41,61 @@
 * THAT YOU HAVE PAID DIRECTLY TO MICROCHIP FOR THIS SOFTWARE.
 *******************************************************************************/
 
-// *****************************************************************************
-// *****************************************************************************
-// Section: Include Files
-// *****************************************************************************
-// *****************************************************************************
+#ifndef PLIB_TMR1_H
+#define PLIB_TMR1_H
 
+#include <stddef.h>
+#include <stdint.h>
 #include "device.h"
-#include "plib_clk.h"
+#include "plib_tmr1_common.h"
+
+
+// DOM-IGNORE-BEGIN
+#ifdef __cplusplus  // Provide C++ Compatibility
+
+    extern "C" {
+
+#endif
+// DOM-IGNORE-END
 
 // *****************************************************************************
 // *****************************************************************************
-// Section: File Scope Functions
+// Section: Data Types
 // *****************************************************************************
 // *****************************************************************************
 
 // *****************************************************************************
-/* Function:
-    void CLK_Initialize( void )
+// *****************************************************************************
+// Section: Interface Routines
+// *****************************************************************************
+// *****************************************************************************
 
-  Summary:
-    Initializes hardware and internal data structure of the System Clock.
+// *****************************************************************************
+void TMR1_Initialize(void);
 
-  Description:
-    This function initializes the hardware and internal data structure of System
-    Clock Service.
+void TMR1_Start(void);
 
-  Remarks:
-    This is configuration values for the static version of the Clock System
-    Service module is determined by the user via the MHC GUI.
+void TMR1_Stop(void);
 
-    The objective is to eliminate the user's need to be knowledgeable in the
-    function of the 'configuration bits' to configure the system oscillators.
-*/
+void TMR1_PeriodSet(uint16_t);
 
-void CLK_Initialize( void )
-{
-    /* unlock system for clock configuration */
-    SYSKEY = 0x00000000;
-    SYSKEY = 0xAA996655;
-    SYSKEY = 0x556699AA;
+uint16_t TMR1_PeriodGet(void);
 
-  
+uint16_t TMR1_CounterGet(void);
 
-    /* Peripheral Module Disable Configuration */
+uint32_t TMR1_FrequencyGet(void);
 
-    CFGCONbits.PMDLOCK = 0;
+void TMR1_InterruptEnable(void);
 
-    PMD1 = 0x360;
-    PMD2 = 0x17001f;
-    PMD3 = 0xffffffff;
-    PMD4 = 0xf0001fc;
-    PMD5 = 0xf3003f3c;
-    PMD6 = 0xd0d0000;
-    PMD7 = 0x0;
+void TMR1_InterruptDisable(void);
 
-    CFGCONbits.PMDLOCK = 1;
+void TMR1_CallbackRegister( TMR1_CALLBACK callback_fn, uintptr_t context );
 
-    /* Lock system since done with clock configuration */
-    SYSKEY = 0x33333333;
-}
+// DOM-IGNORE-BEGIN
+#ifdef __cplusplus  // Provide C++ Compatibility
+
+    }
+#endif
+// DOM-IGNORE-END
+
+#endif /* PLIB_TMR1_H */

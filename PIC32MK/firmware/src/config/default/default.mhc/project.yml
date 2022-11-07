@@ -34,13 +34,13 @@ files:
   security: NON_SECURE
   type: SOURCE
   userChecksum: 96A5E8899132E43E9A62E26755431908
-- generatedChecksum: 86D2B60F6E60B14485B2EA7713DD3FB3
+- generatedChecksum: 31A65B46B6DBD252BBABD99445D1E919
   logicalPath: config/default/peripheral/clk
   name: plib_clk.c
   physicalPath: peripheral/clk
   security: NON_SECURE
   type: SOURCE
-  userChecksum: 86D2B60F6E60B14485B2EA7713DD3FB3
+  userChecksum: 31A65B46B6DBD252BBABD99445D1E919
 - generatedChecksum: 36E421A04D1D88E3946505EC4585104B
   logicalPath: config/default/peripheral/evic
   name: plib_evic.c
@@ -55,13 +55,13 @@ files:
   security: NON_SECURE
   type: SOURCE
   userChecksum: A6C6D1A2E3D7A7330BDD0768898C6251
-- generatedChecksum: FCFCEF66B278D4DC1ADE424FDE14B751
+- generatedChecksum: 226345D39E5CE048CA9B3F798BB7900E
   logicalPath: config/default/peripheral/mcpwm
   name: plib_mcpwm.c
   physicalPath: peripheral/mcpwm
   security: NON_SECURE
   type: SOURCE
-  userChecksum: FCFCEF66B278D4DC1ADE424FDE14B751
+  userChecksum: 226345D39E5CE048CA9B3F798BB7900E
 - generatedChecksum: EC7B2897D8D8DE100A38DE1269321B28
   logicalPath: config/default/peripheral/nvm
   name: plib_nvm.c

@@ -201,6 +201,11 @@ void showMotorRotation(){
 
 static int motorCh;
 static int pwm[NMOTOR];
+static bool bCurrentControl;
+void changePwmMode(){
+    bCurrentControl = !bCurrentControl;
+	printf("PWM mode is %s\r\n", bCurrentControl ? "current" : "PWM");
+}
 void selectMotor(){
 	motorCh++;
 	if (motorCh >= NMOTOR) motorCh = 0;
@@ -210,15 +215,21 @@ void pwmUp(){
 //	if (pwm[motorCh] < 10) pwm[motorCh] ++;
 	if (pwm[motorCh] < SDEC_ONE) pwm[motorCh] ++;
 	printf("Set pwm %d to motor %d \r\n", pwm[motorCh], motorCh);
-	setPwm(motorCh, pwm[motorCh] * (SDEC_ONE/50));
-//	setPwm(motorCh, pwm[motorCh]);
+#ifdef PIC32MK_MCJ
+    setPwm2(motorCh, pwm[motorCh] * (SDEC_ONE/50), bCurrentControl);
+#else
+    setPwm(motorCh, pwm[motorCh] * (SDEC_ONE/50));
+#endif    
 }
 void pwmDown(){
 //	if (pwm[motorCh] > -10) pwm[motorCh] --;
 	if (pwm[motorCh] > -SDEC_ONE) pwm[motorCh] --;
 	printf("Set pwm %d to motor %d \r\n", pwm[motorCh], motorCh);
+#ifdef PIC32MK_MCJ
+	setPwm2(motorCh, pwm[motorCh] * (SDEC_ONE/50), bCurrentControl);
+#else
 	setPwm(motorCh, pwm[motorCh] * (SDEC_ONE/50));
-//	setPwm(motorCh, pwm[motorCh]);
+#endif
 }
 void showPwm(){
 #ifdef PIC32MK_MCJ    
@@ -345,15 +356,16 @@ struct MonitorFunc monitors[] = {
 	{'r', "Show motor rotation", showMotorRotation, true},
 	{'c', "Show control status", showControlStatus, true},
 	{'C', "Show control timer", showControlTimer, true},
-	{'u', "show uart status", showUartState, true},
+	{'U', "show uart status", showUartState, true},
     {'R', "read register", readAddress, false},
     {'W', "write register", writeAddress, false},
 	{'L', "Log level up", logLevelUp, false},
 	{'l', "Log level down", logLevelDown, false},
 	{'s', "toggle control timer", toggleControlTimer, false},
 	{'m', "Select motor", selectMotor, false},
-	{'P', "Pwm up", pwmUp, false},
-	{'p', "Pwm down", pwmDown, false},
+	{'u', "Pwm up", pwmUp, false},
+	{'d', "Pwm down", pwmDown, false},
+    {'p', "pwm mode", changePwmMode, false},
 	{'w', "Pwm status", showPwm, true},
 	{'g', "Print GP", printGp, true},
 	{'N', "Write NVM", nvmWriteTest, false},
