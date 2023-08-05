@@ -150,13 +150,29 @@ namespace PCController
                     Console.WriteLine(packet.ToString());
 
                     // packetが,区切りなのを利用してモーターに送る値をresultsに入れる
-                    var results = packet.ToString().Split(',').Skip(1).Select(e => Convert.ToInt16(e)).ToArray();
+                    // results[0]～results[8]の9つ.親指(振動、締め付け、摩擦)、右手、左手の順
+                    string[] results_str = packet.ToString().Split(',').Skip(1).ToArray();
+                    short[] results = Array.ConvertAll(results_str, s => {
+                        short tmp = 0;
+                        // short型に変換できない文字列だった時デフォルト値に設定
+                        if (!short.TryParse(s, out tmp))
+                        {
+                            tmp = 0;    // default value
+                            Console.WriteLine("cannot convert to short. Set default=" + tmp);
+                        }
+                        return tmp;
+                    });
+
                     if (boards.NMotor != 0)
                     {
                         short[] currents = new short[boards.NMotor];
-                        currents[0] = results[0];
-                        currents[1] = results[1];
-                        currents[2] = results[2];
+                        for (int i=0; i<boards.NMotor; i++)
+                        {
+                            currents[i] = results[i];
+                        }
+                        //currents[0] = results[0];
+                        //currents[1] = results[1];
+                        //currents[2] = results[2];
                         boards.SendCurrent(currents);
                         //OscClient();
                     }
