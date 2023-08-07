@@ -24,3 +24,16 @@ C:\Users\ayaka\Documents\project\IVRC\controller\PCController\obj\Debug\PCContro
 C:\Users\ayaka\Documents\project\IVRC\controller\PCController\obj\Debug\PCController.csproj.CopyComplete
 C:\Users\ayaka\Documents\project\IVRC\controller\PCController\obj\Debug\PCController.exe
 C:\Users\ayaka\Documents\project\IVRC\controller\PCController\obj\Debug\PCController.pdb
+C:\IVRC\StuffedV3\PCController\bin\Debug\PCController.exe.config
+C:\IVRC\StuffedV3\PCController\bin\Debug\PCController.exe
+C:\IVRC\StuffedV3\PCController\bin\Debug\PCController.pdb
+C:\IVRC\StuffedV3\PCController\bin\Debug\Rug.Osc.dll
+C:\IVRC\StuffedV3\PCController\bin\Debug\Rug.Osc.xml
+C:\IVRC\StuffedV3\PCController\obj\Debug\PCController.csproj.AssemblyReference.cache
+C:\IVRC\StuffedV3\PCController\obj\Debug\PCController.MainForm.resources
+C:\IVRC\StuffedV3\PCController\obj\Debug\PCController.Properties.Resources.resources
+C:\IVRC\StuffedV3\PCController\obj\Debug\PCController.csproj.GenerateResource.cache
+C:\IVRC\StuffedV3\PCController\obj\Debug\PCController.csproj.CoreCompileInputs.cache
+C:\IVRC\StuffedV3\PCController\obj\Debug\PCController.csproj.CopyComplete
+C:\IVRC\StuffedV3\PCController\obj\Debug\PCController.exe
+C:\IVRC\StuffedV3\PCController\obj\Debug\PCController.pdb
