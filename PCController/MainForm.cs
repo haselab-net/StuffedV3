@@ -137,29 +137,18 @@ namespace PCController
                     Console.WriteLine(packet.ToString());
 
                     // packetが,区切りなのを利用してモーターに送る値をresultsに入れる
-                    /*
-                    string[] results_str = packet.ToString().Split(',').Skip(1).ToArray();
-                    short[] results = Array.ConvertAll(results_str, s => {
-                        short tmp = 0;
-                        // float型に変換できない文字列だった時デフォルト値に設定
-                        if (!short.TryParse(s, out tmp))
-                        {
-                            tmp = 0;    // default value
-                            Console.WriteLine("cannot convert to float. Set default=" + tmp);
-                        }
-                        return tmp;
-                    });*/
                     var results = packet.ToString().Split(',').Skip(1).Select(e => Convert.ToInt16(e)).ToArray();
 
-                    Console.WriteLine("results = [" + string.Join(", ", results) + "]");
+                    // Console.WriteLine("results = [" + string.Join(", ", results) + "]");
 
                     if (boards.NMotor != 0)
                     {
                         short[] currents = new short[boards.NMotor];
-
+                        // Console.WriteLine("NMotor = " + boards.NMotor);
                         for (int i=0; i<boards.NMotor; i++)
                         {
                             currents[i] = results[i];
+                            // Console.WriteLine("currents[" + i + "] = " + currents[i]);
                         }
 
                         boards.SendCurrent(currents);
