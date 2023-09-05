@@ -124,6 +124,7 @@ namespace PCController
 
         private void OscListenProcess()
         {
+            string receive_message_address = "/uOSC/right";
             try
             {
                 // OSCレシーバーが終了されるまで繰り返し処理する
@@ -134,21 +135,21 @@ namespace PCController
                     OscPacket packet = m_OscReceiver.Receive();
 
                     // 受信したメッセージをコンソールに出力
-                    Console.WriteLine(packet.ToString());
+                    //Console.WriteLine(packet.ToString());
 
+                    string message_address = packet.ToString().Split(',')[0];
                     // packetが,区切りなのを利用してモーターに送る値をresultsに入れる
                     var results = packet.ToString().Split(',').Skip(1).Select(e => Convert.ToInt16(e)).ToArray();
 
                     // Console.WriteLine("results = [" + string.Join(", ", results) + "]");
-
-                    if (boards.NMotor != 0)
+                    if (message_address == receive_message_address & boards.NMotor != 0)
                     {
                         short[] currents = new short[boards.NMotor];
                         // Console.WriteLine("NMotor = " + boards.NMotor);
                         for (int i=0; i<boards.NMotor; i++)
                         {
                             currents[i] = results[i];
-                            // Console.WriteLine("currents[" + i + "] = " + currents[i]);
+                            Console.WriteLine("currents[" + i + "] = " + currents[i]);
                         }
 
                         boards.SendCurrent(currents);
