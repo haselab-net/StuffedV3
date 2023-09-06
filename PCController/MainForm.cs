@@ -21,6 +21,7 @@ namespace PCController
         int[] times = null;
         int count = 0;
         int count1000 = 0;
+        private int port;
         void mmTimer_Tick(Object sender)   //  Haptic制御
         {
             count++;
@@ -92,8 +93,27 @@ namespace PCController
 
             // OSCのデータ受信のための設定
             //m_OscReceiver = new OscReceiver(System.Net.IPAddress.Parse("127.0.0.1"), 8000);
+
             //m_OscReceiver = new OscReceiver(System.Net.IPAddress.Parse("192.168.91.122"), 8000);
-            m_OscReceiver = new OscReceiver(8000);
+
+        }
+
+        private string label = "left";
+
+        private void StartOscReceiver()
+        {
+            if (cmbPortBin.Text == "COM4")
+            {
+                port = 3333;
+                //m_OscReceiver = new OscReceiver(8000);
+                label = "right";
+            }
+            else if (cmbPortBin.Text == "COM3")
+            {
+                port = 8000;
+                //m_OscReceiver = new OscReceiver(3333);
+            }
+            m_OscReceiver = new OscReceiver(System.Net.IPAddress.Parse("127.0.0.1"), port);
 
             // OSCのレシーバーを接続
             m_OscReceiver.Connect();
@@ -125,6 +145,10 @@ namespace PCController
         private void OscListenProcess()
         {
             string receive_message_address = "/uOSC/right";
+            if (label == "left")
+            {
+                receive_message_address = "/uOSC/left";
+            }
             try
             {
                 // OSCレシーバーが終了されるまで繰り返し処理する
@@ -135,7 +159,7 @@ namespace PCController
                     OscPacket packet = m_OscReceiver.Receive();
 
                     // 受信したメッセージをコンソールに出力
-                    //Console.WriteLine(packet.ToString());
+                    Console.WriteLine(packet.ToString());
 
                     string message_address = packet.ToString().Split(',')[0];
                     // packetが,区切りなのを利用してモーターに送る値をresultsに入れる
@@ -150,6 +174,7 @@ namespace PCController
                         {
                             currents[i] = results[i];
                             Console.WriteLine("currents[" + i + "] = " + currents[i]);
+                            Console.WriteLine(receive_message_address, port.ToString());
                         }
 
                         boards.SendCurrent(currents);
@@ -248,6 +273,19 @@ namespace PCController
             if (uartBin.IsOpen) uartBin.Close();
             if (cmbPortBin.Text.Length == 0) return;
             uartBin.PortName = cmbPortBin.Text;
+            /*
+            if (cmbPortBin.Text == "COM4")
+            {
+                Console.WriteLine(cmbPortBin.Text);
+            }
+            else if (cmbPortBin.Text == "COM3")
+            {
+                Console.WriteLine(cmbPortBin.Text);
+            }
+            //Console.WriteLine(cmbPortBin.Text);
+            */
+
+            StartOscReceiver();
             uartBin.BaudRate = 2000000;
             try
             {
@@ -282,6 +320,7 @@ namespace PCController
         }
         private void UpdateCurrent()
         {
+            //Console.Write(port.ToString());
             short[] currents = new short[boards.NMotor];
             for (int i = 0; i < currentControls.Count; ++i)
             {
@@ -455,6 +494,7 @@ namespace PCController
             {
                 motors[i].pd.SetSpidarDefault();
             }
+            Console.Write(port.ToString());
         }
         private void btLoadNubotiHeat_Click(object sender, EventArgs e)
         {
