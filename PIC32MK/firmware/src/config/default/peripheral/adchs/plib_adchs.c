@@ -41,6 +41,7 @@
 // DOM-IGNORE-END
 #include "device.h"
 #include "plib_adchs.h"
+#include "interrupts.h"
 
 #define ADCHS_CHANNEL_32  (32U)
 
@@ -53,47 +54,48 @@
 
 
 
-void ADCHS_Initialize()
+void ADCHS_Initialize(void)
 {
     ADCCON1bits.ON = 0;
-ADC0CFG = DEVADC0;
-ADC0TIME = 0x3010001;
-ADC1CFG = DEVADC1;
-ADC1TIME = 0x3010001;
-ADC2CFG = DEVADC2;
-ADC2TIME = 0x3010001;
-ADC3CFG = DEVADC3;
-ADC3TIME = 0x3010001;
-ADC4CFG = DEVADC4;
-ADC4TIME = 0x3010001;
-ADC5CFG = DEVADC5;
-ADC5TIME = 0x3010001;
+    ADC0CFG = DEVADC0;
+    ADC0TIME = 0x3010001U;
+    ADC1CFG = DEVADC1;
+    ADC1TIME = 0x3010001U;
+    ADC2CFG = DEVADC2;
+    ADC2TIME = 0x3010001U;
+    ADC3CFG = DEVADC3;
+    ADC3TIME = 0x3010001U;
+    ADC4CFG = DEVADC4;
+    ADC4TIME = 0x3010001U;
+    ADC5CFG = DEVADC5;
+    ADC5TIME = 0x3010001U;
+
     ADC7CFG = DEVADC7;
 
-    ADCCON1 = 0x630000;
-    ADCCON2 = 0x20001;
-    ADCCON3 = 0x1000000;
+    ADCCON1 = 0x630000U;
+    ADCCON2 = 0x20001U;
+    ADCCON3 = 0x1000000U;
 
-    ADCTRGMODE = 0x0;
+    ADCTRGMODE = 0x0U;
 
-    ADCTRG1 = 0x3030303; 
-    ADCTRG2 = 0x3030003; 
-    ADCTRG3 = 0x3030303; 
-    ADCTRG4 = 0x3030303; 
-    ADCTRG5 = 0x3; 
+    ADCTRG1 = 0x3030303U; 
+    ADCTRG2 = 0x3030003U; 
+    ADCTRG3 = 0x3030303U; 
+    ADCTRG4 = 0x3030303U; 
+    ADCTRG5 = 0x3U; 
     
-    ADCTRG7 = 0x3030303; 
+    ADCTRG7 = 0x3030303U; 
 
-    ADCTRGSNS = 0x0;
+    ADCTRGSNS = 0x0U;
 
-    ADCIMCON1 = 0x0;
-    ADCIMCON2 = 0x0; 
-    ADCIMCON3 = 0x0; 
-    ADCIMCON4 = 0x0; 
+    ADCIMCON1 = 0x0U;
+    ADCIMCON2 = 0x0U; 
+    ADCIMCON3 = 0x0U; 
+    ADCIMCON4 = 0x0U; 
 
     /* Input scan */
-    ADCCSS1 = 0x500ffff;
-    ADCCSS2 = 0x4200; 
+    ADCCSS1 = 0x500ffffU;
+    ADCCSS2 = 0x4200U; 
 
 
 
@@ -104,42 +106,69 @@ ADC5TIME = 0x3010001;
 
     /* Turn ON ADC */
     ADCCON1bits.ON = 1;
-    while(!ADCCON2bits.BGVRRDY); // Wait until the reference voltage is ready
-    while(ADCCON2bits.REFFLT); // Wait if there is a fault with the reference voltage
+    while(ADCCON2bits.BGVRRDY == 0U) // Wait until the reference voltage is ready
+    {
+        /* Nothing to do */
+    }
+    while(ADCCON2bits.REFFLT != 0U) // Wait if there is a fault with the reference voltage
+    {
+        /* Nothing to do */
+    }
 
     /* ADC 0 */
     ADCANCONbits.ANEN0 = 1;      // Enable the clock to analog bias
-    while(!ADCANCONbits.WKRDY0); // Wait until ADC is ready
+    while(ADCANCONbits.WKRDY0 == 0U) // Wait until ADC is ready
+    {
+        /* Nothing to do */
+    }
     ADCCON3bits.DIGEN0 = 1;      // Enable ADC
 
     /* ADC 1 */
     ADCANCONbits.ANEN1 = 1;      // Enable the clock to analog bias
-    while(!ADCANCONbits.WKRDY1); // Wait until ADC is ready
+    while(ADCANCONbits.WKRDY1 == 0U) // Wait until ADC is ready
+    {
+        /* Nothing to do */
+    }
     ADCCON3bits.DIGEN1 = 1;      // Enable ADC
 
     /* ADC 2 */
     ADCANCONbits.ANEN2 = 1;      // Enable the clock to analog bias
-    while(!ADCANCONbits.WKRDY2); // Wait until ADC is ready
+    while(ADCANCONbits.WKRDY2 == 0U) // Wait until ADC is ready
+    {
+        /* Nothing to do */
+    }
     ADCCON3bits.DIGEN2 = 1;      // Enable ADC
 
     /* ADC 3 */
     ADCANCONbits.ANEN3 = 1;      // Enable the clock to analog bias
-    while(!ADCANCONbits.WKRDY3); // Wait until ADC is ready
+    while(ADCANCONbits.WKRDY3 == 0U) // Wait until ADC is ready
+    {
+        /* Nothing to do */
+    }
     ADCCON3bits.DIGEN3 = 1;      // Enable ADC
 
     /* ADC 4 */
     ADCANCONbits.ANEN4 = 1;      // Enable the clock to analog bias
-    while(!ADCANCONbits.WKRDY4); // Wait until ADC is ready
+    while(ADCANCONbits.WKRDY4 == 0U) // Wait until ADC is ready
+    {
+        /* Nothing to do */
+    }
     ADCCON3bits.DIGEN4 = 1;      // Enable ADC
 
     /* ADC 5 */
     ADCANCONbits.ANEN5 = 1;      // Enable the clock to analog bias
-    while(!ADCANCONbits.WKRDY5); // Wait until ADC is ready
+    while(ADCANCONbits.WKRDY5 == 0U) // Wait until ADC is ready
+    {
+        /* Nothing to do */
+    }
     ADCCON3bits.DIGEN5 = 1;      // Enable ADC
 
     /* ADC 7 */
     ADCANCONbits.ANEN7 = 1;      // Enable the clock to analog bias
-    while(!ADCANCONbits.WKRDY7); // Wait until ADC is ready
+    while(ADCANCONbits.WKRDY7 == 0U) // Wait until ADC is ready
+    {
+        /* Nothing to do */
+    }
     ADCCON3bits.DIGEN7 = 1;      // Enable ADC
 
 
@@ -149,13 +178,13 @@ ADC5TIME = 0x3010001;
 /* Enable ADCHS channels */
 void ADCHS_ModulesEnable (ADCHS_MODULE_MASK moduleMask)
 {
-    ADCCON3 |= (moduleMask << 16);
+    ADCCON3 |= ((uint32_t)moduleMask << 16);
 }
 
 /* Disable ADCHS channels */
 void ADCHS_ModulesDisable (ADCHS_MODULE_MASK moduleMask)
 {
-    ADCCON3 &= ~(moduleMask << 16);
+    ADCCON3 &= ~(((uint32_t)moduleMask << 16));
 }
 
 
@@ -163,11 +192,11 @@ void ADCHS_ChannelResultInterruptEnable (ADCHS_CHANNEL_NUM channel)
 {
     if (channel < ADCHS_CHANNEL_32)
     {
-        ADCGIRQEN1 |= 0x01 << channel;
+        ADCGIRQEN1 |= 0x01UL << channel;
     }
     else
     {
-        ADCGIRQEN2 |= 0x01 << (channel - 32);
+        ADCGIRQEN2 |= 0x01UL << (channel - 32U);
     }
 }
 
@@ -175,11 +204,11 @@ void ADCHS_ChannelResultInterruptDisable (ADCHS_CHANNEL_NUM channel)
 {
     if (channel < ADCHS_CHANNEL_32)
     {
-        ADCGIRQEN1 &= ~(0x01 << channel);
+        ADCGIRQEN1 &= ~(0x01UL << channel);
     }
     else
     {
-        ADCGIRQEN2 &= ~(0x01 << (channel - 32));
+        ADCGIRQEN2 &= ~(0x01UL << (channel - 32U));
     }
 }
 
@@ -187,11 +216,11 @@ void ADCHS_ChannelEarlyInterruptEnable (ADCHS_CHANNEL_NUM channel)
 {
     if (channel < ADCHS_CHANNEL_32)
     {
-        ADCEIEN1 |= (0x01 << channel);
+        ADCEIEN1 |= (0x01UL << channel);
     }
     else
     {
-        ADCEIEN2 |= (0x01 << (channel - 32));
+        ADCEIEN2 |= (0x01UL << (channel - 32U));
     }
 }
 
@@ -199,11 +228,11 @@ void ADCHS_ChannelEarlyInterruptDisable (ADCHS_CHANNEL_NUM channel)
 {
     if (channel < ADCHS_CHANNEL_32)
     {
-        ADCEIEN1 &= ~(0x01 << channel);
+        ADCEIEN1 &= ~(0x01UL << channel);
     }
     else
     {
-        ADCEIEN2 &= ~(0x01 << (channel - 32));
+        ADCEIEN2 &= ~(0x01UL << (channel - 32U));
     }
 }
 
@@ -224,7 +253,7 @@ void ADCHS_GlobalLevelConversionStop(void)
 
 void ADCHS_ChannelConversionStart(ADCHS_CHANNEL_NUM channel)
 {
-    ADCCON3bits.ADINSEL = channel;
+    ADCCON3bits.ADINSEL = (uint8_t)channel;
     ADCCON3bits.RQCNVRT = 1;
 }
 
@@ -235,11 +264,11 @@ bool ADCHS_ChannelResultIsReady(ADCHS_CHANNEL_NUM channel)
     bool status = false;
     if (channel < ADCHS_CHANNEL_32)
     {
-        status = (ADCDSTAT1 >> channel) & 0x01;
+        status = (((ADCDSTAT1 >> channel) & 0x01U) != 0U);
     }
     else
     {
-        status = (ADCDSTAT2 >> (channel - 32)) & 0x01;
+        status = (((ADCDSTAT2 >> (channel - 32U)) & 0x01U) != 0U);
     }
     return status;
 }
@@ -247,7 +276,7 @@ bool ADCHS_ChannelResultIsReady(ADCHS_CHANNEL_NUM channel)
 /* Read the conversion result */
 uint16_t ADCHS_ChannelResultGet(ADCHS_CHANNEL_NUM channel)
 {
-    return (uint16_t) (*((&ADCDATA0) + (channel << 2)));
+    return (uint16_t)(*((&ADCDATA0) + (channel << 2)));
 
 }
 

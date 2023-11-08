@@ -38,8 +38,8 @@
 * THAT YOU HAVE PAID DIRECTLY TO MICROCHIP FOR THIS SOFTWARE.
 *******************************************************************************/
 
-#ifndef _PLIB_QEI3_H
-#define _PLIB_QEI3_H
+#ifndef PLIB_QEI3_H
+#define PLIB_QEI3_H
 
 #include <stddef.h>
 #include <stdbool.h>
@@ -99,4 +99,4 @@ void QEI3_VelocityCountSet(uint32_t velocity_count);
 #endif
 
 // DOM-IGNORE-END
-#endif // _PLIB_QEI3_H
+#endif // PLIB_QEI3_H
