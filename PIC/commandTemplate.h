@@ -71,6 +71,7 @@ struct SetGetParam##BOARD{    /* CI_SETPARAM / CI_GETPARAM */       \
         SDEC PACKED a[BOARD##_NMOTOR];	/* Current */               \
         unsigned char boardId;	/* boardId */                       \
         unsigned long baudrate[2];	/* baudrate */                  \
+        unsigned long encoder;      /* encoder */                   \
         struct MotorHeatLimit##BOARD heat;                          \
     } PACKED;														\
 } PACKED;															\

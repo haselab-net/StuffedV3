@@ -655,7 +655,7 @@ void onControlTimer(){
 
 
 ///	motor paramters
-void saveMotorParam(){
+void saveMotorParam(unsigned long encoder){
 	NvData nvData;
     int i;
 	NVMRead(&nvData);
