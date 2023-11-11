@@ -69,6 +69,9 @@
 void CORE_TIMER_Handler (void);
 void TIMER_1_Handler (void);
 void TIMER_2_Handler (void);
+void CHANGE_NOTICE_B_Handler (void);
+void CHANGE_NOTICE_C_Handler (void);
+void CHANGE_NOTICE_E_Handler (void);
 
 
 // *****************************************************************************
@@ -85,9 +88,28 @@ void __ISR(_CORE_TIMER_VECTOR, ipl1SRS) CORE_TIMER_Handler (void)
     TIMER_1_InterruptHandler();
 }*/
 
+extern void CHANGE_NOTICE_B_InterruptHandlerForEncoder();
+extern void CHANGE_NOTICE_C_InterruptHandlerForEncoder();
+extern void CHANGE_NOTICE_E_InterruptHandlerForEncoder();
+
 void __ISR(_TIMER_2_VECTOR, ipl1SRS) TIMER_2_Handler (void)
 {
     TIMER_2_InterruptHandler();
+}
+
+void __ISR(_CHANGE_NOTICE_B_VECTOR, ipl1SRS) CHANGE_NOTICE_B_Handler (void)
+{
+    CHANGE_NOTICE_B_InterruptHandlerForEncoder();
+}
+
+void __ISR(_CHANGE_NOTICE_C_VECTOR, ipl1SRS) CHANGE_NOTICE_C_Handler (void)
+{
+    CHANGE_NOTICE_C_InterruptHandlerForEncoder();
+}
+
+void __ISR(_CHANGE_NOTICE_E_VECTOR, ipl1SRS) CHANGE_NOTICE_E_Handler (void)
+{
+    CHANGE_NOTICE_E_InterruptHandlerForEncoder();
 }
 
 

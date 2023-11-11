@@ -91,6 +91,7 @@
         <itemPath>../../../PIC/monitor.c</itemPath>
         <itemPath>../../../PIC/nvm.c</itemPath>
         <itemPath>../../../PIC/monitorOut.c</itemPath>
+        <itemPath>../../../PIC/encoderCountPic.c</itemPath>
       </logicalFolder>
       <logicalFolder name="f1" displayName="config" projectFiles="true">
         <logicalFolder name="f1" displayName="default" projectFiles="true">

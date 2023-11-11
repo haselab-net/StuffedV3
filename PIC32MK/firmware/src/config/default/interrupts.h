@@ -59,6 +59,9 @@
 
 void TIMER_1_InterruptHandler( void );
 void TIMER_2_InterruptHandler( void );
+void CHANGE_NOTICE_B_InterruptHandler( void );
+void CHANGE_NOTICE_C_InterruptHandler( void );
+void CHANGE_NOTICE_E_InterruptHandler( void );
 
 
 

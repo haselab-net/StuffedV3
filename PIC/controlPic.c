@@ -262,26 +262,40 @@ AN      2 3    5     10
     msinRaw[8] = FilterForCurrent(msinRaw[8], ADCDATA26);
     mcosRaw[9] = FilterForCurrent(mcosRaw[9], ADCDATA46);
     msinRaw[9] = FilterForCurrent(msinRaw[9], ADCDATA41);
+    
 #endif
 
 	//	update mcos msin
     int i;
+    int iBit=1;
     for(i=0; i<NAXIS; ++i){
-    	mcos[i] = (int)(mcosRaw[i] - mcosOffset[i]) * mcosScale[i] / SDEC_ONE;
-    	msin[i] = (int)(msinRaw[i] - msinOffset[i]) * msinScale[i] / SDEC_ONE;
-    }
-    //  update min max rotation state
-    for(i=0; i<NAXIS; ++i){
-        if (mcosRaw[i] > mcosMax[i]) mcosMax[i] = mcosRaw[i];
-        else if (mcosRaw[i] < mcosMin[i]) mcosMin[i] = mcosRaw[i];
-        if (msinRaw[i] > msinMax[i]) msinMax[i] = msinRaw[i];
-        else if (msinRaw[i] < msinMin[i]) msinMin[i] = msinRaw[i];
-        updateRotationState(i);
+        if (PNVDATA->encoder & iBit){
+            msin[i] = 1;    //  mcos[i] is used for counter.
+        }else{
+            mcos[i] = (int)(mcosRaw[i] - mcosOffset[i]) * mcosScale[i] / SDEC_ONE;
+            msin[i] = (int)(msinRaw[i] - msinOffset[i]) * msinScale[i] / SDEC_ONE;
+
+            //  update min max rotation state
+            if (mcosRaw[i] > mcosMax[i]) mcosMax[i] = mcosRaw[i];
+            else if (mcosRaw[i] < mcosMin[i]) mcosMin[i] = mcosRaw[i];
+            if (msinRaw[i] > msinMax[i]) msinMax[i] = msinRaw[i];
+            else if (msinRaw[i] < msinMin[i]) msinMin[i] = msinRaw[i];
+            updateRotationState(i);
+        }
+        iBit <<= 1;
     }
 }
 
 #endif // else MODULE TEST
-
+void readQEI(){
+#if defined PIC32MM
+    //  No hardware. do nothing
+#elif defined PIC32MK_MCJ
+    qeCount[0] = POS1CNT;
+    qeCount[1] = POS3CNT;
+    qeCount[7] = POS2CNT;
+#endif
+}
 
 //  PWM by SPI
 extern unsigned long spiPwmWord1;
@@ -574,8 +588,8 @@ void __attribute__ ((vector(_SPI2_TX_VECTOR), interrupt(IPL6AUTO))) spiEmpty(voi
 #endif
 
 
-extern unsigned int addrSPI2BUF;
 
+extern unsigned int addrSPI2BUF;
 void controlInitPic(){
 #ifdef PIC32MM
     addrSPI2BUF = (unsigned int)&SPI2BUF;
@@ -606,8 +620,27 @@ void controlInitPic(){
 	SPI2CONbits.ON = 1;	//	SPI2 start	
 	
 	SPI2BUF = 0;
+#elif defined PIC32MK_MCJ
+    //  0:ADC in  or 1:Digital (magnet or encoder)
+    unsigned int anselACLR = 0x8000U;
+    unsigned int anselBCLR = 0x8000U;
+    unsigned int anselCCLR = 0x8000U;
+    unsigned int anselECLR = 0x0000U;
+    if (PNVDATA->encoder & (1<<0)) anselACLR |= 0x1800; // RA11,12
+    if (PNVDATA->encoder & (1<<1)) anselACLR |= 0x0003; // RA0,1
+    if (PNVDATA->encoder & (1<<2)) anselBCLR |= 0x0003; // RB0,1
+    if (PNVDATA->encoder & (1<<3)) anselBCLR |= 0x000C; // RB2,3
+    if (PNVDATA->encoder & (1<<4)) anselCCLR |= 0x0003; // RC0,1
+    if (PNVDATA->encoder & (1<<5)) anselCCLR |= 0x0804; // RC2,11    
+    if (PNVDATA->encoder & (1<<6)) anselECLR |= 0x3000; // RE12,13
+    if (PNVDATA->encoder & (1<<7)) anselECLR |= 0xC000; // RE14,15
+    ANSELACLR = anselACLR;
+    ANSELBCLR = anselBCLR;
+    ANSELCCLR = anselCCLR;
+    ANSELECLR = anselECLR;
 #endif
 }
+
 void onControlTimer(){
 #ifdef PIC32MM
 	LATCbits.LATC2 = 1;	//	LED ON

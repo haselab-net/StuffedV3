@@ -21,6 +21,7 @@ enum ControlMode controlMode, nextControlMode;
 SDEC mcos[NAXIS], msin[NAXIS];
 SDEC forceOffset[NFORCE];
 SDEC currentSense[NMOTOR];
+int qeCount[NAXIS] = {0,0,0,0,0,0,0,0,0,0};
 
 //	motor heat limit
 #define USE_HEAT_LIMIT
@@ -85,29 +86,36 @@ void updateMotorState(){
     static unsigned short count;
 	int i;
 	readADC();
+    readQEI();
+    int iBit = 1;
     for(i=0; i<NMOTOR; ++i){
-        LDEC sense, prev, cur, diff;
-		if (mcos[i] || msin[i]){
-			sense = S2LDEC(atan2SDEC(msin[i], mcos[i]));
-			cur = prev = motorState.pos[i];
-			diff = sense - GetDecimalL(prev);
-			cur += diff;
-			if (diff < -LDEC_ONE/2){
-				cur += LDEC_ONE;
-			}else if (diff > LDEC_ONE/2){
-				cur -= LDEC_ONE;
-			}
+        bool encoder = PNVDATA->encoder & iBit;
+        if (encoder){
+            motorState.vel[i] = qeCount[i] - motorState.pos[i];
+            motorState.pos[i] = qeCount[i];
+        }else if (mcos[i] || msin[i]){
+            LDEC sense, prev, cur, diff;
+            sense = S2LDEC(atan2SDEC(msin[i], mcos[i]));
+            cur = prev = motorState.pos[i];
+            diff = sense - GetDecimalL(prev);
+            cur += diff;
+            if (diff < -LDEC_ONE/2){
+                cur += LDEC_ONE;
+            }else if (diff > LDEC_ONE/2){
+                cur -= LDEC_ONE;
+            }
 #if 0	//	move motor pos for debug. (by hasevr) 
-			cur = prev + ((i%2)*2 - 1) * (SDEC)(SDEC_ONE*0.01);
+            cur = prev + ((i%2)*2 - 1) * (SDEC)(SDEC_ONE*0.01);
 #endif
-			motorState.pos[i] = cur;
-			motorState.vel[i] = motorState.pos[i] - prev;
+            motorState.pos[i] = cur;
+            motorState.vel[i] = motorState.pos[i] - prev;
 		}
 #if 0
 		if (i==0){
 			logPrintf("p %f,  s %f, (%d,%d) %d\r\n", LDEC2DBL(motorState.pos[i]), LDEC2DBL(sense), msin[i], mcos[i], diff);
 		}
 #endif
+        iBit <<= 1;
     }
 #ifdef USE_HEAT_LIMIT	//	motor heat
 	count ++;

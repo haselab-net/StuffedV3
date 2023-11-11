@@ -52,6 +52,7 @@ void loadMotorParam();
 
 //	device depended functions
 void readADC();								//	read adc and set it to mcos and msin
+void readQEI();								//	read QEI and set it to qeCount
 void setPwm(int ch, SDEC torque);			//	set pwm of motor
 #ifdef BOARD5
 void setPwm2(int ch, SDEC torque, bool currrentContorl);			//	set pwm of motor
@@ -72,6 +73,7 @@ extern struct MotorState motorTarget, motorState;
 extern SDEC currentTarget[NMOTOR];
 extern SDEC forceControlJK[NFORCE][NMOTOR];
 #define NAXIS	(NMOTOR+NFORCE/2)	//	NAXIS=NMOTOR+NFORCE/2
+extern int qeCount[NAXIS];
 extern SDEC mcos[NAXIS], msin[NAXIS];
 extern SDEC mcosRaw[NAXIS], msinRaw[NAXIS];
 
