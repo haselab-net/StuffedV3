@@ -57,7 +57,7 @@
 // *****************************************************************************
 // *****************************************************************************
 
-//void TIMER_1_InterruptHandler( void );
+void TIMER_1_InterruptHandler( void );
 void TIMER_2_InterruptHandler( void );
 
 

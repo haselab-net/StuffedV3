@@ -68,7 +68,7 @@ void EVIC_Initialize( void )
     while (PRISS != 0x76543210U)
     {
         /* Wait for PRISS value to take effect */
-}
+    }
 }
 
 void EVIC_SourceEnable( INT_SOURCE source )

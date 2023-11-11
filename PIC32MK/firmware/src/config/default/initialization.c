@@ -173,7 +173,7 @@ void SYS_Initialize ( void* data )
     CLK_Initialize();
 
     /* Configure CP0.K0 for optimal performance (cached instruction pre-fetch) */
-    __builtin_mtc0(16, 0,(__builtin_mfc0(16, 0) | 0x3));
+    __builtin_mtc0(16, 0,(__builtin_mfc0(16, 0) | 0x3U));
 
     /* Configure Wait States and Prefetch */
     CHECONbits.PFMWS = 2;
@@ -189,19 +189,19 @@ void SYS_Initialize ( void* data )
 
     QEI1_Initialize();
 
-	UART1_Initialize();
-
     QEI2_Initialize();
 
-	UART2_Initialize();
+	UART1_Initialize();
 
     QEI3_Initialize();
 
+	UART2_Initialize();
+
     TMR2_Initialize();
 
-    TMR1_Initialize();
-
     MCPWM_Initialize();
+
+    TMR1_Initialize();
 
 
 

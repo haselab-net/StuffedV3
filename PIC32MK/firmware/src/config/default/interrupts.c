@@ -80,10 +80,10 @@ void __ISR(_CORE_TIMER_VECTOR, ipl1SRS) CORE_TIMER_Handler (void)
 {
 }
 
-//void __ISR(_TIMER_1_VECTOR, ipl1SRS) TIMER_1_Handler (void)
-//{
-//    TIMER_1_InterruptHandler();
-//}
+/*void __ISR(_TIMER_1_VECTOR, ipl1SRS) TIMER_1_Handler (void)
+{
+    TIMER_1_InterruptHandler();
+}*/
 
 void __ISR(_TIMER_2_VECTOR, ipl1SRS) TIMER_2_Handler (void)
 {
