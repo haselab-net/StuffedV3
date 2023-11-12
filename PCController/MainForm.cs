@@ -126,15 +126,18 @@ namespace PCController
             short[] release = new short[boards.NMotor];
             short[] torqueMin = new short[boards.NMotor];
             short[] torqueMax = new short[boards.NMotor];
+            bool[] encoder = new bool[boards.NMotor];
             boards.RecvParamPd(ref k, ref b);
             boards.RecvParamCurrent(ref a);
             boards.RecvParamTorque(ref torqueMin, ref torqueMax);
             boards.RecvParamHeat(ref limit, ref release);
+            boards.RecvParamEncoder(ref encoder);
             for (int i = 0; i < boards.NMotor; ++i)
             {
                 motors[i].pd.K = k[i];
                 motors[i].pd.B = b[i];
                 motors[i].pd.A = a[i];
+                motors[i].pd.Enc = encoder[i];
                 if (limit[i] > 32000) limit[i] = 32000;
                 if (limit[i] < 0) limit[i] = 0;
                 motors[i].heat.HeatLimit = limit[i] * release[i];
@@ -292,14 +295,17 @@ namespace PCController
             short[] k = new short[boards.NMotor];
             short[] b = new short[boards.NMotor];
             short[] a = new short[boards.NMotor];
+            bool[] encoder = new bool[boards.NMotor];
             for (int i = 0; i < motors.Count; ++i)
             {
                 k[i] = (short)motors[i].pd.K;
                 b[i] = (short)motors[i].pd.B;
                 a[i] = (short)motors[i].pd.A;
+                encoder[i] = motors[i].pd.Enc;
             }
             boards.SendParamPd(k, b);
             boards.SendParamCurrent(a);
+            boards.SendParamEncoder(encoder);
         }
         private void btRecvPd_Click(object sender, EventArgs e)
         {
@@ -307,13 +313,16 @@ namespace PCController
             short[] k = new short[boards.NMotor];
             short[] b = new short[boards.NMotor];
             short[] a = new short[boards.NMotor];
+            bool[] encoder = new bool[boards.NMotor];
             boards.RecvParamPd(ref k, ref b);
             boards.RecvParamCurrent(ref a);
+            boards.RecvParamEncoder(ref encoder);
             for (int i = 0; i < motors.Count; ++i)
             {
                 motors[i].pd.K = k[i];
                 motors[i].pd.B = b[i];
                 motors[i].pd.A = a[i];
+                motors[i].pd.Enc = encoder[i];
             }
         }
         private void btLoadNuibot_Click(object sender, EventArgs e)
