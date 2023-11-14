@@ -185,23 +185,23 @@ void SYS_Initialize ( void* data )
 
     NVM_Initialize();
 
-    ADCHS_Initialize();
-
     QEI1_Initialize();
 
-	UART1_Initialize();
+    ADCHS_Initialize();
 
     QEI2_Initialize();
 
-    QEI3_Initialize();
+	UART1_Initialize();
 
 	UART2_Initialize();
 
+    QEI3_Initialize();
+
     TMR2_Initialize();
 
-    MCPWM_Initialize();
-
     TMR1_Initialize();
+
+    MCPWM_Initialize();
 
 
 

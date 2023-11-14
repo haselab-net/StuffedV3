@@ -14,6 +14,7 @@ struct TorqueLimit torqueLimit;
 struct Targets targets;
 LDEC lastTorques[NMOTOR];	//	last intended torque to limit sudden torque change.
 SDEC lastRatio[NMOTOR];		//	last applied torque to limit heat
+long encoderFlags;
 
 
 enum ControlMode controlMode, nextControlMode;
@@ -89,10 +90,20 @@ void updateMotorState(){
     readQEI();
     int iBit = 1;
     for(i=0; i<NMOTOR; ++i){
-        bool encoder = PNVDATA->encoder & iBit;
+        bool encoder = encoderFlags & iBit;
         if (encoder){
-            motorState.vel[i] = qeCount[i] - motorState.pos[i];
-            motorState.pos[i] = qeCount[i];
+            LDEC cur = S2LDEC(qeCount[i]);
+            motorState.vel[i] = cur - motorState.pos[i];
+            motorState.pos[i] = cur;
+/*            
+            static int readQeiCount = 0;
+            if (i==2){
+                readQeiCount ++;
+                if (readQeiCount > 1000){
+                    readQeiCount = 0;
+                    printf("QE pos %d: %d\n", i, (int)motorState.pos[i]);
+                }
+            }   //  */
         }else if (mcos[i] || msin[i]){
             LDEC sense, prev, cur, diff;
             sense = S2LDEC(atan2SDEC(msin[i], mcos[i]));

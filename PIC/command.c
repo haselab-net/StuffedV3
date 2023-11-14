@@ -140,13 +140,15 @@ void ecSetParam(){
         bSaveParam = true;
         } break;
     case PT_ENCODER:
+        encoderFlags = command.param.encoder;
+        initEncoder();
         bSaveParam = true;
         break;
     default:
         PIC_LOGE("ecSetParam got wrong type %d", (int)command.param.type);
         break;
     }
-    if (bSaveParam) saveMotorParam(PNVDATA->encoder);
+    if (bSaveParam) saveMotorParam();
 }
 void ecResetSensor(){
     int i;
@@ -315,7 +317,7 @@ void rcGetParam(){
         }
         break;
     case PT_ENCODER:
-        retPacket.param.encoder = PNVDATA->encoder;
+        retPacket.param.encoder = encoderFlags;
         break;
     default:
         PIC_LOGE("rcGetParam got wrong type %d, set = %d", (int)getParamType, (int)command.param.type);

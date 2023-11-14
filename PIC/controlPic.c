@@ -269,7 +269,7 @@ AN      2 3    5     10
     int i;
     int iBit=1;
     for(i=0; i<NAXIS; ++i){
-        if (PNVDATA->encoder & iBit){
+        if (encoderFlags & iBit){
             msin[i] = 1;    //  mcos[i] is used for counter.
         }else{
             mcos[i] = (int)(mcosRaw[i] - mcosOffset[i]) * mcosScale[i] / SDEC_ONE;
@@ -588,7 +588,6 @@ void __attribute__ ((vector(_SPI2_TX_VECTOR), interrupt(IPL6AUTO))) spiEmpty(voi
 #endif
 
 
-
 extern unsigned int addrSPI2BUF;
 void controlInitPic(){
 #ifdef PIC32MM
@@ -621,23 +620,7 @@ void controlInitPic(){
 	
 	SPI2BUF = 0;
 #elif defined PIC32MK_MCJ
-    //  0:ADC in  or 1:Digital (magnet or encoder)
-    unsigned int anselACLR = 0x8000U;
-    unsigned int anselBCLR = 0x8000U;
-    unsigned int anselCCLR = 0x8000U;
-    unsigned int anselECLR = 0x0000U;
-    if (PNVDATA->encoder & (1<<0)) anselACLR |= 0x1800; // RA11,12
-    if (PNVDATA->encoder & (1<<1)) anselACLR |= 0x0003; // RA0,1
-    if (PNVDATA->encoder & (1<<2)) anselBCLR |= 0x0003; // RB0,1
-    if (PNVDATA->encoder & (1<<3)) anselBCLR |= 0x000C; // RB2,3
-    if (PNVDATA->encoder & (1<<4)) anselCCLR |= 0x0003; // RC0,1
-    if (PNVDATA->encoder & (1<<5)) anselCCLR |= 0x0804; // RC2,11    
-    if (PNVDATA->encoder & (1<<6)) anselECLR |= 0x3000; // RE12,13
-    if (PNVDATA->encoder & (1<<7)) anselECLR |= 0xC000; // RE14,15
-    ANSELACLR = anselACLR;
-    ANSELBCLR = anselBCLR;
-    ANSELCCLR = anselCCLR;
-    ANSELECLR = anselECLR;
+    initEncoder();    
 #endif
 }
 
@@ -655,7 +638,7 @@ void onControlTimer(){
 
 
 ///	motor paramters
-void saveMotorParam(unsigned long encoder){
+void saveMotorParam(){
 	NvData nvData;
     int i;
 	NVMRead(&nvData);
@@ -667,6 +650,7 @@ void saveMotorParam(unsigned long encoder){
         nvData.heat.release[i] = 	motorHeatRelease[i];
         nvData.heat.limit[i] = motorHeatLimit[i] / motorHeatRelease[i];
     }
+    nvData.encoder = encoderFlags;
     NVMWrite(&nvData);
 }
 void loadMotorParam(){
@@ -678,4 +662,5 @@ void loadMotorParam(){
         motorHeatRelease[i] = PNVDATA->heat.release[i];	
         motorHeatLimit[i] = PNVDATA->heat.limit[i] * PNVDATA->heat.release[i];
     }
+    encoderFlags = PNVDATA->encoder;
 }

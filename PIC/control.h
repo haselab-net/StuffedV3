@@ -27,6 +27,7 @@ extern SDEC motorHeatRelease[NMOTOR];		//	heat release from motor / loop (10Hz)
 extern long motorHeatLimit[NMOTOR];			//	limit for heat amount of the motor
 extern long motorHeat[NMOTOR];				//	current heat amount
 extern SDEC lastRatio[NMOTOR];				//	pwm ratio actually applied to motor
+extern long encoderFlags;                   //  flags whether use 1:encoder or 0:magnetic sensor
 
 ///	PD control and current control
 #define PDPARAM_K   SDEC_ONE
@@ -115,6 +116,7 @@ unsigned char targetsReadAvail();
 int targetsCountMin();
 int targetsCountMax();
 
+void initEncoder();
 void controlInit();
 void controlSetMode(enum ControlMode m);
 void controlLoop();

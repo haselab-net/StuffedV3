@@ -30,7 +30,7 @@ const struct NvPageData __attribute__((aligned(NVPAGESIZE))) theNvPage = {
     {
         BOARD_ID,   //  boardID
         {0},        //  pad
-        0,          //  encoder flags for each motor (1:QE=encoder, 0:ADC=magnet sensor)        
+        0x0,          //  encoder flags for each motor (1:QE=encoder, 0:ADC=magnet sensor)        
         {2000000, 3000000},    //  2MBPS for command, 3MBPS for monitor
         {   //  PDParam
             {PDPARAM_K, PDPARAM_K, PDPARAM_K, EL4(PDPARAM_K), EL5678(PDPARAM_K, PDPARAM_K, PDPARAM_K, PDPARAM_K)},   //k

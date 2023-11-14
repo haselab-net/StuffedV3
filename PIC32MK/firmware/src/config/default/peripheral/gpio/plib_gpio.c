@@ -113,8 +113,14 @@ void GPIO_Initialize ( void )
     CFGCONbits.IOLOCK = 0U;
 
     /* PPS Input Remapping */
-    U1RXR = 10;
-    U2RXR = 4;
+    U1RXR = 10; //  RPG8 = 6pin
+    U2RXR = 4;  //  RPB8 = 48pin
+    QEA1R = 8;  //  RPA11
+    QEB1R = 8;  //  RPA12
+    QEA2R = 8;  //  RPE15
+    QEB2R = 8;  //  RPE14
+    QEA3R = 0;  //  RPA0
+    QEB3R = 0;  //  RPA1
 
     /* PPS Output Remapping */
     RPE0R = 1;

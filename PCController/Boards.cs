@@ -256,8 +256,8 @@ namespace PCController
                 WriteShort(sendBuf, ref cur, (short)ResetSensorFlags.RSF_MOTOR);
                 Serial.Write(sendBuf, 0, sendBuf.Length);
             }
-        }        public void SendSense()
-        {
+        }
+        public void SendSense() {
             foreach (Board board in this)
             {
                 byte[] sendBuf = null, recvBuf = null;

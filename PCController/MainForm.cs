@@ -195,10 +195,6 @@ namespace PCController
             {
                 currentControls[i].lbCurrent.Text = "" + boards.GetCurrent(i);
             }
-            for(int i=0; i < boards.NForce; ++i)
-            {
-                txMsg.Text += " F"+i+"="+boards.GetForce(i);
-            }
         }
 
         private void timer_Tick(object sender, EventArgs e)
