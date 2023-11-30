@@ -52,6 +52,12 @@ namespace PCController
                     m.AddData(t, i + t, 10 - i - t);
                 }*/
             }
+            for(int i=0; i<boards.NForce; i+=2)
+            {
+                Magnet m = new Magnet(pnMagnet);
+                magnets.Add(m);
+                pnMagnet.Controls.Add(m.chart);
+            }
             pnMagnet_Resize(this, new EventArgs());
         }
         private void pnMagnet_Resize(object sender, EventArgs e)
@@ -59,10 +65,10 @@ namespace PCController
             Size sz = pnMagnet.ClientSize;
             for (int i=0; i<magnets.Count; ++i){
                 Magnet m = magnets[i];
-                m.chart.Left = (i % 2) * ((sz.Width) / 2);
-                m.chart.Top = (i / 2) * ((sz.Height) / 2);
-                m.chart.Width = sz.Width / 2 - 3;
-                m.chart.Height = sz.Height / 2 - 3;
+                m.chart.Left = (i % 3) * ((sz.Width) / 3);
+                m.chart.Top = (i / 3) * ((sz.Height) / 4);
+                m.chart.Width = sz.Width / 3 - 1;
+                m.chart.Height = sz.Height / 4 - 1;
             }
         }
         int magnetCount = 0;
@@ -86,12 +92,12 @@ namespace PCController
                 boards.SendSense();
                 initialPos = new short [motors.Count];
                 for (int i = 0; i != motors.Count; ++i) initialPos[i] = boards.GetPos(i);
-                magnetSensors = new short[motors.Count * 2];
+                magnetSensors = new short[motors.Count * 2 + (boards.NForce+1) / 2 * 2];
                 boards.RecvParamMagnetSensor(ref magnetSensors);
             }
             //  Set motor control pattern 
-            const int duration = 200;       //  duration to test in 10ms 
-            const int motion = 1024 * 2;    //  amount of motion (1024 = 1 rotation)
+            const int duration = 30;       //  duration to test in 10ms 
+            const int motion = 1024;    //  amount of motion (1024 = 1 rotation)
             const int C1 = 2, C2 = C1+duration, C3 = C2+duration*2, C4 = C3+duration;
             if (C1 <= magnetCount && magnetCount <= C4)
             {
@@ -100,19 +106,6 @@ namespace PCController
                     magnets[i].AddData(magnetCount - C1, magnetSensors[i * 2], magnetSensors[i * 2 + 1]);
                 }
             }
-#if false
-            if (magnetCount == C1 || magnetCount == C2 || magnetCount == C3)
-            {
-                short[] targets = new short[boards.NMotor];
-                for (int i = 0; i < motors.Count; ++i)
-                {
-                    if (magnetCount == C1) targets[i] = (short)(initialPos[i] + 1500);
-                    if (magnetCount == C2) targets[i] = (short)(initialPos[i] - 1500);
-                    if (magnetCount == C3) targets[i] = initialPos[i];
-                }
-                boards.SendPosDirect(targets);
-            }
-#else
             if (C1 <= magnetCount && magnetCount < C4)
             {
                 short[] targets = new short[boards.NMotor];
@@ -124,7 +117,6 @@ namespace PCController
             }
                 boards.SendPosDirect(targets);
             }
-#endif
             if (magnetCount == C4) {
                 timer.Interval = timerIntervalBackup;
                 magnetCount = 0;

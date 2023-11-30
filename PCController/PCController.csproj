@@ -80,7 +80,8 @@
     <Compile Include="Board.cs" />
     <Compile Include="Boards.cs" />
     <Compile Include="Haptic.cs" />
-    <Compile Include="Magnet.cs" />    <Compile Include="MainForm.cs">
+    <Compile Include="Magnet.cs" />
+    <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="MainForm.Designer.cs">

@@ -569,6 +569,11 @@ namespace PCController
                 }
                 mi += board.nMotor * 2;
             }
+            SendSense();
+            for (int i=0; i<NForce; ++i)
+            {
+                m[NMotor*2 + i] = force[i];
+            }
         }
         public void RecvParamEncoder(ref bool[] enc)
         {

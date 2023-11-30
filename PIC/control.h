@@ -132,9 +132,8 @@ static inline SDEC getForceRaw(int ch){
 	return 0;
 }
 static inline SDEC getForce(int ch){
-	if (ch == 0) return mcosRaw[3] - forceOffset[ch];
-	if (ch == 1) return msinRaw[3] - forceOffset[ch];
-	return 0;
+    if (ch%2 == 0) return mcosRaw[NMOTOR + ch/2] - forceOffset[ch];
+    else return msinRaw[NMOTOR + ch/2] - forceOffset[ch];
 }
 
 // #ifdef PIC
