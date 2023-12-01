@@ -544,7 +544,7 @@ void setPwmPin(int ch, bool cc){
             IOCON7bits.PENL = !cc;
             break;
         case 7:
-            IOCON9bits.PENH = cc;
+            IOCON8bits.PENH = cc;
             IOCON8bits.PENL = !cc;
             break;
     }
