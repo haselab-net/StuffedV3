@@ -62,6 +62,6 @@ void initMk(){
     TMR1_Start();
     
     MCPWM_Start();
-    GPIO_RB9_Clear();
-
+    IOCON9bits.PENL = 0;    //  PWM8L should be GPIO
+    GPIO_RB9_Set();     //  LED
 }

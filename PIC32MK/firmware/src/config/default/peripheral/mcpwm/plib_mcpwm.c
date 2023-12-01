@@ -62,7 +62,7 @@ void MCPWM_Initialize (void)
     /*  SSEIEN = false */
     STCON = 0x0;
 
-    PTPER = 50;
+    PTPER = 200;
     STPER = 2000;
     SEVTCMP = 0;
     SSEVTCMP = 10;
@@ -521,6 +521,63 @@ void MCPWM_Initialize (void)
     /*  PHR        = 0  */
     LEBCON8 = 0x0;
     LEBDLY8 = 10;
+
+
+    /*********** Channel 9 Configurations **********/
+    /* PWMCON9 register  */
+    /*  MTBS   = 0 */
+    /*  PTDIR  =  0 */
+    /*  ECAM   =  0 */
+    /*  DTCP   =  0 */
+    /*  DTC    =  2 */
+    /*  ITB    = 0 */
+    /*  PWMHIEN =  false */
+    /*  PWMLIEN = false */
+    /*  TRGIEN = false */
+    /*  CLIEN = false */
+    /*  FLTIEN = false */
+    PWMCON9 = 0x80;
+
+    /* IOCON9 register  */
+    /*  SWAP    = 0*/
+    /*  PMOD    = 1*/
+    /*  POLH    = 0*/
+    /*  POLL    = 0*/
+    /*  FLTDAT  = 0b00 */
+    /*  FLTMOD  = 3 */
+    /*  PENH  = 1 */
+    /*  PENL  = 1 */
+    /*  FLTPOL  = 0  */
+    /*  FLTSRC  = 0  */
+    /*  CLDAT  = 0b00 */
+    /*  CLMOD  = 0 */
+    /*  CLPOL  = 0  */
+    /*  CLSRC  = 0  */
+    IOCON9 = 0x3c400;
+
+    PDC9 = 1000;
+    SDC9 = 500;
+    PHASE9 = 0;
+
+    /* Dead Time */
+    DTR9 = 0;
+    ALTDTR9 = 0;
+
+    /* Trigger Generator */
+    TRGCON9 = 0x0;
+    TRIG9 = 0;
+    STRIG9 = 0;
+
+    /* leading edge blanking */
+    /* LEBCON9 register  */
+    /*  CLLEBEN    = false  */
+    /*  FLTLEBEN   = false */
+    /*  PLF        = 0  */
+    /*  PLR        = 0  */
+    /*  PHF        = 0  */
+    /*  PHR        = 0  */
+    LEBCON9 = 0x0;
+    LEBDLY9 = 10;
 
 
 }

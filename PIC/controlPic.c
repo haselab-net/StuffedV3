@@ -544,13 +544,13 @@ void setPwmPin(int ch, bool cc){
             IOCON7bits.PENL = !cc;
             break;
         case 7:
-            IOCON8bits.PENH = cc;
+            IOCON9bits.PENH = cc;
             IOCON8bits.PENL = !cc;
             break;
     }
 }
 void setPwm2(int ch, SDEC ratio, bool currentControl){
-    #define PWM_PERIOD  50
+    #define PWM_PERIOD  200
     int reverse = 0;
     if (ratio < 0){
         ratio = -ratio;
@@ -564,6 +564,9 @@ void setPwm2(int ch, SDEC ratio, bool currentControl){
     }
     setPHLevel(ch, reverse);
     MCPWM_ChannelPrimaryDutySet(ch, pwm ? pwm-1 : pwm);
+    if (ch==7){
+        MCPWM_ChannelPrimaryDutySet(8, pwm ? pwm-1 : pwm);
+    }
 }
 void setPwm(int ch, SDEC ratio){
     setPwm2(ch, ratio, true);
