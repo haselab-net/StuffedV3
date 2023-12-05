@@ -48,6 +48,7 @@ const struct NvPageData __attribute__((aligned(NVPAGESIZE))) theNvPage = {
             {MOTOR_HEAT_RELEASE, MOTOR_HEAT_RELEASE, MOTOR_HEAT_RELEASE, EL4(MOTOR_HEAT_RELEASE),
                 MOTOR_HEAT_RELEASE, MOTOR_HEAT_RELEASE, MOTOR_HEAT_RELEASE, MOTOR_HEAT_RELEASE}    // SDEC release
         },
+        200  //  pwmResolution
     }
 };
 

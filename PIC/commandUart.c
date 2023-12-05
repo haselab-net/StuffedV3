@@ -54,8 +54,11 @@ void __ISR(_TIMER_1_VECTOR, ipl3SRS) TIMER_1_Handler (void)
 		//	stop timer interrupt
 		IEC0bits.T1IE = 0;
 		//	start TX
-#ifdef PC32MK_MCJ
-        ODCGSET = 0x000; /* Open Drain Disable for TX*/
+#ifdef PC32MM
+#elif defined PIC32MK_MCJ
+        ODCGCLR = 0x200; /* Open Drain Disable for TX*/
+#else
+#error
 #endif
 		UCSTAbits.UTXEN = 1;	//	enable TX
 		UCSTAbits.UTXISEL = 2;	//	10 = Interrupt is generated and asserted while the transmit buffer is empty
@@ -78,8 +81,11 @@ void __attribute__ ((vector(_UARTC_TX_VECTOR), interrupt(IPL2AUTO))) _UARTC_TX_H
 		UCSTAbits.UTXISEL = 1;		//	01 = Interrupt is generated and asserted when all characters have been transmitted
 		if (UCSTAbits.TRMT){		//	TX completed
 			IEC_UCTXIE = 0;	//	disable interrupt
-#ifdef PC32MK_MCJ
+#ifdef PC32MM
+#elif defined PIC32MK_MCJ
             ODCGSET = 0x200; /* Open Drain Enable for TX*/
+#else
+#error
 #endif
 			UCSTAbits.UTXEN = 0;	//	disable UCTX
 		}

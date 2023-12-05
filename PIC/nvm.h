@@ -21,6 +21,7 @@ typedef struct {
     struct PdParam param;                   // 36       2x3x4 = 24 
     struct TorqueLimit torque;              // 52       2x2x4 = 16
     MotorHeatLimit heat;                    // 68       2x2x4 = 16
+    unsigned short pwmResolution;           // 70       2
 } __attribute__((__packed__)) NvData;
 
 #ifdef PIC

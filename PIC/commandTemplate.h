@@ -70,6 +70,7 @@ struct SetGetParam##BOARD{    /* CI_SETPARAM / CI_GETPARAM */       \
         }PACKED magnet;												\
         SDEC PACKED a[BOARD##_NMOTOR];	/* Current */               \
         unsigned char boardId;	/* boardId */                       \
+        unsigned short pwmResolution;	/* pwm resolution */        \
         unsigned long baudrate[2];	/* baudrate */                  \
         unsigned long encoder;      /* encoder */                   \
         struct MotorHeatLimit##BOARD heat;                          \
@@ -179,6 +180,7 @@ union ReturnPacket##BOARD {										\
 				unsigned char nCurrent;							\
 				unsigned char nForce;							\
 				unsigned char nTouch;							\
+				unsigned short pwmResolution;					\
 			}PACKED boardInfo;									\
 			struct {		 /*	 CI_ALL */						\
 				unsigned char controlMode;						\

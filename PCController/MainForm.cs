@@ -177,6 +177,7 @@ namespace PCController
                     nb.Nodes.Add("nMotor " + b.nMotor);
                     nb.Nodes.Add("nCurrent " + b.nCurrent);
                     nb.Nodes.Add("nForce " + b.nForce);
+                    nb.Nodes.Add("PWM res " + b.pwmResolution);
                 }
                 times = Enumerable.Repeat(0, boards.NMotor).ToArray();
                 ResetPanels();
@@ -232,37 +233,58 @@ namespace PCController
 
         private void trBoards_AfterLabelEdit(object sender, NodeLabelEditEventArgs e)
         {
+            e.CancelEdit = true;
             if (e.Label != null)
             {
-                int id;
-                if (!int.TryParse(e.Label, out id)) {
-                    if (!int.TryParse(e.Label.Substring(2), out id))
-                    {
-                        e.CancelEdit = true;
+                int newNumber;
+                if (!int.TryParse(e.Label, out newNumber)) {
+                    if (!int.TryParse(e.Label.Split(' ').Last(), out newNumber)) return;
+                }
+                TreeNodeCollection nodes = e.Node.Parent.Nodes;
+                int idOrg = -1;
+                foreach(TreeNode node in nodes)
+                {
+                    if (node.Text.Contains("ID")) {
+                        idOrg = int.Parse(node.Text.Split(' ').Last());
                     }
                 }
-                if (!e.CancelEdit)
+                if (idOrg == -1) return;
+                if (e.Node.Text.Contains("ID"))
                 {
                     foreach (Board b in boards)
                     {
-                        if (b.boardId == id)
-                        {
-                            e.CancelEdit = true;
-                        }
+                        if (b.boardId == newNumber) return; //  The same id is already used.
                     }
-                }
-                if (!e.CancelEdit) {
-                    int oid;
-                    int.TryParse(e.Node.Text.Substring(2), out oid);
+                    e.Node.Text = "ID " + newNumber;
                     byte[] ids = new byte[boards.Count];
-                    for (int i = 0; i < boards.Count; ++i) {
+                    int boardPos = -1;
+                    for (int i = 0; i < boards.Count; ++i)
+                    {
                         ids[i] = (byte)boards[i].boardId;
-                        if (ids[i] == oid)
+                        if (ids[i] == idOrg)
                         {
-                            ids[i] = (byte)id;
+                            ids[i] = (byte)newNumber;
+                            boardPos = i;
                         }
                     }
                     boards.SendParamBoardId(ids);
+                    boards[boardPos].boardId = (byte) newNumber;
+                }
+                if (e.Node.Text.Contains("PWM"))
+                {
+                    e.Node.Text = "PWM res " + newNumber;
+                    byte[] ids = new byte[boards.Count];
+                    ushort[] pwms = new ushort[boards.Count];
+                    for (int i = 0; i < boards.Count; ++i)
+                    {
+                        pwms[i] = boards[i].pwmResolution;
+                        if (boards[i].boardId == idOrg)
+                        {
+                            pwms[i] = (ushort)newNumber;
+                            boards[i].pwmResolution = (ushort)newNumber;
+                        }
+                    }
+                    boards.SendParamPwmResolution(pwms);
                 }
             }
         }
@@ -271,7 +293,7 @@ namespace PCController
         {
             if (e.Node != null)
             {
-                if (!e.Node.Text.Contains("ID"))
+                if (!e.Node.Text.Contains("ID") && !e.Node.Text.Contains("PWM"))
                 {
                     e.CancelEdit = true;
                 }

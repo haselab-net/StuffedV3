@@ -132,6 +132,15 @@ void ecSetParam(){
         NVMWrite(&nvData);
 #endif
         } break;
+    case PT_PWM_RESOLUTION:{
+#ifdef PIC
+        NvData nvData;
+        NVMRead(&nvData);
+        nvData.pwmResolution = command.param.pwmResolution;
+        setPwmResolution(nvData.pwmResolution);
+        NVMWrite(&nvData);
+#endif
+        } break;
     case PT_MOTOR_HEAT:{
         for(i=0; i<NMOTOR; ++i){
             motorHeatRelease[i] = command.param.heat.release[i];
@@ -178,6 +187,7 @@ void rcBoardInfo(){
 	retPacket.boardInfo.nCurrent = NCURRENT;
 	retPacket.boardInfo.nForce = NFORCE;
 	retPacket.boardInfo.nTouch = NTOUCH;
+    retPacket.boardInfo.pwmResolution = PNVDATA->pwmResolution;
 }
 void rcAll(){
     int i;

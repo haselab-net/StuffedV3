@@ -116,6 +116,7 @@ namespace PCController
             v |= (long)(buf[cur++]) << 24;
             return v;
         }
+        public static ushort ReadUShort(byte[] buf, ref int cur) { return (ushort) ReadShort(buf, ref cur); }
         public static short ReadShort(byte[] buf, ref int cur)
         {
             short v;
@@ -400,10 +401,24 @@ namespace PCController
                 Thread.Sleep(100);
             }
         }
+        public void SendParamPwmResolution(ushort[] pwmRes)
+        {
+            int i = 0;
+            foreach (Board board in this)
+            {
+                byte[] sendBuf = null, recvBuf = null;
+                PrepareBuffers(ref sendBuf, ref recvBuf, CommandId.CI_SET_PARAM, board);
+                sendBuf[1] = (byte)SetParamType.PT_PWM_RESOLUTION;
+                int cur = 2;
+                WriteUShort(sendBuf, ref cur, pwmRes[i++]);
+                Serial.Write(sendBuf, 0, sendBuf.Length);
+                Thread.Sleep(100);
+            }
+        }
         public void EnumerateBoard()
         {
             if (serial == null) return;
-            byte[] tempInit = { 0, 0, 0, 0, 0, 0, 0 };
+            byte[] tempInit = { 0, 0, 0, 0, 0, 0, 0, 0, 0};
             Board boardTemp = new Board(tempInit, null);
             //  clear serial receive buffer
             while (Serial.BytesToRead > 0) Serial.DiscardInBuffer();
@@ -419,19 +434,19 @@ namespace PCController
             {
                 sendBuf[0] = Board.MakeHeader(CommandId.CI_BOARD_INFO, bi);
                 Serial.Write(sendBuf, 0, bufLen);
-                for (int t = 0; t < 10; ++t)
+            }
+            Thread.Sleep(20);
+            for (int t = 0; t < 10; ++t)    //  Up to 7 boards can be connected and responsed.
+            {
+                if (Serial.BytesToRead >= retLen)
                 {
-                    if (Serial.BytesToRead == retLen)
-                    {
-                        Serial.Read(recvBuf, 0, retLen);
-                        Board board = new Board(recvBuf, this);
-                        nMotor += board.nMotor;
-                        nCurrent += board.nCurrent;
-                        nForce += board.nForce;
-                        nTouch += board.nTouch;
-                        Add(board);
-                    }
-                    Thread.Sleep(2);
+                    Serial.Read(recvBuf, 0, retLen);
+                    Board board = new Board(recvBuf, this);
+                    nMotor += board.nMotor;
+                    nCurrent += board.nCurrent;
+                    nForce += board.nForce;
+                    nTouch += board.nTouch;
+                    Add(board);
                 }
             }
             //  set command length of all boards.

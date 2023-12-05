@@ -72,6 +72,10 @@ enum RotationState {
 } rotationState[NAXIS]; //  start from UNKNOWN
 
 
+//  pwmResolution
+static unsigned short pwmResolution = 200;
+
+
 inline short FilterForAngle(short prev, short cur){
     const short IIR = 16;
     return (prev*(IIR-1) + cur) / IIR;
@@ -550,13 +554,12 @@ void setPwmPin(int ch, bool cc){
     }
 }
 void setPwm2(int ch, SDEC ratio, bool currentControl){
-    #define PWM_PERIOD  200
     int reverse = 0;
     if (ratio < 0){
         ratio = -ratio;
         reverse = 1;
     }
-    int pwm = (((int)ratio) * PWM_PERIOD) >> SDEC_BITS;
+    int pwm = (((int)ratio) * pwmResolution) >> SDEC_BITS;
     if (pwm){
         setPwmPin(ch, currentControl);
     }else{
@@ -639,6 +642,12 @@ void onControlTimer(){
 #endif
 }
 
+void setPwmResolution(unsigned short resolution){
+    pwmResolution = resolution;
+#if defined PIC32MK_MCJ
+    MCPWM_PrimaryPeriodSet(pwmResolution);
+#endif
+}
 
 ///	motor paramters
 void saveMotorParam(){
@@ -667,3 +676,4 @@ void loadMotorParam(){
     }
     encoderFlags = PNVDATA->encoder;
 }
+

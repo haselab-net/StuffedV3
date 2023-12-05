@@ -13,11 +13,9 @@
 
 void initEncoder(){
 #if defined PIC32MK_MCJ
-    QEI1_Start();
-    QEI2_Start();
-    QEI3_Start();
-    //  0:ADC in  or 1:Digital (magnet or encoder)
-    ANSELA = 0xFFFFU;
+    //  Bits of encoderFlags mean 0:Magnet sensro=ADC, 1:encoder=digital.
+    //  Clear = set all magnet.
+    ANSELA = 0xFFFFU;   //  1:ADC 1:Digital
     ANSELB = 0xFFFFU;
     ANSELC = 0xFFFFU;
     ANSELE = 0xFFFFU;
@@ -25,6 +23,23 @@ void initEncoder(){
     unsigned int anselBCLR = 0x2800U;
     unsigned int anselCCLR = 0x1400U;
     unsigned int anselECLR = 0x0000U;
+    //  No interrput for software counters.
+    GPIO_PinIntDisable(GPIO_PIN_RB0);
+    GPIO_PinIntDisable(GPIO_PIN_RB1);
+    GPIO_PinIntDisable(GPIO_PIN_RB2);
+    GPIO_PinIntDisable(GPIO_PIN_RB3);        
+    GPIO_PinIntDisable(GPIO_PIN_RC0);
+    GPIO_PinIntDisable(GPIO_PIN_RC1);                
+    GPIO_PinIntDisable(GPIO_PIN_RC2);
+    GPIO_PinIntDisable(GPIO_PIN_RC11);                        
+    GPIO_PinIntDisable(GPIO_PIN_RE12);
+    GPIO_PinIntDisable(GPIO_PIN_RE13);
+    
+    //  start three hardware encoder counters.
+    QEI1_Start();
+    QEI2_Start();
+    QEI3_Start();
+
     if (encoderFlags & (1<<0)) anselACLR |= 0x1800; // RA11,12  Use QEI1
     if (encoderFlags & (1<<1)) anselACLR |= 0x0003; // RA0,1    Use QEI3
     if (encoderFlags & (1<<2)){

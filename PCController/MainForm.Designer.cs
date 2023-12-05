@@ -839,7 +839,7 @@
             // 
             this.splitContainerBottom.Panel2.Controls.Add(this.txMsg);
             this.splitContainerBottom.Size = new System.Drawing.Size(229, 453);
-            this.splitContainerBottom.SplitterDistance = 252;
+            this.splitContainerBottom.SplitterDistance = 208;
             this.splitContainerBottom.TabIndex = 5;
             // 
             // trBoards
@@ -848,7 +848,7 @@
             this.trBoards.LabelEdit = true;
             this.trBoards.Location = new System.Drawing.Point(0, 0);
             this.trBoards.Name = "trBoards";
-            this.trBoards.Size = new System.Drawing.Size(229, 252);
+            this.trBoards.Size = new System.Drawing.Size(229, 208);
             this.trBoards.TabIndex = 4;
             this.trBoards.BeforeLabelEdit += new System.Windows.Forms.NodeLabelEditEventHandler(this.trBoards_BeforeLabelEdit);
             this.trBoards.AfterLabelEdit += new System.Windows.Forms.NodeLabelEditEventHandler(this.trBoards_AfterLabelEdit);
@@ -860,7 +860,7 @@
             this.txMsg.Multiline = true;
             this.txMsg.Name = "txMsg";
             this.txMsg.ReadOnly = true;
-            this.txMsg.Size = new System.Drawing.Size(229, 197);
+            this.txMsg.Size = new System.Drawing.Size(229, 241);
             this.txMsg.TabIndex = 0;
             // 
             // MainForm

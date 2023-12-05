@@ -122,7 +122,7 @@ void controlSetMode(enum ControlMode m);
 void controlLoop();
 void updateMotorState();
 void setPwmWithLimit(int ch, SDEC ratio);
-
+void setPwmResolution(unsigned short resolution);
 
 extern SDEC forceOffset[NFORCE];
 
