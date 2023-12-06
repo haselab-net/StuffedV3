@@ -31,7 +31,6 @@ void commandUartInit(){
 #else
 #error
 #endif
-
 }
 
 uint32_t timeRetCmd, timeTx;
@@ -50,23 +49,6 @@ void __ISR(_TIMER_1_VECTOR, ipl3SRS) TIMER_1_Handler (void)
 		PIC_LOGI("RC%d len%d ", retPacket.commandId, retLen);
         returnCommand[retPacket.commandId]();
 		timeRetCmd = TMR1;
-
-//  NEW CODE: start to send ASAP.
-        //	stop timer1 interrupt
-		IEC0bits.T1IE = false;
-#ifdef PC32MM
-#elif defined PIC32MK_MCJ
-        ODCGCLR = 0x200; // Open Drain Disable for TX
-#else
-#error
-#endif
-		UCSTAbits.UTXEN = 1;	//	enable TX
-		UCSTAbits.UTXISEL = 2;	//	10 = Interrupt is generated and asserted while the transmit buffer is empty
-		IEC_UCTXIE = 1;         //	enable UART's interrupt
-		timeTx = TMR1;
-		PIC_LOGI("RCE %d %d ", timeRetCmd, timeTx);        
-        
-/*  OLD CODE: Wait to send response until one whole period of the timer 2.
 	}else{
 		//	stop timer interrupt
 		IEC0bits.T1IE = false;
@@ -81,10 +63,8 @@ void __ISR(_TIMER_1_VECTOR, ipl3SRS) TIMER_1_Handler (void)
 		UCSTAbits.UTXISEL = 2;	//	10 = Interrupt is generated and asserted while the transmit buffer is empty
 		IEC_UCTXIE = 1;         //	enable UART's interrupt
 		timeTx = TMR1 + PR1;
-*/
-	}else{
-		PIC_LOGE("RC Never called.");        
-    }
+		PIC_LOGI("REC %d %d ", timeRetCmd, timeTx);
+	}
     IFS0bits.T1IF = false;
 }
 
@@ -114,7 +94,7 @@ void __attribute__ ((vector(_UARTC_TX_VECTOR), interrupt(IPL2AUTO))) _UARTC_TX_H
 }
 //	handler for rx interrupt
 //	Note: "IPL4" below must fit to "IPC5bits.UCRXIP = 4" in interrupt_manager.c;
-void __attribute__ ((vector(_UARTC_RX_VECTOR), interrupt(IPL4AUTO))) _UARTC_RX_HANDLER(void){
+void __attribute__ ((vector(_UARTC_RX_VECTOR), interrupt(IPL4SRS))) _UARTC_RX_HANDLER(void){
 	union CommandHeader head;
 	static bool bRead;
 	int i;
@@ -133,10 +113,10 @@ void __attribute__ ((vector(_UARTC_RX_VECTOR), interrupt(IPL4AUTO))) _UARTC_RX_H
 				retLen = retPacketLen[command.commandId];
 				if (retLen) {	//	start to return.
 					//	Prepare to return
+                    bRunReturnCommand = true;
 					retPacket.header = command.header;
 					retCur = 0;
-					//	Start TMR1 to enable TX after some delay.
-					bRunReturnCommand = true;
+					//	Start TMR1 to make retPacket and start to send.
 					IFS0bits.T1IF = false;
 					IEC0bits.T1IE = true;
 					TMR1 = PR1-1;	//	call timer as soon as this task is ended.
@@ -151,6 +131,7 @@ void __attribute__ ((vector(_UARTC_RX_VECTOR), interrupt(IPL4AUTO))) _UARTC_RX_H
 		}else{
 			head.header = UCRXREG;
 		}
+
 		if (cmdCur == cmdLen-1){
             if (bRead){
 				bRunExecCommand = true;	//	exec command in main thread.

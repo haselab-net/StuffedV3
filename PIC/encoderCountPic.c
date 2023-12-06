@@ -20,10 +20,10 @@ void initEncoder(){
     ANSELC = 0xFFFFU;
     ANSELE = 0xFFFFU;
     unsigned int anselACLR = 0x8000U;
-    unsigned int anselBCLR = 0x2800U;
+    unsigned int anselBCLR = 0x280U;
     unsigned int anselCCLR = 0x1400U;
-    unsigned int anselECLR = 0x0000U;
-    //  No interrput for software counters.
+    unsigned int anselECLR = 0x0U;
+    //  No interrupt for software counters.
     GPIO_PinIntDisable(GPIO_PIN_RB0);
     GPIO_PinIntDisable(GPIO_PIN_RB1);
     GPIO_PinIntDisable(GPIO_PIN_RB2);
@@ -83,6 +83,15 @@ void initEncoder(){
     ANSELCCLR = anselCCLR;
     ANSELECLR = anselECLR;
     printf("Digital: A=%x, B=%x, C=%x, E=%x\r\n", anselACLR, anselBCLR, anselCCLR, anselECLR);
+
+    /*
+    //  RB3
+    ANSELBSET = 0x08;
+    CNPUBSET = 0x08; // Pull-Up Enable
+    TRISBCLR = 0x08;    //  output
+    LATBSET = 0x08; //  HI
+    */
+
 #endif
 }
 
