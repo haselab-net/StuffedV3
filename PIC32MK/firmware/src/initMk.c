@@ -59,6 +59,8 @@ void initMk(){
     TMR2_CallbackRegister(tmr2CallBack, NULL);
     TMR2_Start();
 
+    //	stop TMR1 interrupt
+    IEC0bits.T1IE = false;
     TMR1_Start();
     
     MCPWM_Start();

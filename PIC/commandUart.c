@@ -50,13 +50,30 @@ void __ISR(_TIMER_1_VECTOR, ipl3SRS) TIMER_1_Handler (void)
 		PIC_LOGI("RC%d len%d ", retPacket.commandId, retLen);
         returnCommand[retPacket.commandId]();
 		timeRetCmd = TMR1;
+
+//  NEW CODE: start to send ASAP.
+        //	stop timer1 interrupt
+		IEC0bits.T1IE = false;
+#ifdef PC32MM
+#elif defined PIC32MK_MCJ
+        ODCGCLR = 0x200; // Open Drain Disable for TX
+#else
+#error
+#endif
+		UCSTAbits.UTXEN = 1;	//	enable TX
+		UCSTAbits.UTXISEL = 2;	//	10 = Interrupt is generated and asserted while the transmit buffer is empty
+		IEC_UCTXIE = 1;         //	enable UART's interrupt
+		timeTx = TMR1;
+		PIC_LOGI("RCE %d %d ", timeRetCmd, timeTx);        
+        
+/*  OLD CODE: Wait to send response until one whole period of the timer 2.
 	}else{
 		//	stop timer interrupt
 		IEC0bits.T1IE = false;
 		//	start TX
 #ifdef PC32MM
 #elif defined PIC32MK_MCJ
-        ODCGCLR = 0x200; /* Open Drain Disable for TX*/
+        ODCGCLR = 0x200; // Open Drain Disable for TX
 #else
 #error
 #endif
@@ -64,7 +81,10 @@ void __ISR(_TIMER_1_VECTOR, ipl3SRS) TIMER_1_Handler (void)
 		UCSTAbits.UTXISEL = 2;	//	10 = Interrupt is generated and asserted while the transmit buffer is empty
 		IEC_UCTXIE = 1;         //	enable UART's interrupt
 		timeTx = TMR1 + PR1;
-	}
+*/
+	}else{
+		PIC_LOGE("RC Never called.");        
+    }
     IFS0bits.T1IF = false;
 }
 
