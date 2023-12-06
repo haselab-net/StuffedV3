@@ -237,9 +237,10 @@ void showPwm(){
 #endif
 }
 
+#ifdef PIC32MM
 static unsigned short useRx = 0;
 void enableRx(){
-    useRx = 0xFFFF;
+    useRx = 0xFFFF;#
 #ifdef BOARD3_SEPARATE
     printf("RX enabled. Baud rate will be changed into 1200 bps.\r\n");
 #else
@@ -275,6 +276,8 @@ void printGp(){
     printf("spiPwmGpBackup = %x.\r\n", (int)spiPwmGpBackup);
 #endif
 }
+#endif
+
 void nvmWriteTest(){
     NvData data;
     NVMRead(&data);
@@ -367,10 +370,14 @@ struct MonitorFunc monitors[] = {
 	{'d', "Pwm down", pwmDown, false},
     {'p', "pwm mode", changePwmMode, false},
 	{'w', "Pwm status", showPwm, true},
+#ifdef PIC32MM
 	{'g', "Print GP", printGp, true},
+#endif
 	{'N', "Write NVM", nvmWriteTest, false},
 	{'n', "Read NVM", nvmReadTest, false},
+#ifdef PIC32MM
 	{'E', "End monitor", disableRx, false},
+#endif
 };
 void showHelp(){
 	int i;
@@ -384,7 +391,7 @@ void monitor(){
 	static int ch = 0;
 	bool bHit = false;
 	int i;
-#if  !defined BOARD1_MOTORDRIVER && !defined USE_MONITOR_RX
+#if  defined PIC32MM && (!defined BOARD1_MOTORDRIVER && !defined USE_MONITOR_RX)
     //  Enable U1RX when break signal is sent.
     if (NCURRENT == 4 && useRx != 0xFFFF){
         if (useRx < 10){
@@ -397,7 +404,7 @@ void monitor(){
             enableRx();
         }
     }
-#endif    
+#endif
 	if (UMSTAbits.URXDA){
 		ch = UMRXREG;
 	}

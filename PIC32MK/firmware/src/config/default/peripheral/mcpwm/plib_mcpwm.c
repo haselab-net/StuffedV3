@@ -99,7 +99,7 @@ void MCPWM_Initialize (void)
     /*  CLSRC  = 0  */
     IOCON1 = 0x3c400;
 
-    PDC1 = 1000;
+    PDC1 = 0;
     SDC1 = 500;
     PHASE1 = 0;
 
@@ -156,7 +156,7 @@ void MCPWM_Initialize (void)
     /*  CLSRC  = 0  */
     IOCON2 = 0x3c400;
 
-    PDC2 = 1000;
+    PDC2 = 0;
     SDC2 = 500;
     PHASE2 = 0;
 
@@ -213,7 +213,7 @@ void MCPWM_Initialize (void)
     /*  CLSRC  = 0  */
     IOCON3 = 0x3c400;
 
-    PDC3 = 1000;
+    PDC3 = 0;
     SDC3 = 500;
     PHASE3 = 0;
 
@@ -270,7 +270,7 @@ void MCPWM_Initialize (void)
     /*  CLSRC  = 0  */
     IOCON4 = 0x3c400;
 
-    PDC4 = 1000;
+    PDC4 = 0;
     SDC4 = 500;
     PHASE4 = 0;
 
@@ -327,7 +327,7 @@ void MCPWM_Initialize (void)
     /*  CLSRC  = 0  */
     IOCON5 = 0x3c400;
 
-    PDC5 = 1000;
+    PDC5 = 0;
     SDC5 = 500;
     PHASE5 = 0;
 
@@ -384,7 +384,7 @@ void MCPWM_Initialize (void)
     /*  CLSRC  = 0  */
     IOCON6 = 0x3c400;
 
-    PDC6 = 1000;
+    PDC6 = 0;
     SDC6 = 500;
     PHASE6 = 0;
 
@@ -441,7 +441,7 @@ void MCPWM_Initialize (void)
     /*  CLSRC  = 0  */
     IOCON7 = 0x3c400;
 
-    PDC7 = 1000;
+    PDC7 = 0;
     SDC7 = 500;
     PHASE7 = 0;
 
@@ -498,7 +498,7 @@ void MCPWM_Initialize (void)
     /*  CLSRC  = 0  */
     IOCON8 = 0x3c400;
 
-    PDC8 = 1000;
+    PDC8 = 0;
     SDC8 = 500;
     PHASE8 = 0;
 
@@ -555,7 +555,7 @@ void MCPWM_Initialize (void)
     /*  CLSRC  = 0  */
     IOCON9 = 0x3c400;
 
-    PDC9 = 1000;
+    PDC9 = 0;
     SDC9 = 500;
     PHASE9 = 0;
 

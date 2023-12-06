@@ -495,25 +495,25 @@ void setPHLevel(int ch, int val){
             !val ? GPIO_RB4_Set() : GPIO_RB4_Clear();     //  APH0
             break;    
         case 1:
-            !val ? GPIO_RA15_Set() : GPIO_RA15_Clear();   //  BPH0
+            val ? GPIO_RA15_Set() : GPIO_RA15_Clear();   //  BPH0
             break;    
         case 2:
             !val ? GPIO_RD8_Set() : GPIO_RD8_Clear();
             break;    
         case 3:
-            !val ? GPIO_RC12_Set() : GPIO_RC12_Clear();
+            val ? GPIO_RC12_Set() : GPIO_RC12_Clear();
             break;
         case 4:
             !val ? GPIO_RC10_Set() : GPIO_RC10_Clear();
             break;    
         case 5:
-            !val ? GPIO_RB7_Set() : GPIO_RB7_Clear();
+            val ? GPIO_RB7_Set() : GPIO_RB7_Clear();
             break;    
         case 6:
             !val ? GPIO_RF0_Set() : GPIO_RF0_Clear();
             break;    
         case 7:
-            !val ? GPIO_RD6_Set() : GPIO_RD6_Clear();
+            val ? GPIO_RD6_Set() : GPIO_RD6_Clear();
             break;    
     }
 }
@@ -560,15 +560,12 @@ void setPwm2(int ch, SDEC ratio, bool currentControl){
         reverse = 1;
     }
     int pwm = (((int)ratio) * pwmResolution) >> SDEC_BITS;
-    if (pwm){
-        setPwmPin(ch, currentControl);
-    }else{
-        setPwmPin(ch, false);
-    }
+    if (pwm > pwmResolution) pwm = pwmResolution;
+    setPwmPin(ch, currentControl);
     setPHLevel(ch, reverse);
-    MCPWM_ChannelPrimaryDutySet(ch, pwm ? pwm-1 : pwm);
+    MCPWM_ChannelPrimaryDutySet(ch, pwm);
     if (ch==7){
-        MCPWM_ChannelPrimaryDutySet(8, pwm ? pwm-1 : pwm);
+        MCPWM_ChannelPrimaryDutySet(8, pwm);
     }
 }
 void setPwm(int ch, SDEC ratio){
@@ -636,7 +633,9 @@ void onControlTimer(){
 	controlLoop();
 	LATCbits.LATC2 = 0;	//	LED OFF
 #elif PIC32MK_MCJ
+    GPIO_RB9_Set();     //  LED ON
 	controlLoop();
+    GPIO_RB9_Clear();     //  LED OFF
 #else
 #error
 #endif

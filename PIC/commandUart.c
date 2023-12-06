@@ -52,7 +52,7 @@ void __ISR(_TIMER_1_VECTOR, ipl3SRS) TIMER_1_Handler (void)
 		timeRetCmd = TMR1;
 	}else{
 		//	stop timer interrupt
-		IEC0bits.T1IE = 0;
+		IEC0bits.T1IE = false;
 		//	start TX
 #ifdef PC32MM
 #elif defined PIC32MK_MCJ
@@ -62,10 +62,10 @@ void __ISR(_TIMER_1_VECTOR, ipl3SRS) TIMER_1_Handler (void)
 #endif
 		UCSTAbits.UTXEN = 1;	//	enable TX
 		UCSTAbits.UTXISEL = 2;	//	10 = Interrupt is generated and asserted while the transmit buffer is empty
-		IEC_UCTXIE = 1;	//	enable interrupt
+		IEC_UCTXIE = 1;         //	enable UART's interrupt
 		timeTx = TMR1 + PR1;
 	}
-	IFS0CLR= 1 << _IFS0_T1IF_POSITION;
+    IFS0bits.T1IF = false;
 }
 
 //  Handler for TX interrupt
@@ -121,8 +121,7 @@ void __attribute__ ((vector(_UARTC_RX_VECTOR), interrupt(IPL4AUTO))) _UARTC_RX_H
 					IEC0bits.T1IE = true;
 					TMR1 = PR1-1;	//	call timer as soon as this task is ended.
 				}
-            }
-			if (head.commandId == CI_SET_CMDLEN){
+            }else if (head.commandId == CI_SET_CMDLEN){
 				bRead = true;
 				command.header = head.header;
                 //printf("SCL%d len=%d\n", head.boardId, cmdLen);
