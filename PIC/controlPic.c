@@ -561,7 +561,7 @@ void setPwm2(int ch, SDEC ratio, bool currentControl){
     }
     int pwm = (((int)ratio) * pwmResolution) >> SDEC_BITS;
     if (pwm > pwmResolution) pwm = pwmResolution;
-    setPwmPin(ch, currentControl);
+    setPwmPin(ch, pwm ? currentControl : 0);
     setPHLevel(ch, reverse);
     MCPWM_ChannelPrimaryDutySet(ch, pwm);
     if (ch==7){

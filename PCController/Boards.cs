@@ -421,7 +421,10 @@ namespace PCController
             byte[] tempInit = { 0, 0, 0, 0, 0, 0, 0, 0, 0};
             Board boardTemp = new Board(tempInit, null);
             //  clear serial receive buffer
-            while (Serial.BytesToRead > 0) Serial.DiscardInBuffer();
+            while (Serial.BytesToRead > 0)
+            {
+                Serial.DiscardInBuffer();
+            }
             //  compute length
             int wait = boardTemp.GetWaitLen(CommandId.CI_BOARD_INFO);
             int bufLen = wait + boardTemp.CommandLen(CommandId.CI_BOARD_INFO);
@@ -441,6 +444,12 @@ namespace PCController
                 if (Serial.BytesToRead >= retLen)
                 {
                     Serial.Read(recvBuf, 0, retLen);
+                    string packet = "R:";
+                    for(int i=0; i<retLen; ++i)
+                    {
+                        packet += $" {recvBuf[i]:X2}";
+                    }
+                    System.Diagnostics.Debug.WriteLine(packet);
                     Board board = new Board(recvBuf, this);
                     nMotor += board.nMotor;
                     nCurrent += board.nCurrent;
