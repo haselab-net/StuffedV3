@@ -126,15 +126,18 @@ namespace PCController
             short[] release = new short[boards.NMotor];
             short[] torqueMin = new short[boards.NMotor];
             short[] torqueMax = new short[boards.NMotor];
+            bool[] encoder = new bool[boards.NMotor];
             boards.RecvParamPd(ref k, ref b);
             boards.RecvParamCurrent(ref a);
             boards.RecvParamTorque(ref torqueMin, ref torqueMax);
             boards.RecvParamHeat(ref limit, ref release);
+            boards.RecvParamEncoder(ref encoder);
             for (int i = 0; i < boards.NMotor; ++i)
             {
                 motors[i].pd.K = k[i];
                 motors[i].pd.B = b[i];
                 motors[i].pd.A = a[i];
+                motors[i].pd.Enc = encoder[i];
                 if (limit[i] > 32000) limit[i] = 32000;
                 if (limit[i] < 0) limit[i] = 0;
                 motors[i].heat.HeatLimit = limit[i] * release[i];
@@ -149,7 +152,7 @@ namespace PCController
             if (uartBin.IsOpen) uartBin.Close();
             if (cmbPortBin.Text.Length == 0) return;
             uartBin.PortName = cmbPortBin.Text;
-            uartBin.BaudRate = 2000000;
+            uartBin.BaudRate = 2000*1000;   //  baudrate:3M
             try
             {
                 uartBin.Open();
@@ -174,6 +177,7 @@ namespace PCController
                     nb.Nodes.Add("nMotor " + b.nMotor);
                     nb.Nodes.Add("nCurrent " + b.nCurrent);
                     nb.Nodes.Add("nForce " + b.nForce);
+                    nb.Nodes.Add("PWM res " + b.pwmResolution);
                 }
                 times = Enumerable.Repeat(0, boards.NMotor).ToArray();
                 ResetPanels();
@@ -191,10 +195,6 @@ namespace PCController
             for (int i = 0; i < currentControls.Count && i < boards.NCurrent; ++i)
             {
                 currentControls[i].lbCurrent.Text = "" + boards.GetCurrent(i);
-            }
-            for(int i=0; i < boards.NForce; ++i)
-            {
-                txMsg.Text += " F"+i+"="+boards.GetForce(i);
             }
         }
 
@@ -233,37 +233,58 @@ namespace PCController
 
         private void trBoards_AfterLabelEdit(object sender, NodeLabelEditEventArgs e)
         {
+            e.CancelEdit = true;
             if (e.Label != null)
             {
-                int id;
-                if (!int.TryParse(e.Label, out id)) {
-                    if (!int.TryParse(e.Label.Substring(2), out id))
-                    {
-                        e.CancelEdit = true;
+                int newNumber;
+                if (!int.TryParse(e.Label, out newNumber)) {
+                    if (!int.TryParse(e.Label.Split(' ').Last(), out newNumber)) return;
+                }
+                TreeNodeCollection nodes = e.Node.Parent.Nodes;
+                int idOrg = -1;
+                foreach(TreeNode node in nodes)
+                {
+                    if (node.Text.Contains("ID")) {
+                        idOrg = int.Parse(node.Text.Split(' ').Last());
                     }
                 }
-                if (!e.CancelEdit)
+                if (idOrg == -1) return;
+                if (e.Node.Text.Contains("ID"))
                 {
                     foreach (Board b in boards)
                     {
-                        if (b.boardId == id)
-                        {
-                            e.CancelEdit = true;
-                        }
+                        if (b.boardId == newNumber) return; //  The same id is already used.
                     }
-                }
-                if (!e.CancelEdit) {
-                    int oid;
-                    int.TryParse(e.Node.Text.Substring(2), out oid);
+                    e.Node.Text = "ID " + newNumber;
                     byte[] ids = new byte[boards.Count];
-                    for (int i = 0; i < boards.Count; ++i) {
+                    int boardPos = -1;
+                    for (int i = 0; i < boards.Count; ++i)
+                    {
                         ids[i] = (byte)boards[i].boardId;
-                        if (ids[i] == oid)
+                        if (ids[i] == idOrg)
                         {
-                            ids[i] = (byte)id;
+                            ids[i] = (byte)newNumber;
+                            boardPos = i;
                         }
                     }
                     boards.SendParamBoardId(ids);
+                    boards[boardPos].boardId = (byte) newNumber;
+                }
+                if (e.Node.Text.Contains("PWM"))
+                {
+                    e.Node.Text = "PWM res " + newNumber;
+                    byte[] ids = new byte[boards.Count];
+                    ushort[] pwms = new ushort[boards.Count];
+                    for (int i = 0; i < boards.Count; ++i)
+                    {
+                        pwms[i] = boards[i].pwmResolution;
+                        if (boards[i].boardId == idOrg)
+                        {
+                            pwms[i] = (ushort)newNumber;
+                            boards[i].pwmResolution = (ushort)newNumber;
+                        }
+                    }
+                    boards.SendParamPwmResolution(pwms);
                 }
             }
         }
@@ -272,7 +293,7 @@ namespace PCController
         {
             if (e.Node != null)
             {
-                if (!e.Node.Text.Contains("ID"))
+                if (!e.Node.Text.Contains("ID") && !e.Node.Text.Contains("PWM"))
                 {
                     e.CancelEdit = true;
                 }
@@ -292,14 +313,17 @@ namespace PCController
             short[] k = new short[boards.NMotor];
             short[] b = new short[boards.NMotor];
             short[] a = new short[boards.NMotor];
+            bool[] encoder = new bool[boards.NMotor];
             for (int i = 0; i < motors.Count; ++i)
             {
                 k[i] = (short)motors[i].pd.K;
                 b[i] = (short)motors[i].pd.B;
                 a[i] = (short)motors[i].pd.A;
+                encoder[i] = motors[i].pd.Enc;
             }
             boards.SendParamPd(k, b);
             boards.SendParamCurrent(a);
+            boards.SendParamEncoder(encoder);
         }
         private void btRecvPd_Click(object sender, EventArgs e)
         {
@@ -307,13 +331,16 @@ namespace PCController
             short[] k = new short[boards.NMotor];
             short[] b = new short[boards.NMotor];
             short[] a = new short[boards.NMotor];
+            bool[] encoder = new bool[boards.NMotor];
             boards.RecvParamPd(ref k, ref b);
             boards.RecvParamCurrent(ref a);
+            boards.RecvParamEncoder(ref encoder);
             for (int i = 0; i < motors.Count; ++i)
             {
                 motors[i].pd.K = k[i];
                 motors[i].pd.B = b[i];
                 motors[i].pd.A = a[i];
+                motors[i].pd.Enc = encoder[i];
             }
         }
         private void btLoadNuibot_Click(object sender, EventArgs e)

@@ -3,8 +3,8 @@
 #include "control.h"
 #include "boardType.h"
 #include "nvm.h"
-#include "uart.h"
 #include <string.h>
+#include "uart.h"
 #ifdef WROOM
 #include "../WROOM/components/SoftRobot/commandWROOM.h"
 #endif
@@ -21,6 +21,7 @@ extern SDEC getTouch(int i);
 #else
 static inline SDEC getTouch(int i){
     PIC_LOGE("getTouch called");
+    return (SDEC)-1;
 }
 #endif
 
@@ -115,6 +116,7 @@ void ecSetParam(){
         NvData nvData;
         NVMRead(&nvData);
         nvData.boardId = command.param.boardId;
+        printf("BoardID:%d\r\n", nvData.boardId);
         NVMWrite(&nvData);
         boardId = PNVDATA->boardId;
         if (boardId > 7) boardId = 7;
@@ -130,6 +132,15 @@ void ecSetParam(){
         NVMWrite(&nvData);
 #endif
         } break;
+    case PT_PWM_RESOLUTION:{
+#ifdef PIC
+        NvData nvData;
+        NVMRead(&nvData);
+        nvData.pwmResolution = command.param.pwmResolution;
+        setPwmResolution(nvData.pwmResolution);
+        NVMWrite(&nvData);
+#endif
+        } break;
     case PT_MOTOR_HEAT:{
         for(i=0; i<NMOTOR; ++i){
             motorHeatRelease[i] = command.param.heat.release[i];
@@ -137,6 +148,11 @@ void ecSetParam(){
         }
         bSaveParam = true;
         } break;
+    case PT_ENCODER:
+        encoderFlags = command.param.encoder;
+        initEncoder();
+        bSaveParam = true;
+        break;
     default:
         PIC_LOGE("ecSetParam got wrong type %d", (int)command.param.type);
         break;
@@ -171,6 +187,7 @@ void rcBoardInfo(){
 	retPacket.boardInfo.nCurrent = NCURRENT;
 	retPacket.boardInfo.nForce = NFORCE;
 	retPacket.boardInfo.nTouch = NTOUCH;
+    retPacket.boardInfo.pwmResolution = PNVDATA->pwmResolution;
 }
 void rcAll(){
     int i;
@@ -308,6 +325,9 @@ void rcGetParam(){
             retPacket.param.magnet.cos[i] = mcos[i];
             retPacket.param.magnet.sin[i] = msin[i];
         }
+        break;
+    case PT_ENCODER:
+        retPacket.param.encoder = encoderFlags;
         break;
     default:
         PIC_LOGE("rcGetParam got wrong type %d, set = %d", (int)getParamType, (int)command.param.type);

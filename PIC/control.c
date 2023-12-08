@@ -14,6 +14,7 @@ struct TorqueLimit torqueLimit;
 struct Targets targets;
 LDEC lastTorques[NMOTOR];	//	last intended torque to limit sudden torque change.
 SDEC lastRatio[NMOTOR];		//	last applied torque to limit heat
+long encoderFlags;
 
 
 enum ControlMode controlMode, nextControlMode;
@@ -21,6 +22,7 @@ enum ControlMode controlMode, nextControlMode;
 SDEC mcos[NAXIS], msin[NAXIS];
 SDEC forceOffset[NFORCE];
 SDEC currentSense[NMOTOR];
+int qeCount[NAXIS] = {0,0,0,0,0,0,0,0,0,0};
 
 //	motor heat limit
 #define USE_HEAT_LIMIT
@@ -43,6 +45,7 @@ int underflowCount;
 #ifdef PIC
 #define DISABLE_INTERRUPT 	asm volatile("di"); // Disable all interrupts  
 #define ENABLE_INTERRUPT	asm volatile("ei"); // Enable all interrupt	
+void controlInitPic();
 #endif
 
 
@@ -81,32 +84,49 @@ inline unsigned char targetsReadAvail(){
 
 
 void updateMotorState(){
-    static u_short count;
+    static unsigned short count;
 	int i;
 	readADC();
+    readQEI();
+    int iBit = 1;
     for(i=0; i<NMOTOR; ++i){
-        LDEC sense, prev, cur, diff;
-		if (mcos[i] || msin[i]){
-			sense = S2LDEC(atan2SDEC(msin[i], mcos[i]));
-			cur = prev = motorState.pos[i];
-			diff = sense - GetDecimalL(prev);
-			cur += diff;
-			if (diff < -LDEC_ONE/2){
-				cur += LDEC_ONE;
-			}else if (diff > LDEC_ONE/2){
-				cur -= LDEC_ONE;
-			}
+        bool encoder = encoderFlags & iBit;
+        if (encoder){
+            LDEC cur = S2LDEC(qeCount[i]);
+            motorState.vel[i] = cur - motorState.pos[i];
+            motorState.pos[i] = cur;
+/*            
+            static int readQeiCount = 0;
+            if (i==2){
+                readQeiCount ++;
+                if (readQeiCount > 1000){
+                    readQeiCount = 0;
+                    printf("QE pos %d: %d\n", i, (int)motorState.pos[i]);
+                }
+            }   //  */
+        }else if (mcos[i] || msin[i]){
+            LDEC sense, prev, cur, diff;
+            sense = S2LDEC(atan2SDEC(msin[i], mcos[i]));
+            cur = prev = motorState.pos[i];
+            diff = sense - GetDecimalL(prev);
+            cur += diff;
+            if (diff < -LDEC_ONE/2){
+                cur += LDEC_ONE;
+            }else if (diff > LDEC_ONE/2){
+                cur -= LDEC_ONE;
+            }
 #if 0	//	move motor pos for debug. (by hasevr) 
-			cur = prev + ((i%2)*2 - 1) * (SDEC)(SDEC_ONE*0.01);
+            cur = prev + ((i%2)*2 - 1) * (SDEC)(SDEC_ONE*0.01);
 #endif
-			motorState.pos[i] = cur;
-			motorState.vel[i] = motorState.pos[i] - prev;
+            motorState.pos[i] = cur;
+            motorState.vel[i] = motorState.pos[i] - prev;
 		}
 #if 0
 		if (i==0){
 			logPrintf("p %f,  s %f, (%d,%d) %d\r\n", LDEC2DBL(motorState.pos[i]), LDEC2DBL(sense), msin[i], mcos[i], diff);
 		}
 #endif
+        iBit <<= 1;
     }
 #ifdef USE_HEAT_LIMIT	//	motor heat
 	count ++;
@@ -198,9 +218,15 @@ inline int truncate(int min, int val, int max){
     return val;
 }
 void currentControl(){
+#ifdef BOARD5
+    int i;
+    for(i=0; i<NMOTOR; ++i){
+        setPwm2(i, currentTarget[i], true);
+    }
+#else
     const SDEC DIFF_ZERO_LIMIT = SDEC_ONE / 16;
 	int i;
-    SDEC diff;
+    SDEC diff=0;
     int sign;
 	for(i=0; i<NCURRENT && i<NMOTOR; ++i){
         if (currentTarget[i] > 0){
@@ -240,6 +266,7 @@ void currentControl(){
         targetPwm[i] = currentTarget[i];
 		setPwmWithLimit(i, targetPwm[i]);        
     }
+#endif
 }
 
 //----------------------------------------------------------------------------

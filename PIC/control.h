@@ -9,7 +9,11 @@
 #endif
 
 #ifdef __XC32
+#ifdef PIC32MM
 #include "mcc_generated_files/mcc.h"
+#else
+#include "definitions.h"
+#endif
 #endif
 #include <assert.h>
 
@@ -23,6 +27,7 @@ extern SDEC motorHeatRelease[NMOTOR];		//	heat release from motor / loop (10Hz)
 extern long motorHeatLimit[NMOTOR];			//	limit for heat amount of the motor
 extern long motorHeat[NMOTOR];				//	current heat amount
 extern SDEC lastRatio[NMOTOR];				//	pwm ratio actually applied to motor
+extern long encoderFlags;                   //  flags whether use 1:encoder or 0:magnetic sensor
 
 ///	PD control and current control
 #define PDPARAM_K   SDEC_ONE
@@ -48,7 +53,11 @@ void loadMotorParam();
 
 //	device depended functions
 void readADC();								//	read adc and set it to mcos and msin
+void readQEI();								//	read QEI and set it to qeCount
 void setPwm(int ch, SDEC torque);			//	set pwm of motor
+#ifdef BOARD5
+void setPwm2(int ch, SDEC torque, bool currrentContorl);			//	set pwm of motor
+#endif
 void setPwmWithLimit(int ch, SDEC torque);	//	limit the torque to torqueLimit then call setPwm 
 
 
@@ -65,6 +74,7 @@ extern struct MotorState motorTarget, motorState;
 extern SDEC currentTarget[NMOTOR];
 extern SDEC forceControlJK[NFORCE][NMOTOR];
 #define NAXIS	(NMOTOR+NFORCE/2)	//	NAXIS=NMOTOR+NFORCE/2
+extern int qeCount[NAXIS];
 extern SDEC mcos[NAXIS], msin[NAXIS];
 extern SDEC mcosRaw[NAXIS], msinRaw[NAXIS];
 
@@ -106,12 +116,13 @@ unsigned char targetsReadAvail();
 int targetsCountMin();
 int targetsCountMax();
 
+void initEncoder();
 void controlInit();
 void controlSetMode(enum ControlMode m);
 void controlLoop();
 void updateMotorState();
 void setPwmWithLimit(int ch, SDEC ratio);
-
+void setPwmResolution(unsigned short resolution);
 
 extern SDEC forceOffset[NFORCE];
 
@@ -121,9 +132,8 @@ static inline SDEC getForceRaw(int ch){
 	return 0;
 }
 static inline SDEC getForce(int ch){
-	if (ch == 0) return mcosRaw[3] - forceOffset[ch];
-	if (ch == 1) return msinRaw[3] - forceOffset[ch];
-	return 0;
+    if (ch%2 == 0) return mcosRaw[NMOTOR + ch/2] - forceOffset[ch];
+    else return msinRaw[NMOTOR + ch/2] - forceOffset[ch];
 }
 
 // #ifdef PIC

@@ -1,0 +1,40 @@
+PWMH1-4	VrefA	pwm out	2 62 60 64
+PWML1-4	VrefB	pwm out	3 63 61 1
+
+PWML5-8	PH=direction	55 51 5 59	= GPIO_RC9, RC7, RG7, RF1
+
+PWMH5-8	EN=H			52 50 4 58
+
+
+RD8		4BEN=H			42
+RC15	4BPH=direction	40
+AN9		AEN=H			12
+AN2		5APH=direction	15
+AN3		5BEN=H			16
+AN4		5BPH=direction	17
+RC13	NSLEEP			47	pullup
+
+NFAULT	RB4	32 -> 48
+LED 48 -> 32
+
+#	IC2	PWM6 PWM5
+#	IC3	PWM8 PWM9
+#	IC4	PWM7 RD8 DC15
+#	IC5	AN2 AN9 AN3 An4
+
+Angle	AN41-24, AN47-46, AN48-49, AN6-5, AN7-8, AN13-11, AN14-12, AN15-26
+Force	AN16-10, AN27-25
+
+=	5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 16,  24, 25, 26, 27,  41, 46, 47, 48, 49
+
+
+* problem
+47 48 should be output
+  need out but only for in
+
+
+
+
+Current assign
+34:	U1RX (PIC's TX) is usable
+6: U1TX (PIC's RX) is usable

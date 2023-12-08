@@ -232,6 +232,7 @@ namespace PCController
         public NumericUpDown udK;
         public NumericUpDown udB;
         public NumericUpDown udA;
+        public CheckBox ckEnc;
         [DataMember]
         public int K
         {
@@ -250,6 +251,12 @@ namespace PCController
             set { udA.Value = value; }
             get { return (int)udA.Value; }
         }
+        [DataMember]
+        public bool Enc
+        {
+            set { ckEnc.Checked = value; }
+            get { return ckEnc.Checked; }
+        }
         [OnDeserializing]
         private void OnDeserializing(StreamingContext context) { Init(); }
         public MotorPd() { Init();  }
@@ -258,18 +265,21 @@ namespace PCController
             K = 1024;
             B = 1024 * 1;
             A = 1024 / 2;
+            Enc = false;
         }
         public void SetSpidarDefault()
         {
             K = 100;
             B = 50;
             A = 1024 * 3 / 2;
+            Enc = false;
         }
         private void Init(){
             int width = 100;
             udK = new NumericUpDown();
             udB = new NumericUpDown();
             udA = new NumericUpDown();
+            ckEnc = new CheckBox();
             udK.Width = width;
             udB.Width = width;
             udA.Width = width;
@@ -304,14 +314,19 @@ namespace PCController
             lA.Top = udA.Top;
             udA.Left = lA.Width;
 
+            ckEnc.Top = udA.Top + udA.Height;
+            ckEnc.Text = "Use Encoder";
+            ckEnc.Left = udA.Left;
+
             panel.Controls.Add(udA);
             panel.Controls.Add(lA);
             panel.Controls.Add(udB);
             panel.Controls.Add(lB);
             panel.Controls.Add(udK);
             panel.Controls.Add(lK);
+            panel.Controls.Add(ckEnc);
 
-            panel.Height = udK.Height + udB.Height + udA.Height;
+            panel.Height = udK.Height + udB.Height + udA.Height + ckEnc.Height;
             panel.Width = udK.Width + lA.Width;
         }
     }

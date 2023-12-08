@@ -86,6 +86,13 @@ namespace PCController
         short[] current;
         short[] force;
         short[] touch;
+        public static void WriteLong(byte[] buf, ref int cur, long v)
+        {
+            buf[cur++] = (byte)(v & 0xFF);
+            buf[cur++] = (byte)((v >> 8) & 0xFF);
+            buf[cur++] = (byte)((v >> 16) & 0xFF);
+            buf[cur++] = (byte)((v >> 24) & 0xFF);
+        }
         public static void WriteUShort(byte[] buf, ref int cur, ushort v)
         {
             buf[cur++] = (byte)(v & 0xFF);
@@ -100,6 +107,16 @@ namespace PCController
         {
             buf[cur++] = v;
         }
+        public static long ReadLong(byte[] buf, ref int cur)
+        {
+            long v;
+            v = buf[cur++];
+            v |= (long)(buf[cur++]) << 8;
+            v |= (long)(buf[cur++]) << 16;
+            v |= (long)(buf[cur++]) << 24;
+            return v;
+        }
+        public static ushort ReadUShort(byte[] buf, ref int cur) { return (ushort) ReadShort(buf, ref cur); }
         public static short ReadShort(byte[] buf, ref int cur)
         {
             short v;
@@ -240,8 +257,8 @@ namespace PCController
                 WriteShort(sendBuf, ref cur, (short)ResetSensorFlags.RSF_MOTOR);
                 Serial.Write(sendBuf, 0, sendBuf.Length);
             }
-        }        public void SendSense()
-        {
+        }
+        public void SendSense() {
             foreach (Board board in this)
             {
                 byte[] sendBuf = null, recvBuf = null;
@@ -365,13 +382,49 @@ namespace PCController
                 Thread.Sleep(100);
             }
         }
+        public void SendParamEncoder(bool[] enc)
+        {
+            int ei = 0;
+            foreach (Board board in this)
+            {
+                byte[] sendBuf = null, recvBuf = null;
+                PrepareBuffers(ref sendBuf, ref recvBuf, CommandId.CI_SET_PARAM, board);
+                sendBuf[1] = (byte)SetParamType.PT_ENCODER;
+                long encBoard = 0;
+                for (int i = 0; i < board.nMotor; ++i)
+                {
+                    encBoard |= (enc[ei++] ? 1L : 0L) << i;
+                }
+                int cur = 2;
+                WriteLong(sendBuf, ref cur, encBoard);
+                Serial.Write(sendBuf, 0, sendBuf.Length);
+                Thread.Sleep(100);
+            }
+        }
+        public void SendParamPwmResolution(ushort[] pwmRes)
+        {
+            int i = 0;
+            foreach (Board board in this)
+            {
+                byte[] sendBuf = null, recvBuf = null;
+                PrepareBuffers(ref sendBuf, ref recvBuf, CommandId.CI_SET_PARAM, board);
+                sendBuf[1] = (byte)SetParamType.PT_PWM_RESOLUTION;
+                int cur = 2;
+                WriteUShort(sendBuf, ref cur, pwmRes[i++]);
+                Serial.Write(sendBuf, 0, sendBuf.Length);
+                Thread.Sleep(100);
+            }
+        }
         public void EnumerateBoard()
         {
             if (serial == null) return;
-            byte[] tempInit = { 0, 0, 0, 0, 0, 0, 0 };
+            byte[] tempInit = { 0, 0, 0, 0, 0, 0, 0, 0, 0};
             Board boardTemp = new Board(tempInit, null);
             //  clear serial receive buffer
-            while (Serial.BytesToRead > 0) Serial.DiscardInBuffer();
+            while (Serial.BytesToRead > 0)
+            {
+                Serial.DiscardInBuffer();
+            }
             //  compute length
             int wait = boardTemp.GetWaitLen(CommandId.CI_BOARD_INFO);
             int bufLen = wait + boardTemp.CommandLen(CommandId.CI_BOARD_INFO);
@@ -384,19 +437,25 @@ namespace PCController
             {
                 sendBuf[0] = Board.MakeHeader(CommandId.CI_BOARD_INFO, bi);
                 Serial.Write(sendBuf, 0, bufLen);
-                for (int t = 0; t < 10; ++t)
+            }
+            Thread.Sleep(20);
+            for (int t = 0; t < 10; ++t)    //  Up to 7 boards can be connected and responsed.
+            {
+                if (Serial.BytesToRead >= retLen)
                 {
-                    if (Serial.BytesToRead == retLen)
+                    Serial.Read(recvBuf, 0, retLen);
+                    string packet = "R:";
+                    for(int i=0; i<retLen; ++i)
                     {
-                        Serial.Read(recvBuf, 0, retLen);
-                        Board board = new Board(recvBuf, this);
-                        nMotor += board.nMotor;
-                        nCurrent += board.nCurrent;
-                        nForce += board.nForce;
-                        nTouch += board.nTouch;
-                        Add(board);
+                        packet += $" {recvBuf[i]:X2}";
                     }
-                    Thread.Sleep(2);
+                    System.Diagnostics.Debug.WriteLine(packet);
+                    Board board = new Board(recvBuf, this);
+                    nMotor += board.nMotor;
+                    nCurrent += board.nCurrent;
+                    nForce += board.nForce;
+                    nTouch += board.nTouch;
+                    Add(board);
                 }
             }
             //  set command length of all boards.
@@ -533,6 +592,31 @@ namespace PCController
                     m[mi + i*2+1] = ReadShort(recvBuf, ref cur);
                 }
                 mi += board.nMotor * 2;
+            }
+            SendSense();
+            for (int i=0; i<NForce; ++i)
+            {
+                m[NMotor*2 + i] = force[i];
+            }
+        }
+        public void RecvParamEncoder(ref bool[] enc)
+        {
+            int ei = 0;
+            foreach (Board board in this)
+            {
+                byte[] sendBuf = null, recvBuf = null;
+                PrepareBuffers(ref sendBuf, ref recvBuf, CommandId.CI_GET_PARAM, board);
+                sendBuf[1] = (byte)SetParamType.PT_ENCODER;
+                Serial.Write(sendBuf, 0, sendBuf.Length);
+                ReadSerial(ref recvBuf);
+                Serial.Write(sendBuf, 0, sendBuf.Length);
+                ReadSerial(ref recvBuf);
+                int cur = 2;
+                long encBit = ReadLong(recvBuf, ref cur);
+                for (int i = 0; i < board.nMotor; ++i)
+                {
+                    enc[ei++] = ((encBit >> i)&0x01L) != 0;
+                }
             }
         }
     }

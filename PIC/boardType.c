@@ -15,7 +15,9 @@
 #elif BOARD_TYPE == BT_B3M
  CHOOSE_BoardInfoImpl(B3M)
 #elif BOARD_TYPE == BT_B3F
- CHOOSE_BoardInfoImpl(B3F)
+ CHOOSE_BoardInfoImpl(B5M)
+#elif BOARD_TYPE == BT_B5M
+ CHOOSE_BoardInfoImpl(B5M)
 #else
 #error BORAD_TYPE is wrong.
 #endif
