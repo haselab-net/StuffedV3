@@ -29,45 +29,34 @@ void commandUartInit(){
     //int U2BRGbefore = U2BRG;
     //U2BRG = (120*1000*1000 / (4*PNVDATA->baudrate[0])) - 1;
     //printf("U2BRG: %d -> %d Baudrate; %d\n", U2BRGbefore, U2BRG, (int)PNVDATA->baudrate[0]);
-    PR1 = (60*1000*1000 / PNVDATA->baudrate[0]) * 5; 
+    //PR1 = (60*1000*1000 / PNVDATA->baudrate[0]) * 5; 
 #else
 #error
 #endif
-
 }
 
-uint32_t timeRetCmd, timeTx;
 
 static volatile bool bRunExecCommand=false;
 //	handler for TMR1 timer for TX
-volatile bool bRunReturnCommand = false;
 #ifdef PIC32MM
 void __attribute__ ((vector(_TIMER_1_VECTOR), interrupt(IPL3AUTO))) TMR1_ISR()
 #elif defined PIC32MK_MCJ
 void _TIMER_1_Handler()
 #endif
 {
-	if (bRunReturnCommand){	//	call from recv
-		bRunReturnCommand = false;
-		PIC_LOGI("RC%d L%d=", retPacket.commandId, retLen);
-        PIC_LOGI("%02x %02x", (int)command.bytes[1], (int)command.bytes[2]);
-        returnCommand[retPacket.commandId]();
-		timeRetCmd = TMR1;
-	}else{
-		//	stop timer interrupt
-		IEC0bits.T1IE = false;
-		//	start TX
+    PIC_LOGI("RC%d L%d=", retPacket.commandId, retLen);
+    //PIC_LOGI("%02x %02x", (int)command.bytes[1], (int)command.bytes[2]);
+    returnCommand[retPacket.commandId]();
+    //	stop timer interrupt
+    IEC0bits.T1IE = false;
+    //	start TX
 #ifdef PC32MM
 #elif defined PIC32MK_MCJ
-        ODCGCLR = 0x200; /* Open Drain Disable for TX*/
-#else
-#error
+    ODCGCLR = 0x200; /* Open Drain Disable for TX*/
 #endif
-		UCSTAbits.UTXEN = 1;	//	enable TX
-		UCSTAbits.UTXISEL = 2;	//	10 = Interrupt is generated and asserted while the transmit buffer is empty
-		IEC_UCTXIE = 1;         //	enable UART's interrupt
-		timeTx = TMR1 + PR1;
-	}
+    UCSTAbits.UTXEN = 1;	//	enable TX
+    UCSTAbits.UTXISEL = 2;	//	10 = Interrupt is generated and asserted while the transmit buffer is empty
+    IEC_UCTXIE = 1;         //	enable UART's interrupt
     IFS0bits.T1IF = false;
 }
 
@@ -129,10 +118,9 @@ void _UARTC_RX_Handler (void){
 					retPacket.header = command.header;
 					retCur = 0;
 					//	Start TMR1 to enable TX after some delay.
-					bRunReturnCommand = true;
 					IFS0bits.T1IF = false;
 					IEC0bits.T1IE = true;
-					TMR1 = PR1-1;	//	call timer as soon as this task is ended.
+					TMR1 = 0;	//	call timer as soon as this task is ended.
 				}
             }
             if (head.commandId == CI_SET_CMDLEN){
