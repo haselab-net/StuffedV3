@@ -13,7 +13,7 @@
 #include "spiPwmDefs.h"
 #include "controlPic.h"
 
-#if NAXIS==4
+#if NMOTOR <= 4
 SDEC mcosOffset[NAXIS] ={ 2048, 2048, 2048, 2048 };
 SDEC msinOffset[NAXIS] ={ 2048, 2048, 2048, 2048 };
 #else
@@ -32,7 +32,7 @@ SDEC msinRaw[NAXIS];
 #define OFFSET  2048
 #define AMPLITUDE   (OFFSET*0.9)
 #define SCALE   (4096*4096) / (AMPLITUDE*2)
-#if NAXIS==4
+#if NMOTOR <= 4
 SDEC mcosMin[NAXIS] = {0,0,0,0};
 SDEC mcosMax[NAXIS] = {0,0,0,0};
 SDEC msinMin[NAXIS] = {0,0,0,0};
@@ -676,3 +676,8 @@ void loadMotorParam(){
     encoderFlags = PNVDATA->encoder;
 }
 
+#ifdef PIC32MM
+void initEncoder(){
+    PIC_LOGE("initEncoder not implemented yet.");
+}
+#endif

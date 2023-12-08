@@ -18,7 +18,7 @@ struct NvPageData{
  #define EL5678(x)
 #elif BOARD_TYPE==BT_B3M || BOARD_TYPE==BT_B2M || BOARD_TYPE==BT_B1M
  #define EL4(x) x
- #define EL5678(x)
+ #define EL5678(a, b, c, d)
 #elif BOARD_TYPE==BT_B5M
  #define EL4(x) x
  #define EL5678(a, b, c, d) a,b,c,d
@@ -46,13 +46,13 @@ const struct NvPageData __attribute__((aligned(NVPAGESIZE))) theNvPage = {
                     EL5678(MOTOR_HEAT_LIMIT/MOTOR_HEAT_RELEASE, MOTOR_HEAT_LIMIT/MOTOR_HEAT_RELEASE, MOTOR_HEAT_LIMIT/MOTOR_HEAT_RELEASE, MOTOR_HEAT_LIMIT/MOTOR_HEAT_RELEASE)
             },   //  SDEC limit
             {MOTOR_HEAT_RELEASE, MOTOR_HEAT_RELEASE, MOTOR_HEAT_RELEASE, EL4(MOTOR_HEAT_RELEASE),
-                MOTOR_HEAT_RELEASE, MOTOR_HEAT_RELEASE, MOTOR_HEAT_RELEASE, MOTOR_HEAT_RELEASE}    // SDEC release
+                EL5678(MOTOR_HEAT_RELEASE, MOTOR_HEAT_RELEASE, MOTOR_HEAT_RELEASE, MOTOR_HEAT_RELEASE)}    // SDEC release
         },
         200  //  pwmResolution
     }
 };
 
-#ifdef PIC32MM___
+#ifdef PIC32MM
 /*  Page size = 512 x 32 bit words = 2048 bytes = 0x800 bytes
  *  64kB flash = 9d00_0000 - 9d00_FFFF
  *  program 0000-a97d
@@ -140,7 +140,7 @@ unsigned int NVMWrite(NvData* data){
     }
     return rv;
 }
-#else
+#elif defined PIC32MK_MCJ
 unsigned int NVMWrite(NvData* data){
     assert(sizeof(NvData) < NVPAGESIZE);
     NVM_PageErase(NVPAGE);    
@@ -157,8 +157,8 @@ unsigned int NVMWrite(NvData* data){
     }
     return rv;
 }
-
-
+#else
+#erro
 #endif
 
 void NVMRead(NvData* p){

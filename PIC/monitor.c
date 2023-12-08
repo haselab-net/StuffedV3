@@ -240,7 +240,7 @@ void showPwm(){
 #ifdef PIC32MM
 static unsigned short useRx = 0;
 void enableRx(){
-    useRx = 0xFFFF;#
+    useRx = 0xFFFF;
 #ifdef BOARD3_SEPARATE
     printf("RX enabled. Baud rate will be changed into 1200 bps.\r\n");
 #else
@@ -324,6 +324,9 @@ void readLine(char* buf, int len){
 	}
     buf[cur] = 0;
 }
+#ifdef PIC32MM
+#define ADCCON1 AD1CON1
+#endif
 void readAddress(){
     printf("Input offset:");
     char adr[80];

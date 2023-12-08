@@ -60,14 +60,16 @@ void _TIMER_1_Handler()
     IFS0bits.T1IF = false;
 }
 
+
 //  Handler for TX interrupt
-#ifdef PC32MM
+#ifdef PIC32MM
 //	Note: "IPL2" below must fit to "IPC_UCTXIP = 2" in interrupt_manager.c;
-void __attribute__ ((vector(_UARTC_TX_VECTOR), interrupt(IPL2AUTO))) _UARTC_TX_HANDLER(void){	
+void __attribute__ ((vector(_UARTC_TX_VECTOR), interrupt(IPL2AUTO))) _UARTC_TX_Handler(void)
 #elif defined PIC32MK_MCJ
-void _UARTC_TX_Handler (void){
+void _UARTC_TX_Handler (void)
 #endif
-	//	Send
+{
+    //	Send
 	while (retCur < retLen && !UCSTAbits.UTXBF){
 		UCTXREG = retPacket.bytes[retCur];
 		retCur ++;
@@ -77,7 +79,7 @@ void _UARTC_TX_Handler (void){
 		UCSTAbits.UTXISEL = 1;		//	01 = Interrupt is generated and asserted when all characters have been transmitted
 		if (UCSTAbits.TRMT){		//	TX completed
 			IEC_UCTXIE = 0;	//	disable interrupt
-#ifdef PC32MM
+#ifdef PIC32MM
 #elif defined PIC32MK_MCJ
             ODCGSET = 0x200; /* Open Drain Enable for TX*/
 #else
@@ -89,9 +91,7 @@ void _UARTC_TX_Handler (void){
 	CLEAR_IFS_UCTXIF;
 }
 //	handler for rx interrupt
-#ifdef PC32MM
-//	Note: "IPL2" below must fit to "IPC_UCTXIP = 2" in interrupt_manager.c;
-void __attribute__ ((vector(_UARTC_TX_VECTOR), interrupt(IPL2AUTO))) _UARTC_TX_HANDLER(void){	
+#ifdef PIC32MM
 //	Note: "IPL4" below must fit to "IPC5bits.UCRXIP = 4" in interrupt_manager.c;
 void __attribute__ ((vector(_UARTC_RX_VECTOR), interrupt(IPL4AUTO))) _UARTC_RX_HANDLER(void){
 #elif defined PIC32MK_MCJ

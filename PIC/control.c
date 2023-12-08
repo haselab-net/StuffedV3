@@ -16,13 +16,20 @@ LDEC lastTorques[NMOTOR];	//	last intended torque to limit sudden torque change.
 SDEC lastRatio[NMOTOR];		//	last applied torque to limit heat
 long encoderFlags;
 
+#ifdef PIC32MM
+ #define EL5678910(a, b, c, d, e, f)
+#elif defined PIC32MK_MCJ
+ #define EL5678910(a, b, c, d, e, f) a,b,c,d,e,f
+#else
+#endif
+
 
 enum ControlMode controlMode, nextControlMode;
 //	 angle
 SDEC mcos[NAXIS], msin[NAXIS];
 SDEC forceOffset[NFORCE];
 SDEC currentSense[NMOTOR];
-int qeCount[NAXIS] = {0,0,0,0,0,0,0,0,0,0};
+int qeCount[NAXIS] = {0,0,0,0,EL5678910(0,0,0,0,0,0)};
 
 //	motor heat limit
 #define USE_HEAT_LIMIT
