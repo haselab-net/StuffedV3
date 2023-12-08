@@ -152,7 +152,7 @@ namespace PCController
             if (uartBin.IsOpen) uartBin.Close();
             if (cmbPortBin.Text.Length == 0) return;
             uartBin.PortName = cmbPortBin.Text;
-            uartBin.BaudRate = 2000000;
+            uartBin.BaudRate = 2000*1000;   //  baudrate:3M
             try
             {
                 uartBin.Open();

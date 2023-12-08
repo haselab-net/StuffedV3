@@ -488,7 +488,7 @@ void MCPWM_Initialize (void)
     /*  POLL    = 0*/
     /*  FLTDAT  = 0b00 */
     /*  FLTMOD  = 3 */
-    /*  PENH  = 1 */
+    /*  PENH  = 0 */
     /*  PENL  = 1 */
     /*  FLTPOL  = 0  */
     /*  FLTSRC  = 0  */
@@ -496,7 +496,7 @@ void MCPWM_Initialize (void)
     /*  CLMOD  = 0 */
     /*  CLPOL  = 0  */
     /*  CLSRC  = 0  */
-    IOCON8 = 0x3c400;
+    IOCON8 = 0x34400;
 
     PDC8 = 0;
     SDC8 = 500;
@@ -546,14 +546,14 @@ void MCPWM_Initialize (void)
     /*  FLTDAT  = 0b00 */
     /*  FLTMOD  = 3 */
     /*  PENH  = 1 */
-    /*  PENL  = 1 */
+    /*  PENL  = 0 */
     /*  FLTPOL  = 0  */
     /*  FLTSRC  = 0  */
     /*  CLDAT  = 0b00 */
     /*  CLMOD  = 0 */
     /*  CLPOL  = 0  */
     /*  CLSRC  = 0  */
-    IOCON9 = 0x3c400;
+    IOCON9 = 0x38400;
 
     PDC9 = 0;
     SDC9 = 500;

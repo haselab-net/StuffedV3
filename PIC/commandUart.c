@@ -26,7 +26,9 @@ void commandUartInit(){
     //  sysclk = 120MHz, BRGH=1
     //  UxBRG = ((CLKSEL Frequency / (4 * Desired Baud Rate)) ? 1)
     //U2BRG = (120 / (4 * 3)) - 1;
-    U2BRG = (120*1000*1000 / (4*PNVDATA->baudrate[0])) - 1;
+    //int U2BRGbefore = U2BRG;
+    //U2BRG = (120*1000*1000 / (4*PNVDATA->baudrate[0])) - 1;
+    //printf("U2BRG: %d -> %d Baudrate; %d\n", U2BRGbefore, U2BRG, (int)PNVDATA->baudrate[0]);
     PR1 = (60*1000*1000 / PNVDATA->baudrate[0]) * 5; 
 #else
 #error
@@ -42,12 +44,13 @@ volatile bool bRunReturnCommand = false;
 #ifdef PIC32MM
 void __attribute__ ((vector(_TIMER_1_VECTOR), interrupt(IPL3AUTO))) TMR1_ISR()
 #elif defined PIC32MK_MCJ
-void __ISR(_TIMER_1_VECTOR, ipl3SRS) TIMER_1_Handler (void)
+void _TIMER_1_Handler()
 #endif
 {
 	if (bRunReturnCommand){	//	call from recv
 		bRunReturnCommand = false;
-		PIC_LOGI("RC%d len%d ", retPacket.commandId, retLen);
+		PIC_LOGI("RC%d L%d=", retPacket.commandId, retLen);
+        PIC_LOGI("%02x %02x", (int)command.bytes[1], (int)command.bytes[2]);
         returnCommand[retPacket.commandId]();
 		timeRetCmd = TMR1;
 	}else{
@@ -69,8 +72,12 @@ void __ISR(_TIMER_1_VECTOR, ipl3SRS) TIMER_1_Handler (void)
 }
 
 //  Handler for TX interrupt
+#ifdef PC32MM
 //	Note: "IPL2" below must fit to "IPC_UCTXIP = 2" in interrupt_manager.c;
 void __attribute__ ((vector(_UARTC_TX_VECTOR), interrupt(IPL2AUTO))) _UARTC_TX_HANDLER(void){	
+#elif defined PIC32MK_MCJ
+void _UARTC_TX_Handler (void){
+#endif
 	//	Send
 	while (retCur < retLen && !UCSTAbits.UTXBF){
 		UCTXREG = retPacket.bytes[retCur];
@@ -93,8 +100,14 @@ void __attribute__ ((vector(_UARTC_TX_VECTOR), interrupt(IPL2AUTO))) _UARTC_TX_H
 	CLEAR_IFS_UCTXIF;
 }
 //	handler for rx interrupt
+#ifdef PC32MM
+//	Note: "IPL2" below must fit to "IPC_UCTXIP = 2" in interrupt_manager.c;
+void __attribute__ ((vector(_UARTC_TX_VECTOR), interrupt(IPL2AUTO))) _UARTC_TX_HANDLER(void){	
 //	Note: "IPL4" below must fit to "IPC5bits.UCRXIP = 4" in interrupt_manager.c;
 void __attribute__ ((vector(_UARTC_RX_VECTOR), interrupt(IPL4AUTO))) _UARTC_RX_HANDLER(void){
+#elif defined PIC32MK_MCJ
+void _UARTC_RX_Handler (void){
+#endif
 	union CommandHeader head;
 	static bool bRead;
 	int i;
@@ -121,7 +134,8 @@ void __attribute__ ((vector(_UARTC_RX_VECTOR), interrupt(IPL4AUTO))) _UARTC_RX_H
 					IEC0bits.T1IE = true;
 					TMR1 = PR1-1;	//	call timer as soon as this task is ended.
 				}
-            }else if (head.commandId == CI_SET_CMDLEN){
+            }
+            if (head.commandId == CI_SET_CMDLEN){
 				bRead = true;
 				command.header = head.header;
                 //printf("SCL%d len=%d\n", head.boardId, cmdLen);

@@ -82,7 +82,7 @@ void initEncoder(){
     ANSELBCLR = anselBCLR;
     ANSELCCLR = anselCCLR;
     ANSELECLR = anselECLR;
-    printf("Digital: A=%x, B=%x, C=%x, E=%x\r\n", anselACLR, anselBCLR, anselCCLR, anselECLR);
+    //printf("Digital: A=%x, B=%x, C=%x, E=%x\r\n", anselACLR, anselBCLR, anselCCLR, anselECLR);
 #endif
 }
 

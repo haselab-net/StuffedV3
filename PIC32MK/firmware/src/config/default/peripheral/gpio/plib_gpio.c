@@ -80,7 +80,7 @@ void GPIO_Initialize ( void )
     IEC1SET = _IEC1_CNBIE_MASK;
     /* PORTC Initialization */
     LATC = 0x83c0U; /* Initial Latch Value */
-    TRISCCLR = 0x87c0U; /* Direction Control */
+    TRISCCLR = 0x97c0U; /* Direction Control */
     ANSELCCLR = 0x1400U; /* Digital Mode Enable */
     CNPUCSET = 0x2000U; /* Pull-Up Enable */
 
