@@ -187,7 +187,6 @@ void rcBoardInfo(){
 	retPacket.boardInfo.nCurrent = NCURRENT;
 	retPacket.boardInfo.nForce = NFORCE;
 	retPacket.boardInfo.nTouch = NTOUCH;
-    retPacket.boardInfo.pwmResolution = PNVDATA->pwmResolution;
 }
 void rcAll(){
     int i;
@@ -328,6 +327,9 @@ void rcGetParam(){
         break;
     case PT_ENCODER:
         retPacket.param.encoder = encoderFlags;
+        break;
+    case PT_PWM_RESOLUTION:
+        retPacket.param.pwmResolution = PNVDATA->pwmResolution;
         break;
     default:
         PIC_LOGE("rcGetParam got wrong type %d, set = %d", (int)getParamType, (int)command.param.type);

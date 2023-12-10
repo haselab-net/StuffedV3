@@ -74,6 +74,7 @@ namespace PCController
         int magnetCount = 0;
         private void btMeasure_Click(object sender, EventArgs e)
         {
+            boards.SendResetMotor();
             ResetMagnet();
             if (magnetCount == 0) {
                 magnetCount = 1;

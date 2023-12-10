@@ -12,6 +12,12 @@
             <file>file:/C:/home/hase/Project/Nuibot/StuffedV3/PIC/commandUart.c</file>
             <file>file:/C:/home/hase/Project/Nuibot/StuffedV3/PIC/nvm.c</file>
             <file>file:/C:/home/hase/Project/Nuibot/StuffedV3/PIC/monitor.c</file>
+            <file>file:/C:/home/hase/Project/Nuibot/StuffedV3/PIC/command.c</file>
+            <file>file:/C:/home/hase/Project/Nuibot/StuffedV3/PIC/nbproject/Makefile-default.mk</file>
+            <file>file:/C:/home/hase/Project/Nuibot/StuffedV3/PIC/encoderCountPic.c</file>
+            <file>file:/C:/home/hase/Project/Nuibot/StuffedV3/PIC/commandTemplate.h</file>
+            <file>file:/C:/home/hase/Project/Nuibot/StuffedV3/PIC/commandCommon.h</file>
+            <file>file:/C:/home/hase/Project/Nuibot/StuffedV3/PIC/boardType.c</file>
         </group>
     </open-files>
 </project-private>

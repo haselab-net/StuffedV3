@@ -32,7 +32,6 @@ namespace PCController
             nCurrent = info[cur++];
             nForce = info[cur++];
             nTouch = info[cur++];
-            pwmResolution = Boards.ReadUShort(info, ref cur);
             int c = 0;
             
             if (boards != null) c = boards.NMotor;
@@ -97,7 +96,7 @@ namespace PCController
         {
             switch (r)
             {
-                case CommandId.CI_BOARD_INFO: return 1 + 6 + 2;
+                case CommandId.CI_BOARD_INFO: return 1 + 6; //  uchar: modelNumber, nTarget, nMotor, nCurrent, nForce, nTouch
                 case CommandId.CI_DIRECT: return 1 + nMotor * 2 * 2;
                 case CommandId.CI_INTERPOLATE: return 1 + nMotor * 2 + 2 + 1;
                 case CommandId.CI_CURRENT: return 1 + nMotor * 2 * 2 + nForce * 2;
