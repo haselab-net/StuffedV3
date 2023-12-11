@@ -63,13 +63,6 @@ namespace PCController
             InitializeComponent();
             boards = new Boards();
             boards.Serial = uartBin;
-            string[] ports = SerialPort.GetPortNames();
-            Array.Sort(ports);
-            cmbPortBin.Items.AddRange(ports);
-            if (cmbPortBin.Items.Count > 0)
-            {
-                cmbPortBin.Text = cmbPortBin.Items[0].ToString();
-            }
             motors = new Motors();
             haptics = new Haptics();
             udLoopTime_ValueChanged(udLoopTime, null);
@@ -200,6 +193,7 @@ namespace PCController
 
         private void timer_Tick(object sender, EventArgs e)
         {
+            txMsg.Text = "";
 	        if (bHaptic) {
 	            haptics.Update();
             }
@@ -214,7 +208,7 @@ namespace PCController
 			else if (tbControl.SelectedTab == tpMagnet) {
                 UpdateMagnet();
             }
-            txMsg.Text = "Pos:";
+            txMsg.Text += "Pos:";
             for (int i = 0; i < boards.NMotor; ++i)
             {
                 txMsg.Text += " ";
@@ -443,6 +437,18 @@ namespace PCController
             if (bHaptic) btHapticStart_Click(sender, e);
         }
 
+        private void cmbPortBin_DropDown(object sender, EventArgs e)
+        {
+            cmbPortBin.Items.Clear();
+            string[] ports = SerialPort.GetPortNames();
+            //string[] ports = { "COM1", "COM2" };
+            Array.Sort(ports);
+            cmbPortBin.Items.AddRange(ports);
+            if (cmbPortBin.Items.Count > 0)
+            {
+                cmbPortBin.Text = cmbPortBin.Items[0].ToString();
+            }
+        }
     }
     public class CurrentControl
     {

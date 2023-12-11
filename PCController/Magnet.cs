@@ -72,20 +72,33 @@ namespace PCController
             }
         }
         int magnetCount = 0;
+        bool magnetDriveMotor = false;
         private void btMeasure_Click(object sender, EventArgs e)
         {
-            boards.SendResetMotor();
+            magnetDriveMotor = false;
             ResetMagnet();
             if (magnetCount == 0) {
                 magnetCount = 1;
             }
         }
+        private void btDriveMeasure_Click(object sender, EventArgs e)
+        {
+            magnetDriveMotor = true;
+            boards.SendResetMotor();
+            ResetMagnet();
+            if (magnetCount == 0)
+            {
+                magnetCount = 1;
+            }
+        }
+
         short[] initialPos;
         short[] magnetSensors;
         int timerIntervalBackup;
         private void UpdateMagnet()
         {
             if (magnetCount == 0) return;
+            txMsg.Text = (magnetDriveMotor ? "Drive and Measure" : "Measure") + " " + magnetCount + "\r\n";
             if (magnetCount == 1)
             {
                 timerIntervalBackup = timer.Interval;
@@ -115,12 +128,22 @@ namespace PCController
                     if (magnetCount < C2) targets[i] = (short)(initialPos[i] + motion * (magnetCount-C1)/(C2-C1));
                     else if (magnetCount < C3) targets[i] = (short)(initialPos[i] + motion - 2* motion* (magnetCount - C2) / (C3 - C2));
                     else targets[i] = (short)(initialPos[i] - motion + motion * (magnetCount - C3) / (C4 - C3));
-            }
-                boards.SendPosDirect(targets);
+                }
+                if (magnetDriveMotor)
+                {
+                    boards.SendPosDirect(targets);
+                }
             }
             if (magnetCount == C4) {
                 timer.Interval = timerIntervalBackup;
                 magnetCount = 0;
+                if (magnetDriveMotor)
+                {
+                    short[] currents = new short[boards.NMotor];
+                    for (int i = 0; i < boards.NMotor; ++i) currents[i] = 0;
+                    boards.SendCurrent(currents);
+                }
+                txMsg.Text = "";
                 return;
             }
             magnetCount++;

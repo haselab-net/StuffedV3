@@ -38,6 +38,7 @@
             this.tpMagnet = new System.Windows.Forms.TabPage();
             this.pnMagnet = new System.Windows.Forms.Panel();
             this.panel3 = new System.Windows.Forms.Panel();
+            this.button1 = new System.Windows.Forms.Button();
             this.btMeasure = new System.Windows.Forms.Button();
             this.tpHaptic = new System.Windows.Forms.TabPage();
             this.flHaptic = new System.Windows.Forms.FlowLayoutPanel();
@@ -206,6 +207,7 @@
             // 
             // panel3
             // 
+            this.panel3.Controls.Add(this.button1);
             this.panel3.Controls.Add(this.btMeasure);
             this.panel3.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel3.Location = new System.Drawing.Point(3, 3);
@@ -213,15 +215,25 @@
             this.panel3.Size = new System.Drawing.Size(737, 32);
             this.panel3.TabIndex = 2;
             // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(191, 3);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(102, 23);
+            this.button1.TabIndex = 1;
+            this.button1.Text = "Measure";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.btMeasure_Click);
+            // 
             // btMeasure
             // 
             this.btMeasure.Location = new System.Drawing.Point(3, 3);
             this.btMeasure.Name = "btMeasure";
-            this.btMeasure.Size = new System.Drawing.Size(75, 23);
+            this.btMeasure.Size = new System.Drawing.Size(163, 23);
             this.btMeasure.TabIndex = 0;
-            this.btMeasure.Text = "Measure";
+            this.btMeasure.Text = "Drive and Measure";
             this.btMeasure.UseVisualStyleBackColor = true;
-            this.btMeasure.Click += new System.EventHandler(this.btMeasure_Click);
+            this.btMeasure.Click += new System.EventHandler(this.btDriveMeasure_Click);
             // 
             // tpHaptic
             // 
@@ -804,6 +816,7 @@
             this.cmbPortBin.Name = "cmbPortBin";
             this.cmbPortBin.Size = new System.Drawing.Size(121, 23);
             this.cmbPortBin.TabIndex = 0;
+            this.cmbPortBin.DropDown += new System.EventHandler(this.cmbPortBin_DropDown);
             // 
             // label1
             // 
@@ -978,6 +991,7 @@
         private System.Windows.Forms.Panel panel6;
         private System.Windows.Forms.Button btLoadSpidarHeat;
         private System.Windows.Forms.Button btLoadNubotiHeat;
+        private System.Windows.Forms.Button button1;
     }
 }
 
