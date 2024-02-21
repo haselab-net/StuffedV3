@@ -58,6 +58,10 @@
     <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Rug.Osc, Version=1.2.5.17694, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>packages\Rug.Osc.1.2.5\lib\Rug.Osc.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -80,7 +84,8 @@
     <Compile Include="Board.cs" />
     <Compile Include="Boards.cs" />
     <Compile Include="Haptic.cs" />
-    <Compile Include="Magnet.cs" />    <Compile Include="MainForm.cs">
+    <Compile Include="Magnet.cs" />
+    <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="MainForm.Designer.cs">
@@ -116,6 +121,8 @@
       <DesignTime>True</DesignTime>
     </Compile>
     <None Include="app.config" />
+    <None Include="packages\Rug.Osc.1.2.5\.signature.p7s" />
+    <None Include="packages\Rug.Osc.1.2.5\Rug.Osc.1.2.5.nupkg" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -142,6 +149,10 @@
       <ProductName>Windows インストーラー 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="packages\Rug.Osc.1.2.5\lib\Rug.Osc.dll" />
+    <Content Include="packages\Rug.Osc.1.2.5\lib\Rug.Osc.XML" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -11,7 +11,7 @@ namespace PCController
     {
         List<Pose> poses = new List<Pose>();
         int curTime = 0;
-        //  V‚µ‚¢Pose‚ğì‚éBÂ‚¢ƒCƒ“ƒWƒP[ƒ^(ƒ{ƒ^ƒ“)‚àì‚é
+        //  ï¿½Vï¿½ï¿½ï¿½ï¿½Poseï¿½ï¿½ï¿½ï¿½Bï¿½Â‚ï¿½ï¿½Cï¿½ï¿½ï¿½Wï¿½Pï¿½[ï¿½^(ï¿½{ï¿½^ï¿½ï¿½)ï¿½ï¿½ï¿½ï¿½
         Pose NewPose()
         {
             Pose pose = new Pose(boards.NMotor);
@@ -246,7 +246,7 @@ namespace PCController
             if (curTime > udLoopTime.Value)
             {
                 curTime = 0;
-                if (ckRunOnce.Checked == true) //ƒ‚[ƒVƒ‡ƒ“‚ğˆê“x‚¾‚¯Às‚·‚éê‡
+                if (ckRunOnce.Checked == true) //ï¿½ï¿½ï¿½[ï¿½Vï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½xï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½sï¿½ï¿½ï¿½ï¿½ê‡
                 {
                     ckRun.Checked = false;
                     boards.SendPosDirect(Interpolate(curTime) + motors.Offset());
@@ -258,7 +258,7 @@ namespace PCController
             }
             lbCurTime.Text = curTime.ToString();
         }
-        //  motors‚Épose‚Ì’l‚ğƒ[ƒh
+        //  motorsï¿½ï¿½poseï¿½Ì’lï¿½ï¿½ï¿½ï¿½[ï¿½h
         bool SaveFromEditorGuard;
         void LoadToEditor(PoseData pose)
         {
@@ -407,7 +407,7 @@ namespace PCController
 #endif
                     curTime += timer.Interval * (int)udStep.Value;
                     UpdateCurTime(curTime, true);
-                    if (ckRun.Checked)  //  once‚Ìê‡AUpdateCurTime‚ÅckRun‚ªØ‚ê‚éB
+                    if (ckRun.Checked)  //  onceï¿½Ìê‡ï¿½AUpdateCurTimeï¿½ï¿½ckRunï¿½ï¿½ï¿½Ø‚ï¿½ï¿½B
                     {
                         boards.SendPosInterpolate(Interpolate(curTime) + motors.Offset(), (ushort)(timer.Interval*3));
 #if RUNTICK_DEBUG

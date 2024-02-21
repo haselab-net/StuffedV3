@@ -5,6 +5,8 @@ using System.Windows.Forms;
 using System.IO.Ports;
 using System.Threading;
 using System.Linq;
+using Rug.Osc;
+using System.Threading.Tasks;
 
 namespace PCController
 {
@@ -51,6 +53,16 @@ namespace PCController
                 boards.SendCurrent(haptics.currents);
             }   
         }
+
+        // OSCのレシーバー
+        private OscReceiver m_OscReceiver;
+
+        // OSC受信待ちをするタスク
+        private Task m_OscReceiveTask = null;
+        private Task m_OscServerTask = null;
+
+        private short m_Pos3;
+
         public MainForm()
         {
             mmTimer = new MMTimer();
@@ -74,7 +86,90 @@ namespace PCController
             haptics = new Haptics();
             udLoopTime_ValueChanged(udLoopTime, null);
             ResetMagnet();
+
+            // OSCのデータ受信のための設定
+            m_OscReceiver = new OscReceiver(System.Net.IPAddress.Parse("127.0.0.1"), 8000);
+
+            // OSCのレシーバーを接続
+            m_OscReceiver.Connect();
+
+            // OSC受信用のタスクを生成
+            m_OscReceiveTask = new Task(() => OscListenProcess());
+
+            // タスクをスタート
+            m_OscReceiveTask.Start();
         }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            // OSCでの通信を止める（新しく値が来てモータードライバーへ渡すのを防ぐ）
+            m_OscReceiver.Close();
+
+            // モーターを全て止める
+            if (boards.NMotor != 0)
+            {
+                short[] currents = new short[boards.NMotor];
+                boards.SendCurrent(currents);
+            }
+
+            base.OnClosed(e);
+
+        }
+
+        /*private void OscClient()
+        {
+            using (OscSender oscSender = new OscSender(System.Net.IPAddress.Parse("127.0.0.1"), 7001))
+            {
+                oscSender.Connect();
+
+                if (boards.NMotor > 2)
+                {
+                    OscMessage msg = new OscMessage("/uOSC/test", m_Pos3.ToString());
+                    oscSender.Send(msg);
+                }
+            }
+        }*/
+
+        private void OscListenProcess()
+        {
+            try
+            {
+                // OSCレシーバーが終了されるまで繰り返し処理する
+                while (m_OscReceiver.State != OscSocketState.Closed)
+                {
+                    // 受信待ち(メッセージを受信したら処理が帰ってくる)
+                    // packet = "address", num1, num2, num3
+                    OscPacket packet = m_OscReceiver.Receive();
+
+                    // 受信したメッセージをコンソールに出力
+                    Console.WriteLine(packet.ToString());
+
+                    // packetが,区切りなのを利用してモーターに送る値をresultsに入れる
+                    var results = packet.ToString().Split(',').Skip(1).Select(e => Convert.ToInt16(e)).ToArray();
+                    if (boards.NMotor != 0)
+                    {
+                        short[] currents = new short[boards.NMotor];
+                        currents[0] = results[0];
+                        currents[1] = results[1];
+                        currents[2] = results[2];
+                        boards.SendCurrent(currents);
+                        //OscClient();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // 例外処理　発生時はコンソールに出力
+                // 　ただし
+                //    m_OscReceiver.Receive()で受信待ち状態の時に終了処理(m_OscReceiver.close())をすると
+                //    正しい処理でもExceptionnとなるため、接続中かで正しい処理か例外かを判断する
+                if (m_OscReceiver.State == OscSocketState.Connected)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+            }
+        }
+
         void SetTextMessage(string msg)
         {
             txMsg.Text = msg;
