@@ -22,6 +22,7 @@
 #define BT_B2F 4
 #define BT_B3M 5
 #define BT_B3F 6
+#define BT_B5M 7
 
 
 #if defined BOARD1_MOTORDRIVER

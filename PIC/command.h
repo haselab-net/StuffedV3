@@ -9,18 +9,25 @@
 
 #if BOARD_TYPE == BT_B1M
  CHOOSE_BoardInfo(B1M)
+ #define NMOTOR 4
 #elif BOARD_TYPE == BT_B1F
  CHOOSE_BoardInfo(B1F)
+ #define NMOTOR 3
 #elif BOARD_TYPE == BT_B2M
  CHOOSE_BoardInfo(B2M)
+ #define NMOTOR 4
 #elif BOARD_TYPE == BT_B2F
  CHOOSE_BoardInfo(B2F)
+ #define NMOTOR 3
 #elif BOARD_TYPE == BT_B3M
  CHOOSE_BoardInfo(B3M)
+ #define NMOTOR 4
 #elif BOARD_TYPE == BT_B3F
  CHOOSE_BoardInfo(B3F)
+ #define NMOTOR 3
 #elif BOARD_TYPE == BT_B5M
  CHOOSE_BoardInfo(B5M)
+ #define NMOTOR 8
 #else
 #error BORAD_TYPE is wrong.
 #endif

@@ -99,8 +99,8 @@ void _UARTC_RX_Handler (void){
 #endif
 	union CommandHeader head;
 	static bool bRead;
-	int i;
-	for(i=0; i<6; ++i){
+	//int i;
+	while(UCSTAbits.URXDA){
         if (cmdCur == 0){
 	        head.header = UCRXREG;
 			//	Skip spacing (make time for return packet), invalid value (They may come after reset.) and invalid command
@@ -122,8 +122,7 @@ void _UARTC_RX_Handler (void){
 					IEC0bits.T1IE = true;
 					TMR1 = 0;	//	call timer as soon as this task is ended.
 				}
-            }
-            if (head.commandId == CI_SET_CMDLEN){
+            }else if (head.commandId == CI_SET_CMDLEN){
 				bRead = true;
 				command.header = head.header;
                 //printf("SCL%d len=%d\n", head.boardId, cmdLen);
