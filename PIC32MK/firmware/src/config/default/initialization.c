@@ -88,7 +88,7 @@
 #pragma config FPLLIDIV =   DIV_1
 #pragma config FPLLRNG =    RANGE_5_10_MHZ
 #pragma config FPLLICLK =   PLL_FRC
-#pragma config FPLLMULT =   MUL_60
+#pragma config FPLLMULT =   MUL_61
 #pragma config FPLLODIV =   DIV_4
 #pragma config BORSEL =     LOW
 
@@ -185,23 +185,23 @@ void SYS_Initialize ( void* data )
 
     NVM_Initialize();
 
-    QEI1_Initialize();
-
     ADCHS_Initialize();
 
-	UART1_Initialize();
+    QEI1_Initialize();
 
     QEI2_Initialize();
 
-	UART2_Initialize();
+	UART1_Initialize();
 
     QEI3_Initialize();
 
+	UART2_Initialize();
+
     TMR2_Initialize();
 
-    MCPWM_Initialize();
-
     TMR1_Initialize();
+
+    MCPWM_Initialize();
 
 
 

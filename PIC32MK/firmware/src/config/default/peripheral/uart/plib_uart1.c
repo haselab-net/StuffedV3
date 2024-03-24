@@ -88,10 +88,10 @@ void UART1_Initialize( void )
     /* WAKE = 0 */
     /* SIDL = 0 */
     /* RUNOVF = 0 */
-    /* CLKSEL = 3 */
+    /* CLKSEL = 1 */
     /* SLPEN = 0 */
     /* UEN = 0 */
-    U1MODE = 0x60008;
+    U1MODE = 0x20008;
 
     /* Enable UART1 Receiver and Transmitter */
     U1STASET = (_U1STA_UTXEN_MASK | _U1STA_URXEN_MASK );

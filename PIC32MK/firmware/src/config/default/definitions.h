@@ -53,15 +53,15 @@
 #include "peripheral/gpio/plib_gpio.h"
 #include "peripheral/evic/plib_evic.h"
 #include "peripheral/nvm/plib_nvm.h"
-#include "peripheral/qei/plib_qei1.h"
 #include "peripheral/adchs/plib_adchs.h"
-#include "peripheral/uart/plib_uart1.h"
+#include "peripheral/qei/plib_qei1.h"
 #include "peripheral/qei/plib_qei2.h"
-#include "peripheral/uart/plib_uart2.h"
+#include "peripheral/uart/plib_uart1.h"
 #include "peripheral/qei/plib_qei3.h"
+#include "peripheral/uart/plib_uart2.h"
 #include "peripheral/tmr/plib_tmr2.h"
-#include "peripheral/mcpwm/plib_mcpwm.h"
 #include "peripheral/tmr1/plib_tmr1.h"
+#include "peripheral/mcpwm/plib_mcpwm.h"
 
 // DOM-IGNORE-BEGIN
 #ifdef __cplusplus  // Provide C++ Compatibility
@@ -78,7 +78,7 @@ extern "C" {
 #define DEVICE_SERIES		 "PIC32MK"
 
 /* CPU clock frequency */
-#define CPU_CLOCK_FREQUENCY 120000000
+#define CPU_CLOCK_FREQUENCY 122000000
 
 // *****************************************************************************
 // *****************************************************************************

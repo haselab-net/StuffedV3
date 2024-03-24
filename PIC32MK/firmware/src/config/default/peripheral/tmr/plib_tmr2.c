@@ -75,7 +75,7 @@ void TMR2_Initialize(void)
     TMR2 = 0x0;
 
     /*Set period */
-    PR2 = 5399U;
+    PR2 = 10979U;
 
     IEC0SET = _IEC0_T2IE_MASK;
 
@@ -111,7 +111,7 @@ uint32_t TMR2_CounterGet(void)
 
 uint32_t TMR2_FrequencyGet(void)
 {
-    return (60000000);
+    return (122000000);
 }
 
 void __attribute__((used)) TIMER_2_InterruptHandler (void)

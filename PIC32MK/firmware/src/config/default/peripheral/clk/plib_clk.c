@@ -89,6 +89,14 @@ void CLK_Initialize( void )
     SYSKEY = 0xAA996655U;
     SYSKEY = 0x556699AAU;
 
+    /* Peripheral Bus 1 is by default enabled, set its divisor */
+    PB1DIVbits.PBDIV = 0;
+    /* Peripheral Bus 2 is by default enabled, set its divisor */
+    PB2DIVbits.PBDIV = 0;
+
+    /* Peripheral Bus 4 is by default enabled, set its divisor */
+    PB4DIVbits.PBDIV = 0;
+
     /* Set up Reference Clock 1 */
     /* REFO1CON register */
     /* ROSEL =  SPLL */
@@ -100,8 +108,8 @@ void CLK_Initialize( void )
     /* ROTRIM = 2 */
     REFO1TRIM = 0x1000000;
 
-    /* Enable oscillator (ON bit) and Enable Output (OE bit) */
-    REFO1CONSET = 0x00001000 | 0x00008000;
+    /* Enable oscillator (ON bit) */
+    REFO1CONSET = 0x00008000;
 
   
 

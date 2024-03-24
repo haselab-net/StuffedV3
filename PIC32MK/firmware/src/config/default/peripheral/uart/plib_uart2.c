@@ -88,10 +88,10 @@ void UART2_Initialize( void )
     /* WAKE = 0 */
     /* SIDL = 0 */
     /* RUNOVF = 0 */
-    /* CLKSEL = 3 */
+    /* CLKSEL = 1 */
     /* SLPEN = 0 */
     /* UEN = 0 */
-    U2MODE = 0x60008;
+    U2MODE = 0x20008;
 
     /* Enable UART2 Receiver and Transmitter */
     U2STASET = (_U2STA_UTXEN_MASK | _U2STA_URXEN_MASK );
