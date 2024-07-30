@@ -179,10 +179,12 @@ namespace PCController
         private void UpdateCurrent()
         {
             short[] currents = new short[boards.NMotor];
+            
             for (int i = 0; i < currentControls.Count; ++i)
             {
                 currents[i] = (short)currentControls[i].udTargetCurrent.Value;
             }
+            
             boards.SendCurrent(currents);
             boards.SendSense();
             for (int i = 0; i < currentControls.Count && i < boards.NCurrent; ++i)
@@ -448,6 +450,11 @@ namespace PCController
             {
                 cmbPortBin.Text = cmbPortBin.Items[0].ToString();
             }
+        }
+
+        private void btStart_Click(object sender, EventArgs e)
+        {
+            currentControls[0].udTargetCurrent.Value = 100;
         }
     }
     public class CurrentControl

@@ -85,6 +85,7 @@
             this.btLoadNubotiHeat = new System.Windows.Forms.Button();
             this.btRecvHeat = new System.Windows.Forms.Button();
             this.btSendHeat = new System.Windows.Forms.Button();
+            this.btStart = new System.Windows.Forms.Button();
             this.splitContainerTop = new System.Windows.Forms.SplitContainer();
             this.panel1 = new System.Windows.Forms.Panel();
             this.btReset = new System.Windows.Forms.Button();
@@ -135,6 +136,7 @@
             // timer
             // 
             this.timer.Enabled = true;
+            this.timer.Interval = 50;
             this.timer.Tick += new System.EventHandler(this.timer_Tick);
             // 
             // openPose
@@ -162,6 +164,7 @@
             // 
             // splitContainerHoriz.Panel2
             // 
+            this.splitContainerHoriz.Panel2.Controls.Add(this.btStart);
             this.splitContainerHoriz.Panel2.Controls.Add(this.splitContainerTop);
             this.splitContainerHoriz.Size = new System.Drawing.Size(984, 593);
             this.splitContainerHoriz.SplitterDistance = 751;
@@ -181,6 +184,7 @@
             this.tbControl.SelectedIndex = 0;
             this.tbControl.Size = new System.Drawing.Size(751, 593);
             this.tbControl.TabIndex = 5;
+            this.tbControl.Click += new System.EventHandler(this.btListBoards_Click);
             // 
             // tpMagnet
             // 
@@ -769,6 +773,16 @@
             this.btSendHeat.UseVisualStyleBackColor = true;
             this.btSendHeat.Click += new System.EventHandler(this.btSendHeat_Click);
             // 
+            // btStart
+            // 
+            this.btStart.Location = new System.Drawing.Point(5, 110);
+            this.btStart.Name = "btStart";
+            this.btStart.Size = new System.Drawing.Size(121, 22);
+            this.btStart.TabIndex = 4;
+            this.btStart.Text = "start";
+            this.btStart.UseVisualStyleBackColor = true;
+            this.btStart.Click += new System.EventHandler(this.btStart_Click);
+            // 
             // splitContainerTop
             // 
             this.splitContainerTop.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -992,6 +1006,7 @@
         private System.Windows.Forms.Button btLoadSpidarHeat;
         private System.Windows.Forms.Button btLoadNubotiHeat;
         private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button btStart;
     }
 }
 
