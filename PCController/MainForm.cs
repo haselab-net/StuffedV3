@@ -17,21 +17,69 @@ namespace PCController
 
         bool bHaptic = false;
         int[] times = null;
-        int count = 0;
-        int count1000 = 0;
+        int count = 0; //単位ms
+        int count1000 = 0; //単位s
+        int hapticCount = 0; //単位msで3秒測るためのもの
+        int diffCount = 50; //タイミング間隔の秒数(ms)
+        int v; //trackbarの値代入するメンバ関数
+        
+        
+
         void mmTimer_Tick(Object sender)   //  Haptic制御
         {
             count ++;
-            if (count >= 1000) {
+            if (count >= 1000)
+            {
                 count = 0;
                 count1000++;
-                System.Diagnostics.Debug.WriteLine("Tick called " + count1000 * 1000 + " times.");
+                System.Diagnostics.Debug.WriteLine("Tick called " + count1000 * 1000 + " times.");//1sごとに文章出力
             }
-            short vib=0;
-            short [] wave = { 1, 0, -1, 0 };
-            if (bHaptic) {
+            //short vib=0; //shortは値の単位指定
+            //short [] wave = { 1, 0, -1, 0 }; //sin波で振動を作り出している
+
+            //textBox1.Text = hapticCount.ToString();
+            if (bHaptic)
+            {
+                hapticCount++;
+                //モーターに送る電流値の最大値と最小値の設定
+                short hapticMin = 0;
+                short hapticMax = 100;
+                short diff = 50;//最大値になるまでの秒数
+
+                //直線なら差をとって５ずつとか，割合でやるなら曲線になる        
+                //5秒以内で刺激の提示が終わるようにする
+        
+                if ((hapticCount <= 5000) && haptics.currents[2] < hapticMax)
+                {
+                        haptics.currents[2] += (short)((hapticMax - hapticMin) / diff);//モーターに送る電流値の線形増加
+                }
+
+                if ((hapticCount <= 5000) && (hapticCount > (diffCount * v)) && (haptics.currents[1] < hapticMax) && (haptics.currents[3] < hapticMax))
+                {
+                        haptics.currents[1] += (short)((hapticMax - hapticMin) / diff);
+                        haptics.currents[3] += (short)((hapticMax - hapticMin) / diff);
+                }
+                if ((hapticCount <= 5000) && (hapticCount > ((diffCount * v) + (diffCount * v))) && (haptics.currents[0] < hapticMax) && (haptics.currents[4] < hapticMax))
+                {
+                        haptics.currents[0] += (short)((hapticMax - hapticMin) / diff);
+                        haptics.currents[4] += (short)((hapticMax - hapticMin) / diff);
+
+                }
+
+                if(hapticCount > 5000)
+                {
+                    haptics.currents[0] = 0;
+                    haptics.currents[1] = 0;
+                    haptics.currents[2] = 0;
+                    haptics.currents[3] = 0;
+                    haptics.currents[4] = 0;
+                    bHaptic = false;
+                    System.Diagnostics.Debug.WriteLine("5秒経過");
+                    //hapticCount = 0;
+                }
+                /*
                 for (int i = 0; i < boards.NMotor; ++i) {
-                    int diff = haptics[i].T - boards.GetPos(i);
+                    int diff = haptics[i].T - boards.GetPos(i);//差をとって振動付与に使っている
                     if (diff > SDEC.ONE) diff = SDEC.ONE;
                     if (diff < 0)
                     {
@@ -39,24 +87,57 @@ namespace PCController
                         times[i] = 0;
                     }
                     else {
+                        //振動計算
                         times[i] ++;
                         vib = (short)((short)udAmp.Value * wave[times[i] % 4]);
                         vib = (short)(vib * Math.Exp(-times[i] * (double)udDamp.Value));
                     }
-                    short c = (short)(diff * haptics[i].K / SDEC.ONE);
-                    if (c < haptics[i].M) c = haptics[i].M;
-                    c += vib;
-                    haptics.currents[i] = c;
+                    short c = (short)(diff * haptics[i].K / SDEC.ONE);//ハード内で整数計算で行うために1024倍してるのを二回やってるから1回分割ってる
+                    if (c < haptics[i].M) c = haptics[i].M; //最小張力
+                    c += vib; //振動追加
+                    haptics.currents[i] = c; //ここでモーター1つずつに対して定義して↓
                 }
-                boards.SendCurrent(haptics.currents);
-            }   
+            */
+                boards.SendCurrent(haptics.currents); //ここで一気に電流値を送ってる, 8/11→",true"消した      
+            }
         }
+        
+        private void btStart_Click(object sender, EventArgs e)
+        {
+            //currentControls[0].udTargetCurrent.Value = hapticTrackBar.Value*100;
+            hapticTrackBar.Minimum = 0;
+            hapticTrackBar.Maximum = 10;
+            bHaptic = true;
+
+            //label6.Text = count.ToString();
+            
+            if(bHaptic == true)
+            {
+                label6.Text = "実行中";
+                //mmTimer.Enabled = true;
+            }
+            if (hapticCount > 5000)
+            {
+                label6.Text = "終了";
+                //mmTimer.Enabled = true;
+            }
+
+        }
+        
+
+        private void hapticTrackBar_ValueChanged(object sender, EventArgs e) //trackbarをスライドしたときの値を表示
+        {
+            v = hapticTrackBar.Value;
+            textBox0.Text = v.ToString();
+            //System.Diagnostics.Debug.WriteLine(v);
+        }
+
         public MainForm()
         {
             mmTimer = new MMTimer();
             mmTimer.Interval = 1;
             mmTimer.Resolution = 1;
-            mmTimer.Enabled = false;
+            mmTimer.Enabled = true; //変更
             mmTimer.OnTimer += mmTimer_Tick;
 
             System.Diagnostics.Debug.Assert(CommandId.CI_NCOMMAND <= CommandId.CI_NCOMMAND_MAX);
@@ -68,6 +149,8 @@ namespace PCController
             udLoopTime_ValueChanged(udLoopTime, null);
             ResetMagnet();
         }
+
+
         void SetTextMessage(string msg)
         {
             txMsg.Text = msg;
@@ -141,7 +224,6 @@ namespace PCController
         }
         private void btListBoards_Click(object sender, EventArgs e)
         {
-            if (bHaptic) btHapticStart_Click(sender, e);
             if (uartBin.IsOpen) uartBin.Close();
             if (cmbPortBin.Text.Length == 0) return;
             uartBin.PortName = cmbPortBin.Text;
@@ -198,6 +280,12 @@ namespace PCController
             txMsg.Text = "";
 	        if (bHaptic) {
 	            haptics.Update();
+                //電流値の表示→mmtimer.Tickでいじると壊れそうだから，マルチメディアじゃない方のタイマーで実装しようねってことでここに記載
+                textBox1.Text = haptics.currents[0].ToString();
+                textBox2.Text = haptics.currents[1].ToString();
+                textBox3.Text = haptics.currents[2].ToString();
+                textBox4.Text = haptics.currents[3].ToString();
+                textBox5.Text = haptics.currents[4].ToString();
             }
             else if (tbControl.SelectedTab == tpPos)
 			{
@@ -305,7 +393,6 @@ namespace PCController
 
         private void btSendPd_Click(object sender, EventArgs e)
         {
-            if (bHaptic) btHapticStart_Click(sender, e);
             short[] k = new short[boards.NMotor];
             short[] b = new short[boards.NMotor];
             short[] a = new short[boards.NMotor];
@@ -323,7 +410,6 @@ namespace PCController
         }
         private void btRecvPd_Click(object sender, EventArgs e)
         {
-            if (bHaptic) btHapticStart_Click(sender, e);
             short[] k = new short[boards.NMotor];
             short[] b = new short[boards.NMotor];
             short[] a = new short[boards.NMotor];
@@ -370,7 +456,6 @@ namespace PCController
 
         private void btSendHeat_Click(object sender, EventArgs e)
         {
-            if (bHaptic) btHapticStart_Click(sender, e);
             short[] heatLimit = new short[boards.NMotor];
             short[] heatRelease = new short[boards.NMotor];
             for (int i = 0; i < motors.Count; ++i)
@@ -383,7 +468,6 @@ namespace PCController
 
         private void btRecvHeat_Click(object sender, EventArgs e)
         {
-            if (bHaptic) btHapticStart_Click(sender, e);
             short[] heatLimit = new short[boards.NMotor];
             short[] heatRelease = new short[boards.NMotor];
             boards.RecvParamHeat(ref heatLimit, ref heatRelease);
@@ -404,39 +488,10 @@ namespace PCController
 #if USE_THREAD
         Thread hapticThread;
 #endif
-        private void btHapticStart_Click(object sender, EventArgs e)
-        {
-            if (haptics == null || haptics.Count == 0) return;
-
-            if (!bHaptic)
-            {
-                btHapticStart.Text = "Stop";
-                bHaptic = true;
-#if USE_THREAD
-                mmTimer.Enabled = false;
-                hapticThread = new Thread(new ThreadStart(HapticControl));
-                hapticThread.Priority = ThreadPriority.Highest;
-                hapticThread.Start();
-#else //  MM timer
-                mmTimer.Enabled = true;
-#endif
-            }
-            else {
-                btHapticStart.Text = "Start";
-                bHaptic = false;
-                mmTimer.Enabled = false;
-            }
-        }
 
         private void btReset_Click(object sender, EventArgs e)
         {
-            if (bHaptic) btHapticStart_Click(sender, e);
             boards.SendResetMotor();
-        }
-
-        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            if (bHaptic) btHapticStart_Click(sender, e);
         }
 
         private void cmbPortBin_DropDown(object sender, EventArgs e)
@@ -452,10 +507,6 @@ namespace PCController
             }
         }
 
-        private void btStart_Click(object sender, EventArgs e)
-        {
-            currentControls[0].udTargetCurrent.Value = 100;
-        }
     }
     public class CurrentControl
     {
