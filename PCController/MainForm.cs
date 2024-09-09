@@ -22,7 +22,8 @@ namespace PCController
         int hapticCount = 0; //単位msで3秒測るためのもの
         int diffCount = 50; //タイミング間隔の秒数(ms)
         int v; //trackbarの値代入するメンバ関数
-        
+        int t = 3000;//提示時間
+        int td = 5; //何ミリ秒に一回電流値を増加させるか
         
 
         void mmTimer_Tick(Object sender)   //  Haptic制御
@@ -43,39 +44,42 @@ namespace PCController
                 hapticCount++;
                 //モーターに送る電流値の最大値と最小値の設定
                 short hapticMin = 0;
-                short hapticMax = 100;
-                short diff = 50;//最大値になるまでの秒数
+                short hapticMax = 180;
+                short diff = 100;//最大値になるまでの秒数
 
                 //直線なら差をとって５ずつとか，割合でやるなら曲線になる        
                 //5秒以内で刺激の提示が終わるようにする
-        
-                if ((hapticCount <= 5000) && haptics.currents[2] < hapticMax)
+
+                //int sumForce = haptics.currents[0] + haptics.currents[1] + haptics.currents[2] + haptics.currents[3] + haptics.currents[4];
+
+                if ((hapticCount <= t) && (haptics.currents[2] < hapticMax) && (hapticCount% td == 0))
                 {
                         haptics.currents[2] += (short)((hapticMax - hapticMin) / diff);//モーターに送る電流値の線形増加
                 }
 
-                if ((hapticCount <= 5000) && (hapticCount > (diffCount * v)) && (haptics.currents[1] < hapticMax) && (haptics.currents[3] < hapticMax))
+                if ((hapticCount <= t) && (hapticCount > (diffCount * v)) && (haptics.currents[1] < hapticMax) && (haptics.currents[3] < hapticMax)&&(hapticCount % td == 0))
                 {
-                        haptics.currents[1] += (short)((hapticMax - hapticMin) / diff);
-                        haptics.currents[3] += (short)((hapticMax - hapticMin) / diff);
+                        //haptics.currents[1] += (short)((hapticMax - hapticMin) / diff);
+                        //haptics.currents[3] += (short)((hapticMax - hapticMin) / diff);
                 }
-                if ((hapticCount <= 5000) && (hapticCount > ((diffCount * v) + (diffCount * v))) && (haptics.currents[0] < hapticMax) && (haptics.currents[4] < hapticMax))
+                if ((hapticCount <= t) && (hapticCount > ((diffCount * v) + (diffCount * v))) && (haptics.currents[0] < hapticMax) && (haptics.currents[4] < hapticMax)&& (hapticCount % td == 0))
                 {
                         haptics.currents[0] += (short)((hapticMax - hapticMin) / diff);
                         haptics.currents[4] += (short)((hapticMax - hapticMin) / diff);
 
                 }
 
-                if(hapticCount > 5000)
+                if(hapticCount > t)
                 {
-                    haptics.currents[0] = 0;
-                    haptics.currents[1] = 0;
-                    haptics.currents[2] = 0;
-                    haptics.currents[3] = 0;
-                    haptics.currents[4] = 0;
+                    short minForce = 35;
+                    haptics.currents[0] = minForce;
+                    //haptics.currents[1] = minForce;
+                    haptics.currents[2] = minForce;
+                    //haptics.currents[3] = minForce;
+                    haptics.currents[4] = minForce;
                     bHaptic = false;
-                    System.Diagnostics.Debug.WriteLine("5秒経過");
-                    //hapticCount = 0;
+                    System.Diagnostics.Debug.WriteLine("3秒経過");
+                    hapticCount = 0;
                 }
                 /*
                 for (int i = 0; i < boards.NMotor; ++i) {
@@ -109,21 +113,7 @@ namespace PCController
             hapticTrackBar.Maximum = 10;
             bHaptic = true;
 
-            //label6.Text = count.ToString();
-            
-            if(bHaptic == true)
-            {
-                label6.Text = "実行中";
-                //mmTimer.Enabled = true;
-            }
-            if (hapticCount > 5000)
-            {
-                label6.Text = "終了";
-                //mmTimer.Enabled = true;
-            }
-
         }
-        
 
         private void hapticTrackBar_ValueChanged(object sender, EventArgs e) //trackbarをスライドしたときの値を表示
         {
@@ -286,6 +276,7 @@ namespace PCController
                 textBox3.Text = haptics.currents[2].ToString();
                 textBox4.Text = haptics.currents[3].ToString();
                 textBox5.Text = haptics.currents[4].ToString();
+                textBox6.Text = "実行中";
             }
             else if (tbControl.SelectedTab == tpPos)
 			{
@@ -297,6 +288,10 @@ namespace PCController
             }
 			else if (tbControl.SelectedTab == tpMagnet) {
                 UpdateMagnet();
+            }
+            else
+            {
+                textBox6.Text = "準備中";
             }
             txMsg.Text += "Pos:";
             for (int i = 0; i < boards.NMotor; ++i)
