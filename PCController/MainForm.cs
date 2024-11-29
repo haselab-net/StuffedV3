@@ -23,9 +23,8 @@ namespace PCController
         int diffCount = 50; //タイミング間隔の秒数(ms)
         int v; //trackbarの値代入するメンバ関数
         int t = 3000;//提示時間
-        int td = 5; //何ミリ秒に一回電流値を増加させるか
+        //int td = 5; //何ミリ秒に一回電流値を増加させるか
         
-
         void mmTimer_Tick(Object sender)   //  Haptic制御
         {
             count ++;
@@ -42,40 +41,116 @@ namespace PCController
             if (bHaptic)
             {
                 hapticCount++;
+                //System.Diagnostics.Debug.WriteLine("hapticCount " + hapticCount);
                 //モーターに送る電流値の最大値と最小値の設定
+                short minForce = 35;
                 short hapticMin = 0;
-                short hapticMax = 180;
+                short hapticMax = 180; //180
                 short diff = 100;//最大値になるまでの秒数
+
+                double vaa = ((double)hapticMax)/(((double)t / 6.0)*((double)t / 6.0)); //加速度定義→距離が電流値に相当
 
                 //直線なら差をとって５ずつとか，割合でやるなら曲線になる        
                 //5秒以内で刺激の提示が終わるようにする
 
-                //int sumForce = haptics.currents[0] + haptics.currents[1] + haptics.currents[2] + haptics.currents[3] + haptics.currents[4];
-
-                if ((hapticCount <= t) && (haptics.currents[2] < hapticMax) && (hapticCount% td == 0))
+                //力の合計値を一定にしなかった場合，最終的にかかる力が同じになる
+                if ((hapticCount <= t) && (haptics.currents[2] < hapticMax + minForce))
                 {
-                        haptics.currents[2] += (short)((hapticMax - hapticMin) / diff);//モーターに送る電流値の線形増加
+                    if((hapticCount >= 0)&&(hapticCount < (t/6)))
+                    {
+                        haptics.currents[2] = (short)((vaa / 2) * (hapticCount * hapticCount) + minForce);
+                    }
+                    if ((hapticCount >= (t / 6)) && (hapticCount < (t / 3)))
+                    {
+                        haptics.currents[2] = (short)(((-vaa / 2) * ((hapticCount- t / 3)* (hapticCount - t / 3)))+ hapticMax + minForce);
+                    }
+                    if ((hapticCount >= (t / 3)) && (hapticCount < (2*t / 3)))
+                    {
+                        haptics.currents[2] = (short)(hapticMax + minForce);
+                    }
+                    if ((hapticCount >= (2*t / 3)) && (hapticCount <= t))
+                    {
+                        haptics.currents[2]-= (short)((hapticMax - hapticMin) / diff);
+                    }
                 }
 
-                if ((hapticCount <= t) && (hapticCount > (diffCount * v)) && (haptics.currents[1] < hapticMax) && (haptics.currents[3] < hapticMax)&&(hapticCount % td == 0))
+                if ((hapticCount <= t) && (hapticCount > (diffCount * v)) && (haptics.currents[1] < hapticMax + minForce) && (haptics.currents[3] < hapticMax + minForce))
                 {
-                        //haptics.currents[1] += (short)((hapticMax - hapticMin) / diff);
-                        //haptics.currents[3] += (short)((hapticMax - hapticMin) / diff);
+                    //変更途中
+                        haptics.currents[1] += (short)((hapticMax - hapticMin) / diff);
+                        haptics.currents[3] += (short)((hapticMax - hapticMin) / diff);
+                    if ((hapticCount >= 0 + diffCount* v) && (hapticCount < (t / 6 + diffCount * v)))
+                    {
+                        haptics.currents[2] = (short)((vaa / 2) * (hapticCount * hapticCount) + minForce);
+                    }
+                    if ((hapticCount >= (t / 6 + diffCount * v)) && (hapticCount < (t / 3 + diffCount * v)))
+                    {
+                        haptics.currents[2] = (short)(((-vaa / 2) * ((hapticCount - t / 3) * (hapticCount - t / 3))) + hapticMax + minForce);
+                    }
+                    if ((hapticCount >= (t / 3 + diffCount * v)) && (hapticCount < (2 * t / 3 + diffCount * v)))
+                    {
+                        haptics.currents[2] = (short)(hapticMax + minForce);
+                    }
+                    if ((hapticCount >= (2 * t / 3) + diffCount * v) && (hapticCount <= t + diffCount * v))
+                    {
+                        haptics.currents[2] -= (short)((hapticMax - hapticMin) / diff);
+                    }
                 }
-                if ((hapticCount <= t) && (hapticCount > ((diffCount * v) + (diffCount * v))) && (haptics.currents[0] < hapticMax) && (haptics.currents[4] < hapticMax)&& (hapticCount % td == 0))
+                if ((hapticCount <= t) && (hapticCount > ((diffCount * v) + (diffCount * v))) && (haptics.currents[0] < hapticMax + minForce) && (haptics.currents[4] < hapticMax + minForce))
                 {
-                        haptics.currents[0] += (short)((hapticMax - hapticMin) / diff);
-                        haptics.currents[4] += (short)((hapticMax - hapticMin) / diff);
-
+                        //haptics.currents[0] += (short)((hapticMax - hapticMin) / diff);
+                        //haptics.currents[4] += (short)((hapticMax - hapticMin) / diff);
                 }
 
-                if(hapticCount > t)
+                /*
+                //案1 力の合計値を一定にしなかった場合，最終的にかかる力が同じになる
+                if ((hapticCount <= t) && (haptics.currents[2] < hapticMax) && (hapticCount % td == 0))
                 {
-                    short minForce = 35;
+                    haptics.currents[2] += (short)((hapticMax - hapticMin) / diff);//モーターに送る電流値の線形増加
+                }
+
+                if ((hapticCount <= t) && (hapticCount > (diffCount * v)) && (haptics.currents[1] < hapticMax) && (haptics.currents[3] < hapticMax) && (hapticCount % td == 0))
+                {
+                    //haptics.currents[1] += (short)((hapticMax - hapticMin) / diff);
+                    //haptics.currents[3] += (short)((hapticMax - hapticMin) / diff);
+                }
+                if ((hapticCount <= t) && (hapticCount > ((diffCount * v) + (diffCount * v))) && (haptics.currents[0] < hapticMax) && (haptics.currents[4] < hapticMax) && (hapticCount % td == 0))
+                {
+                    //haptics.currents[0] += (short)((hapticMax - hapticMin) / diff);
+                    //haptics.currents[4] += (short)((hapticMax - hapticMin) / diff);
+                }
+                */
+
+                //案2 ここから力の合計値を設定したときのプログラム
+                /*
+                short hapticMax = 900; 
+                int sumForce = haptics.currents[0] + haptics.currents[1] + haptics.currents[2] + haptics.currents[3] + haptics.currents[4];
+
+                if ((hapticCount <= t) && (sumForce < hapticMax) && (hapticCount % td == 0))
+                {
+                    haptics.currents[2] += (short)((hapticMax - hapticMin) / diff);//モーターに送る電流値の線形増加
+                }
+
+                if ((hapticCount <= t) && (hapticCount > (diffCount * v)) && (sumForce < hapticMax) && (hapticCount % td == 0))
+                {
+                    haptics.currents[1] += (short)((hapticMax - hapticMin) / diff);
+                    haptics.currents[3] += (short)((hapticMax - hapticMin) / diff);
+                }
+                if ((hapticCount <= t) && (hapticCount > ((diffCount * v) + (diffCount * v))) && (sumForce < hapticMax) && (hapticCount % td == 0))
+                {
+                    haptics.currents[0] += (short)((hapticMax - hapticMin) / diff);
+                    haptics.currents[4] += (short)((hapticMax - hapticMin) / diff);
+                }
+                */
+                
+                //System.Diagnostics.Debug.WriteLine(haptics.currents[2]);//確認用
+                //ここで刺激を提示していないときの糸のたわみがないような電流値を入れておく
+                if (hapticCount > t)
+                {
                     haptics.currents[0] = minForce;
-                    //haptics.currents[1] = minForce;
+                    haptics.currents[1] = minForce;
                     haptics.currents[2] = minForce;
-                    //haptics.currents[3] = minForce;
+                    haptics.currents[3] = minForce;
                     haptics.currents[4] = minForce;
                     bHaptic = false;
                     System.Diagnostics.Debug.WriteLine("3秒経過");
