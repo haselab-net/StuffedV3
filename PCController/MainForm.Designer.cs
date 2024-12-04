@@ -144,7 +144,6 @@
             // 
             // timer
             // 
-            this.timer.Enabled = true;
             this.timer.Tick += new System.EventHandler(this.timer_Tick);
             // 
             // openPose
@@ -200,7 +199,7 @@
             this.tpMagnet.Controls.Add(this.panel3);
             this.tpMagnet.Location = new System.Drawing.Point(4, 25);
             this.tpMagnet.Name = "tpMagnet";
-            this.tpMagnet.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.tpMagnet.Padding = new System.Windows.Forms.Padding(3);
             this.tpMagnet.Size = new System.Drawing.Size(742, 564);
             this.tpMagnet.TabIndex = 5;
             this.tpMagnet.Text = "Magnet";
@@ -241,7 +240,7 @@
             this.tpHaptic.Controls.Add(this.panel6);
             this.tpHaptic.Location = new System.Drawing.Point(4, 25);
             this.tpHaptic.Name = "tpHaptic";
-            this.tpHaptic.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.tpHaptic.Padding = new System.Windows.Forms.Padding(3);
             this.tpHaptic.Size = new System.Drawing.Size(742, 564);
             this.tpHaptic.TabIndex = 5;
             this.tpHaptic.Text = "Haptic";
@@ -346,7 +345,7 @@
             this.tpPos.Controls.Add(this.track);
             this.tpPos.Location = new System.Drawing.Point(4, 25);
             this.tpPos.Name = "tpPos";
-            this.tpPos.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.tpPos.Padding = new System.Windows.Forms.Padding(3);
             this.tpPos.Size = new System.Drawing.Size(742, 564);
             this.tpPos.TabIndex = 3;
             this.tpPos.Text = "Pos";
@@ -609,7 +608,7 @@
             this.tpCurrent.Controls.Add(this.flCurrent);
             this.tpCurrent.Location = new System.Drawing.Point(4, 25);
             this.tpCurrent.Name = "tpCurrent";
-            this.tpCurrent.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.tpCurrent.Padding = new System.Windows.Forms.Padding(3);
             this.tpCurrent.Size = new System.Drawing.Size(742, 564);
             this.tpCurrent.TabIndex = 1;
             this.tpCurrent.Text = "Current";
@@ -629,7 +628,7 @@
             this.tpParam.Controls.Add(this.panel4);
             this.tpParam.Location = new System.Drawing.Point(4, 25);
             this.tpParam.Name = "tpParam";
-            this.tpParam.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.tpParam.Padding = new System.Windows.Forms.Padding(3);
             this.tpParam.Size = new System.Drawing.Size(742, 564);
             this.tpParam.TabIndex = 2;
             this.tpParam.Text = "Param";
@@ -703,7 +702,7 @@
             this.tpHeat.Controls.Add(this.panel5);
             this.tpHeat.Location = new System.Drawing.Point(4, 25);
             this.tpHeat.Name = "tpHeat";
-            this.tpHeat.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.tpHeat.Padding = new System.Windows.Forms.Padding(3);
             this.tpHeat.Size = new System.Drawing.Size(742, 564);
             this.tpHeat.TabIndex = 4;
             this.tpHeat.Text = "Heat";
@@ -781,9 +780,9 @@
             this.tabPage1.Controls.Add(this.button2);
             this.tabPage1.Controls.Add(this.tbCurrents);
             this.tabPage1.Location = new System.Drawing.Point(4, 25);
-            this.tabPage1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabPage1.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabPage1.Padding = new System.Windows.Forms.Padding(2);
             this.tabPage1.Size = new System.Drawing.Size(742, 564);
             this.tabPage1.TabIndex = 6;
             this.tabPage1.Text = "GoroGoro";
@@ -823,7 +822,7 @@
             // button3
             // 
             this.button3.Location = new System.Drawing.Point(229, 104);
-            this.button3.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.button3.Margin = new System.Windows.Forms.Padding(2);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(60, 25);
             this.button3.TabIndex = 7;
@@ -834,7 +833,7 @@
             // tbCurrents1
             // 
             this.tbCurrents1.Location = new System.Drawing.Point(125, 27);
-            this.tbCurrents1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tbCurrents1.Margin = new System.Windows.Forms.Padding(2);
             this.tbCurrents1.Name = "tbCurrents1";
             this.tbCurrents1.Size = new System.Drawing.Size(79, 22);
             this.tbCurrents1.TabIndex = 4;
@@ -843,7 +842,7 @@
             // tbCurrent
             // 
             this.tbCurrent.Location = new System.Drawing.Point(125, 107);
-            this.tbCurrent.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tbCurrent.Margin = new System.Windows.Forms.Padding(2);
             this.tbCurrent.Name = "tbCurrent";
             this.tbCurrent.Size = new System.Drawing.Size(79, 22);
             this.tbCurrent.TabIndex = 6;
@@ -852,7 +851,7 @@
             // button1
             // 
             this.button1.Location = new System.Drawing.Point(229, 25);
-            this.button1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.button1.Margin = new System.Windows.Forms.Padding(2);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(60, 25);
             this.button1.TabIndex = 1;
@@ -863,7 +862,7 @@
             // button2
             // 
             this.button2.Location = new System.Drawing.Point(229, 65);
-            this.button2.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.button2.Margin = new System.Windows.Forms.Padding(2);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(60, 25);
             this.button2.TabIndex = 5;
@@ -874,7 +873,7 @@
             // tbCurrents
             // 
             this.tbCurrents.Location = new System.Drawing.Point(125, 67);
-            this.tbCurrents.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tbCurrents.Margin = new System.Windows.Forms.Padding(2);
             this.tbCurrents.Name = "tbCurrents";
             this.tbCurrents.Size = new System.Drawing.Size(79, 22);
             this.tbCurrents.TabIndex = 0;
