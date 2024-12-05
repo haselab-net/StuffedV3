@@ -22,7 +22,7 @@ namespace PCController
         int hapticCount = 0; //単位msで3秒測るためのもの
         int diffCount = 50; //タイミング間隔の秒数(ms)
         int v; //trackbarの値代入するメンバ関数
-        int t = 3000;//提示時間
+        int t = 1500;//提示時間
         //int td = 5; //何ミリ秒に一回電流値を増加させるか
         
         void mmTimer_Tick(Object sender)   //  Haptic制御
@@ -48,7 +48,7 @@ namespace PCController
                 short hapticMax = 180; //180
                 //short diff = 100;//最大値になるまでの秒数
 
-                double vaa = ((double)hapticMax)/(((double)t / 6.0)*((double)t / 6.0)); //加速度定義→距離が電流値に相当
+                double vaa = ((double)hapticMax)/(((double)t / 6.0)*(t / 6.0)); //加速度定義→距離が電流値に相当
 
                 //直線なら差をとって５ずつとか，割合でやるなら曲線になる        
                 //5秒以内で刺激の提示が終わるようにする
@@ -64,7 +64,7 @@ namespace PCController
                     {
                         haptics.currents[2] = (short)(((-vaa / 2) * ((hapticCount- t / 3)* (hapticCount - t / 3)))+ hapticMax + minForce);
                     }
-                    if ((hapticCount >= (t / 3)) && (hapticCount < (2*t / 3)))
+                    if ((hapticCount >= (t / 3)) && (hapticCount < 2*t))
                     {
                         haptics.currents[2] = (short)(hapticMax + minForce);
                     }
@@ -90,7 +90,7 @@ namespace PCController
                         haptics.currents[1] = (short)(((-vaa / 2) * (((hapticCount - d) - t / 3) * ((hapticCount - d) - t / 3))) + hapticMax + minForce);
                         haptics.currents[3] = (short)(((-vaa / 2) * (((hapticCount - d) - t / 3) * ((hapticCount - d) - t / 3))) + hapticMax + minForce);
                     }
-                    if ((hapticCount >= ((t / 3) + d)) && (hapticCount < ((2 * t / 3) + d)))
+                    if ((hapticCount >= ((t / 3) + d)) && (hapticCount < (2*t + d)))
                     {
                         haptics.currents[1] = (short)(hapticMax + minForce);
                         haptics.currents[3] = (short)(hapticMax + minForce);
@@ -114,7 +114,7 @@ namespace PCController
                         haptics.currents[0] = (short)(((-vaa / 2) * (((hapticCount - 2 * d) - t / 3) * ((hapticCount - 2 * d) - t / 3))) + hapticMax + minForce);
                         haptics.currents[4] = (short)(((-vaa / 2) * (((hapticCount - 2 * d) - t / 3) * ((hapticCount - 2 * d) - t / 3))) + hapticMax + minForce);
                     }
-                    if ((hapticCount >= ((t / 3) + (2 * d))) && (hapticCount < ((2 * t / 3) + (2 * d))))
+                    if ((hapticCount >= ((t / 3) + (2 * d))) && (hapticCount < (2*t + (2 * d))))
                     {
                         haptics.currents[0] = (short)(hapticMax + minForce);
                         haptics.currents[4] = (short)(hapticMax + minForce);
@@ -168,10 +168,10 @@ namespace PCController
                 }
                 */
 
-                System.Diagnostics.Debug.WriteLine(haptics.currents[0]);//確認用
+                //System.Diagnostics.Debug.WriteLine(haptics.currents[0]);//確認用
 
                 //ここで刺激を提示していないときの糸のたわみがないような電流値を入れておく
-                if (hapticCount > t)
+                if (hapticCount > 2*t)
                 {
                     haptics.currents[0] = minForce;
                     haptics.currents[1] = minForce;
