@@ -20,16 +20,15 @@ namespace PCController
         int count = 0; //単位ms
         int count1000 = 0; //単位s
         int hapticCount = 0; //単位msで3秒測るためのもの
-        int diffCount = 50; //タイミング間隔の秒数(ms)
         int v; //trackbarの値代入するメンバ関数
-        int t = 3000;//提示時間
+        int t = 2000;//提示時間
         int t0 = 500; //提示するまでの上昇・下降時間
         short minForce = 35;
         short hapticMax = 180; //180
 
         void mmTimer_Tick(Object sender)   //  Haptic制御
         {
-            count ++;
+            count++;
             if (count >= 1000)
             {
                 count = 0;
@@ -39,7 +38,8 @@ namespace PCController
             if (bHaptic)
             {
                 hapticCount++;
-                double vaa = ((double)hapticMax * 4.0) / ((double)t0*t0); //加速度定義→距離が電流値に相当
+                double vaa = ((double)hapticMax * 4.0) / ((double)t0 * t0); //加速度定義→距離が電流値に相当
+                int diffCount = 50; //タイミング間隔の秒数(ms)
 
                 //力の合計値を一定にしなかった場合，最終的にかかる力が同じになる
                 if ((hapticCount <= (2 * t0) + t) && (haptics.currents[2] <= hapticMax + minForce))
@@ -50,7 +50,7 @@ namespace PCController
                     }
                     if ((hapticCount >= (t0 / 2)) && (hapticCount < t0))
                     {
-                        haptics.currents[2] = (short)(((-vaa / 2) * ((hapticCount- t0) * (hapticCount - t0)))+ hapticMax + minForce);
+                        haptics.currents[2] = (short)(((-vaa / 2) * ((hapticCount - t0) * (hapticCount - t0))) + hapticMax + minForce);
                     }
                     if ((hapticCount >= t0) && (hapticCount < (t0 + t)))
                     {
@@ -66,62 +66,69 @@ namespace PCController
                         haptics.currents[2] = (short)(((vaa / 2) * ((hapticCount - ((2 * t0) + t)) * (hapticCount - ((2 * t0) + t)))) + minForce);
                     }
                 }
-                /*
+
                 int d = diffCount * v; //提示タイミングの秒差分
 
-                if ((hapticCount <= t) && (hapticCount > d) && (haptics.currents[1] < hapticMax + minForce) && (haptics.currents[3] < hapticMax + minForce))
+                if ((hapticCount <= (2 * t0) + t + d) && (hapticCount >= d) && (haptics.currents[1] <= hapticMax + minForce) && (haptics.currents[3] <= hapticMax + minForce))
                 {
-                    if ((hapticCount >= d) && (hapticCount < ((t / 6) + d)))
+                    if ((hapticCount >= 0 + d) && (hapticCount < (t0 / 2) + d))
                     {
                         haptics.currents[1] = (short)((vaa / 2) * ((hapticCount - d) * (hapticCount - d)) + minForce);
                         haptics.currents[3] = (short)((vaa / 2) * ((hapticCount - d) * (hapticCount - d)) + minForce);
                     }
-                    if ((hapticCount >= ((t / 6) + d)) && (hapticCount < ((t / 3) + d)))
+                    if ((hapticCount >= (t0 / 2) + d) && (hapticCount < t0 + d))
                     {
-                        haptics.currents[1] = (short)(((-vaa / 2) * (((hapticCount - d) - t / 3) * ((hapticCount - d) - t / 3))) + hapticMax + minForce);
-                        haptics.currents[3] = (short)(((-vaa / 2) * (((hapticCount - d) - t / 3) * ((hapticCount - d) - t / 3))) + hapticMax + minForce);
+                        haptics.currents[1] = (short)(((-vaa / 2) * (((hapticCount - d) - t0) * ((hapticCount - d) - t0))) + hapticMax + minForce);
+                        haptics.currents[3] = (short)(((-vaa / 2) * (((hapticCount - d) - t0) * ((hapticCount - d) - t0))) + hapticMax + minForce);
                     }
-                    if ((hapticCount >= ((t / 3) + d)) && (hapticCount < (2*t + d)))
+                    if ((hapticCount >= t0 + d) && (hapticCount < (t0 + t) + d))
                     {
                         haptics.currents[1] = (short)(hapticMax + minForce);
                         haptics.currents[3] = (short)(hapticMax + minForce);
                     }
-                    
-                    if ((hapticCount >= (2 * t / 3) + d) && (hapticCount <= t + d))
+                    if ((hapticCount >= (t0 + t) + d) && (hapticCount <= (3 * t0 / 2) + t + d))
                     {
-                        haptics.currents[2] -= (short)((hapticMax - hapticMin) / diff);
+                        haptics.currents[1] = (short)(((-vaa / 2) * (((hapticCount - d) - (t0 + t)) * ((hapticCount - d) - (t0 + t)))) + hapticMax + minForce);
+                        haptics.currents[3] = (short)(((-vaa / 2) * (((hapticCount - d) - (t0 + t)) * ((hapticCount - d) - (t0 + t)))) + hapticMax + minForce);
                     }
-                    
-                }
-                if ((hapticCount <= t) && (hapticCount > 2 * d) && (haptics.currents[0] < hapticMax + minForce) && (haptics.currents[4] < hapticMax + minForce))
+                    if ((hapticCount >= (3 * t0 / 2) + t + d) && (hapticCount < ((2 * t0) + t) + d))
+                    {
+                        haptics.currents[1] = (short)(((vaa / 2) * (((hapticCount - d) - ((2 * t0) + t)) * ((hapticCount - d) - ((2 * t0) + t)))) + minForce);
+                        haptics.currents[3] = (short)(((vaa / 2) * (((hapticCount - d) - ((2 * t0) + t)) * ((hapticCount - d) - ((2 * t0) + t)))) + minForce);
+                    }
+
+                if ((hapticCount <= (2 * t0) + t + (2 * d)) && (hapticCount >= 2 * d) && (haptics.currents[0] <= hapticMax + minForce) && (haptics.currents[4] <= hapticMax + minForce))
                 {
-                    if ((hapticCount >= (2 * d)) && (hapticCount < ((t / 6) + (2 * d))))
+                    if ((hapticCount >= 0 + (2 * d)) && (hapticCount < (t0 / 2) + (2 * d)))
                     {
                         haptics.currents[0] = (short)((vaa / 2) * ((hapticCount - (2 * d)) * (hapticCount - (2 * d))) + minForce);
                         haptics.currents[4] = (short)((vaa / 2) * ((hapticCount - (2 * d)) * (hapticCount - (2 * d))) + minForce);
                     }
-                    if ((hapticCount >= ((t / 6) + (2 * d))) && (hapticCount < ((t / 3) + (2 * d))))
+                    if ((hapticCount >= (t0 / 2) + (2 * d)) && (hapticCount < t0 + (2 * d)))
                     {
-                        haptics.currents[0] = (short)(((-vaa / 2) * (((hapticCount - 2 * d) - t / 3) * ((hapticCount - 2 * d) - t / 3))) + hapticMax + minForce);
-                        haptics.currents[4] = (short)(((-vaa / 2) * (((hapticCount - 2 * d) - t / 3) * ((hapticCount - 2 * d) - t / 3))) + hapticMax + minForce);
+                        haptics.currents[0] = (short)(((-vaa / 2) * (((hapticCount - (2 * d)) - t0) * ((hapticCount - (2 * d)) - t0))) + hapticMax + minForce);
+                        haptics.currents[4] = (short)(((-vaa / 2) * (((hapticCount - (2 * d)) - t0) * ((hapticCount - (2 * d)) - t0))) + hapticMax + minForce);
                     }
-                    if ((hapticCount >= ((t / 3) + (2 * d))) && (hapticCount < (2*t + (2 * d))))
+                    if ((hapticCount >= t0 + (2 * d)) && (hapticCount < (t0 + t) + (2 * d)))
                     {
                         haptics.currents[0] = (short)(hapticMax + minForce);
                         haptics.currents[4] = (short)(hapticMax + minForce);
                     }
-                    
-                    if ((hapticCount >= (2 * t / 3) + (2 * d)) && (hapticCount <= t + (2 * d)))
+                    if ((hapticCount >= (t0 + t) + (2 * d)) && (hapticCount <= (3 * t0 / 2) + t + (2 * d)))
                     {
-                        haptics.currents[2] -= (short)((hapticMax - hapticMin) / diff);
+                        haptics.currents[0] = (short)(((-vaa / 2) * (((hapticCount - (2 * d)) - (t0 + t)) * ((hapticCount - (2 * d)) - (t0 + t)))) + hapticMax + minForce);
+                        haptics.currents[4] = (short)(((-vaa / 2) * (((hapticCount - (2 * d)) - (t0 + t)) * ((hapticCount - (2 * d)) - (t0 + t)))) + hapticMax + minForce);
                     }
-                    
+                    if ((hapticCount >= (3 * t0 / 2) + t + (2 * d)) && (hapticCount < ((2 * t0) + t) + (2 * d)))
+                    {
+                        haptics.currents[0] = (short)(((vaa / 2) * (((hapticCount - (2 * d)) - ((2 * t0) + t)) * ((hapticCount - (2 * d)) - ((2 * t0) + t)))) + minForce);
+                        haptics.currents[4] = (short)(((vaa / 2) * (((hapticCount - (2 * d)) - ((2 * t0) + t)) * ((hapticCount - (2 * d)) - ((2 * t0) + t)))) + minForce);
+                    }
                 }
-                */
-                System.Diagnostics.Debug.WriteLine("[2]=" + haptics.currents[2]);//確認用
+                System.Diagnostics.Debug.WriteLine("[0]=" + haptics.currents[0]);//確認用
 
                 //ここで刺激を提示していないときの糸のたわみがないような電流値を入れておく
-                if (hapticCount > (2 * t0) + t)
+                if (hapticCount > (2 * t0) + t + (2 * d))
                 {
                     haptics.currents[0] = minForce;
                     haptics.currents[1] = minForce;
@@ -129,13 +136,14 @@ namespace PCController
                     haptics.currents[3] = minForce;
                     haptics.currents[4] = minForce;
                     haptics.currents[5] = minForce;
-                    bHaptic = false;
                     System.Diagnostics.Debug.WriteLine("4秒経過");
+                    bHaptic = false;
                     hapticCount = 0;
                 }
                 boards.SendCurrent(haptics.currents); //ここで一気に電流値を送ってる, 8/11→",true"消した      
             }
         }
+    }
         
         private void btStart_Click(object sender, EventArgs e)
         {
