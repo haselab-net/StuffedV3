@@ -21,7 +21,7 @@ namespace PCController
         int count1000 = 0; //単位s
         int hapticCount = 0; //単位msで3秒測るためのもの
         int v; //trackbarの値代入するメンバ関数
-        int t = 2000;//提示時間
+        int t = 3000;//提示時間
         int t0 = 500; //提示するまでの上昇・下降時間
         short minForce = 35;
         short hapticMax = 180; //180
@@ -40,9 +40,11 @@ namespace PCController
                 hapticCount++;
                 double vaa = ((double)hapticMax * 4.0) / ((double)t0 * t0); //加速度定義→距離が電流値に相当
                 int diffCount = 50; //タイミング間隔の秒数(ms)
+                int d = diffCount * v; //提示タイミングの秒差分
 
                 //力の合計値を一定にしなかった場合，最終的にかかる力が同じになる
-                if ((hapticCount <= (2 * t0) + t) && (haptics.currents[2] <= hapticMax + minForce))
+                //haptics.currents[2]
+                if ((hapticCount <= (2 * t0) + t + (2 * d)) && (haptics.currents[2] <= hapticMax + minForce))
                 {
                     if ((hapticCount >= 0) && (hapticCount < (t0 / 2)))
                     {
@@ -65,11 +67,14 @@ namespace PCController
                     {
                         haptics.currents[2] = (short)(((vaa / 2) * ((hapticCount - ((2 * t0) + t)) * (hapticCount - ((2 * t0) + t)))) + minForce);
                     }
+                    if ((hapticCount >= ((2 * t0) + t)) && (hapticCount < (2 * t0) + t + (2 * d)))
+                    {
+                        haptics.currents[2] = minForce;
+                    }
                 }
-
-                int d = diffCount * v; //提示タイミングの秒差分
-
-                if ((hapticCount <= (2 * t0) + t + d) && (hapticCount >= d) && (haptics.currents[1] <= hapticMax + minForce) && (haptics.currents[3] <= hapticMax + minForce))
+                
+                //haptics.currents[1],[3]
+                if ((hapticCount <= (2 * t0) + t + (2 * d)) && (hapticCount >= d) && (haptics.currents[1] <= hapticMax + minForce) && (haptics.currents[3] <= hapticMax + minForce))
                 {
                     if ((hapticCount >= 0 + d) && (hapticCount < (t0 / 2) + d))
                     {
@@ -96,7 +101,13 @@ namespace PCController
                         haptics.currents[1] = (short)(((vaa / 2) * (((hapticCount - d) - ((2 * t0) + t)) * ((hapticCount - d) - ((2 * t0) + t)))) + minForce);
                         haptics.currents[3] = (short)(((vaa / 2) * (((hapticCount - d) - ((2 * t0) + t)) * ((hapticCount - d) - ((2 * t0) + t)))) + minForce);
                     }
-
+                    if ((hapticCount >= (2 * t0) + t + d) && (hapticCount < (2 * t0) + t + (2 * d)))
+                    {
+                        haptics.currents[1] = minForce;
+                        haptics.currents[3] = minForce;
+                    }
+                }
+                //haptics.currents[0],[4]
                 if ((hapticCount <= (2 * t0) + t + (2 * d)) && (hapticCount >= 2 * d) && (haptics.currents[0] <= hapticMax + minForce) && (haptics.currents[4] <= hapticMax + minForce))
                 {
                     if ((hapticCount >= 0 + (2 * d)) && (hapticCount < (t0 / 2) + (2 * d)))
@@ -125,7 +136,8 @@ namespace PCController
                         haptics.currents[4] = (short)(((vaa / 2) * (((hapticCount - (2 * d)) - ((2 * t0) + t)) * ((hapticCount - (2 * d)) - ((2 * t0) + t)))) + minForce);
                     }
                 }
-                System.Diagnostics.Debug.WriteLine("[0]=" + haptics.currents[0]);//確認用
+                
+                System.Diagnostics.Debug.WriteLine("[2]=" + haptics.currents[2] + ",[1]=" + haptics.currents[1] + ",[0]=" + haptics.currents[0]);//確認用
 
                 //ここで刺激を提示していないときの糸のたわみがないような電流値を入れておく
                 if (hapticCount > (2 * t0) + t + (2 * d))
@@ -143,7 +155,6 @@ namespace PCController
                 boards.SendCurrent(haptics.currents); //ここで一気に電流値を送ってる, 8/11→",true"消した      
             }
         }
-    }
         
         private void btStart_Click(object sender, EventArgs e)
         {
@@ -324,7 +335,8 @@ namespace PCController
             {
                 UpdateCurrent();
             }
-			else if (tbControl.SelectedTab == tpMagnet) {
+			else if (tbControl.SelectedTab == tpMagnet)
+            {
                 UpdateMagnet();
             }
             else
