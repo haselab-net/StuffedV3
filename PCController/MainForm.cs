@@ -21,7 +21,7 @@ namespace PCController
         int count1000 = 0; //単位s
         int hapticCount = 0; //単位msで3秒測るためのもの
         int v; //trackbarの値代入するメンバ関数
-        int t = 3000;//提示時間
+        int t = 2000;//提示時間
         int t0 = 500; //提示するまでの上昇・下降時間
         short minForce = 35;
         short hapticMax = 180; //180
@@ -49,27 +49,37 @@ namespace PCController
                     if ((hapticCount >= 0) && (hapticCount < (t0 / 2)))
                     {
                         haptics.currents[2] = (short)((vaa / 2) * (hapticCount * hapticCount) + minForce);
+                        haptics.currents[5] = (short)((vaa / 2) * (hapticCount * hapticCount) + minForce);
+                        //haptics.currents[5] = minForce;
                     }
                     if ((hapticCount >= (t0 / 2)) && (hapticCount < t0))
                     {
                         haptics.currents[2] = (short)(((-vaa / 2) * ((hapticCount - t0) * (hapticCount - t0))) + hapticMax + minForce);
+                        haptics.currents[5] = (short)(((-vaa / 2) * ((hapticCount - t0) * (hapticCount - t0))) + hapticMax + minForce);
+                        //haptics.currents[5] = minForce;
                     }
                     if ((hapticCount >= t0) && (hapticCount < (t0 + t)))
                     {
                         haptics.currents[2] = (short)(hapticMax + minForce);
-                        haptics.currents[6] = 100;
+                        haptics.currents[5] = (short)(hapticMax + minForce);
+                        //haptics.currents[5] = 100;
                     }
                     if ((hapticCount >= (t0 + t)) && (hapticCount <= (3 * t0 / 2) + t))
                     {
                         haptics.currents[2] = (short)(((-vaa / 2) * ((hapticCount - (t0 + t)) * (hapticCount - (t0 + t)))) + hapticMax + minForce);
+                        haptics.currents[5] = (short)(((-vaa / 2) * ((hapticCount - (t0 + t)) * (hapticCount - (t0 + t)))) + hapticMax + minForce);
+                        //haptics.currents[5] = minForce;
                     }
                     if ((hapticCount >= (3 * t0 / 2) + t) && (hapticCount < ((2 * t0) + t)))
                     {
                         haptics.currents[2] = (short)(((vaa / 2) * ((hapticCount - ((2 * t0) + t)) * (hapticCount - ((2 * t0) + t)))) + minForce);
+                        haptics.currents[5] = (short)(((vaa / 2) * ((hapticCount - ((2 * t0) + t)) * (hapticCount - ((2 * t0) + t)))) + minForce);
+                        //haptics.currents[5] = minForce;
                     }
                     if ((hapticCount >= ((2 * t0) + t)) && (hapticCount < (2 * t0) + t + (2 * d)))
                     {
                         haptics.currents[2] = minForce;
+                        haptics.currents[5] = minForce;
                     }
                 }
                 
@@ -136,7 +146,33 @@ namespace PCController
                         haptics.currents[4] = (short)(((vaa / 2) * (((hapticCount - (2 * d)) - ((2 * t0) + t)) * ((hapticCount - (2 * d)) - ((2 * t0) + t)))) + minForce);
                     }
                 }
-                
+                /*
+                //エレベーターの挙動
+                if ((hapticCount <= (2 * t0) + t + (2 * d)) && (haptics.currents[5] <= hapticMax + minForce))
+                {
+                    if ((hapticCount >= 0) && (hapticCount < 3 * t0))//1.5s
+                    {
+                        haptics.currents[5] = 100;
+                    }
+                    if ((hapticCount >= 3 * t0) && (hapticCount < 4 * t0))//0.5s
+                    {
+                        haptics.currents[5] = minForce;
+                    }
+                    if ((hapticCount >= 4 * t0) && (hapticCount < 7 * t0))//1.5s
+                    {
+                        haptics.currents[5] = 100;
+                    }
+                    if ((hapticCount >= 7 * t0) && (hapticCount < 8 * t0))//0.5s
+                    {
+                        haptics.currents[5] = minForce;
+                    }
+                    /*
+                    if ((hapticCount >= 6 * t0) && (hapticCount < 8 * t0))//1s
+                    {
+                        haptics.currents[5] = 100;
+                    }
+                }
+                */
                 System.Diagnostics.Debug.WriteLine("[2]=" + haptics.currents[2] + ",[1]=" + haptics.currents[1] + ",[0]=" + haptics.currents[0]);//確認用
 
                 //ここで刺激を提示していないときの糸のたわみがないような電流値を入れておく
