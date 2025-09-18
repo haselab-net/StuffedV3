@@ -34,7 +34,7 @@ void initMk(){
     ADCCON1bits.STRGSRC = 1;    //  00010 = Global level software trigger (GLSWTRG) is not self-cleared
                                 //  00001 = Global software trigger (GSWTRG) is self-cleared on the next clock cycle
     
-    TMR2_CallbackRegister(tmr2CallBack, NULL);
+    TMR2_CallbackRegister(tmr2CallBack, (uintptr_t)NULL);
     TMR2_Start();
 
     TMR1_Start();
